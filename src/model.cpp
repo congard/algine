@@ -41,7 +41,7 @@ class ModelBuffers {
 
             /* --- making tangent and bitangent buffers --- */
             float tmp;
-            float tangents[arrays.outVertices.size], bitangents[arrays.outVertices.size];
+            float *tangents = new float[arrays.outVertices.size], *bitangents = new float[arrays.outVertices.size];
             glm::vec3 tmpv;
             for (size_t i = 0; i < arrays.outVertices.size / XYZ; i += TRIANGLE) {
                 /* --- calculating edge and UV vectors --- */
@@ -94,9 +94,12 @@ class ModelBuffers {
             }
 
             glBindBuffer(GL_ARRAY_BUFFER, buffers[3]); // tangents
-            glBufferData(GL_ARRAY_BUFFER, sizeof(tangents), tangents, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arrays.outVertices.size, tangents, GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, buffers[4]); // bitangents
-            glBufferData(GL_ARRAY_BUFFER, sizeof(bitangents), bitangents, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arrays.outVertices.size, bitangents, GL_STATIC_DRAW);
+
+            delete[] tangents;
+            delete[] bitangents;
         }
 
         void recycle() {

@@ -1,7 +1,7 @@
 # Algine
 Algine [Al'gine] - OpenGL 3.3+ engine written in C++
 
-Version: 1.0 alpha
+Version: 1.1 alpha
 
 Supported systems: Linux (Windows in the future)
 
@@ -11,7 +11,9 @@ Engine tested on Asus x302uv (Intel Core I5-6200U, Nvidia GeForce 920mx, 8GB RAM
 
 If you find any errors or you have recommendations for improving the project - a big one please let me know!
 
-![Algine v1.0 alpha](pictures/4.png)
+**Note:** strong optimization will be carried out in version 1.2 alpha
+
+![Algine v1.1 alpha](pictures/6.png)
 
 # Functionality
  * Textures
@@ -24,6 +26,7 @@ If you find any errors or you have recommendations for improving the project - a
  * Point lighting
  * Bloom
  * CMF models support
+ * Depth of field (DOF)
  * Etc.
 
 Take into account, this is a test (alpha) version! All major functions will be added in later versions.
@@ -44,7 +47,7 @@ Also you need `pkg-config` to compile using `build/make.sh` script
 # Compilation
 1. `cd algine`
 2. `chmod +x build/make.sh`
-3. `./build/make.sh`
+3. `./build/make.sh` - to run on standard videocard,`./build/make.sh primus` - to run on second videocard using `primusrun`, `./build/make.sh opti` - to run on second videocard using `optirun`
 
 # Contact
 You can contact me by telegram or email:

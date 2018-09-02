@@ -16,19 +16,20 @@
 #include "utils/shader_utils.cpp"
 #include "utils/math.cpp"
 
-#define BLUR_KERNEL_SIZE 15
-#define BLUR_KERNEL_SIGMA 6.0f
+#define BLOOM_KERNEL_SIZE 15
+#define BLOOM_KERNEL_SIGMA 6.0f
 
 namespace advren {
     GLuint blurAmount = 4, SCR_W, SCR_H;
     float exposure = 3.0f, gamma = 1.0f; // blend variables
-    std::string blur_kernel_name = "kernel";
-
+    
 	// anonymous namespace
 	namespace {
 		ShaderProgram shaderBlurProgram, shaderBlendProgram;
     	GLuint displayFBO, 
-			pingpongFBO[2], colorBuffers[2], pingpongBuffers[2], // blur
+			pingpongFBO[2], colorBuffers[2], 
+			pingpongBuffers[2], // blur buffers
+			dofBuffers[2], // dof buffers
         	rboBuffer, 
         	quadBuffers[2], // vertexBuffer and texCoordsBuffer
         	colorAttachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
@@ -56,22 +57,30 @@ namespace advren {
 
     	void mkBlur() {
 			// configuring textures
-			glActiveTexture(GL_TEXTURE0);
 			for (int i = 0; i < 2; i++) {
 				glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
 				glBindTexture(GL_TEXTURE_2D, pingpongBuffers[i]);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_W, SCR_H, 0, GL_RGB, GL_FLOAT, NULL);
-				// Do not need to call glClear, because the texture is completely redrawn
+
+				glBindTexture(GL_TEXTURE_2D, dofBuffers[i]);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_W, SCR_H, 0, GL_RGBA, GL_FLOAT, NULL);
+				glClearColor(0, 0, 0, 1); // for effective dof
 			}
 			
 			horizontal = true; 
 			firstIteration = true;
 			glUseProgram(shaderBlurProgram.programId);
-			glActiveTexture(GL_TEXTURE0);
 			for (int i = 0; i < blurAmount; i++) {
+				glActiveTexture(GL_TEXTURE0);
 				glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
+				
 				glUniform1i(shaderBlurProgram.getValueId("isHorizontal"), horizontal);
 				glBindTexture(GL_TEXTURE_2D, firstIteration ? colorBuffers[1] : pingpongBuffers[!horizontal]);
+
+				glActiveTexture(GL_TEXTURE1);
+				glUniform1i(shaderBlurProgram.getValueId("image2"), 1);
+				glBindTexture(GL_TEXTURE_2D, firstIteration ? colorBuffers[0] : dofBuffers[!horizontal]);
+
 				renderQuad(shaderBlurProgram);
 				horizontal = !horizontal;
 				if (firstIteration) firstIteration = false;
@@ -81,10 +90,13 @@ namespace advren {
     	void blend() {
 			// Do not need to call glClear, because the texture is completely redrawn
 			glUseProgram(shaderBlendProgram.programId);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, colorBuffers[0]);
+			// glActiveTexture(GL_TEXTURE0);
+			// glBindTexture(GL_TEXTURE_2D, colorBuffers[0]);
+			// ^^^ will be available in 1.2 alpha ^^^
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, pingpongBuffers[!horizontal]);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, dofBuffers[!horizontal]);
 			renderQuad(shaderBlendProgram);
 		}
 	}
@@ -95,9 +107,13 @@ namespace advren {
 		glGenRenderbuffers(1, &rboBuffer);
 		glGenFramebuffers(2, pingpongFBO);
 		glGenTextures(2, pingpongBuffers);
+		glGenTextures(2, dofBuffers);
+
+		// configuring display framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, displayFBO);
+		glDrawBuffers(2, colorAttachments); // use 2 color components
 
         // configuring textures
-		glActiveTexture(GL_TEXTURE0);
 		for (int i = 0; i < 2; i++) {
 			// configuring render textures
 			glBindFramebuffer(GL_FRAMEBUFFER, displayFBO);
@@ -108,10 +124,16 @@ namespace advren {
 				
 			// configuring ping-pong (blur) textures
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
+			glDrawBuffers(2, colorAttachments); // use 2 color components
+
 			glBindTexture(GL_TEXTURE_2D, pingpongBuffers[i]);
 			applyDefaultTextureParams();
-			// attach texture to framebuffer
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongBuffers[i], 0);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
+			glBindTexture(GL_TEXTURE_2D, dofBuffers[i]);
+			applyDefaultTextureParams();
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, dofBuffers[i], 0);
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -119,19 +141,22 @@ namespace advren {
         shaderBlurProgram.init("src/resources/shaders/vertex_blur_shader.glsl", "src/resources/shaders/fragment_blur_shader.glsl");
 		shaderBlurProgram.loadValueId("inPos", GLSL_ATTRIBUTE);
 		shaderBlurProgram.loadValueId("inTexCoords", GLSL_ATTRIBUTE);
-		shaderBlurProgram.loadValueId("image", GLSL_UNIFORM);
+		shaderBlurProgram.loadValueId("image", GLSL_UNIFORM); // bloom
+		shaderBlurProgram.loadValueId("image2", GLSL_UNIFORM); // dof
 		shaderBlurProgram.loadValueId("isHorizontal", GLSL_UNIFORM);
 		shaderBlurProgram.loadValueId("kernel", GLSL_UNIFORM);
+		shaderBlurProgram.loadValueId("max_sigma", GLSL_UNIFORM);
+		shaderBlurProgram.loadValueId("min_sigma", GLSL_UNIFORM);
 
         // configuring blur kernel
 		// sending to shader center of kernel and right part
-		float kernel[BLUR_KERNEL_SIZE];
-		getGB1DKernel(kernel, BLUR_KERNEL_SIZE, BLUR_KERNEL_SIGMA);
+		float kernel[BLOOM_KERNEL_SIZE];
+		getGB1DKernel(kernel, BLOOM_KERNEL_SIZE, BLOOM_KERNEL_SIGMA);
 		glUseProgram(shaderBlurProgram.programId);
-		for (int i = 0; i < BLUR_KERNEL_SIZE / 2 + 1; i++) 
+		for (int i = 0; i < BLOOM_KERNEL_SIZE / 2 + 1; i++) 
             glUniform1f(
-                glGetUniformLocation(shaderBlurProgram.programId, (blur_kernel_name + "[" + std::to_string(i) + "]").c_str()), 
-                kernel[BLUR_KERNEL_SIZE / 2 + i]
+                glGetUniformLocation(shaderBlurProgram.programId, ("kernel[" + std::to_string(i) + "]").c_str()), 
+                kernel[BLOOM_KERNEL_SIZE / 2 + i]
             );
 		glUseProgram(0);
 
@@ -157,15 +182,17 @@ namespace advren {
         shaderBlendProgram.init("src/resources/shaders/vertex_blend_shader.glsl", "src/resources/shaders/fragment_blend_shader.glsl");
         shaderBlendProgram.loadValueId("inPos", GLSL_ATTRIBUTE);
 		shaderBlendProgram.loadValueId("inTexCoords", GLSL_ATTRIBUTE);
-		shaderBlendProgram.loadValueId("scene", GLSL_UNIFORM);
+		// shaderBlendProgram.loadValueId("scene", GLSL_UNIFORM); // will be available in 1.2 alpha
 		shaderBlendProgram.loadValueId("bluredScene", GLSL_UNIFORM);
+		shaderBlendProgram.loadValueId("dofScene", GLSL_UNIFORM);
 		shaderBlendProgram.loadValueId("exposure", GLSL_UNIFORM);
 		shaderBlendProgram.loadValueId("gamma", GLSL_UNIFORM);
 
         // blend setting
         glUseProgram(shaderBlendProgram.programId);
-        glUniform1i(shaderBlendProgram.getValueId("scene"), 0); // GL_TEXTURE0
+        // glUniform1i(shaderBlendProgram.getValueId("scene"), 0); // GL_TEXTURE0 // will be available in 1.2 alpha
         glUniform1i(shaderBlendProgram.getValueId("bluredScene"), 1); // GL_TEXTURE1
+		glUniform1i(shaderBlendProgram.getValueId("dofScene"), 2); // GL_TEXTURE2
         glUniform1f(shaderBlendProgram.getValueId("exposure"), exposure);
         glUniform1f(shaderBlendProgram.getValueId("gamma"), gamma);
         glUseProgram(0);
@@ -176,19 +203,16 @@ namespace advren {
 		glBindRenderbuffer(GL_RENDERBUFFER, rboBuffer);
 	    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_W, SCR_H);
 	    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboBuffer);
-	    glDrawBuffers(2, colorAttachments); // use 2 color components
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear it
 	    // configuring textures
-		glActiveTexture(GL_TEXTURE0);
 		for (int i = 0; i < 2; i++) {
 			glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_W, SCR_H, 0, GL_RGB, GL_FLOAT, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_W, SCR_H, 0, GL_RGBA, GL_FLOAT, NULL);
 		}
     }
 
     void end() {
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		glDrawBuffers(1, colorAttachments); // use 1 color component
 		mkBlur();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		blend();
@@ -201,6 +225,8 @@ namespace advren {
 		glDeleteRenderbuffers(1, &rboBuffer);
 		glDeleteFramebuffers(2, pingpongFBO);
 		glDeleteTextures(2, pingpongBuffers);
+		glDeleteTextures(2, dofBuffers);
+		glDeleteBuffers(2, quadBuffers);
 
 		#ifdef ALGINE_LOGGING
         std::cout << "~AdvancedRendering\n";
@@ -208,7 +234,7 @@ namespace advren {
     }
 };
 
-#undef BLUR_KERNEL_SIZE
-#undef BLUR_KERNEL_SIGMA
+#undef BLOOM_KERNEL_SIZE
+#undef BLOOM_KERNEL_SIGMA
 
 #endif /* ALGINE_ADVANCED_RENDERING_CPP */

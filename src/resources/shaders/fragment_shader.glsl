@@ -17,6 +17,9 @@ uniform int u_LampsCount;					// Lamps count
 uniform float brightnessThreshold = 0.3;	// brightness threshold variable
 uniform float far_plane;	 				// shadow matrix far plane
 
+uniform float focalDepth;
+uniform float focalRange;
+
 in mat4 model, view, projection;
 in mat3 v_TBN;							// Tangent Bitangent Normal matrix
 in vec4 v_Position;						// Position for this fragment in world space
@@ -154,7 +157,8 @@ void main() {
 			toVec4(ambientResult) * texture(u_Mapping.ambient, v_Texture) +
 			toVec4(diffuseResult) * texture(u_Mapping.diffuse, v_Texture) +
 			toVec4(specularResult) * texture(u_Mapping.specular, v_Texture);
-
+	fragColor.a = clamp(abs(focalDepth + fragPos.z) / focalRange, 0.0, 1.0);
+	
 	// brightness calculation
 	float brightness = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 	if (brightness > brightnessThreshold) fragBrightColor = vec4(fragColor.rgb, 1.0);

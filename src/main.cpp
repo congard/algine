@@ -5,7 +5,7 @@
  * My gitlab: https://gitlab.com/congard
  * @author congard
  * 
- * @version 1.0 alpha
+ * @version 1.1 alpha
  */
 
 #include <iostream>
@@ -46,10 +46,10 @@
  * Models on this scene:
  * 1. Lucy
  * 2. Brickwall
- * 3. Box ( 4,  0,  4)
- * 4. Box (-4,  0,  4)
- * 5. Box ( 4,  0, -4)
- * 6. Box (-4,  0, -4)
+ * 3. Box ( 4,  0,  8)
+ * 4. Box (-4,  0,  8)
+ * 5. Box ( 4,  0, -8)
+ * 6. Box (-4,  0, -8)
  * All 4 boxes use 1 ModelBuffers and 1 ModelMapping
  */
 #define MODELS_COUNT 6
@@ -77,7 +77,7 @@ ShaderProgram shaderProgram, shaderShadowProgram;
 glm::mat4 projectionMatrix, viewMatrix, modelMatrix;
 
 // camera params
-glm::vec3 cameraPos(0, 6, 6);
+glm::vec3 cameraPos(0, 6, 16);
 glm::vec3 cameraLookAt(0, 4, 0);
 glm::vec3 cameraUp(0, 1, 0);
 
@@ -94,6 +94,13 @@ TextureArray shadowMaps;
 
 // ambient, diffuse, specular, normal mapping
 Mapping mapping;
+
+// DOF variables
+float 
+    focalDepth = 8.0f, 
+    focalRange = 20.0f,
+    dof_max_sigma = 6.0f,
+    dof_min_sigma = 0.0001f;
 
 void createProjectionMatrix() {
     projectionMatrix = glm::perspective(glm::radians(90.0f), (float) WIN_W / (float) WIN_H, 1.0f, 32.0f);
@@ -226,6 +233,8 @@ void initShaders() {
 	shaderProgram.loadValueId("u_View", GLSL_UNIFORM);
 	shaderProgram.loadValueId("u_Projection", GLSL_UNIFORM);
 	shaderProgram.loadValueId("far_plane", GLSL_UNIFORM);
+    shaderProgram.loadValueId("focalDepth", GLSL_UNIFORM);
+    shaderProgram.loadValueId("focalRange", GLSL_UNIFORM);
 
     shaderShadowProgram.init(vertexShadowShader, fragmentShadowShader, geometryShadowShader);
     shaderShadowProgram.loadValueId("a_Position", GLSL_ATTRIBUTE);
@@ -266,11 +275,11 @@ void init_ModelBuffers_ModelMapping() {
 
     // Brickwall
     create_ModelBuffers_ModelMapping(
-        "src/resources/models/brickwall/brickwall_triangulated.cmf",
-        "src/resources/textures/brickwall/brickwall.jpg",
-        "src/resources/textures/brickwall/brickwall.jpg",
-        "src/resources/textures/brickwall/brickwall.jpg",
-        "src/resources/textures/brickwall/brickwall_normal.jpg",
+        "src/resources/models/brickwall/brickwall_triangulated_big.cmf",
+        "src/resources/textures/brickwall/brickwall_big.png",
+        "src/resources/textures/brickwall/brickwall_big.png",
+        "src/resources/textures/brickwall/brickwall_big.png",
+        "src/resources/textures/brickwall/brickwall_big_normal.png",
         1
     );
 
@@ -299,25 +308,28 @@ void init_ModelBuffers_ModelMapping() {
  * Creating models from created buffers and loaded textures
  */
 void createModels() {
+    // lucy
     models[0].buffers = &mbuffers[0];
     models[0].mapping = &mmapping[0];
 
+    // brickwall
     models[1].buffers = &mbuffers[1];
     models[1].mapping = &mmapping[1];
     models[1].angles = glm::vec3(glm::radians(270.0f), 0, 0);
 
+    // boxes
     models[2].buffers = &mbuffers[2];
     models[2].mapping = &mmapping[2];
-    models[2].origin = glm::vec3(4, 0, 4);
+    models[2].origin = glm::vec3(4, 0, 8);
 
     models[3] = models[2];
-    models[3].origin = glm::vec3(-4, 0, 4);
+    models[3].origin = glm::vec3(-4, 0, 8);
 
     models[4] = models[2];
-    models[4].origin = glm::vec3(4, 0, -4);
+    models[4].origin = glm::vec3(4, 0, -8);
 
     models[5] = models[2];
-    models[5].origin = glm::vec3(-4, 0, -4);
+    models[5].origin = glm::vec3(-4, 0, -8);
 }
 
 /**
@@ -348,6 +360,19 @@ void initShadowMaps() {
     shadowMaps.init(shaderProgram.programId, "shadowMaps");
     for (size_t i = 0; i < LAMPS_COUNT; i++) shadowMaps.addTexture(i, lightSources[i].depthCubemap);
     shadowMaps.bind(shaderProgram.programId);
+}
+
+/**
+ * Initialize Depth of field
+ */
+void initDOF() {
+    glUseProgram(advren::shaderBlurProgram.programId);
+    glUniform1f(advren::shaderBlurProgram.getValueId("max_sigma"), dof_max_sigma);
+    glUniform1f(advren::shaderBlurProgram.getValueId("min_sigma"), dof_min_sigma);
+    glUseProgram(shaderProgram.programId);
+    glUniform1f(shaderProgram.getValueId("focalDepth"), focalDepth);
+    glUniform1f(shaderProgram.getValueId("focalRange"), focalRange);
+    glUseProgram(0);
 }
 
 /* init code end */
@@ -495,9 +520,9 @@ void display() {
 }
 
 void animate_scene() {
-    glm::mat3 rotate = glm::mat3(glm::rotate(glm::mat4(), glm::radians(0.1f), glm::vec3(0, 1, 0)));
+    glm::mat3 rotate = glm::mat3(glm::rotate(glm::mat4(), glm::radians(0.01f), glm::vec3(0, 1, 0)));
     while (true) {
-        std::this_thread::sleep_for (std::chrono::milliseconds(2));
+        std::this_thread::sleep_for (std::chrono::milliseconds(1));
         lightSources[0].setPos(lightSources[0].pos * rotate);
     }
 }
@@ -516,6 +541,7 @@ int main() {
     initLamps();
     initShadowMaps();
     mapping.loadLocations(shaderProgram.programId);
+    initDOF();
 
     std::thread animate_scene_th(animate_scene);
 
@@ -538,6 +564,26 @@ int main() {
 
 // Is called whenever a key is pressed/released via GLFW
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
+    else if ((key == GLFW_KEY_Q || key == GLFW_KEY_A || key == GLFW_KEY_W || key == GLFW_KEY_S) && action == GLFW_PRESS) {
+        glUseProgram(shaderProgram.programId);
+
+        if (key == GLFW_KEY_Q) {
+            focalDepth++;
+            glUniform1f(shaderProgram.getValueId("focalDepth"), focalDepth);
+        } else if (key == GLFW_KEY_A) {
+            focalDepth--;
+            glUniform1f(shaderProgram.getValueId("focalDepth"), focalDepth);
+        } else if (key == GLFW_KEY_W) {
+            focalRange += 5;
+            glUniform1f(shaderProgram.getValueId("focalRange"), focalRange);
+        } else if (key == GLFW_KEY_S) {
+            focalRange -= 5;
+            glUniform1f(shaderProgram.getValueId("focalRange"), focalRange);
+        }
+
+        glUseProgram(0);
+
+        std::cout << "focalDepth = " << focalDepth << "\nfocalRange = " << focalRange << "\n";
+    }
 }
