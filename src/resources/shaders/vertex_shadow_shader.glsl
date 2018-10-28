@@ -5,9 +5,10 @@
  * gitlab.com/congard
  */
 
-#version 130
+#version 330 core
 
-attribute vec3 a_Position;
+in vec3 a_Position;
+
 uniform mat4 u_ModelMatrix;
 
 void main() {

@@ -7,29 +7,28 @@
 
 #version 330
 
-#define BLOOM_KERNEL_SIZE 8
-#define DOF_KERNEL_SIZE 8
-/* ^^^ definitions ^^^ */
+#algdef
 
+in vec2 texCoord;
+
+#ifdef ALGINE_BLOOM_MODE_ENABLED
 layout (location = 0) out vec4 bloomFragColor;
+uniform sampler2D image; // bloom
+uniform float bloom_kernel[BLOOM_KERNEL_SIZE];
+vec3 bloom_result;
+#endif
+
+#ifdef ALGINE_DOF_MODE_ENABLED
 layout (location = 1) out vec4 dofFragColor;
 
-in vec2 texCoords;
-
-uniform sampler2D image; // bloom
 uniform sampler2D image2; // dof
-uniform bool isHorizontal;
-
 uniform float max_sigma;
 uniform float min_sigma;
 
-uniform float kernel[BLOOM_KERNEL_SIZE];
-
 float dof_kernel[DOF_KERNEL_SIZE];
+vec3 dof_result;
 
 vec4 tmp;
-vec3 bloom_result;
-vec3 dof_result;
 float fdof;
 
 const int DOF_LCR_SIZE = DOF_KERNEL_SIZE * 2 - 1; // left-center-right (lllcrrr)
@@ -48,50 +47,73 @@ void makeDofKernel(float sigma) {
 	// Normalize the kernel
 	for (int x = 0; x < DOF_KERNEL_SIZE; x++) dof_kernel[x] /= sum;
 }
+#endif
 
 void main() {
+	#ifdef ALGINE_BLOOM_MODE_ENABLED
 	vec2 texOffset = 1.0 / textureSize(image, 0); // gets size of single texel
-	tmp = texture(image2, texCoords);
+	#else
+	vec2 texOffset = 1.0 / textureSize(image2, 0); // gets size of single texel
+	#endif
+
+	#ifdef ALGINE_DOF_MODE_ENABLED
+	tmp = texture(image2, texCoord);
 	fdof = tmp.a;
 	makeDofKernel(max_sigma * fdof + min_sigma);
-	
-	bloom_result = texture(image, texCoords).rgb * kernel[0]; // current fragment’s contribution
 	dof_result = tmp.rgb * dof_kernel[0];
+	#endif
+	
+	#ifdef ALGINE_BLOOM_MODE_ENABLED
+	bloom_result = texture(image, texCoord).rgb * bloom_kernel[0]; // current fragment’s contribution
+	#endif
 
-	if(isHorizontal) {
-		for(int i = 1; i < BLOOM_KERNEL_SIZE; i++) {
-			bloom_result +=
-				kernel[i] * (
-					texture(image, texCoords + vec2(texOffset.x * i, 0.0)).rgb +
-					texture(image, texCoords - vec2(texOffset.x * i, 0.0)).rgb
-				);
-		}
-
-		for(int i = 1; i < DOF_KERNEL_SIZE; i++) {
-			dof_result +=
-				dof_kernel[i] * (
-					texture(image2, texCoords + vec2(texOffset.x * i, 0.0)).rgb +
-					texture(image2, texCoords - vec2(texOffset.x * i, 0.0)).rgb
-				);
-		}
-	} else {
-		for(int i = 1; i < BLOOM_KERNEL_SIZE; i++) {
-			bloom_result +=
-				kernel[i] * (
-					texture(image, texCoords + vec2(0.0, texOffset.y * i)).rgb +
-					texture(image, texCoords - vec2(0.0, texOffset.y * i)).rgb
-				);
-		}
-
-		for(int i = 1; i < DOF_KERNEL_SIZE; i++) {
-			dof_result +=
-				dof_kernel[i] * (
-					texture(image2, texCoords + vec2(0.0, texOffset.y * i)).rgb +
-					texture(image2, texCoords - vec2(0.0, texOffset.y * i)).rgb
-				);
-		}
+	#ifdef ALGINE_BLUS_HORIZONTAL
+	#ifdef ALGINE_BLOOM_MODE_ENABLED
+	for(int i = 1; i < BLOOM_KERNEL_SIZE; i++) {
+		bloom_result +=
+			bloom_kernel[i] * (
+				texture(image, texCoord + vec2(texOffset.x * i, 0.0)).rgb +
+				texture(image, texCoord - vec2(texOffset.x * i, 0.0)).rgb
+			);
 	}
+	#endif
 
+	#ifdef ALGINE_DOF_MODE_ENABLED
+	for(int i = 1; i < DOF_KERNEL_SIZE; i++) {
+		dof_result +=
+			dof_kernel[i] * (
+				texture(image2, texCoord + vec2(texOffset.x * i, 0.0)).rgb +
+				texture(image2, texCoord - vec2(texOffset.x * i, 0.0)).rgb
+			);
+	}
+	#endif
+	#else
+	#ifdef ALGINE_BLOOM_MODE_ENABLED
+	for(int i = 1; i < BLOOM_KERNEL_SIZE; i++) {
+		bloom_result +=
+			bloom_kernel[i] * (
+				texture(image, texCoord + vec2(0.0, texOffset.y * i)).rgb +
+				texture(image, texCoord - vec2(0.0, texOffset.y * i)).rgb
+			);
+	}
+	#endif
+
+	#ifdef ALGINE_DOF_MODE_ENABLED
+	for(int i = 1; i < DOF_KERNEL_SIZE; i++) {
+		dof_result +=
+			dof_kernel[i] * (
+				texture(image2, texCoord + vec2(0.0, texOffset.y * i)).rgb +
+				texture(image2, texCoord - vec2(0.0, texOffset.y * i)).rgb
+			);
+	}
+	#endif
+	#endif
+
+	#ifdef ALGINE_BLOOM_MODE_ENABLED
 	bloomFragColor = vec4(bloom_result, 1.0);
+	#endif
+	
+	#ifdef ALGINE_DOF_MODE_ENABLED
 	dofFragColor = vec4(dof_result, fdof);
+	#endif
 }

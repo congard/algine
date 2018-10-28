@@ -170,30 +170,4 @@ class TextureArray {
 		}
 };
 
-class Mapping {
-	public:
-		GLuint ambientTextureLocation, diffuseTextureLocation, specularTextureLocation, normalTextureLocation, isNormalMappingEnabledLocation;
-
-		void loadLocations(GLuint programId) {
-			ambientTextureLocation = glGetUniformLocation(programId, "u_Mapping.ambient");
-			diffuseTextureLocation = glGetUniformLocation(programId, "u_Mapping.diffuse");
-			specularTextureLocation = glGetUniformLocation(programId, "u_Mapping.specular");
-			normalTextureLocation = glGetUniformLocation(programId, "u_Mapping.normal");
-			isNormalMappingEnabledLocation = glGetUniformLocation(programId, "u_NormalMapping");
-		}
-		
-		// The varying qualifier can be used only with the data types float, vec2, vec3, vec4, mat2, mat3, and mat4, or arrays of these.
-		void setNormalMappingEnabled(float isEnabled) {
-			glUniform1f(isNormalMappingEnabledLocation, isEnabled);
-		}
-		
-		void bindADSTextures(GLuint ambientTexture, GLuint diffuseTexture, GLuint specularTexture) {
-			::bindADSTextures(ambientTextureLocation, diffuseTextureLocation, specularTextureLocation, ambientTexture, diffuseTexture, specularTexture);
-		}
-		
-		void bindADSNTextures(GLuint ambientTexture, GLuint diffuseTexture, GLuint specularTexture, GLuint normalTexture) {
-			::bindADSNTextures(ambientTextureLocation, diffuseTextureLocation, specularTextureLocation, normalTextureLocation, ambientTexture, diffuseTexture, specularTexture, normalTexture);
-		}
-};
-
 #endif /* ALGINE_TEXTURE_UTILS_CPP */

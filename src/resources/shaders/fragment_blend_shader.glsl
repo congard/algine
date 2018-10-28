@@ -7,10 +7,15 @@
 
 #version 330
 
+#algdef
+
 out vec4 fragColor;
-in vec2 texCoords;
-// uniform sampler2D scene; // will be available in 1.2 alpha
-uniform sampler2D bluredScene;
+in vec2 texCoord;
+
+#ifdef ALGINE_BLOOM_MODE_ENABLED
+uniform sampler2D bloomScene;
+#endif
+
 uniform sampler2D dofScene;
 uniform float exposure;
 uniform float gamma;
@@ -21,7 +26,11 @@ void main() {
 			pow(
 				vec3(1.0) - exp(-
 					(
-						texture(bluredScene, texCoords).rgb + texture(dofScene, texCoords).rgb // additive blending
+						#ifdef ALGINE_BLOOM_MODE_ENABLED
+						texture(bloomScene, texCoord).rgb +
+						#endif 
+						
+						texture(dofScene, texCoord).rgb // additive blending
 					) 
 				* exposure), // tone mapping
 			vec3(1.0 / gamma)), // also gamma correct while we’re at it

@@ -117,61 +117,84 @@ GLuint createProgram(GLint vertexShaderId, GLint fragmentShaderId, GLint geometr
     return program;
 }
 
+/* --- mksp - make shader program --- */
+
+/**
+ * Creating shaders from source
+ */
+void mksp_source(GLuint &programId, const char *vertexShaderSource, const char *fragmentShaderSource, const char *geometryShaderSource) {
+    // compiling shaders
+    GLuint vertexShaderId = compileShader(vertexShaderSource, GL_VERTEX_SHADER);
+    GLuint fragmentShaderId = compileShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
+    GLuint geometryShaderId = geometryShaderSource == nullptr ? 0 : compileShader(geometryShaderSource, GL_GEOMETRY_SHADER);
+
+    // making and linking program
+    programId = createProgram(vertexShaderId, fragmentShaderId, geometryShaderId);
+    glLinkProgram(programId);
+
+    // deleting 
+    glDeleteShader(vertexShaderId);
+    glDeleteShader(fragmentShaderId);
+    if (geometryShaderSource != nullptr) glDeleteShader(geometryShaderId);
+}
+
+/**
+ * Creating shaders from file
+ */
+void mksp(GLuint &programId, const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath) {
+    // reading shaders
+    char *vertexShaderSource = readShader(vertexShaderPath);
+    char *fragmentShaderSource = readShader(fragmentShaderPath);
+    char *geometryShaderSource = geometryShaderPath == nullptr ? nullptr : readShader(geometryShaderPath);
+
+    mksp_source(programId, vertexShaderSource, fragmentShaderSource, geometryShaderSource);
+            
+    delete[] vertexShaderSource;
+    delete[] fragmentShaderSource;
+    if (geometryShaderPath != nullptr) delete[] geometryShaderSource;
+}
+
 /* --- classes --- */
 
 #define GLSL_ATTRIBUTE 0
 #define GLSL_UNIFORM 1
 
-class ShaderProgram {
-    public:
-        GLuint programId, vertexShaderId, fragmentShaderId, geometryShaderId;
-        std::map<const char*, GLuint> valuesIds;
+struct ShaderProgram {
+    GLuint programId;
+    std::map<const char*, GLuint> valuesIds;
 
-        void init(const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath) {
-            // reading shaders
-            char *vertexShaderSource = readShader(vertexShaderPath);
-            char *fragmentShaderSource = readShader(fragmentShaderPath);
-            char *geometryShaderSource = geometryShaderPath == nullptr ? nullptr : readShader(geometryShaderPath);
+    void init(const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath) {
+        mksp(programId, vertexShaderPath, fragmentShaderPath, geometryShaderPath);
+    }
 
-            // compiling shaders
-            vertexShaderId = compileShader(vertexShaderSource, GL_VERTEX_SHADER);
-            fragmentShaderId = compileShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
-            geometryShaderId = geometryShaderPath == nullptr ? 0 : compileShader(geometryShaderSource, GL_GEOMETRY_SHADER);
+    void init_source(const char *vertexShaderSource, const char *fragmentShaderSource, const char *geometryShaderSource) {
+        mksp_source(programId, vertexShaderSource, fragmentShaderSource, geometryShaderSource);
+    }
 
-            // making and linking program
-            programId = createProgram(vertexShaderId, fragmentShaderId, geometryShaderId);
-            glLinkProgram(programId);
-            
-            // deleting 
-            glDeleteShader(vertexShaderId);
-            glDeleteShader(fragmentShaderId);
-            delete[] vertexShaderSource;
-            delete[] fragmentShaderSource;
-            if (geometryShaderPath != nullptr) {
-                glDeleteShader(geometryShaderId);
-                delete[] geometryShaderSource;
-            }
-        }
+    void init(const char *vertexShaderPath, const char *fragmentShaderPath) {
+        init(vertexShaderPath, fragmentShaderPath, nullptr);
+    }
 
-        void init(const char *vertexShaderPath, const char *fragmentShaderPath) {
-            init(vertexShaderPath, fragmentShaderPath, nullptr);
-        }
+    GLuint getValueId(const char *name) {
+        return valuesIds.find(name)->second;
+    }
 
-        void loadValueId(const char *name, GLuint type) {
-             if (type == GLSL_ATTRIBUTE) valuesIds[name] = glGetAttribLocation(programId, name);
-            else valuesIds[name] = glGetUniformLocation(programId, name);
-        }
+    // get value id from shader
+    GLuint getValueId(const char *name, GLuint type) {
+        if (type == GLSL_ATTRIBUTE) return glGetAttribLocation(programId, name);
+        else return glGetUniformLocation(programId, name);
+    }
 
-        GLuint getValueId(const char *name) {
-            return valuesIds.find(name)->second;
-        }
+    void loadValueId(const char *name, GLuint type) {
+        valuesIds[name] = getValueId(name, type);
+    }
 
-        ~ShaderProgram() {
-            glDeleteProgram(programId);
-            #ifdef ALGINE_LOGGING
-            std::cout << "Program " << programId << " deleted\n";
-            #endif
-        }
+    ~ShaderProgram() {
+        glDeleteProgram(programId);
+        #ifdef ALGINE_LOGGING
+        std::cout << "Program " << programId << " deleted\n";
+        #endif
+    }
 };
 
 #endif

@@ -8,10 +8,10 @@
 #version 330
 
 in vec3 inPos;
-in vec2 inTexCoords;
-out vec2 texCoords;
+in vec2 inTexCoord;
+out vec2 texCoord;
 
 void main() {
-	texCoords = inTexCoords;
+	texCoord = inTexCoord;
 	gl_Position = vec4(inPos, 1.0);
 }

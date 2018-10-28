@@ -3,6 +3,8 @@
  * dbcongard@gmail.com
  * t.me/congard
  * gitlab.com/congard
+
+  COMPILER WILL REMOVE UNUSED VARIABLES
  */
 
 #version 330 core
@@ -10,22 +12,54 @@
 precision mediump float;					// Set the default precision to medium. We don't need as high of a
 											// precision in the fragment shader.
 
-#define MAX_LAMPS_COUNT 8					// Max lamps count
+#algdef
 
-uniform vec3 u_ViewPos;						// Camera position
-uniform int u_LampsCount;					// Lamps count
-uniform float brightnessThreshold = 0.3;	// brightness threshold variable
-uniform float far_plane;	 				// shadow matrix far plane
+uniform vec3 viewPos; // Camera position
+uniform float focalDepth; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
+uniform float focalRange; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
+uniform bool textureMappingEnabled;	// 0 false (color mapping), true (texture mapping) (if ALGINE_TEXTURE_MAPPING_MODE == ALGINE_TEXTURE_MAPPING_MODE_DUAL)
 
-uniform float focalDepth;
-uniform float focalRange;
+in mat4 model, view, vmMatrix;
+in mat3 v_TBN; // Tangent Bitangent Normal matrix
+in vec4 v_Position; // Position for this fragment in world space
+in vec3 v_Normal; // Interpolated normal for this fragment
+in vec2 v_Texture; // Texture coordinates.
+in float v_NormalMapping; // Is normal mapping enabled 0 - false, 1 - true (if ALGINE_NORMAL_MAPPING_MODE == ALGINE_NORMAL_MAPPING_MODE_DUAL)
 
-in mat4 model, view, projection;
-in mat3 v_TBN;							// Tangent Bitangent Normal matrix
-in vec4 v_Position;						// Position for this fragment in world space
-in vec3 v_Normal;						// Interpolated normal for this fragment.
-in vec2 v_Texture;						// Texture coordinates.
-in float v_NormalMapping;				// Is normal mapping enabled 0 - false, 1 - true
+uniform struct Mapping {
+	#if defined ALGINE_NORMAL_MAPPING_MODE_ENABLED || defined ALGINE_NORMAL_MAPPING_MODE_DUAL
+	sampler2D normal;
+	#endif
+
+	#ifdef ALGINE_LIGHTING_MODE_ENABLED
+
+	#if defined ALGINE_TEXTURE_MAPPING_MODE_ENABLED || defined ALGINE_TEXTURE_MAPPING_MODE_DUAL
+	sampler2D ambient;
+	sampler2D diffuse;
+	sampler2D specular;
+	#endif
+
+	#if defined ALGINE_TEXTURE_MAPPING_MODE_DISABLED || defined ALGINE_TEXTURE_MAPPING_MODE_DUAL
+	vec4 cambient;
+	vec4 cdiffuse;
+	vec4 cspecular;
+	#endif
+
+	#else
+
+	#if defined ALGINE_TEXTURE_MAPPING_MODE_ENABLED || defined ALGINE_TEXTURE_MAPPING_MODE_DUAL
+	sampler2D diffuse;
+	#endif
+
+	#if defined ALGINE_TEXTURE_MAPPING_MODE_DISABLED || defined ALGINE_TEXTURE_MAPPING_MODE_DUAL
+	vec4 cdiffuse;
+	#endif
+
+	#endif /* ALGINE_LIGHTING_MODE_ENABLED */
+} mapping;
+
+#ifdef ALGINE_LIGHTING_MODE_ENABLED
+uniform int lampsCount;	// Lamps count
 
 struct Lamp {
 	float ambientStrength;
@@ -39,61 +73,72 @@ struct Lamp {
 	vec3 lampColor;
 };
 
-uniform samplerCube shadowMaps[MAX_LAMPS_COUNT];
-
-uniform struct Mapping {
-	sampler2D ambient;
-	sampler2D diffuse;
-	sampler2D specular;
-	sampler2D normal;
-} u_Mapping;
-
-uniform Lamp u_Lamps[MAX_LAMPS_COUNT];
+uniform Lamp lamps[MAX_LAMPS_COUNT];
+vec3 lampEyePos; // Transformed lamp position into eye space
+#endif /* ALGINE_LIGHTING_MODE_ENABLED */
 
 vec3 norm;
 vec3 fragPos;
 vec3 fragWorldPos;
-vec3 lampEyePos; // Transformed lamp position into eye space
+
+// output colors
+layout(location = 0) out vec4 fragColor;
+
+#ifdef ALGINE_BLOOM_MODE_ENABLED
+layout(location = 1) out vec4 fragBrightColor;
+uniform float brightnessThreshold = 0.3;	// brightness threshold variable
+#endif
+
+#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED && defined ALGINE_LIGHTING_MODE_ENABLED
+uniform samplerCube shadowMaps[MAX_LAMPS_COUNT];
+uniform float far_plane;	// shadow matrix far plane
+uniform float shadow_bias;
+
 float shadow;
 
+#ifdef ALGINE_SHADOW_MAPPING_MODE_ENABLED
+uniform float diskRadius_k;
+uniform float diskRadius_min;
+
 // for PCF
-vec3 sampleOffsetDirections[20] = vec3[] (
+const vec3 sampleOffsetDirections[20] = vec3[] (
 		vec3(1, 1, 1), vec3(1, -1, 1), vec3(-1, -1, 1), vec3(-1, 1, 1),
 		vec3(1, 1, -1), vec3(1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
 		vec3(1, 1, 0), vec3(1, -1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
 		vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
 		vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 );
-
-// output colors
-layout(location = 0) out vec4 fragColor;
-layout(location = 1) out vec4 fragBrightColor;
+#endif /* ALGINE_SHADOW_MAPPING_MODE_ENABLED */
 
 float calculateShadow(vec3 lightDir, int index) {
 	// get vector between fragment position and light position
-	vec3 fragToLight = fragWorldPos - u_Lamps[index].lampPos;
+	vec3 fragToLight = fragWorldPos - lamps[index].lampPos;
 	// now get current linear depth as the length between the fragment and light position
 	float currentDepth = length(fragToLight);
-	// bias
-	float bias = 0.6;
 	// use the light to fragment vector to sample from the depth map
 	float closestDepth;
 
 	// PCF
-	float viewDistance = length(u_ViewPos - fragWorldPos);
-	float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
-	for (int i = 0; i < 20; ++i) {
+	#ifdef ALGINE_SHADOW_MAPPING_MODE_ENABLED
+	float viewDistance = length(viewPos - fragWorldPos);
+	float diskRadius = (1.0 + (viewDistance / far_plane)) * diskRadius_k + diskRadius_min;
+	for (int i = 0; i < 20; i++) {
 		closestDepth = texture(shadowMaps[index], fragToLight + sampleOffsetDirections[i] * diskRadius).r;
 		closestDepth *= far_plane; // Undo mapping [0;1]
 		// now test for shadows
-		if(currentDepth - bias > closestDepth) shadow += 1.0;
+		if(currentDepth - shadow_bias > closestDepth) shadow += 1.0;
 	}
-	shadow /= 20;
-
-	//fragColor = vec4(vec3(closestDepth / far_plane), 1.0); // visualizing
-	return shadow;
+	return shadow /= 20;
+	#else
+	closestDepth = texture(shadowMaps[index], fragToLight).r;
+	closestDepth *= far_plane; // Undo mapping [0;1]
+	// now test for shadows
+	return currentDepth - shadow_bias > closestDepth ? 1.0 : 0.0;
+	#endif
 }
+#endif
 
+#if defined ALGINE_LIGHTING_MODE_ENABLED && defined ALGINE_ATTENUATION_MODE_ENABLED
 float calculateAttenuation(Lamp lamp) {
 	float distance = length(lampEyePos - fragPos);
 	return 1.0 / (
@@ -102,64 +147,118 @@ float calculateAttenuation(Lamp lamp) {
 					lamp.kq * (distance * distance)
 			);
 }
+#endif
 
-vec4 toVec4(vec3 v) {
-	return vec4(v, 1);
-}
+
+#define toVec4(v) vec4(v, 1.0)
 
 // The entry point for our fragment shader.
 void main() {
 	fragWorldPos = vec3(model * v_Position);
-	 // Transform the vertex into eye space
-	mat4 mvMatrix = view * model;
-	fragPos = vec3(mvMatrix * v_Position);
 
-	vec3 viewDir = normalize(mat3(view) * u_ViewPos - fragPos);
-	if (v_NormalMapping == 0) norm = vec3(normalize(mvMatrix * vec4(v_Normal, 0)));
+	fragPos = vec3(vmMatrix * v_Position); // Transform the vertex into eye space
+
+	#ifdef ALGINE_LIGHTING_MODE_ENABLED
+	#ifdef ALGINE_NORMAL_MAPPING_MODE_DUAL
+	if (v_NormalMapping == 0) norm = vec3(normalize(vmMatrix * vec4(v_Normal, 0)));
 	else { // using normal map if normal mapping enabled
-		norm = texture2D(u_Mapping.normal, v_Texture).rgb;
+		norm = texture2D(mapping.normal, v_Texture).rgb;
 		norm = normalize(norm * 2.0 - 1.0); // from [0; 1] to [-1; 1]
 		norm = normalize(v_TBN * norm);
 	}
+	#elif defined ALGINE_NORMAL_MAPPING_MODE_ENABLED
+	norm = texture2D(mapping.normal, v_Texture).rgb;
+	norm = normalize(norm * 2.0 - 1.0); // from [0; 1] to [-1; 1]
+	norm = normalize(v_TBN * norm);
+	#else
+	norm = vec3(normalize(vmMatrix * vec4(v_Normal, 0)));
+	#endif /* ALGINE_NORMAL_MAPPING_MODE_DUAL */
+	#endif
+
+	#ifdef ALGINE_LIGHTING_MODE_ENABLED
+	vec3 viewDir = normalize(mat3(view) * viewPos - fragPos);
 
 	vec3 ambientResult = vec3(0, 0, 0); // result of ambient lighting for all lamps
 	vec3 diffuseResult = vec3(0, 0, 0); // result of diffuse lighting for all lamps
 	vec3 specularResult = vec3(0, 0, 0); // result of specular lighting for all lamps
 
-	for (int i = 0; i < u_LampsCount; i++) {
-		lampEyePos = vec3(view * toVec4(u_Lamps[i].lampPos));
+	for (int i = 0; i < lampsCount; i++) {
+		lampEyePos = vec3(view * toVec4(lamps[i].lampPos));
+
+		#ifdef ALGINE_ATTENUATION_MODE_ENABLED
 		// attenuation
-		float attenuation = calculateAttenuation(u_Lamps[i]);
+		float attenuation = calculateAttenuation(lamps[i]);
+		#else
+		#define attenuation 1.0
+		#endif /* ALGINE_ATTENUATION_MODE_ENABLED */
 
 		// ambient
-		vec3 ambient = u_Lamps[i].ambientStrength * u_Lamps[i].lampColor * attenuation;
+		vec3 ambient = lamps[i].ambientStrength * lamps[i].lampColor * attenuation;
 
 		// diffuse
 		vec3 lightDir = normalize(lampEyePos - fragPos);
 		float diff = max(dot(norm, lightDir), 0.0);
-		vec3 diffuse = u_Lamps[i].diffuseStrength * diff * u_Lamps[i].lampColor * attenuation;
+		vec3 diffuse = lamps[i].diffuseStrength * diff * lamps[i].lampColor * attenuation;
 
 		// specular
 		vec3 reflectDir = reflect(-lightDir, norm);
-		float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_Lamps[i].shininess);
-		vec3 specular = u_Lamps[i].specularStrength * spec * u_Lamps[i].lampColor * attenuation;
-
-		// calculate shadow
-		shadow = calculateShadow(lightDir, i);
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), lamps[i].shininess);
+		vec3 specular = lamps[i].specularStrength * spec * lamps[i].lampColor * attenuation;
 
 		// result for this(i) lamp
 		ambientResult += ambient;
+		#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
+		// calculate shadow
+		shadow = calculateShadow(lightDir, i);
 		diffuseResult += diffuse * (1 - shadow);
 		specularResult += specular * (1 - shadow);
+		#else
+		diffuseResult += diffuse;
+		specularResult += specular;
+		#endif
 	}
-	
+
+	#ifdef ALGINE_TEXTURE_MAPPING_MODE_ENABLED
 	fragColor =
-			toVec4(ambientResult) * texture(u_Mapping.ambient, v_Texture) +
-			toVec4(diffuseResult) * texture(u_Mapping.diffuse, v_Texture) +
-			toVec4(specularResult) * texture(u_Mapping.specular, v_Texture);
+			toVec4(ambientResult) * texture(mapping.ambient, v_Texture) +
+			toVec4(diffuseResult) * texture(mapping.diffuse, v_Texture) +
+			toVec4(specularResult) * texture(mapping.specular, v_Texture);
+	#elif defined ALGINE_TEXTURE_MAPPING_MODE_DISABLED
+	fragColor =
+			toVec4(ambientResult) * mapping.cambient +
+			toVec4(diffuseResult) * mapping.cdiffuse +
+			toVec4(specularResult) * mapping.cspecular;
+	#else
+	if (textureMappingEnabled)
+		fragColor =
+				toVec4(ambientResult) * texture(mapping.ambient, v_Texture) +
+				toVec4(diffuseResult) * texture(mapping.diffuse, v_Texture) +
+				toVec4(specularResult) * texture(mapping.specular, v_Texture);
+	else
+		fragColor =
+				toVec4(ambientResult) * mapping.cambient +
+				toVec4(diffuseResult) * mapping.cdiffuse +
+				toVec4(specularResult) * mapping.cspecular;
+	#endif /* ALGINE_TEXTURE_MAPPING_MODE_ENABLED */
+
+	#else
+		#ifdef ALGINE_TEXTURE_MAPPING_MODE_ENABLED
+		fragColor = texture(mapping.diffuse, v_Texture);
+		#elif defined ALGINE_TEXTURE_MAPPING_MODE_DISABLED
+		fragColor = mapping.cdiffuse;
+		#else
+		if (textureMappingEnabled) fragColor = texture(mapping.diffuse, v_Texture);
+		else fragColor = mapping.cdiffuse;
+		#endif /* ALGINE_TEXTURE_MAPPING_MODE_ENABLED */
+	#endif /* ALGINE_LIGHTING_MODE_ENABLED */
+
+	#ifdef ALGINE_DOF_MODE_ENABLED
 	fragColor.a = clamp(abs(focalDepth + fragPos.z) / focalRange, 0.0, 1.0);
+	#endif
 	
+	#ifdef ALGINE_BLOOM_MODE_ENABLED
 	// brightness calculation
 	float brightness = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 	if (brightness > brightnessThreshold) fragBrightColor = vec4(fragColor.rgb, 1.0);
+	#endif
 }

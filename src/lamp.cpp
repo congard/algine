@@ -43,17 +43,23 @@ class Lamp {
         /* --- to access shader --- */
         GLuint propLocations[9]; // one lamp has 9 properties
         
+        #include "sconstants.h"
+
         void loadLocations(GLuint programId, GLuint id) {
-            propLocations[0] = glGetUniformLocation(programId, ("u_Lamps[" + std::to_string(id) + "].ambientStrength").c_str());
-			propLocations[1] = glGetUniformLocation(programId, ("u_Lamps[" + std::to_string(id) + "].diffuseStrength").c_str());
-			propLocations[2] = glGetUniformLocation(programId, ("u_Lamps[" + std::to_string(id) + "].specularStrength").c_str());
-			propLocations[3] = glGetUniformLocation(programId, ("u_Lamps[" + std::to_string(id) + "].shininess").c_str());
-			propLocations[4] = glGetUniformLocation(programId, ("u_Lamps[" + std::to_string(id) + "].lampPos").c_str());
-			propLocations[5] = glGetUniformLocation(programId, ("u_Lamps[" + std::to_string(id) + "].lampColor").c_str());
-			propLocations[6] = glGetUniformLocation(programId, ("u_Lamps[" + std::to_string(id) + "].kc").c_str());
-			propLocations[7] = glGetUniformLocation(programId, ("u_Lamps[" + std::to_string(id) + "].kl").c_str());
-			propLocations[8] = glGetUniformLocation(programId, ("u_Lamps[" + std::to_string(id) + "].kq").c_str());
+            // uns - uniform name start
+            std::string uns = ALGINE_NAME_CS_LAMPS + std::string("[") + std::to_string(id) + "].";
+            propLocations[0] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_AMBIENT_STRENGTH).c_str());
+			propLocations[1] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_DIFFUSE_STRENGTH).c_str());
+			propLocations[2] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_SPECULAR_STRENGTH).c_str());
+			propLocations[3] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_SHININESS).c_str());
+			propLocations[4] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_LAMP_POS).c_str());
+			propLocations[5] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_LAMP_COLOR).c_str());
+			propLocations[6] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_KC).c_str());
+			propLocations[7] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_KL).c_str());
+			propLocations[8] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_KQ).c_str());
 		}
+
+        #include "unsconstants.h"
 
         void push_ambientStrength() { glUniform1f(propLocations[0], ambientStrength); }
 
