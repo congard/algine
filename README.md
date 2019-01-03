@@ -1,19 +1,19 @@
 # Algine
 Algine [Al'gine] - OpenGL 3.3+ engine written in C++
 
-Version: 1.2 alpha
+Version: 1.3 beta-candidate
 
 Supported systems: Linux (Windows in the future)
 
 Example of using given in `main.cpp` file
 
-Engine tested on Asus x302uv (Intel Core I5-6200U, Nvidia GeForce 920mx, 8GB RAM, Debian GNU/Linux 9.5.0, 1920x1080 screen) and showed good results
+Engine tested on Asus x302uv (Intel Core I5-6200U, Nvidia GeForce 920mx, 8GB RAM, Debian GNU/Linux buster/sid, 1920x1080 screen) and showed good results
 
 If you find any errors or you have recommendations for improving the project - a big one please let me know!
 
 Shaders are written with the expectation that the compiler optimizes their code. In the future, the optimizer may be written
 
-![Algine v1.2 alpha](pictures/6.png)
+![Algine v1.3 beta-candidate](pictures/1.png)
 
 # Functionality
  * Textures
@@ -27,10 +27,11 @@ Shaders are written with the expectation that the compiler optimizes their code.
  * Bloom
  * CMF models support
  * Depth of field (DOF)
+ * SSR (Screen Space Reflections)
  * Effect management
  * Etc.
 
-Take into account, this is a test (alpha) version! All major functions will be added in later versions.
+Take into account, this is a test (beta-candidate) version! All major functions will be added in later versions.
 
 # Dependencies
 Engine has next dependencies: `glew`, `glfw`, `glm`.

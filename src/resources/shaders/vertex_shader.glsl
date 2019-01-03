@@ -25,24 +25,18 @@ out vec3 v_Normal;
 out vec2 v_Texture;
 out float v_NormalMapping;
 
+#define TBN(matrix) mat3(normalize(vec3(matrix * vec4(a_Tangent, 0.0))), \
+						 normalize(vec3(matrix * vec4(a_Bitangent, 0.0))), \
+						 normalize(vec3(matrix * vec4(a_Normal, 0.0))))
+
 void main() {
     #ifdef ALGINE_NORMAL_MAPPING_MODE_DUAL
 	// creating TBN (tangent-bitangent-normal) matrix if normal mapping enabled
-	if (u_NormalMapping == 1) {
-		vec3 T = normalize(vec3(u_VMMatrix * vec4(a_Tangent, 0.0))); // tangent
-		vec3 B = normalize(vec3(u_VMMatrix * vec4(a_Bitangent, 0.0))); // bitangent
-		vec3 N = normalize(vec3(u_VMMatrix * vec4(a_Normal, 0.0))); // normal
-		mat3 TBN = mat3(T, B, N);
-		v_TBN = TBN;
-	}
+	if (u_NormalMapping == 1) v_TBN = TBN(u_VMMatrix);
     v_NormalMapping = u_NormalMapping;
     #elif defined ALGINE_NORMAL_MAPPING_MODE_ENABLED
 	// creating TBN (tangent-bitangent-normal) matrix if normal mapping enabled
-	vec3 T = normalize(vec3(u_VMMatrix * vec4(a_Tangent, 0.0))); // tangent
-	vec3 B = normalize(vec3(u_VMMatrix * vec4(a_Bitangent, 0.0))); // bitangent
-	vec3 N = normalize(vec3(u_VMMatrix * vec4(a_Normal, 0.0))); // normal
-	mat3 TBN = mat3(T, B, N);
-	v_TBN = TBN;
+	v_TBN = TBN(u_VMMatrix);
     #endif
 
     // gl_Position is a special variable used to store the final position.

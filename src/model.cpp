@@ -14,9 +14,9 @@
 #include <iostream>
 
 #include "lib/libcmf/arraysmaker.cpp"
+#include "texture.cpp"
 
-#include "utils/texture_utils.cpp"
-
+namespace algine {
 #define XYZ 3
 #define XY 2
 #define TRIANGLE 3
@@ -113,17 +113,19 @@ class ModelBuffers {
 
 class ModelMapping {
     public:
-        GLuint textures[4];
+        GLuint textures[6];
 
-        void init(const char *atex, const char *dtex, const char *stex, const char *ntex) {
-            textures[0] = loadTexture(atex);
-            textures[1] = loadTexture(dtex);
-            textures[2] = loadTexture(stex);
-            textures[3] = loadTexture(ntex);
+        void init(const char *atex, const char *dtex, const char *stex, const char *ntex, const char *rstex, const char *jtex) {
+            textures[0] = atex != nullptr ? loadTexture(atex) : 0;
+            textures[1] = dtex != nullptr ? loadTexture(dtex) : 0;
+            textures[2] = stex != nullptr ? loadTexture(stex) : 0;
+            textures[3] = ntex != nullptr ? loadTexture(ntex) : 0;
+            textures[4] = rstex != nullptr ? loadTexture(rstex) : 0;
+            textures[5] = jtex != nullptr ? loadTexture(jtex) : 0;
         }
 
         void recycle() {
-            glDeleteTextures(4, textures);
+            glDeleteTextures(6, textures);
         }
 };
 
@@ -190,23 +192,23 @@ class Model {
             std::swap(angles, other.angles);
         }
 
-        GLuint getVerticesBuffer() {
+        inline GLuint getVerticesBuffer() {
             return buffers->buffers[0];
         }
 
-        GLuint getNormalsBuffer() {
+        inline GLuint getNormalsBuffer() {
             return buffers->buffers[1];
         }
 
-        GLuint getTexCoordsBuffer() {
+        inline GLuint getTexCoordsBuffer() {
             return buffers->buffers[2];
         }
 
-        GLuint getTangentsBuffer() {
+        inline GLuint getTangentsBuffer() {
             return buffers->buffers[3];
         }
 
-        GLuint getBitangentsBuffer() {
+        inline GLuint getBitangentsBuffer() {
             return buffers->buffers[4];
         }
 
@@ -218,5 +220,7 @@ class Model {
 #undef XYZ
 #undef XY
 #undef TRIANGLE
+
+} // namespace algine
 
 #endif

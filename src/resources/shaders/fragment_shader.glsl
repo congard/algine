@@ -20,7 +20,7 @@ uniform float focalRange; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
 uniform bool textureMappingEnabled;	// 0 false (color mapping), true (texture mapping) (if ALGINE_TEXTURE_MAPPING_MODE == ALGINE_TEXTURE_MAPPING_MODE_DUAL)
 
 in mat4 model, view, vmMatrix;
-in mat3 v_TBN; // Tangent Bitangent Normal matrix
+in mat3 v_TBN, v_wTBN; // Tangent Bitangent Normal matrix and this matrix in world space
 in vec4 v_Position; // Position for this fragment in world space
 in vec3 v_Normal; // Interpolated normal for this fragment
 in vec2 v_Texture; // Texture coordinates.
@@ -29,6 +29,11 @@ in float v_NormalMapping; // Is normal mapping enabled 0 - false, 1 - true (if A
 uniform struct Mapping {
 	#if defined ALGINE_NORMAL_MAPPING_MODE_ENABLED || defined ALGINE_NORMAL_MAPPING_MODE_DUAL
 	sampler2D normal;
+	#endif
+
+	#if defined ALGINE_SSR_MODE_ENABLED
+	sampler2D reflectionStrength;
+	sampler2D jitter;
 	#endif
 
 	#ifdef ALGINE_LIGHTING_MODE_ENABLED
@@ -83,15 +88,14 @@ vec3 fragWorldPos;
 
 // output colors
 layout(location = 0) out vec4 fragColor;
-
-#ifdef ALGINE_BLOOM_MODE_ENABLED
-layout(location = 1) out vec4 fragBrightColor;
-uniform float brightnessThreshold = 0.3;	// brightness threshold variable
-#endif
+layout(location = 1) out float dofBuffer;
+layout(location = 2) out vec3 normalBuffer;
+layout(location = 3) out vec2 ssrValuesBuffer;
+layout(location = 4) out vec3 positionBuffer;
 
 #if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED && defined ALGINE_LIGHTING_MODE_ENABLED
 uniform samplerCube shadowMaps[MAX_LAMPS_COUNT];
-uniform float far_plane;	// shadow matrix far plane
+uniform float far_plane_sm;	// shadow matrix far plane
 uniform float shadow_bias;
 
 float shadow;
@@ -121,17 +125,17 @@ float calculateShadow(vec3 lightDir, int index) {
 	// PCF
 	#ifdef ALGINE_SHADOW_MAPPING_MODE_ENABLED
 	float viewDistance = length(viewPos - fragWorldPos);
-	float diskRadius = (1.0 + (viewDistance / far_plane)) * diskRadius_k + diskRadius_min;
+	float diskRadius = (1.0 + (viewDistance / far_plane_sm)) * diskRadius_k + diskRadius_min;
 	for (int i = 0; i < 20; i++) {
 		closestDepth = texture(shadowMaps[index], fragToLight + sampleOffsetDirections[i] * diskRadius).r;
-		closestDepth *= far_plane; // Undo mapping [0;1]
+		closestDepth *= far_plane_sm; // Undo mapping [0;1]
 		// now test for shadows
 		if(currentDepth - shadow_bias > closestDepth) shadow += 1.0;
 	}
 	return shadow /= 20;
 	#else
 	closestDepth = texture(shadowMaps[index], fragToLight).r;
-	closestDepth *= far_plane; // Undo mapping [0;1]
+	closestDepth *= far_plane_sm; // Undo mapping [0;1]
 	// now test for shadows
 	return currentDepth - shadow_bias > closestDepth ? 1.0 : 0.0;
 	#endif
@@ -253,12 +257,13 @@ void main() {
 	#endif /* ALGINE_LIGHTING_MODE_ENABLED */
 
 	#ifdef ALGINE_DOF_MODE_ENABLED
-	fragColor.a = clamp(abs(focalDepth + fragPos.z) / focalRange, 0.0, 1.0);
+	dofBuffer = abs(focalDepth + fragPos.z) / focalRange;
 	#endif
-	
-	#ifdef ALGINE_BLOOM_MODE_ENABLED
-	// brightness calculation
-	float brightness = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-	if (brightness > brightnessThreshold) fragBrightColor = vec4(fragColor.rgb, 1.0);
+
+	#ifdef ALGINE_SSR_MODE_ENABLED
+	normalBuffer = norm;
+	positionBuffer = fragPos;
+	ssrValuesBuffer.r = texture(mapping.reflectionStrength, v_Texture).r;
+	ssrValuesBuffer.g = texture(mapping.jitter, v_Texture).r;
 	#endif
 }

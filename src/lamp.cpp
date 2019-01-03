@@ -16,9 +16,10 @@
 
 #include <iostream>
 
-#include "utils/shader_utils.cpp"
+#include "algine_renderer.cpp"
 #include "model.cpp"
 
+namespace algine {
 #define LAMP_FAR_PLANE 32.0f
 
 class Lamp {
@@ -69,9 +70,9 @@ class Lamp {
 
         void push_shininess() { glUniform1i(propLocations[3], shininess); }
 
-        void push_lampPos() { su::setVec3(propLocations[4], pos); }
+        void push_lampPos() { setVec3(propLocations[4], pos); }
 
-        void push_lampColor() { su::setVec3(propLocations[5], color); }
+        void push_lampColor() { setVec3(propLocations[5], color); }
 
         void push_kc() { glUniform1f(propLocations[6], kc); }
 
@@ -111,11 +112,11 @@ class Lamp {
         }
 
         void setLightPos() {
-            su::setVec3(lightPosLocation, pos);
+            setVec3(lightPosLocation, pos);
         }
 
         void setShadowMatrices() {
-            for (size_t i = 0; i < 6; i++) su::setMat4(shadowMatricesLocations[i], lightSpaceMatrices[i]);
+            for (size_t i = 0; i < 6; i++) setMat4(shadowMatricesLocations[i], lightSpaceMatrices[i]);
         }
 
         void updateMatrices() {
@@ -263,5 +264,7 @@ class LampModel : public Lamp {
             mptr->origin = pos;
         }
 };
+
+} // namespace algine
 
 #endif /* ALGINE_LAMP_CPP */

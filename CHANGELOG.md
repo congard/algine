@@ -21,3 +21,32 @@
  7. Compressed textures for models
  8. Added FPS meter in the sample scene
  9. Other improvements and fixes
+
+1.3 beta-candidate:
+ 1. Optimization;
+ 2. Completely changed the architecture of the engine. Now everything is divided into separate modules;
+ 3. Removed `utils/shader_utils.cpp` and `utils/texture_utils.cpp`;
+ 4. All engine modules are placed in the namespace `algine`;
+ 5. `static GLuint loadTexture(const char *path)` and `class TextureArray` from `utils/texture_utils.cpp` moved into `texture.cpp`;
+ 6. `class TextureArray => struct TextureArray`;
+ 7. Removed many obsolete functions and structures (mainly from `algine.cpp`, `utils/texture_utils.cpp`, `utils/shader_utils.cpp`);
+ 8. Renamed most of the structures and their members. No more ugly names like `ALGINE_PATHS_TO_SHADERS`, `ALGINE_PROCESSED_SHADERS`;
+ 9. No more spam in the console when compiling shaders. Logs are displayed only when errors occur. The size of the log buffer is now strictly controlled, and exactly as needed to obtain this data;
+ 10. Some functions like `setVec3`, `setVec4`, `setMat4`, `pointer` from `utils/shader_utils.cpp` (`namespace su`) moved into `algine_renderer.cpp`; `void setVec3 && setVec4 && setMat4 > #define setVec3 && setVec4 && setMat4`;
+ 11. For compatibility with `GLM 0.9.9.0`, you must define `GLM_FORCE_CTOR_INIT`. Note: defined in `algine.cpp`;
+ 12. Fixed comments in the example (`main.cpp`);
+ 13. `algine_renderer.cpp`: used for rendering, has basic functions such as `setVec3`, `setVec4`, `setMat4`, `pointer`. Previously, `struct AlgineRenderer` was literally responsible for everything that multiplied by zero all the flexibility, customizability and embeddedness of the engine. Now it has only a few functions that are used for rendering. Such as: `renderQuad`, `mainPass`, `screenspacePass`, `bloomDofPass`, `bloomPass`,`dofPass`, `doubleBlendPass`, `blendPass`, `prepare`. No pointer-to-function!
+ <br>`algine_shader_compiler.cpp`: used for generating Algine shaders, for compiling shaders and combining them into programs, for loading ids of objects from Algine shaders, for saving shaders. It has functions of reading and writing;
+ <br>`algine_structs.cpp`: necessary for the operation of the engine structures
+ <br>`algine.cpp`: just includes all engine and `glm` files
+ <br>`constants.h`: engine constants (like `ALGINE_SSR_MODE_ENABLED`)
+ <br>`framebuffer.cpp`: create, manage, delete framebuffer
+ <br>`shaderprogram.cpp`: create, manage, delete shader and shader program; has functions for getting info log
+ <br>`texture.cpp`: create, manage, delete texture;
+ 14. Fix in `model.cpp`: now it’s not necessary to specify paths to all textures. If the texture is not needed, its path can be `nullptr`;
+ 15. Arguments `internalformat = GL_RGB, format = GL_RGB, type = GL_UNSIGNED_BYTE` have been added to `loadTexture`;
+ 16. Added new effect: **SSR** (*Screen Space Reflections*). In this regard, introduced 2 new types of textures: *reflection strength map*, *jitter map*;
+ 17. Due to decentralization of engine functions, memory consumption is reduced;
+ 18. Other changes and improvements.
+ 
+**If this new architecture is approved, then the process of creating documentation will begin, and the engine will move to the beta stage.**

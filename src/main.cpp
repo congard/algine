@@ -5,7 +5,7 @@
  * My gitlab: https://gitlab.com/congard
  * @author congard
  * 
- * @version 1.1 alpha
+ * @version 1.3 beta-candidate
  */
 
 #include <iostream>
@@ -14,17 +14,8 @@
 
 #define ALGINE_LOGGING
 
-#include "model.cpp"
-#include "lamp.cpp"
 #include "algine.cpp"
-#include "sconstants.h"
-
 #include "lib/libcmf/loader.cpp"
-
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
 
 #define SHADOW_MAP_RESOLUTION 1024
 
@@ -64,9 +55,12 @@ GLuint vao;
 glm::mat4 projectionMatrix, viewMatrix, modelMatrix;
 
 // camera params
-glm::vec3 cameraPos(0, 6, 16);
+glm::vec3 cameraPos(0, 6, 14); // prev: 10; 6; 8
 glm::vec3 cameraLookAt(0, 4, 0);
 glm::vec3 cameraUp(0, 1, 0);
+
+// framebuffers, textures etc for rendering
+using namespace algine;
 
 // models
 ModelBuffers mbuffers[MODEL_BUFFERS_MAPPING_COUNT];
@@ -80,7 +74,27 @@ LampModel lightSources[LAMPS_COUNT];
 TextureArray shadowMaps;
 
 // renderer
-AlgineRenderer *renderer;
+AlgineRenderer renderer;
+
+GLuint
+        displayFB,
+        screenspaceFB,
+        pingpongFB[2],
+        rbo;
+
+GLuint
+        colorTex,
+        dofTex,
+        normalTex,
+        ssrValues,
+        positionTex,
+        screenspaceTex,
+        bloomTex,
+        pingpongBloomTex[2],
+        pingpongDofTex[2];
+
+AlginePrograms programs;
+AlgineParams params;
 
 float
     // DOF variables
@@ -110,8 +124,8 @@ void createViewMatrix() {
 void window_size_callback(GLFWwindow* window, int width, int height) {
     WIN_W = width;
     WIN_H = height;
-    ALGINE_SCR_W = WIN_W;
-    ALGINE_SCR_H = WIN_H;
+    params.SCR_W = WIN_W;
+    params.SCR_H = WIN_H;
     createProjectionMatrix();
 }
 
@@ -129,7 +143,7 @@ void createLamp(LampModel &result, const glm::vec3 &pos, const glm::vec3 &color,
     result.kq = 0.0075f;
     result.shininess = 32;
 
-    result.loadLocations(ALGINE_PROGRAM_ID_CS, id);
+    result.loadLocations(programs.PROGRAM_ID_CS, id);
     result.initShadowMapping(SHADOW_MAP_RESOLUTION);
 }
 
@@ -143,7 +157,7 @@ void createLamp(LampModel &result, const glm::vec3 &pos, const glm::vec3 &color,
  * @param id - ModelXXX id
  * @param inverseNormals - if true, normals will be inverted
  */
-void create_ModelBuffers_ModelMapping(const char *path, const char *atex, const char *dtex, const char *stex, const char *ntex, size_t id, bool inverseNormals) {
+void create_ModelBuffers_ModelMapping(const char *path, const char *atex, const char *dtex, const char *stex, const char *ntex, const char *rstex, const char *jtex, size_t id, bool inverseNormals) {
     CMFLoader loader;
     loader.loadCMF(path);
     loader.load();
@@ -155,7 +169,7 @@ void create_ModelBuffers_ModelMapping(const char *path, const char *atex, const 
     c2a.make(true, true, true);
 
     mbuffers[id].init(c2a);
-    mmapping[id].init(atex, dtex, stex, ntex);
+    mmapping[id].init(atex, dtex, stex, ntex, rstex, jtex);
 
     c2a.cleanup();
 }
@@ -170,8 +184,8 @@ void create_ModelBuffers_ModelMapping(const char *path, const char *atex, const 
  * @param id - ModelXXX id
  * inverseNormals set to false
  */
-void create_ModelBuffers_ModelMapping(const char *path, const char *atex, const char *dtex, const char *stex, const char *ntex, size_t id) {
-    create_ModelBuffers_ModelMapping(path, atex, dtex, stex, ntex, id, false);
+void create_ModelBuffers_ModelMapping(const char *path, const char *atex, const char *dtex, const char *stex, const char *ntex, const char *rstex, const char *jtex, size_t id) {
+    create_ModelBuffers_ModelMapping(path, atex, dtex, stex, ntex, rstex, jtex, id, false);
 }
 
 /* init code begin */
@@ -182,7 +196,7 @@ void create_ModelBuffers_ModelMapping(const char *path, const char *atex, const 
 void initGL() {
     std::cout << "Starting GLFW context, OpenGL 3.3" << std::endl;
     // Init GLFW
-    glfwInit();
+    if (!glfwInit()) std::cout << "GLFW init failed";
     // Set all the required options for GLFW
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -195,56 +209,130 @@ void initGL() {
         glfwCreateWindow(WIN_W, WIN_H, "Algine", nullptr, nullptr);
     
     glfwMakeContextCurrent(window);
-
+    
     // Set the required callback functions
     glfwSetKeyCallback(window, key_callback);
     glfwSetWindowSizeCallback(window, window_size_callback);
 
     // Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
-    // glewExperimental = GL_TRUE;
+    glewExperimental = GL_TRUE;
     // Initialize GLEW to setup the OpenGL Function pointers
-    glewInit();
+    if (glewInit() != GLEW_NO_ERROR) std::cout << "GLEW init failed\n";
 
     glEnable(GL_DEPTH_TEST);
 	glDepthMask(true);
-    //glCullFace(GL_BACK);
 }
 
 /**
  * Loading and compiling shaders
  */
 void initShaders() {
-    ALGINE_PATHS_TO_SHADERS apts {
-        (const char*) "src/resources/shaders/vertex_shader.glsl",
-        (const char*) "src/resources/shaders/fragment_shader.glsl",
-
-        (const char*) "src/resources/shaders/vertex_shadow_shader.glsl",
-        (const char*) "src/resources/shaders/geometry_shadow_shader.glsl",
-        (const char*) "src/resources/shaders/fragment_shadow_shader.glsl",
-
-        (const char*) "src/resources/shaders/vertex_blur_shader.glsl",
-        (const char*) "src/resources/shaders/fragment_blur_shader.glsl",
-
-        (const char*) "src/resources/shaders/vertex_blend_shader.glsl",
-        (const char*) "src/resources/shaders/fragment_blend_shader.glsl"
-    };
-
     std::cout << "Compiling algine shaders\n";
 
-    //ALGINE_TEXTURE_MAPPING_MODE = ALGINE_TEXTURE_MAPPING_MODE_DISABLED;
-    //ALGINE_NORMAL_MAPPING_MODE = ALGINE_NORMAL_MAPPING_MODE_DISABLED;
-    //ALGINE_LIGHTING_MODE = ALGINE_LIGHTING_MODE_DISABLED;
-    //ALGINE_ATTENUATION_MODE = ALGINE_ATTENUATION_MODE_DISABLED;
-    //ALGINE_DOF_MODE = ALGINE_DOF_MODE_DISABLED;
-    //ALGINE_BLOOM_MODE = ALGINE_BLOOM_MODE_DISABLED;
-    //ALGINE_SHADOW_MAPPING_MODE = ALGINE_SHADOW_MAPPING_MODE_DISABLED;
-    //ALGINE_KERNEL_BLOOM_SIZE = 4;
-    ALGINE_KERNEL_DOF_SIZE = 3;
-    algine_compile_shaders(algine_create_shaders_sources(apts));
-    algine_load_locations();
+    params.KERNEL_DOF_SIZE = 3;
+    programs.PROGRAM_ID_CS = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getCS(
+        params,
+        "src/resources/shaders/vertex_shader.glsl",
+        "src/resources/shaders/fragment_shader.glsl")
+    ));
+    programs.PROGRAM_ID_SS = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSS(
+        "src/resources/shaders/vertex_shadow_shader.glsl",
+        "src/resources/shaders/fragment_shadow_shader.glsl",
+        "src/resources/shaders/geometry_shadow_shader.glsl")
+    ));
+    programs.PROGRAM_ID_SSS = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSSS(
+        params,
+        "src/resources/shaders/vertex_screenspace_shader.glsl",
+        "src/resources/shaders/fragment_screenspace_shader.glsl")
+    ));
+    std::vector<ShadersData> blus = scompiler::getBLUS(
+        params,
+        "src/resources/shaders/vertex_blur_shader.glsl",
+        "src/resources/shaders/fragment_blur_shader.glsl"
+    );
+    programs.PROGRAM_ID_BLUS_HORIZONTAL = scompiler::createShaderProgramDS(scompiler::compileShaders(
+        blus[0]
+    ));
+    programs.PROGRAM_ID_BLUS_VERTICAL = scompiler::createShaderProgramDS(scompiler::compileShaders(
+        blus[1]
+    ));
+    programs.PROGRAM_ID_BLES = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getBLES(
+        params,
+        "src/resources/shaders/vertex_blend_shader.glsl",
+        "src/resources/shaders/fragment_blend_shader.glsl")
+    ));
+    scompiler::loadLocations(programs, params);
 
-    renderer = new AlgineRenderer();
-    renderer->prepare();
+    renderer.programs = programs;
+    renderer.params = &params;
+    renderer.prepare();
+
+    Framebuffer::create(&displayFB);
+    Framebuffer::create(&screenspaceFB);
+    Framebuffer::create(pingpongFB, 2);
+    glGenRenderbuffers(1, &rbo);
+
+    Texture::create(&colorTex);
+    Texture::create(&dofTex);
+    Texture::create(&normalTex);
+    Texture::create(&ssrValues);
+    Texture::create(&positionTex);
+    Texture::create(&screenspaceTex);
+    Texture::create(&bloomTex);
+    Texture::create(pingpongBloomTex, 2);
+    Texture::create(pingpongDofTex, 2);
+
+    GLuint displayColorAttachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+    bindFramebuffer(displayFB);
+    glDrawBuffers(5, displayColorAttachments);
+
+    Framebuffer::attachTexture(colorTex, COLOR_ATTACHMENT(0));
+    Framebuffer::attachTexture(dofTex, COLOR_ATTACHMENT(1));
+    Framebuffer::attachTexture(normalTex, COLOR_ATTACHMENT(2));
+    Framebuffer::attachTexture(ssrValues, COLOR_ATTACHMENT(3));
+    Framebuffer::attachTexture(positionTex, COLOR_ATTACHMENT(4));
+
+    GLuint colorAttachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+
+    for (size_t i = 0; i < 2; i++) {
+        // configuring ping-pong (blur) textures
+        glBindFramebuffer(GL_FRAMEBUFFER, pingpongFB[i]);
+        glDrawBuffers(2, colorAttachments); // use 2 color components (boom / dof)
+
+        Framebuffer::attachTexture(pingpongBloomTex[i], COLOR_ATTACHMENT(0));
+        Framebuffer::attachTexture(pingpongDofTex[i], COLOR_ATTACHMENT(1));
+    }
+
+    // sending to shader center of kernel and right part
+    float kernel[(params.KERNEL_BLOOM_SIZE - 1) * 2];
+    getGB1DKernel(kernel, (params.KERNEL_BLOOM_SIZE - 1) * 2, params.KERNEL_BLOOM_SIGMA);
+
+    for (size_t j = 0; j < 2; j++) {
+        glUseProgram(renderer.blusPrograms[j].programId);
+        for (GLuint i = 0; i < params.KERNEL_BLOOM_SIZE; i++)
+            glUniform1f(
+                j ? programs.BLUS_H_KERNEL_BLOOM[params.KERNEL_BLOOM_SIZE - 1 - i] : programs.BLUS_V_KERNEL_BLOOM[params.KERNEL_BLOOM_SIZE - 1 - i],
+                kernel[i]);
+    }
+
+    glUseProgram(0);
+
+    bindFramebuffer(screenspaceFB);
+    glDrawBuffers(2, colorAttachments);
+    Framebuffer::attachTexture(screenspaceTex, COLOR_ATTACHMENT(0));
+    Framebuffer::attachTexture(bloomTex, COLOR_ATTACHMENT(1));
+
+    bindFramebuffer(0);
+
+    // configuring CS
+    useShaderProgram(programs.PROGRAM_ID_CS);
+    glUniform1i(programs.CS_SAMPLER_MAPPING_AMBIENT, 0);
+    glUniform1i(programs.CS_SAMPLER_MAPPING_DIFFUSE, 1);
+    glUniform1i(programs.CS_SAMPLER_MAPPING_SPECULAR, 2);
+    glUniform1i(programs.CS_SAMPLER_MAPPING_NORMAL, 3);
+    glUniform1i(programs.CS_SAMPLER_MAPPING_REFLECTIONSTRENGTH, 4);
+    glUniform1i(programs.CS_SAMPLER_MAPPING_JITTER, 5);
+    useShaderProgram(0);
 }
 
 /**
@@ -274,16 +362,17 @@ void init_ModelBuffers_ModelMapping() {
         "src/resources/textures/LucyAngel/Stanfords_Lucy_Angel_diffuse_1k.jpg",
         "src/resources/textures/LucyAngel/Stanfords_Lucy_Angel_specular_1k.jpg",
         "src/resources/textures/LucyAngel/Stanfords_Lucy_Angel_normal_1k.jpg",
+        nullptr, nullptr,
         0
     );
 
     // Brickwall
     create_ModelBuffers_ModelMapping(
         "src/resources/models/brickwall/brickwall_triangulated_big.cmf",
-        "src/resources/textures/brickwall/brickwall_big_2k.png",
-        "src/resources/textures/brickwall/brickwall_big_2k.png",
-        "src/resources/textures/brickwall/brickwall_big_2k.png",
+        nullptr, nullptr, nullptr,
         "src/resources/textures/brickwall/brickwall_big_normal_2k.png",
+        "src/resources/textures/brickwall/brickwall_big_reflection_strength_2k.png",
+        "src/resources/textures/brickwall/brickwall_big_jitter_2k.png",
         1
     );
 
@@ -294,6 +383,8 @@ void init_ModelBuffers_ModelMapping() {
         "src/resources/textures/cube/cube_diffuse.jpg",
         "src/resources/textures/cube/cube_specular.jpg",
         "src/resources/textures/cube/cube_normal.jpg",
+        "src/resources/textures/cube/cube_reflection_strength.jpg",
+        "src/resources/textures/cube/cube_jitter.jpg",
         2
     );
 
@@ -304,6 +395,7 @@ void init_ModelBuffers_ModelMapping() {
         "src/resources/textures/japanese_lamp/diffuse.tga",
         "src/resources/textures/japanese_lamp/specular.tga",
         "src/resources/textures/japanese_lamp/normal.tga",
+        nullptr, nullptr,
         3, true
     );
 }
@@ -315,7 +407,8 @@ void createModels() {
     // lucy
     models[0].buffers = &mbuffers[0];
     models[0].mapping = &mmapping[0];
-
+    //models[0].origin = glm::vec3(4, 0, 0);
+    
     // brickwall
     models[1].buffers = &mbuffers[1];
     models[1].mapping = &mmapping[1];
@@ -340,8 +433,8 @@ void createModels() {
  * Creating light sources
  */
 void initLamps() {
-    Lamp::lightPosLocation = ALGINE_SS_LAMP_POSITION;
-    Lamp::initShadowMatrices(ALGINE_PROGRAM_ID_SS);
+    Lamp::lightPosLocation = programs.SS_LAMP_POSITION;
+    Lamp::initShadowMatrices(programs.PROGRAM_ID_SS);
 
     createLamp(lightSources[0], glm::vec3(8.0f, 8.0f, -2.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0);
     lamps[0].buffers = &mbuffers[3];
@@ -361,16 +454,16 @@ void initLamps() {
  */
 void initShadowMaps() {
     shadowMaps = TextureArray(10, LAMPS_COUNT);
-    shadowMaps.init(ALGINE_PROGRAM_ID_CS, ALGINE_NAME_CS_SHADOW_MAPS);
+    shadowMaps.init(programs.PROGRAM_ID_CS, ALGINE_NAME_CS_SHADOW_MAPS);
     for (size_t i = 0; i < LAMPS_COUNT; i++) shadowMaps.addTexture(i, lightSources[i].depthCubemap);
-    shadowMaps.bind(ALGINE_PROGRAM_ID_CS);
+    shadowMaps.bind(programs.PROGRAM_ID_CS);
 }
 
 void initShadowCalculation() {
-    glUseProgram(ALGINE_PROGRAM_ID_CS);
-    glUniform1f(ALGINE_CS_SHADOW_DISKRADIUS_K, diskRadius_k);
-    glUniform1f(ALGINE_CS_SHADOW_DISKRADIUS_MIN, diskRadius_min);
-    glUniform1f(ALGINE_CS_SHADOW_BIAS, shadow_bias);
+    glUseProgram(programs.PROGRAM_ID_CS);
+    glUniform1f(programs.CS_SHADOW_DISKRADIUS_K, diskRadius_k);
+    glUniform1f(programs.CS_SHADOW_DISKRADIUS_MIN, diskRadius_min);
+    glUniform1f(programs.CS_SHADOW_BIAS, shadow_bias);
     glUseProgram(0);
 }
 
@@ -378,15 +471,15 @@ void initShadowCalculation() {
  * Initialize Depth of field
  */
 void initDOF() {
-    glUseProgram(ALGINE_PROGRAM_ID_BLUS_HORIZONTAL);
-    glUniform1f(ALGINE_BLUS_H_SIGMA_MAX, dof_max_sigma);
-    glUniform1f(ALGINE_BLUS_H_SIGMA_MIN, dof_min_sigma);
-    glUseProgram(ALGINE_PROGRAM_ID_BLUS_VERTICAL);
-    glUniform1f(ALGINE_BLUS_V_SIGMA_MAX, dof_max_sigma);
-    glUniform1f(ALGINE_BLUS_V_SIGMA_MIN, dof_min_sigma);
-    glUseProgram(ALGINE_PROGRAM_ID_CS);
-    glUniform1f(ALGINE_CS_FOCAL_DEPTH, focalDepth);
-    glUniform1f(ALGINE_CS_FOCAL_RANGE, focalRange);
+    glUseProgram(programs.PROGRAM_ID_BLUS_HORIZONTAL);
+    glUniform1f(programs.BLUS_H_SIGMA_MAX, dof_max_sigma);
+    glUniform1f(programs.BLUS_H_SIGMA_MIN, dof_min_sigma);
+    glUseProgram(programs.PROGRAM_ID_BLUS_VERTICAL);
+    glUniform1f(programs.BLUS_V_SIGMA_MAX, dof_max_sigma);
+    glUniform1f(programs.BLUS_V_SIGMA_MIN, dof_min_sigma);
+    glUseProgram(programs.PROGRAM_ID_CS);
+    glUniform1f(programs.CS_FOCAL_DEPTH, focalDepth);
+    glUniform1f(programs.CS_FOCAL_RANGE, focalRange);
     glUseProgram(0);
 }
 
@@ -401,13 +494,13 @@ void recycleAll() {
         mbuffers[i].recycle();
         mmapping[i].recycle();
     }
-    delete renderer;
+    //delete renderer;
 }
 
 void sendLampsData() {
-	glUniform1i(ALGINE_CS_LAMPS_COUNT, LAMPS_COUNT); // lamps count
-	su::setVec3(ALGINE_CS_VIEW_POSITION, cameraPos); // current camera position
-	glUniform1f(ALGINE_CS_SHADOW_FAR_PLANE, LAMP_FAR_PLANE); // far plane in shadow matrices
+	glUniform1i(programs.CS_LAMPS_COUNT, LAMPS_COUNT); // lamps count
+	setVec3(programs.CS_VIEW_POSITION, cameraPos); // current camera position
+	glUniform1f(programs.CS_SHADOW_FAR_PLANE, LAMP_FAR_PLANE); // far plane in shadow matrices
 	for (size_t i = 0; i < LAMPS_COUNT; i++) lightSources[i].pushAll();
 }
 
@@ -421,10 +514,10 @@ glm::mat4 getVMMatrix() {
 }
 
 void updateMatrices() {
-    su::setMat4(ALGINE_CS_MAT_PVM, getPVMMatrix());
-    su::setMat4(ALGINE_CS_MAT_VM, getVMMatrix());
-    su::setMat4(ALGINE_CS_MAT_MODEL, modelMatrix);
-    su::setMat4(ALGINE_CS_MAT_VIEW, viewMatrix);
+    setMat4(programs.CS_MAT_PVM, getPVMMatrix());
+    setMat4(programs.CS_MAT_VM, getVMMatrix());
+    setMat4(programs.CS_MAT_MODEL, modelMatrix);
+    setMat4(programs.CS_MAT_VIEW, viewMatrix);
 }
 /* --- --- */
 
@@ -436,13 +529,13 @@ void updateMatrices() {
  * @param model
  */
 void drawModelDM(Model &model) {
-	su::pointer(ALGINE_SS_IN_POSITION, 3, model.getVerticesBuffer());
+	pointer(programs.SS_IN_POSITION, 3, model.getVerticesBuffer());
 	modelMatrix = glm::mat4();
     modelMatrix = glm::translate(modelMatrix, model.origin);
     modelMatrix = glm::rotate(modelMatrix, model.angles[0], glm::vec3(1, 0, 0));
 	modelMatrix = glm::rotate(modelMatrix, model.angles[1], glm::vec3(0, 1, 0));
     modelMatrix = glm::rotate(modelMatrix, model.angles[2], glm::vec3(0, 0, 1));
-	su::setMat4(ALGINE_SS_MAT_MODEL, modelMatrix);
+	setMat4(programs.SS_MAT_MODEL, modelMatrix);
 	for (size_t i = 0; i < model.polygons.size; i++) glDrawArrays(model.polygons.array[i].type, model.polygons.array[i].start, model.polygons.array[i].count); // drawing
 }
 
@@ -450,24 +543,25 @@ void drawModelDM(Model &model) {
 #define diffuseTexture mapping->textures[1]
 #define specularTexture mapping->textures[2]
 #define normalTexture mapping->textures[3]
+#define reflectionStrengthTexture mapping->textures[4]
+#define jitterTexture mapping->textures[5]
 
 /**
- * Draws models from ModelObject 2D array
- * @param gl
- * @param shaderProgram
- * @param modelsArray
+ * Draws model
  */
 void drawModel(Model &model) {
-	bindADSNTextures(
-        ALGINE_CS_SAMPLER_MAPPING_AMBIENT, ALGINE_CS_SAMPLER_MAPPING_DIFFUSE, ALGINE_CS_SAMPLER_MAPPING_SPECULAR, ALGINE_CS_SAMPLER_MAPPING_NORMAL,
-        model.ambientTexture, model.diffuseTexture, model.specularTexture, model.normalTexture
-    );
+    texture2DAB(0, model.ambientTexture);
+    texture2DAB(1, model.diffuseTexture);
+    texture2DAB(2, model.specularTexture);
+    texture2DAB(3, model.normalTexture);
+    texture2DAB(4, model.reflectionStrengthTexture);
+    texture2DAB(5, model.jitterTexture);
     
-	su::pointer(ALGINE_CS_IN_POSITION, 3, model.getVerticesBuffer());
-	su::pointer(ALGINE_CS_IN_NORMAL, 3, model.getNormalsBuffer());
-	su::pointer(ALGINE_CS_IN_TANGENT, 3, model.getTangentsBuffer());
-	su::pointer(ALGINE_CS_IN_BITANGENT, 3, model.getBitangentsBuffer());
-	su::pointer(ALGINE_CS_IN_TEXCOORD, 2, model.getTexCoordsBuffer());
+	pointer(programs.CS_IN_POSITION, 3, model.getVerticesBuffer());
+	pointer(programs.CS_IN_NORMAL, 3, model.getNormalsBuffer());
+	pointer(programs.CS_IN_TANGENT, 3, model.getTangentsBuffer());
+	pointer(programs.CS_IN_BITANGENT, 3, model.getBitangentsBuffer());
+	pointer(programs.CS_IN_TEXCOORD, 2, model.getTexCoordsBuffer());
 	modelMatrix = glm::mat4();
 	modelMatrix = glm::translate(modelMatrix, model.origin);
     modelMatrix = glm::rotate(modelMatrix, model.angles[0], glm::vec3(1, 0, 0));
@@ -493,7 +587,7 @@ void renderToDepthMap(GLuint index) {
 	lightSources[index].setShadowMatrices();
 	glClear(GL_DEPTH_BUFFER_BIT);
 		
-	glEnableVertexAttribArray(ALGINE_SS_IN_POSITION);
+	glEnableVertexAttribArray(programs.SS_IN_POSITION);
 		
 	// drawing models
 	for (size_t i = 0; i < MODELS_COUNT; i++) drawModelDM(models[i]);
@@ -504,7 +598,7 @@ void renderToDepthMap(GLuint index) {
 		drawModelDM(lamps[i]);
 	}
 		
-	glDisableVertexAttribArray(ALGINE_SS_IN_POSITION);
+	glDisableVertexAttribArray(programs.SS_IN_POSITION);
 	
 	lightSources[index].end();
 }
@@ -512,13 +606,14 @@ void renderToDepthMap(GLuint index) {
 /**
  * Color rendering
  */
-
-#define begin (renderer->*(renderer->begin_rendering))()
-#define end (renderer->*(renderer->end_rendering))()
-
 void render() {
-    // bloom, dof, blending
-    begin;
+    renderer.mainPass(displayFB, rbo);
+    cfgtex(colorTex, GL_RGBA16F, GL_RGBA, params.SCR_W, params.SCR_H);
+    cfgtex(dofTex, GL_R16F, GL_RED, params.SCR_W, params.SCR_H);
+    cfgtex(normalTex, GL_RGB16F, GL_RGB, params.SCR_W, params.SCR_H);
+    cfgtex(ssrValues, GL_RG16F, GL_RG, params.SCR_W, params.SCR_H);
+    cfgtex(positionTex, GL_RGB16F, GL_RGB, params.SCR_W, params.SCR_H);
+    glClearBufferfv(GL_COLOR, 1, ALGINE_RED); // dof buffer
 
 	// view port to window size
 	glViewport(0, 0, WIN_W, WIN_H);
@@ -526,40 +621,56 @@ void render() {
 	createViewMatrix();
 	// sending lamps parameters to fragment shader
 	sendLampsData();
-	
-    glEnableVertexAttribArray(ALGINE_CS_IN_POSITION);
-    glEnableVertexAttribArray(ALGINE_CS_IN_NORMAL);
-    glEnableVertexAttribArray(ALGINE_CS_IN_TEXCOORD);
+    glEnableVertexAttribArray(programs.CS_IN_POSITION);
+    glEnableVertexAttribArray(programs.CS_IN_NORMAL);
+    glEnableVertexAttribArray(programs.CS_IN_TEXCOORD);
 	
 	// drawing
 	//glUniform1f(ALGINE_CS_SWITCH_NORMAL_MAPPING, 1); // with mapping
-    glEnableVertexAttribArray(ALGINE_CS_IN_TANGENT);
-    glEnableVertexAttribArray(ALGINE_CS_IN_BITANGENT);
+    glEnableVertexAttribArray(programs.CS_IN_TANGENT);
+    glEnableVertexAttribArray(programs.CS_IN_BITANGENT);
 	
     for (size_t i = 0; i < MODELS_COUNT; i++) drawModel(models[i]);
 	for (size_t i = 0; i < LAMPS_COUNT; i++) drawModel(lamps[i]);
 	
-    glDisableVertexAttribArray(ALGINE_CS_IN_POSITION);
-    glDisableVertexAttribArray(ALGINE_CS_IN_NORMAL);
-    glDisableVertexAttribArray(ALGINE_CS_IN_TEXCOORD);
-    glDisableVertexAttribArray(ALGINE_CS_IN_TANGENT);
-    glDisableVertexAttribArray(ALGINE_CS_IN_BITANGENT);
+    glDisableVertexAttribArray(programs.CS_IN_POSITION);
+    glDisableVertexAttribArray(programs.CS_IN_NORMAL);
+    glDisableVertexAttribArray(programs.CS_IN_TEXCOORD);
+    glDisableVertexAttribArray(programs.CS_IN_TANGENT);
+    glDisableVertexAttribArray(programs.CS_IN_BITANGENT);
 
-    end;
+    cfgtex(screenspaceTex, GL_RGB16F, GL_RGB, params.SCR_W, params.SCR_H);
+    cfgtex(bloomTex, GL_RGB16F, GL_RGB, params.SCR_W, params.SCR_H);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    renderer.screenspacePass(screenspaceFB, colorTex, normalTex, ssrValues, positionTex);
+
+    // configuring textures
+	for (int i = 0; i < 2; i++) {
+        glBindFramebuffer(GL_FRAMEBUFFER, pingpongFB[i]);
+        cfgtex(pingpongBloomTex[i], GL_RGB16F, GL_RGB, params.SCR_W, params.SCR_H); // bloom
+		cfgtex(pingpongDofTex[i], GL_RGB16F, GL_RGB, params.SCR_W, params.SCR_H); // dof
+	}
+    renderer.bloomDofPass(pingpongFB, pingpongBloomTex, pingpongDofTex, bloomTex, dofTex, screenspaceTex);
+    
+    bindFramebuffer(0);
+    renderer.doubleBlendPass(pingpongDofTex[!renderer.horizontal], pingpongBloomTex[!renderer.horizontal]);
 }
-
-#undef begin
-#undef end
 
 void display() {
     /* --- shadow rendering --- */
-    glUseProgram(ALGINE_PROGRAM_ID_SS);
-	glUniform1f(ALGINE_SS_FAR_PLANE, LAMP_FAR_PLANE);
+    glUseProgram(programs.PROGRAM_ID_SS);
+	glUniform1f(programs.SS_FAR_PLANE, LAMP_FAR_PLANE);
 	for (GLuint i = 0; i < LAMPS_COUNT; i++) renderToDepthMap(i);
 	glUseProgram(0);
+
+    glUseProgram(programs.PROGRAM_ID_SSS);
+    setMat4(programs.SSS_MAT_PROJECTION, projectionMatrix);
+    setMat4(programs.SSS_MAT_VIEW, viewMatrix);
+
+    glUseProgram(0);
 		
 	/* --- color rendering --- */
-	glUseProgram(ALGINE_PROGRAM_ID_CS);
+	glUseProgram(programs.PROGRAM_ID_CS);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	render();
 	glUseProgram(0);
@@ -579,8 +690,8 @@ int main() {
     initShaders();
     initVAO();
     initMatrices();
-    ALGINE_SCR_W = WIN_W;
-    ALGINE_SCR_H = WIN_H;
+    params.SCR_W = WIN_W;
+    params.SCR_H = WIN_H;
     init_ModelBuffers_ModelMapping();
     createModels();
     initLamps();
@@ -623,20 +734,20 @@ int main() {
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
     else if ((key == GLFW_KEY_Q || key == GLFW_KEY_A || key == GLFW_KEY_W || key == GLFW_KEY_S) && action == GLFW_PRESS) {
-        glUseProgram(ALGINE_PROGRAM_ID_CS);
+        glUseProgram(programs.PROGRAM_ID_CS);
 
         if (key == GLFW_KEY_Q) {
             focalDepth++;
-            glUniform1f(ALGINE_CS_FOCAL_DEPTH, focalDepth);
+            glUniform1f(programs.CS_FOCAL_DEPTH, focalDepth);
         } else if (key == GLFW_KEY_A) {
             focalDepth--;
-            glUniform1f(ALGINE_CS_FOCAL_DEPTH, focalDepth);
+            glUniform1f(programs.CS_FOCAL_DEPTH, focalDepth);
         } else if (key == GLFW_KEY_W) {
             focalRange += 5;
-            glUniform1f(ALGINE_CS_FOCAL_RANGE, focalRange);
+            glUniform1f(programs.CS_FOCAL_RANGE, focalRange);
         } else if (key == GLFW_KEY_S) {
             focalRange -= 5;
-            glUniform1f(ALGINE_CS_FOCAL_RANGE, focalRange);
+            glUniform1f(programs.CS_FOCAL_RANGE, focalRange);
         }
 
         glUseProgram(0);

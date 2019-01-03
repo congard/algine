@@ -21,15 +21,12 @@ vec3 bloom_result;
 #ifdef ALGINE_DOF_MODE_ENABLED
 layout (location = 1) out vec4 dofFragColor;
 
-uniform sampler2D image2; // dof
+uniform sampler2D scene; // dof
+uniform sampler2D dofBuffer;
 uniform float max_sigma;
 uniform float min_sigma;
 
 float dof_kernel[DOF_KERNEL_SIZE];
-vec3 dof_result;
-
-vec4 tmp;
-float fdof;
 
 const int DOF_LCR_SIZE = DOF_KERNEL_SIZE * 2 - 1; // left-center-right (lllcrrr)
 const int DOF_MEAN = DOF_LCR_SIZE / 2;
@@ -53,14 +50,12 @@ void main() {
 	#ifdef ALGINE_BLOOM_MODE_ENABLED
 	vec2 texOffset = 1.0 / textureSize(image, 0); // gets size of single texel
 	#else
-	vec2 texOffset = 1.0 / textureSize(image2, 0); // gets size of single texel
+	vec2 texOffset = 1.0 / textureSize(scene, 0); // gets size of single texel
 	#endif
 
 	#ifdef ALGINE_DOF_MODE_ENABLED
-	tmp = texture(image2, texCoord);
-	fdof = tmp.a;
-	makeDofKernel(max_sigma * fdof + min_sigma);
-	dof_result = tmp.rgb * dof_kernel[0];
+	makeDofKernel(max_sigma * texture(dofBuffer, texCoord).r + min_sigma);
+	dofFragColor = texture(scene, texCoord).rgba * dof_kernel[0];
 	#endif
 	
 	#ifdef ALGINE_BLOOM_MODE_ENABLED
@@ -80,10 +75,10 @@ void main() {
 
 	#ifdef ALGINE_DOF_MODE_ENABLED
 	for(int i = 1; i < DOF_KERNEL_SIZE; i++) {
-		dof_result +=
+		dofFragColor +=
 			dof_kernel[i] * (
-				texture(image2, texCoord + vec2(texOffset.x * i, 0.0)).rgb +
-				texture(image2, texCoord - vec2(texOffset.x * i, 0.0)).rgb
+				texture(scene, texCoord + vec2(texOffset.x * i, 0.0)).rgba +
+				texture(scene, texCoord - vec2(texOffset.x * i, 0.0)).rgba
 			);
 	}
 	#endif
@@ -100,10 +95,10 @@ void main() {
 
 	#ifdef ALGINE_DOF_MODE_ENABLED
 	for(int i = 1; i < DOF_KERNEL_SIZE; i++) {
-		dof_result +=
+		dofFragColor +=
 			dof_kernel[i] * (
-				texture(image2, texCoord + vec2(0.0, texOffset.y * i)).rgb +
-				texture(image2, texCoord - vec2(0.0, texOffset.y * i)).rgb
+				texture(scene, texCoord + vec2(0.0, texOffset.y * i)).rgba +
+				texture(scene, texCoord - vec2(0.0, texOffset.y * i)).rgba
 			);
 	}
 	#endif
@@ -111,9 +106,5 @@ void main() {
 
 	#ifdef ALGINE_BLOOM_MODE_ENABLED
 	bloomFragColor = vec4(bloom_result, 1.0);
-	#endif
-	
-	#ifdef ALGINE_DOF_MODE_ENABLED
-	dofFragColor = vec4(dof_result, fdof);
 	#endif
 }
