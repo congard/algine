@@ -22,7 +22,7 @@ void getShaderInfoLog(GLint shader, int type) {
     glGetShaderiv(shader, type, &success);
 
     if (!success) {
-        glGetShaderInfoLog(shader, infoLogSize, NULL, infoLog);
+        glGetShaderInfoLog(shader, infoLogSize, nullptr, infoLog);
         std::cout << "Shader info log (for shader id " << shader << "): " << infoLog << "\n";
     }
 }
@@ -37,7 +37,7 @@ void getProgramInfoLog(GLint program, int type) {
     glGetProgramiv(program, type, &success);
 
     if (!success) {
-        glGetProgramInfoLog(program, infoLogSize, NULL, infoLog);
+        glGetProgramInfoLog(program, infoLogSize, nullptr, infoLog);
         std::cout << "Program info log (for program id " << program << "): " << infoLog << "\n";
     }
 }
@@ -49,9 +49,9 @@ struct Shader {
 
     static void compile(const GLuint shader, const std::string &source) {
         const char *c_str = source.c_str();
-        glShaderSource(shader, 1, &c_str, NULL);
+        glShaderSource(shader, 1, &c_str, nullptr);
         glCompileShader(shader);
-        getShaderInfoLog(shader, GL_COMPILE_STATUS);
+        getShaderInfoLog((GLint) shader, GL_COMPILE_STATUS);
     }
 
     static void destroy(const GLuint shader) {
@@ -70,7 +70,7 @@ struct ShaderProgram {
 
     static void link(const GLuint shaderProgram) {
         glLinkProgram(shaderProgram);
-        getProgramInfoLog(shaderProgram, GL_LINK_STATUS);
+        getProgramInfoLog((GLint) shaderProgram, GL_LINK_STATUS);
     }
 
     static void destroy(const GLuint shaderProgram) {

@@ -20,84 +20,64 @@
 #include "model.cpp"
 
 namespace algine {
-#define LAMP_FAR_PLANE 32.0f
-
 class Lamp {
     public:
         glm::vec3 pos, color;
 
-        // ambient strength param; recommended: 0.01
-	    float ambientStrength;
-	    // diffuse strength param; recommended: 1
-	    float diffuseStrength;
-	    // specular strength param; recommended: 0.1
-	    float specularStrength;
 	    // constant term; usually kept at 1.0
 	    float kc;
 	    // linear term
 	    float kl;
 	    // quadratic term
 	    float kq;
-	    // shininess; recommended: 32
-	    int shininess;
-
+        // far plane
+        float far = 32.0f;
+	    
         /* --- to access shader --- */
-        GLuint propLocations[9]; // one lamp has 9 properties
+        GLint propLocations[6]; // one lamp has 6 properties
         
         #include "sconstants.h"
 
-        void loadLocations(GLuint programId, GLuint id) {
+        void loadLocations(GLint programId, GLuint id) {
             // uns - uniform name start
             std::string uns = ALGINE_NAME_CS_LAMPS + std::string("[") + std::to_string(id) + "].";
-            propLocations[0] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_AMBIENT_STRENGTH).c_str());
-			propLocations[1] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_DIFFUSE_STRENGTH).c_str());
-			propLocations[2] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_SPECULAR_STRENGTH).c_str());
-			propLocations[3] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_SHININESS).c_str());
-			propLocations[4] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_LAMP_POS).c_str());
-			propLocations[5] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_LAMP_COLOR).c_str());
-			propLocations[6] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_KC).c_str());
-			propLocations[7] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_KL).c_str());
-			propLocations[8] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_KQ).c_str());
+			propLocations[0] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_LAMP_POS).c_str());
+			propLocations[1] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_LAMP_COLOR).c_str());
+			propLocations[2] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_KC).c_str());
+			propLocations[3] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_KL).c_str());
+			propLocations[4] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_KQ).c_str());
+            propLocations[5] = glGetUniformLocation(programId, (uns + ALGINE_NAME_CS_LAMP_FAR).c_str());
 		}
 
-        #include "unsconstants.h"
+        void push_lampPos() { setVec3(propLocations[0], pos); }
 
-        void push_ambientStrength() { glUniform1f(propLocations[0], ambientStrength); }
+        void push_lampColor() { setVec3(propLocations[1], color); }
 
-        void push_diffuseStrength() { glUniform1f(propLocations[1], diffuseStrength); }
+        void push_kc() { glUniform1f(propLocations[2], kc); }
 
-        void push_specularStrength() { glUniform1f(propLocations[2], specularStrength); }
+        void push_kl() { glUniform1f(propLocations[3], kl); }
 
-        void push_shininess() { glUniform1i(propLocations[3], shininess); }
+        void push_kq() { glUniform1f(propLocations[4], kq); }
 
-        void push_lampPos() { setVec3(propLocations[4], pos); }
-
-        void push_lampColor() { setVec3(propLocations[5], color); }
-
-        void push_kc() { glUniform1f(propLocations[6], kc); }
-
-        void push_kl() { glUniform1f(propLocations[7], kl); }
-
-        void push_kq() { glUniform1f(propLocations[8], kq); }
+        void push_far() { glUniform1f(propLocations[5], far); }
 
         void pushAll() {
-            push_ambientStrength();
-            push_diffuseStrength();
-            push_specularStrength();
-            push_shininess();
             push_lampPos();
             push_lampColor();
             push_kc();
             push_kl();
             push_kq();
+            push_far();
         }
 
         /* --- shadow mapping --- */
-        static GLuint shadowMatricesLocations[6], lightPosLocation;
+        static GLint shadowMatricesLocations[6], lightPosLocation;
         
         static void initShadowMatrices(GLuint programId) {
-            for (size_t i = 0; i < 6; i++) shadowMatricesLocations[i] = glGetUniformLocation(programId, ("shadowMatrices[" + std::to_string(i) + "]").c_str());
+            for (size_t i = 0; i < 6; i++) shadowMatricesLocations[i] = glGetUniformLocation(programId, (std::string(ALGINE_NAME_SS_MAT_SHADOW) + "[" + std::to_string(i) + "]").c_str());
         }
+
+        #include "unsconstants.h"
 
         GLuint SHADOW_MAP_RESOLUTION;
         GLuint depthMapFBO, depthCubemap;
@@ -120,7 +100,7 @@ class Lamp {
         }
 
         void updateMatrices() {
-            lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, 1.0f, LAMP_FAR_PLANE);
+            lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, 1.0f, far);
             lightViews[0] = glm::lookAt(pos, glm::vec3(pos.x + 1, pos.y, pos.z), glm::vec3(0, -1, 0));
             lightViews[1] = glm::lookAt(pos, glm::vec3(pos.x - 1, pos.y, pos.z), glm::vec3(0, -1, 0));
             lightViews[2] = glm::lookAt(pos, glm::vec3(pos.x, pos.y + 1, pos.z), glm::vec3(0, 0, 1));
@@ -169,13 +149,10 @@ class Lamp {
         void swap(Lamp &other) {
             std::swap(pos, other.pos);
             std::swap(color, other.color);
-            std::swap(ambientStrength, other.ambientStrength);
-            std::swap(diffuseStrength, other.diffuseStrength);
-            std::swap(specularStrength, other.specularStrength);
             std::swap(kc, other.kc);
             std::swap(kl, other.kl);
             std::swap(kq, other.kq);
-            std::swap(shininess, other.shininess);
+            std::swap(far, other.far);
             std::swap(propLocations, other.propLocations);
             std::swap(shadowMatricesLocations, other.shadowMatricesLocations);
             std::swap(SHADOW_MAP_RESOLUTION, other.SHADOW_MAP_RESOLUTION);
@@ -194,13 +171,10 @@ class Lamp {
         Lamp(const Lamp &src) {
             pos = src.pos;
             color = src.color;
-            ambientStrength = src.ambientStrength;
-            diffuseStrength = src.diffuseStrength;
-            specularStrength = src.specularStrength;
             kc = src.kc;
             kl = src.kl;
             kq = src.kq;
-            shininess = src.shininess;
+            far = src.far;
             std::copy(src.propLocations, src.propLocations + 9, propLocations);
             std::copy(src.shadowMatricesLocations, src.shadowMatricesLocations + 6, shadowMatricesLocations);
             SHADOW_MAP_RESOLUTION = src.SHADOW_MAP_RESOLUTION;
@@ -253,7 +227,7 @@ class Lamp {
 };
 
 // define static variables
-GLuint Lamp::Lamp::shadowMatricesLocations[6], Lamp::lightPosLocation;
+GLint Lamp::Lamp::shadowMatricesLocations[6], Lamp::lightPosLocation;
 
 class LampModel : public Lamp {
     public:

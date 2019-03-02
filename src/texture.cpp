@@ -2,13 +2,17 @@
 #define ALGINE_TEXTURE_CPP
 
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include <GL/glew.h>
 #include <iostream>
 #include "lib/stb_image.h"
+#include "lib/stb_image_write.h"
+#include "constants.h"
+#include "framebuffer.cpp"
 
 namespace algine {
-#define bindTexture(texture) glBindTexture(GL_TEXTURE_2D, texture)
+#define bindTexture2D(texture) glBindTexture(GL_TEXTURE_2D, texture)
 #define cfgtex(texture, internalformat, format, width, height) glBindTexture(GL_TEXTURE_2D, texture); \
                                                                glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, GL_FLOAT, NULL);
 #define activeTexture(index, texture) glActiveTexture(index, texture)
@@ -21,11 +25,10 @@ namespace algine {
 
 /**
  * Loading texture using stb_image.h
- * @param *path - path to texture
- * @return texture id
+ * `path` - full path to texture
  */
 static GLuint loadTexture(const char *path, GLint internalformat = GL_RGB, GLuint format = GL_RGB, GLuint type = GL_UNSIGNED_BYTE) {
-    GLuint texture;
+    GLuint texture = 0;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -43,18 +46,122 @@ static GLuint loadTexture(const char *path, GLint internalformat = GL_RGB, GLuin
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, data);
         glGenerateMipmap(GL_TEXTURE_2D);
-    } else std::cout << "Failed to load texture" << std::endl;
+    } else std::cout << "Failed to load texture " << path << std::endl;
 
     stbi_image_free(data);
 
     return texture;
 }
 
-void applyDefaultTextureParams() {
+/**
+ * Default params for bound texture
+ */
+void applyDefaultTexture2DParams() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+/**
+ * Default params for specified texture
+ */
+void applyDefaultTexture2DParams(GLuint texture) {
+    bindTexture2D(texture);
+    applyDefaultTexture2DParams();
+    bindTexture2D(0);   
+}
+
+/**
+ * Default params for textures
+ */
+void applyDefaultTexture2DParams(GLuint *textures, size_t count) {
+    for (size_t i = 0; i < count; i++) applyDefaultTexture2DParams(textures[i]);
+}
+
+inline size_t getTexComponentsCount(GLuint format) {
+    switch (format) {
+        case GL_RG:
+            return 2;
+        case GL_RGB:
+        case GL_BGR:
+            return 3;
+        case GL_RGBA:
+        case GL_BGRA:
+            return 4;
+        default:
+            return 1;
+    }
+}
+
+#define getTexImage(textureType, target, texture, width, height, format) \
+    GLfloat* pixels = new GLfloat[width * height * getTexComponentsCount(format)]; \
+    glActiveTexture(GL_TEXTURE0); \
+    glBindTexture(textureType, texture); \
+    glGetTexImage(target, 0, format, GL_FLOAT, pixels); \
+    glBindTexture(textureType, 0); \
+
+/**
+ * Reads whole texture
+ */
+GLfloat* getTexImage2D(GLuint texture, size_t width, size_t height, GLuint format) {
+    getTexImage(GL_TEXTURE_2D, GL_TEXTURE_2D, texture, width, height, format);
+    return pixels;
+}
+
+/**
+ * Reads whole texture
+ * `target` - `GL_TEXTURE_CUBE_MAP_POSITIVE_X` and others
+ */
+GLfloat* getTexImageCube(GLenum target, GLuint texture, size_t width, size_t height, GLuint format) {
+    getTexImage(GL_TEXTURE_CUBE_MAP, target, texture, width, height, format);
+    return pixels;
+}
+
+#undef getTexImage
+
+/**
+ * Reads pixels from framebuffer
+ */
+inline GLfloat* getPixelsFB(GLuint framebuffer, size_t x, size_t y, size_t width, size_t height, GLuint format) {
+    bindFramebuffer(framebuffer);
+    GLfloat* pixels = new GLfloat(width * height * getTexComponentsCount(format));
+    glReadPixels(x, y, width, height, format, GL_FLOAT, pixels);
+    bindFramebuffer(0);
+    return pixels;
+}
+
+/**
+ * Reads pixels from texture
+ */
+GLfloat* getPixels(GLuint texture, size_t x, size_t y, size_t width, size_t height, GLuint format) {
+    GLuint framebuffer;
+    Framebuffer::create(&framebuffer);
+    bindFramebuffer(framebuffer);
+    Framebuffer::attachTexture2D(texture, COLOR_ATTACHMENT(0));
+    GLfloat* pixels = getPixelsFB(framebuffer, x, y, width, height, format);
+    Framebuffer::destroy(&framebuffer);
+    return pixels;
+}
+
+void saveTexImage(const GLfloat *image, size_t width, size_t height, size_t inComponents, const std::string &path, size_t outComponents, bool flip = true) {
+    unsigned char *data = new unsigned char[width * height * outComponents];
+    for (size_t i = 0; i < width * height * outComponents; i++) data[i] = 0;
+
+    size_t components = inComponents > outComponents ? outComponents : inComponents;
+
+    for (size_t y = 0; y < height; y++) {
+        for (size_t x = 0; x < width; x++) {
+            for (size_t c = 0; c < components; c++) {
+                data[(y * width + x) * outComponents + c] = 255 * image[(y * width + x) * inComponents + c];
+            }
+        }
+    }
+    
+    stbi_flip_vertically_on_write(flip);
+    stbi_write_bmp(path.c_str(), width, height, outComponents, data);
+
+    delete[] data;
 }
 
 struct Texture {
@@ -62,7 +169,7 @@ struct Texture {
         glGenTextures(1, id);
     }
 
-    static void create(GLuint *id, GLuint count) {
+    static void create(GLuint *id, GLsizei count) {
         glGenTextures(count, id);
     }
 
@@ -82,7 +189,7 @@ struct TextureArray {
 	TextureArray(GLuint startId, GLuint count) {
 		this->startId = startId;
 		this->count = count;
-		samplersLocations = new GLuint[count];
+        samplersLocations = new GLint[count];
 		texturesIds = new GLuint[count];
 	}
 
@@ -142,7 +249,7 @@ struct TextureArray {
 		std::swap(TEXTURE_TYPE, other.TEXTURE_TYPE);
 	}
 
-	void init(GLuint programId, std::string textureArray) {
+    void init(GLuint programId, std::string textureArray) {
 		for (GLuint i = 0; i < count; i++) samplersLocations[i] = glGetUniformLocation(programId, (textureArray + "[" + std::to_string(i) + "]").c_str());
 	}
 	
@@ -165,7 +272,8 @@ struct TextureArray {
 	}
 
 	private:
-		GLuint startId, count, *samplersLocations = nullptr, *texturesIds = nullptr;
+        GLuint startId, count, *texturesIds = nullptr;
+        GLint *samplersLocations = nullptr;
 };
 
 } // namespace algine

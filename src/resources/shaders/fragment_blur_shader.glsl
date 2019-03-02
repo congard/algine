@@ -12,14 +12,13 @@
 in vec2 texCoord;
 
 #ifdef ALGINE_BLOOM_MODE_ENABLED
-layout (location = 0) out vec4 bloomFragColor;
+layout (location = 0) out vec3 bloomFragColor;
 uniform sampler2D image; // bloom
 uniform float bloom_kernel[BLOOM_KERNEL_SIZE];
-vec3 bloom_result;
 #endif
 
 #ifdef ALGINE_DOF_MODE_ENABLED
-layout (location = 1) out vec4 dofFragColor;
+layout (location = 1) out vec3 dofFragColor;
 
 uniform sampler2D scene; // dof
 uniform sampler2D dofBuffer;
@@ -54,18 +53,22 @@ void main() {
 	#endif
 
 	#ifdef ALGINE_DOF_MODE_ENABLED
+	#ifdef ALGINE_CINEMATIC_DOF_MODE_ENABLED
+	makeDofKernel(texture(dofBuffer, texCoord).r);
+	#else
 	makeDofKernel(max_sigma * texture(dofBuffer, texCoord).r + min_sigma);
-	dofFragColor = texture(scene, texCoord).rgba * dof_kernel[0];
+	#endif
+	dofFragColor = texture(scene, texCoord).rgb * dof_kernel[0];
 	#endif
 	
 	#ifdef ALGINE_BLOOM_MODE_ENABLED
-	bloom_result = texture(image, texCoord).rgb * bloom_kernel[0]; // current fragment’s contribution
+	bloomFragColor = texture(image, texCoord).rgb * bloom_kernel[0]; // current fragment’s contribution
 	#endif
 
 	#ifdef ALGINE_BLUS_HORIZONTAL
 	#ifdef ALGINE_BLOOM_MODE_ENABLED
 	for(int i = 1; i < BLOOM_KERNEL_SIZE; i++) {
-		bloom_result +=
+		bloomFragColor +=
 			bloom_kernel[i] * (
 				texture(image, texCoord + vec2(texOffset.x * i, 0.0)).rgb +
 				texture(image, texCoord - vec2(texOffset.x * i, 0.0)).rgb
@@ -77,15 +80,15 @@ void main() {
 	for(int i = 1; i < DOF_KERNEL_SIZE; i++) {
 		dofFragColor +=
 			dof_kernel[i] * (
-				texture(scene, texCoord + vec2(texOffset.x * i, 0.0)).rgba +
-				texture(scene, texCoord - vec2(texOffset.x * i, 0.0)).rgba
+				texture(scene, texCoord + vec2(texOffset.x * i, 0.0)).rgb +
+				texture(scene, texCoord - vec2(texOffset.x * i, 0.0)).rgb
 			);
 	}
 	#endif
 	#else
 	#ifdef ALGINE_BLOOM_MODE_ENABLED
 	for(int i = 1; i < BLOOM_KERNEL_SIZE; i++) {
-		bloom_result +=
+		bloomFragColor +=
 			bloom_kernel[i] * (
 				texture(image, texCoord + vec2(0.0, texOffset.y * i)).rgb +
 				texture(image, texCoord - vec2(0.0, texOffset.y * i)).rgb
@@ -97,14 +100,10 @@ void main() {
 	for(int i = 1; i < DOF_KERNEL_SIZE; i++) {
 		dofFragColor +=
 			dof_kernel[i] * (
-				texture(scene, texCoord + vec2(0.0, texOffset.y * i)).rgba +
-				texture(scene, texCoord - vec2(0.0, texOffset.y * i)).rgba
+				texture(scene, texCoord + vec2(0.0, texOffset.y * i)).rgb +
+				texture(scene, texCoord - vec2(0.0, texOffset.y * i)).rgb
 			);
 	}
 	#endif
-	#endif
-
-	#ifdef ALGINE_BLOOM_MODE_ENABLED
-	bloomFragColor = vec4(bloom_result, 1.0);
 	#endif
 }

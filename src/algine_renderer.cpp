@@ -15,7 +15,7 @@ static const GLfloat ALGINE_RED[4] = { 1.0, 0.0, 0.0, 0.0 };
 
 #define clearDOFBuffer glClearBufferfv(GL_COLOR, 1, ALGINE_RED);
 
-inline void pointer(int location, int count, GLuint buffer) {
+inline void pointer(GLint location, int count, GLuint buffer) {
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glVertexAttribPointer(
         location, // attribute location
@@ -23,7 +23,7 @@ inline void pointer(int location, int count, GLuint buffer) {
         GL_FLOAT, // type
         GL_FALSE, // is normalized?
         0,        // step
-       (void *)0  // offset
+        nullptr   // offset
     );
 }
 
@@ -35,26 +35,16 @@ inline void pointer(int location, int count, GLuint buffer) {
 // main, god rays, dof (float), depth (float), normal (vec3), reflection strength (float), position (vec3, in world space)
 
 struct AlgineRenderer {
-    AlginePrograms programs;
+    SSShader *sss;
+    BLEShader *bles;
     AlgineParams *params;
 
-    GLuint
-        quadBuffers[2]; // vertexBuffer and texCoordsBuffer
-
-    struct BlusProgram {
-        GLuint
-            programId,
-            inPos,
-            inTexCoord,
-            samplerDof,
-            samplerDofBuffer;
-    };
-
-    BlusProgram blusPrograms[2];
+    GLuint quadBuffers[2]; // vertexBuffer and texCoordsBuffer
+    BLUShader *blusHV[2]; // { horizontal, vertical }
 
     bool horizontal = true, firstIteration = true; // blur variables
 
-	void renderQuad(const GLuint &inPosLocation, const GLuint &inTexCoordLocation) {
+    void renderQuad(const GLint &inPosLocation, const GLint &inTexCoordLocation) {
 		glEnableVertexAttribArray(inPosLocation);
         glEnableVertexAttribArray(inTexCoordLocation);
 	    pointer(inPosLocation, 3, quadBuffers[0]);
@@ -69,7 +59,7 @@ struct AlgineRenderer {
     void mainPass(GLuint displayFBO, GLuint rboBuffer) {
         glBindFramebuffer(GL_FRAMEBUFFER, displayFBO);
         glBindRenderbuffer(GL_RENDERBUFFER, rboBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, params->SCR_W, params->SCR_H);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, params->scrW, params->scrH);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboBuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
@@ -81,12 +71,12 @@ struct AlgineRenderer {
 		// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, params.SCR_W, params.SCR_H, 0, GL_RGBA, GL_FLOAT, NULL);
         // glBindTexture(GL_TEXTURE_2D, bloomBuffer);
 		// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, params.SCR_W, params.SCR_H, 0, GL_RGBA, GL_FLOAT, NULL);
-        glUseProgram(programs.PROGRAM_ID_SSS);
+        glUseProgram(sss->programId);
         texture2DAB(0, colorMap);
         texture2DAB(1, normalMap);
         texture2DAB(2, ssrValuesMap);
         texture2DAB(3, positionMap);
-        renderQuad(programs.SSS_IN_POSITION, programs.SSS_IN_TEXCOORD);
+        renderQuad(sss->inPosition, sss->inTexCoord);
     }
 
     void bloomDofPass(const GLuint pingpongFBO[2], const GLuint pingpongBuffers[2], const GLuint dofBuffers[2], 
@@ -107,8 +97,8 @@ struct AlgineRenderer {
 			
 		horizontal = true; 
 		firstIteration = true;
-		for (int i = 0; i < params->BLUR_AMOUNT; i++) {
-            glUseProgram(blusPrograms[horizontal].programId);
+        for (size_t i = 0; i < params->blurAmount; i++) {
+            glUseProgram(blusHV[horizontal]->programId);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
 
@@ -117,7 +107,7 @@ struct AlgineRenderer {
             texture2DAB(2, dofMap);
 
             // rendering
-			renderQuad(blusPrograms[horizontal].inPos, blusPrograms[horizontal].inTexCoord);
+			renderQuad(blusHV[horizontal]->inPosition, blusHV[horizontal]->inTexCoord);
 			horizontal = !horizontal;
 			if (firstIteration) firstIteration = false;
 		}
@@ -137,8 +127,8 @@ struct AlgineRenderer {
 			
 		horizontal = true; 
 		firstIteration = true;
-		for (int i = 0; i < params->BLUR_AMOUNT; i++) {
-            glUseProgram(blusPrograms[horizontal].programId);
+        for (size_t i = 0; i < params->blurAmount; i++) {
+            glUseProgram(blusHV[horizontal]->programId);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
 
@@ -146,7 +136,7 @@ struct AlgineRenderer {
 			glBindTexture(GL_TEXTURE_2D, firstIteration ? bloomMap : pingpongBuffers[!horizontal]);
 
             // rendering
-			renderQuad(blusPrograms[horizontal].inPos, blusPrograms[horizontal].inTexCoord);
+			renderQuad(blusHV[horizontal]->inPosition, blusHV[horizontal]->inTexCoord);
 			horizontal = !horizontal;
 			if (firstIteration) firstIteration = false;
 		}
@@ -165,8 +155,8 @@ struct AlgineRenderer {
 			
 		horizontal = true; 
 		firstIteration = true;
-		for (int i = 0; i < params->BLUR_AMOUNT; i++) {
-            glUseProgram(blusPrograms[horizontal].programId);
+        for (size_t i = 0; i < params->blurAmount; i++) {
+            glUseProgram(blusHV[horizontal]->programId);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
 
@@ -175,7 +165,7 @@ struct AlgineRenderer {
             texture2DAB(2, dofMap);
 
             // rendering
-			renderQuad(blusPrograms[horizontal].inPos, blusPrograms[horizontal].inTexCoord);
+			renderQuad(blusHV[horizontal]->inPosition, blusHV[horizontal]->inTexCoord);
 			horizontal = !horizontal;
 			if (firstIteration) firstIteration = false;
 		}
@@ -183,28 +173,20 @@ struct AlgineRenderer {
 
     void doubleBlendPass(const GLuint texture0, const GLuint texture1) {
         // Do not need to call glClear, because the texture is completely redrawn
-		glUseProgram(programs.PROGRAM_ID_BLES);
+		glUseProgram(bles->programId);
         texture2DAB(0, texture0);
 		texture2DAB(1, texture1);
-		renderQuad(programs.BLES_IN_POSITION, programs.BLES_IN_TEXCOORD);
+		renderQuad(bles->inPosition, bles->inTexCoord);
     }
 
     void blendPass(const GLuint texture0) {
         // Do not need to call glClear, because the texture is completely redrawn
-		glUseProgram(programs.PROGRAM_ID_BLES);
+		glUseProgram(bles->programId);
         texture2DAB(0, texture0);
-		renderQuad(programs.BLES_IN_POSITION, programs.BLES_IN_TEXCOORD);
+		renderQuad(bles->inPosition, bles->inTexCoord);
     }
 
     void prepare() {
-        blusPrograms[0] = BlusProgram {
-            programs.PROGRAM_ID_BLUS_VERTICAL, programs.BLUS_V_IN_POSITION, programs.BLUS_V_IN_TEXCOORD, programs.BLUS_V_SAMPLER_SCENE, programs.BLUS_V_SAMPLER_DOF_BUFFER
-        };
-
-        blusPrograms[1] = BlusProgram { 
-            programs.PROGRAM_ID_BLUS_HORIZONTAL, programs.BLUS_H_IN_POSITION, programs.BLUS_H_IN_TEXCOORD, programs.BLUS_H_SAMPLER_SCENE, programs.BLUS_H_SAMPLER_DOF_BUFFER
-        };
-
         // creating buffers for quad rendering
         static float
             vertices[12] = {
@@ -228,24 +210,24 @@ struct AlgineRenderer {
         glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
 
         // blend setting
-        glUseProgram(programs.PROGRAM_ID_BLES);
-        glUniform1i(programs.BLES_SAMPLER_BLOOM_SCENE, 1); // GL_TEXTURE1
-        glUniform1i(programs.BLES_SAMPLER_DOF_SCENE, 0);   // GL_TEXTURE0
-        glUniform1f(programs.BLES_EXPOSURE, params->EXPOSURE);
-        glUniform1f(programs.BLES_GAMMA, params->GAMMA);
+        glUseProgram(bles->programId);
+        glUniform1i(bles->samplerBloomScene, 1); // GL_TEXTURE1
+        glUniform1i(bles->samplerDofScene, 0);   // GL_TEXTURE0
+        glUniform1f(bles->exposure, params->exposure);
+        glUniform1f(bles->gamma, params->gamma);
 
         // blur setting
         for (size_t i = 0; i < 2; i++) {
-            glUseProgram(blusPrograms[i].programId);
-            glUniform1i(blusPrograms[i].samplerDof, 1);
-            glUniform1i(blusPrograms[i].samplerDofBuffer, 2);
+            glUseProgram(blusHV[i]->programId);
+            glUniform1i(blusHV[i]->samplerScene, 1);
+            glUniform1i(blusHV[i]->samplerDofBuffer, 2);
         }
 
         // screen space setting
-        glUseProgram(programs.PROGRAM_ID_SSS);
-        glUniform1i(programs.SSS_SAMPLER_MAP_NORMAL, 1);
-        glUniform1i(programs.SSS_SAMPLER_MAP_SSRVALUES, 2);
-        glUniform1i(programs.SSS_SAMPLER_MAP_POSITION, 3);
+        glUseProgram(sss->programId);
+        glUniform1i(sss->samplerNormalMap, 1);
+        glUniform1i(sss->samplerSSRValuesMap, 2);
+        glUniform1i(sss->samplerPositionMap, 3);
         glUseProgram(0);
     }
 

@@ -12,134 +12,120 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <iostream>
+#include <vector>
 
-#include "lib/libcmf/arraysmaker.cpp"
+#include <assimp/Importer.hpp>  // C++ importer interface
+#include <assimp/scene.h>       // Output data structure
+#include <assimp/postprocess.h> // Post processing flags
+
 #include "texture.cpp"
+#include "mesh.cpp"
 
 namespace algine {
-#define XYZ 3
-#define XY 2
-#define TRIANGLE 3
+struct ModelBuffers {
+    private:
+    GLuint loadTex(const std::string &fullpath, const std::string &path) {
+        std::string absolutePath = io::isAbsolutePath(path) ? path : fullpath + path;
+        
+        if (loadedTextures.find(absolutePath) != loadedTextures.end()) return loadedTextures[absolutePath]; // texture already loaded
+        else {
+            GLuint id = loadTexture(absolutePath.c_str());
+            loadedTextures[absolutePath] = id;
+            return id;
+        }
+    }
 
-class ModelBuffers {
     public:
-        GLuint buffers[5];
-        PolygonArrayHelper polygons;
+    static std::map<std::string, GLuint> loadedTextures;
+    std::vector<Mesh> meshes;
+    
+    void processNode(const aiNode *node, const aiScene *scene, AlgineMTL *amtl = nullptr) {
+        // обработать все полигональные сетки в узле(если есть)
+        for (size_t i = 0; i < node->mNumMeshes; i++) {
+            aiMesh *mesh = scene->mMeshes[node->mMeshes[i]]; 
+            meshes.push_back(Mesh::processMesh(mesh, scene, amtl));			
+        }
+        // выполнить ту же обработку и для каждого потомка узла
+        for(size_t i = 0; i < node->mNumChildren; i++) {
+            processNode(node->mChildren[i], scene, amtl);
+        }
+    }
+    
+    // _fullpath - path with textures, not necessary to ends with '/'
+    void loadTextures(const std::string &_fullpath) {
+        // for loadTex we need path ends with '/'. If _fullpath empty, fullpath will be empty too
+        std::string fullpath = _fullpath;
+        if ((_fullpath.find_last_of('/') != (_fullpath.size() - 1)) && !fullpath.empty()) fullpath += '/';
 
-        void init(CMF2Arrays &arrays) {
-            glGenBuffers(5, buffers);
-            glBindBuffer(GL_ARRAY_BUFFER, buffers[0]); // vertices
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arrays.outVertices.size, arrays.outVertices.array, GL_STATIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, buffers[1]); // normals
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arrays.outNormals.size, arrays.outNormals.array, GL_STATIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, buffers[2]); // tex coords
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arrays.outTexCoords.size, arrays.outTexCoords.array, GL_STATIC_DRAW);
+        for (size_t i = 0; i < meshes.size(); i++) {
+            #define mat meshes[i].mat
+            if (!mat.texAmbientPath.empty()) mat.ambientTexture = loadTex(fullpath, mat.texAmbientPath);
+            if (!mat.texDiffusePath.empty()) mat.diffuseTexture = loadTex(fullpath, mat.texDiffusePath);
+            if (!mat.texSpecularPath.empty()) mat.specularTexture = loadTex(fullpath, mat.texSpecularPath);
+            if (!mat.texNormalPath.empty()) mat.normalTexture = loadTex(fullpath, mat.texNormalPath);
+            if (!mat.texReflectionPath.empty()) mat.reflectionTexture = loadTex(fullpath, mat.texReflectionPath);
+            if (!mat.texJitterPath.empty()) mat.jitterTexture = loadTex(fullpath, mat.texJitterPath);
+            #undef mat
+        }
+    }
 
-            polygons.array = new Polygon[arrays.polygons.size];
-            polygons.size = arrays.polygons.size;
-            for (size_t i = 0; i < arrays.polygons.size; i++) polygons.array[i] = arrays.polygons.array[i];
+    // load texture with full path = current path
+    void loadTextures() {
+        loadTextures(io::getCurrentDir());
+    }
 
-            /* --- making tangent and bitangent buffers --- */
-            float tmp;
-            float *tangents = new float[arrays.outVertices.size], *bitangents = new float[arrays.outVertices.size];
-            glm::vec3 tmpv;
-            for (size_t i = 0; i < arrays.outVertices.size / XYZ; i += TRIANGLE) {
-                /* --- calculating edge and UV vectors --- */
+    void genBuffers() {
+        for (size_t i = 0; i < meshes.size(); i++) meshes[i].genBuffers();
+    }
 
-                glm::vec3 edge1 = 
-                    + glm::vec3(arrays.outVertices.array[i * XYZ + 3], arrays.outVertices.array[i * XYZ + 4], arrays.outVertices.array[i * XYZ + 5])
-                    - glm::vec3(arrays.outVertices.array[i * XYZ + 0], arrays.outVertices.array[i * XYZ + 1], arrays.outVertices.array[i * XYZ + 2]);
-                glm::vec3 edge2 = 
-                    + glm::vec3(arrays.outVertices.array[i * XYZ + 6], arrays.outVertices.array[i * XYZ + 7], arrays.outVertices.array[i * XYZ + 8])
-                    - glm::vec3(arrays.outVertices.array[i * XYZ + 0], arrays.outVertices.array[i * XYZ + 1], arrays.outVertices.array[i * XYZ + 2]);
-                glm::vec2 deltaUV1 = 
-                    + glm::vec2(arrays.outTexCoords.array[i * XY + 2], arrays.outTexCoords.array[i * XY + 3])
-                    - glm::vec2(arrays.outTexCoords.array[i * XY + 0], arrays.outTexCoords.array[i * XY + 1]);
-                glm::vec2 deltaUV2 = 
-                    + glm::vec2(arrays.outTexCoords.array[i * XY + 4], arrays.outTexCoords.array[i * XY + 5])
-                    - glm::vec2(arrays.outTexCoords.array[i * XY + 0], arrays.outTexCoords.array[i * XY + 1]);
-                
-                /*
-                 * calculating tangents and bitangents for triangle vertices
-                 * one triangle - 3 tangents and bitangents
-                 */
+    void delBuffers() {
+        for (size_t i = 0; i < meshes.size(); i++) meshes[i].delBuffers();
+    }
 
-                tmp = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+    void recycleMeshes() {
+        for (size_t i = 0; i < meshes.size(); i++) meshes[i].recycle();
+    }
 
-                // tangents
-                tmpv = glm::vec3(
-                    tmp * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
-                    tmp * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
-                    tmp * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z)
-                );
-                glm::normalize(tmpv);
-                for (size_t j = 0; j < TRIANGLE; j++) {
-                    tangents[i * XYZ + 0 + j * XYZ] = tmpv.x;
-                    tangents[i * XYZ + 1 + j * XYZ] = tmpv.y;
-                    tangents[i * XYZ + 2 + j * XYZ] = tmpv.z;
-                }
+    void init(const std::string &path, const GLuint params) {
+        // Create an instance of the Importer class
+        Assimp::Importer importer;
+        const aiScene *scene = importer.ReadFile(path, params);
 
-                // bitangents
-                tmpv = glm::vec3(
-                    tmp * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x),
-                    tmp * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y),
-                    tmp * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z)
-                );
-                glm::normalize(tmpv);
-                for (size_t j = 0; j < TRIANGLE; j++) {
-                    bitangents[i * XYZ + 0 + j * XYZ] = tmpv.x;
-                    bitangents[i * XYZ + 1 + j * XYZ] = tmpv.y;
-                    bitangents[i * XYZ + 2 + j * XYZ] = tmpv.z;
-                }
-            }
-
-            glBindBuffer(GL_ARRAY_BUFFER, buffers[3]); // tangents
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arrays.outVertices.size, tangents, GL_STATIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, buffers[4]); // bitangents
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * arrays.outVertices.size, bitangents, GL_STATIC_DRAW);
-
-            delete[] tangents;
-            delete[] bitangents;
+        // If the import failed, report it
+        if (!scene) {
+            std::cout << importer.GetErrorString() << "\n";
+            return;
         }
 
-        void recycle() {
-            glDeleteBuffers(5, buffers);
-            delete[] polygons.array;
-            #ifdef ALGINE_LOGGING
-            std::cout << "ModelBuffers::recycle()\n";
-            #endif
-        }
+        std::string amtlPath = path.substr(0, path.find_last_of(".")) + ".amtl";
+        AlgineMTL amtl;
+        if (amtl.load(amtlPath)) processNode(scene->mRootNode, scene, &amtl);
+        else processNode(scene->mRootNode, scene);
+    }
+
+    void inverseNormals() {
+        for (size_t i = 0; i < meshes.size(); i++)
+            for (size_t j = 0; j < meshes[i].normals.size(); j++)
+                meshes[i].normals[j] *= -1;
+    }
+
+    void recycle() {
+        // DELETE ALL MATERIALS AND MESHES
+        recycleMeshes();
+    }
 };
 
-class ModelMapping {
-    public:
-        GLuint textures[6];
-
-        void init(const char *atex, const char *dtex, const char *stex, const char *ntex, const char *rstex, const char *jtex) {
-            textures[0] = atex != nullptr ? loadTexture(atex) : 0;
-            textures[1] = dtex != nullptr ? loadTexture(dtex) : 0;
-            textures[2] = stex != nullptr ? loadTexture(stex) : 0;
-            textures[3] = ntex != nullptr ? loadTexture(ntex) : 0;
-            textures[4] = rstex != nullptr ? loadTexture(rstex) : 0;
-            textures[5] = jtex != nullptr ? loadTexture(jtex) : 0;
-        }
-
-        void recycle() {
-            glDeleteTextures(6, textures);
-        }
-};
+std::map<std::string, GLuint> ModelBuffers::loadedTextures;
 
 class Model {
     public:
         ModelBuffers *buffers;
-        ModelMapping *mapping;
         glm::vec3 origin, angles;
         
         /* --- constructors, operators, destructor --- */
 
         Model(const Model &src) {
             buffers = src.buffers;
-            mapping = src.mapping;
             angles = src.angles;
             origin = src.origin;
             #ifdef ALGINE_LOGGING
@@ -170,9 +156,8 @@ class Model {
             return *this;
         }
 
-        Model(ModelBuffers *buffers, ModelMapping *mapping) {
+        Model(ModelBuffers *buffers) {
             this->buffers = buffers;
-            this->mapping = mapping;
         }
 
         Model() { /* for arrays constructor */ }
@@ -187,39 +172,10 @@ class Model {
 
         void swap(Model &other) {
             std::swap(buffers, other.buffers);
-            std::swap(mapping, other.mapping);
             std::swap(origin, other.origin);
             std::swap(angles, other.angles);
         }
-
-        inline GLuint getVerticesBuffer() {
-            return buffers->buffers[0];
-        }
-
-        inline GLuint getNormalsBuffer() {
-            return buffers->buffers[1];
-        }
-
-        inline GLuint getTexCoordsBuffer() {
-            return buffers->buffers[2];
-        }
-
-        inline GLuint getTangentsBuffer() {
-            return buffers->buffers[3];
-        }
-
-        inline GLuint getBitangentsBuffer() {
-            return buffers->buffers[4];
-        }
-
-        static void inverse(FloatArrayHelper &fah) {
-            for (size_t i = 0; i < fah.size; i++) fah.array[i] *= -1;
-        }
 };
-
-#undef XYZ
-#undef XY
-#undef TRIANGLE
 
 } // namespace algine
 

@@ -50,3 +50,25 @@
  18. Other changes and improvements.
  
 **If this new architecture is approved, then the process of creating documentation will begin, and the engine will move to the beta stage.**
+
+1.4 beta-candidate:
+ 1. Algine now uses the [Assimp](https://github.com/assimp/assimp) - Open Asset Import Library. It can load 40+ model formats;
+ 2. Added support for materials. In addition to those that come with the model itself, which Assimp loads, additional materials have been added - AMTL - Algine Material Library. Which can be used simultaneously with the standard ones, but AMTL has a higher priority. AMTL is used to transfer parameters that are not usually provided by standard materials, such as `{ambient, diffuse, specular}Strength`, ` reflectionStrengthMap`, `jitterMap`; AMTL is a simple JSON array, which consists of JSON objects. Note that the AMTL name of the material must match the model name: `model.obj => model.amtl`;
+ 3. The `AlginePrograms` structure was divided into separate ones, such as `CShader`, `SShader`, `BLUShader`, `BLEShader`, `SSShader`;
+ 4. The extermination of ugly names continues: all the names in `*Shader` from `AlginePrograms` are now read easily, they look quite informative. **NO_CAPITAL_LETTERS**;
+ 5. Removed unused variables;
+ 6. Removed the enforced `applyDefaultTextureParams` from `Framebuffer::attachTexture`
+ 7. `fragment_shader.glsl`: `struct Mapping > Material`, removed unnecessary code; from `Lamp` removed variables which belongs to `Material`;
+ 8. `lamp.cpp`: removed variables which belongs to `material.cpp`;
+ 9. `algine.cpp => algine.h`;
+ 10. Removed support of CMF models. CMF was a temporary solution;
+ 11. Created `io.cpp` - reading/creating, absolute path, exists methods;
+ 12. Created `material.cpp` - material variables, loads AMTL;
+ 13. Created `mesh.cpp` - loads mesh, materials
+ 14. Some methods were renamed: now their name clearly reflects their essence;
+ 15. Added **Cinematic Depth Of Field**;
+ 16. Added methods for saving textures (2D, Cubemap), for getting texture data;
+ 17. Added [JSON library](https://github.com/nlohmann/json), [stb_image_write.h](https://github.com/nothings/stb);
+ 18. Updated [stb_image.h](https://github.com/nothings/stb);
+ 19. New example scene;
+ 20. Minor fixes, other changes and improvements.
