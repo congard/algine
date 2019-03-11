@@ -72,3 +72,8 @@
  18. Updated [stb_image.h](https://github.com/nothings/stb);
  19. New example scene;
  20. Minor fixes, other changes and improvements.
+
+1.4.1 beta-candidate:
+ 1. Fixed: shadow mapping not working on some GPUs (tested on Intel HD Graphics 520)
+ 2. Fixed: flickering on some GPUs (tested on Intel HD Graphics 520)
+ 3. Created `make.bat` and `run.bat` files for Windows, written instructions for compiling on Windows

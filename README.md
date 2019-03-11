@@ -1,9 +1,9 @@
 # Algine
 Algine [Al'gine] - OpenGL 3.3+ engine written in C++
 
-Version: 1.4 beta-candidate
+Version: 1.4.1 beta-candidate
 
-Supported systems: Linux (Windows in the future)
+Supported systems: Linux, Windows (with MinGW-w64)
 
 Example of using given in `main.cpp` file
 
@@ -13,7 +13,9 @@ If you find any errors or you have recommendations for improving the project - a
 
 Shaders are written with the expectation that the compiler optimizes their code. In the future, the optimizer may be written
 
-![Algine v1.4 beta-candidate](pictures/1.png)
+![Algine v1.4.1 beta-candidate](pictures/1.png)
+
+![Algine v1.4.1 beta-candidate](pictures/NVGF_920mx.png)
 
 # Functionality
  * Textures
@@ -54,6 +56,8 @@ How to install assimp you can read [here](https://github.com/assimp/assimp/blob/
 1. `cd algine`
 2. `chmod +x make.sh`
 3. `./make.sh` - to run on standard videocard,`./make.sh primus` - to run on second videocard using `primusrun`, `./make.sh optimus` - to run on second videocard using `optirun`
+
+**About compilation on Windows you can read [here](build.md)**
 
 # Contact
 You can contact me by telegram or email:

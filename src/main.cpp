@@ -5,7 +5,7 @@
  * My gitlab: https://gitlab.com/congard
  * @author congard
  *
- * @version 1.4 beta-candidate
+ * @version 1.4.1 beta-candidate
  */
 
 // #define debug_sm
@@ -444,7 +444,7 @@ void updateMatrices() {
  */
 void drawModelDM(Model &model) {
     for (size_t i = 0; i < model.buffers->meshes.size(); i++) {
-	    pointer(cs.inPosition, 3, model.buffers->meshes[i].getVerticesBuffer());
+	    pointer(ss.inPosition, 3, model.buffers->meshes[i].getVerticesBuffer());
 	    modelMatrix = glm::mat4();
         modelMatrix = glm::translate(modelMatrix, model.origin);
         modelMatrix = glm::rotate(modelMatrix, model.angles[0], glm::vec3(1, 0, 0));
@@ -525,6 +525,7 @@ void render() {
     cfgtex(normalTex, GL_RGB16F, GL_RGB, params.scrW, params.scrH);
     cfgtex(ssrValues, GL_RG16F, GL_RG, params.scrW, params.scrH);
     cfgtex(positionTex, GL_RGB16F, GL_RGB, params.scrW, params.scrH);
+    glClear(GL_COLOR_BUFFER_BIT);
     glClearBufferfv(GL_COLOR, 1, ALGINE_RED); // dof buffer
 
 	// view port to window size

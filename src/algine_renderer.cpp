@@ -94,7 +94,7 @@ struct AlgineRenderer {
 		// 	glBindTexture(GL_TEXTURE_2D, dofBuffers[i]);
 		// 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, ALGINE_SCR_W, ALGINE_SCR_H, 0, GL_RGBA, GL_FLOAT, NULL);
 		// }
-			
+        
 		horizontal = true; 
 		firstIteration = true;
         for (size_t i = 0; i < params->blurAmount; i++) {
