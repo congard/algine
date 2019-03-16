@@ -183,21 +183,23 @@ struct Texture {
  */
 struct TextureArray {
 	GLuint TEXTURE_TYPE = GL_TEXTURE_CUBE_MAP;
+    GLuint startId, size, *texturesIds = nullptr;
+    GLint *samplersLocations = nullptr;
 
 	/* --- constructors, operators, destructor --- */
 
-	TextureArray(GLuint startId, GLuint count) {
+	TextureArray(GLuint startId, GLuint size) {
 		this->startId = startId;
-		this->count = count;
-        samplersLocations = new GLint[count];
-		texturesIds = new GLuint[count];
+		this->size = size;
+        samplersLocations = new GLint[size];
+		texturesIds = new GLuint[size];
 	}
 
 	TextureArray() { /* empty for init or arrays */ }
 
 	TextureArray(const TextureArray &src) {
 		startId = src.startId;
-		count = src.count;
+		size = src.size;
 		samplersLocations = src.samplersLocations;
 		texturesIds = src.texturesIds;
 		TEXTURE_TYPE = src.TEXTURE_TYPE;
@@ -243,14 +245,14 @@ struct TextureArray {
 
 	void swap(TextureArray &other) {
 		std::swap(startId, other.startId);
-		std::swap(count, other.count);
+		std::swap(size, other.size);
 		std::swap(samplersLocations, other.samplersLocations);
 		std::swap(texturesIds, other.texturesIds);
 		std::swap(TEXTURE_TYPE, other.TEXTURE_TYPE);
 	}
 
     void init(GLuint programId, std::string textureArray) {
-		for (GLuint i = 0; i < count; i++) samplersLocations[i] = glGetUniformLocation(programId, (textureArray + "[" + std::to_string(i) + "]").c_str());
+		for (GLuint i = 0; i < size; i++) samplersLocations[i] = glGetUniformLocation(programId, (textureArray + "[" + std::to_string(i) + "]").c_str());
 	}
 	
 	void bind(GLuint programId) {
@@ -260,7 +262,7 @@ struct TextureArray {
 	}
 	
 	void bind() {
-		for (GLuint i = 0; i < count; i++) {
+		for (GLuint i = 0; i < size; i++) {
 			glUniform1i(samplersLocations[i], startId + i);
 			glActiveTexture(GL_TEXTURE0 + startId + i);
 			glBindTexture(TEXTURE_TYPE, texturesIds[i]);
@@ -271,9 +273,9 @@ struct TextureArray {
 		texturesIds[index] = textureId;
 	}
 
-	private:
-        GLuint startId, count, *texturesIds = nullptr;
-        GLint *samplersLocations = nullptr;
+    void fillTexIds(const GLuint defValue) {
+        for (GLuint i = 0; i < size; i++) texturesIds[i] = defValue;
+    }
 };
 
 } // namespace algine

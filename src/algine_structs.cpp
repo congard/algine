@@ -130,7 +130,7 @@ struct SSShader {
 struct AlgineParams {
     GLubyte
         normalMappingMode = ALGINE_NORMAL_MAPPING_MODE_ENABLED,
-        shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_ENABLED,
+        shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_SIMPLE,
         bloomMode = ALGINE_BLOOM_MODE_ENABLED,
         dofMode = ALGINE_DOF_MODE_ENABLED,
         textureMappingMode = ALGINE_TEXTURE_MAPPING_MODE_ENABLED,

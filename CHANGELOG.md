@@ -77,3 +77,8 @@
  1. Fixed: shadow mapping not working on some GPUs (tested on Intel HD Graphics 520)
  2. Fixed: flickering on some GPUs (tested on Intel HD Graphics 520)
  3. Created `make.bat` and `run.bat` files for Windows, written instructions for compiling on Windows
+
+1.4.2 beta-candidate:
+ 1. Fixed: black screen when shadow mapping enabled on AMD GPUs
+ 2. Fixed: make.sh not working on old debian systems
+ 3. Now shadow mapping by default without PCF

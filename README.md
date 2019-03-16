@@ -1,7 +1,7 @@
 # Algine
 Algine [Al'gine] - OpenGL 3.3+ engine written in C++
 
-Version: 1.4.1 beta-candidate
+Version: 1.4.2 beta-candidate
 
 Supported systems: Linux, Windows (with MinGW-w64)
 
@@ -13,9 +13,9 @@ If you find any errors or you have recommendations for improving the project - a
 
 Shaders are written with the expectation that the compiler optimizes their code. In the future, the optimizer may be written
 
-![Algine v1.4.1 beta-candidate](pictures/1.png)
+![Algine v1.4.2 beta-candidate](pictures/1.png)
 
-![Algine v1.4.1 beta-candidate](pictures/NVGF_920mx.png)
+![Algine v1.4.2 beta-candidate](pictures/NVGF_920mx.png)
 
 # Functionality
  * Textures

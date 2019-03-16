@@ -5,10 +5,11 @@
  * My gitlab: https://gitlab.com/congard
  * @author congard
  *
- * @version 1.4.1 beta-candidate
+ * @version 1.4.2 beta-candidate
  */
 
 // #define debug_sm
+#define pcf // for soft shadows
 
 #include <iostream>
 #include <thread>
@@ -182,6 +183,9 @@ void initShaders() {
 
     #ifdef debug_sm
     params.shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_DISABLED;
+    #endif
+    #ifdef pcf
+    params.shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_ENABLED;
     #endif
     params.dofKernelSize = 4;
     params.dofMode = ALGINE_CINEMATIC_DOF_MODE_ENABLED;
@@ -371,7 +375,8 @@ void initLamps() {
  * Binds to depth cubemaps
  */
 void initShadowMaps() {
-    shadowMaps = TextureArray(10, LAMPS_COUNT);
+    shadowMaps = TextureArray(10, params.maxLampsCount); // to avoid black screen on AMD GPUs and old Intel HD Graphics
+    shadowMaps.fillTexIds(0); // to avoid black screen on AMD GPUs and old Intel HD Graphics
     shadowMaps.init(cs.programId, ALGINE_NAME_CS_SHADOW_MAPS);
     for (size_t i = 0; i < LAMPS_COUNT; i++) shadowMaps.addTexture(i, lightSources[i].depthCubemap);
     shadowMaps.bind(cs.programId);
@@ -537,14 +542,11 @@ void render() {
     glEnableVertexAttribArray(cs.inPosition);
     glEnableVertexAttribArray(cs.inNormal);
     glEnableVertexAttribArray(cs.inTexCoord);
-
-	// drawing
-	//glUniform1f(ALGINE_CS_SWITCH_NORMAL_MAPPING, 1); // with mapping
     glEnableVertexAttribArray(cs.inTangent);
     glEnableVertexAttribArray(cs.inBitangent);
 
+    // drawing
     for (size_t i = 0; i < MODELS_COUNT; i++) drawModel(models[i]);
-
 	for (size_t i = 0; i < LAMPS_COUNT; i++) drawModel(lamps[i]);
 
     glDisableVertexAttribArray(cs.inPosition);
@@ -559,8 +561,7 @@ void render() {
     renderer.screenspacePass(screenspaceFB, colorTex, normalTex, ssrValues, positionTex);
 
     // configuring textures
-	for (int i = 0; i < 2; i++) {
-        glBindFramebuffer(GL_FRAMEBUFFER, pingpongFB[i]);
+	for (size_t i = 0; i < 2; i++) {
         cfgtex(pingpongBloomTex[i], GL_RGB16F, GL_RGB, params.scrW, params.scrH); // bloom
 		cfgtex(pingpongDofTex[i], GL_RGB16F, GL_RGB, params.scrW, params.scrH); // dof
 	}
@@ -654,7 +655,6 @@ int main() {
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
 
-    #ifdef debug_sm
     else if (key == GLFW_KEY_S && action == GLFW_PRESS) {
         for (int i = 0; i < 6; i++) {
             GLfloat *pixels = getTexImageCube(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, lightSources[0].depthCubemap, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, GL_DEPTH_COMPONENT);
@@ -669,7 +669,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
         std::cout << "Screenspace map data saved\n";
     }
-    #endif
 }
 
 void mouse_callback(GLFWwindow* window, int button, int action, int mods) {
