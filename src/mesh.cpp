@@ -10,14 +10,14 @@
 
 #include "material.cpp"
 
-#define BUFF_COUNT 6
+#define BUFF_COUNT 8
 
 namespace algine {
 struct Mesh {
-    std::vector<float> vertices, normals, texCoords, tangents, bitangents;
-    std::vector<GLuint> indices;
+    std::vector<float> vertices, normals, texCoords, tangents, bitangents, boneWeights;
+    std::vector<GLuint> indices, boneIds;
     Material mat;
-    
+
     GLuint buffers[BUFF_COUNT] = { 0 };
 
     inline GLuint getVerticesBuffer() {
@@ -44,20 +44,36 @@ struct Mesh {
         return buffers[5];
     }
 
+    inline GLuint getBoneWeightsBuffer() {
+        return buffers[6];
+    }
+
+    inline GLuint getBoneIdsBuffer() {
+        return buffers[7];
+    }
+
     void genBuffers() {
         glGenBuffers(BUFF_COUNT, buffers);
 
-        #define mkArrayBuffer(buffIndex, array) \
+        #define mkArrayBuffer(buffIndex, array, type) \
             glBindBuffer(GL_ARRAY_BUFFER, buffers[buffIndex]); \
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * array.size(), &array[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(type) * array.size(), &array[0], GL_STATIC_DRAW);
 
-        mkArrayBuffer(0, vertices); // vertices
-        if (normals.size() > 0) mkArrayBuffer(1, normals); // normals
-        if (texCoords.size() > 0) mkArrayBuffer(2, texCoords); // texCoords
-        if (tangents.size() > 0) mkArrayBuffer(3, tangents); // tangents
-        if (bitangents.size() > 0) mkArrayBuffer(4, bitangents); // bitangents
+        // brackets because mkArrayBuffer is multi-line, and we use it in the if statement
+        #define mkArrayBufferf(buffIndex, array) { mkArrayBuffer(buffIndex, array, float) }
+        #define mkArrayBufferui(buffIndex, array) { mkArrayBuffer(buffIndex, array, GLuint) }
+
+        mkArrayBufferf(0, vertices); // vertices
+        if (normals.size() > 0) mkArrayBufferf(1, normals); // normals
+        if (texCoords.size() > 0) mkArrayBufferf(2, texCoords); // texCoords
+        if (tangents.size() > 0) mkArrayBufferf(3, tangents); // tangents
+        if (bitangents.size() > 0) mkArrayBufferf(4, bitangents); // bitangents
+        if (boneWeights.size() > 0) mkArrayBufferf(6, boneWeights); // bone weights
+        if (boneIds.size() > 0) mkArrayBufferui(7, boneIds); // bone ids
 
         #undef mkArrayBuffer
+        #undef mkArrayBufferf
+        #undef mkArrayBufferui
 
         // indices
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[5]);
@@ -83,13 +99,22 @@ struct Mesh {
 
     static Mesh processMesh(const aiMesh *aimesh, const aiScene *scene, AlgineMTL *amtl = nullptr) {
         Mesh mesh;
+        
+        // allocating space for vertices, normals, texCoords, tangents and bitangents
+        mesh.vertices.reserve(aimesh->mNumVertices * 3);
+        if (aimesh->HasNormals()) mesh.normals.reserve(aimesh->mNumVertices * 3);
+        if (aimesh->HasTextureCoords(0)) mesh.texCoords.reserve(aimesh->mNumVertices * 2);
+        if (aimesh->HasTangentsAndBitangents()) {
+            mesh.tangents.reserve(aimesh->mNumVertices * 3);
+            mesh.bitangents.reserve(aimesh->mNumVertices * 3);
+        }
 
         for (size_t i = 0; i < aimesh->mNumVertices; i++) {
             // vertices
             mesh.vertices.push_back(aimesh->mVertices[i].x);
             mesh.vertices.push_back(aimesh->mVertices[i].y);
             mesh.vertices.push_back(aimesh->mVertices[i].z);
-            
+
             // normals
             if (aimesh->HasNormals()) {
                 mesh.normals.push_back(aimesh->mNormals[i].x);
@@ -127,7 +152,7 @@ struct Mesh {
         aiMaterial *aimat = scene->mMaterials[aimesh->mMaterialIndex];
 
         mesh.mat.name = aimat->GetName().C_Str();
-        
+
         aimat->GetTexture(aiTextureType_AMBIENT, 0, &tmp_str);
         mesh.mat.texAmbientPath = tmp_str.C_Str();
 

@@ -1,7 +1,7 @@
 #ifndef ALGINE_SHADER_COMPILER_CPP
 #define ALGINE_SHADER_COMPILER_CPP
 
-#include <iostream>
+#include <string>
 #include <vector>
 #include "algine_structs.cpp"
 #include "shaderprogram.cpp"
@@ -53,6 +53,12 @@ ShadersData getCS(const AlgineParams &params, const char *vertexShaderPath, cons
             params.normalMappingMode == ALGINE_NORMAL_MAPPING_MODE_ENABLED ? "#define ALGINE_NORMAL_MAPPING_MODE_ENABLED\n" :
             params.normalMappingMode == ALGINE_NORMAL_MAPPING_MODE_DUAL ? "#define ALGINE_NORMAL_MAPPING_MODE_DUAL\n" : 
             "#define ALGINE_NORMAL_MAPPING_MODE_DISABLED\n"
+        ) + (
+            params.boneSystemMode == ALGINE_BONE_SYSTEM_ENABLED ? "#define ALGINE_BONE_SYSTEM_ENABLED\n" :
+            "#define ALGINE_BONE_SYSTEM_DISABLED\n"
+        ) + (
+            "#define MAX_BONE_ATTRIBS_PER_VERTEX " + std::to_string(params.maxBoneAttribsPerVertex) + "\n" +
+            "#define MAX_BONES " + std::to_string(params.maxBones) + "\n"
         ) + out[1];
 
     out.clear();
@@ -81,18 +87,36 @@ ShadersData getCS(const AlgineParams &params, const char *vertexShaderPath, cons
             params.attenuationMode == ALGINE_ATTENUATION_MODE_ENABLED ? "#define ALGINE_ATTENUATION_MODE_ENABLED\n" :
             "#define ALGINE_ATTENUATION_MODE_DISABLED\n"
         ) + (
-            "#define MAX_LAMPS_COUNT " + std::to_string(params.maxLampsCount) + "\n"
-        ) + (
             params.ssrMode == ALGINE_SSR_MODE_ENABLED ? "#define ALGINE_SSR_MODE_ENABLED\n" :
             "#define ALGINE_SSR_MODE_DISABLED\n"
+        ) + (
+            "#define MAX_LAMPS_COUNT " + std::to_string(params.maxLampsCount) + "\n"
         ) + out[1];
         
     return result;
 }
 
 // shadow shader
-ShadersData getSS(const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath) {
-    return readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath, geometryShaderPath });
+ShadersData getSS(const AlgineParams &params, const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath) {
+    ShadersData ss = readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath, geometryShaderPath });
+    ShadersData result;
+
+    std::vector<std::string> out;
+    splitByDelimiter(out, ss.vertex);
+
+    result.vertex =
+        out[0] + (
+            params.boneSystemMode == ALGINE_BONE_SYSTEM_ENABLED ? "#define ALGINE_BONE_SYSTEM_ENABLED\n" :
+            "#define ALGINE_BONE_SYSTEM_DISABLED\n"
+        ) + (
+            "#define MAX_BONE_ATTRIBS_PER_VERTEX " + std::to_string(params.maxBoneAttribsPerVertex) + "\n" +
+            "#define MAX_BONES " + std::to_string(params.maxBones) + "\n"
+        ) + out[1];
+
+    result.fragment = ss.fragment;
+    result.geometry = ss.geometry;
+
+    return result;
 }
 
 // blur shader
@@ -213,12 +237,16 @@ void loadLocations(CShader &shader) {
     shader.matView = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_VIEW);
     shader.matPVM = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_PVM);
     shader.matVM = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_VM);
+    shader.bones = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_BONES);
     shader.normalMappingSwitcher = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SWITCH_NORMAL_MAPPING);
+    shader.boneAttribsPerVertex = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_BONE_ATTRIBS_PER_VERTEX);
     shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_POSITION);
     shader.inNormal = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_NORMAL);
     shader.inTangent = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_TANGENT);
     shader.inBitangent = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_BITANGENT);
     shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_TEXCOORD);
+    shader.inBoneIds = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_BONE_IDS);
+    shader.inBoneWeights = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_BONE_WEIGHTS);
     
     // fragment shader
     shader.viewPos = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_VIEW_POSITION);
@@ -226,6 +254,7 @@ void loadLocations(CShader &shader) {
     shader.shadowDiskRadiusK = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_DISKRADIUS_K);
     shader.shadowDiskRadiusMin = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_DISKRADIUS_MIN);
     shader.shadowBias = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_BIAS);
+    shader.shadowOpacity = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_OPACITY);
     // linear DOF parameters
     shader.focalDepth = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_FOCAL_DEPTH);
     shader.focalRange = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_FOCAL_RANGE);
@@ -253,7 +282,11 @@ void loadLocations(CShader &shader) {
 
 void loadLocations(SShader &shader) {
     shader.matModel = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_MAT_MODEL);
+    shader.bones = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_BONES);
+    shader.boneAttribsPerVertex = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_BONE_ATTRIBS_PER_VERTEX);
     shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_SS_IN_POSITION);
+    shader.inBoneIds = glGetAttribLocation(shader.programId, ALGINE_NAME_SS_IN_BONE_IDS);
+    shader.inBoneWeights = glGetAttribLocation(shader.programId, ALGINE_NAME_SS_IN_BONE_WEIGHTS);
     
     // fragment shader
     shader.lampPos = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_LAMP_POSITION);

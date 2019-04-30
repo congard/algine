@@ -12,7 +12,7 @@ d 1.000000
 illum 2
 map_Ka Brown_wood_texture.jpg
 map_Kd Brown_wood_texture.jpg
-map_Ks Brown_wood_texture_SPEC.tga
+map_Ks Brown_wood_texture_SPEC.jpg
 map_Kn Brown_wood_texture_NORM.png
 
 newmtl desk
@@ -26,7 +26,7 @@ d 1.000000
 illum 2
 map_Ka desk_texture.jpg
 map_Kd desk_texture.jpg
-map_Ks desk_texture_SPEC.tga
+map_Ks desk_texture_SPEC.jpg
 map_Kn desk_texture_NORM.jpg
 
 newmtl numeration
@@ -54,5 +54,5 @@ d 1.000000
 illum 2
 map_Ka White_wood_texture.jpg
 map_Kd White_wood_texture.jpg
-map_Ks White_wood_texture_SPEC.tga
+map_Ks White_wood_texture_SPEC.jpg
 map_Kn White_wood_texture_NORM.png

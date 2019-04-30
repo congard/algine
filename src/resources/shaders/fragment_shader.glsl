@@ -20,6 +20,8 @@ uniform bool textureMappingEnabled;	// 0 false (color mapping), true (texture ma
 uniform float focalDepth; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
 uniform float focalRange; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
 
+uniform float shadowOpacity = 1.0;
+
 // if ALGINE_DOF_MODE == ALGINE_CINEMATIC_DOF_MODE_ENABLED
 uniform struct CinematicDOF {
 	float p; // plane in focus
@@ -28,7 +30,7 @@ uniform struct CinematicDOF {
 } cinematicDOF;
 
 in mat4 model, view, vmMatrix;
-in mat3 v_TBN, v_wTBN; // Tangent Bitangent Normal matrix and this matrix in world space
+in mat3 v_TBN; // Tangent Bitangent Normal matrix
 in vec4 v_Position; // Position for this fragment in world space
 in vec3 v_Normal; // Interpolated normal for this fragment
 in vec2 v_Texture; // Texture coordinates.
@@ -201,7 +203,7 @@ void main() {
 		ambientResult += ambient;
 		#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
 		// calculate shadow
-		shadow = calculateShadow(lightDir, i);
+		shadow = calculateShadow(lightDir, i) * shadowOpacity;
 		diffuseResult += diffuse * (1 - shadow);
 		specularResult += specular * (1 - shadow);
 		#else

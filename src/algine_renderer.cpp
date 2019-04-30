@@ -19,9 +19,20 @@ inline void pointer(GLint location, int count, GLuint buffer) {
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glVertexAttribPointer(
         location, // attribute location
-        count,    // count (2 or 3)
+        count,    // count (1, 2, 3 or 4)
         GL_FLOAT, // type
         GL_FALSE, // is normalized?
+        0,        // step
+        nullptr   // offset
+    );
+}
+
+inline void pointerui(GLint location, int count, GLuint buffer) {
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glVertexAttribIPointer(
+        location, // attribute location
+        count,    // count (1, 2, 3 or 4)
+        GL_UNSIGNED_INT, // type
         0,        // step
         nullptr   // offset
     );

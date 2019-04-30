@@ -8,7 +8,6 @@
 #include <iostream>
 #include "lib/stb_image.h"
 #include "lib/stb_image_write.h"
-#include "constants.h"
 #include "framebuffer.cpp"
 
 namespace algine {

@@ -4,9 +4,6 @@
 #include <vector>
 #include <string>
 
-#include <assimp/Importer.hpp>  // C++ importer interface
-#include <assimp/scene.h>       // Output data structure
-#include <glm/glm.hpp>
 #include <GL/glew.h>
 
 #include "lib/json.hpp"

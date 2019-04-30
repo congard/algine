@@ -1,0 +1,34 @@
+[
+    {
+        "name":"face",
+        "ambientTex":"boy.jpg",
+        "diffuseTex":"boy.jpg",
+        "specularTex":"boy.jpg",
+        "normalTex":"norm.png"
+    },
+    
+    {
+        "name":"glass",
+        "ambientTex":"boy.jpg",
+        "diffuseTex":"boy.jpg",
+        "specularTex":"boy.jpg",
+        "normalTex":"norm.png"
+    },
+    
+    {
+        "name":"shiny",
+        "ambientTex":"boy.jpg",
+        "diffuseTex":"boy.jpg",
+        "specularTex":"boy.jpg",
+        "normalTex":"norm.png"
+    },
+    
+    {
+        "name":"matte",
+        "ambientTex":"boy.jpg",
+        "diffuseTex":"boy.jpg",
+        "specularTex":"boy.jpg",
+        "normalTex":"norm.png"
+    }
+] 
+ 

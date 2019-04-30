@@ -1,0 +1,10 @@
+[
+    {
+        "name":"material",
+        "ambientTex":"tex.jpg",
+        "diffuseTex":"tex.jpg",
+        "specularTex":"tex.jpg",
+        "normalTex":"norm.png"
+    }
+] 
+ 

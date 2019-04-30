@@ -82,3 +82,20 @@
  1. Fixed: black screen when shadow mapping enabled on AMD GPUs
  2. Fixed: make.sh not working on old debian systems
  3. Now shadow mapping by default without PCF
+
+1.5 alpha:
+ 1. `Mesh::genBuffers` segmentation fault fix (if gen without normals/texCoords/etc)
+ 2. Removed src/utils dir. `math.cpp` replaced to src
+ 3. Removed unnecessary `#include` in some files
+ 4. Added `types.h` where defined basic data types, such as `int8`, `uint8`, `int16`, `uint16`, `uint` (32 bit), `int64`, `uint64`, `float64`. Also on the basis of the bit of your system are defined: `size` (`int` or `long`), `usize` (`unsigned int` or `unsigned long`)
+ 5. Renamed and changed: `struct ModelBuffers => struct Shape`, `class Model => struct Model`; `class Lamp => struct Light`, `class LampModel => struct Lamp` (it will be changed later)
+ 6. `make.sh` devided on `make.sh` and `run.sh` (for Linux systems)
+ 7. Removed unnecessary data from `fragment_shader.glsl`, `main.cpp`
+ 8. Added advanced FPS meter in example scene, new animated models (man and astroboy), exposure increased from 3.0 to 6.0, gamma from 1.0 to 1.125, cleanup in `main.cpp`
+ 9. Fixed chessboard texture (there were rainbow stripes)
+ 10. Added support for **skeletal animations**. Limitations on the *number of bones* / *number of bones per vertex* are hardware only.
+ 11. Added:
+ <br>`animation.cpp`: animation structures
+ <br>`bone.cpp`:  bone structures like `BoneInfo` (for engine only), `Bone`
+ <br>`node.cpp`: node structures (only `Node`)
+ 12. Minor fixes, other changes and improvements.

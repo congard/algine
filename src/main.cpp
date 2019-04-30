@@ -2,10 +2,8 @@
  * Algine: C++ OpenGL Engine
  *
  * My telegram: https://t.me/congard
- * My gitlab: https://gitlab.com/congard
+ * My github: https://github.com/congard
  * @author congard
- *
- * @version 1.4.2 beta-candidate
  */
 
 // #define debug_sm
@@ -24,8 +22,8 @@
 #define FULLSCREEN !true
 
 #define LAMPS_COUNT 1
-#define MODEL_BUFFERS_COUNT 2
-#define MODELS_COUNT 1
+#define SHAPES_COUNT 4
+#define MODELS_COUNT 3
 
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -38,10 +36,10 @@ GLFWwindow* window;
 GLuint vao;
 
 // matrices
-glm::mat4 projectionMatrix, viewMatrix, modelMatrix;
+glm::mat4 projectionMatrix, viewMatrix, *modelMatrix; // model matrix stored in Model::transformation
 
 // camera params
-glm::vec3 cameraPos(-9, 8, 7);
+glm::vec3 cameraPos(-0, 8, 7);
 glm::vec3 cameraLookAt(0, 4, 0);
 glm::vec3 cameraUp(0, 1, 0);
 
@@ -49,11 +47,12 @@ glm::vec3 cameraUp(0, 1, 0);
 using namespace algine;
 
 // models
-ModelBuffers mbuffers[MODEL_BUFFERS_COUNT];
+Shape shapes[SHAPES_COUNT];
 Model models[MODELS_COUNT], lamps[LAMPS_COUNT];
+Animator manAnimator, astroboyAnimator; // animator for man, astroboy models
 
 // light
-LampModel lightSources[LAMPS_COUNT];
+Lamp lightSources[LAMPS_COUNT];
 
 // shadow maps
 TextureArray shadowMaps;
@@ -98,7 +97,10 @@ float
     diskRadius_min = 0.0f,
 
     // other shadow variables
-    shadow_bias = 0.3f;
+    shadow_bias = 0.3f,
+    
+    // shadow opacity: 1.0 - opaque shadow (by default), 0.0 - transparent
+    shadowOpacity = 0.65f;
 
 void createProjectionMatrix() {
     projectionMatrix = glm::perspective(glm::radians(90.0f), (float) WIN_W / (float) WIN_H, 1.0f, 32.0f);
@@ -122,7 +124,7 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
 /**
  * Creates Lamp with default params
  */
-void createLamp(LampModel &result, const glm::vec3 &pos, const glm::vec3 &color, GLuint id) {
+void createLamp(Lamp &result, const glm::vec3 &pos, const glm::vec3 &color, GLuint id) {
     result.pos = pos;
     result.color = color;
     result.kc = 1;
@@ -133,10 +135,11 @@ void createLamp(LampModel &result, const glm::vec3 &pos, const glm::vec3 &color,
     result.initShadowMapping(SHADOW_MAP_RESOLUTION);
 }
 
-void createModelBuffers(const std::string &path, GLuint params, size_t id, bool inverseNormals = false) {
-    mbuffers[id].init(path, params);
-    if (inverseNormals) mbuffers[id].inverseNormals();
-    mbuffers[id].genBuffers();
+void createShapes(const std::string &path, GLuint params, size_t id, bool inverseNormals = false, GLuint bonesPerVertex = 0) {
+    shapes[id].bonesPerVertex = bonesPerVertex;
+    shapes[id].init(path, params);
+    if (inverseNormals) shapes[id].inverseNormals();
+    shapes[id].genBuffers();
 }
 
 /* init code begin */
@@ -189,12 +192,16 @@ void initShaders() {
     #endif
     params.dofKernelSize = 4;
     params.dofMode = ALGINE_CINEMATIC_DOF_MODE_ENABLED;
+    params.boneSystemMode = ALGINE_BONE_SYSTEM_ENABLED;
+    params.exposure = 6.0f;
+    params.gamma = 1.125f;
     cs.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getCS(
         params,
         "src/resources/shaders/vertex_shader.glsl",
         "src/resources/shaders/fragment_shader.glsl")
     ));
     ss.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSS(
+        params,
         "src/resources/shaders/vertex_shadow_shader.glsl",
         "src/resources/shaders/fragment_shadow_shader.glsl",
         "src/resources/shaders/geometry_shadow_shader.glsl")
@@ -309,6 +316,7 @@ void initShaders() {
     glUniform1i(cs.materialNormalTex, 3);
     glUniform1i(cs.materialReflectionStrengthTex, 4);
     glUniform1i(cs.materialJitterTex, 5);
+    glUniform1f(cs.shadowOpacity, shadowOpacity);
     useShaderProgram(0);
 }
 
@@ -329,19 +337,26 @@ void initMatrices() {
 }
 
 /**
- * Creating buffers and loading textures
+ * Creating shapes and loading textures
  */
-void initModelBuffers() {
+void initShapes() {
     GLuint params = aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices;
     std::string path = "src/resources/models/";
 
     // classic chess
-    createModelBuffers(path + "chess/Classic Chess small.obj", params, 0);
-    mbuffers[0].loadTextures(path + "chess");
+    createShapes(path + "chess/Classic Chess small.obj", params, 0);
+    shapes[0].loadTextures(path + "chess");
 
     // Japanese lamp
-    createModelBuffers(path + "japanese_lamp/japanese_lamp.obj", params, 1, true);
-    mbuffers[1].loadTextures(path + "japanese_lamp");
+    createShapes(path + "japanese_lamp/japanese_lamp.obj", params, 1, true);
+    shapes[1].loadTextures(path + "japanese_lamp");
+
+    // animated man
+    createShapes(path + "man/man.dae", params, 2, false, 4);
+    shapes[2].loadTextures(path + "man");
+
+    createShapes(path + "astroboy/astroboy_walk.dae", params, 3, false, 4);
+    shapes[3].loadTextures(path + "astroboy");
 }
 
 /**
@@ -349,26 +364,38 @@ void initModelBuffers() {
  */
 void createModels() {
     // classic chess
-    models[0].buffers = &mbuffers[0];
+    models[0].shape = &shapes[0];
+
+    // animated man
+    manAnimator = Animator(AnimShape(&shapes[2].animations, &shapes[2].bones, &shapes[2].globalInverseTransform, &shapes[2].rootNode));
+    models[1].shape = &shapes[2];
+    models[1].rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    models[1].translate(glm::vec3(-2.0f, 0.0f, 0.0f));
+    models[1].transform();
+    models[1].animator = &manAnimator;
+
+    // animated astroboy
+    astroboyAnimator = Animator(AnimShape(&shapes[3].animations, &shapes[3].bones, &shapes[3].globalInverseTransform, &shapes[3].rootNode));
+    models[2].shape = &shapes[3];
+    models[2].rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    models[2].scale(glm::vec3(50.0f));
+    models[2].translate(glm::vec3(2.0f, 0.0f, 0.0f));
+    models[2].transform();
+    models[2].animator = &astroboyAnimator;
 }
 
 /**
  * Creating light sources
  */
 void initLamps() {
-    Lamp::lightPosLocation = ss.lampPos;
-    Lamp::initShadowMatrices(ss.programId);
+    Light::lightPosLocation = ss.lampPos;
+    Light::initShadowMatrices(ss.programId);
 
-    createLamp(lightSources[0], glm::vec3(-15.0f, 8.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0);
-    lamps[0].buffers = &mbuffers[1];
+    createLamp(lightSources[0], glm::vec3(0.0f, 8.0f, 15.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0);
+    lamps[0].shape = &shapes[1];
     lightSources[0].mptr = &lamps[0];
-    lamps[0].origin = lightSources[0].pos;
-    
-    // // second lamp
-    // createLamp(lightSources[1], glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1);
-    // lamps[1].buffers = &mbuffers[3];
-    // lamps[1].origin = lightSources[1].pos;
-    // lightSources[1].mptr = &lamps[1];
+    lamps[0].translate(lightSources[0].pos);
+    lamps[0].transform();
 }
 
 /**
@@ -414,7 +441,7 @@ void initDOF() {
  */
 void recycleAll() {
     glDeleteVertexArrays(1, &vao);
-    for (size_t i = 0; i < MODEL_BUFFERS_COUNT; i++) mbuffers[i].recycle();
+    for (size_t i = 0; i < SHAPES_COUNT; i++) shapes[i].recycle();
 }
 
 void sendLampsData() {
@@ -425,22 +452,19 @@ void sendLampsData() {
 
 /* --- matrices --- */
 glm::mat4 getPVMMatrix() {
-    return projectionMatrix * viewMatrix * modelMatrix;
+    return projectionMatrix * viewMatrix * *modelMatrix;
 }
 
 glm::mat4 getVMMatrix() {
-    return viewMatrix * modelMatrix;
+    return viewMatrix * *modelMatrix;
 }
 
 void updateMatrices() {
     setMat4(cs.matPVM, getPVMMatrix());
     setMat4(cs.matVM, getVMMatrix());
-    setMat4(cs.matModel, modelMatrix);
+    setMat4(cs.matModel, *modelMatrix);
     setMat4(cs.matView, viewMatrix);
 }
-/* --- --- */
-
-#define polygons buffers->polygons
 
 /**
  * Draws model in depth map
@@ -448,16 +472,30 @@ void updateMatrices() {
  * @param model
  */
 void drawModelDM(Model &model) {
-    for (size_t i = 0; i < model.buffers->meshes.size(); i++) {
-	    pointer(ss.inPosition, 3, model.buffers->meshes[i].getVerticesBuffer());
-	    modelMatrix = glm::mat4();
-        modelMatrix = glm::translate(modelMatrix, model.origin);
-        modelMatrix = glm::rotate(modelMatrix, model.angles[0], glm::vec3(1, 0, 0));
-	    modelMatrix = glm::rotate(modelMatrix, model.angles[1], glm::vec3(0, 1, 0));
-        modelMatrix = glm::rotate(modelMatrix, model.angles[2], glm::vec3(0, 0, 1));
-	    setMat4(ss.matModel, modelMatrix);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.buffers->meshes[i].getIndicesBuffer());
-        glDrawElements(GL_TRIANGLES, model.buffers->meshes[i].indices.size(), GL_UNSIGNED_INT, nullptr);
+    if (model.shape->bonesPerVertex != 0) {
+        glEnableVertexAttribArray(ss.inBoneWeights);
+        glEnableVertexAttribArray(ss.inBoneIds);
+
+        for (size_t i = 0; i < model.shape->bones.size(); i++) {
+            setMat4(ss.bones + i, model.shape->bones[i].finalTransformation);
+        }
+    }
+
+    glUniform1i(ss.boneAttribsPerVertex, model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1));
+    for (size_t i = 0; i < model.shape->meshes.size(); i++) {
+	    pointer(ss.inPosition, 3, model.shape->meshes[i].getVerticesBuffer());
+        if (model.shape->bonesPerVertex != 0) {
+            pointer(ss.inBoneWeights, 4, model.shape->meshes[i].getBoneWeightsBuffer());
+            pointerui(ss.inBoneIds, 4, model.shape->meshes[i].getBoneIdsBuffer());
+        }
+	    setMat4(ss.matModel, model.transformation);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.shape->meshes[i].getIndicesBuffer());
+        glDrawElements(GL_TRIANGLES, model.shape->meshes[i].indices.size(), GL_UNSIGNED_INT, nullptr);
+    }
+
+    if (model.shape->bonesPerVertex != 0) {
+        glDisableVertexAttribArray(ss.inBoneWeights);
+        glDisableVertexAttribArray(ss.inBoneIds);
     }
 }
 
@@ -465,32 +503,47 @@ void drawModelDM(Model &model) {
  * Draws model
  */
 void drawModel(Model &model) {
-    for (size_t i = 0; i < model.buffers->meshes.size(); i++) {
-        texture2DAB(0, model.buffers->meshes[i].mat.ambientTexture);
-        texture2DAB(1, model.buffers->meshes[i].mat.diffuseTexture);
-        texture2DAB(2, model.buffers->meshes[i].mat.specularTexture);
-        texture2DAB(3, model.buffers->meshes[i].mat.normalTexture);
-        texture2DAB(4, model.buffers->meshes[i].mat.reflectionTexture);
-        texture2DAB(5, model.buffers->meshes[i].mat.jitterTexture);
+    if (model.shape->bonesPerVertex != 0) {
+        glEnableVertexAttribArray(cs.inBoneWeights);
+        glEnableVertexAttribArray(cs.inBoneIds);
 
-        glUniform1f(cs.materialAmbientStrength, model.buffers->meshes[i].mat.ambientStrength);
-        glUniform1f(cs.materialDiffuseStrength, model.buffers->meshes[i].mat.diffuseStrength);
-        glUniform1f(cs.materialSpecularStrength, model.buffers->meshes[i].mat.specularStrength);
-        glUniform1f(cs.materialShininess, model.buffers->meshes[i].mat.shininess);
+        for (size_t i = 0; i < model.shape->bones.size(); i++) {
+            setMat4(cs.bones + i, model.shape->bones[i].finalTransformation);
+        }
+    }
 
-	    pointer(cs.inPosition, 3, model.buffers->meshes[i].getVerticesBuffer());
-	    pointer(cs.inNormal, 3, model.buffers->meshes[i].getNormalsBuffer());
-	    pointer(cs.inTangent, 3, model.buffers->meshes[i].getTangentsBuffer());
-	    pointer(cs.inBitangent, 3, model.buffers->meshes[i].getBitangentsBuffer());
-	    pointer(cs.inTexCoord, 2, model.buffers->meshes[i].getTexCoordsBuffer());
-	    modelMatrix = glm::mat4();
-        modelMatrix = glm::translate(modelMatrix, model.origin);
-        modelMatrix = glm::rotate(modelMatrix, model.angles[0], glm::vec3(1, 0, 0));
-	    modelMatrix = glm::rotate(modelMatrix, model.angles[1], glm::vec3(0, 1, 0));
-        modelMatrix = glm::rotate(modelMatrix, model.angles[2], glm::vec3(0, 0, 1));
+    glUniform1i(cs.boneAttribsPerVertex, model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1));
+    for (size_t i = 0; i < model.shape->meshes.size(); i++) {
+        texture2DAB(0, model.shape->meshes[i].mat.ambientTexture);
+        texture2DAB(1, model.shape->meshes[i].mat.diffuseTexture);
+        texture2DAB(2, model.shape->meshes[i].mat.specularTexture);
+        texture2DAB(3, model.shape->meshes[i].mat.normalTexture);
+        texture2DAB(4, model.shape->meshes[i].mat.reflectionTexture);
+        texture2DAB(5, model.shape->meshes[i].mat.jitterTexture);
+
+        glUniform1f(cs.materialAmbientStrength, model.shape->meshes[i].mat.ambientStrength);
+        glUniform1f(cs.materialDiffuseStrength, model.shape->meshes[i].mat.diffuseStrength);
+        glUniform1f(cs.materialSpecularStrength, model.shape->meshes[i].mat.specularStrength);
+        glUniform1f(cs.materialShininess, model.shape->meshes[i].mat.shininess);
+
+	    pointer(cs.inPosition, 3, model.shape->meshes[i].getVerticesBuffer());
+	    pointer(cs.inNormal, 3, model.shape->meshes[i].getNormalsBuffer());
+	    pointer(cs.inTangent, 3, model.shape->meshes[i].getTangentsBuffer());
+	    pointer(cs.inBitangent, 3, model.shape->meshes[i].getBitangentsBuffer());
+	    pointer(cs.inTexCoord, 2, model.shape->meshes[i].getTexCoordsBuffer());
+        if (model.shape->bonesPerVertex != 0) {
+            pointer(cs.inBoneWeights, 4, model.shape->meshes[i].getBoneWeightsBuffer());
+            pointerui(cs.inBoneIds, 4, model.shape->meshes[i].getBoneIdsBuffer());
+        }
+	    modelMatrix = &model.transformation;
 	    updateMatrices();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.buffers->meshes[i].getIndicesBuffer());
-        glDrawElements(GL_TRIANGLES, model.buffers->meshes[i].indices.size(), GL_UNSIGNED_INT, nullptr);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.shape->meshes[i].getIndicesBuffer());
+        glDrawElements(GL_TRIANGLES, model.shape->meshes[i].indices.size(), GL_UNSIGNED_INT, nullptr);
+    }
+
+    if (model.shape->bonesPerVertex != 0) {
+        glDisableVertexAttribArray(cs.inBoneWeights);
+        glDisableVertexAttribArray(cs.inBoneIds);
     }
 }
 
@@ -572,11 +625,16 @@ void render() {
 }
 
 void display() {
+    // animate
+    for (usize i = 0; i < MODELS_COUNT; i++)
+        if (models[i].shape->bonesPerVertex != 0)
+            models[i].animator->animate(glfwGetTime());
+
     /* --- shadow rendering --- */
     glUseProgram(ss.programId);
 	for (GLuint i = 0; i < LAMPS_COUNT; i++) {
-        renderToDepthMap(i);
         glUniform1f(ss.far, lightSources[i].far);
+        renderToDepthMap(i);
     }
 	glUseProgram(0);
 
@@ -609,7 +667,7 @@ int main() {
     initMatrices();
     params.scrW = WIN_W;
     params.scrH = WIN_H;
-    initModelBuffers();
+    initShapes();
     createModels();
     initLamps();
     initShadowMaps();
@@ -627,8 +685,8 @@ int main() {
         frameCount++;
         // If a second has passed.
         if (currentTime - previousTime >= 1.0) {
-            // Display the frame count here any way you want.
-            std::cout << frameCount << " fps\n";
+            // Display the average frame count and the average time for 1 frame
+            std::cout << frameCount << " (" << (frameCount / (currentTime - previousTime)) << ") FPS, " << ((currentTime - previousTime) / frameCount) * 1000 << " ms\n";
             frameCount = 0;
             previousTime = currentTime;
         }

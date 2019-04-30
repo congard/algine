@@ -1,7 +1,7 @@
 # Algine
 Algine [Al'gine] - OpenGL 3.3+ engine written in C++
 
-Version: 1.4.2 beta-candidate
+Version: 1.5 alpha
 
 Supported systems: Linux, Windows (with MinGW-w64)
 
@@ -13,9 +13,8 @@ If you find any errors or you have recommendations for improving the project - a
 
 Shaders are written with the expectation that the compiler optimizes their code. In the future, the optimizer may be written
 
-![Algine v1.4.2 beta-candidate](pictures/1.png)
-
-![Algine v1.4.2 beta-candidate](pictures/NVGF_920mx.png)
+Click on picture to watch video
+[![Algine v1.5 alpha](pictures/1.png)](https://youtu.be/HQKTpQhn40c)
 
 # Functionality
  * Textures
@@ -32,10 +31,11 @@ Shaders are written with the expectation that the compiler optimizes their code.
  * Cinematic Depth of field
  * Support of 40+ 3D model formats (thanks to [Assimp](https://github.com/assimp/assimp))
  * Support of materials
+ * Skeletal animations / bone system. Limitations on the *number of bones* / *number of bones per vertex* are **hardware only**.
  * Effect management
  * Etc.
 
-Take into account, this is a test (beta-candidate) version! All major functions will be added in later versions.
+Take into account, this is a test (alpha) version! All major functions will be added in later versions.
 
 # Dependencies
 Engine has next dependencies: `glew`, `glfw`, `glm`, `assimp`.
@@ -54,8 +54,9 @@ How to install assimp you can read [here](https://github.com/assimp/assimp/blob/
 
 # Compilation
 1. `cd algine`
-2. `chmod +x make.sh`
-3. `./make.sh` - to run on standard videocard,`./make.sh primus` - to run on second videocard using `primusrun`, `./make.sh optimus` - to run on second videocard using `optirun`
+2. `chmod +x make.sh run.sh`
+3. `./make.sh`
+4. `./run.sh` - to run on standard videocard,`./run.sh primus` - to run on second videocard using `primusrun`, `./run.sh optimus` - to run on second videocard using `optirun`
 
 **About compilation on Windows you can read [here](build.md)**
 
@@ -66,3 +67,7 @@ You can contact me by telegram or email:
 
 # You can support me financially
 <b>Payeer:</b> P36281059
+
+Or you can do it even without finance. Just open [this](http://fainbory.com/8aWY) link
+
+Thank you.

@@ -7,12 +7,16 @@
 #define ALGINE_NAME_CS_MAT_VIEW "u_View"
 #define ALGINE_NAME_CS_MAT_PVM "u_PVMMatrix"
 #define ALGINE_NAME_CS_MAT_VM "u_VMMatrix"
+#define ALGINE_NAME_CS_BONES "bones[0]"
 #define ALGINE_NAME_CS_SWITCH_NORMAL_MAPPING "u_NormalMapping"
+#define ALGINE_NAME_CS_BONE_ATTRIBS_PER_VERTEX "boneAttribsPerVertex"
 #define ALGINE_NAME_CS_IN_POSITION "a_Position"
 #define ALGINE_NAME_CS_IN_NORMAL "a_Normal"
 #define ALGINE_NAME_CS_IN_TANGENT "a_Tangent"
 #define ALGINE_NAME_CS_IN_BITANGENT "a_Bitangent"
 #define ALGINE_NAME_CS_IN_TEXCOORD "a_Texture"
+#define ALGINE_NAME_CS_IN_BONE_IDS "a_BoneIds[0]"
+#define ALGINE_NAME_CS_IN_BONE_WEIGHTS "a_BoneWeights[0]"
     
 // CS fragment shader names
 #define ALGINE_NAME_CS_VIEW_POSITION "viewPos"
@@ -20,6 +24,7 @@
 #define ALGINE_NAME_CS_SHADOW_DISKRADIUS_K "diskRadius_k"
 #define ALGINE_NAME_CS_SHADOW_DISKRADIUS_MIN "diskRadius_min"
 #define ALGINE_NAME_CS_SHADOW_BIAS "shadow_bias"
+#define ALGINE_NAME_CS_SHADOW_OPACITY "shadowOpacity"
 #define ALGINE_NAME_CS_FOCAL_DEPTH "focalDepth"
 #define ALGINE_NAME_CS_FOCAL_RANGE "focalRange"
 #define ALGINE_NAME_CS_SHADOW_MAPS "shadowMaps"
@@ -43,8 +48,12 @@
 #define ALGINE_NAME_CS_CINEMATIC_DOF_IMAGE_DISTANCE "cinematicDOF.i"
 
 // SS vertex shader
-#define ALGINE_NAME_SS_MAT_MODEL "u_ModelMatrix"
 #define ALGINE_NAME_SS_IN_POSITION "a_Position"
+#define ALGINE_NAME_SS_IN_BONE_IDS "a_BoneIds[0]"
+#define ALGINE_NAME_SS_IN_BONE_WEIGHTS "a_BoneWeights[0]"
+#define ALGINE_NAME_SS_MAT_MODEL "u_ModelMatrix"
+#define ALGINE_NAME_SS_BONES "bones[0]"
+#define ALGINE_NAME_SS_BONE_ATTRIBS_PER_VERTEX "boneAttribsPerVertex"
     
 // SS geometry shader
 #define ALGINE_NAME_SS_MAT_SHADOW "shadowMatrices"
