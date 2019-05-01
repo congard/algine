@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function run() {
-    LD_LIBRARY_PATH=$libPath $1 ./out/main.o;
+    LD_LIBRARY_PATH=$libPath $1 ./out/main;
     exit 0;
 }
 

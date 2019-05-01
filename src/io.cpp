@@ -1,6 +1,3 @@
-#ifndef ALGINE_IO_CPP
-#define ALGINE_IO_CPP
-
 #include <stdio.h>  /* defines FILENAME_MAX */
 #ifdef __linux__
 #include <unistd.h>
@@ -10,7 +7,7 @@
 #define _getCurrentDir _getcwd
 #endif
 
-#include <iostream>
+#include <algine/io.h>
 
 namespace algine {
 namespace io {
@@ -70,5 +67,3 @@ std::string getAbsolutePath(const std::string &path) {
 
 }
 }
-
-#endif /* ALGINE_IO_CPP */

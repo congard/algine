@@ -10,7 +10,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <assimp/anim.h>
 
-#include "types.h"
+#include <algine/types.h>
 #include "node.cpp"
 #include "mesh.cpp"
 #include "bone.cpp"

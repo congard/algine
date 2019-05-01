@@ -18,7 +18,7 @@
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
 
-#include "types.h"
+#include <algine/types.h>
 #include "texture.cpp"
 #include "mesh.cpp"
 #include "node.cpp"

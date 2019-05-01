@@ -5,14 +5,8 @@
  * My github: https://github.com/congard
  * @author congard
  */
-
-#ifndef ALGINE_MATH_CPP
-#define ALGINE_MATH_CPP
-
 #include <tgmath.h>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/vec3.hpp>
-#include <assimp/matrix4x4.h>
+#include <algine/math.h>
 
 namespace algine {
 /**
@@ -21,7 +15,7 @@ namespace algine {
  * @param sigma - sigma value
  * @return pointer to 1D kernel
  */
-static void getGB1DKernel(float *kernel, int size, float sigma) {
+void getGB1DKernel(float *kernel, int size, float sigma) {
 	int mean = size / 2;
 	float sum = 0; // For accumulating the kernel values
 	for (int x = 0; x < size; x++)  {
@@ -39,7 +33,7 @@ static void getGB1DKernel(float *kernel, int size, float sigma) {
  * radians it is angle in radians
  * rotationAxis it is the axis around which you want to make rotation
  */
-static glm::quat getQuat(float radians, const glm::vec3 &rotationAxis) {
+glm::quat getQuat(float radians, const glm::vec3 &rotationAxis) {
 	return glm::quat(
 		cos(radians / 2),					// w
 		rotationAxis.x * sin(radians / 2),	// x
@@ -49,7 +43,7 @@ static glm::quat getQuat(float radians, const glm::vec3 &rotationAxis) {
 }
 
 // converts aiMatrix4x4 to glm::mat4
-static glm::mat4 getMat4(const aiMatrix4x4 &in_mat) {
+glm::mat4 getMat4(const aiMatrix4x4 &in_mat) {
     glm::mat4 mat;
     
     mat[0][0] = in_mat.a1;
@@ -76,5 +70,3 @@ static glm::mat4 getMat4(const aiMatrix4x4 &in_mat) {
 }
 
 } /* namespace algine */
-
-#endif /* ALGINE_MATH_CPP */

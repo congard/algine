@@ -5,8 +5,8 @@
 #include <vector>
 #include "algine_structs.cpp"
 #include "shaderprogram.cpp"
-#include "sconstants.h"
-#include "io.cpp"
+#include <algine/sconstants.h>
+#include <algine/io.h>
 
 namespace algine {
 // shader compiler

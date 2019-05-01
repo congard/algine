@@ -35,7 +35,7 @@ struct Light {
     /* --- to access shader --- */
     GLint propLocations[6]; // one lamp has 6 properties
     
-    #include "sconstants.h"
+    #include <algine/sconstants.h>
 
     void loadLocations(GLint programId, GLuint id) {
         // uns - uniform name start
@@ -76,7 +76,7 @@ struct Light {
         for (size_t i = 0; i < 6; i++) shadowMatricesLocations[i] = glGetUniformLocation(programId, (std::string(ALGINE_NAME_SS_MAT_SHADOW) + "[" + std::to_string(i) + "]").c_str());
     }
 
-    #include "unsconstants.h"
+    #include <algine/unsconstants.h>
 
     GLuint SHADOW_MAP_RESOLUTION;
     GLuint depthMapFBO, depthCubemap;

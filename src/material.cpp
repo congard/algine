@@ -6,9 +6,9 @@
 
 #include <GL/glew.h>
 
-#include "lib/json.hpp"
-#include "io.cpp"
-#include "constants.h"
+#include <nlohmann/json.hpp>
+#include <algine/io.h>
+#include <algine/constants.h>
 
 namespace algine {
 struct Material {

@@ -3,8 +3,8 @@
 
 #include <string>
 #include <GL/glew.h>
-#include "constants.h"
-#include "types.h"
+#include <algine/constants.h>
+#include <algine/types.h>
 
 namespace algine {
 // color shader ids

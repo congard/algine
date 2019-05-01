@@ -5,7 +5,7 @@
 #include <vector>
 #include <glm/mat4x4.hpp>
 #include <assimp/scene.h>
-#include "math.cpp"
+#include <algine/math.h>
 
 namespace algine {
 struct Node {

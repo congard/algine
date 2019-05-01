@@ -14,18 +14,18 @@
 #include "algine_structs.cpp"
 #include "animation.cpp"
 #include "bone.cpp"
-#include "constants.h"
+#include <algine/constants.h>
 #include "framebuffer.cpp"
-#include "io.cpp"
+#include <algine/io.h>
 #include "lamp.cpp"
 #include "material.cpp"
-#include "math.cpp"
+#include <algine/math.h>
 #include "mesh.cpp"
 #include "model.cpp"
 #include "node.cpp"
-#include "sconstants.h"
+#include <algine/sconstants.h>
 #include "shaderprogram.cpp"
 #include "texture.cpp"
-#include "types.h"
+#include <algine/types.h>
 
 #endif /* ALGINE_CPP */
