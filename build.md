@@ -13,6 +13,6 @@
 6. Open a command prompt in the root Algine folder. Run `make.bat`. It will start compilation. If you did everything right, you will see the following message: *Compilation done*
 7. Just type `run.bat`. If you did everything right, you will see Algine window with the scene :)
 
-![Algine on Windows](pictures/NVGF_920mx.png)
+![Algine on Windows](pictures/5.png)
 
 If I'm forgot something in this instruction, please notify me
