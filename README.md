@@ -58,6 +58,15 @@ How to install assimp you can read [here](https://github.com/assimp/assimp/blob/
 3. `./make.sh`
 4. `./run.sh` - to run on standard videocard,`./run.sh primus` - to run on second videocard using `primusrun`, `./run.sh optimus` - to run on second videocard using `optirun`
 
+If you use Visual Studio Code, you can build/run the sample directly from the editor (Note that Git Bash (MinTTY) is required for proper working on Windows). Just press Ctrl+Shift+B and choose one of these:
+1. Build
+2. Run
+3. Run on Linux with primus
+4. Build and run
+5. Build and run on Linux with primus
+
+![VSCode](pictures/vscode_project.png)
+
 **About compilation on Windows you can read [here](build.md)**
 
 # Contact

@@ -26,10 +26,13 @@ set headers_full=
 set sources_full=
 
 setlocal EnableDelayedExpansion
+
+rem headers paths
 for %%v in (%headers%) do (
     set headers_full=!headers_full! %include%/algine/%%v
 )
 
+rem sources paths
 for %%v in (%sources%) do (
     set sources_full=!sources_full! %source%/%%v
 )
