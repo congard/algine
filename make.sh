@@ -12,14 +12,16 @@ sources=(main.cpp math.cpp io.cpp)
 headers_full=""
 sources_full=""
 
+# headers paths
 for var in ${headers[@]}
 do
-headers_full="$headers_full $include/algine/$var"
+    headers_full="$headers_full $include/algine/$var"
 done
 
+# sources paths
 for var in ${sources[@]}
 do
-sources_full="$sources_full $source/$var"
+    sources_full="$sources_full $source/$var"
 done
 
 time g++ -I $include $headers_full $sources_full -o out/main `pkg-config --libs glfw3 glew` -pthread -lassimp;

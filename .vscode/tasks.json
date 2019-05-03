@@ -1,0 +1,65 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build on Linux",
+            "type": "shell",
+            "command": "./make.sh",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+
+        {
+            "label": "Run on Linux",
+            "type": "shell",
+            "command": "./run.sh",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+
+        {
+            "label": "Run on Linux with primus",
+            "type": "shell",
+            "command": "./run.sh",
+            "args": [
+                "primus"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+
+        {
+            "label": "Build and run on Linux",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "./make.sh && ./run.sh"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+
+        {
+            "label": "Build and run on Linux with primus",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "./make.sh && ./run.sh primus"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
