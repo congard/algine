@@ -98,20 +98,22 @@ struct AnimShape {
 
 struct Animator {
     AnimShape shape;
+    usize animationIndex;
 
     Animator() { /* empty */ }
 
-    Animator(const AnimShape &shape) {
+    Animator(const AnimShape &shape, usize animationIndex = 0) {
         this->shape = shape;
+        this->animationIndex = animationIndex;
     }
 
     void animate(float timeInSeconds) {
         glm::mat4 identity;
 
-        float ticksPerSecond = shape.animations->operator[](0).ticksPerSecond != 0 ? shape.animations->operator[](0).ticksPerSecond : 25.0f;
+        float ticksPerSecond = shape.animations->operator[](animationIndex).ticksPerSecond != 0 ? shape.animations->operator[](0).ticksPerSecond : 25.0f;
 
         float timeInTicks = timeInSeconds * ticksPerSecond;
-        float animationTime = fmod(timeInTicks, shape.animations->operator[](0).duration);
+        float animationTime = fmod(timeInTicks, shape.animations->operator[](animationIndex).duration);
 
         readNodeHeirarchy(animationTime, *shape.rootNode, identity);
     }
@@ -233,7 +235,7 @@ struct Animator {
 
     void readNodeHeirarchy(float animationTime, const Node &node, const glm::mat4 &parentTransform) {
         const std::string &nodeName = node.name;
-        const Animation &animation = shape.animations->operator[](0);
+        const Animation &animation = shape.animations->operator[](animationIndex);
         glm::mat4 nodeTransformation = node.transformation;
         const AnimNode *animNode = findNodeAnim(&animation, nodeName);
 
