@@ -20,14 +20,13 @@
     
 // CS fragment shader names
 #define ALGINE_NAME_CS_VIEW_POSITION "viewPos"
-#define ALGINE_NAME_CS_LAMPS_COUNT "lampsCount"
+#define ALGINE_NAME_CS_POINT_LIGHTS_COUNT "pointLightsCount"
+#define ALGINE_NAME_CS_DIR_LIGHTS_COUNT "dirLightsCount"
 #define ALGINE_NAME_CS_SHADOW_DISKRADIUS_K "diskRadius_k"
 #define ALGINE_NAME_CS_SHADOW_DISKRADIUS_MIN "diskRadius_min"
-#define ALGINE_NAME_CS_SHADOW_BIAS "shadow_bias"
 #define ALGINE_NAME_CS_SHADOW_OPACITY "shadowOpacity"
 #define ALGINE_NAME_CS_FOCAL_DEPTH "focalDepth"
 #define ALGINE_NAME_CS_FOCAL_RANGE "focalRange"
-#define ALGINE_NAME_CS_SHADOW_MAPS "shadowMaps"
 #define ALGINE_NAME_CS_MATERIAL_AMBIENT_TEX "material.ambient"
 #define ALGINE_NAME_CS_MATERIAL_DIFFUSE_TEX "material.diffuse"
 #define ALGINE_NAME_CS_MATERIAL_SPECULAR_TEX "material.specular"
@@ -42,7 +41,8 @@
 #define ALGINE_NAME_CS_MATERIAL_SPECULAR_STRENGTH "material.specularStrength"
 #define ALGINE_NAME_CS_MATERIAL_SHININESS "material.shininess"
 #define ALGINE_NAME_CS_SWITCH_TEXTURE_MAPPING "textureMappingEnabled"
-#define ALGINE_NAME_CS_LAMPS "lamps"
+#define ALGINE_NAME_CS_POINT_LIGHTS "pointLights"
+#define ALGINE_NAME_CS_DIR_LIGHTS "dirLights"
 #define ALGINE_NAME_CS_CINEMATIC_DOF_PLANE_IN_FOCUS "cinematicDOF.p"
 #define ALGINE_NAME_CS_CINEMATIC_DOF_APERTURE "cinematicDOF.a"
 #define ALGINE_NAME_CS_CINEMATIC_DOF_IMAGE_DISTANCE "cinematicDOF.i"
@@ -51,12 +51,13 @@
 #define ALGINE_NAME_SS_IN_POSITION "a_Position"
 #define ALGINE_NAME_SS_IN_BONE_IDS "a_BoneIds[0]"
 #define ALGINE_NAME_SS_IN_BONE_WEIGHTS "a_BoneWeights[0]"
+#define ALGINE_NAME_SS_MAT_LIGHT_SPACE "u_LightSpaceMatrix"
 #define ALGINE_NAME_SS_MAT_MODEL "u_ModelMatrix"
 #define ALGINE_NAME_SS_BONES "bones[0]"
 #define ALGINE_NAME_SS_BONE_ATTRIBS_PER_VERTEX "boneAttribsPerVertex"
     
 // SS geometry shader
-#define ALGINE_NAME_SS_MAT_SHADOW "shadowMatrices"
+#define ALGINE_NAME_SS_MAT_SHADOW "shadowMatrices[0]"
 
 // SS fragment shader
 #define ALGINE_NAME_SS_LAMP_POSITION "lightPos"
@@ -94,7 +95,7 @@
 #define ALGINE_NAME_BLUS_SAMPLER_DOF_BUFFER "dofBuffer"
 #define ALGINE_NAME_BLUS_SIGMA_MIN "min_sigma"
 #define ALGINE_NAME_BLUS_SIGMA_MAX "max_sigma"
-#define ALGINE_NAME_BLUS_KERNEL_BLOOM "bloom_kernel"
+#define ALGINE_NAME_BLUS_KERNEL_BLOOM "bloom_kernel[0]"
 
 // BLES vertex shader
 #define ALGINE_NAME_BLES_IN_POSITION "inPos"
@@ -107,9 +108,14 @@
 #define ALGINE_NAME_BLES_GAMMA "gamma"
 
 // lamp.cpp shader constants
-#define ALGINE_NAME_CS_LAMP_LAMP_POS "lampPos"
-#define ALGINE_NAME_CS_LAMP_LAMP_COLOR "lampColor"
-#define ALGINE_NAME_CS_LAMP_KC "kc"
-#define ALGINE_NAME_CS_LAMP_KL "kl"
-#define ALGINE_NAME_CS_LAMP_KQ "kq"
-#define ALGINE_NAME_CS_LAMP_FAR "far"
+#define ALGINE_NAME_CS_LIGHT_POS "pos"
+#define ALGINE_NAME_CS_LIGHT_COLOR "color"
+#define ALGINE_NAME_CS_LIGHT_KC "kc"
+#define ALGINE_NAME_CS_LIGHT_KL "kl"
+#define ALGINE_NAME_CS_LIGHT_KQ "kq"
+#define ALGINE_NAME_CS_LIGHT_FAR "far"
+#define ALGINE_NAME_CS_LIGHT_BIAS "bias"
+#define ALGINE_NAME_CS_LIGHT_MAX_BIAS "maxBias"
+#define ALGINE_NAME_CS_LIGHT_MIN_BIAS "minBias"
+#define ALGINE_NAME_CS_LIGHT_SHADOW_MAP "shadowMap"
+#define ALGINE_NAME_CS_LIGHT_MATRIX "lightMatrix"
