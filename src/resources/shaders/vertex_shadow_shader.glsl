@@ -2,7 +2,7 @@
  * @author Congard
  * dbcongard@gmail.com
  * t.me/congard
- * gitlab.com/congard
+ * github.com/congard
  */
 
 #version 330 core
@@ -13,6 +13,7 @@ in vec4 a_BoneWeights[MAX_BONE_ATTRIBS_PER_VERTEX];
 in ivec4 a_BoneIds[MAX_BONE_ATTRIBS_PER_VERTEX];
 in vec4 a_Position;
 
+uniform mat4 u_LightSpaceMatrix; // if dir light
 uniform mat4 u_ModelMatrix;
 uniform mat4 bones[MAX_BONES];
 uniform int boneAttribsPerVertex = 0;
@@ -34,5 +35,9 @@ void main() {
     }
     #endif
 
+    #ifdef ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING
 	gl_Position = u_ModelMatrix * position;
+    #else
+    gl_Position = u_LightSpaceMatrix * u_ModelMatrix * position;
+    #endif
 }

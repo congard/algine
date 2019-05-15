@@ -17,7 +17,7 @@
 #include <algine/constants.h>
 #include "framebuffer.cpp"
 #include <algine/io.h>
-#include "lamp.cpp"
+#include "light.cpp"
 #include "material.cpp"
 #include <algine/math.h>
 #include "mesh.cpp"

@@ -22,6 +22,9 @@ uniform float focalRange; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
 
 uniform float shadowOpacity = 1.0;
 
+uniform int pointLightsCount; // Point lights count
+uniform int dirLightsCount; // Point lights count
+
 // if ALGINE_DOF_MODE == ALGINE_CINEMATIC_DOF_MODE_ENABLED
 uniform struct CinematicDOF {
 	float p; // plane in focus
@@ -56,25 +59,36 @@ uniform struct Material {
 	float shininess;
 } material;
 
-#ifdef ALGINE_LIGHTING_MODE_ENABLED
-uniform int lampsCount;	// Lamps count
-
-struct Lamp {
+struct PointLight {
 	float kc; // constant term
 	float kl; // linear term
 	float kq; // quadratic term
 	float far; // shadow matrix far plane
-	vec3 lampPos; // in world space
-	vec3 lampColor;
+	float bias;
+	vec3 pos; // in world space
+	vec3 color;
+	samplerCube shadowMap;
 };
 
-uniform Lamp lamps[MAX_LAMPS_COUNT];
-vec3 lampEyePos; // Transformed lamp position into eye space
-#endif /* ALGINE_LIGHTING_MODE_ENABLED */
+struct DirLight {
+	float kc; // constant term
+	float kl; // linear term
+	float kq; // quadratic term
+	float minBias, maxBias;
+	vec3 pos; // in world space
+	vec3 color;
+	mat4 lightMatrix;
+	sampler2D shadowMap;
+};
 
+uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
+uniform DirLight dirLights[MAX_DIR_LIGHTS_COUNT];
+
+vec3 lampEyePos; // Transformed lamp position into eye space
 vec3 norm;
 vec3 fragPos;
 vec3 fragWorldPos;
+vec3 ambient, diffuse, specular, viewDir, lightDir; // base lighting variables
 
 // output colors
 layout(location = 0) out vec4 fragColor;
@@ -84,10 +98,6 @@ layout(location = 3) out vec2 ssrValuesBuffer;
 layout(location = 4) out vec3 positionBuffer;
 
 #if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED && defined ALGINE_LIGHTING_MODE_ENABLED
-uniform samplerCube shadowMaps[MAX_LAMPS_COUNT];
-uniform float far_plane_sm;	// shadow matrix far plane
-uniform float shadow_bias;
-
 float shadow;
 
 #ifdef ALGINE_SHADOW_MAPPING_MODE_ENABLED
@@ -104,9 +114,9 @@ const vec3 sampleOffsetDirections[20] = vec3[] (
 );
 #endif /* ALGINE_SHADOW_MAPPING_MODE_ENABLED */
 
-float calculateShadow(vec3 lightDir, int index) {
+float calculatePointLightShadow(int index) {
 	// get vector between fragment position and light position
-	vec3 fragToLight = fragWorldPos - lamps[index].lampPos;
+	vec3 fragToLight = fragWorldPos - pointLights[index].pos;
 	// now get current linear depth as the length between the fragment and light position
 	float currentDepth = length(fragToLight);
 	// use the light to fragment vector to sample from the depth map
@@ -115,36 +125,94 @@ float calculateShadow(vec3 lightDir, int index) {
 	// PCF
 	#ifdef ALGINE_SHADOW_MAPPING_MODE_ENABLED
 	float viewDistance = length(viewPos - fragWorldPos);
-	float diskRadius = (1.0 + (viewDistance / lamps[index].far)) * diskRadius_k + diskRadius_min;
+	float diskRadius = (1.0 + (viewDistance / pointLights[index].far)) * diskRadius_k + diskRadius_min;
 	for (int i = 0; i < 20; i++) {
-		closestDepth = texture(shadowMaps[index], fragToLight + sampleOffsetDirections[i] * diskRadius).r;
-		closestDepth *= lamps[index].far; // Undo mapping [0;1]
+		closestDepth = texture(pointLights[index].shadowMap, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+		closestDepth *= pointLights[index].far; // Undo mapping [0;1]
 		// now test for shadows
-		if(currentDepth - shadow_bias > closestDepth) shadow += 1.0;
+		if(currentDepth - pointLights[index].bias > closestDepth) shadow += 1.0;
 	}
 	return shadow /= 20;
 	#else
-	closestDepth = texture(shadowMaps[index], fragToLight).r;
-	closestDepth *= lamps[index].far; // Undo mapping [0;1]
+	closestDepth = texture(pointLights[index].shadowMap, fragToLight).r;
+	closestDepth *= pointLights[index].far; // Undo mapping [0;1]
 	// now test for shadows
-	return currentDepth - shadow_bias > closestDepth ? 1.0 : 0.0;
+	return currentDepth - pointLights[index].bias > closestDepth ? 1.0 : 0.0;
+	#endif
+}
+
+float calculateDirLightShadow(int index) {
+	vec4 fragPosLightSpace = dirLights[index].lightMatrix * vec4(fragWorldPos, 1.0);
+	// perform perspective divide
+	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+	// transform to [0,1] range
+	projCoords = projCoords * 0.5 + 0.5;
+	// get closest depth value from light’s perspective (using [0; 1] range projCoords as coords)
+	float closestDepth = texture(dirLights[index].shadowMap, projCoords.xy).r;
+	// get depth of current fragment from light’s perspective
+	float currentDepth = projCoords.z;
+	
+	/*
+	 * Here we have a maximum bias of 0.05 and a minimum of 0.005 based on the surface’s normal and
+	 * light direction. This way surfaces like the floor that are almost perpendicular to the light source get a small
+	 * bias, while surfaces like the cube’s side-faces get a much larger bias.
+	*/
+	float bias = max(dirLights[index].maxBias * (1.0 - dot(norm, lightDir)), dirLights[index].minBias);
+
+	// soft shadow pcf 3*3
+	#ifdef ALGINE_SHADOW_MAPPING_MODE_ENABLED // PCF
+	vec2 texelSize = 1.0 / textureSize(dirLights[index].shadowMap, 0);
+	shadow = 0;
+	for (int x = -1; x <= 1; x++) {
+		for (int y = -1; y <= 1; y++) {
+			float pcfDepth = texture(dirLights[index].shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+		}
+	}
+
+	return shadow /= 9.0;
+
+	#else
+	return currentDepth - bias > closestDepth ? 1.0 : 0.0; // simple shadow
 	#endif
 }
 #endif
 
-#if defined ALGINE_LIGHTING_MODE_ENABLED && defined ALGINE_ATTENUATION_MODE_ENABLED
-float calculateAttenuation(Lamp lamp) {
+float calculateAttenuation(float kc, float kl, float kq) {
 	float distance = length(lampEyePos - fragPos);
 	return 1.0 / (
-					lamp.kc +
-					lamp.kl * distance +
-					lamp.kq * (distance * distance)
+					kc +
+					kl * distance +
+					kq * (distance * distance)
 			);
 }
-#endif
-
 
 #define toVec4(v) vec4(v, 1.0)
+
+// kclq: vec3(kc, kl, kq)
+void calculateBaseLighting(vec3 pos, vec3 color, float kc, float kl, float kq) {
+	lampEyePos = vec3(view * toVec4(pos));
+
+	#ifdef ALGINE_ATTENUATION_MODE_ENABLED
+	// attenuation
+	float attenuation = calculateAttenuation(kc, kl, kq);
+	#else
+	#define attenuation 1.0
+	#endif /* ALGINE_ATTENUATION_MODE_ENABLED */
+
+	// ambient
+	ambient = material.ambientStrength * color * attenuation;
+
+	// diffuse
+	lightDir = normalize(lampEyePos - fragPos);
+	float diff = max(dot(norm, lightDir), 0.0);
+	diffuse = material.diffuseStrength * diff * color * attenuation;
+
+	// specular
+	vec3 reflectDir = reflect(-lightDir, norm);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+	specular = material.specularStrength * spec * color * attenuation;
+}
 
 // The entry point for our fragment shader.
 void main() {
@@ -170,46 +238,40 @@ void main() {
 	#endif
 
 	#ifdef ALGINE_LIGHTING_MODE_ENABLED
-	vec3 viewDir = normalize(mat3(view) * viewPos - fragPos);
+	viewDir = normalize(mat3(view) * viewPos - fragPos);
 
-	vec3 ambientResult = vec3(0, 0, 0); // result of ambient lighting for all lamps
-	vec3 diffuseResult = vec3(0, 0, 0); // result of diffuse lighting for all lamps
-	vec3 specularResult = vec3(0, 0, 0); // result of specular lighting for all lamps
+	vec3 ambientResult = vec3(0, 0, 0); // result of ambient lighting for all lights
+	vec3 diffuseResult = vec3(0, 0, 0); // result of diffuse lighting for all lights
+	vec3 specularResult = vec3(0, 0, 0); // result of specular lighting for all lights
 
-	for (int i = 0; i < lampsCount; i++) {
-		lampEyePos = vec3(view * toVec4(lamps[i].lampPos));
-
-		#ifdef ALGINE_ATTENUATION_MODE_ENABLED
-		// attenuation
-		float attenuation = calculateAttenuation(lamps[i]);
-		#else
-		#define attenuation 1.0
-		#endif /* ALGINE_ATTENUATION_MODE_ENABLED */
-
-		// ambient
-		vec3 ambient = material.ambientStrength * lamps[i].lampColor * attenuation;
-
-		// diffuse
-		vec3 lightDir = normalize(lampEyePos - fragPos);
-		float diff = max(dot(norm, lightDir), 0.0);
-		vec3 diffuse = material.diffuseStrength * diff * lamps[i].lampColor * attenuation;
-
-		// specular
-		vec3 reflectDir = reflect(-lightDir, norm);
-		float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-		vec3 specular = material.specularStrength * spec * lamps[i].lampColor * attenuation;
-
-		// result for this(i) lamp
-		ambientResult += ambient;
+	for (int i = 0; i < pointLightsCount; i++) {
+		calculateBaseLighting(pointLights[i].pos, pointLights[i].color, pointLights[i].kc, pointLights[i].kl, pointLights[i].kq);
+		
 		#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
 		// calculate shadow
-		shadow = calculateShadow(lightDir, i) * shadowOpacity;
+		shadow = calculatePointLightShadow(i) * shadowOpacity;
+		#else
+		shadow = 0;
+		#endif
+		
+		ambientResult += ambient;
 		diffuseResult += diffuse * (1 - shadow);
 		specularResult += specular * (1 - shadow);
+	}
+
+	for (int i = 0; i < dirLightsCount; i++) {
+		calculateBaseLighting(dirLights[i].pos, dirLights[i].color, dirLights[i].kc, dirLights[i].kl, dirLights[i].kq);
+
+		#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
+		// calculate shadow
+		shadow = calculateDirLightShadow(i) * shadowOpacity;
 		#else
-		diffuseResult += diffuse;
-		specularResult += specular;
+		shadow = 0;
 		#endif
+
+		ambientResult += ambient;
+		diffuseResult += diffuse * (1 - shadow);
+		specularResult += specular * (1 - shadow);
 	}
 
 	#ifdef ALGINE_TEXTURE_MAPPING_MODE_ENABLED
@@ -235,7 +297,7 @@ void main() {
 				toVec4(specularResult) * material.cspecular;
 	#endif /* ALGINE_TEXTURE_MAPPING_MODE_ENABLED */
 
-	#else
+	#else /* ALGINE_LIGHTING_MODE_DISABLED */
 		#ifdef ALGINE_TEXTURE_MAPPING_MODE_ENABLED
 		fragColor = texture(material.diffuse, v_Texture);
 		#elif defined ALGINE_TEXTURE_MAPPING_MODE_DISABLED
@@ -244,7 +306,7 @@ void main() {
 		if (textureMappingEnabled) fragColor = texture(material.diffuse, v_Texture);
 		else fragColor = material.cdiffuse;
 		#endif /* ALGINE_TEXTURE_MAPPING_MODE_ENABLED */
-	#endif /* ALGINE_LIGHTING_MODE_ENABLED */
+	#endif /* ALGINE_LIGHTING_MODE_XXX */
 
 	#ifdef ALGINE_DOF_MODE_ENABLED
 	dofBuffer = abs(focalDepth + fragPos.z) / focalRange;

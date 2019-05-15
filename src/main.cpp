@@ -21,7 +21,8 @@
 
 #define FULLSCREEN !true
 
-#define LAMPS_COUNT 1
+#define POINT_LAMPS_COUNT 1
+#define DIR_LAMPS_COUNT 1
 #define SHAPES_COUNT 4
 #define MODELS_COUNT 3
 
@@ -48,14 +49,12 @@ using namespace algine;
 
 // models
 Shape shapes[SHAPES_COUNT];
-Model models[MODELS_COUNT], lamps[LAMPS_COUNT];
+Model models[MODELS_COUNT], lamps[POINT_LAMPS_COUNT + DIR_LAMPS_COUNT];
 Animator manAnimator, astroboyAnimator; // animator for man, astroboy models
 
 // light
-Lamp lightSources[LAMPS_COUNT];
-
-// shadow maps
-TextureArray shadowMaps;
+PointLamp pointLamps[POINT_LAMPS_COUNT];
+DirLamp dirLamps[DIR_LAMPS_COUNT];
 
 // renderer
 AlgineRenderer renderer;
@@ -78,7 +77,7 @@ GLuint
     pingpongDofTex[2];
 
 CShader cs;
-SShader ss;
+SShader ss, ss_dir;
 BLUShader blusH, blusV;
 BLEShader bles;
 SSShader sss;
@@ -96,9 +95,6 @@ float
     diskRadius_k = 1.0f / 25.0f,
     diskRadius_min = 0.0f,
 
-    // other shadow variables
-    shadow_bias = 0.3f,
-    
     // shadow opacity: 1.0 - opaque shadow (by default), 0.0 - transparent
     shadowOpacity = 0.65f;
 
@@ -124,15 +120,51 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
 /**
  * Creates Lamp with default params
  */
-void createLamp(Lamp &result, const glm::vec3 &pos, const glm::vec3 &color, GLuint id) {
+void createPointLamp(PointLamp &result, const glm::vec3 &pos, const glm::vec3 &color, usize id) {
     result.pos = pos;
     result.color = color;
     result.kc = 1;
     result.kl = 0.045f;
     result.kq = 0.0075f;
 
-    result.loadLocations(cs.programId, id);
-    result.initShadowMapping(SHADOW_MAP_RESOLUTION);
+    result.cs = &cs;
+    result.ss = &ss;
+    result.index = id;
+    result.initShadowMapping(SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION);
+
+    glUseProgram(cs.programId);
+    result.push_color();
+    result.push_kc();
+    result.push_kl();
+    result.push_kq();
+    result.push_far();
+    result.push_bias();
+    glUseProgram(0);
+}
+
+void createDirLamp(DirLamp &result, const glm::vec3 &pos, const glm::vec3 &color, usize id) {
+    result.pos = pos;
+    result.color = color;
+    result.kc = 1;
+    result.kl = 0.045f;
+    result.kq = 0.0075f;
+
+    result.cs = &cs;
+    result.ss = &ss;
+    result.index = id;
+    result.textureStartId = 6 + POINT_LAMPS_COUNT;
+    result.orthoShadowMapping(-10.0f, 10.0f, -10.0f, 10.0f);
+    result.initShadowMapping(SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION);
+
+    glUseProgram(cs.programId);
+    result.push_color();
+    result.push_kc();
+    result.push_kl();
+    result.push_kq();
+    result.push_lightMatrix();
+    result.push_minBias();
+    result.push_maxBias();
+    glUseProgram(0);
 }
 
 void createShapes(const std::string &path, GLuint params, size_t id, bool inverseNormals = false, GLuint bonesPerVertex = 0) {
@@ -175,6 +207,8 @@ void initGL() {
     if (glewInit() != GLEW_NO_ERROR) std::cout << "GLEW init failed\n";
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 	glDepthMask(true);
 }
 
@@ -189,6 +223,8 @@ void initShaders() {
     #endif
     #ifdef pcf
     params.shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_ENABLED;
+    #else
+    params.shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_SIMPLE;
     #endif
     params.dofKernelSize = 4;
     params.dofMode = ALGINE_CINEMATIC_DOF_MODE_ENABLED;
@@ -205,6 +241,12 @@ void initShaders() {
         "src/resources/shaders/vertex_shadow_shader.glsl",
         "src/resources/shaders/fragment_shadow_shader.glsl",
         "src/resources/shaders/geometry_shadow_shader.glsl")
+    ));
+    params.shadowMappingType = ALGINE_SHADOW_MAPPING_TYPE_DIR_LIGHTING;
+    ss_dir.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSS(
+        params,
+        "src/resources/shaders/vertex_shadow_shader.glsl",
+        "src/resources/shaders/fragment_shadow_shader.glsl")
     ));
     sss.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSSS(
         params,
@@ -227,8 +269,9 @@ void initShaders() {
         "src/resources/shaders/vertex_blend_shader.glsl",
         "src/resources/shaders/fragment_blend_shader.glsl")
     ));
-    scompiler::loadLocations(cs);
+    scompiler::loadLocations(cs, params);
     scompiler::loadLocations(ss);
+    scompiler::loadLocations(ss_dir);
     scompiler::loadLocations(sss);
     scompiler::loadLocations(blusH, params);
     scompiler::loadLocations(blusV, params);
@@ -295,7 +338,7 @@ void initShaders() {
         glUseProgram(renderer.blusHV[j]->programId);
         for (GLuint i = 0; i < params.bloomKernelSize; i++)
             glUniform1f(
-                j ? blusV.bloomKernel[params.bloomKernelSize - 1 - i] : blusH.bloomKernel[params.bloomKernelSize - 1 - i],
+                j ? blusV.bloomKernel + (params.bloomKernelSize - 1 - i) : blusH.bloomKernel + (params.bloomKernelSize - 1 - i),
                 kernel[i]);
     }
 
@@ -388,32 +431,46 @@ void createModels() {
  * Creating light sources
  */
 void initLamps() {
-    Light::lightPosLocation = ss.lampPos;
-    Light::initShadowMatrices(ss.programId);
-
-    createLamp(lightSources[0], glm::vec3(0.0f, 8.0f, 15.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0);
+    createPointLamp(pointLamps[0], glm::vec3(0.0f, 8.0f, 15.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0);
     lamps[0].shape = &shapes[1];
-    lightSources[0].mptr = &lamps[0];
-    lamps[0].translate(lightSources[0].pos);
+    pointLamps[0].mptr = &lamps[0];
+    lamps[0].translate(pointLamps[0].pos);
     lamps[0].transform();
+
+    createDirLamp(dirLamps[0], glm::vec3(0.0f, 8.0f, -15.0f), glm::vec3(253.0f / 255.0f, 184.0f / 255.0f, 19.0f / 255.0f), 0);
+    lamps[1].shape = &shapes[1];
+    dirLamps[0].mptr = &lamps[1];
+    lamps[1].translate(dirLamps[0].pos);
+    lamps[1].transform();
 }
 
 /**
  * Binds to depth cubemaps
  */
 void initShadowMaps() {
-    shadowMaps = TextureArray(10, params.maxLampsCount); // to avoid black screen on AMD GPUs and old Intel HD Graphics
-    shadowMaps.fillTexIds(0); // to avoid black screen on AMD GPUs and old Intel HD Graphics
-    shadowMaps.init(cs.programId, ALGINE_NAME_CS_SHADOW_MAPS);
-    for (size_t i = 0; i < LAMPS_COUNT; i++) shadowMaps.addTexture(i, lightSources[i].depthCubemap);
-    shadowMaps.bind(cs.programId);
+    glUseProgram(cs.programId);
+    // to avoid black screen on AMD GPUs and old Intel HD Graphics
+    for (usize i = 0; i < params.maxPointLightsCount; i++) {
+        glUniform1i(cs.pointLights[i].shadowMap, pointLamps[0].textureStartId + i);
+		glActiveTexture(GL_TEXTURE0 + pointLamps[0].textureStartId + i);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
+    for (usize i = 0; i < POINT_LAMPS_COUNT; i++) pointLamps[i].push_shadowMap();
+
+    // to avoid black screen on AMD GPUs and old Intel HD Graphics
+    for (usize i = 0; i < params.maxDirLightsCount; i++) {
+        glUniform1i(cs.dirLights[i].shadowMap, dirLamps[0].textureStartId + i);
+		glActiveTexture(GL_TEXTURE0 + dirLamps[0].textureStartId + i);
+		glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    for (usize i = 0; i < DIR_LAMPS_COUNT; i++) dirLamps[i].push_shadowMap();
+    glUseProgram(0);
 }
 
 void initShadowCalculation() {
     glUseProgram(cs.programId);
     glUniform1f(cs.shadowDiskRadiusK, diskRadius_k);
     glUniform1f(cs.shadowDiskRadiusMin, diskRadius_min);
-    glUniform1f(cs.shadowBias, shadow_bias);
     glUseProgram(0);
 }
 
@@ -445,9 +502,11 @@ void recycleAll() {
 }
 
 void sendLampsData() {
-	glUniform1i(cs.lampsCount, LAMPS_COUNT); // lamps count
+	glUniform1i(cs.pointLightsCount, POINT_LAMPS_COUNT); // point lamps count
+    glUniform1i(cs.dirLightsCount, DIR_LAMPS_COUNT); // dir lamps count
 	setVec3(cs.viewPos, cameraPos); // current camera position
-	for (size_t i = 0; i < LAMPS_COUNT; i++) lightSources[i].pushAll();
+	for (size_t i = 0; i < POINT_LAMPS_COUNT; i++) pointLamps[i].push_pos();
+    for (size_t i = 0; i < DIR_LAMPS_COUNT; i++) dirLamps[i].push_pos();
 }
 
 /* --- matrices --- */
@@ -468,10 +527,10 @@ void updateMatrices() {
 
 /**
  * Draws model in depth map
- * @param shaderProgram
  * @param model
+ * @param ss
  */
-void drawModelDM(Model &model) {
+void drawModelDM(const Model &model, const SShader &ss) {
     if (model.shape->bonesPerVertex != 0) {
         glEnableVertexAttribArray(ss.inBoneWeights);
         glEnableVertexAttribArray(ss.inBoneIds);
@@ -550,41 +609,66 @@ void drawModel(Model &model) {
 /**
  * Renders to depth cubemap
  */
-void renderToDepthMap(GLuint index) {
-	lightSources[index].begin();
-	lightSources[index].setLightPos();
-	lightSources[index].updateMatrices();
-	lightSources[index].setShadowMatrices();
+void renderToDepthCubemap(uint index) {
+	pointLamps[index].begin();
+	pointLamps[index].setLightPosSS();
+	pointLamps[index].updateMatrices();
+	pointLamps[index].setShadowMatricesSS();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	glEnableVertexAttribArray(ss.inPosition);
 
 	// drawing models
-	for (size_t i = 0; i < MODELS_COUNT; i++) drawModelDM(models[i]);
+	for (size_t i = 0; i < MODELS_COUNT; i++) drawModelDM(models[i], ss);
 
 	// drawing lamps
-	for (GLuint i = 0; i < LAMPS_COUNT; i++) {
+	for (GLuint i = 0; i < POINT_LAMPS_COUNT; i++) {
 		if (i == index) continue;
-		drawModelDM(lamps[i]);
+		drawModelDM(*pointLamps[i].mptr, ss);
 	}
 
 	glDisableVertexAttribArray(ss.inPosition);
 
-	lightSources[index].end();
+	pointLamps[index].end();
+}
+
+/**
+ * Renders to depth map
+ */
+void renderToDepthMap(uint index) {
+	dirLamps[index].begin();
+    setMat4(ss_dir.matLightSpace, dirLamps[index].lightSpace);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	glEnableVertexAttribArray(ss_dir.inPosition);
+
+	// drawing models
+	for (size_t i = 0; i < MODELS_COUNT; i++) drawModelDM(models[i], ss_dir);
+
+	// drawing lamps
+	for (GLuint i = 0; i < DIR_LAMPS_COUNT; i++) {
+		if (i == index) continue;
+		drawModelDM(*dirLamps[i].mptr, ss_dir);
+	}
+
+	glDisableVertexAttribArray(ss_dir.inPosition);
+
+	dirLamps[index].end();
 }
 
 /**
  * Color rendering
  */
+float dof[3] = {32.0f, 0.0f, 0.0f};
 void render() {
     renderer.mainPass(displayFB, rbo);
-    cfgtex(colorTex, GL_RGBA16F, GL_RGBA, params.scrW, params.scrH);
+    cfgtex(colorTex, GL_RGB16F, GL_RGB, params.scrW, params.scrH);
     cfgtex(dofTex, GL_R16F, GL_RED, params.scrW, params.scrH);
     cfgtex(normalTex, GL_RGB16F, GL_RGB, params.scrW, params.scrH);
     cfgtex(ssrValues, GL_RG16F, GL_RG, params.scrW, params.scrH);
     cfgtex(positionTex, GL_RGB16F, GL_RGB, params.scrW, params.scrH);
     glClear(GL_COLOR_BUFFER_BIT);
-    glClearBufferfv(GL_COLOR, 1, ALGINE_RED); // dof buffer
+    glClearBufferfv(GL_COLOR, 1, dof); // dof buffer
 
 	// view port to window size
 	glViewport(0, 0, WIN_W, WIN_H);
@@ -600,7 +684,7 @@ void render() {
 
     // drawing
     for (size_t i = 0; i < MODELS_COUNT; i++) drawModel(models[i]);
-	for (size_t i = 0; i < LAMPS_COUNT; i++) drawModel(lamps[i]);
+	for (size_t i = 0; i < POINT_LAMPS_COUNT + DIR_LAMPS_COUNT; i++) drawModel(lamps[i]);
 
     glDisableVertexAttribArray(cs.inPosition);
     glDisableVertexAttribArray(cs.inNormal);
@@ -631,18 +715,23 @@ void display() {
             models[i].animator->animate(glfwGetTime());
 
     /* --- shadow rendering --- */
+    // point lights
     glUseProgram(ss.programId);
-	for (GLuint i = 0; i < LAMPS_COUNT; i++) {
-        glUniform1f(ss.far, lightSources[i].far);
-        renderToDepthMap(i);
+	for (uint i = 0; i < POINT_LAMPS_COUNT; i++) {
+        glUniform1f(ss.far, pointLamps[i].far);
+        renderToDepthCubemap(i);
     }
+	glUseProgram(0);
+    // dir lights
+    glUseProgram(ss_dir.programId);
+	for (uint i = 0; i < DIR_LAMPS_COUNT; i++)
+        renderToDepthMap(i);
 	glUseProgram(0);
 
     glUseProgram(sss.programId);
     setMat4(sss.matProjection, projectionMatrix);
     setMat4(sss.matView, viewMatrix);
-
-    glUseProgram(0);
+    // glUseProgram(0); - not need
 
 	/* --- color rendering --- */
 	glUseProgram(cs.programId);
@@ -655,7 +744,7 @@ void animate_scene() {
     glm::mat3 rotate = glm::mat3(glm::rotate(glm::mat4(), glm::radians(0.01f), glm::vec3(0, 1, 0)));
     while (true) {
         std::this_thread::sleep_for (std::chrono::milliseconds(1));
-        lightSources[0].setPos(lightSources[0].pos * rotate);
+        pointLamps[0].setPos(pointLamps[0].pos * rotate);
     }
 }
 
@@ -715,13 +804,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     else if (key == GLFW_KEY_S && action == GLFW_PRESS) {
         for (int i = 0; i < 6; i++) {
-            GLfloat *pixels = getTexImageCube(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, lightSources[0].depthCubemap, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, GL_DEPTH_COMPONENT);
+            GLfloat *pixels = getTexImageCube(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, pointLamps[0].depthMap, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, GL_DEPTH_COMPONENT);
             saveTexImage(pixels, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, 1, io::getCurrentDir() + "/out/scr_" + std::to_string(i) + ".bmp", 3, false);
             delete[] pixels;
         }
+        GLfloat *pixels = getTexImage2D(dirLamps[0].depthMap, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, GL_DEPTH_COMPONENT);
+        saveTexImage(pixels, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, 1, io::getCurrentDir() + "/out/dir_depth.bmp", 3);
+        delete[] pixels;
         std::cout << "Depth map data saved\n";
 
-        GLfloat *pixels = getTexImage2D(screenspaceTex, WIN_W, WIN_H, GL_RGB);
+        pixels = getTexImage2D(screenspaceTex, WIN_W, WIN_H, GL_RGB);
         saveTexImage(pixels, WIN_W, WIN_H, 3, io::getCurrentDir() + "/out/scr_screenspace.bmp", 3);
         delete[] pixels;
 

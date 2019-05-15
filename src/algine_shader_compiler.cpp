@@ -90,15 +90,20 @@ ShadersData getCS(const AlgineParams &params, const char *vertexShaderPath, cons
             params.ssrMode == ALGINE_SSR_MODE_ENABLED ? "#define ALGINE_SSR_MODE_ENABLED\n" :
             "#define ALGINE_SSR_MODE_DISABLED\n"
         ) + (
-            "#define MAX_LAMPS_COUNT " + std::to_string(params.maxLampsCount) + "\n"
+            "#define MAX_POINT_LIGHTS_COUNT " + std::to_string(params.maxPointLightsCount) + "\n" +
+            "#define MAX_DIR_LIGHTS_COUNT " + std::to_string(params.maxDirLightsCount) + "\n"
         ) + out[1];
         
     return result;
 }
 
 // shadow shader
-ShadersData getSS(const AlgineParams &params, const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath) {
-    ShadersData ss = readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath, geometryShaderPath });
+ShadersData getSS(const AlgineParams &params, const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath = nullptr) {
+    ShadersData ss;
+    if (geometryShaderPath != nullptr)
+        ss = readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath, geometryShaderPath });
+    else
+        ss = readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath });
     ShadersData result;
 
     std::vector<std::string> out;
@@ -109,13 +114,24 @@ ShadersData getSS(const AlgineParams &params, const char *vertexShaderPath, cons
             params.boneSystemMode == ALGINE_BONE_SYSTEM_ENABLED ? "#define ALGINE_BONE_SYSTEM_ENABLED\n" :
             "#define ALGINE_BONE_SYSTEM_DISABLED\n"
         ) + (
+            params.shadowMappingType == ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING ? "#define ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING\n" :
+            "#define ALGINE_SHADOW_MAPPING_TYPE_DIR_LIGHTING\n"
+        ) + (
             "#define MAX_BONE_ATTRIBS_PER_VERTEX " + std::to_string(params.maxBoneAttribsPerVertex) + "\n" +
             "#define MAX_BONES " + std::to_string(params.maxBones) + "\n"
         ) + out[1];
 
-    result.fragment = ss.fragment;
-    result.geometry = ss.geometry;
+    out.clear();
+    splitByDelimiter(out, ss.fragment);
+    result.fragment =
+        out[0] + (
+            params.shadowMappingType == ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING ? "#define ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING\n" :
+            "#define ALGINE_SHADOW_MAPPING_TYPE_DIR_LIGHTING\n"
+        ) + out[1];
 
+    if (params.shadowMappingType == ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING)
+        result.geometry = ss.geometry;
+    
     return result;
 }
 
@@ -232,7 +248,7 @@ GLuint createShaderProgramDS(const std::vector<GLuint> &shaders) {
     return sp;
 }
 
-void loadLocations(CShader &shader) {
+void loadLocations(CShader &shader, const AlgineParams &params) {
     shader.matModel = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_MODEL);
     shader.matView = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_VIEW);
     shader.matPVM = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_PVM);
@@ -250,10 +266,10 @@ void loadLocations(CShader &shader) {
     
     // fragment shader
     shader.viewPos = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_VIEW_POSITION);
-    shader.lampsCount = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_LAMPS_COUNT);
+    shader.pointLightsCount = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_POINT_LIGHTS_COUNT);
+    shader.dirLightsCount = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_DIR_LIGHTS_COUNT);
     shader.shadowDiskRadiusK = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_DISKRADIUS_K);
     shader.shadowDiskRadiusMin = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_DISKRADIUS_MIN);
-    shader.shadowBias = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_BIAS);
     shader.shadowOpacity = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_OPACITY);
     // linear DOF parameters
     shader.focalDepth = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_FOCAL_DEPTH);
@@ -278,9 +294,50 @@ void loadLocations(CShader &shader) {
     shader.cinematicDOFPlaneInFocus = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_CINEMATIC_DOF_PLANE_IN_FOCUS);
     shader.cinematicDOFAperture = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_CINEMATIC_DOF_APERTURE);
     shader.cinematicDOFImageDistance = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_CINEMATIC_DOF_IMAGE_DISTANCE);
+    
+    // lights
+    shader.pointLights.reserve(params.maxPointLightsCount);
+    shader.dirLights.reserve(params.maxDirLightsCount);
+
+    #define loadLightProp(light) \
+        shader.light.kc = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_KC).c_str()); \
+        shader.light.kl = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_KL).c_str()); \
+        shader.light.kq = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_KQ).c_str()); \
+        shader.light.pos = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_POS).c_str()); \
+        shader.light.color = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_COLOR).c_str()); \
+        shader.light.shadowMap = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_SHADOW_MAP).c_str());
+
+    // uns - uniform name start
+    std::string uns;
+
+    // point lights
+    for (usize i = 0; i < params.maxPointLightsCount; i++) {
+        uns = ALGINE_NAME_CS_POINT_LIGHTS + std::string("[") + std::to_string(i) + "].";
+        shader.pointLights.push_back(PointLightIds());
+        loadLightProp(pointLights[i]);
+        shader.pointLights[i].far = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_FAR).c_str());
+        shader.pointLights[i].bias = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_BIAS).c_str());
+    }
+
+    // directional lights
+    for (usize i = 0; i < params.maxDirLightsCount; i++) {
+        uns = ALGINE_NAME_CS_DIR_LIGHTS + std::string("[") + std::to_string(i) + "].";
+        shader.dirLights.push_back(DirLightIds());
+        loadLightProp(dirLights[i]);
+        shader.dirLights[i].lightMatrix = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_MATRIX).c_str());
+        shader.dirLights[i].minBias = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_MIN_BIAS).c_str());
+        shader.dirLights[i].maxBias = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_MAX_BIAS).c_str());
+    }
+
+    #undef loadLightProp
 }
 
 void loadLocations(SShader &shader) {
+    // geometry shader
+    shader.shadowMatrices = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_MAT_SHADOW);
+
+    // vertex shader
+    shader.matLightSpace = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_MAT_LIGHT_SPACE);
     shader.matModel = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_MAT_MODEL);
     shader.bones = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_BONES);
     shader.boneAttribsPerVertex = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_BONE_ATTRIBS_PER_VERTEX);
@@ -303,9 +360,7 @@ void loadLocations(BLUShader &shader, const AlgineParams &params) {
     shader.samplerDofBuffer = glGetUniformLocation(shader.programId, ALGINE_NAME_BLUS_SAMPLER_DOF_BUFFER);
     shader.sigmaMin = glGetUniformLocation(shader.programId, ALGINE_NAME_BLUS_SIGMA_MIN);
     shader.sigmaMax = glGetUniformLocation(shader.programId, ALGINE_NAME_BLUS_SIGMA_MAX);
-    shader.bloomKernel = new GLint[params.bloomKernelSize];
-    for (size_t i = 0; i < params.bloomKernelSize; i++)
-        shader.bloomKernel[i] = glGetUniformLocation(shader.programId, (std::string(ALGINE_NAME_BLUS_KERNEL_BLOOM) + "[" + std::to_string(i) + "]").c_str());
+    shader.bloomKernel = glGetUniformLocation(shader.programId, ALGINE_NAME_BLUS_KERNEL_BLOOM);
 }
 
 void loadLocations(BLEShader &shader) {
