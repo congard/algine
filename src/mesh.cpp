@@ -9,13 +9,14 @@
 #include <assimp/scene.h>       // Output data structure
 
 #include "material.cpp"
+#include <algine/types.h>
 
 #define BUFF_COUNT 8
 
 namespace algine {
 struct Mesh {
     std::vector<float> vertices, normals, texCoords, tangents, bitangents, boneWeights;
-    std::vector<GLuint> indices, boneIds;
+    std::vector<uint> indices, boneIds;
     Material mat;
 
     GLuint buffers[BUFF_COUNT] = { 0 };
