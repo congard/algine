@@ -48,7 +48,7 @@ void makeDofKernel(float sigma) {
 void main() {
 	#ifdef ALGINE_BLOOM_MODE_ENABLED
 	vec2 texOffset = 1.0 / textureSize(image, 0); // gets size of single texel
-	#else
+	#elif ALGINE_DOF_MODE_ENABLED
 	vec2 texOffset = 1.0 / textureSize(scene, 0); // gets size of single texel
 	#endif
 
