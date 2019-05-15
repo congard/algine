@@ -14,7 +14,7 @@ namespace algine {
 #define bindTexture2D(texture) glBindTexture(GL_TEXTURE_2D, texture)
 #define cfgtex(texture, internalformat, format, width, height) glBindTexture(GL_TEXTURE_2D, texture); \
                                                                glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, GL_FLOAT, NULL);
-#define activeTexture(index, texture) glActiveTexture(index, texture)
+#define activeTexture(texture) glActiveTexture(texture)
     
 #define COLOR_ATTACHMENT(n) (GL_COLOR_ATTACHMENT0 + n)
 #define TEXTURE(n) (GL_TEXTURE0 + n)
@@ -174,106 +174,6 @@ struct Texture {
 
     static void destroy(GLuint *id) {
         glDeleteTextures(1, id);
-    }
-};
-
-/**
- * To access sampler2D[SIZE]
- */
-struct TextureArray {
-	GLuint TEXTURE_TYPE = GL_TEXTURE_CUBE_MAP;
-    GLuint startId, size, *texturesIds = nullptr;
-    GLint *samplersLocations = nullptr;
-
-	/* --- constructors, operators, destructor --- */
-
-	TextureArray(GLuint startId, GLuint size) {
-		this->startId = startId;
-		this->size = size;
-        samplersLocations = new GLint[size];
-		texturesIds = new GLuint[size];
-	}
-
-	TextureArray() { /* empty for init or arrays */ }
-
-	TextureArray(const TextureArray &src) {
-		startId = src.startId;
-		size = src.size;
-		samplersLocations = src.samplersLocations;
-		texturesIds = src.texturesIds;
-		TEXTURE_TYPE = src.TEXTURE_TYPE;
-		#ifdef ALGINE_LOGGING
-        std::cout << "TextureArray copy constructor\n";
-        #endif
-	}
-
-	TextureArray(TextureArray &&src) {
-        src.swap(*this);
-        #ifdef ALGINE_LOGGING
-        std::cout << "TextureArray move constructor\n";
-        #endif
-    }
-
-    TextureArray& operator = (const TextureArray &rhs) {
-        if (&rhs != this) TextureArray(rhs).swap(*this);
-        #ifdef ALGINE_LOGGING
-        std::cout << "TextureArray copy operator =\n";
-        #endif
-
-        return *this;
-    }
-
-    TextureArray& operator = (TextureArray &&rhs) {
-        rhs.swap(*this);
-        #ifdef ALGINE_LOGGING
-        std::cout << "TextureArray move operator =\n";
-        #endif
-
-        return *this;
-    }
-
-	~TextureArray() {
-		if (samplersLocations != nullptr) delete[] samplersLocations;
-		if (texturesIds != nullptr) delete[] texturesIds;
-		#ifdef ALGINE_LOGGING
-        std::cout << "~TextureArray()\n";
-        #endif
-	}
-
-	/* --- --- */
-
-	void swap(TextureArray &other) {
-		std::swap(startId, other.startId);
-		std::swap(size, other.size);
-		std::swap(samplersLocations, other.samplersLocations);
-		std::swap(texturesIds, other.texturesIds);
-		std::swap(TEXTURE_TYPE, other.TEXTURE_TYPE);
-	}
-
-    void init(GLuint programId, std::string textureArray) {
-		for (GLuint i = 0; i < size; i++) samplersLocations[i] = glGetUniformLocation(programId, (textureArray + "[" + std::to_string(i) + "]").c_str());
-	}
-	
-	void bind(GLuint programId) {
-		glUseProgram(programId);
-		bind();
-		glUseProgram(0);
-	}
-	
-	void bind() {
-		for (GLuint i = 0; i < size; i++) {
-			glUniform1i(samplersLocations[i], startId + i);
-			glActiveTexture(GL_TEXTURE0 + startId + i);
-			glBindTexture(TEXTURE_TYPE, texturesIds[i]);
-		}
-	}
-	
-	void addTexture(GLuint index, GLuint textureId) {
-		texturesIds[index] = textureId;
-	}
-
-    void fillTexIds(const GLuint defValue) {
-        for (GLuint i = 0; i < size; i++) texturesIds[i] = defValue;
     }
 };
 
