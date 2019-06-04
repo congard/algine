@@ -17,6 +17,7 @@ set assimpL="%i%Assimp/bin"
 set l=-lassimp -lglew32 -lglfw3 -lopengl32
 
 set include=include
+set contrib=contrib
 set source=src
 set headers=math.h io.h
 set sources=main.cpp math.cpp io.cpp
@@ -39,7 +40,7 @@ for %%v in (%sources%) do (
 
 g++ -I %glewI% -I %glfwI% -I %glmI% -I %assimpI%^
     -L %glewL% -L %glfwL% -L %glmL% -L %assimpL%^
-    -I %include% %headers_full% %sources_full%^
+    -I %include% -I %contrib% %headers_full% %sources_full%^
     -o out/main.exe %l%
 
 echo Compilation done
