@@ -23,6 +23,7 @@
 #include "mesh.cpp"
 #include "model.cpp"
 #include "node.cpp"
+#include "renderbuffer.cpp"
 #include <algine/sconstants.h>
 #include "shaderprogram.cpp"
 #include "texture.cpp"
