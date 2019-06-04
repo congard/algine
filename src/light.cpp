@@ -156,7 +156,7 @@ struct DirLight : public Light {
 
     virtual void begin() {
         bindFramebuffer(depthMapFBO);
-        activeTexture(TEXTURE(0));
+        activeTexture(0);
 		bindTexture2D(depthMap);
 		glViewport(0, 0, shadowMapWidth, shadowMapHeight);
     }
