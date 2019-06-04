@@ -10,17 +10,29 @@
 #include <stb/stb_image_write.h>
 #include "framebuffer.cpp"
 
-namespace algine {
-#define bindTexture2D(texture) glBindTexture(GL_TEXTURE_2D, texture)
-#define cfgtex(texture, internalformat, format, width, height) glBindTexture(GL_TEXTURE_2D, texture); \
-                                                               glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, GL_FLOAT, NULL);
-#define activeTexture(texture) glActiveTexture(texture)
-    
+#define _cfgtex(texture, internalformat, format, width, height) glBindTexture(GL_TEXTURE_2D, texture); \
+                                                                glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, GL_FLOAT, NULL);
 #define COLOR_ATTACHMENT(n) (GL_COLOR_ATTACHMENT0 + n)
 #define TEXTURE(n) (GL_TEXTURE0 + n)
-// Activate & Bind
-#define texture2DAB(index, texture) glActiveTexture(GL_TEXTURE0 + index); \
-		                            glBindTexture(GL_TEXTURE_2D, texture);
+
+namespace algine {
+inline void activeTexture(const uint &index) {
+    glActiveTexture(TEXTURE(index));
+}
+
+inline void bindTexture2D(const uint &texture) {
+    glBindTexture(GL_TEXTURE_2D, texture);
+}
+
+// Activate & Bind 2D texture
+inline void texture2DAB(const uint &index, const uint &texture) {
+    activeTexture(index);
+	bindTexture2D(texture);
+}
+
+inline void cfgtex(const uint &texture, const int &internalformat, const uint &format, const uint &width, const uint &height) {
+    _cfgtex(texture, internalformat, format, width, height);
+}
 
 /**
  * Loading texture using stb_image.h
