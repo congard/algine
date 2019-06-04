@@ -4,6 +4,7 @@ echo "Compiling";
 
 # configuration
 include="include"
+contrib="contrib"
 source="src"
 headers=(math.h io.h)
 sources=(main.cpp math.cpp io.cpp)
@@ -24,7 +25,7 @@ do
     sources_full="$sources_full $source/$var"
 done
 
-time g++ -I $include $headers_full $sources_full -o out/main `pkg-config --libs glfw3 glew` -pthread -lassimp;
+time g++ -I $include -I $contrib $headers_full $sources_full -o out/main `pkg-config --libs glfw3 glew` -pthread -lassimp;
 
 echo;
 echo "Compilation done";
