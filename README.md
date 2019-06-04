@@ -7,7 +7,7 @@ Supported systems: Linux, Windows (with MinGW-w64)
 
 Example of using given in `main.cpp` file
 
-Engine tested on Asus x302uv (Intel Core I5-6200U, Nvidia GeForce 920mx, 8GB RAM, Debian GNU/Linux buster/sid, 1920x1080 screen) and showed good results
+Engine tested on Asus x302uv (Intel Core I5-6200U, Nvidia GeForce 920mx, 8GB RAM, Debian GNU/Linux buster/sid, ArchLinux, 1920x1080 screen) and showed good results
 
 If you find any errors or you have recommendations for improving the project - a big one please let me know!
 
@@ -40,15 +40,21 @@ Take into account, this is a test (alpha) version! All major functions will be a
 # Dependencies
 Engine has next dependencies: `glew`, `glfw`, `glm`, `assimp`.
 
-Installation on Debian-based systems:
+* Installation on Debian-based systems:
 
-`sudo apt install libglew-dev libglfw3-dev libglm-dev`
+  `sudo apt install libglew-dev libglfw3-dev libglm-dev`
 
-Also you need `pkg-config` to compile using `make.sh` script
+  Also you need `pkg-config` to compile using `make.sh` script: `apt install pkg-config`
 
-`sudo apt install pkg-config`
+  `pkg-config --libs glfw3 glew` output is `-lglfw -lGLEW -lGLU -lGL` (to compile project without `pkg-config`)
 
-`pkg-config --libs glfw3 glew` output is `-lglfw -lGLEW -lGLU -lGL` (to compile project without `pkg-config`)
+* Installation on ArchLinux-based systems:
+
+  x11: `pacman -S glew glfw-x11 glm`
+  
+  wayland: `pacman -S glew-wayland glfw-wayland glm`
+
+  Also you need `pkgconf` to compile using `make.sh` script: `pacman -S pkgconf`
 
 How to install assimp you can read [here](https://github.com/assimp/assimp/blob/master/Build.md)
 
