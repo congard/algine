@@ -9,12 +9,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "algine_structs.cpp"
 #include "texture.cpp"
+#include "framebuffer.cpp"
+#include "renderbuffer.cpp"
+#include "shaderprogram.cpp"
+#include <algine/types.h>
+#include <algine/constants.h>
 
 namespace algine {
-static const GLfloat ALGINE_RED[4] = { 1.0, 0.0, 0.0, 0.0 };
-
-#define clearDOFBuffer glClearBufferfv(GL_COLOR, 1, ALGINE_RED);
-
 inline void pointer(GLint location, int count, GLuint buffer) {
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glVertexAttribPointer(
@@ -43,19 +44,21 @@ inline void pointerui(GLint location, int count, GLuint buffer) {
 // GLuint location, glm::mat4 mat
 #define setMat4(location, mat) glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat))
 
-// main, god rays, dof (float), depth (float), normal (vec3), reflection strength (float), position (vec3, in world space)
-
 struct AlgineRenderer {
-    SSShader *sss;
-    BLEShader *bles;
-    AlgineParams *params;
-
+    SSRShader *ssrs;
+    BloomSearchShader *bloomSearchShader;
+    BlurShader *blurShaders[2]; // { horizontal, vertical }
+    BlendShader *blendShader;
+    
     GLuint quadBuffers[2]; // vertexBuffer and texCoordsBuffer
-    BLUShader *blusHV[2]; // { horizontal, vertical }
+    DOFBlurShader *dofBlurShaders[2]; // { horizontal, vertical }
+
+    float gamma = 1;
+    float exposure = 3;
 
     bool horizontal = true, firstIteration = true; // blur variables
 
-    void renderQuad(const GLint &inPosLocation, const GLint &inTexCoordLocation) {
+    void renderQuad(const int &inPosLocation, const int &inTexCoordLocation) {
 		glEnableVertexAttribArray(inPosLocation);
         glEnableVertexAttribArray(inTexCoordLocation);
 	    pointer(inPosLocation, 3, quadBuffers[0]);
@@ -67,134 +70,85 @@ struct AlgineRenderer {
         glDisableVertexAttribArray(inTexCoordLocation);
 	}
 
-    void mainPass(GLuint displayFBO, GLuint rboBuffer) {
+    // configures renderbuffer for main pass rendering
+    // note: this function will bind empty renderbuffer (`bindRenderbuffer(0)`)
+    void configureMainPassRenderbuffer(const uint &renderbuffer, const uint &width, const uint &height) {
+        bindRenderbuffer(renderbuffer);
+        Renderbuffer::setupStorage(ALGINE_DEPTH_COMPONENT, width, height);
+        Framebuffer::attachRenderbuffer(ALGINE_DEPTH_ATTACHMENT, renderbuffer);
+        bindRenderbuffer(0);
+    }
+
+    void mainPass(const uint &displayFBO, const uint &rboBuffer) {
         glBindFramebuffer(GL_FRAMEBUFFER, displayFBO);
-        glBindRenderbuffer(GL_RENDERBUFFER, rboBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, params->scrW, params->scrH);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboBuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    void screenspacePass(GLuint ssFBO, GLuint colorMap, GLuint normalMap, GLuint ssrValuesMap, GLuint positionMap) {
+    void bloomSearchPass(const uint &bsFBO, const uint &image) {
+        bindFramebuffer(bsFBO);
+        useShaderProgram(bloomSearchShader->programId);
+        texture2DAB(0, image);
+        renderQuad(bloomSearchShader->inPosition, bloomSearchShader->inTexCoord);
+    }
+
+    void blurPass(const uint pingpongFBO[2], const uint pingpongBuffers[2], const uint &image, const uint &blurAmount) {
+        horizontal = true; 
+		firstIteration = true;
+        for (usize i = 0; i < blurAmount; i++) {
+            glUseProgram(blurShaders[horizontal]->programId);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
+            
+            texture2DAB(0, firstIteration ? image : pingpongBuffers[!horizontal]); // bloom
+            
+            // rendering
+			renderQuad(blurShaders[horizontal]->inPosition, blurShaders[horizontal]->inTexCoord);
+			horizontal = !horizontal;
+			if (firstIteration) firstIteration = false;
+		}
+    }
+
+    void screenspacePass(uint ssFBO, uint colorMap, uint normalMap, uint ssrValuesMap, uint positionMap) {
         glBindFramebuffer(GL_FRAMEBUFFER, ssFBO);
-        // developer must do this before call screenspacePass
-        // glBindTexture(GL_TEXTURE_2D, ssBuffer);
-		// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, params.SCR_W, params.SCR_H, 0, GL_RGBA, GL_FLOAT, NULL);
-        // glBindTexture(GL_TEXTURE_2D, bloomBuffer);
-		// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, params.SCR_W, params.SCR_H, 0, GL_RGBA, GL_FLOAT, NULL);
-        glUseProgram(sss->programId);
+        glUseProgram(ssrs->programId);
         texture2DAB(0, colorMap);
         texture2DAB(1, normalMap);
         texture2DAB(2, ssrValuesMap);
         texture2DAB(3, positionMap);
-        renderQuad(sss->inPosition, sss->inTexCoord);
+        renderQuad(ssrs->inPosition, ssrs->inTexCoord);
     }
 
-    void bloomDofPass(const GLuint pingpongFBO[2], const GLuint pingpongBuffers[2], const GLuint dofBuffers[2], 
-                      const GLuint bloomMap, const GLuint dofMap, const GLuint sceneMap) {
-        // developer must do this before call bloomDofPass
-        // // configuring textures
-		// for (int i = 0; i < 2; i++) {
-        //     glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
-
-        //     // bloom
-		// 	glBindTexture(GL_TEXTURE_2D, pingpongBuffers[i]);
-		// 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, ALGINE_SCR_W, ALGINE_SCR_H, 0, GL_RGB, GL_FLOAT, NULL);
-
-        //     // dof
-		// 	glBindTexture(GL_TEXTURE_2D, dofBuffers[i]);
-		// 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, ALGINE_SCR_W, ALGINE_SCR_H, 0, GL_RGBA, GL_FLOAT, NULL);
-		// }
-        
-		horizontal = true; 
+    void dofBlurPass(const uint pingpongFBO[2], const uint dofBuffers[2], const uint &dofMap, const uint &sceneMap, const uint &blurAmount) {
+        horizontal = true; 
 		firstIteration = true;
-        for (size_t i = 0; i < params->blurAmount; i++) {
-            glUseProgram(blusHV[horizontal]->programId);
+        for (size_t i = 0; i < blurAmount; i++) {
+            glUseProgram(dofBlurShaders[horizontal]->programId);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
 
-            texture2DAB(0, firstIteration ? bloomMap : pingpongBuffers[!horizontal]); // bloom
-            texture2DAB(1, firstIteration ? sceneMap : dofBuffers[!horizontal]); // dof
-            texture2DAB(2, dofMap);
+            texture2DAB(0, firstIteration ? sceneMap : dofBuffers[!horizontal]);
+            texture2DAB(1, dofMap);
 
             // rendering
-			renderQuad(blusHV[horizontal]->inPosition, blusHV[horizontal]->inTexCoord);
+			renderQuad(dofBlurShaders[horizontal]->inPosition, dofBlurShaders[horizontal]->inTexCoord);
 			horizontal = !horizontal;
 			if (firstIteration) firstIteration = false;
 		}
     }
 
-    void bloomPass(const GLuint pingpongFBO[2], const GLuint pingpongBuffers[2], 
-                   const GLuint bloomMap) {
-        // developer must do this before call bloomPass
-        // // configuring textures
-        // glActiveTexture(GL_TEXTURE0);
-		// for (int i = 0; i < 2; i++) {
-        //     // bloom
-		// 	glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
-		// 	glBindTexture(GL_TEXTURE_2D, pingpongBuffers[i]);
-		// 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, ALGINE_SCR_W, ALGINE_SCR_H, 0, GL_RGB, GL_FLOAT, NULL);
-		// }
-			
-		horizontal = true; 
-		firstIteration = true;
-        for (size_t i = 0; i < params->blurAmount; i++) {
-            glUseProgram(blusHV[horizontal]->programId);
-
-			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
-
-            // bloom
-			glBindTexture(GL_TEXTURE_2D, firstIteration ? bloomMap : pingpongBuffers[!horizontal]);
-
-            // rendering
-			renderQuad(blusHV[horizontal]->inPosition, blusHV[horizontal]->inTexCoord);
-			horizontal = !horizontal;
-			if (firstIteration) firstIteration = false;
-		}
-    }
-
-    void dofPass(const GLuint pingpongFBO[2], const GLuint dofBuffers[2], 
-                 const GLuint dofMap, const GLuint sceneMap) {
-        // // configuring textures
-        // glActiveTexture(GL_TEXTURE0);
-		// for (int i = 0; i < 2; i++) {
-        //     // dof
-		// 	glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
-		// 	glBindTexture(GL_TEXTURE_2D, dofBuffers[i]);
-		// 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, ALGINE_SCR_W, ALGINE_SCR_H, 0, GL_RGBA, GL_FLOAT, NULL);
-		// }
-			
-		horizontal = true; 
-		firstIteration = true;
-        for (size_t i = 0; i < params->blurAmount; i++) {
-            glUseProgram(blusHV[horizontal]->programId);
-
-			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
-
-            // dof
-            texture2DAB(1, firstIteration ? sceneMap : dofBuffers[!horizontal]);
-            texture2DAB(2, dofMap);
-
-            // rendering
-			renderQuad(blusHV[horizontal]->inPosition, blusHV[horizontal]->inTexCoord);
-			horizontal = !horizontal;
-			if (firstIteration) firstIteration = false;
-		}
-    }
-
-    void doubleBlendPass(const GLuint texture0, const GLuint texture1) {
+    void doubleBlendPass(const uint &image, const uint &bloom) {
         // Do not need to call glClear, because the texture is completely redrawn
-		glUseProgram(bles->programId);
-        texture2DAB(0, texture0);
-		texture2DAB(1, texture1);
-		renderQuad(bles->inPosition, bles->inTexCoord);
+		glUseProgram(blendShader->programId);
+        texture2DAB(0, image);
+		texture2DAB(1, bloom);
+		renderQuad(blendShader->inPosition, blendShader->inTexCoord);
     }
 
-    void blendPass(const GLuint texture0) {
+    void blendPass(const uint &texture0) {
         // Do not need to call glClear, because the texture is completely redrawn
-		glUseProgram(bles->programId);
+		glUseProgram(blendShader->programId);
         texture2DAB(0, texture0);
-		renderQuad(bles->inPosition, bles->inTexCoord);
+		renderQuad(blendShader->inPosition, blendShader->inTexCoord);
     }
 
     void prepare() {
@@ -221,24 +175,24 @@ struct AlgineRenderer {
         glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
 
         // blend setting
-        glUseProgram(bles->programId);
-        glUniform1i(bles->samplerBloomScene, 1); // GL_TEXTURE1
-        glUniform1i(bles->samplerDofScene, 0);   // GL_TEXTURE0
-        glUniform1f(bles->exposure, params->exposure);
-        glUniform1f(bles->gamma, params->gamma);
+        glUseProgram(blendShader->programId);
+        glUniform1i(blendShader->samplerImage, 0);   // GL_TEXTURE0
+        glUniform1i(blendShader->samplerBloom, 1); // GL_TEXTURE1
+        glUniform1f(blendShader->exposure, exposure);
+        glUniform1f(blendShader->gamma, gamma);
 
         // blur setting
         for (size_t i = 0; i < 2; i++) {
-            glUseProgram(blusHV[i]->programId);
-            glUniform1i(blusHV[i]->samplerScene, 1);
-            glUniform1i(blusHV[i]->samplerDofBuffer, 2);
+            glUseProgram(dofBlurShaders[i]->programId);
+            glUniform1i(dofBlurShaders[i]->samplerImage, 0);
+            glUniform1i(dofBlurShaders[i]->samplerDofBuffer, 1);
         }
 
         // screen space setting
-        glUseProgram(sss->programId);
-        glUniform1i(sss->samplerNormalMap, 1);
-        glUniform1i(sss->samplerSSRValuesMap, 2);
-        glUniform1i(sss->samplerPositionMap, 3);
+        glUseProgram(ssrs->programId);
+        glUniform1i(ssrs->samplerNormalMap, 1);
+        glUniform1i(ssrs->samplerSSRValuesMap, 2);
+        glUniform1i(ssrs->samplerPositionMap, 3);
         glUseProgram(0);
     }
 
