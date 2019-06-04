@@ -63,49 +63,61 @@
 #define ALGINE_NAME_SS_LAMP_POSITION "lightPos"
 #define ALGINE_NAME_SS_FAR_PLANE "far_plane"
 
-// SSS vertex shader
-#define ALGINE_NAME_SSS_IN_POSITION "inPos"
-#define ALGINE_NAME_SSS_IN_TEXCOORD "inTexCoord"
+// SSRS vertex shader
+#define ALGINE_NAME_SSRS_IN_POSITION "inPos"
+#define ALGINE_NAME_SSRS_IN_TEXCOORD "inTexCoord"
 
-// SSS fragment shader
-#define ALGINE_NAME_SSS_SAMPLER_MAP_COLOR "colorMap"
-#define ALGINE_NAME_SSS_SAMPLER_MAP_NORMAL "normalMap"
-#define ALGINE_NAME_SSS_SAMPLER_MAP_SSRVALUES "ssrValuesMap"
-#define ALGINE_NAME_SSS_SAMPLER_MAP_POSITION "positionMap"
-#define ALGINE_NAME_SSS_MAT_PROJECTION "projection"
-#define ALGINE_NAME_SSS_MAT_VIEW "view"
+// SSRS fragment shader
+#define ALGINE_NAME_SSRS_SAMPLER_MAP_COLOR "colorMap"
+#define ALGINE_NAME_SSRS_SAMPLER_MAP_NORMAL "normalMap"
+#define ALGINE_NAME_SSRS_SAMPLER_MAP_SSRVALUES "ssrValuesMap"
+#define ALGINE_NAME_SSRS_SAMPLER_MAP_POSITION "positionMap"
+#define ALGINE_NAME_SSRS_MAT_PROJECTION "projection"
+#define ALGINE_NAME_SSRS_MAT_VIEW "view"
 // SSR - Screen Space Reflections
-#define ALGINE_NAME_SSS_SSR_SKYCOLOR "ssr_skyColor"
-#define ALGINE_NAME_SSS_SSR_BINARYSEARCHCOUNT "ssr_binarySearchCount"
-#define ALGINE_NAME_SSS_SSR_RAYMARCHCOUNT "ssr_rayMarchCount"
-#define ALGINE_NAME_SSS_SSR_STEP "ssr_step"
-#define ALGINE_NAME_SSS_SSR_LLIMITER "ssr_LLimiter"
-#define ALGINE_NAME_SSS_SSR_MINRAYSTEP "ssr_minRayStep"
-// BL - bloom
-#define ALGINE_NAME_SSS_BL_VECTHRESHOLD "vecThreshold"
-#define ALGINE_NAME_SSS_BL_BRIGHTNESSTHRESHOLD "brightnessThreshold"
+#define ALGINE_NAME_SSRS_SKYCOLOR "skyColor"
+#define ALGINE_NAME_SSRS_BINARYSEARCHCOUNT "binarySearchCount"
+#define ALGINE_NAME_SSRS_RAYMARCHCOUNT "rayMarchCount"
+#define ALGINE_NAME_SSRS_STEP "step"
+#define ALGINE_NAME_SSRS_LLIMITER "LLimiter"
+#define ALGINE_NAME_SSRS_MINRAYSTEP "minRayStep"
 
-// BLUS vertex shader
-#define ALGINE_NAME_BLUS_IN_POSITION "inPos"
-#define ALGINE_NAME_BLUS_IN_TEXCOORD "inTexCoord"
+// dof blur vertex shader
+#define ALGINE_NAME_DOFBLUR_IN_POSITION "inPos"
+#define ALGINE_NAME_DOFBLUR_IN_TEXCOORD "inTexCoord"
     
-// BLUS fragment shader
-#define ALGINE_NAME_BLUS_SAMPLER_BLOOM "image"
-#define ALGINE_NAME_BLUS_SAMPLER_SCENE "scene"
-#define ALGINE_NAME_BLUS_SAMPLER_DOF_BUFFER "dofBuffer"
-#define ALGINE_NAME_BLUS_SIGMA_MIN "min_sigma"
-#define ALGINE_NAME_BLUS_SIGMA_MAX "max_sigma"
-#define ALGINE_NAME_BLUS_KERNEL_BLOOM "bloom_kernel[0]"
+// dof blur fragment shader
+#define ALGINE_NAME_DOFBLUR_SAMPLER_IMAGE "image"
+#define ALGINE_NAME_DOFBLUR_SAMPLER_DOF_BUFFER "dofBuffer"
+#define ALGINE_NAME_DOFBLUR_SIGMA_MIN "min_sigma"
+#define ALGINE_NAME_DOFBLUR_SIGMA_MAX "max_sigma"
 
-// BLES vertex shader
-#define ALGINE_NAME_BLES_IN_POSITION "inPos"
-#define ALGINE_NAME_BLES_IN_TEXCOORD "inTexCoord"
+// blend vertex shader
+#define ALGINE_NAME_BLEND_IN_POSITION "inPos"
+#define ALGINE_NAME_BLEND_IN_TEXCOORD "inTexCoord"
 
-// BLES fragment shader
-#define ALGINE_NAME_BLES_SAMPLER_BLOOM_SCENE "bloomScene"
-#define ALGINE_NAME_BLES_SAMPLER_DOF_SCENE "dofScene"
-#define ALGINE_NAME_BLES_EXPOSURE "exposure"
-#define ALGINE_NAME_BLES_GAMMA "gamma"
+// blend fragment shader
+#define ALGINE_NAME_BLEND_SAMPLER_BLOOM "bloom"
+#define ALGINE_NAME_BLEND_SAMPLER_IMAGE "image"
+#define ALGINE_NAME_BLEND_EXPOSURE "exposure"
+#define ALGINE_NAME_BLEND_GAMMA "gamma"
+
+// bloom search vertex
+#define ALGINE_NAME_BLOOM_SEARCH_IN_POSITION "inPos"
+#define ALGINE_NAME_BLOOM_SEARCH_IN_TEXCOORD "inTexCoord"
+
+// bloom search fragment
+#define ALGINE_NAME_BLOOM_SEARCH_THRESHOLD "threshold"
+#define ALGINE_NAME_BLOOM_SEARCH_BRIGHTNESS_THRESHOLD "brightnessThreshold"
+#define ALGINE_NAME_BLOOM_SEARCH_IMAGE "image"
+
+// blur vertex
+#define ALGINE_NAME_BLUR_IN_POSITION "inPos"
+#define ALGINE_NAME_BLUR_IN_TEXCOORD "inTexCoord"
+
+// blur fragment
+#define ALGINE_NAME_BLUR_IMAGE "image"
+#define ALGINE_NAME_BLUR_KERNEL "kernel[0]"
 
 // lamp.cpp shader constants
 #define ALGINE_NAME_CS_LIGHT_POS "pos"

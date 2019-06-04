@@ -1,9 +1,4 @@
-/*
- * @author Congard
- * dbcongard@gmail.com
- * t.me/congard
- * gitlab.com/congard
- */
+// Algine blend vertex shader
 
 #version 330
 

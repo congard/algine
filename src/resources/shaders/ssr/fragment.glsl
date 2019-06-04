@@ -1,6 +1,6 @@
-#version 330 core
+// Algine SSR fragment shader
 
-#algdef
+#version 330 core
 
 uniform sampler2D normalMap; // in view space
 uniform sampler2D colorMap;
@@ -8,20 +8,16 @@ uniform sampler2D ssrValuesMap;
 uniform sampler2D positionMap; // in view space
 uniform mat4 projection, view;
 
-uniform vec3 ssr_skyColor = vec3(0.0);
-uniform int ssr_binarySearchCount = 10;
-uniform int ssr_rayMarchCount = 30; // 60
-uniform float ssr_step = 0.05; // 0.025
-uniform float ssr_LLimiter = 0.1;
-uniform float ssr_minRayStep = 0.2;
-
-uniform vec3 bloom_vecThreshold = vec3(0.2126, 0.7152, 0.0722);
-uniform float bloom_brightnessThreshold = 0.3;
+uniform vec3 skyColor = vec3(0.0);
+uniform int binarySearchCount = 10;
+uniform int rayMarchCount = 30; // 60
+uniform float step = 0.05; // 0.025
+uniform float LLimiter = 0.1;
+uniform float minRayStep = 0.2;
 
 in vec2 texCoord;
 
 layout (location = 0) out vec3 fragColor;
-layout (location = 1) out vec3 bloom_fragColor;
 
 // SSR based on tutorial by Imanol Fotia
 // http://imanolfotia.com/blog/update/2017/03/11/ScreenSpaceReflections.html
@@ -33,7 +29,7 @@ vec2 binarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth) {
 
     vec4 projectedCoord;
  
-    for(int i = 0; i < ssr_binarySearchCount; i++) {
+    for(int i = 0; i < binarySearchCount; i++) {
         projectedCoord = projection * vec4(hitCoord, 1.0);
         projectedCoord.xy /= projectedCoord.w;
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
@@ -57,9 +53,9 @@ vec2 binarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth) {
 }
 
 vec2 rayCast(vec3 dir, inout vec3 hitCoord, out float dDepth) {
-    dir *= ssr_step;
+    dir *= step;
     
-    for (int i = 0; i < ssr_rayMarchCount; i++) {
+    for (int i = 0; i < rayMarchCount; i++) {
         hitCoord += dir;
 
         vec4 projectedCoord = projection * vec4(hitCoord, 1.0);
@@ -97,7 +93,7 @@ float fresnel(vec3 direction, vec3 normal) {
     return factor;
 }
 
-void ssr() {
+void main() {
     float reflectionStrength = texture(ssrValuesMap, texCoord).r;
 
     if (reflectionStrength == 0) {
@@ -117,10 +113,10 @@ void ssr() {
     // Ray cast
     vec3 hitPos = viewPos;
     float dDepth; 
-    vec2 coords = rayCast(jitt + reflected * max(-viewPos.z, ssr_minRayStep), hitPos, dDepth);
+    vec2 coords = rayCast(jitt + reflected * max(-viewPos.z, minRayStep), hitPos, dDepth);
 
     float L = length(getPosition(coords) - viewPos);
-    L = clamp(L * ssr_LLimiter, 0, 1);
+    L = clamp(L * LLimiter, 0, 1);
     float error = 1 - L;
 
     float fresnel = fresnel(reflected, normal);
@@ -135,17 +131,5 @@ void ssr() {
         return;
     }
     
-    fragColor = mix(texture(colorMap, texCoord), vec4(ssr_skyColor, 1.0), reflectionStrength).rgb;
-}
-
-void main() {
-    fragColor = texture(colorMap, texCoord).rgb;
-
-    #ifdef ALGINE_SSR_MODE_ENABLED
-    ssr();
-    #endif
-    
-    #ifdef ALGINE_BLOOM_MODE_ENABLED
-    if (dot(fragColor, bloom_vecThreshold) > bloom_brightnessThreshold) bloom_fragColor = fragColor;
-    #endif
+    fragColor = mix(texture(colorMap, texCoord), vec4(skyColor, 1.0), reflectionStrength).rgb;
 }

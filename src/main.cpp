@@ -18,6 +18,13 @@
 #include "algine.h"
 
 #define SHADOW_MAP_RESOLUTION 1024
+#define bloomK 0.5f
+#define bloomBlurAmount 4
+#define bloomBlurKernelRadius 15
+#define bloomBlurKernelSigma 16
+#define dofBlurAmount 4
+#define dofBlurKernelRadius 4
+#define dofBlurKernelSigma 4
 
 #define FULLSCREEN !true
 
@@ -31,7 +38,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mouse_callback(GLFWwindow* window, int button, int action, int mods);
 
 // Window dimensions
-GLuint WIN_W = 1366, WIN_H = 763;
+GLuint winWidth = 1366, winHeight = 763;
 GLFWwindow* window;
 
 GLuint vao;
@@ -62,7 +69,9 @@ AlgineRenderer renderer;
 GLuint
     displayFB,
     screenspaceFB,
+    bloomSearchFB,
     pingpongFB[2],
+    pingpongBlurFB[2],
     rbo;
 
 GLuint
@@ -73,16 +82,20 @@ GLuint
     positionTex,
     screenspaceTex,
     bloomTex,
-    pingpongBloomTex[2],
-    pingpongDofTex[2];
+    pingpongDofTex[2],
+    pingpongBlurTex[2];
 
 CShader cs;
 SShader ss, ss_dir;
-BLUShader blusH, blusV;
-BLEShader bles;
-SSShader sss;
+DOFBlurShader dofBlurH, dofBlurV;
+BlurShader blurH, blurV;
+BlendShader blendShader;
+SSRShader ssrs;
+BloomSearchShader bloomSearchShader;
 
 AlgineParams params;
+ColorShaderParams csp;
+ShadowShaderParams ssp;
 
 float
     // DOF variables
@@ -99,21 +112,43 @@ float
     shadowOpacity = 0.65f;
 
 void createProjectionMatrix() {
-    projectionMatrix = glm::perspective(glm::radians(90.0f), (float) WIN_W / (float) WIN_H, 1.0f, 32.0f);
+    projectionMatrix = glm::perspective(glm::radians(90.0f), (float) winWidth / (float) winHeight, 1.0f, 32.0f);
 }
 
 void createViewMatrix() {
     viewMatrix = glm::lookAt(cameraPos, cameraLookAt, cameraUp);
 }
 
+void updateRenderTextures(const uint &width, const uint &height) {
+    cfgtex(colorTex, GL_RGB16F, GL_RGB, winWidth, winHeight);
+    cfgtex(dofTex, GL_R16F, GL_RED, winWidth, winHeight);
+    cfgtex(normalTex, GL_RGB16F, GL_RGB, winWidth, winHeight);
+    cfgtex(ssrValues, GL_RG16F, GL_RG, winWidth, winHeight);
+    cfgtex(positionTex, GL_RGB16F, GL_RGB, winWidth, winHeight);
+
+    cfgtex(screenspaceTex, GL_RGB16F, GL_RGB, winWidth, winHeight);
+
+    cfgtex(bloomTex, GL_RGB16F, GL_RGB, winWidth * bloomK, winHeight * bloomK);
+
+    for (size_t i = 0; i < 2; i++) {
+        cfgtex(pingpongBlurTex[i], GL_RGB16F, GL_RGB, winWidth * bloomK, winHeight * bloomK);
+        cfgtex(pingpongDofTex[i], GL_RGB16F, GL_RGB, winWidth, winHeight);
+    }
+}
+
 /**
  * To correctly display the scene when changing the window size
  */
 void window_size_callback(GLFWwindow* window, int width, int height) {
-    WIN_W = width;
-    WIN_H = height;
-    params.scrW = WIN_W;
-    params.scrH = WIN_H;
+    winWidth = width;
+    winHeight = height;
+
+    bindFramebuffer(displayFB);
+    renderer.configureMainPassRenderbuffer(rbo, width, height);
+    bindFramebuffer(0);
+
+    updateRenderTextures(width, height);
+
     createProjectionMatrix();
 }
 
@@ -191,8 +226,8 @@ void initGL() {
 
     // Create a GLFWwindow object that we can use for GLFW's functions
     window = FULLSCREEN == true ?
-        glfwCreateWindow(WIN_W, WIN_H, "Algine", glfwGetPrimaryMonitor(), nullptr) :
-        glfwCreateWindow(WIN_W, WIN_H, "Algine", nullptr, nullptr);
+        glfwCreateWindow(winWidth, winHeight, "Algine", glfwGetPrimaryMonitor(), nullptr) :
+        glfwCreateWindow(winWidth, winHeight, "Algine", nullptr, nullptr);
 
     glfwMakeContextCurrent(window);
 
@@ -226,68 +261,89 @@ void initShaders() {
     #else
     params.shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_SIMPLE;
     #endif
-    params.dofKernelSize = 4;
     params.dofMode = ALGINE_CINEMATIC_DOF_MODE_ENABLED;
     params.boneSystemMode = ALGINE_BONE_SYSTEM_ENABLED;
-    params.exposure = 6.0f;
-    params.gamma = 1.125f;
+
     cs.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getCS(
-        params,
+        params, csp,
         "src/resources/shaders/vertex_shader.glsl",
         "src/resources/shaders/fragment_shader.glsl")
     ));
     ss.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSS(
-        params,
-        "src/resources/shaders/vertex_shadow_shader.glsl",
-        "src/resources/shaders/fragment_shadow_shader.glsl",
-        "src/resources/shaders/geometry_shadow_shader.glsl")
+        params, ssp,
+        "src/resources/shaders/shadow/vertex_shadow_shader.glsl",
+        "src/resources/shaders/shadow/fragment_shadow_shader.glsl",
+        "src/resources/shaders/shadow/geometry_shadow_shader.glsl")
     ));
     params.shadowMappingType = ALGINE_SHADOW_MAPPING_TYPE_DIR_LIGHTING;
     ss_dir.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSS(
-        params,
-        "src/resources/shaders/vertex_shadow_shader.glsl",
-        "src/resources/shaders/fragment_shadow_shader.glsl")
+        params, ssp,
+        "src/resources/shaders/shadow/vertex_shadow_shader.glsl",
+        "src/resources/shaders/shadow/fragment_shadow_shader.glsl")
     ));
-    sss.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSSS(
-        params,
-        "src/resources/shaders/vertex_screenspace_shader.glsl",
-        "src/resources/shaders/fragment_screenspace_shader.glsl")
+    ssrs.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSSRShader(
+        "src/resources/shaders/ssr/vertex.glsl",
+        "src/resources/shaders/ssr/fragment.glsl")
     ));
-    std::vector<ShadersData> blus = scompiler::getBLUS(
-        params,
-        "src/resources/shaders/vertex_blur_shader.glsl",
-        "src/resources/shaders/fragment_blur_shader.glsl"
+    std::vector<ShadersData> blus = scompiler::getDOFBlurShader(
+        params, dofBlurKernelRadius,
+        "src/resources/shaders/dof/vertex.glsl",
+        "src/resources/shaders/dof/fragment.glsl"
     );
-    blusH.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(
+    dofBlurH.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(
         blus[0]
     ));
-    blusV.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(
+    dofBlurV.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(
         blus[1]
     ));
-    bles.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getBLES(
+    blendShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getBlendShader(
         params,
-        "src/resources/shaders/vertex_blend_shader.glsl",
-        "src/resources/shaders/fragment_blend_shader.glsl")
+        "src/resources/shaders/blend/vertex.glsl",
+        "src/resources/shaders/blend/fragment.glsl")
     ));
-    scompiler::loadLocations(cs, params);
+
+    bloomSearchShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getBloomSearchShader(
+        "src/resources/shaders/bloom/vertex_search.glsl",
+        "src/resources/shaders/bloom/fragment_search.glsl")
+    ));
+
+    std::vector<ShadersData> blur = scompiler::getBlurShader(
+        bloomBlurKernelRadius,
+        "src/resources/shaders/blur/vertex.glsl",
+        "src/resources/shaders/blur/fragment.glsl"
+    );
+    blurH.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(blur[0]));
+    blurV.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(blur[1]));
+
+    scompiler::loadLocations(cs, params, csp);
     scompiler::loadLocations(ss);
     scompiler::loadLocations(ss_dir);
-    scompiler::loadLocations(sss);
-    scompiler::loadLocations(blusH, params);
-    scompiler::loadLocations(blusV, params);
-    scompiler::loadLocations(bles);
+    scompiler::loadLocations(ssrs);
+    scompiler::loadLocations(dofBlurH);
+    scompiler::loadLocations(dofBlurV);
+    scompiler::loadLocations(blendShader);
+    scompiler::loadLocations(bloomSearchShader);
+    scompiler::loadLocations(blurH);
+    scompiler::loadLocations(blurV);
 
-    renderer.sss = &sss;
-    renderer.bles = &bles;
-    renderer.blusHV[0] = &blusH;
-    renderer.blusHV[1] = &blusV;
-    renderer.params = &params;
+    renderer.exposure = 6.0f;
+    renderer.gamma = 1.125f;
+    renderer.ssrs = &ssrs;
+    renderer.blendShader = &blendShader;
+    renderer.dofBlurShaders[0] = &dofBlurH;
+    renderer.dofBlurShaders[1] = &dofBlurV;
+    renderer.bloomSearchShader = &bloomSearchShader;
+    renderer.blurShaders[0] = &blurH;
+    renderer.blurShaders[1] = &blurV;
     renderer.prepare();
 
     Framebuffer::create(&displayFB);
     Framebuffer::create(&screenspaceFB);
+    Framebuffer::create(&bloomSearchFB);
     Framebuffer::create(pingpongFB, 2);
-    glGenRenderbuffers(1, &rbo);
+    Framebuffer::create(pingpongBlurFB, 2);
+
+    Renderbuffer::create(&rbo);
 
     Texture::create(&colorTex);
     Texture::create(&dofTex);
@@ -296,8 +352,8 @@ void initShaders() {
     Texture::create(&positionTex);
     Texture::create(&screenspaceTex);
     Texture::create(&bloomTex);
-    Texture::create(pingpongBloomTex, 2);
     Texture::create(pingpongDofTex, 2);
+    Texture::create(pingpongBlurTex, 2);
 
     applyDefaultTexture2DParams(colorTex);
     applyDefaultTexture2DParams(dofTex);
@@ -306,11 +362,14 @@ void initShaders() {
     applyDefaultTexture2DParams(positionTex);
     applyDefaultTexture2DParams(screenspaceTex);
     applyDefaultTexture2DParams(bloomTex);
-    applyDefaultTexture2DParams(pingpongBloomTex, 2);
     applyDefaultTexture2DParams(pingpongDofTex, 2);
+    applyDefaultTexture2DParams(pingpongBlurTex, 2);
+
+    updateRenderTextures(winWidth, winHeight);
 
     GLuint displayColorAttachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
     bindFramebuffer(displayFB);
+    renderer.configureMainPassRenderbuffer(rbo, winWidth, winHeight);
     glDrawBuffers(5, displayColorAttachments);
 
     Framebuffer::attachTexture2D(colorTex, COLOR_ATTACHMENT(0));
@@ -319,36 +378,39 @@ void initShaders() {
     Framebuffer::attachTexture2D(ssrValues, COLOR_ATTACHMENT(3));
     Framebuffer::attachTexture2D(positionTex, COLOR_ATTACHMENT(4));
 
-    GLuint colorAttachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-
+    // configuring ping-pong (blur)
     for (size_t i = 0; i < 2; i++) {
-        // configuring ping-pong (blur) textures
         glBindFramebuffer(GL_FRAMEBUFFER, pingpongFB[i]);
-        glDrawBuffers(2, colorAttachments); // use 2 color components (boom / dof)
+        Framebuffer::attachTexture2D(pingpongDofTex[i], COLOR_ATTACHMENT(0));
+    }
 
-        Framebuffer::attachTexture2D(pingpongBloomTex[i], COLOR_ATTACHMENT(0));
-        Framebuffer::attachTexture2D(pingpongDofTex[i], COLOR_ATTACHMENT(1));
+    // configuring ping-pong (blur)
+    for (usize i = 0; i < 2; i++) {
+        glBindFramebuffer(GL_FRAMEBUFFER, pingpongBlurFB[i]);
+        Framebuffer::attachTexture2D(pingpongBlurTex[i], COLOR_ATTACHMENT(0));
     }
 
     // sending to shader center of kernel and right part
-    float kernel[(params.bloomKernelSize - 1) * 2];
-    getGB1DKernel(kernel, (params.bloomKernelSize - 1) * 2, params.bloomKernelSigma);
-
+    float kernel[bloomBlurKernelRadius * 2 - 1];
+    getGB1DKernel(kernel, bloomBlurKernelRadius * 2 - 1, bloomBlurKernelSigma);
+    
     for (size_t j = 0; j < 2; j++) {
-        glUseProgram(renderer.blusHV[j]->programId);
-        for (GLuint i = 0; i < params.bloomKernelSize; i++)
+        glUseProgram(renderer.blurShaders[j]->programId);
+        for (uint i = 0; i < bloomBlurKernelRadius; i++) {
             glUniform1f(
-                j ? blusV.bloomKernel + (params.bloomKernelSize - 1 - i) : blusH.bloomKernel + (params.bloomKernelSize - 1 - i),
-                kernel[i]);
+                j ? blurV.kernel + (bloomBlurKernelRadius - 1 - i) : blurH.kernel + (bloomBlurKernelRadius - 1 - i),
+                kernel[i]
+            );
+        }
     }
 
     glUseProgram(0);
 
     bindFramebuffer(screenspaceFB);
-    glDrawBuffers(2, colorAttachments);
     Framebuffer::attachTexture2D(screenspaceTex, COLOR_ATTACHMENT(0));
-    Framebuffer::attachTexture2D(bloomTex, COLOR_ATTACHMENT(1));
-
+    
+    bindFramebuffer(bloomSearchFB);
+    Framebuffer::attachTexture2D(bloomTex, COLOR_ATTACHMENT(0));
     bindFramebuffer(0);
 
     // configuring CS
@@ -450,7 +512,7 @@ void initLamps() {
 void initShadowMaps() {
     glUseProgram(cs.programId);
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
-    for (usize i = 0; i < params.maxPointLightsCount; i++) {
+    for (usize i = 0; i < csp.maxPointLightsCount; i++) {
         glUniform1i(cs.pointLights[i].shadowMap, pointLamps[0].textureStartId + i);
 		glActiveTexture(GL_TEXTURE0 + pointLamps[0].textureStartId + i);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -458,7 +520,7 @@ void initShadowMaps() {
     for (usize i = 0; i < POINT_LAMPS_COUNT; i++) pointLamps[i].push_shadowMap();
 
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
-    for (usize i = 0; i < params.maxDirLightsCount; i++) {
+    for (usize i = 0; i < csp.maxDirLightsCount; i++) {
         glUniform1i(cs.dirLights[i].shadowMap, dirLamps[0].textureStartId + i);
 		glActiveTexture(GL_TEXTURE0 + dirLamps[0].textureStartId + i);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -478,12 +540,12 @@ void initShadowCalculation() {
  * Initialize Depth of field
  */
 void initDOF() {
-    glUseProgram(blusH.programId);
-    glUniform1f(blusH.sigmaMax, dof_max_sigma);
-    glUniform1f(blusH.sigmaMin, dof_min_sigma);
-    glUseProgram(blusV.programId);
-    glUniform1f(blusV.sigmaMax, dof_max_sigma);
-    glUniform1f(blusV.sigmaMin, dof_min_sigma);
+    glUseProgram(dofBlurH.programId);
+    glUniform1f(dofBlurH.sigmaMax, dof_max_sigma);
+    glUniform1f(dofBlurH.sigmaMin, dof_min_sigma);
+    glUseProgram(dofBlurV.programId);
+    glUniform1f(dofBlurV.sigmaMax, dof_max_sigma);
+    glUniform1f(dofBlurV.sigmaMin, dof_min_sigma);
     glUseProgram(cs.programId);
     glUniform1f(cs.cinematicDOFAperture, dofAperture);
     glUniform1f(cs.cinematicDOFImageDistance, dofImageDistance);
@@ -499,6 +561,14 @@ void initDOF() {
 void recycleAll() {
     glDeleteVertexArrays(1, &vao);
     for (size_t i = 0; i < SHAPES_COUNT; i++) shapes[i].recycle();
+
+    Framebuffer::destroy(&displayFB);
+    Framebuffer::destroy(&screenspaceFB);
+    Framebuffer::destroy(&bloomSearchFB);
+    Framebuffer::destroy(pingpongFB, 2);
+    Framebuffer::destroy(pingpongBlurFB, 2);
+
+    Renderbuffer::destroy(&rbo);
 }
 
 void sendLampsData() {
@@ -662,16 +732,11 @@ void renderToDepthMap(uint index) {
 float dof[3] = {32.0f, 0.0f, 0.0f};
 void render() {
     renderer.mainPass(displayFB, rbo);
-    cfgtex(colorTex, GL_RGB16F, GL_RGB, params.scrW, params.scrH);
-    cfgtex(dofTex, GL_R16F, GL_RED, params.scrW, params.scrH);
-    cfgtex(normalTex, GL_RGB16F, GL_RGB, params.scrW, params.scrH);
-    cfgtex(ssrValues, GL_RG16F, GL_RG, params.scrW, params.scrH);
-    cfgtex(positionTex, GL_RGB16F, GL_RGB, params.scrW, params.scrH);
     glClear(GL_COLOR_BUFFER_BIT);
     glClearBufferfv(GL_COLOR, 1, dof); // dof buffer
 
 	// view port to window size
-	glViewport(0, 0, WIN_W, WIN_H);
+	glViewport(0, 0, winWidth, winHeight);
 	// updating view matrix (because camera position was changed)
 	createViewMatrix();
 	// sending lamps parameters to fragment shader
@@ -692,20 +757,19 @@ void render() {
     glDisableVertexAttribArray(cs.inTangent);
     glDisableVertexAttribArray(cs.inBitangent);
 
-    cfgtex(screenspaceTex, GL_RGB16F, GL_RGB, params.scrW, params.scrH);
-    cfgtex(bloomTex, GL_RGB16F, GL_RGB, params.scrW, params.scrH);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    
     renderer.screenspacePass(screenspaceFB, colorTex, normalTex, ssrValues, positionTex);
 
-    // configuring textures
-	for (size_t i = 0; i < 2; i++) {
-        cfgtex(pingpongBloomTex[i], GL_RGB16F, GL_RGB, params.scrW, params.scrH); // bloom
-		cfgtex(pingpongDofTex[i], GL_RGB16F, GL_RGB, params.scrW, params.scrH); // dof
-	}
-    renderer.bloomDofPass(pingpongFB, pingpongBloomTex, pingpongDofTex, bloomTex, dofTex, screenspaceTex);
+    glViewport(0, 0, winWidth * bloomK, winHeight * bloomK);
+    renderer.bloomSearchPass(bloomSearchFB, screenspaceTex);
+    renderer.blurPass(pingpongBlurFB, pingpongBlurTex, bloomTex, bloomBlurAmount);
+    glViewport(0, 0, winWidth, winHeight);
+
+    renderer.dofBlurPass(pingpongFB, pingpongDofTex, dofTex, screenspaceTex, dofBlurAmount);
 
     bindFramebuffer(0);
-    renderer.doubleBlendPass(pingpongDofTex[!renderer.horizontal], pingpongBloomTex[!renderer.horizontal]);
+    renderer.doubleBlendPass(pingpongDofTex[!renderer.horizontal], pingpongBlurTex[!renderer.horizontal]);
 }
 
 void display() {
@@ -728,9 +792,9 @@ void display() {
         renderToDepthMap(i);
 	glUseProgram(0);
 
-    glUseProgram(sss.programId);
-    setMat4(sss.matProjection, projectionMatrix);
-    setMat4(sss.matView, viewMatrix);
+    glUseProgram(ssrs.programId);
+    setMat4(ssrs.matProjection, projectionMatrix);
+    setMat4(ssrs.matView, viewMatrix);
     // glUseProgram(0); - not need
 
 	/* --- color rendering --- */
@@ -754,8 +818,6 @@ int main() {
     initShaders();
     initVAO();
     initMatrices();
-    params.scrW = WIN_W;
-    params.scrH = WIN_H;
     initShapes();
     createModels();
     initLamps();
@@ -813,8 +875,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         delete[] pixels;
         std::cout << "Depth map data saved\n";
 
-        pixels = getTexImage2D(screenspaceTex, WIN_W, WIN_H, GL_RGB);
-        saveTexImage(pixels, WIN_W, WIN_H, 3, io::getCurrentDir() + "/out/scr_screenspace.bmp", 3);
+        pixels = getTexImage2D(bloomTex, winWidth * bloomK, winHeight * bloomK, GL_RGB);
+        saveTexImage(pixels, winWidth * bloomK, winHeight * bloomK, 3, io::getCurrentDir() + "/out/scr_screenspace.bmp", 3);
+        delete[] pixels;
+
+        pixels = getTexImage2D(pingpongBlurTex[!renderer.horizontal], winWidth * bloomK, winHeight * bloomK, GL_RGB);
+        saveTexImage(pixels, winWidth * bloomK, winHeight * bloomK, 3, io::getCurrentDir() + "/out/scr_screenspace_blur.bmp", 3);
         delete[] pixels;
 
         std::cout << "Screenspace map data saved\n";
@@ -828,7 +894,7 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods) {
         glfwGetCursorPos(window, &x, &y);
         std::cout << "x: " << x << "; y: " << y << "\n";
 
-        GLfloat *pixels = getPixels(positionTex, (size_t) x, WIN_H - (size_t) y, 1, 1, GL_RGB);
+        GLfloat *pixels = getPixels(positionTex, (size_t) x, winHeight - (size_t) y, 1, 1, GL_RGB);
         
         std::cout << "x: " << pixels[0] << "; y: " << pixels[1] << "; z: " << pixels[2] << "\n";
         

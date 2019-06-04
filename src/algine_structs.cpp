@@ -101,8 +101,24 @@ struct SShader {
         far;
 };
 
-// blur shader ids
-struct BLUShader {
+// dof blur shader ids
+struct DOFBlurShader {
+    GLint
+        programId,
+
+        // vertex shader
+        inPosition,
+        inTexCoord,
+
+        // fragment shader
+        samplerImage,
+        samplerDofBuffer,
+        sigmaMin,
+        sigmaMax;
+};
+
+// blend shader ids
+struct BlendShader {
     GLint
         programId,
 
@@ -112,32 +128,13 @@ struct BLUShader {
 
         // fragment shader
         samplerBloom,
-        samplerScene,
-        samplerDofBuffer,
-        sigmaMin,
-        sigmaMax,
-        bloomKernel; // zero element id
-};
-
-// blend shader ids
-struct BLEShader {
-    GLint
-        programId,
-
-        // vertex shader
-        inPosition,
-        inTexCoord,
-
-        // fragment shader
-        samplerBloomScene,
-        samplerDofScene,
+        samplerImage,
         exposure,
         gamma;
 };
 
-// screen space shader ids
-struct SSShader {
-    // SSS - screen space shader
+// screen space reflections shader ids
+struct SSRShader {
     GLint
         programId,
 
@@ -153,15 +150,53 @@ struct SSShader {
         matProjection,
         matView,
 
-        ssrSkyColor,
-        ssrBinarySearchCount,
-        ssrRayMarchCount,
-        ssrStep,
-        ssrLLimiter,
-        ssrMinRayStep,
+        skyColor,
+        binarySearchCount,
+        rayMarchCount,
+        step,
+        LLimiter,
+        minRayStep;
+};
 
-        blVecThreshold,
-        blBrightnessThreshold;
+struct BloomSearchShader {
+    GLint
+        programId,
+
+        // vertex shader
+        inPosition,
+        inTexCoord,
+
+        // fragment shader
+        threshold,
+        brightnessThreshold,
+        image;
+};
+
+struct BlurShader {
+    GLint
+        programId,
+
+        // vertex shader
+        inPosition,
+        inTexCoord,
+
+        // fragment shader
+        image,
+        kernel; // zero element id
+};
+
+struct ColorShaderParams {
+    uint
+        maxPointLightsCount = 8,
+        maxDirLightsCount = 8,
+        maxBoneAttribsPerVertex = 1, // 1 bone attrib = 4 bones per vertex
+        maxBones = 64; // max bones in mesh
+};
+
+struct ShadowShaderParams {
+    uint
+        maxBoneAttribsPerVertex = 1, // 1 bone attrib = 4 bones per vertex
+        maxBones = 64; // max bones in mesh
 };
 
 struct AlgineParams {
@@ -170,6 +205,7 @@ struct AlgineParams {
         shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_DISABLED,
         shadowMappingType = ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING,
         bloomMode = ALGINE_BLOOM_MODE_ENABLED,
+        bloomType = ALGINE_BLOOM_TYPE_ADD,
         dofMode = ALGINE_DOF_MODE_ENABLED,
         textureMappingMode = ALGINE_TEXTURE_MAPPING_MODE_ENABLED,
         lightingMode = ALGINE_LIGHTING_MODE_ENABLED,
@@ -177,21 +213,9 @@ struct AlgineParams {
         ssrMode = ALGINE_SSR_MODE_ENABLED,
         boneSystemMode = ALGINE_BONE_SYSTEM_DISABLED;
 
-    uint
-        maxPointLightsCount = 8,
-        maxDirLightsCount = 8,
-        maxBoneAttribsPerVertex = 1, // 1 bone attrib = 4 bones per vertex
-        maxBones = 64, // max bones in mesh
-        bloomKernelSize = 8,
-        dofKernelSize = 8,
-        scrW = 1366,
-        scrH = 768,
-        blurAmount = 4;
-
-    float
-        gamma = 1,
-        exposure = 3,
-        bloomKernelSigma = 3;
+    // uint
+    //     scrW = 1366,
+    //     scrH = 768;
 };
 
 struct ShadersData {
