@@ -25,8 +25,6 @@
 #define ALGINE_NAME_CS_SHADOW_DISKRADIUS_K "diskRadius_k"
 #define ALGINE_NAME_CS_SHADOW_DISKRADIUS_MIN "diskRadius_min"
 #define ALGINE_NAME_CS_SHADOW_OPACITY "shadowOpacity"
-#define ALGINE_NAME_CS_FOCAL_DEPTH "focalDepth"
-#define ALGINE_NAME_CS_FOCAL_RANGE "focalRange"
 #define ALGINE_NAME_CS_MATERIAL_AMBIENT_TEX "material.ambient"
 #define ALGINE_NAME_CS_MATERIAL_DIFFUSE_TEX "material.diffuse"
 #define ALGINE_NAME_CS_MATERIAL_SPECULAR_TEX "material.specular"
@@ -43,9 +41,6 @@
 #define ALGINE_NAME_CS_SWITCH_TEXTURE_MAPPING "textureMappingEnabled"
 #define ALGINE_NAME_CS_POINT_LIGHTS "pointLights"
 #define ALGINE_NAME_CS_DIR_LIGHTS "dirLights"
-#define ALGINE_NAME_CS_CINEMATIC_DOF_PLANE_IN_FOCUS "cinematicDOF.p"
-#define ALGINE_NAME_CS_CINEMATIC_DOF_APERTURE "cinematicDOF.a"
-#define ALGINE_NAME_CS_CINEMATIC_DOF_IMAGE_DISTANCE "cinematicDOF.i"
 
 // SS vertex shader
 #define ALGINE_NAME_SS_IN_POSITION "a_Position"
@@ -88,9 +83,14 @@
     
 // dof blur fragment shader
 #define ALGINE_NAME_DOFBLUR_SAMPLER_IMAGE "image"
-#define ALGINE_NAME_DOFBLUR_SAMPLER_DOF_BUFFER "dofBuffer"
+#define ALGINE_NAME_DOFBLUR_SAMPLER_MAP_POSITION "positionMap"
 #define ALGINE_NAME_DOFBLUR_SIGMA_MIN "min_sigma"
 #define ALGINE_NAME_DOFBLUR_SIGMA_MAX "max_sigma"
+#define ALGINE_NAME_DOFBLUR_FOCAL_DEPTH "focalDepth"
+#define ALGINE_NAME_DOFBLUR_FOCAL_RANGE "focalRange"
+#define ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_PLANE_IN_FOCUS "cinematicDOF.p"
+#define ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_APERTURE "cinematicDOF.a"
+#define ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_IMAGE_DISTANCE "cinematicDOF.i"
 
 // blend vertex shader
 #define ALGINE_NAME_BLEND_IN_POSITION "inPos"
@@ -118,6 +118,15 @@
 // blur fragment
 #define ALGINE_NAME_BLUR_IMAGE "image"
 #define ALGINE_NAME_BLUR_KERNEL "kernel[0]"
+
+// cubemap vertex
+#define ALGINE_NAME_CUBEMAP_IN_POSITION "inPos"
+#define ALGINE_NAME_CUBEMAP_MAT_TRANSFORM "transform"
+
+// cubemap fragment
+#define ALGINE_NAME_CUBEMAP_CUBEMAP "cubemap"
+#define ALGINE_NAME_CUBEMAP_COLOR "color"
+#define ALGINE_NAME_CUBEMAP_POS_SCALING "scaling"
 
 // lamp.cpp shader constants
 #define ALGINE_NAME_CS_LIGHT_POS "pos"
