@@ -4,6 +4,9 @@
 namespace algine {
 typedef char int8;
 typedef unsigned char uint8;
+typedef int8 byte;
+typedef uint8 ubyte;
+typedef uint8 uchar;
 typedef short int16;
 typedef unsigned short uint16;
 typedef unsigned int uint;
