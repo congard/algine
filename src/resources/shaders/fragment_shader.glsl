@@ -17,20 +17,10 @@ precision mediump float;					// Set the default precision to medium. We don't ne
 uniform vec3 viewPos; // camera position
 uniform bool textureMappingEnabled;	// 0 false (color mapping), true (texture mapping) (if ALGINE_TEXTURE_MAPPING_MODE == ALGINE_TEXTURE_MAPPING_MODE_DUAL)
 
-uniform float focalDepth; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
-uniform float focalRange; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
-
 uniform float shadowOpacity = 1.0;
 
 uniform int pointLightsCount; // Point lights count
 uniform int dirLightsCount; // Point lights count
-
-// if ALGINE_DOF_MODE == ALGINE_CINEMATIC_DOF_MODE_ENABLED
-uniform struct CinematicDOF {
-	float p; // plane in focus
-	float a; // aperture
-	float i; // image distance
-} cinematicDOF;
 
 in mat4 model, view, vmMatrix;
 in mat3 v_TBN; // Tangent Bitangent Normal matrix
@@ -92,10 +82,9 @@ vec3 ambient, diffuse, specular, viewDir, lightDir; // base lighting variables
 
 // output colors
 layout(location = 0) out vec4 fragColor;
-layout(location = 1) out float dofBuffer;
-layout(location = 2) out vec3 normalBuffer;
+layout(location = 1) out vec3 normalBuffer;
+layout(location = 2) out vec3 positionBuffer;
 layout(location = 3) out vec2 ssrValuesBuffer;
-layout(location = 4) out vec3 positionBuffer;
 
 #if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED && defined ALGINE_LIGHTING_MODE_ENABLED
 float shadow;
@@ -307,15 +296,6 @@ void main() {
 		else fragColor = material.cdiffuse;
 		#endif /* ALGINE_TEXTURE_MAPPING_MODE_ENABLED */
 	#endif /* ALGINE_LIGHTING_MODE_XXX */
-
-	#ifdef ALGINE_DOF_MODE_ENABLED
-	dofBuffer = abs(focalDepth + fragPos.z) / focalRange;
-	#elif defined ALGINE_CINEMATIC_DOF_MODE_ENABLED
-	float p = -cinematicDOF.p;
-	float f = (p + cinematicDOF.i) / (p * cinematicDOF.i);
-	float d = -fragPos.z;
-	dofBuffer = abs((cinematicDOF.a * f * (p - d)) / (d * (p - f)));
-	#endif
 
 	#ifdef ALGINE_SSR_MODE_ENABLED
 	normalBuffer = norm;
