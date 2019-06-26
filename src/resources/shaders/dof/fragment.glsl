@@ -16,9 +16,19 @@ in vec2 texCoord;
 layout (location = 0) out vec3 fragColor;
 
 uniform sampler2D image;
-uniform sampler2D dofBuffer;
+uniform sampler2D positionMap;
 uniform float max_sigma;
 uniform float min_sigma;
+
+uniform float focalDepth; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
+uniform float focalRange; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
+
+// if ALGINE_DOF_MODE == ALGINE_CINEMATIC_DOF_MODE_ENABLED
+uniform struct CinematicDOF {
+	float p; // plane in focus
+	float a; // aperture
+	float i; // image distance
+} cinematicDOF;
 
 float dof_kernel[KERNEL_RADIUS];
 
@@ -43,27 +53,33 @@ void main() {
 	vec2 texOffset = 1.0 / textureSize(image, 0); // gets size of single texel
 	
 	#ifdef ALGINE_CINEMATIC_DOF
-	makeDofKernel(texture(dofBuffer, texCoord).r);
+		float p = -cinematicDOF.p;
+		float f = (p + cinematicDOF.i) / (p * cinematicDOF.i);
+		float d = -texture(positionMap, texCoord).z;
+		float sigma = abs((cinematicDOF.a * f * (p - d)) / (d * (p - f)));
+		makeDofKernel(sigma);
 	#else
-	makeDofKernel(max_sigma * texture(dofBuffer, texCoord).r + min_sigma);
+		float sigma = abs(focalDepth + texture(positionMap, texCoord).z) / focalRange;
+		makeDofKernel(max_sigma * sigma + min_sigma);
 	#endif
+
 	fragColor = texture(image, texCoord).rgb * dof_kernel[0];
 	
 	#ifdef ALGINE_HORIZONTAL
-	for(int i = 1; i < KERNEL_RADIUS; i++) {
-		fragColor +=
-			dof_kernel[i] * (
-				texture(image, texCoord + vec2(texOffset.x * i, 0.0)).rgb +
-				texture(image, texCoord - vec2(texOffset.x * i, 0.0)).rgb
-			);
-	}
+		for(int i = 1; i < KERNEL_RADIUS; i++) {
+			fragColor +=
+				dof_kernel[i] * (
+					texture(image, texCoord + vec2(texOffset.x * i, 0.0)).rgb +
+					texture(image, texCoord - vec2(texOffset.x * i, 0.0)).rgb
+				);
+		}
 	#else
-	for(int i = 1; i < KERNEL_RADIUS; i++) {
-		fragColor +=
-			dof_kernel[i] * (
-				texture(image, texCoord + vec2(0.0, texOffset.y * i)).rgb +
-				texture(image, texCoord - vec2(0.0, texOffset.y * i)).rgb
-			);
-	}
+		for(int i = 1; i < KERNEL_RADIUS; i++) {
+			fragColor +=
+				dof_kernel[i] * (
+					texture(image, texCoord + vec2(0.0, texOffset.y * i)).rgb +
+					texture(image, texCoord - vec2(0.0, texOffset.y * i)).rgb
+				);
+		}
 	#endif
 }
