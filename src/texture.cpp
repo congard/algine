@@ -8,10 +8,16 @@
 #include <iostream>
 #include <stb/stb_image.h>
 #include <stb/stb_image_write.h>
-#include "framebuffer.cpp"
+#include <algine/framebuffer.h>
 
-#define _cfgtex(texture, internalformat, format, width, height) glBindTexture(GL_TEXTURE_2D, texture); \
-                                                                glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, GL_FLOAT, NULL);
+// fill bound texture
+#define _fillbtex(target, level, internalformat, format, width, height, type, data) \
+    glTexImage2D(target, level, internalformat, width, height, 0, format, type, data)
+
+#define _cfgtex(target, texture, level, internalformat, format, width, height, type) \
+    glBindTexture(target, texture); \
+    glTexImage2D(target, level, internalformat, width, height, 0, format, type, NULL);
+
 #define COLOR_ATTACHMENT(n) (GL_COLOR_ATTACHMENT0 + n)
 #define TEXTURE(n) (GL_TEXTURE0 + n)
 
@@ -30,8 +36,25 @@ inline void texture2DAB(const uint &index, const uint &texture) {
 	bindTexture2D(texture);
 }
 
-inline void cfgtex(const uint &texture, const int &internalformat, const uint &format, const uint &width, const uint &height) {
-    _cfgtex(texture, internalformat, format, width, height);
+inline void bindTextureCube(const uint &texture) {
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+}
+
+struct TextureParams {
+    uint target; // specifies the target texture. Must be GL_TEXTURE_2D, etc
+    int level = 0; // specifies the level-of-detail number. Level 0 is the base image level. Level n is the nth mipmap reduction image
+    int internalformat; // specifies the number of color components in the texture
+    uint width, height;
+    uint format; // specifies the format of the pixel data. The following symbolic values are accepted: GL_RED, GL_RG, GL_RGB, etc
+    uint type = GL_FLOAT; // specifies the data type of the pixel data. The following symbolic values are accepted: GL_UNSIGNED_BYTE, GL_BYTE, etc
+};
+
+inline void cfgtex2D(const uint &texture, const int &internalformat, const uint &format, const uint &width, const uint &height) {
+    _cfgtex(GL_TEXTURE_2D, texture, 0, internalformat, format, width, height, GL_FLOAT);
+}
+
+inline void fillbtex(const TextureParams &tp, const void *data) {
+    _fillbtex(tp.target, tp.level, tp.internalformat, tp.format, tp.width, tp.height, tp.type, data);
 }
 
 /**
@@ -75,9 +98,20 @@ void applyDefaultTexture2DParams() {
 }
 
 /**
+ * Default params for bound texture
+ */
+void applyDefaultTextureCubeParams() {
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
+/**
  * Default params for specified texture
  */
-void applyDefaultTexture2DParams(GLuint texture) {
+void applyDefaultTexture2DParams(const GLuint &texture) {
     bindTexture2D(texture);
     applyDefaultTexture2DParams();
     bindTexture2D(0);   
@@ -88,6 +122,15 @@ void applyDefaultTexture2DParams(GLuint texture) {
  */
 void applyDefaultTexture2DParams(GLuint *textures, size_t count) {
     for (size_t i = 0; i < count; i++) applyDefaultTexture2DParams(textures[i]);
+}
+
+/**
+ * Default params for specified cube texture
+ */
+void applyDefaultTextureCubeParams(const GLuint &texture) {
+    bindTextureCube(texture);
+    applyDefaultTextureCubeParams();
+    bindTextureCube(0);   
 }
 
 inline size_t getTexComponentsCount(GLuint format) {
@@ -186,6 +229,54 @@ struct Texture {
 
     static void destroy(GLuint *id) {
         glDeleteTextures(1, id);
+    }
+};
+
+struct TextureCube: public Texture {
+    struct CubePaths {
+        std::string right, left, top, bottom, back, front;
+
+        CubePaths(
+            const std::string &right, const std::string &left,
+            const std::string &top, const std::string &bottom,
+            const std::string &back, const std::string &front
+        ) {
+            this->right = right;
+            this->left = left;
+            this->top = top;
+            this->bottom = bottom;
+            this->back = back;
+            this->front = front;
+        }
+
+        CubePaths() {}
+    };
+
+    static void setFace(const TextureParams &params, const void *data) {
+        fillbtex(params, data);
+    }
+
+    static void setFace(const TextureParams &params, const uint &texCube, const void *data) {
+        glBindTexture(GL_TEXTURE_CUBE_MAP, texCube);
+        fillbtex(params, data);
+    }
+
+    static void loadFaces(const TextureParams &_params, const CubePaths &paths) {
+        TextureParams params = _params;
+
+        int width, height, nrChannels;
+
+        for (uint i = 0; i < 6; i++) {
+            ubyte *data = stbi_load((*(&paths.right + i)).c_str(), &width, &height, &nrChannels, 0);
+
+            params.width = width;
+            params.height = height;
+            params.target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+
+            setFace(params, data);
+            
+            stbi_image_free(data);
+        }
     }
 };
 
