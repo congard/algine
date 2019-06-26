@@ -9,8 +9,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "algine_structs.cpp"
 #include "texture.cpp"
-#include "framebuffer.cpp"
-#include "renderbuffer.cpp"
+#include <algine/framebuffer.h>
+#include <algine/renderbuffer.h>
 #include "shaderprogram.cpp"
 #include <algine/types.h>
 #include <algine/constants.h>
@@ -43,6 +43,49 @@ inline void pointerui(GLint location, int count, GLuint buffer) {
 #define setVec3(location, vec) glUniform3f(location, vec.x, vec.y, vec.z)
 // GLuint location, glm::mat4 mat
 #define setMat4(location, mat) glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat))
+
+struct CubemapRenderer {
+    uint cubeBuffers;
+
+    void init() {
+        // source: https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
+	    static const float vertices[] = {
+            -1.0f,  1.0f,  1.0f,    // Front-top-left
+             1.0f,  1.0f,  1.0f,    // Front-top-right
+            -1.0f, -1.0f,  1.0f,    // Front-bottom-left
+             1.0f, -1.0f,  1.0f,    // Front-bottom-right
+             1.0f, -1.0f, -1.0f,    // Back-bottom-right
+             1.0f,  1.0f,  1.0f,    // Front-top-right
+             1.0f,  1.0f, -1.0f,    // Back-top-right
+            -1.0f,  1.0f,  1.0f,    // Front-top-left
+            -1.0f,  1.0f, -1.0f,    // Back-top-left
+            -1.0f, -1.0f,  1.0f,    // Front-bottom-left
+            -1.0f, -1.0f, -1.0f,    // Back-bottom-left
+             1.0f, -1.0f, -1.0f,    // Back-bottom-right
+            -1.0f,  1.0f, -1.0f,    // Back-top-left
+             1.0f,  1.0f, -1.0f     // Back-top-right
+        };
+
+        glGenBuffers(1, &cubeBuffers);
+        glBindBuffer(GL_ARRAY_BUFFER, cubeBuffers);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    inline void render(const int &inPosLocation) {
+        glEnableVertexAttribArray(inPosLocation);
+	    pointer(inPosLocation, 3, cubeBuffers);
+        
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+
+        glDisableVertexAttribArray(inPosLocation);
+    }
+
+    inline void render(const int &programId, const int &inPosLocation) {
+        useShaderProgram(programId);
+        render(inPosLocation);
+    }
+};
 
 struct AlgineRenderer {
     SSRShader *ssrs;
@@ -119,7 +162,7 @@ struct AlgineRenderer {
     }
 
     void dofBlurPass(const uint pingpongFBO[2], const uint dofBuffers[2], const uint &dofMap, const uint &sceneMap, const uint &blurAmount) {
-        horizontal = true; 
+        horizontal = true;
 		firstIteration = true;
         for (size_t i = 0; i < blurAmount; i++) {
             glUseProgram(dofBlurShaders[horizontal]->programId);
@@ -185,7 +228,7 @@ struct AlgineRenderer {
         for (size_t i = 0; i < 2; i++) {
             glUseProgram(dofBlurShaders[i]->programId);
             glUniform1i(dofBlurShaders[i]->samplerImage, 0);
-            glUniform1i(dofBlurShaders[i]->samplerDofBuffer, 1);
+            glUniform1i(dofBlurShaders[i]->samplerPositionMap, 1);
         }
 
         // screen space setting
