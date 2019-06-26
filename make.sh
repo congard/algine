@@ -6,8 +6,8 @@ echo "Compiling";
 include="include"
 contrib="contrib"
 source="src"
-headers=(math.h io.h)
-sources=(main.cpp math.cpp io.cpp)
+headers=(math.h io.h node.h framebuffer.h renderbuffer.h core_utils.h)
+sources=(main.cpp math.cpp io.cpp node.cpp framebuffer.cpp renderbuffer.cpp core_utils.cpp)
 
 # compilation
 headers_full=""
