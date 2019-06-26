@@ -11,7 +11,7 @@
 #include <assimp/anim.h>
 
 #include <algine/types.h>
-#include "node.cpp"
+#include <algine/node.h>
 #include "mesh.cpp"
 #include "bone.cpp"
 

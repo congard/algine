@@ -20,7 +20,7 @@
 #include "model.cpp"
 #include <algine/types.h>
 #include "algine_structs.cpp"
-#include "framebuffer.cpp"
+#include <algine/framebuffer.h>
 #include "texture.cpp"
 
 namespace algine {

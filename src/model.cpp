@@ -21,7 +21,7 @@
 #include <algine/types.h>
 #include "texture.cpp"
 #include "mesh.cpp"
-#include "node.cpp"
+#include <algine/node.h>
 #include "bone.cpp"
 #include "animation.cpp"
 
