@@ -55,8 +55,6 @@ struct CShader {
         shadowDiskRadiusK,
         shadowDiskRadiusMin,
         shadowOpacity,
-        focalDepth,
-        focalRange,
         materialAmbientTex,
         materialDiffuseTex,
         materialSpecularTex,
@@ -70,10 +68,7 @@ struct CShader {
         materialDiffuseStrength,
         materialSpecularStrength,
         materialShininess,
-        textureMappingSwitcher,
-        cinematicDOFPlaneInFocus,
-        cinematicDOFAperture,
-        cinematicDOFImageDistance;
+        textureMappingSwitcher;
 
     std::vector<PointLightIds> pointLights;
     std::vector<DirLightIds> dirLights;
@@ -112,9 +107,14 @@ struct DOFBlurShader {
 
         // fragment shader
         samplerImage,
-        samplerDofBuffer,
+        samplerPositionMap,
         sigmaMin,
-        sigmaMax;
+        sigmaMax,
+        focalDepth,
+        focalRange,
+        cinematicDOFPlaneInFocus,
+        cinematicDOFAperture,
+        cinematicDOFImageDistance;
 };
 
 // blend shader ids
@@ -185,6 +185,20 @@ struct BlurShader {
         kernel; // zero element id
 };
 
+struct CubemapShader {
+    GLint
+        programId,
+
+        // vertex shader
+        inPosition,
+        matTransform,
+        
+        // fragment shader
+        cubemap,
+        color,
+        positionScaling;
+};
+
 struct ColorShaderParams {
     uint
         maxPointLightsCount = 8,
@@ -197,6 +211,15 @@ struct ShadowShaderParams {
     uint
         maxBoneAttribsPerVertex = 1, // 1 bone attrib = 4 bones per vertex
         maxBones = 64; // max bones in mesh
+};
+
+struct CubemapShaderParams {
+    uint
+        cubemapColorOutColorComponent = ALGINE_OUT_CS_COLOR_COMPONENT_COLOR,
+        positionOutColorComponent = ALGINE_OUT_CS_COLOR_COMPONENT_POSITION,
+        vecout = ALGINE_VEC3,
+        cubemapColorOutput = ALGINE_ENABLED,
+        positionOutput = ALGINE_DISABLED;
 };
 
 struct AlgineParams {
@@ -212,10 +235,6 @@ struct AlgineParams {
         attenuationMode = ALGINE_ATTENUATION_MODE_ENABLED,
         ssrMode = ALGINE_SSR_MODE_ENABLED,
         boneSystemMode = ALGINE_BONE_SYSTEM_DISABLED;
-
-    // uint
-    //     scrW = 1366,
-    //     scrH = 768;
 };
 
 struct ShadersData {
