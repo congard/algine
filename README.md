@@ -37,6 +37,9 @@ Click on picture to watch video
 
 Take into account, this is a test (alpha) version! All major functions will be added in later versions.
 
+# TODO
+You can find TODO list [here](http://evassmat.com/ZaDr)
+
 # Dependencies
 Engine has next dependencies: `glew`, `glfw`, `glm`, `assimp`.
 
