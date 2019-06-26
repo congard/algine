@@ -7,23 +7,11 @@
 #include "shaderprogram.cpp"
 #include <algine/sconstants.h>
 #include <algine/io.h>
+#include <algine/core_utils.h>
 
 namespace algine {
 // shader compiler
 namespace scompiler {
-static std::string ALGINE_DEF_DELIMITER = "#algdef";
-
-void splitByDelimiter(std::vector<std::string> &out, std::string &in) {
-    size_t pos = 0;
-    std::string token;
-    while ((pos = in.find(ALGINE_DEF_DELIMITER)) != std::string::npos) {
-        token = in.substr(0, pos);
-        out.push_back(token);
-        in.erase(0, pos + ALGINE_DEF_DELIMITER.length());
-    }
-    out.push_back(in);
-}
-
 ShadersData readShader(const ShadersPaths &path) {
     char
         *vertexSource = io::read(path.vertex.c_str()),
@@ -46,8 +34,7 @@ ShadersData getCS(const AlgineParams &params, const ColorShaderParams &csp, cons
     ShadersData cs = readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath });
     ShadersData result;
 
-    std::vector<std::string> out;
-    splitByDelimiter(out, cs.vertex);
+    std::vector<std::string> out = split(cs.vertex, ALGINE_SHADER_DEFINITIONS);
     result.vertex = 
         out[0] + (
             params.normalMappingMode == ALGINE_NORMAL_MAPPING_MODE_ENABLED ? "#define ALGINE_NORMAL_MAPPING_MODE_ENABLED\n" :
@@ -61,8 +48,7 @@ ShadersData getCS(const AlgineParams &params, const ColorShaderParams &csp, cons
             "#define MAX_BONES " + std::to_string(csp.maxBones) + "\n"
         ) + out[1];
 
-    out.clear();
-    splitByDelimiter(out, cs.fragment);
+    out = split(cs.fragment, ALGINE_SHADER_DEFINITIONS);
     result.fragment = 
         out[0] + (
             params.normalMappingMode == ALGINE_NORMAL_MAPPING_MODE_ENABLED ? "#define ALGINE_NORMAL_MAPPING_MODE_ENABLED\n" :
@@ -106,9 +92,7 @@ ShadersData getSS(const AlgineParams &params, const ShadowShaderParams &ssp, con
         ss = readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath });
     ShadersData result;
 
-    std::vector<std::string> out;
-    splitByDelimiter(out, ss.vertex);
-
+    std::vector<std::string> out = split(ss.vertex, ALGINE_SHADER_DEFINITIONS);
     result.vertex =
         out[0] + (
             params.boneSystemMode == ALGINE_BONE_SYSTEM_ENABLED ? "#define ALGINE_BONE_SYSTEM_ENABLED\n" :
@@ -121,8 +105,7 @@ ShadersData getSS(const AlgineParams &params, const ShadowShaderParams &ssp, con
             "#define MAX_BONES " + std::to_string(ssp.maxBones) + "\n"
         ) + out[1];
 
-    out.clear();
-    splitByDelimiter(out, ss.fragment);
+    out = split(ss.fragment, ALGINE_SHADER_DEFINITIONS);
     result.fragment =
         out[0] + (
             params.shadowMappingType == ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING ? "#define ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING\n" :
@@ -142,8 +125,7 @@ std::vector<ShadersData> getDOFBlurShader(const AlgineParams &params, const uint
 
     resultVertical.vertex = resultHorizontal.vertex = dof.vertex;
 
-    std::vector<std::string> out;
-    splitByDelimiter(out, dof.fragment);
+    std::vector<std::string> out = split(dof.fragment, ALGINE_SHADER_DEFINITIONS);
 
     resultHorizontal.fragment = 
         out[0] + (
@@ -169,8 +151,7 @@ ShadersData getBlendShader(const AlgineParams &params, const char *vertexShaderP
 
     result.vertex = bles.vertex;
 
-    std::vector<std::string> out;
-    splitByDelimiter(out, bles.fragment);
+    std::vector<std::string> out = split(bles.fragment, ALGINE_SHADER_DEFINITIONS);
 
     result.fragment = 
         out[0] + (
@@ -200,8 +181,7 @@ std::vector<ShadersData> getBlurShader(const uint &blurKernelRadius, const char 
 
     resultHorizontal.vertex = resultVertical.vertex = blur.vertex;
 
-    std::vector<std::string> out;
-    splitByDelimiter(out, blur.fragment);
+    std::vector<std::string> out = split(blur.fragment, ALGINE_SHADER_DEFINITIONS);
 
     resultHorizontal.fragment = 
         out[0] + (
@@ -213,6 +193,30 @@ std::vector<ShadersData> getBlurShader(const uint &blurKernelRadius, const char 
 
     // in alphabet order
     return std::vector<ShadersData> { resultHorizontal, resultVertical };
+}
+
+ShadersData getCubemapShader(const CubemapShaderParams &params, const char *vertexShaderPath, const char *fragmentShaderPath) {
+    ShadersData shaderfile = readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath });
+    ShadersData result;
+
+    result.vertex = shaderfile.vertex;
+
+    std::vector<std::string> out = split(shaderfile.fragment, ALGINE_SHADER_DEFINITIONS);
+
+    result.fragment = 
+        out[0] + (
+            "#define ALGINE_CUBEMAP_COLOR_OUT_COLOR_COMPONENT " + std::to_string(params.cubemapColorOutColorComponent) + "\n" +
+            "#define ALGINE_POS_OUT_COLOR_COMPONENT " + std::to_string(params.positionOutColorComponent) + "\n"
+        ) + (
+            "#define vecout " + std::string(params.vecout == ALGINE_VEC3 ? "vec3" : "vec4") + "\n"
+        ) + (
+            params.cubemapColorOutput == ALGINE_ENABLED ? "#define ALGINE_CUBEMAP_COLOR\n" : ""
+        ) + (
+            params.positionOutput == ALGINE_CUBE_POSITIONS ? "#define ALGINE_CUBE_POSITIONS\n" :
+            params.positionOutput == ALGINE_SPHERE_POSITIONS ? "#define ALGINE_SPHERE_POSITIONS\n" : ""
+        ) + out[1];
+
+    return result;
 }
 
 void saveShaders(const ShadersData &shader, const ShadersPaths &path) {
@@ -276,9 +280,6 @@ void loadLocations(CShader &shader, const AlgineParams &params, const ColorShade
     shader.shadowDiskRadiusK = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_DISKRADIUS_K);
     shader.shadowDiskRadiusMin = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_DISKRADIUS_MIN);
     shader.shadowOpacity = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_OPACITY);
-    // linear DOF parameters
-    shader.focalDepth = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_FOCAL_DEPTH);
-    shader.focalRange = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_FOCAL_RANGE);
     // material
     shader.materialAmbientTex = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_AMBIENT_TEX);
     shader.materialDiffuseTex = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_DIFFUSE_TEX);
@@ -295,10 +296,6 @@ void loadLocations(CShader &shader, const AlgineParams &params, const ColorShade
     shader.materialShininess = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_SHININESS);
     // mapping
     shader.textureMappingSwitcher = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SWITCH_TEXTURE_MAPPING);
-    // cinematic DOF parameters
-    shader.cinematicDOFPlaneInFocus = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_CINEMATIC_DOF_PLANE_IN_FOCUS);
-    shader.cinematicDOFAperture = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_CINEMATIC_DOF_APERTURE);
-    shader.cinematicDOFImageDistance = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_CINEMATIC_DOF_IMAGE_DISTANCE);
     
     // lights
     shader.pointLights.reserve(csp.maxPointLightsCount);
@@ -361,9 +358,16 @@ void loadLocations(DOFBlurShader &shader) {
     
     // fragment shader
     shader.samplerImage = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_SAMPLER_IMAGE);
-    shader.samplerDofBuffer = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_SAMPLER_DOF_BUFFER);
+    shader.samplerPositionMap = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_SAMPLER_MAP_POSITION);
+    // linear DOF parameters
+    shader.focalDepth = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_FOCAL_DEPTH);
+    shader.focalRange = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_FOCAL_RANGE);
     shader.sigmaMin = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_SIGMA_MIN);
     shader.sigmaMax = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_SIGMA_MAX);
+    // cinematic DOF parameters
+    shader.cinematicDOFPlaneInFocus = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_PLANE_IN_FOCUS);
+    shader.cinematicDOFAperture = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_APERTURE);
+    shader.cinematicDOFImageDistance = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_IMAGE_DISTANCE);
 }
 
 void loadLocations(BlendShader &shader) {
@@ -413,6 +417,16 @@ void loadLocations(BlurShader &shader) {
     // fragment shader
     shader.image = glGetUniformLocation(shader.programId, ALGINE_NAME_BLUR_IMAGE);
     shader.kernel = glGetUniformLocation(shader.programId, ALGINE_NAME_BLUR_KERNEL);
+}
+
+void loadLocations(CubemapShader &shader) {
+    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_CUBEMAP_IN_POSITION);
+    shader.matTransform = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_MAT_TRANSFORM);
+
+    // fragment shader
+    shader.cubemap = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_CUBEMAP);
+    shader.color = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_COLOR);
+    shader.positionScaling = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_POS_SCALING);
 }
 
 } // namespace scompiler
