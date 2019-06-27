@@ -73,6 +73,7 @@ GLuint
     bloomSearchFB,
     pingpongFB[2],
     pingpongBlurFB[2],
+    cocFB,
     rbo;
 
 GLuint
@@ -84,11 +85,13 @@ GLuint
     bloomTex,
     pingpongDofTex[2],
     pingpongBlurTex[2],
-    skybox;
+    skybox,
+    cocTex;
 
 CShader cs;
 SShader ss, ss_dir;
 DOFBlurShader dofBlurH, dofBlurV;
+DOFCoCShader dofCoCShader;
 BlurShader blurH, blurV;
 BlendShader blendShader;
 SSRShader ssrs;
@@ -98,6 +101,8 @@ CubemapShader skyboxShader;
 AlgineParams params;
 ColorShaderParams csp;
 ShadowShaderParams ssp;
+
+float exposure = 6.0f, gamma = 1.125f;
 
 float
     // DOF variables
@@ -135,6 +140,8 @@ void updateRenderTextures(const uint &width, const uint &height) {
         cfgtex2D(pingpongBlurTex[i], GL_RGB16F, GL_RGB, winWidth * bloomK, winHeight * bloomK);
         cfgtex2D(pingpongDofTex[i], GL_RGB16F, GL_RGB, winWidth, winHeight);
     }
+
+    cfgtex2D(cocTex, GL_R16F, GL_RED, winWidth, winHeight);
 }
 
 /**
@@ -264,7 +271,6 @@ void initShaders() {
     #else
     params.shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_SIMPLE;
     #endif
-    params.dofMode = ALGINE_CINEMATIC_DOF_MODE_ENABLED;
     params.boneSystemMode = ALGINE_BONE_SYSTEM_ENABLED;
 
     cs.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getCS(
@@ -288,6 +294,8 @@ void initShaders() {
         "src/resources/shaders/ssr/vertex.glsl",
         "src/resources/shaders/ssr/fragment.glsl")
     ));
+
+    params.dofMode = ALGINE_DOF_FROM_COC_MAP;
     std::vector<ShadersData> blus = scompiler::getDOFBlurShader(
         params, dofBlurKernelRadius,
         "src/resources/shaders/dof/vertex.glsl",
@@ -299,6 +307,14 @@ void initShaders() {
     dofBlurV.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(
         blus[1]
     ));
+
+    params.dofMode = ALGINE_CINEMATIC_DOF_MODE_ENABLED;
+    dofCoCShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getDOFCoCShader(
+        params,
+        "src/resources/shaders/dof/vertex.glsl",
+        "src/resources/shaders/dof/coc_fragment.glsl")
+    ));
+
     blendShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getBlendShader(
         params,
         "src/resources/shaders/blend/vertex.glsl",
@@ -332,14 +348,13 @@ void initShaders() {
     scompiler::loadLocations(ssrs);
     scompiler::loadLocations(dofBlurH);
     scompiler::loadLocations(dofBlurV);
+    scompiler::loadLocations(dofCoCShader);
     scompiler::loadLocations(blendShader);
     scompiler::loadLocations(bloomSearchShader);
     scompiler::loadLocations(blurH);
     scompiler::loadLocations(blurV);
     scompiler::loadLocations(skyboxShader);
 
-    renderer.exposure = 6.0f;
-    renderer.gamma = 1.125f;
     renderer.ssrs = &ssrs;
     renderer.blendShader = &blendShader;
     renderer.dofBlurShaders[0] = &dofBlurH;
@@ -347,6 +362,7 @@ void initShaders() {
     renderer.bloomSearchShader = &bloomSearchShader;
     renderer.blurShaders[0] = &blurH;
     renderer.blurShaders[1] = &blurV;
+    renderer.dofCoCShader = &dofCoCShader;
     renderer.prepare();
 
     skyboxRenderer.init();
@@ -356,6 +372,7 @@ void initShaders() {
     Framebuffer::create(&bloomSearchFB);
     Framebuffer::create(pingpongFB, 2);
     Framebuffer::create(pingpongBlurFB, 2);
+    Framebuffer::create(&cocFB);
 
     Renderbuffer::create(&rbo);
 
@@ -367,6 +384,7 @@ void initShaders() {
     Texture::create(&bloomTex);
     Texture::create(pingpongDofTex, 2);
     Texture::create(pingpongBlurTex, 2);
+    Texture::create(&cocTex);
 
     TextureCube::create(&skybox);
     TextureCube::CubePaths paths(
@@ -391,6 +409,7 @@ void initShaders() {
     applyDefaultTexture2DParams(bloomTex);
     applyDefaultTexture2DParams(pingpongDofTex, 2);
     applyDefaultTexture2DParams(pingpongBlurTex, 2);
+    applyDefaultTexture2DParams(cocTex);
 
     updateRenderTextures(winWidth, winHeight);
 
@@ -437,6 +456,9 @@ void initShaders() {
     
     bindFramebuffer(bloomSearchFB);
     Framebuffer::attachTexture2D(bloomTex, COLOR_ATTACHMENT(0));
+
+    bindFramebuffer(cocFB);
+    Framebuffer::attachTexture2D(cocTex, COLOR_ATTACHMENT(0));
     bindFramebuffer(0);
 
     // configuring CS
@@ -453,6 +475,27 @@ void initShaders() {
     useShaderProgram(skyboxShader.programId);
     setVec3(skyboxShader.color, glm::vec3(0.125f));
     glUniform1f(skyboxShader.positionScaling, 32.0f);
+
+    // blend setting
+    glUseProgram(blendShader.programId);
+    glUniform1i(blendShader.samplerImage, 0);   // GL_TEXTURE0
+    glUniform1i(blendShader.samplerBloom, 1); // GL_TEXTURE1
+    glUniform1f(blendShader.exposure, exposure);
+    glUniform1f(blendShader.gamma, gamma);
+
+    // blur setting
+    for (size_t i = 0; i < 2; i++) {
+        glUseProgram(renderer.dofBlurShaders[i]->programId);
+        glUniform1i(renderer.dofBlurShaders[i]->samplerImage, 0);
+        glUniform1i(renderer.dofBlurShaders[i]->samplerCoCMap, 1);
+    }
+
+    // screen space setting
+    glUseProgram(ssrs.programId);
+    glUniform1i(ssrs.samplerNormalMap, 1);
+    glUniform1i(ssrs.samplerSSRValuesMap, 2);
+    glUniform1i(ssrs.samplerPositionMap, 3);
+    glUseProgram(0);
     useShaderProgram(0);
 }
 
@@ -571,20 +614,12 @@ void initShadowCalculation() {
  * Initialize Depth of field
  */
 void initDOF() {
-    glUseProgram(dofBlurH.programId);
-    glUniform1f(dofBlurH.sigmaMax, dof_max_sigma);
-    glUniform1f(dofBlurH.sigmaMin, dof_min_sigma);
-    glUniform1f(dofBlurH.cinematicDOFAperture, dofAperture);
-    glUniform1f(dofBlurH.cinematicDOFImageDistance, dofImageDistance);
-    glUniform1f(dofBlurH.cinematicDOFPlaneInFocus, -1.0f);
-
-    glUseProgram(dofBlurV.programId);
-    glUniform1f(dofBlurV.sigmaMax, dof_max_sigma);
-    glUniform1f(dofBlurV.sigmaMin, dof_min_sigma);
-    glUniform1f(dofBlurV.cinematicDOFAperture, dofAperture);
-    glUniform1f(dofBlurV.cinematicDOFImageDistance, dofImageDistance);
-    glUniform1f(dofBlurV.cinematicDOFPlaneInFocus, -1.0f);
-
+    useShaderProgram(dofCoCShader.programId);
+    glUniform1f(dofCoCShader.sigmaMax, dof_max_sigma);
+    glUniform1f(dofCoCShader.sigmaMin, dof_min_sigma);
+    glUniform1f(dofCoCShader.cinematicDOFAperture, dofAperture);
+    glUniform1f(dofCoCShader.cinematicDOFImageDistance, dofImageDistance);
+    glUniform1f(dofCoCShader.cinematicDOFPlaneInFocus, -1.0f);
     useShaderProgram(0);
 }
 
@@ -817,7 +852,9 @@ void render() {
     renderer.blurPass(pingpongBlurFB, pingpongBlurTex, bloomTex, bloomBlurAmount);
     glViewport(0, 0, winWidth, winHeight);
 
-    renderer.dofBlurPass(pingpongFB, pingpongDofTex, positionTex, screenspaceTex, dofBlurAmount);
+    renderer.dofCoCPass(cocFB, positionTex);
+
+    renderer.dofBlurPass(pingpongFB, pingpongDofTex, cocTex, screenspaceTex, dofBlurAmount);
 
     bindFramebuffer(0);
     renderer.doubleBlendPass(pingpongDofTex[!renderer.horizontal], pingpongBlurTex[!renderer.horizontal]);
@@ -953,10 +990,8 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods) {
         
         std::cout << "x: " << pixels[0] << "; y: " << pixels[1] << "; z: " << pixels[2] << "\n";
         
-        glUseProgram(dofBlurH.programId);
-        glUniform1f(dofBlurH.cinematicDOFPlaneInFocus, pixels[2] == 0 ? FLT_EPSILON : pixels[2]);
-        glUseProgram(dofBlurV.programId);
-        glUniform1f(dofBlurV.cinematicDOFPlaneInFocus, pixels[2] == 0 ? FLT_EPSILON : pixels[2]);
+        useShaderProgram(dofCoCShader.programId);
+        glUniform1f(dofCoCShader.cinematicDOFPlaneInFocus, pixels[2] == 0 ? FLT_EPSILON : pixels[2]);
         useShaderProgram(0);
         
         delete[] pixels;

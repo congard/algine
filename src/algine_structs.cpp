@@ -108,6 +108,26 @@ struct DOFBlurShader {
         // fragment shader
         samplerImage,
         samplerPositionMap,
+        samplerCoCMap,
+        sigmaMin,
+        sigmaMax,
+        focalDepth,
+        focalRange,
+        cinematicDOFPlaneInFocus,
+        cinematicDOFAperture,
+        cinematicDOFImageDistance;
+};
+
+struct DOFCoCShader {
+    GLint
+        programId,
+
+        // vertex shader
+        inPosition,
+        inTexCoord,
+
+        // fragment shader
+        samplerPositionMap,
         sigmaMin,
         sigmaMax,
         focalDepth,

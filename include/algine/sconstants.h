@@ -77,20 +77,21 @@
 #define ALGINE_NAME_SSRS_LLIMITER "LLimiter"
 #define ALGINE_NAME_SSRS_MINRAYSTEP "minRayStep"
 
-// dof blur vertex shader
-#define ALGINE_NAME_DOFBLUR_IN_POSITION "inPos"
-#define ALGINE_NAME_DOFBLUR_IN_TEXCOORD "inTexCoord"
+// dof blur/CoC vertex shader
+#define ALGINE_NAME_DOF_IN_POSITION "inPos"
+#define ALGINE_NAME_DOF_IN_TEXCOORD "inTexCoord"
     
-// dof blur fragment shader
-#define ALGINE_NAME_DOFBLUR_SAMPLER_IMAGE "image"
-#define ALGINE_NAME_DOFBLUR_SAMPLER_MAP_POSITION "positionMap"
-#define ALGINE_NAME_DOFBLUR_SIGMA_MIN "min_sigma"
-#define ALGINE_NAME_DOFBLUR_SIGMA_MAX "max_sigma"
-#define ALGINE_NAME_DOFBLUR_FOCAL_DEPTH "focalDepth"
-#define ALGINE_NAME_DOFBLUR_FOCAL_RANGE "focalRange"
-#define ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_PLANE_IN_FOCUS "cinematicDOF.p"
-#define ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_APERTURE "cinematicDOF.a"
-#define ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_IMAGE_DISTANCE "cinematicDOF.i"
+// dof blur/CoC fragment shader
+#define ALGINE_NAME_DOF_SAMPLER_IMAGE "image"
+#define ALGINE_NAME_DOF_SAMPLER_MAP_POSITION "positionMap"
+#define ALGINE_NAME_DOF_SAMPLER_MAP_COC "cocMap"
+#define ALGINE_NAME_DOF_SIGMA_MIN "min_sigma"
+#define ALGINE_NAME_DOF_SIGMA_MAX "max_sigma"
+#define ALGINE_NAME_DOF_FOCAL_DEPTH "focalDepth"
+#define ALGINE_NAME_DOF_FOCAL_RANGE "focalRange"
+#define ALGINE_NAME_DOF_CINEMATIC_DOF_PLANE_IN_FOCUS "cinematicDOF.p"
+#define ALGINE_NAME_DOF_CINEMATIC_DOF_APERTURE "cinematicDOF.a"
+#define ALGINE_NAME_DOF_CINEMATIC_DOF_IMAGE_DISTANCE "cinematicDOF.i"
 
 // blend vertex shader
 #define ALGINE_NAME_BLEND_IN_POSITION "inPos"

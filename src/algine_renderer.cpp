@@ -95,9 +95,7 @@ struct AlgineRenderer {
     
     GLuint quadBuffers[2]; // vertexBuffer and texCoordsBuffer
     DOFBlurShader *dofBlurShaders[2]; // { horizontal, vertical }
-
-    float gamma = 1;
-    float exposure = 3;
+    DOFCoCShader *dofCoCShader;
 
     bool horizontal = true, firstIteration = true; // blur variables
 
@@ -151,7 +149,7 @@ struct AlgineRenderer {
 		}
     }
 
-    void screenspacePass(uint ssFBO, uint colorMap, uint normalMap, uint ssrValuesMap, uint positionMap) {
+    void screenspacePass(const uint &ssFBO, const uint &colorMap, const uint &normalMap, const uint &ssrValuesMap, const uint &positionMap) {
         glBindFramebuffer(GL_FRAMEBUFFER, ssFBO);
         glUseProgram(ssrs->programId);
         texture2DAB(0, colorMap);
@@ -161,23 +159,35 @@ struct AlgineRenderer {
         renderQuad(ssrs->inPosition, ssrs->inTexCoord);
     }
 
-    void dofBlurPass(const uint pingpongFBO[2], const uint dofBuffers[2], const uint &dofMap, const uint &sceneMap, const uint &blurAmount) {
-        horizontal = true;
-		firstIteration = true;
-        for (size_t i = 0; i < blurAmount; i++) {
-            glUseProgram(dofBlurShaders[horizontal]->programId);
-
-			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
-
-            texture2DAB(0, firstIteration ? sceneMap : dofBuffers[!horizontal]);
-            texture2DAB(1, dofMap);
-
-            // rendering
-			renderQuad(dofBlurShaders[horizontal]->inPosition, dofBlurShaders[horizontal]->inTexCoord);
-			horizontal = !horizontal;
-			if (firstIteration) firstIteration = false;
-		}
+    void dofCoCPass(const uint &cocFBO, const uint &positionMap) {
+        bindFramebuffer(cocFBO);
+        useShaderProgram(dofCoCShader->programId);
+        texture2DAB(0, positionMap);
+        renderQuad(dofCoCShader->inPosition, dofCoCShader->inTexCoord);
     }
+
+    #define _dofBlurPass(pingpongFBO, dofBuffers, blurAmount, code_tex_ab) \
+        horizontal = true;                                                 \
+		firstIteration = true;                                             \
+        for (size_t i = 0; i < blurAmount; i++) {                          \
+            glUseProgram(dofBlurShaders[horizontal]->programId);           \
+			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);    \
+            code_tex_ab                                                    \
+            /* rendering */                                                \
+			renderQuad(dofBlurShaders[horizontal]->inPosition, dofBlurShaders[horizontal]->inTexCoord); \
+			horizontal = !horizontal;                                      \
+			if (firstIteration) firstIteration = false;                    \
+		}
+
+    // dofMap may be position map or coc map depending on the method you use
+    void dofBlurPass(const uint pingpongFBO[2], const uint dofBuffers[2], const uint &dofMap, const uint &image, const uint &blurAmount) {
+        _dofBlurPass(pingpongFBO, dofBuffers, blurAmount, {
+            texture2DAB(0, firstIteration ? image : dofBuffers[!horizontal]);
+            texture2DAB(1, dofMap);
+        })
+    }
+
+    #undef _dofBlurPass
 
     void doubleBlendPass(const uint &image, const uint &bloom) {
         // Do not need to call glClear, because the texture is completely redrawn
@@ -216,27 +226,6 @@ struct AlgineRenderer {
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, quadBuffers[1]); // texCoords
         glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
-
-        // blend setting
-        glUseProgram(blendShader->programId);
-        glUniform1i(blendShader->samplerImage, 0);   // GL_TEXTURE0
-        glUniform1i(blendShader->samplerBloom, 1); // GL_TEXTURE1
-        glUniform1f(blendShader->exposure, exposure);
-        glUniform1f(blendShader->gamma, gamma);
-
-        // blur setting
-        for (size_t i = 0; i < 2; i++) {
-            glUseProgram(dofBlurShaders[i]->programId);
-            glUniform1i(dofBlurShaders[i]->samplerImage, 0);
-            glUniform1i(dofBlurShaders[i]->samplerPositionMap, 1);
-        }
-
-        // screen space setting
-        glUseProgram(ssrs->programId);
-        glUniform1i(ssrs->samplerNormalMap, 1);
-        glUniform1i(ssrs->samplerSSRValuesMap, 2);
-        glUniform1i(ssrs->samplerPositionMap, 3);
-        glUseProgram(0);
     }
 
     ~AlgineRenderer() {

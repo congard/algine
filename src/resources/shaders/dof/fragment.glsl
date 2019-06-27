@@ -4,7 +4,7 @@
  * @author Congard
  * dbcongard@gmail.com
  * t.me/congard
- * gitlab.com/congard
+ * github.com/congard
  */
 
 #version 330
@@ -17,11 +17,13 @@ layout (location = 0) out vec3 fragColor;
 
 uniform sampler2D image;
 uniform sampler2D positionMap;
+uniform sampler2D cocMap;
+
+// if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
 uniform float max_sigma;
 uniform float min_sigma;
-
-uniform float focalDepth; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
-uniform float focalRange; // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
+uniform float focalDepth;
+uniform float focalRange;
 
 // if ALGINE_DOF_MODE == ALGINE_CINEMATIC_DOF_MODE_ENABLED
 uniform struct CinematicDOF {
@@ -58,9 +60,11 @@ void main() {
 		float d = -texture(positionMap, texCoord).z;
 		float sigma = abs((cinematicDOF.a * f * (p - d)) / (d * (p - f)));
 		makeDofKernel(sigma);
-	#else
+	#elif defined ALGINE_LINEAR_DOF
 		float sigma = abs(focalDepth + texture(positionMap, texCoord).z) / focalRange;
 		makeDofKernel(max_sigma * sigma + min_sigma);
+	#else
+		makeDofKernel(texture(cocMap, texCoord).r);
 	#endif
 
 	fragColor = texture(image, texCoord).rgb * dof_kernel[0];

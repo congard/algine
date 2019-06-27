@@ -130,10 +130,10 @@ std::vector<ShadersData> getDOFBlurShader(const AlgineParams &params, const uint
     resultHorizontal.fragment = 
         out[0] + (
             params.dofMode == ALGINE_CINEMATIC_DOF_MODE_ENABLED ? "#define ALGINE_CINEMATIC_DOF\n" :
-            "#define ALGINE_LINEAR_DOF\n"
+            params.dofMode == ALGINE_DOF_MODE_ENABLED ? "#define ALGINE_LINEAR_DOF\n" :
+            params.dofMode == ALGINE_DOF_FROM_COC_MAP ? "#define ALGINE_DOF_FROM_COC_MAP\n" : ""
         ) + (
-            params.dofMode == ALGINE_DOF_MODE_ENABLED || params.dofMode == ALGINE_CINEMATIC_DOF_MODE_ENABLED ?
-            "#define KERNEL_RADIUS " + std::to_string(blurKernelRadius) + "\n" : ""
+            "#define KERNEL_RADIUS " + std::to_string(blurKernelRadius) + "\n"
         );
 
     // fragment shader vertical 1st and 2nd part
@@ -142,6 +142,24 @@ std::vector<ShadersData> getDOFBlurShader(const AlgineParams &params, const uint
     resultHorizontal.fragment += "#define ALGINE_HORIZONTAL\n" + out[1];
 
     return std::vector<ShadersData> { resultHorizontal, resultVertical };
+}
+
+// dof coc shader
+ShadersData getDOFCoCShader(const AlgineParams &params, const char *vertexShaderPath, const char *fragmentShaderPath) {
+    ShadersData sdata = readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath });
+    ShadersData result;
+
+    result.vertex = sdata.vertex;
+
+    std::vector<std::string> out = split(sdata.fragment, ALGINE_SHADER_DEFINITIONS);
+
+    result.fragment = 
+        out[0] + (
+            params.dofMode == ALGINE_CINEMATIC_DOF_MODE_ENABLED ? "#define ALGINE_CINEMATIC_DOF\n" :
+            "#define ALGINE_LINEAR_DOF\n"
+        ) + out[1];
+
+    return result;
 }
 
 // blend shader
@@ -352,23 +370,35 @@ void loadLocations(SShader &shader) {
     shader.far = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_FAR_PLANE);
 }
 
+#define _loadDOFLocations(shader) \
+    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_DOF_IN_POSITION); \
+    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_DOF_IN_TEXCOORD); \
+    \
+    /* fragment shader */ \
+    shader.samplerPositionMap = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SAMPLER_MAP_POSITION); \
+    /* linear DOF parameters */ \
+    shader.focalDepth = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_FOCAL_DEPTH); \
+    shader.focalRange = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_FOCAL_RANGE); \
+    shader.sigmaMin = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SIGMA_MIN); \
+    shader.sigmaMax = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SIGMA_MAX); \
+    /* cinematic DOF parameters */ \
+    shader.cinematicDOFPlaneInFocus = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_CINEMATIC_DOF_PLANE_IN_FOCUS); \
+    shader.cinematicDOFAperture = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_CINEMATIC_DOF_APERTURE); \
+    shader.cinematicDOFImageDistance = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_CINEMATIC_DOF_IMAGE_DISTANCE);
+
 void loadLocations(DOFBlurShader &shader) {
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_DOFBLUR_IN_POSITION);
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_DOFBLUR_IN_TEXCOORD);
+    _loadDOFLocations(shader)
     
     // fragment shader
-    shader.samplerImage = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_SAMPLER_IMAGE);
-    shader.samplerPositionMap = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_SAMPLER_MAP_POSITION);
-    // linear DOF parameters
-    shader.focalDepth = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_FOCAL_DEPTH);
-    shader.focalRange = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_FOCAL_RANGE);
-    shader.sigmaMin = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_SIGMA_MIN);
-    shader.sigmaMax = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_SIGMA_MAX);
-    // cinematic DOF parameters
-    shader.cinematicDOFPlaneInFocus = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_PLANE_IN_FOCUS);
-    shader.cinematicDOFAperture = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_APERTURE);
-    shader.cinematicDOFImageDistance = glGetUniformLocation(shader.programId, ALGINE_NAME_DOFBLUR_CINEMATIC_DOF_IMAGE_DISTANCE);
+    shader.samplerImage = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SAMPLER_IMAGE);
+    shader.samplerCoCMap = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SAMPLER_MAP_COC);
 }
+
+void loadLocations(DOFCoCShader &shader) {
+    _loadDOFLocations(shader)
+}
+
+#undef _loadDOFLocations
 
 void loadLocations(BlendShader &shader) {
     shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_BLEND_IN_POSITION);
