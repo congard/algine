@@ -65,7 +65,8 @@ DirLamp dirLamps[DIR_LAMPS_COUNT];
 
 // renderer
 AlgineRenderer renderer;
-CubemapRenderer skyboxRenderer;
+CubeRenderer skyboxRenderer;
+QuadRenderer quadRenderer;
 
 GLuint
     displayFB,
@@ -102,7 +103,7 @@ AlgineParams params;
 ColorShaderParams csp;
 ShadowShaderParams ssp;
 
-float exposure = 6.0f, gamma = 1.125f;
+float blendExposure = 6.0f, blendGamma = 1.125f;
 
 float
     // DOF variables
@@ -363,9 +364,10 @@ void initShaders() {
     renderer.blurShaders[0] = &blurH;
     renderer.blurShaders[1] = &blurV;
     renderer.dofCoCShader = &dofCoCShader;
-    renderer.prepare();
+    renderer.quadRenderer = &quadRenderer;
 
     skyboxRenderer.init();
+    quadRenderer.init();
 
     Framebuffer::create(&displayFB);
     Framebuffer::create(&screenspaceFB);
@@ -480,8 +482,8 @@ void initShaders() {
     glUseProgram(blendShader.programId);
     glUniform1i(blendShader.samplerImage, 0);   // GL_TEXTURE0
     glUniform1i(blendShader.samplerBloom, 1); // GL_TEXTURE1
-    glUniform1f(blendShader.exposure, exposure);
-    glUniform1f(blendShader.gamma, gamma);
+    glUniform1f(blendShader.exposure, blendExposure);
+    glUniform1f(blendShader.gamma, blendGamma);
 
     // blur setting
     for (size_t i = 0; i < 2; i++) {
@@ -495,7 +497,6 @@ void initShaders() {
     glUniform1i(ssrs.samplerNormalMap, 1);
     glUniform1i(ssrs.samplerSSRValuesMap, 2);
     glUniform1i(ssrs.samplerPositionMap, 3);
-    glUseProgram(0);
     useShaderProgram(0);
 }
 
