@@ -193,7 +193,7 @@ ShadersData getBloomSearchShader(const char *vertexShaderPath, const char *fragm
 }
 
 // returns `std::vector<ShadersData> { blurHorizontal, blurVertical }`
-std::vector<ShadersData> getBlurShader(const uint &blurKernelRadius, const char *vertexShaderPath, const char *fragmentShaderPath) {
+std::vector<ShadersData> getBlurShader(const BlurShaderParams &params, const char *vertexShaderPath, const char *fragmentShaderPath) {
     ShadersData blur = readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath });
     ShadersData resultHorizontal, resultVertical;
 
@@ -203,7 +203,9 @@ std::vector<ShadersData> getBlurShader(const uint &blurKernelRadius, const char 
 
     resultHorizontal.fragment = 
         out[0] + (
-            "#define KERNEL_RADIUS " + std::to_string(blurKernelRadius) + "\n"
+            "#define KERNEL_RADIUS " + std::to_string(params.blurKernelRadius) + "\n" +
+            "#define vecout " + getShaderStr(params.vecout) + "\n" +
+            "#define texComponent " + getShaderStr(params.texComponent) + "\n"
         );
 
     resultVertical.fragment = resultHorizontal.fragment + "#define ALGINE_VERTICAL\n" + out[1];
@@ -226,7 +228,7 @@ ShadersData getCubemapShader(const CubemapShaderParams &params, const char *vert
             "#define ALGINE_CUBEMAP_COLOR_OUT_COLOR_COMPONENT " + std::to_string(params.cubemapColorOutColorComponent) + "\n" +
             "#define ALGINE_POS_OUT_COLOR_COMPONENT " + std::to_string(params.positionOutColorComponent) + "\n"
         ) + (
-            "#define vecout " + std::string(params.vecout == ALGINE_VEC3 ? "vec3" : "vec4") + "\n"
+            "#define vecout " + getShaderStr(params.vecout) + "\n"
         ) + (
             params.cubemapColorOutput == ALGINE_ENABLED ? "#define ALGINE_CUBEMAP_COLOR\n" : ""
         ) + (

@@ -242,6 +242,13 @@ struct CubemapShaderParams {
         positionOutput = ALGINE_DISABLED;
 };
 
+struct BlurShaderParams {
+    uint
+        blurKernelRadius = 4,
+        vecout = ALGINE_VEC3,
+        texComponent = ALGINE_SHADER_TEX_COMPONENT_RGB;
+};
+
 struct AlgineParams {
     uint
         normalMappingMode = ALGINE_NORMAL_MAPPING_MODE_ENABLED,
