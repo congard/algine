@@ -143,7 +143,7 @@ struct QuadRenderer {
 struct AlgineRenderer {
     SSRShader *ssrs;
     BloomSearchShader *bloomSearchShader;
-    BlurShader *blurShaders[2]; // { horizontal, vertical }
+    BlurShader **blurShaders; // { horizontal, vertical }
     BlendShader *blendShader;
     DOFBlurShader *dofBlurShaders[2]; // { horizontal, vertical }
     DOFCoCShader *dofCoCShader;
