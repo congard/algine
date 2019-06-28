@@ -20,6 +20,9 @@ std::vector<std::string> split(std::string &in, const std::string &delimiter);
 // splits `in` by `delimiter`
 std::vector<std::string> split(const std::string &in, const std::string &delimiter);
 
+// returns shader string. `val` can be `ALGINE_VEC1..ALGINE_VEC4`, `ALGINE_SHADER_TEX_COMPONENT_RED..ALGINE_SHADER_TEX_COMPONENT_RGB`
+std::string getShaderStr(const uint &val);
+
 }
 
 #endif /* ALGINE_CORE_UTILS_H */
