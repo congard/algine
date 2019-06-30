@@ -221,10 +221,18 @@ struct AlgineRenderer {
 		}
 
     // dofMap may be position map or coc map depending on the method you use
-    void dofBlurPass(const uint pingpongFBO[2], const uint dofBuffers[2], const uint &dofMap, const uint &image, const uint &blurAmount) {
+    void dofBlurPass(const uint pingpongFBO[2], const uint dofBuffers[2], const uint &image, const uint &dofMap, const uint &blurAmount) {
         _dofBlurPass(pingpongFBO, dofBuffers, blurAmount, {
             texture2DAB(0, firstIteration ? image : dofBuffers[!horizontal]);
             texture2DAB(1, dofMap);
+        })
+    }
+
+    void dofBlurPass(const uint pingpongFBO[2], const uint dofBuffers[2], const uint &image, const uint &cocMap, const uint &positionMap, const uint &blurAmount) {
+        _dofBlurPass(pingpongFBO, dofBuffers, blurAmount, {
+            texture2DAB(0, firstIteration ? image : dofBuffers[!horizontal]);
+            texture2DAB(1, cocMap);
+            texture2DAB(2, positionMap);
         })
     }
 
