@@ -59,10 +59,6 @@ ShadersData getCS(const AlgineParams &params, const ColorShaderParams &csp, cons
             params.shadowMappingMode == ALGINE_SHADOW_MAPPING_MODE_SIMPLE ? "#define ALGINE_SHADOW_MAPPING_MODE_SIMPLE\n" : 
             "#define ALGINE_SHADOW_MAPPING_MODE_DISABLED\n"
         ) + (
-            params.dofMode == ALGINE_DOF_MODE_ENABLED ? "#define ALGINE_DOF_MODE_ENABLED\n" :
-            params.dofMode == ALGINE_CINEMATIC_DOF_MODE_ENABLED ? "#define ALGINE_CINEMATIC_DOF_MODE_ENABLED\n" :
-            "#define ALGINE_DOF_MODE_DISABLED\n"
-        ) + (
             params.textureMappingMode == ALGINE_TEXTURE_MAPPING_MODE_ENABLED ? "#define ALGINE_TEXTURE_MAPPING_MODE_ENABLED\n" :
             params.textureMappingMode == ALGINE_TEXTURE_MAPPING_MODE_DUAL ? "#define ALGINE_TEXTURE_MAPPING_MODE_DUAL\n" : 
             "#define ALGINE_TEXTURE_MAPPING_MODE_DISABLED\n"
@@ -119,7 +115,8 @@ ShadersData getSS(const AlgineParams &params, const ShadowShaderParams &ssp, con
 }
 
 // dof blur shader
-std::vector<ShadersData> getDOFBlurShader(const AlgineParams &params, const uint &blurKernelRadius, const char *vertexShaderPath, const char *fragmentShaderPath) {
+#define s(n) std::string(n)
+std::vector<ShadersData> getDOFBlurShader(const DOFBlurShaderParams &params, const char *vertexShaderPath, const char *fragmentShaderPath) {
     ShadersData dof = readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath });
     ShadersData resultHorizontal, resultVertical;
 
@@ -129,11 +126,15 @@ std::vector<ShadersData> getDOFBlurShader(const AlgineParams &params, const uint
 
     resultHorizontal.fragment = 
         out[0] + (
-            params.dofMode == ALGINE_CINEMATIC_DOF_MODE_ENABLED ? "#define ALGINE_CINEMATIC_DOF\n" :
-            params.dofMode == ALGINE_DOF_MODE_ENABLED ? "#define ALGINE_LINEAR_DOF\n" :
-            params.dofMode == ALGINE_DOF_FROM_COC_MAP ? "#define ALGINE_DOF_FROM_COC_MAP\n" : ""
+            params.type == ALGINE_CINEMATIC_DOF ? "#define ALGINE_CINEMATIC_DOF\n" :
+            params.type == ALGINE_LINEAR_DOF ? "#define ALGINE_LINEAR_DOF\n" :
+            params.type == ALGINE_DOF_FROM_COC_MAP ? "#define ALGINE_DOF_FROM_COC_MAP\n" : ""
         ) + (
-            "#define KERNEL_RADIUS " + std::to_string(blurKernelRadius) + "\n"
+            (params.bleedingEliminationDeltaZ == ALGINE_ENABLED ? s("#define ALGINE_BLEEDING_ELIM_DZ\n") : s()) +
+            (params.bleedingEliminationDeltaCoC == ALGINE_ENABLED ? s("#define ALGINE_BLEEDING_ELIM_DCOC\n") : s()) +
+            (params.bleedingEliminationFocusCoC == ALGINE_ENABLED ? s("#define ALGINE_BLEEDING_ELIM_FCOC\n") : s())
+        ) + (
+            "#define KERNEL_RADIUS " + std::to_string(params.blurKernelRadius) + "\n"
         );
 
     // fragment shader vertical 1st and 2nd part
@@ -143,9 +144,10 @@ std::vector<ShadersData> getDOFBlurShader(const AlgineParams &params, const uint
 
     return std::vector<ShadersData> { resultHorizontal, resultVertical };
 }
+#undef s
 
 // dof coc shader
-ShadersData getDOFCoCShader(const AlgineParams &params, const char *vertexShaderPath, const char *fragmentShaderPath) {
+ShadersData getDOFCoCShader(const DOFBlurShaderParams &params, const char *vertexShaderPath, const char *fragmentShaderPath) {
     ShadersData sdata = readShader(ShadersPaths { vertexShaderPath, fragmentShaderPath });
     ShadersData result;
 
@@ -155,7 +157,7 @@ ShadersData getDOFCoCShader(const AlgineParams &params, const char *vertexShader
 
     result.fragment = 
         out[0] + (
-            params.dofMode == ALGINE_CINEMATIC_DOF_MODE_ENABLED ? "#define ALGINE_CINEMATIC_DOF\n" :
+            params.type == ALGINE_CINEMATIC_DOF ? "#define ALGINE_CINEMATIC_DOF\n" :
             "#define ALGINE_LINEAR_DOF\n"
         ) + out[1];
 
@@ -394,6 +396,9 @@ void loadLocations(DOFBlurShader &shader) {
     // fragment shader
     shader.samplerImage = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SAMPLER_IMAGE);
     shader.samplerCoCMap = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SAMPLER_MAP_COC);
+    shader.bleedingEliminationMinDeltaZ = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_BLEEDING_ELIM_MIN_DZ);
+    shader.bleedingEliminationMinDeltaCoC = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_BLEEDING_ELIM_MIN_DCOC);
+    shader.bleedingEliminationMaxFocusCoC = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_BLEEDING_ELIM_MAX_FCOC);
 }
 
 void loadLocations(DOFCoCShader &shader) {

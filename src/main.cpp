@@ -109,6 +109,7 @@ BlurShader *blurCoCShaders[2] = { &blurCoCH, &blurCoCV };
 AlgineParams params;
 ColorShaderParams csp;
 ShadowShaderParams ssp;
+DOFBlurShaderParams dofBlurParams;
 
 float blendExposure = 6.0f, blendGamma = 1.125f;
 
@@ -118,6 +119,9 @@ float
     dofAperture = 20.0f,
     dof_max_sigma = 6.0f,
     dof_min_sigma = 0.0001f,
+    bleedingEliminationMinDeltaZ = 5.0f,
+    bleedingEliminationMinDeltaCoC = 1.0f,
+    bleedingEliminationMaxFocusCoC = 2.5f,
 
     // diskRadius variables
     diskRadius_k = 1.0f / 25.0f,
@@ -281,6 +285,10 @@ void initShaders() {
     params.shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_SIMPLE;
     #endif
     params.boneSystemMode = ALGINE_BONE_SYSTEM_ENABLED;
+    dofBlurParams.blurKernelRadius = dofBlurKernelRadius;
+    dofBlurParams.bleedingEliminationDeltaZ = ALGINE_ENABLED;
+    dofBlurParams.bleedingEliminationDeltaCoC = ALGINE_ENABLED;
+    dofBlurParams.bleedingEliminationFocusCoC = ALGINE_ENABLED;
 
     cs.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getCS(
         params, csp,
@@ -304,9 +312,9 @@ void initShaders() {
         "src/resources/shaders/ssr/fragment.glsl")
     ));
 
-    params.dofMode = ALGINE_DOF_FROM_COC_MAP;
+    dofBlurParams.type = ALGINE_DOF_FROM_COC_MAP;
     std::vector<ShadersData> blus = scompiler::getDOFBlurShader(
-        params, dofBlurKernelRadius,
+        dofBlurParams,
         "src/resources/shaders/dof/vertex.glsl",
         "src/resources/shaders/dof/fragment.glsl"
     );
@@ -317,9 +325,9 @@ void initShaders() {
         blus[1]
     ));
 
-    params.dofMode = ALGINE_CINEMATIC_DOF_MODE_ENABLED;
+    dofBlurParams.type = ALGINE_CINEMATIC_DOF;
     dofCoCShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getDOFCoCShader(
-        params,
+        dofBlurParams,
         "src/resources/shaders/dof/vertex.glsl",
         "src/resources/shaders/dof/coc_fragment.glsl")
     ));
@@ -358,6 +366,8 @@ void initShaders() {
         "src/resources/shaders/basic/cubemap_vertex.glsl",
         "src/resources/shaders/basic/cubemap_fragment.glsl")
     ));
+
+    std::cout << "Compilation done\n";
 
     scompiler::loadLocations(cs, params, csp);
     scompiler::loadLocations(ss);
@@ -517,11 +527,15 @@ void initShaders() {
     glUniform1f(blendShader.exposure, blendExposure);
     glUniform1f(blendShader.gamma, blendGamma);
 
-    // blur setting
+    // dof blur setting
     for (size_t i = 0; i < 2; i++) {
         glUseProgram(renderer.dofBlurShaders[i]->programId);
         glUniform1i(renderer.dofBlurShaders[i]->samplerImage, 0);
         glUniform1i(renderer.dofBlurShaders[i]->samplerCoCMap, 1);
+        glUniform1i(renderer.dofBlurShaders[i]->samplerPositionMap, 2);
+        glUniform1f(renderer.dofBlurShaders[i]->bleedingEliminationMinDeltaZ, bleedingEliminationMinDeltaZ);
+        glUniform1f(renderer.dofBlurShaders[i]->bleedingEliminationMinDeltaCoC, bleedingEliminationMinDeltaCoC);
+        glUniform1f(renderer.dofBlurShaders[i]->bleedingEliminationMaxFocusCoC, bleedingEliminationMaxFocusCoC);
     }
 
     // screen space setting
@@ -892,7 +906,7 @@ void render() {
     renderer.blurShaders = blurCoCShaders;
     renderer.blurPass(pingpongBlurCoCFB, pingpongBlurCoCTex, cocTex, bloomBlurAmount);
 
-    renderer.dofBlurPass(pingpongFB, pingpongDofTex, pingpongBlurCoCTex[!renderer.horizontal], screenspaceTex, dofBlurAmount);
+    renderer.dofBlurPass(pingpongFB, pingpongDofTex, screenspaceTex, pingpongBlurCoCTex[!renderer.horizontal], positionTex, dofBlurAmount);
 
     bindFramebuffer(0);
     renderer.doubleBlendPass(pingpongDofTex[!renderer.horizontal], pingpongBlurTex[!renderer.horizontal]);

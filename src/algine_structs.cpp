@@ -115,7 +115,10 @@ struct DOFBlurShader {
         focalRange,
         cinematicDOFPlaneInFocus,
         cinematicDOFAperture,
-        cinematicDOFImageDistance;
+        cinematicDOFImageDistance,
+        bleedingEliminationMinDeltaZ,
+        bleedingEliminationMinDeltaCoC,
+        bleedingEliminationMaxFocusCoC;
 };
 
 struct DOFCoCShader {
@@ -249,6 +252,15 @@ struct BlurShaderParams {
         texComponent = ALGINE_SHADER_TEX_COMPONENT_RGB;
 };
 
+struct DOFBlurShaderParams {
+    uint
+        blurKernelRadius,
+        type,
+        bleedingEliminationDeltaZ = ALGINE_DISABLED,
+        bleedingEliminationDeltaCoC = ALGINE_DISABLED,
+        bleedingEliminationFocusCoC = ALGINE_DISABLED;
+};
+
 struct AlgineParams {
     uint
         normalMappingMode = ALGINE_NORMAL_MAPPING_MODE_ENABLED,
@@ -256,7 +268,6 @@ struct AlgineParams {
         shadowMappingType = ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING,
         bloomMode = ALGINE_BLOOM_MODE_ENABLED,
         bloomType = ALGINE_BLOOM_TYPE_ADD,
-        dofMode = ALGINE_DOF_MODE_ENABLED,
         textureMappingMode = ALGINE_TEXTURE_MAPPING_MODE_ENABLED,
         lightingMode = ALGINE_LIGHTING_MODE_ENABLED,
         attenuationMode = ALGINE_ATTENUATION_MODE_ENABLED,
