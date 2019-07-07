@@ -10,8 +10,8 @@
 #include <glm/glm.hpp>
 
 #include "algine_renderer.cpp"
-#include "algine_shader_compiler.cpp"
-#include "algine_structs.cpp"
+#include <algine/shader_compiler.h>
+#include <algine/algine_structs.h>
 #include "animation.cpp"
 #include "bone.cpp"
 #include <algine/core_utils.h>
@@ -21,13 +21,12 @@
 #include "light.cpp"
 #include "material.cpp"
 #include <algine/math.h>
-#include "mesh.cpp"
 #include "model.cpp"
 #include <algine/node.h>
 #include <algine/renderbuffer.h>
 #include <algine/sconstants.h>
-#include "shaderprogram.cpp"
-#include "texture.cpp"
+#include <algine/shader_program.h>
+#include <algine/texture.h>
 #include <algine/types.h>
 
 #endif /* ALGINE_CPP */

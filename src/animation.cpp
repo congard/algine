@@ -12,7 +12,6 @@
 
 #include <algine/types.h>
 #include <algine/node.h>
-#include "mesh.cpp"
 #include "bone.cpp"
 
 #ifdef ALGINE_ANIMATION_FACTOR_ASSERTION

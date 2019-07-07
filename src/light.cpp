@@ -19,9 +19,9 @@
 #include "algine_renderer.cpp"
 #include "model.cpp"
 #include <algine/types.h>
-#include "algine_structs.cpp"
+#include <algine/algine_structs.h>
 #include <algine/framebuffer.h>
-#include "texture.cpp"
+#include <algine/texture.h>
 
 namespace algine {
 struct Light {
