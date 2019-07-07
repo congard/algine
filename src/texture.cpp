@@ -1,59 +1,38 @@
-#ifndef ALGINE_TEXTURE_CPP
-#define ALGINE_TEXTURE_CPP
+#include <algine/texture.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
-#include <GL/glew.h>
-#include <iostream>
 #include <stb/stb_image.h>
 #include <stb/stb_image_write.h>
 #include <algine/framebuffer.h>
-
-// fill bound texture
-#define _fillbtex(target, level, internalformat, format, width, height, type, data) \
-    glTexImage2D(target, level, internalformat, width, height, 0, format, type, data)
-
-#define _cfgtex(target, texture, level, internalformat, format, width, height, type) \
-    glBindTexture(target, texture); \
-    glTexImage2D(target, level, internalformat, width, height, 0, format, type, NULL);
-
-#define COLOR_ATTACHMENT(n) (GL_COLOR_ATTACHMENT0 + n)
-#define TEXTURE(n) (GL_TEXTURE0 + n)
+#include <iostream>
+#include <algine/types.h>
 
 namespace algine {
-inline void activeTexture(const uint &index) {
+void activeTexture(const uint &index) {
     glActiveTexture(TEXTURE(index));
 }
 
-inline void bindTexture2D(const uint &texture) {
+void bindTexture2D(const uint &texture) {
     glBindTexture(GL_TEXTURE_2D, texture);
 }
 
 // Activate & Bind 2D texture
-inline void texture2DAB(const uint &index, const uint &texture) {
+void texture2DAB(const uint &index, const uint &texture) {
     activeTexture(index);
 	bindTexture2D(texture);
 }
 
-inline void bindTextureCube(const uint &texture) {
+void bindTextureCube(const uint &texture) {
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 }
 
-struct TextureParams {
-    uint target; // specifies the target texture. Must be GL_TEXTURE_2D, etc
-    int level = 0; // specifies the level-of-detail number. Level 0 is the base image level. Level n is the nth mipmap reduction image
-    int internalformat; // specifies the number of color components in the texture
-    uint width, height;
-    uint format; // specifies the format of the pixel data. The following symbolic values are accepted: GL_RED, GL_RG, GL_RGB, etc
-    uint type = GL_FLOAT; // specifies the data type of the pixel data. The following symbolic values are accepted: GL_UNSIGNED_BYTE, GL_BYTE, etc
-};
-
-inline void cfgtex2D(const uint &texture, const int &internalformat, const uint &format, const uint &width, const uint &height) {
+void cfgtex2D(const uint &texture, const int &internalformat, const uint &format, const uint &width, const uint &height) {
     _cfgtex(GL_TEXTURE_2D, texture, 0, internalformat, format, width, height, GL_FLOAT);
 }
 
-inline void fillbtex(const TextureParams &tp, const void *data) {
+void fillbtex(const TextureParams &tp, const void *data) {
     _fillbtex(tp.target, tp.level, tp.internalformat, tp.format, tp.width, tp.height, tp.type, data);
 }
 
@@ -61,7 +40,7 @@ inline void fillbtex(const TextureParams &tp, const void *data) {
  * Loading texture using stb_image.h
  * `path` - full path to texture
  */
-static GLuint loadTexture(const char *path, GLint internalformat = GL_RGB, GLuint format = GL_RGB, GLuint type = GL_UNSIGNED_BYTE) {
+uint loadTexture(const char *path, int internalformat, uint format, uint type) {
     GLuint texture = 0;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -111,7 +90,7 @@ void applyDefaultTextureCubeParams() {
 /**
  * Default params for specified texture
  */
-void applyDefaultTexture2DParams(const GLuint &texture) {
+void applyDefaultTexture2DParams(const uint &texture) {
     bindTexture2D(texture);
     applyDefaultTexture2DParams();
     bindTexture2D(0);   
@@ -120,20 +99,20 @@ void applyDefaultTexture2DParams(const GLuint &texture) {
 /**
  * Default params for textures
  */
-void applyDefaultTexture2DParams(GLuint *textures, size_t count) {
+void applyDefaultTexture2DParams(uint *textures, size_t count) {
     for (size_t i = 0; i < count; i++) applyDefaultTexture2DParams(textures[i]);
 }
 
 /**
  * Default params for specified cube texture
  */
-void applyDefaultTextureCubeParams(const GLuint &texture) {
+void applyDefaultTextureCubeParams(const uint &texture) {
     bindTextureCube(texture);
     applyDefaultTextureCubeParams();
     bindTextureCube(0);   
 }
 
-inline size_t getTexComponentsCount(GLuint format) {
+size_t getTexComponentsCount(uint format) {
     switch (format) {
         case GL_RG:
             return 2;
@@ -158,7 +137,7 @@ inline size_t getTexComponentsCount(GLuint format) {
 /**
  * Reads whole texture
  */
-GLfloat* getTexImage2D(GLuint texture, size_t width, size_t height, GLuint format) {
+float* getTexImage2D(uint texture, size_t width, size_t height, uint format) {
     getTexImage(GL_TEXTURE_2D, GL_TEXTURE_2D, texture, width, height, format);
     return pixels;
 }
@@ -167,7 +146,7 @@ GLfloat* getTexImage2D(GLuint texture, size_t width, size_t height, GLuint forma
  * Reads whole texture
  * `target` - `GL_TEXTURE_CUBE_MAP_POSITIVE_X` and others
  */
-GLfloat* getTexImageCube(GLenum target, GLuint texture, size_t width, size_t height, GLuint format) {
+float* getTexImageCube(GLenum target, GLuint texture, size_t width, size_t height, GLuint format) {
     getTexImage(GL_TEXTURE_CUBE_MAP, target, texture, width, height, format);
     return pixels;
 }
@@ -177,7 +156,7 @@ GLfloat* getTexImageCube(GLenum target, GLuint texture, size_t width, size_t hei
 /**
  * Reads pixels from framebuffer
  */
-inline GLfloat* getPixelsFB(GLuint framebuffer, size_t x, size_t y, size_t width, size_t height, GLuint format) {
+float* getPixelsFB(uint framebuffer, size_t x, size_t y, size_t width, size_t height, uint format) {
     bindFramebuffer(framebuffer);
     GLfloat* pixels = new GLfloat(width * height * getTexComponentsCount(format));
     glReadPixels(x, y, width, height, format, GL_FLOAT, pixels);
@@ -188,7 +167,7 @@ inline GLfloat* getPixelsFB(GLuint framebuffer, size_t x, size_t y, size_t width
 /**
  * Reads pixels from texture
  */
-GLfloat* getPixels(GLuint texture, size_t x, size_t y, size_t width, size_t height, GLuint format) {
+float* getPixels(uint texture, size_t x, size_t y, size_t width, size_t height, uint format) {
     GLuint framebuffer;
     Framebuffer::create(&framebuffer);
     bindFramebuffer(framebuffer);
@@ -198,7 +177,7 @@ GLfloat* getPixels(GLuint texture, size_t x, size_t y, size_t width, size_t heig
     return pixels;
 }
 
-void saveTexImage(const GLfloat *image, size_t width, size_t height, size_t inComponents, const std::string &path, size_t outComponents, bool flip = true) {
+void saveTexImage(const float *image, size_t width, size_t height, size_t inComponents, const std::string &path, size_t outComponents, bool flip) {
     unsigned char *data = new unsigned char[width * height * outComponents];
     for (size_t i = 0; i < width * height * outComponents; i++) data[i] = 0;
 
@@ -218,68 +197,65 @@ void saveTexImage(const GLfloat *image, size_t width, size_t height, size_t inCo
     delete[] data;
 }
 
-struct Texture {
-    static void create(GLuint *id) {
-        glGenTextures(1, id);
-    }
+// struct Texture
+void Texture::create(uint *id) {
+    glGenTextures(1, id);
+}
 
-    static void create(GLuint *id, GLsizei count) {
-        glGenTextures(count, id);
-    }
+void Texture::create(uint *id, const uint &count) {
+    glGenTextures(count, id);
+}
 
-    static void destroy(GLuint *id) {
-        glDeleteTextures(1, id);
-    }
-};
+void Texture::destroy(uint *id) {
+    glDeleteTextures(1, id);
+}
 
-struct TextureCube: public Texture {
-    struct CubePaths {
-        std::string right, left, top, bottom, back, front;
+void Texture::destroy(uint *id, const uint &count) {
+    glDeleteTextures(count, id);
+}
 
-        CubePaths(
-            const std::string &right, const std::string &left,
-            const std::string &top, const std::string &bottom,
-            const std::string &back, const std::string &front
-        ) {
-            this->right = right;
-            this->left = left;
-            this->top = top;
-            this->bottom = bottom;
-            this->back = back;
-            this->front = front;
-        }
+// struct TextureCube::CubePaths
+TextureCube::CubePaths::CubePaths(
+    const std::string &right, const std::string &left,
+    const std::string &top, const std::string &bottom,
+    const std::string &back, const std::string &front
+) {
+    this->right = right;
+    this->left = left;
+    this->top = top;
+    this->bottom = bottom;
+    this->back = back;
+    this->front = front;
+}
 
-        CubePaths() {}
-    };
+TextureCube::CubePaths::CubePaths() {}
 
-    static void setFace(const TextureParams &params, const void *data) {
-        fillbtex(params, data);
-    }
+// struct TextureCube
+void TextureCube::setFace(const TextureParams &params, const void *data) {
+    fillbtex(params, data);
+}
 
-    static void setFace(const TextureParams &params, const uint &texCube, const void *data) {
-        glBindTexture(GL_TEXTURE_CUBE_MAP, texCube);
-        fillbtex(params, data);
-    }
+void TextureCube::setFace(const TextureParams &params, const uint &texCube, const void *data) {
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texCube);
+    fillbtex(params, data);
+}
 
-    static void loadFaces(const TextureParams &_params, const CubePaths &paths) {
-        TextureParams params = _params;
+void TextureCube::loadFaces(const TextureParams &_params, const CubePaths &paths) {
+    TextureParams params = _params;
 
-        int width, height, nrChannels;
+    int width, height, nrChannels;
 
-        for (uint i = 0; i < 6; i++) {
-            ubyte *data = stbi_load((*(&paths.right + i)).c_str(), &width, &height, &nrChannels, 0);
+    for (uint i = 0; i < 6; i++) {
+        ubyte *data = stbi_load((*(&paths.right + i)).c_str(), &width, &height, &nrChannels, 0);
 
-            params.width = width;
-            params.height = height;
-            params.target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+        params.width = width;
+        params.height = height;
+        params.target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
 
-            setFace(params, data);
+        setFace(params, data);
             
-            stbi_image_free(data);
-        }
+        stbi_image_free(data);
     }
-};
+}
 
 } // namespace algine
-
-#endif /* ALGINE_TEXTURE_CPP */
