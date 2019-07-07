@@ -5,6 +5,9 @@
 #include <vector>
 #include <string>
 
+#define delete_ptr(ptr) if (ptr != nullptr) { delete ptr; ptr = nullptr; }
+#define delete_ptr_arr(ptr) if (ptr != nullptr) { delete[] ptr; ptr = nullptr; }
+
 namespace algine {
 // returns GPU Vendor name
 // for example `NVIDIA Corporation`
