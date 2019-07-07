@@ -7,35 +7,35 @@
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "algine_structs.cpp"
-#include "texture.cpp"
+#include <algine/algine_structs.h>
+#include <algine/texture.h>
 #include <algine/framebuffer.h>
 #include <algine/renderbuffer.h>
-#include "shaderprogram.cpp"
+#include <algine/shader_program.h>
 #include <algine/types.h>
 #include <algine/constants.h>
 
 namespace algine {
-inline void pointer(GLint location, int count, GLuint buffer) {
+inline void pointer(const int location, const int count, const uint buffer, const uint stride = 0, const void *offset = nullptr) {
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glVertexAttribPointer(
         location, // attribute location
         count,    // count (1, 2, 3 or 4)
         GL_FLOAT, // type
         GL_FALSE, // is normalized?
-        0,        // step
-        nullptr   // offset
+        stride,   // step
+        offset    // offset
     );
 }
 
-inline void pointerui(GLint location, int count, GLuint buffer) {
+inline void pointerui(const int location, const int count, const uint buffer, const uint stride = 0, const void *offset = nullptr) {
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glVertexAttribIPointer(
-        location, // attribute location
-        count,    // count (1, 2, 3 or 4)
+        location,        // attribute location
+        count,           // count (1, 2, 3 or 4)
         GL_UNSIGNED_INT, // type
-        0,        // step
-        nullptr   // offset
+        stride,          // step
+        offset           // offset
     );
 }
 
@@ -45,9 +45,10 @@ inline void pointerui(GLint location, int count, GLuint buffer) {
 #define setMat4(location, mat) glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat))
 
 struct CubeRenderer {
-    uint cubeBuffer;
+    uint cubeBuffer, cubeVAO;
 
-    void init() {
+    // if `inPosLocation` != -1, VAO will be created
+    void init(const int &inPosLocation = -1) {
         // source: https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
 	    static const float vertices[] = {
             -1.0f,  1.0f,  1.0f,    // Front-top-left
@@ -70,6 +71,31 @@ struct CubeRenderer {
         glBindBuffer(GL_ARRAY_BUFFER, cubeBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        if (inPosLocation == -1) return;
+
+        // create & configure VAO
+        glGenVertexArrays(1, &cubeVAO);
+        glBindVertexArray(cubeVAO);
+
+        glEnableVertexAttribArray(inPosLocation);
+	    pointer(inPosLocation, 3, cubeBuffer);
+
+        glBindVertexArray(0);
+    }
+
+    inline void bindVAO() {
+        glBindVertexArray(cubeVAO);
+    }
+
+    // just calls `glDrawArrays(GL_TRIANGLE_STRIP, 0, 14)`
+    inline void drawCube() {
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
+    }
+
+    inline void render() {
+        bindVAO();
+        drawCube();
     }
 
     inline void render(const int &inPosLocation) {
@@ -88,13 +114,15 @@ struct CubeRenderer {
 
     ~CubeRenderer() {
         glDeleteBuffers(1, &cubeBuffer);
+        glDeleteVertexArrays(1, &cubeVAO);
     }
 };
 
 struct QuadRenderer {
     uint quadBuffers[2]; // vertexBuffer and texCoordsBuffer
+    uint quadVAO;
 
-    void init() {
+    void init(const int &inPosLocation = -1, const int &inTexCoordLocation = -1) {
         // creating buffers for quad rendering
         static float
             vertices[12] = {
@@ -116,9 +144,36 @@ struct QuadRenderer {
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, quadBuffers[1]); // texCoords
         glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
+
+        if (inPosLocation == -1 || inTexCoordLocation == -1) return;
+
+        // create & configure VAO
+        glGenVertexArrays(1, &quadVAO);
+        glBindVertexArray(quadVAO);
+
+        glEnableVertexAttribArray(inPosLocation);
+        glEnableVertexAttribArray(inTexCoordLocation);
+	    pointer(inPosLocation, 3, quadBuffers[0]);
+		pointer(inTexCoordLocation, 2, quadBuffers[1]);
+
+        glBindVertexArray(0);
     }
 
-    void render(const int &inPosLocation, const int &inTexCoordLocation) {
+    inline void bindVAO() {
+        glBindVertexArray(quadVAO);
+    }
+
+    // just calls `glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)`
+    inline void drawQuad() {
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+
+    inline void render() {
+        bindVAO();
+        drawQuad();
+    }
+
+    inline void render(const int &inPosLocation, const int &inTexCoordLocation) {
 		glEnableVertexAttribArray(inPosLocation);
         glEnableVertexAttribArray(inTexCoordLocation);
 	    pointer(inPosLocation, 3, quadBuffers[0]);
@@ -130,13 +185,14 @@ struct QuadRenderer {
         glDisableVertexAttribArray(inTexCoordLocation);
 	}
 
-    void render(const int &programId, const int &inPosLocation, const int &inTexCoordLocation) {
+    inline void render(const int &programId, const int &inPosLocation, const int &inTexCoordLocation) {
         useShaderProgram(programId);
         render(inPosLocation, inTexCoordLocation);
     }
 
     ~QuadRenderer() {
         glDeleteBuffers(2, quadBuffers);
+        glDeleteVertexArrays(1, &quadVAO);
     }
 };
 
@@ -170,7 +226,7 @@ struct AlgineRenderer {
         bindFramebuffer(bsFBO);
         useShaderProgram(bloomSearchShader->programId);
         texture2DAB(0, image);
-        quadRenderer->render(bloomSearchShader->inPosition, bloomSearchShader->inTexCoord);
+        quadRenderer->drawQuad();
     }
 
     void blurPass(const uint pingpongFBO[2], const uint pingpongBuffers[2], const uint &image, const uint &blurAmount) {
@@ -184,7 +240,7 @@ struct AlgineRenderer {
             texture2DAB(0, firstIteration ? image : pingpongBuffers[!horizontal]); // bloom
             
             // rendering
-			quadRenderer->render(blurShaders[horizontal]->inPosition, blurShaders[horizontal]->inTexCoord);
+			quadRenderer->drawQuad();
 			horizontal = !horizontal;
 			if (firstIteration) firstIteration = false;
 		}
@@ -197,14 +253,14 @@ struct AlgineRenderer {
         texture2DAB(1, normalMap);
         texture2DAB(2, ssrValuesMap);
         texture2DAB(3, positionMap);
-        quadRenderer->render(ssrs->inPosition, ssrs->inTexCoord);
+        quadRenderer->drawQuad();
     }
 
     void dofCoCPass(const uint &cocFBO, const uint &positionMap) {
         bindFramebuffer(cocFBO);
         useShaderProgram(dofCoCShader->programId);
         texture2DAB(0, positionMap);
-        quadRenderer->render(dofCoCShader->inPosition, dofCoCShader->inTexCoord);
+        quadRenderer->drawQuad();
     }
 
     #define _dofBlurPass(pingpongFBO, dofBuffers, blurAmount, code_tex_ab) \
@@ -215,7 +271,7 @@ struct AlgineRenderer {
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);    \
             code_tex_ab                                                    \
             /* rendering */                                                \
-			quadRenderer->render(dofBlurShaders[horizontal]->inPosition, dofBlurShaders[horizontal]->inTexCoord); \
+			quadRenderer->drawQuad();                                      \
 			horizontal = !horizontal;                                      \
 			if (firstIteration) firstIteration = false;                    \
 		}
@@ -243,14 +299,14 @@ struct AlgineRenderer {
 		glUseProgram(blendShader->programId);
         texture2DAB(0, image);
 		texture2DAB(1, bloom);
-		quadRenderer->render(blendShader->inPosition, blendShader->inTexCoord);
+		quadRenderer->drawQuad();
     }
 
     void blendPass(const uint &texture0) {
         // Do not need to call glClear, because the texture is completely redrawn
 		glUseProgram(blendShader->programId);
         texture2DAB(0, texture0);
-		quadRenderer->render(blendShader->inPosition, blendShader->inTexCoord);
+		quadRenderer->drawQuad();
     }
 
     ~AlgineRenderer() {

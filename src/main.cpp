@@ -43,13 +43,11 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods);
 GLuint winWidth = 1366, winHeight = 763;
 GLFWwindow* window;
 
-GLuint vao;
-
 // matrices
 glm::mat4 projectionMatrix, viewMatrix, *modelMatrix; // model matrix stored in Model::transformation
 
 // camera params
-glm::vec3 cameraPos(-0, 8, 7);
+glm::vec3 cameraPos(0, 8, 7);
 glm::vec3 cameraLookAt(0, 4, 0);
 glm::vec3 cameraUp(0, 1, 0);
 
@@ -116,7 +114,7 @@ float blendExposure = 6.0f, blendGamma = 1.125f;
 float
     // DOF variables
     dofImageDistance = 1.0f,
-    dofAperture = 20.0f,
+    dofAperture = 10.0f,
     dof_max_sigma = 6.0f,
     dof_min_sigma = 0.0001f,
     bleedingEliminationMinDeltaZ = 5.0f,
@@ -228,6 +226,8 @@ void createShapes(const std::string &path, GLuint params, size_t id, bool invers
     shapes[id].init(path, params);
     if (inverseNormals) shapes[id].inverseNormals();
     shapes[id].genBuffers();
+    shapes[id].createVAO(ss.inPosition, -1, -1, -1, -1, ss.inBoneWeights, ss.inBoneIds); // all shadow shaders have same ids
+    shapes[id].createVAO(cs.inPosition, cs.inTexCoord, cs.inNormal, cs.inTangent, cs.inBitangent, cs.inBoneWeights, cs.inBoneIds);
 }
 
 /* init code begin */
@@ -308,14 +308,14 @@ void initShaders() {
         "src/resources/shaders/shadow/fragment_shadow_shader.glsl")
     ));
     ssrs.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSSRShader(
-        "src/resources/shaders/ssr/vertex.glsl",
+        "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/ssr/fragment.glsl")
     ));
 
     dofBlurParams.type = ALGINE_DOF_FROM_COC_MAP;
     std::vector<ShadersData> blus = scompiler::getDOFBlurShader(
         dofBlurParams,
-        "src/resources/shaders/dof/vertex.glsl",
+        "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/dof/fragment.glsl"
     );
     dofBlurH.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(
@@ -328,24 +328,24 @@ void initShaders() {
     dofBlurParams.type = ALGINE_CINEMATIC_DOF;
     dofCoCShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getDOFCoCShader(
         dofBlurParams,
-        "src/resources/shaders/dof/vertex.glsl",
+        "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/dof/coc_fragment.glsl")
     ));
 
     blendShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getBlendShader(
         params,
-        "src/resources/shaders/blend/vertex.glsl",
+        "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/blend/fragment.glsl")
     ));
 
     bloomSearchShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getBloomSearchShader(
-        "src/resources/shaders/bloom/vertex_search.glsl",
+        "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/bloom/fragment_search.glsl")
     ));
 
     std::vector<ShadersData> blur = scompiler::getBlurShader(
         BlurShaderParams { bloomBlurKernelRadius },
-        "src/resources/shaders/blur/vertex.glsl",
+        "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/blur/fragment.glsl"
     );
     blurBloomH.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(blur[0]));
@@ -353,7 +353,7 @@ void initShaders() {
 
     blur = scompiler::getBlurShader(
         BlurShaderParams { cocBlurKernelRadius, ALGINE_VEC1, ALGINE_SHADER_TEX_COMPONENT_RED },
-        "src/resources/shaders/blur/vertex.glsl",
+        "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/blur/fragment.glsl"
     );
     blurCoCH.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(blur[0]));
@@ -393,8 +393,8 @@ void initShaders() {
     renderer.dofCoCShader = &dofCoCShader;
     renderer.quadRenderer = &quadRenderer;
 
-    skyboxRenderer.init();
-    quadRenderer.init();
+    skyboxRenderer.init(skyboxShader.inPosition);
+    quadRenderer.init(ALGINE_IN_POS_LOCATION, ALGINE_IN_TEX_COORD_LOCATION);
 
     Framebuffer::create(&displayFB);
     Framebuffer::create(&screenspaceFB);
@@ -547,14 +547,6 @@ void initShaders() {
 }
 
 /**
- * Generating Vertex Array Object
- */
-void initVAO() {
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-}
-
-/**
  * Creating matrices
  */
 void initMatrices() {
@@ -676,7 +668,6 @@ void initDOF() {
  * Cleans memory before exit
  */
 void recycleAll() {
-    glDeleteVertexArrays(1, &vao);
     for (size_t i = 0; i < SHAPES_COUNT; i++) shapes[i].recycle();
 
     Framebuffer::destroy(&displayFB);
@@ -685,6 +676,19 @@ void recycleAll() {
     Framebuffer::destroy(pingpongFB, 2);
     Framebuffer::destroy(pingpongBlurBloomFB, 2);
     Framebuffer::destroy(pingpongBlurCoCFB, 2);
+    Framebuffer::destroy(&cocFB);
+
+    Texture::destroy(&colorTex);
+    Texture::destroy(&normalTex);
+    Texture::destroy(&ssrValues);
+    Texture::destroy(&positionTex);
+    Texture::destroy(&screenspaceTex);
+    Texture::destroy(&bloomTex);
+    Texture::destroy(pingpongDofTex, 2);
+    Texture::destroy(pingpongBlurTex, 2);
+    Texture::destroy(pingpongBlurCoCTex, 2);
+    Texture::destroy(&skybox);
+    Texture::destroy(&cocTex);
 
     Renderbuffer::destroy(&rbo);
 }
@@ -719,30 +723,19 @@ void updateMatrices() {
  * @param ss
  */
 void drawModelDM(const Model &model, const SShader &ss) {
-    if (model.shape->bonesPerVertex != 0) {
-        glEnableVertexAttribArray(ss.inBoneWeights);
-        glEnableVertexAttribArray(ss.inBoneIds);
+    glBindVertexArray(model.shape->vaos[0]);
 
+    if (model.shape->bonesPerVertex != 0) {
         for (size_t i = 0; i < model.shape->bones.size(); i++) {
             setMat4(ss.bones + i, model.shape->bones[i].finalTransformation);
         }
     }
 
     glUniform1i(ss.boneAttribsPerVertex, model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1));
+    setMat4(ss.matModel, model.transformation);
+    
     for (size_t i = 0; i < model.shape->meshes.size(); i++) {
-	    pointer(ss.inPosition, 3, model.shape->meshes[i].getVerticesBuffer());
-        if (model.shape->bonesPerVertex != 0) {
-            pointer(ss.inBoneWeights, 4, model.shape->meshes[i].getBoneWeightsBuffer());
-            pointerui(ss.inBoneIds, 4, model.shape->meshes[i].getBoneIdsBuffer());
-        }
-	    setMat4(ss.matModel, model.transformation);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.shape->meshes[i].getIndicesBuffer());
-        glDrawElements(GL_TRIANGLES, model.shape->meshes[i].indices.size(), GL_UNSIGNED_INT, nullptr);
-    }
-
-    if (model.shape->bonesPerVertex != 0) {
-        glDisableVertexAttribArray(ss.inBoneWeights);
-        glDisableVertexAttribArray(ss.inBoneIds);
+        glDrawElements(GL_TRIANGLES, model.shape->meshes[i].count, GL_UNSIGNED_INT, reinterpret_cast<void*>(model.shape->meshes[i].start * sizeof(uint)));
     }
 }
 
@@ -750,16 +743,17 @@ void drawModelDM(const Model &model, const SShader &ss) {
  * Draws model
  */
 void drawModel(Model &model) {
+    glBindVertexArray(model.shape->vaos[1]);
+    
     if (model.shape->bonesPerVertex != 0) {
-        glEnableVertexAttribArray(cs.inBoneWeights);
-        glEnableVertexAttribArray(cs.inBoneIds);
-
         for (size_t i = 0; i < model.shape->bones.size(); i++) {
             setMat4(cs.bones + i, model.shape->bones[i].finalTransformation);
         }
     }
 
     glUniform1i(cs.boneAttribsPerVertex, model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1));
+    modelMatrix = &model.transformation;
+	updateMatrices();
     for (size_t i = 0; i < model.shape->meshes.size(); i++) {
         texture2DAB(0, model.shape->meshes[i].mat.ambientTexture);
         texture2DAB(1, model.shape->meshes[i].mat.diffuseTexture);
@@ -773,24 +767,7 @@ void drawModel(Model &model) {
         glUniform1f(cs.materialSpecularStrength, model.shape->meshes[i].mat.specularStrength);
         glUniform1f(cs.materialShininess, model.shape->meshes[i].mat.shininess);
 
-	    pointer(cs.inPosition, 3, model.shape->meshes[i].getVerticesBuffer());
-	    pointer(cs.inNormal, 3, model.shape->meshes[i].getNormalsBuffer());
-	    pointer(cs.inTangent, 3, model.shape->meshes[i].getTangentsBuffer());
-	    pointer(cs.inBitangent, 3, model.shape->meshes[i].getBitangentsBuffer());
-	    pointer(cs.inTexCoord, 2, model.shape->meshes[i].getTexCoordsBuffer());
-        if (model.shape->bonesPerVertex != 0) {
-            pointer(cs.inBoneWeights, 4, model.shape->meshes[i].getBoneWeightsBuffer());
-            pointerui(cs.inBoneIds, 4, model.shape->meshes[i].getBoneIdsBuffer());
-        }
-	    modelMatrix = &model.transformation;
-	    updateMatrices();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.shape->meshes[i].getIndicesBuffer());
-        glDrawElements(GL_TRIANGLES, model.shape->meshes[i].indices.size(), GL_UNSIGNED_INT, nullptr);
-    }
-
-    if (model.shape->bonesPerVertex != 0) {
-        glDisableVertexAttribArray(cs.inBoneWeights);
-        glDisableVertexAttribArray(cs.inBoneIds);
+        glDrawElements(GL_TRIANGLES, model.shape->meshes[i].count, GL_UNSIGNED_INT, reinterpret_cast<void*>(model.shape->meshes[i].start * sizeof(uint)));
     }
 }
 
@@ -804,8 +781,6 @@ void renderToDepthCubemap(uint index) {
 	pointLamps[index].setShadowMatricesSS();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	glEnableVertexAttribArray(ss.inPosition);
-
 	// drawing models
 	for (size_t i = 0; i < MODELS_COUNT; i++) drawModelDM(models[i], ss);
 
@@ -814,8 +789,6 @@ void renderToDepthCubemap(uint index) {
 		if (i == index) continue;
 		drawModelDM(*pointLamps[i].mptr, ss);
 	}
-
-	glDisableVertexAttribArray(ss.inPosition);
 
 	pointLamps[index].end();
 }
@@ -828,8 +801,6 @@ void renderToDepthMap(uint index) {
     setMat4(ss_dir.matLightSpace, dirLamps[index].lightSpace);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	glEnableVertexAttribArray(ss_dir.inPosition);
-
 	// drawing models
 	for (size_t i = 0; i < MODELS_COUNT; i++) drawModelDM(models[i], ss_dir);
 
@@ -839,60 +810,47 @@ void renderToDepthMap(uint index) {
 		drawModelDM(*dirLamps[i].mptr, ss_dir);
 	}
 
-	glDisableVertexAttribArray(ss_dir.inPosition);
-
 	dirLamps[index].end();
 }
 
 /**
  * Color rendering
  */
-float dof[3] = {32.0f, 0.0f, 0.0f};
 uint colorAttachment02[3] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_COLOR_ATTACHMENT2 };
 uint colorAttachment0123[4] = {
     GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3
 };
 void render() {
     renderer.mainPass(displayFB, rbo);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClearBufferfv(GL_COLOR, 1, dof); // dof buffer
-
+    
 	// view port to window size
 	glViewport(0, 0, winWidth, winHeight);
 	// updating view matrix (because camera position was changed)
 	createViewMatrix();
 
+    // render skybox
     glDrawBuffers(3, colorAttachment02);
     glDepthFunc(GL_LEQUAL);
     useShaderProgram(skyboxShader.programId);
     setMat4(skyboxShader.matTransform, projectionMatrix * glm::mat4(glm::mat3(viewMatrix)));
     glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
-    skyboxRenderer.render(skyboxShader.inPosition);
+    skyboxRenderer.render();
 
-    glDrawBuffers(4, colorAttachment0123);
     glDepthFunc(GL_LESS);
+    glDrawBuffers(4, colorAttachment0123);
     glUseProgram(cs.programId);
 
-	// sending lamps parameters to fragment shader
+    // sending lamps parameters to fragment shader
 	sendLampsData();
-    glEnableVertexAttribArray(cs.inPosition);
-    glEnableVertexAttribArray(cs.inNormal);
-    glEnableVertexAttribArray(cs.inTexCoord);
-    glEnableVertexAttribArray(cs.inTangent);
-    glEnableVertexAttribArray(cs.inBitangent);
-
+    
     // drawing
     for (size_t i = 0; i < MODELS_COUNT; i++) drawModel(models[i]);
 	for (size_t i = 0; i < POINT_LAMPS_COUNT + DIR_LAMPS_COUNT; i++) drawModel(lamps[i]);
 
-    glDisableVertexAttribArray(cs.inPosition);
-    glDisableVertexAttribArray(cs.inNormal);
-    glDisableVertexAttribArray(cs.inTexCoord);
-    glDisableVertexAttribArray(cs.inTangent);
-    glDisableVertexAttribArray(cs.inBitangent);
-
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     
+    renderer.quadRenderer->bindVAO();
+
     renderer.screenspacePass(screenspaceFB, colorTex, normalTex, ssrValues, positionTex);
 
     glViewport(0, 0, winWidth * bloomK, winHeight * bloomK);
@@ -925,21 +883,18 @@ void display() {
         glUniform1f(ss.far, pointLamps[i].far);
         renderToDepthCubemap(i);
     }
-	glUseProgram(0);
+
     // dir lights
     glUseProgram(ss_dir.programId);
 	for (uint i = 0; i < DIR_LAMPS_COUNT; i++)
         renderToDepthMap(i);
-	glUseProgram(0);
-
+	
     glUseProgram(ssrs.programId);
     setMat4(ssrs.matProjection, projectionMatrix);
     setMat4(ssrs.matView, viewMatrix);
-    // glUseProgram(0); - not need
 
 	/* --- color rendering --- */
-	glUseProgram(cs.programId);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT); // color will cleared by quad rendering
 	render();
 	glUseProgram(0);
 }
@@ -956,7 +911,6 @@ void animate_scene() {
 int main() {
     initGL();
     initShaders();
-    initVAO();
     initMatrices();
     initShapes();
     createModels();
