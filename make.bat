@@ -19,8 +19,8 @@ set l=-lassimp -lglew32 -lglfw3 -lopengl32
 set include=include
 set contrib=contrib
 set source=src
-set headers=math.h io.h node.h framebuffer.h renderbuffer.h core_utils.h shader_compiler.h texture.h shader_program.h
-set sources=main.cpp math.cpp io.cpp node.cpp framebuffer.cpp renderbuffer.cpp core_utils.cpp shader_compiler.cpp texture.cpp shader_program.cpp
+set headers=math.h io.h node.h framebuffer.h renderbuffer.h core_utils.h shader_compiler.h texture.h shader_program.h bone.h material.h animation.h algine_renderer.h model.h light.h
+set sources=main.cpp math.cpp io.cpp node.cpp framebuffer.cpp renderbuffer.cpp core_utils.cpp shader_compiler.cpp texture.cpp shader_program.cpp bone.cpp material.cpp animation.cpp algine_renderer.cpp model.cpp light.cpp
 
 rem compilation
 set headers_full=

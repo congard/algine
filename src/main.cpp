@@ -9,13 +9,18 @@
 // #define debug_sm
 #define pcf // for soft shadows
 
+#define GLM_FORCE_CTOR_INIT
+
 #include <iostream>
 #include <thread>
 #include <chrono>
 
+#include <assimp/postprocess.h>
+#include <glm/gtc/type_ptr.hpp>
+
 #define ALGINE_LOGGING
 
-#include "algine.h"
+#include <algine/algine.h>
 
 #define SHADOW_MAP_RESOLUTION 1024
 #define bloomK 0.5f
