@@ -1,4 +1,9 @@
-# There are all dynamic files. They cannot be loaded into the repository, they are superfluous
-# files:
+# Build scripts output, debug pictures
 out
-.vscode/
+
+# Visual Studio Code dir
+.vscode
+
+# CLion Dirs
+cmake-build-debug
+.idea
