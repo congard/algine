@@ -15,21 +15,15 @@ void main() {
 	vec2 texOffset = 1.0 / textureSize(image, 0); // gets size of single texel
     fragColor = texture(image, texCoord).texComponent * kernel[0]; // current fragment’s contribution
 
-    #ifdef ALGINE_HORIZONTAL
-	for(int i = 1; i < KERNEL_RADIUS; i++) {
-		fragColor +=
-			kernel[i] * (
-				texture(image, texCoord + vec2(texOffset.x * i, 0.0)).texComponent +
-				texture(image, texCoord - vec2(texOffset.x * i, 0.0)).texComponent
-			);
-	}
+	#ifdef ALGINE_HORIZONTAL
+		#define _texCoordP texCoord + vec2(texOffset.x * i, 0.0)
+		#define _texCoordM texCoord - vec2(texOffset.x * i, 0.0)
 	#else
-    for(int i = 1; i < KERNEL_RADIUS; i++) {
-		fragColor +=
-			kernel[i] * (
-				texture(image, texCoord + vec2(0.0, texOffset.y * i)).texComponent +
-				texture(image, texCoord - vec2(0.0, texOffset.y * i)).texComponent
-			);
-	}
+		#define _texCoordP texCoord + vec2(0.0, texOffset.y * i)
+		#define _texCoordM texCoord - vec2(0.0, texOffset.y * i)
 	#endif
+
+    for(int i = 1; i < KERNEL_RADIUS; i++) {
+		fragColor += kernel[i] * (texture(image, _texCoordP).texComponent + texture(image, _texCoordM).texComponent);
+	}
 }
