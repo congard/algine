@@ -1,4 +1,23 @@
 @echo off
+
+echo This script is deprecated. Use CMake instead.
+echo.
+
+if %1%==compile (
+    call :compile
+) else if %1%==run (
+    call :run
+) else if %1%==help (
+    call :printHelp
+) else (
+    echo Unknown arg %1
+    echo.
+    call :printHelp
+)
+
+goto :eof
+
+:compile
 echo Compiling Algine
 rem i - install path (the place where the libraries were installed)
 rem I - include path
@@ -44,3 +63,18 @@ g++ -I %glewI% -I %glfwI% -I %glmI% -I %assimpI%^
     -o out/main.exe %l%
 
 echo Compilation done
+goto :eof
+
+:run
+echo Starting on DEFAULT videocard
+"out/main.exe"
+goto :eof
+
+:printHelp
+echo Algine example batch script
+echo This script must be launched from project root directory! I.e. launch command is 'scripts/algine.bat'
+echo Available args:
+echo compile - compiles example, binary will be putted on 'out' dir
+echo run - runs binary
+echo help - print help
+goto :eof
