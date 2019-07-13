@@ -3,11 +3,39 @@ project(algine)
 
 set(CMAKE_CXX_STANDARD 14)
 
+# note: compiling on Windows only tested under MinGW-w64
+# most likely it will not work with Microsoft Visual Studio
+# for working use CLion, QtCreator etc instead
+
+if (WIN32)
+    set(LIBS_DIR "C:\\Program\ Files\ (x86)\\")
+
+    set(GLEW_INCLUDE_DIR "${LIBS_DIR}glew\\include")
+    set(GLEW_LIBRARY "${LIBS_DIR}glew\\bin")
+
+    set(glfw3_DIR "${LIBS_DIR}GLFW\\lib\\cmake\\glfw3")
+    set(GLFW3_INCLUDE_DIRS "${LIBS_DIR}GLFW\\include")
+    set(GLFW3_LIBRARIES "${LIBS_DIR}GLFW\\lib")
+
+    set(GLM_INCLUDE_DIRS "${LIBS_DIR}glm\\include")
+
+    set(ASSIMP_LIBS "${LIBS_DIR}Assimp\\bin")
+endif()
+
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(glm REQUIRED)
 find_package(assimp REQUIRED)
 
-if (UNIX)
+if (WIN32)
+    include_directories(${GLFW3_INCLUDE_DIRS})
+    include_directories(${GLEW_INCLUDE_DIRS})
+    include_directories(${ASSIMP_INCLUDE_DIRS})
+    include_directories(${GLM_INCLUDE_DIRS})
+
+    link_libraries(assimp glew32 glfw3 opengl32)
+    link_directories(${GLFW3_LIBRARIES} ${GLEW_LIBRARIES} ${ASSIMP_LIBS})
+elseif (UNIX)
     link_libraries(glfw GLEW GLU GL assimp pthread)
     link_directories(/usr/local/lib)
 endif()
