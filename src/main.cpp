@@ -141,7 +141,7 @@ void createViewMatrix() {
     viewMatrix = glm::lookAt(cameraPos, cameraLookAt, cameraUp);
 }
 
-void updateRenderTextures(const uint &width, const uint &height) {
+void updateRenderTextures() {
     cfgtex2D(colorTex, GL_RGB16F, GL_RGB, winWidth, winHeight);
     cfgtex2D(normalTex, GL_RGB16F, GL_RGB, winWidth, winHeight);
     cfgtex2D(ssrValues, GL_RG16F, GL_RG, winWidth, winHeight);
@@ -171,7 +171,7 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
     renderer.configureMainPassRenderbuffer(rbo, width, height);
     bindFramebuffer(0);
 
-    updateRenderTextures(width, height);
+    updateRenderTextures();
 
     createProjectionMatrix();
 }
@@ -226,7 +226,7 @@ void createDirLamp(DirLamp &result, const glm::vec3 &pos, const glm::vec3 &color
     glUseProgram(0);
 }
 
-void createShapes(const std::string &path, GLuint params, size_t id, bool inverseNormals = false, GLuint bonesPerVertex = 0) {
+void createShapes(const std::string &path, const uint params, const size_t id, const bool inverseNormals = false, const uint bonesPerVertex = 0) {
     shapes[id].bonesPerVertex = bonesPerVertex;
     shapes[id].init(path, params);
     if (inverseNormals) shapes[id].inverseNormals();
@@ -251,7 +251,7 @@ void initGL() {
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
     // Create a GLFWwindow object that we can use for GLFW's functions
-    window = FULLSCREEN == true ?
+    window = FULLSCREEN ?
         glfwCreateWindow(winWidth, winHeight, "Algine", glfwGetPrimaryMonitor(), nullptr) :
         glfwCreateWindow(winWidth, winHeight, "Algine", nullptr, nullptr);
 
@@ -448,7 +448,7 @@ void initShaders() {
     applyDefaultTexture2DParams(pingpongBlurCoCTex, 2);
     applyDefaultTexture2DParams(cocTex);
 
-    updateRenderTextures(winWidth, winHeight);
+    updateRenderTextures();
 
     GLuint displayColorAttachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     bindFramebuffer(displayFB);
@@ -492,7 +492,7 @@ void initShaders() {
         glUseProgram(blurCoCShaders[j]->programId);
         for (uint i = 0; i < cocBlurKernelRadius; i++) {
             glUniform1f(
-                j ? blurCoCV.kernel + (cocBlurKernelRadius - 1 - i) : blurCoCV.kernel + (cocBlurKernelRadius - 1 - i),
+                j ? blurCoCV.kernel + (cocBlurKernelRadius - 1 - i) : blurCoCH.kernel + (cocBlurKernelRadius - 1 - i),
                 kernelCoC[i]
             );
         }
@@ -563,7 +563,7 @@ void initMatrices() {
  * Creating shapes and loading textures
  */
 void initShapes() {
-    GLuint params = aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices;
+    uint params = aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices;
     std::string path = "src/resources/models/";
 
     // classic chess

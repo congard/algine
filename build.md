@@ -9,10 +9,13 @@
 4. Next you need to install the resulting `.dll`:
     1. Copy `.dll` files to `C:\Windows\System32`
     2. Run `regsvr32 filename.dll`
-5. Check `make.bat` file. Be sure that all directories are right;
-6. Open a command prompt in the root Algine folder. Run `make.bat`. It will start compilation. If you did everything right, you will see the following message: *Compilation done*
-7. Just type `run.bat`. If you did everything right, you will see Algine window with the scene :)
+5. Building Algine example:
+    1. CMake: just open IDE (CLion, QtCreator etc) and press on "Run" button!
+    2. **DEPRECATED**:
+        1. Check `scripts\algine.bat` file. Be sure that all directories are right;
+        2. Open a command prompt in the root Algine folder. Run `start scripts\algine.bat compile`. It will start compilation. If you did everything right, you will see the following message: *Compilation done*
+        3. Just type `start scripts\run.bat`. If you did everything right, you will see Algine window with the scene :)
 
-![Algine on Windows](pictures/5.png)
+![Algine on Windows](pictures/4.png)
 
 If I'm forgot something in this instruction, please notify me

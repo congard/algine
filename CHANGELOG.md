@@ -99,3 +99,26 @@
  <br>`bone.cpp`:  bone structures like `BoneInfo` (for engine only), `Bone`
  <br>`node.cpp`: node structures (only `Node`)
  12. Minor fixes, other changes and improvements.
+ 
+1.6 alpha:
+ 1. Created headers for all source files
+ 2. Now using CMake. Supports Linux and MinGW-w64
+ 3. Removed `make.sh`, `run.sh`, `make.bat` and `run.bat` scripts, created `algine.sh` and `algine.bat` instead. They marked as deprecated
+ 4. Removed `.vscode` directory
+ 5. Fixed `activeTexture`, removed `TextureArray`
+ 6. Added directional lighting (shadow mapping)
+ 7. `lamp.cpp => light.cpp`
+ 8. Created `contrib` directory
+ 9. Added `renderbuffer.cpp`
+ 10. Some shaders separated and renamed, removed duplicates
+ 11. Added `TextureCube`, created cubemap shader
+ 12. DOF: added CoC calculation from position map, added CoC shader, added ability to eliminate bleeding and sharp unsharpness artifact
+ 13. Main (color) fragment shader output reorder
+ 14. Added `CubeRenderer`, `QuadRenderer`
+ 15. Added `core_utils.cpp`
+ 16. `mesh.cpp` merged with `model.cpp`
+ 17. Now engine using VAO instead of `glEnableVertexAttribArray()` and `glDisableVertexAttribArray()`
+ 18. Improved readability of shaders
+ 19. Removed dead code
+ 20. Added `update-contrib` bash script, updated contrib
+ 21. Performance improvements and other minor fixes.
