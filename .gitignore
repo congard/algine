@@ -7,3 +7,6 @@ out
 # CLion Dirs
 cmake-build-debug
 .idea
+
+# QtCreator files
+CMakeLists.txt.user
