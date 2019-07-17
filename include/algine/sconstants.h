@@ -132,7 +132,7 @@
 #define ALGINE_NAME_CUBEMAP_COLOR "color"
 #define ALGINE_NAME_CUBEMAP_POS_SCALING "scaling"
 
-// lamp.cpp shader constants
+// light constants
 #define ALGINE_NAME_CS_LIGHT_POS "pos"
 #define ALGINE_NAME_CS_LIGHT_COLOR "color"
 #define ALGINE_NAME_CS_LIGHT_KC "kc"
