@@ -374,7 +374,7 @@ void initShaders() {
 
     std::cout << "Compilation done\n";
 
-    scompiler::loadLocations(cs, params, csp);
+    scompiler::loadLocations(cs, csp);
     scompiler::loadLocations(ss);
     scompiler::loadLocations(ss_dir);
     scompiler::loadLocations(ssrs);
