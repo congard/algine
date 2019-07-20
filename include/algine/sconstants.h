@@ -41,6 +41,8 @@
 #define ALGINE_NAME_CS_SWITCH_TEXTURE_MAPPING "textureMappingEnabled"
 #define ALGINE_NAME_CS_POINT_LIGHTS "pointLights"
 #define ALGINE_NAME_CS_DIR_LIGHTS "dirLights"
+#define ALGINE_NAME_CS_POINT_LIGHT_SHADOW_MAPS "pointLightShadowMaps"
+#define ALGINE_NAME_CS_DIR_LIGHT_SHADOW_MAPS "dirLightShadowMaps"
 
 // SS vertex shader
 #define ALGINE_NAME_SS_IN_POSITION "a_Position"
@@ -142,5 +144,4 @@
 #define ALGINE_NAME_CS_LIGHT_BIAS "bias"
 #define ALGINE_NAME_CS_LIGHT_MAX_BIAS "maxBias"
 #define ALGINE_NAME_CS_LIGHT_MIN_BIAS "minBias"
-#define ALGINE_NAME_CS_LIGHT_SHADOW_MAP "shadowMap"
 #define ALGINE_NAME_CS_LIGHT_MATRIX "lightMatrix"
