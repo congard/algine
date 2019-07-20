@@ -276,7 +276,7 @@ uint createShaderProgramDS(const std::vector<uint> &shaders) {
     return sp;
 }
 
-void loadLocations(CShader &shader, const AlgineParams &params, const ColorShaderParams &csp) {
+void loadLocations(CShader &shader, const ColorShaderParams &csp) {
     shader.matModel = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_MODEL);
     shader.matView = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_VIEW);
     shader.matPVM = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_PVM);
@@ -325,8 +325,7 @@ void loadLocations(CShader &shader, const AlgineParams &params, const ColorShade
         shader.light.kl = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_KL).c_str()); \
         shader.light.kq = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_KQ).c_str()); \
         shader.light.pos = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_POS).c_str()); \
-        shader.light.color = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_COLOR).c_str()); \
-        shader.light.shadowMap = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_SHADOW_MAP).c_str());
+        shader.light.color = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_COLOR).c_str());
 
     // uns - uniform name start
     std::string uns;
@@ -338,6 +337,7 @@ void loadLocations(CShader &shader, const AlgineParams &params, const ColorShade
         loadLightProp(pointLights[i]);
         shader.pointLights[i].far = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_FAR).c_str());
         shader.pointLights[i].bias = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_BIAS).c_str());
+        shader.pointLights[i].shadowMap = glGetUniformLocation(shader.programId, (ALGINE_NAME_CS_POINT_LIGHT_SHADOW_MAPS + std::string("[") + std::to_string(i) + "]").c_str());
     }
 
     // directional lights
@@ -348,6 +348,7 @@ void loadLocations(CShader &shader, const AlgineParams &params, const ColorShade
         shader.dirLights[i].lightMatrix = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_MATRIX).c_str());
         shader.dirLights[i].minBias = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_MIN_BIAS).c_str());
         shader.dirLights[i].maxBias = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_MAX_BIAS).c_str());
+        shader.dirLights[i].shadowMap = glGetUniformLocation(shader.programId, (ALGINE_NAME_CS_DIR_LIGHT_SHADOW_MAPS + std::string("[") + std::to_string(i) + "]").c_str());
     }
 
     #undef loadLightProp

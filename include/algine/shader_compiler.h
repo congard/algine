@@ -51,7 +51,7 @@ uint createShaderProgram(const std::vector<uint> &shaders);
 // DS - delete shaders
 uint createShaderProgramDS(const std::vector<uint> &shaders);
 
-void loadLocations(CShader &shader, const AlgineParams &params, const ColorShaderParams &csp);
+void loadLocations(CShader &shader, const ColorShaderParams &csp);
 
 void loadLocations(SShader &shader);
 
