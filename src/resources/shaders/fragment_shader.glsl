@@ -7,7 +7,8 @@
   COMPILER WILL REMOVE UNUSED VARIABLES
  */
 
-#version 330 core
+// some GPUs can work with 330 (basically Nvidia)
+#version 400 core
 
 precision mediump float;					// Set the default precision to medium. We don't need as high of a
 											// precision in the fragment shader.
@@ -49,7 +50,7 @@ uniform struct Material {
 	float shininess;
 } material;
 
-struct PointLight {
+uniform struct PointLight {
 	float kc; // constant term
 	float kl; // linear term
 	float kq; // quadratic term
@@ -57,10 +58,10 @@ struct PointLight {
 	float bias;
 	vec3 pos; // in world space
 	vec3 color;
-	samplerCube shadowMap;
-};
+}, pointLights[MAX_POINT_LIGHTS_COUNT];
+uniform samplerCube pointLightShadowMaps[MAX_POINT_LIGHTS_COUNT];
 
-struct DirLight {
+uniform struct DirLight {
 	float kc; // constant term
 	float kl; // linear term
 	float kq; // quadratic term
@@ -68,11 +69,8 @@ struct DirLight {
 	vec3 pos; // in world space
 	vec3 color;
 	mat4 lightMatrix;
-	sampler2D shadowMap;
-};
-
-uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
-uniform DirLight dirLights[MAX_DIR_LIGHTS_COUNT];
+}, dirLights[MAX_DIR_LIGHTS_COUNT];
+uniform sampler2D dirLightShadowMaps[MAX_DIR_LIGHTS_COUNT];
 
 vec3 lampEyePos; // Transformed lamp position into eye space
 vec3 norm;
@@ -116,14 +114,14 @@ float calculatePointLightShadow(int index) {
 	float viewDistance = length(viewPos - fragWorldPos);
 	float diskRadius = (1.0 + (viewDistance / pointLights[index].far)) * diskRadius_k + diskRadius_min;
 	for (int i = 0; i < 20; i++) {
-		closestDepth = texture(pointLights[index].shadowMap, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+		closestDepth = texture(pointLightShadowMaps[index], fragToLight + sampleOffsetDirections[i] * diskRadius).r;
 		closestDepth *= pointLights[index].far; // Undo mapping [0;1]
 		// now test for shadows
 		if(currentDepth - pointLights[index].bias > closestDepth) shadow += 1.0;
 	}
 	return shadow /= 20;
 	#else
-	closestDepth = texture(pointLights[index].shadowMap, fragToLight).r;
+	closestDepth = texture(pointLightShadowMaps[index], fragToLight).r;
 	closestDepth *= pointLights[index].far; // Undo mapping [0;1]
 	// now test for shadows
 	return currentDepth - pointLights[index].bias > closestDepth ? 1.0 : 0.0;
@@ -137,7 +135,7 @@ float calculateDirLightShadow(int index) {
 	// transform to [0,1] range
 	projCoords = projCoords * 0.5 + 0.5;
 	// get closest depth value from light’s perspective (using [0; 1] range projCoords as coords)
-	float closestDepth = texture(dirLights[index].shadowMap, projCoords.xy).r;
+	float closestDepth = texture(dirLightShadowMaps[index], projCoords.xy).r;
 	// get depth of current fragment from light’s perspective
 	float currentDepth = projCoords.z;
 	
@@ -150,11 +148,11 @@ float calculateDirLightShadow(int index) {
 
 	// soft shadow pcf 3*3
 	#ifdef ALGINE_SHADOW_MAPPING_MODE_ENABLED // PCF
-	vec2 texelSize = 1.0 / textureSize(dirLights[index].shadowMap, 0);
+	vec2 texelSize = 1.0 / textureSize(dirLightShadowMaps[index], 0);
 	shadow = 0;
 	for (int x = -1; x <= 1; x++) {
 		for (int y = -1; y <= 1; y++) {
-			float pcfDepth = texture(dirLights[index].shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+			float pcfDepth = texture(dirLightShadowMaps[index], projCoords.xy + vec2(x, y) * texelSize).r;
 			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 		}
 	}
