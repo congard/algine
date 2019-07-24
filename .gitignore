@@ -10,3 +10,8 @@ cmake-build-debug
 
 # QtCreator files
 CMakeLists.txt.user
+
+# KDevelop
+build
+algine.kdev4
+.kdev4
