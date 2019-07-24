@@ -49,12 +49,7 @@ GLuint winWidth = 1366, winHeight = 763;
 GLFWwindow* window;
 
 // matrices
-glm::mat4 projectionMatrix, viewMatrix, *modelMatrix; // model matrix stored in Model::transformation
-
-// camera params
-glm::vec3 cameraPos(0, 8, 7);
-glm::vec3 cameraLookAt(0, 4, 0);
-glm::vec3 cameraUp(0, 1, 0);
+glm::mat4 *modelMatrix; // model matrix stored in Model::transformation
 
 // framebuffers, textures etc for rendering
 using namespace algine;
@@ -114,6 +109,8 @@ ColorShaderParams csp;
 ShadowShaderParams ssp;
 DOFBlurShaderParams dofBlurParams;
 
+Camera camera;
+
 float blendExposure = 6.0f, blendGamma = 1.125f;
 
 float
@@ -132,14 +129,6 @@ float
 
     // shadow opacity: 1.0 - opaque shadow (by default), 0.0 - transparent
     shadowOpacity = 0.65f;
-
-void createProjectionMatrix() {
-    projectionMatrix = glm::perspective(glm::radians(90.0f), (float) winWidth / (float) winHeight, 1.0f, 32.0f);
-}
-
-void createViewMatrix() {
-    viewMatrix = glm::lookAt(cameraPos, cameraLookAt, cameraUp);
-}
 
 void updateRenderTextures() {
     cfgtex2D(colorTex, GL_RGB16F, GL_RGB, winWidth, winHeight);
@@ -173,7 +162,8 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
 
     updateRenderTextures();
 
-    createProjectionMatrix();
+    camera.aspectRatio = (float)winWidth / (float)winHeight;
+    camera.perspective();
 }
 
 /**
@@ -554,9 +544,13 @@ void initShaders() {
 /**
  * Creating matrices
  */
-void initMatrices() {
-    createProjectionMatrix();
-    createViewMatrix();
+void initCamera() {
+    camera.pos = glm::vec3(0, 8, 7);
+    camera.lookPos = glm::vec3(0, 4, 0);
+    camera.fov = glm::radians(90.0f);
+    camera.aspectRatio = (float)winWidth / (float)winHeight;
+    camera.perspective();
+    camera.lookAt();
 }
 
 /**
@@ -701,25 +695,25 @@ void recycleAll() {
 void sendLampsData() {
 	glUniform1i(cs.pointLightsCount, POINT_LAMPS_COUNT); // point lamps count
     glUniform1i(cs.dirLightsCount, DIR_LAMPS_COUNT); // dir lamps count
-	setVec3(cs.viewPos, cameraPos); // current camera position
+    setVec3(cs.viewPos, camera.pos); // current camera position
 	for (size_t i = 0; i < POINT_LAMPS_COUNT; i++) pointLamps[i].push_pos();
     for (size_t i = 0; i < DIR_LAMPS_COUNT; i++) dirLamps[i].push_pos();
 }
 
 /* --- matrices --- */
 glm::mat4 getPVMMatrix() {
-    return projectionMatrix * viewMatrix * *modelMatrix;
+    return camera.projection * camera.view * *modelMatrix;
 }
 
 glm::mat4 getVMMatrix() {
-    return viewMatrix * *modelMatrix;
+    return camera.view * *modelMatrix;
 }
 
 void updateMatrices() {
     setMat4(cs.matPVM, getPVMMatrix());
     setMat4(cs.matVM, getVMMatrix());
     setMat4(cs.matModel, *modelMatrix);
-    setMat4(cs.matView, viewMatrix);
+    setMat4(cs.matView, camera.view);
 }
 
 /**
@@ -831,13 +825,13 @@ void render() {
 	// view port to window size
 	glViewport(0, 0, winWidth, winHeight);
 	// updating view matrix (because camera position was changed)
-	createViewMatrix();
+    // createViewMatrix();
 
     // render skybox
     glDrawBuffers(3, colorAttachment02);
     glDepthFunc(GL_LEQUAL);
     useShaderProgram(skyboxShader.programId);
-    setMat4(skyboxShader.matTransform, projectionMatrix * glm::mat4(glm::mat3(viewMatrix)));
+    setMat4(skyboxShader.matTransform, camera.projection * glm::mat4(glm::mat3(camera.view)));
     glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
     skyboxRenderer.render();
 
@@ -895,8 +889,8 @@ void display() {
         renderToDepthMap(i);
 	
     glUseProgram(ssrs.programId);
-    setMat4(ssrs.matProjection, projectionMatrix);
-    setMat4(ssrs.matView, viewMatrix);
+    setMat4(ssrs.matProjection, camera.projection);
+    setMat4(ssrs.matView, camera.view);
 
 	/* --- color rendering --- */
 	glClear(GL_DEPTH_BUFFER_BIT); // color will cleared by quad rendering
@@ -916,7 +910,7 @@ void animate_scene() {
 int main() {
     initGL();
     initShaders();
-    initMatrices();
+    initCamera();
     initShapes();
     createModels();
     initLamps();
@@ -955,6 +949,8 @@ int main() {
 
     // Terminate GLFW, clearing any resources allocated by GLFW.
     glfwTerminate();
+    
+    std::cout << "Exit with exit code 0";
 
     return 0;
 }
