@@ -7,7 +7,7 @@
 
 #version 330 core
 
-#algdef
+$ALGINE_DEFINITIONS
 
 in vec4 a_BoneWeights[MAX_BONE_ATTRIBS_PER_VERTEX];
 in ivec4 a_BoneIds[MAX_BONE_ATTRIBS_PER_VERTEX];

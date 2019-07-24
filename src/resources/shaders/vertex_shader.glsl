@@ -9,7 +9,7 @@
 
 #version 330
 
-#algdef
+$ALGINE_DEFINITIONS
 
 uniform mat4 u_PVMMatrix, u_Model, u_View, u_VMMatrix;
 uniform mat4 bones[MAX_BONES];

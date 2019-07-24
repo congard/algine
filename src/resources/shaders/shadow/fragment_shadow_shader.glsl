@@ -7,7 +7,7 @@
 
 #version 330 core
 
-#algdef
+$ALGINE_DEFINITIONS
 
 #ifdef ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING
 in vec4 fragPos; // world space

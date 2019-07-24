@@ -1,6 +1,6 @@
 #version 330 core
 
-#algdef
+$ALGINE_DEFINITIONS
 
 // #define vecout vec3
 

@@ -2,7 +2,7 @@
 
 #version 330
 
-#algdef
+$ALGINE_DEFINITIONS
 
 out vec3 fragColor;
 in vec2 texCoord;

@@ -2,7 +2,7 @@
 
 #version 330
 
-#algdef
+$ALGINE_DEFINITIONS
 
 in vec2 texCoord;
 

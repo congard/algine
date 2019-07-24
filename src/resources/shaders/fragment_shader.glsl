@@ -13,7 +13,7 @@
 precision mediump float;					// Set the default precision to medium. We don't need as high of a
 											// precision in the fragment shader.
 
-#algdef
+$ALGINE_DEFINITIONS
 
 uniform vec3 viewPos; // camera position
 uniform bool textureMappingEnabled;	// 0 false (color mapping), true (texture mapping) (if ALGINE_TEXTURE_MAPPING_MODE == ALGINE_TEXTURE_MAPPING_MODE_DUAL)
