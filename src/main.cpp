@@ -109,7 +109,7 @@ ColorShaderParams csp;
 ShadowShaderParams ssp;
 DOFBlurShaderParams dofBlurParams;
 
-Camera camera;
+FreeCamera camera;
 
 float blendExposure = 6.0f, blendGamma = 1.125f;
 
@@ -546,11 +546,12 @@ void initShaders() {
  */
 void initCamera() {
     camera.pos = glm::vec3(0, 8, 7);
-    camera.lookPos = glm::vec3(0, 4, 0);
     camera.fov = glm::radians(90.0f);
     camera.aspectRatio = (float)winWidth / (float)winHeight;
     camera.perspective();
-    camera.lookAt();
+    
+    camera.pitch = glm::radians(30.0f);
+    camera.updateView();
 }
 
 /**
