@@ -43,6 +43,7 @@
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, int button, int action, int mods);
+void cursor_pos_callback(GLFWwindow* window, double x, double y);
 
 // Window dimensions
 GLuint winWidth = 1366, winHeight = 763;
@@ -109,7 +110,8 @@ ColorShaderParams csp;
 ShadowShaderParams ssp;
 DOFBlurShaderParams dofBlurParams;
 
-FreeCamera camera;
+FPSCamera camera;
+FPSCameraController camController;
 
 float blendExposure = 6.0f, blendGamma = 1.125f;
 
@@ -250,6 +252,7 @@ void initGL() {
     // Set the required callback functions
     glfwSetKeyCallback(window, key_callback);
     glfwSetMouseButtonCallback(window, mouse_callback);
+    glfwSetCursorPosCallback(window, cursor_pos_callback);
     glfwSetWindowSizeCallback(window, window_size_callback);
 
     // Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
@@ -415,7 +418,7 @@ void initShaders() {
     TextureCube::create(&skybox);
     TextureCube::CubePaths paths(
         "src/resources/skybox/right.tga", "src/resources/skybox/left.tga",
-        "src/resources/skybox/top.tga", "src/resources/skybox/bottom.tga",
+        "src/resources/skybox/top.jpg", "src/resources/skybox/bottom.tga",
         "src/resources/skybox/back.tga", "src/resources/skybox/front.tga"
     );
     TextureParams params;
@@ -545,13 +548,16 @@ void initShaders() {
  * Creating matrices
  */
 void initCamera() {
-    camera.pos = glm::vec3(0, 8, 7);
-    camera.fov = glm::radians(90.0f);
+    camera.pos = glm::vec3(0, 10, 14);
+    camera.far = 64.0f;
+    camera.fov = glm::radians(45.0f);
     camera.aspectRatio = (float)winWidth / (float)winHeight;
     camera.perspective();
     
     camera.pitch = glm::radians(30.0f);
     camera.updateView();
+    
+    camController.camera = &camera;
 }
 
 /**
@@ -959,49 +965,35 @@ int main() {
 // Is called whenever a key is pressed/released via GLFW
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
-
-    else if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-        for (int i = 0; i < 6; i++) {
-            GLfloat *pixels = getTexImageCube(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, pointLamps[0].depthMap, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, GL_DEPTH_COMPONENT);
-            saveTexImage(pixels, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, 1, io::getCurrentDir() + "/out/scr_" + std::to_string(i) + ".bmp", 3, false);
-            delete[] pixels;
-        }
-        GLfloat *pixels = getTexImage2D(dirLamps[0].depthMap, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, GL_DEPTH_COMPONENT);
-        saveTexImage(pixels, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, 1, io::getCurrentDir() + "/out/dir_depth.bmp", 3);
-        delete[] pixels;
-        std::cout << "Depth map data saved\n";
-
-        pixels = getTexImage2D(bloomTex, winWidth * bloomK, winHeight * bloomK, GL_RGB);
-        saveTexImage(pixels, winWidth * bloomK, winHeight * bloomK, 3, io::getCurrentDir() + "/out/scr_screenspace.bmp", 3);
-        delete[] pixels;
-
-        pixels = getTexImage2D(pingpongBlurTex[!renderer.horizontal], winWidth * bloomK, winHeight * bloomK, GL_RGB);
-        saveTexImage(pixels, winWidth * bloomK, winHeight * bloomK, 3, io::getCurrentDir() + "/out/scr_screenspace_blur.bmp", 3);
-        delete[] pixels;
-
-        pixels = getTexImage2D(screenspaceTex, winWidth, winHeight, GL_RGB);
-        saveTexImage(pixels, winWidth, winHeight, 3, io::getCurrentDir() + "/out/scr_screenspace_.bmp", 3);
-        delete[] pixels;
-
-        pixels = getTexImage2D(cocTex, winWidth, winHeight, GL_RED);
-        saveTexImage(pixels, winWidth, winHeight, 1, io::getCurrentDir() + "/out/scr_screenspace_coc.bmp", 3);
-        delete[] pixels;
-
-        pixels = getTexImage2D(pingpongBlurCoCTex[!renderer.horizontal], winWidth, winHeight, GL_RED);
-        saveTexImage(pixels, winWidth, winHeight, 1, io::getCurrentDir() + "/out/scr_screenspace_cocrdr.bmp", 3);
-        delete[] pixels;
-
-        std::cout << "Screenspace map data saved\n";
+    else if (key == GLFW_KEY_W && (action == GLFW_REPEAT || action == GLFW_RELEASE)) {
+        camController.goForward();
+        camera.updateView();
+    } else if (key == GLFW_KEY_S && (action == GLFW_REPEAT || action == GLFW_RELEASE)) {
+        camController.goBack();
+        camera.updateView();
+    } else if (key == GLFW_KEY_A && (action == GLFW_REPEAT || action == GLFW_RELEASE)) {
+        camController.goLeft();
+        camera.updateView();
+    } else if (key == GLFW_KEY_D && (action == GLFW_REPEAT || action == GLFW_RELEASE)) {
+        camController.goRight();
+        camera.updateView();
     }
 }
 
+bool canMove = false;
 void mouse_callback(GLFWwindow* window, int button, int action, int mods) {
+    double x;
+    double y;
+    glfwGetCursorPos(window, &x, &y);
+        
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        double x;
-        double y;
-        glfwGetCursorPos(window, &x, &y);
+        canMove = true;
+        camController.setMousePos(x, y);
+    } else if (action == GLFW_RELEASE) {
+        canMove = false;
+        
         std::cout << "x: " << x << "; y: " << y << "\n";
-
+        
         GLfloat *pixels = getPixels(positionTex, (size_t) x, winHeight - (size_t) y, 1, 1, GL_RGB);
         
         std::cout << "x: " << pixels[0] << "; y: " << pixels[1] << "; z: " << pixels[2] << "\n";
@@ -1012,4 +1004,10 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods) {
         
         delete[] pixels;
     }
+}
+
+void cursor_pos_callback(GLFWwindow* window, double x, double y) {
+    if (!canMove) return;
+    camController.mouseMove(x, y);
+    camera.updateView();
 }
