@@ -43,6 +43,7 @@
 // Function prototypes
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, int button, int action, int mods);
+void mouse_callback(algine::MouseEventListener::MouseEvent *event);
 void cursor_pos_callback(GLFWwindow* window, double x, double y);
 
 // Window dimensions
@@ -109,6 +110,8 @@ AlgineParams params;
 ColorShaderParams csp;
 ShadowShaderParams ssp;
 DOFBlurShaderParams dofBlurParams;
+
+MouseEventListener mouseEventListener;
 
 FPSCamera camera;
 FPSCameraController camController;
@@ -516,7 +519,7 @@ void initShaders() {
     // configuring CubemapShader
     useShaderProgram(skyboxShader.programId);
     setVec3(skyboxShader.color, glm::vec3(0.125f));
-    glUniform1f(skyboxShader.positionScaling, 32.0f);
+    glUniform1f(skyboxShader.positionScaling, 64.0f);
 
     // blend setting
     glUseProgram(blendShader.programId);
@@ -550,7 +553,7 @@ void initShaders() {
 void initCamera() {
     camera.pos = glm::vec3(0, 10, 14);
     camera.far = 64.0f;
-    camera.fov = glm::radians(45.0f);
+    camera.fov = glm::radians(60.0f);
     camera.aspectRatio = (float)winWidth / (float)winHeight;
     camera.perspective();
     
@@ -838,6 +841,7 @@ void render() {
     glDrawBuffers(3, colorAttachment02);
     glDepthFunc(GL_LEQUAL);
     useShaderProgram(skyboxShader.programId);
+    glUniformMatrix3fv(skyboxShader.matView, 1, GL_FALSE, glm::value_ptr(glm::mat3(camera.view)));
     setMat4(skyboxShader.matTransform, camera.projection * glm::mat4(glm::mat3(camera.view)));
     glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
     skyboxRenderer.render();
@@ -924,6 +928,8 @@ int main() {
     initShadowMaps();
     initShadowCalculation();
     initDOF();
+    
+    mouseEventListener.setCallback(mouse_callback);
 
     #ifndef debug_sm
     std::thread animate_scene_th(animate_scene);
@@ -980,34 +986,51 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-bool canMove = false;
 void mouse_callback(GLFWwindow* window, int button, int action, int mods) {
     double x;
     double y;
     glfwGetCursorPos(window, &x, &y);
-        
+    
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+        mouseEventListener.buttonDown(x, y, MouseEventListener::buttonRight);
+    else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+        mouseEventListener.buttonUp(x, y, MouseEventListener::buttonRight);
+    
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        canMove = true;
-        camController.setMousePos(x, y);
-    } else if (action == GLFW_RELEASE) {
-        canMove = false;
-        
-        std::cout << "x: " << x << "; y: " << y << "\n";
-        
-        GLfloat *pixels = getPixels(positionTex, (size_t) x, winHeight - (size_t) y, 1, 1, GL_RGB);
-        
-        std::cout << "x: " << pixels[0] << "; y: " << pixels[1] << "; z: " << pixels[2] << "\n";
-        
-        useShaderProgram(dofCoCShader.programId);
-        glUniform1f(dofCoCShader.cinematicDOFPlaneInFocus, pixels[2] == 0 ? FLT_EPSILON : pixels[2]);
-        useShaderProgram(0);
-        
-        delete[] pixels;
+        mouseEventListener.buttonDown(x, y, MouseEventListener::buttonLeft);
+    } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+        mouseEventListener.buttonUp(x, y, MouseEventListener::buttonLeft);
     }
 }
 
 void cursor_pos_callback(GLFWwindow* window, double x, double y) {
-    if (!canMove) return;
-    camController.mouseMove(x, y);
-    camera.updateView();
+    mouseEventListener.mouseMove(x, y);
+}
+
+void mouse_callback(MouseEventListener::MouseEvent *event) {
+    switch(event->action) {
+        case MouseEventListener::actionDown:
+            camController.setMousePos(event->getX(), event->getY());
+            break;
+        case MouseEventListener::actionMove:
+            if (!event->listener->buttons[MouseEventListener::buttonLeft].isPressed)
+                break;
+            
+            camController.mouseMove(event->getX(), event->getY());
+            camera.updateView();
+            break;
+        case MouseEventListener::actionClick:
+            std::cout << "x: " << event->getX() << "; y: " << event->getY() << "\n";
+        
+            GLfloat *pixels = getPixels(positionTex, (size_t)event->getX(), winHeight - (size_t)event->getY(), 1, 1, GL_RGB);
+        
+            std::cout << "x: " << pixels[0] << "; y: " << pixels[1] << "; z: " << pixels[2] << "\n";
+        
+            useShaderProgram(dofCoCShader.programId);
+            glUniform1f(dofCoCShader.cinematicDOFPlaneInFocus, pixels[2] == 0 ? FLT_EPSILON : pixels[2]);
+            useShaderProgram(0);
+        
+            delete[] pixels;
+            break;
+    }
 }
