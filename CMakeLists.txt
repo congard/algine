@@ -70,8 +70,8 @@ add_executable(algine
         include/algine/shader_program.h
         include/algine/texture.h
         include/algine/types.h
-        include/algine/unsconstants.h
         include/algine/camera.h
+        include/algine/event.h
         src/algine_renderer.cpp
         src/animation.cpp
         src/bone.cpp
@@ -88,4 +88,5 @@ add_executable(algine
         src/shader_compiler.cpp
         src/shader_program.cpp
         src/texture.cpp
-        src/camera.cpp)
+        src/camera.cpp
+        src/event.cpp)
