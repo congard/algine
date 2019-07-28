@@ -340,8 +340,8 @@ void loadLocations(SShader &shader) {
 }
 
 #define _loadDOFLocations(shader) \
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_DOF_IN_POSITION); \
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_DOF_IN_TEXCOORD); \
+    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_POSITION); \
+    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_TEXCOORD); \
     \
     /* fragment shader */ \
     shader.samplerPositionMap = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SAMPLER_MAP_POSITION); \
@@ -373,8 +373,8 @@ void loadLocations(DOFCoCShader &shader) {
 #undef _loadDOFLocations
 
 void loadLocations(BlendShader &shader) {
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_BLEND_IN_POSITION);
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_BLEND_IN_TEXCOORD);
+    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_POSITION);
+    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_TEXCOORD);
 
     // fragment shader
     shader.samplerBloom = glGetUniformLocation(shader.programId, ALGINE_NAME_BLEND_SAMPLER_BLOOM);
@@ -384,8 +384,8 @@ void loadLocations(BlendShader &shader) {
 }
 
 void loadLocations(SSRShader &shader) {
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_SSRS_IN_POSITION);
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_SSRS_IN_TEXCOORD);
+    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_POSITION);
+    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_TEXCOORD);
 
     // SSS fragment shader
     shader.samplerColorMap = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_SAMPLER_MAP_COLOR);
@@ -403,8 +403,8 @@ void loadLocations(SSRShader &shader) {
 }
 
 void loadLocations(BloomSearchShader &shader) {
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_BLOOM_SEARCH_IN_POSITION);
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_BLOOM_SEARCH_IN_TEXCOORD);
+    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_POSITION);
+    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_TEXCOORD);
 
     // fragment shader
     shader.threshold = glGetUniformLocation(shader.programId, ALGINE_NAME_BLOOM_SEARCH_THRESHOLD);
@@ -413,8 +413,8 @@ void loadLocations(BloomSearchShader &shader) {
 }
 
 void loadLocations(BlurShader &shader) {
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_BLUR_IN_POSITION);
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_BLUR_IN_TEXCOORD);
+    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_POSITION);
+    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_TEXCOORD);
 
     // fragment shader
     shader.image = glGetUniformLocation(shader.programId, ALGINE_NAME_BLUR_IMAGE);
@@ -429,6 +429,7 @@ void loadLocations(CubemapShader &shader) {
     shader.cubemap = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_CUBEMAP);
     shader.color = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_COLOR);
     shader.positionScaling = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_POS_SCALING);
+    shader.matView = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_MAT_VIEW);
 }
 
 } // namespace scompiler

@@ -219,7 +219,8 @@ struct CubemapShader {
         // fragment shader
         cubemap,
         color,
-        positionScaling;
+        positionScaling,
+        matView;
 };
 
 struct ColorShaderParams {

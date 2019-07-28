@@ -1,3 +1,6 @@
+#ifndef ALGINE_SCONSTANTS_H
+#define ALGINE_SCONSTANTS_H
+
 /**
  * sconstants - shader constants
  */
@@ -60,9 +63,9 @@
 #define ALGINE_NAME_SS_LAMP_POSITION "lightPos"
 #define ALGINE_NAME_SS_FAR_PLANE "far_plane"
 
-// SSRS vertex shader
-#define ALGINE_NAME_SSRS_IN_POSITION "inPos"
-#define ALGINE_NAME_SSRS_IN_TEXCOORD "inTexCoord"
+// Quad (basic) vertex shader
+#define ALGINE_NAME_QUAD_IN_POSITION "inPos"
+#define ALGINE_NAME_QUAD_IN_TEXCOORD "inTexCoord"
 
 // SSRS fragment shader
 #define ALGINE_NAME_SSRS_SAMPLER_MAP_COLOR "colorMap"
@@ -79,10 +82,6 @@
 #define ALGINE_NAME_SSRS_LLIMITER "LLimiter"
 #define ALGINE_NAME_SSRS_MINRAYSTEP "minRayStep"
 
-// dof blur/CoC vertex shader
-#define ALGINE_NAME_DOF_IN_POSITION "inPos"
-#define ALGINE_NAME_DOF_IN_TEXCOORD "inTexCoord"
-    
 // dof blur/CoC fragment shader
 #define ALGINE_NAME_DOF_SAMPLER_IMAGE "image"
 #define ALGINE_NAME_DOF_SAMPLER_MAP_POSITION "positionMap"
@@ -98,28 +97,16 @@
 #define ALGINE_NAME_DOF_BLEEDING_ELIM_MIN_DCOC "bleedingMinDeltaCoC"
 #define ALGINE_NAME_DOF_BLEEDING_ELIM_MAX_FCOC "bleedingMaxFocusCoC"
 
-// blend vertex shader
-#define ALGINE_NAME_BLEND_IN_POSITION "inPos"
-#define ALGINE_NAME_BLEND_IN_TEXCOORD "inTexCoord"
-
 // blend fragment shader
 #define ALGINE_NAME_BLEND_SAMPLER_BLOOM "bloom"
 #define ALGINE_NAME_BLEND_SAMPLER_IMAGE "image"
 #define ALGINE_NAME_BLEND_EXPOSURE "exposure"
 #define ALGINE_NAME_BLEND_GAMMA "gamma"
 
-// bloom search vertex
-#define ALGINE_NAME_BLOOM_SEARCH_IN_POSITION "inPos"
-#define ALGINE_NAME_BLOOM_SEARCH_IN_TEXCOORD "inTexCoord"
-
 // bloom search fragment
 #define ALGINE_NAME_BLOOM_SEARCH_THRESHOLD "threshold"
 #define ALGINE_NAME_BLOOM_SEARCH_BRIGHTNESS_THRESHOLD "brightnessThreshold"
 #define ALGINE_NAME_BLOOM_SEARCH_IMAGE "image"
-
-// blur vertex
-#define ALGINE_NAME_BLUR_IN_POSITION "inPos"
-#define ALGINE_NAME_BLUR_IN_TEXCOORD "inTexCoord"
 
 // blur fragment
 #define ALGINE_NAME_BLUR_IMAGE "image"
@@ -130,6 +117,7 @@
 #define ALGINE_NAME_CUBEMAP_MAT_TRANSFORM "transform"
 
 // cubemap fragment
+#define ALGINE_NAME_CUBEMAP_MAT_VIEW "view"
 #define ALGINE_NAME_CUBEMAP_CUBEMAP "cubemap"
 #define ALGINE_NAME_CUBEMAP_COLOR "color"
 #define ALGINE_NAME_CUBEMAP_POS_SCALING "scaling"
@@ -145,3 +133,5 @@
 #define ALGINE_NAME_CS_LIGHT_MAX_BIAS "maxBias"
 #define ALGINE_NAME_CS_LIGHT_MIN_BIAS "minBias"
 #define ALGINE_NAME_CS_LIGHT_MATRIX "lightMatrix"
+
+#endif
