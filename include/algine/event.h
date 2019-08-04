@@ -6,17 +6,17 @@
 namespace algine {
 struct MouseEventListener {
     enum {
-        actionDown,
-        actionMove,
-        actionUp,
-        actionClick,
-        actionDoubleClick
+        ActionDown,
+        ActionMove,
+        ActionUp,
+        ActionClick,
+        ActionLongClick
     };
     
     enum {
-        buttonLeft,
-        buttonRight,
-        buttonNone
+        ButtonLeft,
+        ButtonRight,
+        ButtonNone
     };
     
     struct MouseEvent {
@@ -30,15 +30,17 @@ struct MouseEventListener {
     
     struct MouseButton {
         float downX, downY;
+        long downTime;
         bool isPressed = false;
         bool canClick = true;
-    } buttons[buttonNone];
+    } buttons[ButtonNone];
     
     float x, y;
     float clickRadius = 2.0f;
+    long longClickTime = 2000; // in ms
     
-    void buttonDown(const float x, const float y, const uint button = buttonLeft);
-    void buttonUp(const float x, const float y, const uint button = buttonLeft);
+    void buttonDown(const float x, const float y, const uint button = ButtonLeft);
+    void buttonUp(const float x, const float y, const uint button = ButtonLeft);
     void mouseMove(const float x, const float y);
     void setCallback(void (*callback)(MouseEvent *event));
     

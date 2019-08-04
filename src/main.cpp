@@ -963,7 +963,7 @@ int main() {
     // Terminate GLFW, clearing any resources allocated by GLFW.
     glfwTerminate();
     
-    std::cout << "Exit with exit code 0";
+    std::cout << "Exit with exit code 0\n";
 
     return 0;
 }
@@ -992,14 +992,14 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods) {
     glfwGetCursorPos(window, &x, &y);
     
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-        mouseEventListener.buttonDown(x, y, MouseEventListener::buttonRight);
+        mouseEventListener.buttonDown(x, y, MouseEventListener::ButtonRight);
     else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
-        mouseEventListener.buttonUp(x, y, MouseEventListener::buttonRight);
+        mouseEventListener.buttonUp(x, y, MouseEventListener::ButtonRight);
     
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        mouseEventListener.buttonDown(x, y, MouseEventListener::buttonLeft);
+        mouseEventListener.buttonDown(x, y, MouseEventListener::ButtonLeft);
     } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-        mouseEventListener.buttonUp(x, y, MouseEventListener::buttonLeft);
+        mouseEventListener.buttonUp(x, y, MouseEventListener::ButtonLeft);
     }
 }
 
@@ -1009,17 +1009,20 @@ void cursor_pos_callback(GLFWwindow* window, double x, double y) {
 
 void mouse_callback(MouseEventListener::MouseEvent *event) {
     switch(event->action) {
-        case MouseEventListener::actionDown:
+        case MouseEventListener::ActionDown:
             camController.setMousePos(event->getX(), event->getY());
             break;
-        case MouseEventListener::actionMove:
-            if (!event->listener->buttons[MouseEventListener::buttonLeft].isPressed)
+        case MouseEventListener::ActionMove:
+            if (!event->listener->buttons[MouseEventListener::ButtonLeft].isPressed)
                 break;
             
             camController.mouseMove(event->getX(), event->getY());
             camera.updateView();
             break;
-        case MouseEventListener::actionClick:
+        case MouseEventListener::ActionLongClick:
+            std::cout << "Long click " << event->button << "\n";
+            break;
+        case MouseEventListener::ActionClick:
             std::cout << "x: " << event->getX() << "; y: " << event->getY() << "\n";
         
             GLfloat *pixels = getPixels(positionTex, (size_t)event->getX(), winHeight - (size_t)event->getY(), 1, 1, GL_RGB);

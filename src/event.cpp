@@ -1,4 +1,5 @@
 #include <algine/event.h>
+#include <algine/core_utils.h>
 #include <cmath>
 
 namespace algine {
@@ -20,8 +21,9 @@ void MouseEventListener::buttonDown(const float x, const float y, const uint but
     buttons[button].isPressed = true;
     buttons[button].downX = x;
     buttons[button].downY = y;
+    buttons[button].downTime = getTime();
     
-    createCallback(actionDown, button);
+    createCallback(ActionDown, button);
 }
 
 void MouseEventListener::buttonUp(const float x, const float y, const uint button) {
@@ -30,10 +32,14 @@ void MouseEventListener::buttonUp(const float x, const float y, const uint butto
     
     buttons[button].isPressed = false;
     
-    createCallback(actionUp, button);
+    createCallback(ActionUp, button);
     
-    if (buttons[button].canClick)
-        createCallback(actionClick, button);
+    if (buttons[button].canClick) {
+        if (getTime() - buttons[button].downTime >= longClickTime)
+            createCallback(ActionLongClick, button);
+        else
+            createCallback(ActionClick, button);
+    }
     
     buttons[button].canClick = true;
 }
@@ -48,11 +54,11 @@ void MouseEventListener::mouseMove(const float x, const float y) {
     this->x = x;
     this->y = y;
     
-    for (uint i = 0; i < buttonNone; i++) {
+    for (uint i = 0; i < ButtonNone; i++) {
         _checkBtn(buttons[i]);
     }
     
-    createCallback(actionMove, buttonNone);
+    createCallback(ActionMove, ButtonNone);
 }
 
 void MouseEventListener::setCallback(void (*callback)(MouseEvent *event)) {
