@@ -2,6 +2,7 @@
 #include <algine/constants.h>
 #include <GL/glew.h>
 #include <iostream>
+#include <chrono>
 
 namespace algine {
 // returns GPU Vendor name
@@ -61,6 +62,10 @@ std::string getShaderStr(const uint &val) {
             std::cout << "Unknown shader string: " << val << "\n";
             return "";
     }
+}
+
+long getTime() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 }

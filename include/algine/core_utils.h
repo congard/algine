@@ -29,6 +29,9 @@ std::string replace(const std::string &src, const std::string &target, const std
 // returns shader string. `val` can be `ALGINE_VEC1..ALGINE_VEC4`, `ALGINE_SHADER_TEX_COMPONENT_RED..ALGINE_SHADER_TEX_COMPONENT_RGB`
 std::string getShaderStr(const uint &val);
 
+// returns current time in milliseconds
+long getTime();
+
 }
 
 #endif /* ALGINE_CORE_UTILS_H */
