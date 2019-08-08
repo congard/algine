@@ -3,6 +3,13 @@ project(algine)
 
 set(CMAKE_CXX_STANDARD 14)
 
+if (CMAKE_BUILD_TYPE EQUAL "Debug")
+    message("Debug mode - adding -g option")
+    add_compile_options("-g")
+elseif (CMAKE_BUILD_TYPE EQUAL "Release")
+    message("Release mode")
+endif()
+
 # note: compiling on Windows only tested under MinGW-w64
 # most likely it will not work with Microsoft Visual Studio
 # for working use CLion, QtCreator etc instead
@@ -72,6 +79,8 @@ add_executable(algine
         include/algine/types.h
         include/algine/camera.h
         include/algine/event.h
+        include/algine/object3d.h
+        include/algine/rotator.h
         src/algine_renderer.cpp
         src/animation.cpp
         src/bone.cpp
@@ -89,4 +98,6 @@ add_executable(algine
         src/shader_program.cpp
         src/texture.cpp
         src/camera.cpp
-        src/event.cpp)
+        src/event.cpp
+        src/object3d.cpp
+        src/rotator.cpp)
