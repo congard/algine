@@ -35,7 +35,6 @@ void pointerui(const int location, const int count, const uint buffer, const uin
     );
 }
 
-// struct CubeRenderer
 // if `inPosLocation` != -1, VAO will be created
 void CubeRenderer::init(const int inPosLocation) {
     // source: https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
@@ -106,7 +105,6 @@ CubeRenderer::~CubeRenderer() {
     glDeleteVertexArrays(1, &cubeVAO);
 }
 
-// struct QuadRenderer
 void QuadRenderer::init(const int inPosLocation, const int inTexCoordLocation) {
     // creating buffers for quad rendering
     static float
@@ -180,8 +178,6 @@ QuadRenderer::~QuadRenderer() {
     glDeleteVertexArrays(1, &quadVAO);
 }
 
-// struct AlgineRenderer
-
 // configures renderbuffer for main pass rendering
 // note: this function will bind empty renderbuffer (`bindRenderbuffer(0)`)
 void AlgineRenderer::configureMainPassRenderbuffer(const uint renderbuffer, const uint width, const uint height) {
@@ -191,7 +187,7 @@ void AlgineRenderer::configureMainPassRenderbuffer(const uint renderbuffer, cons
     bindRenderbuffer(0);
 }
 
-void AlgineRenderer::mainPass(const uint displayFBO, const uint rboBuffer) {
+void AlgineRenderer::mainPass(const uint displayFBO) {
     glBindFramebuffer(GL_FRAMEBUFFER, displayFBO);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
