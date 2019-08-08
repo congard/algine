@@ -113,8 +113,10 @@ DOFBlurShaderParams dofBlurParams;
 
 MouseEventListener mouseEventListener;
 
-FPSCamera camera;
+Camera camera;
 FPSCameraController camController;
+
+EulerRotator manHeadRotator;
 
 float blendExposure = 6.0f, blendGamma = 1.125f;
 
@@ -551,14 +553,18 @@ void initShaders() {
  * Creating matrices
  */
 void initCamera() {
-    camera.pos = glm::vec3(0, 10, 14);
     camera.far = 64.0f;
     camera.fov = glm::radians(60.0f);
     camera.aspectRatio = (float)winWidth / (float)winHeight;
     camera.perspective();
     
-    camera.pitch = glm::radians(30.0f);
-    camera.updateView();
+    camera.setPitch(glm::radians(30.0f));
+    camera.rotate();
+
+    camera.setPos(0, 10, 14);
+    camera.translate();
+
+    camera.updateMatrix();
     
     camController.camera = &camera;
 }
@@ -591,23 +597,31 @@ void initShapes() {
  */
 void createModels() {
     // classic chess
+    models[0] = Model(Rotator::RotatorTypeSimple);
     models[0].shape = &shapes[0];
 
     // animated man
     manAnimator = Animator(AnimShape(&shapes[2].animations, &shapes[2].bones, &shapes[2].globalInverseTransform, &shapes[2].rootNode));
+    models[1] = Model(Rotator::RotatorTypeSimple);
     models[1].shape = &shapes[2];
-    models[1].rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    models[1].translate(glm::vec3(-2.0f, 0.0f, 0.0f));
-    models[1].transform();
+    models[1].setPitch(glm::radians(90.0f));
+    models[1].rotate();
+    models[1].setX(-2.0f);
+    models[1].translate();
+    models[1].updateMatrix();
     models[1].animator = &manAnimator;
 
     // animated astroboy
     astroboyAnimator = Animator(AnimShape(&shapes[3].animations, &shapes[3].bones, &shapes[3].globalInverseTransform, &shapes[3].rootNode));
+    models[2] = Model(Rotator::RotatorTypeSimple);
     models[2].shape = &shapes[3];
-    models[2].rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    models[2].scale(glm::vec3(50.0f));
-    models[2].translate(glm::vec3(2.0f, 0.0f, 0.0f));
-    models[2].transform();
+    models[2].setPitch(glm::radians(90.0f));
+    models[2].rotate();
+    models[2].setScale(glm::vec3(50.0f));
+    models[2].scale();
+    models[2].setX(2.0f);
+    models[2].translate();
+    models[2].updateMatrix();
     models[2].animator = &astroboyAnimator;
 }
 
@@ -616,16 +630,20 @@ void createModels() {
  */
 void initLamps() {
     createPointLamp(pointLamps[0], glm::vec3(0.0f, 8.0f, 15.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0);
+    lamps[0] = Model(Rotator::RotatorTypeSimple);
     lamps[0].shape = &shapes[1];
     pointLamps[0].mptr = &lamps[0];
-    lamps[0].translate(pointLamps[0].pos);
-    lamps[0].transform();
+    lamps[0].setPos(pointLamps[0].pos);
+    lamps[0].translate();
+    lamps[0].updateMatrix();
 
     createDirLamp(dirLamps[0], glm::vec3(0.0f, 8.0f, -15.0f), glm::vec3(253.0f / 255.0f, 184.0f / 255.0f, 19.0f / 255.0f), 0);
+    lamps[1] = Model(Rotator::RotatorTypeSimple);
     lamps[1].shape = &shapes[1];
     dirLamps[0].mptr = &lamps[1];
-    lamps[1].translate(dirLamps[0].pos);
-    lamps[1].transform();
+    lamps[1].setPos(dirLamps[0].pos);
+    lamps[1].translate();
+    lamps[1].updateMatrix();
 }
 
 /**
@@ -705,25 +723,25 @@ void recycleAll() {
 void sendLampsData() {
 	glUniform1i(cs.pointLightsCount, POINT_LAMPS_COUNT); // point lamps count
     glUniform1i(cs.dirLightsCount, DIR_LAMPS_COUNT); // dir lamps count
-    setVec3(cs.viewPos, camera.pos); // current camera position
+    setVec3(cs.viewPos, camera.getPosition()); // current camera position
 	for (size_t i = 0; i < POINT_LAMPS_COUNT; i++) pointLamps[i].push_pos();
     for (size_t i = 0; i < DIR_LAMPS_COUNT; i++) dirLamps[i].push_pos();
 }
 
 /* --- matrices --- */
 glm::mat4 getPVMMatrix() {
-    return camera.projection * camera.view * *modelMatrix;
+    return camera.getProjectionMatrix() * camera.getViewMatrix() * *modelMatrix;
 }
 
 glm::mat4 getVMMatrix() {
-    return camera.view * *modelMatrix;
+    return camera.getViewMatrix() * *modelMatrix;
 }
 
 void updateMatrices() {
     setMat4(cs.matPVM, getPVMMatrix());
     setMat4(cs.matVM, getVMMatrix());
     setMat4(cs.matModel, *modelMatrix);
-    setMat4(cs.matView, camera.view);
+    setMat4(cs.matView, camera.getViewMatrix());
 }
 
 /**
@@ -741,7 +759,7 @@ void drawModelDM(const Model &model, const SShader &ss) {
     }
 
     glUniform1i(ss.boneAttribsPerVertex, model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1));
-    setMat4(ss.matModel, model.transformation);
+    setMat4(ss.matModel, model.m_transform);
     
     for (size_t i = 0; i < model.shape->meshes.size(); i++) {
         glDrawElements(GL_TRIANGLES, model.shape->meshes[i].count, GL_UNSIGNED_INT, reinterpret_cast<void*>(model.shape->meshes[i].start * sizeof(uint)));
@@ -761,7 +779,7 @@ void drawModel(Model &model) {
     }
 
     glUniform1i(cs.boneAttribsPerVertex, model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1));
-    modelMatrix = &model.transformation;
+    modelMatrix = &model.m_transform;
 	updateMatrices();
     for (size_t i = 0; i < model.shape->meshes.size(); i++) {
         texture2DAB(0, model.shape->meshes[i].mat.ambientTexture);
@@ -830,7 +848,7 @@ uint colorAttachment0123[4] = {
     GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3
 };
 void render() {
-    renderer.mainPass(displayFB, rbo);
+    renderer.mainPass(displayFB);
     
 	// view port to window size
 	glViewport(0, 0, winWidth, winHeight);
@@ -841,8 +859,8 @@ void render() {
     glDrawBuffers(3, colorAttachment02);
     glDepthFunc(GL_LEQUAL);
     useShaderProgram(skyboxShader.programId);
-    glUniformMatrix3fv(skyboxShader.matView, 1, GL_FALSE, glm::value_ptr(glm::mat3(camera.view)));
-    setMat4(skyboxShader.matTransform, camera.projection * glm::mat4(glm::mat3(camera.view)));
+    glUniformMatrix3fv(skyboxShader.matView, 1, GL_FALSE, glm::value_ptr(glm::mat3(camera.getViewMatrix())));
+    setMat4(skyboxShader.matTransform, camera.getProjectionMatrix() * glm::mat4(glm::mat3(camera.getViewMatrix())));
     glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
     skyboxRenderer.render();
 
@@ -900,8 +918,8 @@ void display() {
         renderToDepthMap(i);
 	
     glUseProgram(ssrs.programId);
-    setMat4(ssrs.matProjection, camera.projection);
-    setMat4(ssrs.matView, camera.view);
+    setMat4(ssrs.matProjection, camera.getProjectionMatrix());
+    setMat4(ssrs.matView, camera.getViewMatrix());
 
 	/* --- color rendering --- */
 	glClear(GL_DEPTH_BUFFER_BIT); // color will cleared by quad rendering
@@ -914,6 +932,7 @@ void animate_scene() {
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
         pointLamps[0].setPos(pointLamps[0].pos * rotate);
+        pointLamps[0].mptr->updateMatrix();
     }
 }
 
@@ -971,18 +990,33 @@ int main() {
 // Is called whenever a key is pressed/released via GLFW
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
-    else if (key == GLFW_KEY_W && (action == GLFW_REPEAT || action == GLFW_RELEASE)) {
-        camController.goForward();
-        camera.updateView();
-    } else if (key == GLFW_KEY_S && (action == GLFW_REPEAT || action == GLFW_RELEASE)) {
-        camController.goBack();
-        camera.updateView();
-    } else if (key == GLFW_KEY_A && (action == GLFW_REPEAT || action == GLFW_RELEASE)) {
-        camController.goLeft();
-        camera.updateView();
-    } else if (key == GLFW_KEY_D && (action == GLFW_REPEAT || action == GLFW_RELEASE)) {
-        camController.goRight();
-        camera.updateView();
+    else if (action == GLFW_REPEAT || action == GLFW_RELEASE) {
+        if (key == GLFW_KEY_W || key == GLFW_KEY_S || key == GLFW_KEY_A || key == GLFW_KEY_D) {
+            if (key == GLFW_KEY_W)
+                camController.goForward();
+            else if (key == GLFW_KEY_S)
+                camController.goBack();
+            else if (key == GLFW_KEY_A)
+                camController.goLeft();
+            else if (key == GLFW_KEY_D)
+                camController.goRight();
+
+            camera.translate();
+            camera.updateMatrix();
+        } else if (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT || key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) {
+            glm::mat4 r;
+            if (key == GLFW_KEY_LEFT)
+                manHeadRotator.setYaw(manHeadRotator.getYaw() + glm::radians(5.0f));
+            else if (key == GLFW_KEY_RIGHT)
+                manHeadRotator.setYaw(manHeadRotator.getYaw() - glm::radians(5.0f));
+            else if (key == GLFW_KEY_UP)
+                manHeadRotator.setPitch(manHeadRotator.getPitch() + glm::radians(5.0f));
+            else if (key == GLFW_KEY_DOWN)
+                manHeadRotator.setPitch(manHeadRotator.getPitch() - glm::radians(5.0f));
+
+            manHeadRotator.rotate(r);
+            shapes[2].setNodeTransform("Armature_Head", r);
+        }
     }
 }
 
@@ -1017,7 +1051,8 @@ void mouse_callback(MouseEventListener::MouseEvent *event) {
                 break;
             
             camController.mouseMove(event->getX(), event->getY());
-            camera.updateView();
+            camera.rotate();
+            camera.updateMatrix();
             break;
         case MouseEventListener::ActionLongClick:
             std::cout << "Long click " << event->button << "\n";

@@ -27,5 +27,7 @@
 #include <algine/shader_program.h>
 #include <algine/texture.h>
 #include <algine/types.h>
+#include <algine/rotator.h>
+#include <algine/object3d.h>
 
 #endif /* ALGINE_H */
