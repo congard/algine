@@ -213,7 +213,7 @@ const AnimNode* Animator::findNodeAnim(const Animation *animation, const std::st
 void Animator::readNodeHeirarchy(const float animationTime, const Node &node, const glm::mat4 &parentTransform) {
     const std::string &nodeName = node.name;
     const Animation &animation = shape.animations->operator[](animationIndex);
-    glm::mat4 nodeTransformation = node.transformation;
+    glm::mat4 nodeTransformation = node.defaultTransform * node.transformation; // WARNING: experimental feature "node.transformation"
     const AnimNode *animNode = findNodeAnim(&animation, nodeName);
 
     if (animNode) {
@@ -238,7 +238,9 @@ void Animator::readNodeHeirarchy(const float animationTime, const Node &node, co
         nodeTransformation = translationM * rotationM * scalingM;
     }
 
-    glm::mat4 globalTransformation = parentTransform * nodeTransformation;
+    // WARNING: node.transformation: before or after nodeTransformation?
+    // WARNING: experimental feature "node.transformation"
+    glm::mat4 globalTransformation = parentTransform * nodeTransformation * node.transformation;
 
     for (usize i = 0; i < shape.bones->size(); i++) {
         if (shape.bones->operator[](i).name == nodeName) {

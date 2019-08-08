@@ -9,7 +9,8 @@
 #include <algine/bone.h>
 
 namespace algine {
-struct VecAnimKey {
+class VecAnimKey {
+public:
     double time;
     glm::vec3 value;
 
@@ -18,7 +19,8 @@ struct VecAnimKey {
     float getTime();
 };
 
-struct QuatAnimKey {
+class QuatAnimKey {
+public:
     double time;
     glm::quat value;
 
@@ -27,7 +29,8 @@ struct QuatAnimKey {
     float getTime();
 };
 
-struct AnimNode {
+class AnimNode {
+public:
     std::string name;
     std::vector<VecAnimKey> scalingKeys, positionKeys;
     std::vector<QuatAnimKey> rotationKeys;
@@ -35,7 +38,8 @@ struct AnimNode {
     AnimNode(const aiNodeAnim *nodeAnim);
 };
 
-struct Animation {
+class Animation {
+public:
     double ticksPerSecond, duration;
     std::string name;
     std::vector<AnimNode> channels;
@@ -43,41 +47,33 @@ struct Animation {
     Animation(const aiAnimation *anim);
 };
 
-struct AnimShape {
+class AnimShape {
+public:
     std::vector<Animation> *animations;
     std::vector<Bone> *bones;
     glm::mat4 *globalInverseTransform;
     Node *rootNode;
 
     AnimShape();
-
     AnimShape(std::vector<Animation> *animations, std::vector<Bone> *bones, glm::mat4 *globalInverseTransform, Node *rootNode);
 };
 
-struct Animator {
+class Animator {
+public:
     AnimShape shape;
     usize animationIndex;
 
     Animator();
-
     Animator(const AnimShape &shape, const usize animationIndex = 0);
 
     void animate(const float timeInSeconds);
-
     static usize findPosition(const float animationTime, const AnimNode *animNode);
-
     static void calcInterpolatedPosition(glm::vec3 &out, const float animationTime, const AnimNode *animNode);
-
     static usize findRotation(const float animationTime, const AnimNode *animNode);
-
     static void calcInterpolatedRotation(glm::quat &out, const float animationTime, const AnimNode *animNode);
-
     static usize findScaling(const float animationTime, const AnimNode *animNode);
-
     static void calcInterpolatedScaling(glm::vec3 &out, const float animationTime, const AnimNode *animNode);
-
     static const AnimNode* findNodeAnim(const Animation *animation, const std::string &nodeName);
-
     void readNodeHeirarchy(const float animationTime, const Node &node, const glm::mat4 &parentTransform);
 };
 
