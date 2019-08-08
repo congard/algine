@@ -8,14 +8,16 @@
 #include <algine/math.h>
 
 namespace algine {
-struct Node {
+class Node {
+public:
     std::string name;
     std::vector<Node> childs;
-    glm::mat4 transformation;
+    glm::mat4 defaultTransform, transformation = glm::mat4(1.0f);
 
-    Node() { /* empty */ }
-
+    Node();
     Node(const aiNode *node);
+
+    Node* getNode(const std::string &name);
 };
 
 } /* namespace algine */
