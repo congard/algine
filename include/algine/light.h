@@ -16,7 +16,8 @@
 #include <glm/mat4x4.hpp>
 
 namespace algine {
-struct Light {
+class Light {
+public:
     glm::vec3 pos, color;
     float kc; // constant term; usually kept at 1.0
     float kl; // linear term
@@ -36,27 +37,20 @@ struct Light {
     virtual void push_kq();
     virtual void push_shadowMap();
     virtual void pushAll();
-
     virtual void updateMatrices();
-
     virtual void initShadowMapping(const usize shadowMapWidth, const usize shadowMapHeight);
-
     virtual void createDepthMapFBO();
-
     virtual void createDepthMap();
-
     virtual void configureDepthMap();
-
     virtual void begin();
-		
 	virtual void end();
 
     Light();
-
     ~Light();
 };
 
-struct DirLight : public Light {
+class DirLight : public Light {
+public:
     glm::mat4 lightView, lightSpace;
     glm::vec3 lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -72,25 +66,18 @@ struct DirLight : public Light {
     virtual void push_maxBias();
     virtual void push_shadowMap();
     virtual void pushAll();
-
     virtual void orthoShadowMapping(const float left, const float right, const float bottom, const float top, const float near = 1.0f, const float far = 32.0f);
-
     virtual void perspectiveShadowMapping(const float fovy, const float aspect, const float near = 1.0f, const float far = 32.0f);
-
     virtual void viewMatrixLookAt();
-
     virtual void updateLightSpaceMatrix();
-
     virtual void updateMatrices();
-
     virtual void configureDepthMap();
-
     virtual void begin();
-		
 	virtual void end();
 };
 
-struct PointLight : public Light {
+class PointLight : public Light {
+public:
     // far plane
     float far = 32.0f;
     float bias = 0.4f;
@@ -105,27 +92,23 @@ struct PointLight : public Light {
     virtual void push_bias();
     virtual void push_shadowMap();
     virtual void pushAll();
-
     virtual void updateMatrices();
-    
     virtual void setLightPosSS();
-
     virtual void setShadowMatricesSS();
-
     virtual void configureDepthMap();
-
     virtual void begin();
-		
 	virtual void end();
 };
 
-struct PointLamp : public PointLight {
+class PointLamp : public PointLight {
+public:
     Model *mptr;
 
     void setPos(const glm::vec3 &pos);
 };
 
-struct DirLamp : public DirLight {
+class DirLamp : public DirLight {
+public:
     Model *mptr;
 
     void setPos(const glm::vec3 &pos);
@@ -133,4 +116,4 @@ struct DirLamp : public DirLight {
 
 } /* namespace algine */
 
-#endif /* ALGINE_LIGHT_H */
+#endif // ALGINE_LIGHT_H

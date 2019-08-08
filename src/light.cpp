@@ -10,14 +10,15 @@
 #include <algine/framebuffer.h>
 #include <algine/texture.h>
 
+#define empty { /* empty */ }
+
 namespace algine {
-// struct Light
-void Light::push_pos() { }
-void Light::push_color() { }
-void Light::push_kc() { }
-void Light::push_kl() { }
-void Light::push_kq() { }
-void Light::push_shadowMap() { }
+void Light::push_pos() empty
+void Light::push_color() empty
+void Light::push_kc() empty
+void Light::push_kl() empty
+void Light::push_kq() empty
+void Light::push_shadowMap() empty
 
 void Light::pushAll() {
     push_pos();
@@ -28,7 +29,7 @@ void Light::pushAll() {
     push_shadowMap();
 }
 
-void Light::updateMatrices() { }
+void Light::updateMatrices() empty
 
 void Light::initShadowMapping(const usize shadowMapWidth, const usize shadowMapHeight) {
     this->shadowMapWidth = shadowMapWidth;
@@ -47,13 +48,13 @@ void Light::createDepthMap() {
     Texture::create(&depthMap);
 }
 
-void Light::configureDepthMap() { }
+void Light::configureDepthMap() empty
 
-void Light::begin() { }
+void Light::begin() empty
 	
-void Light::end() { }
+void Light::end() empty
 
-Light::Light() { /* empty for arrays */ }
+Light::Light() = default;
 
 Light::~Light() {
     Framebuffer::destroy(&depthMapFBO);
@@ -63,15 +64,38 @@ Light::~Light() {
     #endif
 }
 
-// struct DirLight
-void DirLight::push_pos() { setVec3(cs->dirLights[index].pos, pos); }
-void DirLight::push_color() { setVec3(cs->dirLights[index].color, color); }
-void DirLight::push_kc() { glUniform1f(cs->dirLights[index].kc, kc); }
-void DirLight::push_kl() { glUniform1f(cs->dirLights[index].kl, kl); }
-void DirLight::push_kq() { glUniform1f(cs->dirLights[index].kq, kq); }
-void DirLight::push_lightMatrix() { setMat4(cs->dirLights[index].lightMatrix, lightSpace); }
-void DirLight::push_minBias() { glUniform1f(cs->dirLights[index].minBias, minBias); }
-void DirLight::push_maxBias() { glUniform1f(cs->dirLights[index].maxBias, maxBias); }
+void DirLight::push_pos() {
+    setVec3(cs->dirLights[index].pos, pos);
+}
+
+void DirLight::push_color() {
+    setVec3(cs->dirLights[index].color, color);
+}
+
+void DirLight::push_kc() {
+    glUniform1f(cs->dirLights[index].kc, kc);
+}
+
+void DirLight::push_kl() {
+    glUniform1f(cs->dirLights[index].kl, kl);
+}
+
+void DirLight::push_kq() {
+    glUniform1f(cs->dirLights[index].kq, kq);
+}
+
+void DirLight::push_lightMatrix() {
+    setMat4(cs->dirLights[index].lightMatrix, lightSpace);
+}
+
+void DirLight::push_minBias() {
+    glUniform1f(cs->dirLights[index].minBias, minBias);
+}
+
+void DirLight::push_maxBias() {
+    glUniform1f(cs->dirLights[index].maxBias, maxBias);
+}
+
 void DirLight::push_shadowMap() {
     glUniform1i(cs->dirLights[index].shadowMap, textureStartId + index);
 	glActiveTexture(GL_TEXTURE0 + textureStartId + index);
@@ -132,14 +156,34 @@ void DirLight::end() {
     bindFramebuffer(0);
 }
 
-// struct PointLight
-void PointLight::push_pos() { setVec3(cs->pointLights[index].pos, pos); }
-void PointLight::push_color() { setVec3(cs->pointLights[index].color, color); }
-void PointLight::push_kc() { glUniform1f(cs->pointLights[index].kc, kc); }
-void PointLight::push_kl() { glUniform1f(cs->pointLights[index].kl, kl); }
-void PointLight::push_kq() { glUniform1f(cs->pointLights[index].kq, kq); }
-void PointLight::push_far() { glUniform1f(cs->pointLights[index].far, far); }
-void PointLight::push_bias() { glUniform1f(cs->pointLights[index].bias, bias); }
+void PointLight::push_pos() {
+    setVec3(cs->pointLights[index].pos, pos);
+}
+
+void PointLight::push_color() {
+    setVec3(cs->pointLights[index].color, color);
+}
+
+void PointLight::push_kc() {
+    glUniform1f(cs->pointLights[index].kc, kc);
+}
+
+void PointLight::push_kl() {
+    glUniform1f(cs->pointLights[index].kl, kl);
+}
+
+void PointLight::push_kq() {
+    glUniform1f(cs->pointLights[index].kq, kq);
+}
+
+void PointLight::push_far() {
+    glUniform1f(cs->pointLights[index].far, far);
+}
+
+void PointLight::push_bias() {
+    glUniform1f(cs->pointLights[index].bias, bias);
+}
+
 void PointLight::push_shadowMap() {
     glUniform1i(cs->pointLights[index].shadowMap, textureStartId + index);
 	glActiveTexture(GL_TEXTURE0 + textureStartId + index);
@@ -199,18 +243,16 @@ void PointLight::end() {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-// struct PointLamp
 void PointLamp::setPos(const glm::vec3 &pos) {
     Light::pos = pos;
     mptr->setPos(pos);
-    mptr->transform();
+    mptr->translate();
 }
 
-// struct DirLamp
 void DirLamp::setPos(const glm::vec3 &pos) {
     Light::pos = pos;
     mptr->setPos(pos);
-    mptr->transform();
+    mptr->translate();
 }
 
 } // namespace algine
