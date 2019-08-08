@@ -6,7 +6,6 @@
 #include <iostream>
 
 #include <assimp/Importer.hpp>  // C++ importer interface
-#include <assimp/postprocess.h> // Post processing flags
 
 #include <algine/core_utils.h>
 #include <algine/texture.h>
@@ -15,7 +14,6 @@
 #include <algine/io.h>
 
 namespace algine {
-// struct Mesh
 void Mesh::delMaterial() {
     mat.recycle();
 }
@@ -24,7 +22,6 @@ void Mesh::recycle() {
     delMaterial();
 }
 
-// static
 Mesh Mesh::processMesh(const aiMesh *aimesh, const aiScene *scene, Geometry &geometry, AlgineMTL *amtl) {
     Mesh mesh;
     mesh.start = geometry.indices.size();
@@ -122,7 +119,8 @@ Mesh Mesh::processMesh(const aiMesh *aimesh, const aiScene *scene, Geometry &geo
             sine(texDiffusePath);
             sine(texSpecularPath);
             sine(texNormalPath);
-            if (amt.shininess != -1) mesh.mat.shininess = amt.shininess;
+            if (amt.shininess != -1)
+                mesh.mat.shininess = amt.shininess;
             #undef sine
         }
     }
@@ -135,7 +133,6 @@ Mesh Mesh::processMesh(const aiMesh *aimesh, const aiScene *scene, Geometry &geo
     return mesh;
 }
 
-// struct Shape
 uint Shape::loadTex(const std::string &fullpath, const std::string &path) {
     std::string absolutePath = io::isAbsolutePath(path) ? path : fullpath + path;
     
@@ -155,7 +152,7 @@ size Shape::getBoneIndex(const std::string &name) {
     return -1;
 }
 
-void Shape::loadBones(Mesh &mesh, const aiMesh *aimesh) {
+void Shape::loadBones(const aiMesh *aimesh) {
     std::vector<BoneInfo> binfos; // bone infos
     binfos.reserve(aimesh->mNumVertices); // allocating space
     
@@ -196,7 +193,7 @@ void Shape::processNode(const aiNode *node, const aiScene *scene, AlgineMTL *amt
     for (size_t i = 0; i < node->mNumMeshes; i++) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
         meshes.push_back(Mesh::processMesh(mesh, scene, geometry, amtl));
-        if (bonesPerVertex != 0) loadBones(meshes[meshes.size() - 1], mesh);	
+        if (bonesPerVertex != 0) loadBones(mesh);
     }
     
     // выполнить ту же обработку и для каждого потомка узла
@@ -341,6 +338,10 @@ void Shape::inverseNormals() {
         geometry.normals[i] *= -1;
 }
 
+void Shape::setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation) {
+    rootNode.getNode(nodeName)->transformation = transformation;
+}
+
 void Shape::recycle() {
     // delete all materials and meshes
     recycleMeshes();
@@ -350,87 +351,8 @@ void Shape::recycle() {
 std::map<std::string, uint> Shape::loadedTextures;
 
 // `Model` is a container for `Shape`, that have own `Animator` and transformations
-// struct Model
-void Model::translate(const glm::vec3 &tvec) {
-    translation = glm::translate(translation, tvec);
-}
-
-void Model::scale(const glm::vec3 &svec) {
-    scaling = glm::scale(scaling, svec);
-}
-
-void Model::rotate(float radians, const glm::vec3 &rvec) {
-    rotation = glm::rotate(rotation, radians, rvec);
-}
-
-// translation matrix to identity, then `translate(pos)`
-void Model::setPos(const glm::vec3 &pos) {
-    translation = glm::mat4();
-    translate(pos);
-}
-
-// Applies transformation. Result is transformation matrix
-void Model::transform() {
-    transformation = translation * rotation * scaling;
-}
-
-/* --- constructors, operators, destructor --- */
-
-Model::Model(const Model &src) {
-    shape = src.shape;
-    animator = src.animator;
-    translation = src.translation;
-    rotation = src.rotation;
-    scaling = src.scaling;
-    transformation = src.transformation;
-    
-    #ifdef ALGINE_LOGGING
-    std::cout << "Model copy constructor\n";
-    #endif
-}
-
-Model::Model(Model &&src) {
-    src.swap(*this);
-    #ifdef ALGINE_LOGGING
-    std::cout << "Model move constructor\n";
-    #endif
-}
-
-Model& Model::operator = (const Model &rhs) {
-    if (&rhs != this) Model(rhs).swap(*this);
-    #ifdef ALGINE_LOGGING
-    std::cout << "Model copy operator =\n";
-    #endif
-    return *this;
-}
-
-Model& Model::operator = (Model &&rhs) {
-    rhs.swap(*this);
-    #ifdef ALGINE_LOGGING
-    std::cout << "Model move operator =\n";
-    #endif
-    return *this;
-}
-
-Model::Model(Shape *shape) {
-    this->shape = shape;
-}
-
-Model::Model() { /* empty */ }
-
-Model::~Model() {
-    #ifdef ALGINE_LOGGING
-    std::cout << "~Model()\n";
-    #endif
-}
-
-void Model::swap(Model &other) {
-    std::swap(shape, other.shape);
-    std::swap(animator, other.animator);
-    std::swap(translation, other.translation);
-    std::swap(rotation, other.rotation);
-    std::swap(scaling, other.scaling);
-    std::swap(transformation, other.transformation);
+Model::Model(const uint rotatorType) : Object3D (rotatorType) {
+    type = Object3DTypeModel;
 }
 
 } // namespace algine

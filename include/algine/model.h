@@ -13,6 +13,7 @@
 #include <algine/material.h>
 #include <algine/bone.h>
 #include <algine/animation.h>
+#include <algine/object3d.h>
 #include <vector>
 #include <map>
 #include <assimp/scene.h> // Output data structure
@@ -23,24 +24,21 @@ struct Geometry {
     std::vector<uint> indices, boneIds;
 };
 
-struct Mesh {
+class Mesh {
+public:
     uint start = 0, count = 0;
     Material mat;
 
     void delMaterial();
-
     void recycle();
-
     static Mesh processMesh(const aiMesh *aimesh, const aiScene *scene, Geometry &geometry, AlgineMTL *amtl = nullptr);
 };
 
-struct Shape {
+class Shape {
 protected:
     static uint loadTex(const std::string &fullpath, const std::string &path);
-
     size getBoneIndex(const std::string &name);
-
-    void loadBones(Mesh &mesh, const aiMesh *aimesh);
+    void loadBones(const aiMesh *aimesh);
 
 public:
     static std::map<std::string, uint> loadedTextures;
@@ -57,21 +55,13 @@ public:
     struct Buffers {
         uint vertices, normals, texCoords, tangents, bitangents, indices, boneWeights, boneIds;
     } buffers;
-    
+
     void processNode(const aiNode *node, const aiScene *scene, AlgineMTL *amtl = nullptr);
-    
-    // _fullpath - path with textures, not necessary to ends with '/'
-    void loadTextures(const std::string &_fullpath);
-
-    // load texture with full path = current path
-    void loadTextures();
-
+    void loadTextures(const std::string &_fullpath); // _fullpath - path with textures, not necessary to ends with '/'
+    void loadTextures(); // load texture with full path = current path
     void genBuffers();
-
     void delBuffers();
-
     void recycleMeshes();
-
     void init(const std::string &path, const uint params);
 
     // creates VAO and adds it into `vaos` array
@@ -84,47 +74,19 @@ public:
         );
 
     void inverseNormals();
-
+    void setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation);
     void recycle();
 };
 
 // `Model` is a container for `Shape`, that have own `Animator` and transformations
-struct Model {
+class Model: public Object3D {
+public:
     Shape *shape = nullptr;
     Animator *animator = nullptr;
-    glm::mat4 translation, rotation, scaling, transformation;
 
-    void translate(const glm::vec3 &tvec);
-
-    void scale(const glm::vec3 &svec);
-
-    void rotate(float radians, const glm::vec3 &rvec);
-
-    // translation matrix to identity, then `translate(pos)`
-    void setPos(const glm::vec3 &pos);
-
-    // Applies transformation. Result is transformation matrix
-    void transform();
-    
-    /* --- constructors, operators, destructor --- */
-
-    Model(const Model &src);
-
-    Model(Model &&src);
-
-    Model& operator = (const Model &rhs);
-
-    Model& operator = (Model &&rhs);
-
-    Model(Shape *shape);
-
-    Model();
-
-    ~Model();
-
-    void swap(Model &other);
+    Model(const uint rotatorType = Rotator::RotatorTypeSimple);
 };
 
 } // namespace algine
 
-#endif /* ALGINE_MODEL_H */
+#endif // ALGINE_MODEL_H
