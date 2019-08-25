@@ -9,25 +9,13 @@
 #include <algine/algine_renderer.h>
 #include <algine/framebuffer.h>
 #include <algine/texture.h>
+#include <algine/core_utils.h>
+#include <algine/sconstants.h>
 
 #define empty { /* empty */ }
 
 namespace algine {
-void Light::push_pos() empty
-void Light::push_color() empty
-void Light::push_kc() empty
-void Light::push_kl() empty
-void Light::push_kq() empty
-void Light::push_shadowMap() empty
-
-void Light::pushAll() {
-    push_pos();
-    push_color();
-    push_kc();
-    push_kl();
-    push_kq();
-    push_shadowMap();
-}
+using namespace AlgineNames;
 
 void Light::updateMatrices() empty
 
@@ -64,49 +52,8 @@ Light::~Light() {
     #endif
 }
 
-void DirLight::push_pos() {
-    setVec3(cs->dirLights[index].pos, pos);
-}
-
-void DirLight::push_color() {
-    setVec3(cs->dirLights[index].color, color);
-}
-
-void DirLight::push_kc() {
-    glUniform1f(cs->dirLights[index].kc, kc);
-}
-
-void DirLight::push_kl() {
-    glUniform1f(cs->dirLights[index].kl, kl);
-}
-
-void DirLight::push_kq() {
-    glUniform1f(cs->dirLights[index].kq, kq);
-}
-
-void DirLight::push_lightMatrix() {
-    setMat4(cs->dirLights[index].lightMatrix, lightSpace);
-}
-
-void DirLight::push_minBias() {
-    glUniform1f(cs->dirLights[index].minBias, minBias);
-}
-
-void DirLight::push_maxBias() {
-    glUniform1f(cs->dirLights[index].maxBias, maxBias);
-}
-
-void DirLight::push_shadowMap() {
-    glUniform1i(cs->dirLights[index].shadowMap, textureStartId + index);
-	glActiveTexture(GL_TEXTURE0 + textureStartId + index);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
-}
-
-void DirLight::pushAll() {
-    Light::pushAll();
-    push_lightMatrix();
-    push_minBias();
-    push_maxBias();
+DirLight::DirLight() {
+    type = TypeDirLight;
 }
 
 void DirLight::orthoShadowMapping(const float left, const float right, const float bottom, const float top, const float near, const float far) {
@@ -156,44 +103,8 @@ void DirLight::end() {
     bindFramebuffer(0);
 }
 
-void PointLight::push_pos() {
-    setVec3(cs->pointLights[index].pos, pos);
-}
-
-void PointLight::push_color() {
-    setVec3(cs->pointLights[index].color, color);
-}
-
-void PointLight::push_kc() {
-    glUniform1f(cs->pointLights[index].kc, kc);
-}
-
-void PointLight::push_kl() {
-    glUniform1f(cs->pointLights[index].kl, kl);
-}
-
-void PointLight::push_kq() {
-    glUniform1f(cs->pointLights[index].kq, kq);
-}
-
-void PointLight::push_far() {
-    glUniform1f(cs->pointLights[index].far, far);
-}
-
-void PointLight::push_bias() {
-    glUniform1f(cs->pointLights[index].bias, bias);
-}
-
-void PointLight::push_shadowMap() {
-    glUniform1i(cs->pointLights[index].shadowMap, textureStartId + index);
-	glActiveTexture(GL_TEXTURE0 + textureStartId + index);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, depthMap);
-}
-
-void PointLight::pushAll() {
-    Light::pushAll();
-    push_far();
-    push_bias();
+PointLight::PointLight() {
+    type = TypePointLight;
 }
 
 void PointLight::updateMatrices() {
@@ -204,15 +115,8 @@ void PointLight::updateMatrices() {
     lightViews[3] = glm::lookAt(pos, glm::vec3(pos.x, pos.y - 1, pos.z), glm::vec3(0, 0, -1));
     lightViews[4] = glm::lookAt(pos, glm::vec3(pos.x, pos.y, pos.z + 1), glm::vec3(0, -1, 0));
     lightViews[5] = glm::lookAt(pos, glm::vec3(pos.x, pos.y, pos.z - 1), glm::vec3(0, -1, 0));
-    for (size_t i = 0; i < 6; i++) lightSpaceMatrices[i] = lightProjection * lightViews[i];
-}
-
-void PointLight::setLightPosSS() {
-    setVec3(ss->lampPos, pos);
-}
-
-void PointLight::setShadowMatricesSS() {
-    for (size_t i = 0; i < 6; i++) setMat4(ss->shadowMatrices + i, lightSpaceMatrices[i]);
+    for (size_t i = 0; i < 6; i++)
+        lightSpaceMatrices[i] = lightProjection * lightViews[i];
 }
 
 void PointLight::configureDepthMap() {
@@ -241,6 +145,251 @@ void PointLight::begin() {
 void PointLight::end() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
+
+LightDataSetter::LightDataSetter() = default;
+
+LightDataSetter::LightDataSetter(const LightDataSetter &src) {
+    dirLightsCount = src.dirLightsCount;
+    pointLightsCount = src.pointLightsCount;
+    shadowShaderPos = src.shadowShaderPos;
+    shadowShaderFarPlane = src.shadowShaderFarPlane;
+    shadowShaderMatrices = src.shadowShaderMatrices;
+
+    lightLocations[0].reserve(src.lightLocations[0].size());
+    for (auto i : src.lightLocations[0])
+        lightLocations[0].push_back(new DirLightLocations(*reinterpret_cast<DirLightLocations*>(i)));
+
+    lightLocations[1].reserve(src.lightLocations[1].size());
+    for (auto i : src.lightLocations[1])
+        lightLocations[1].push_back(new PointLightLocations(*reinterpret_cast<PointLightLocations*>(i)));
+}
+
+LightDataSetter::LightDataSetter(LightDataSetter &&src) noexcept {
+    src.swap(*this);
+}
+
+LightDataSetter& LightDataSetter::operator=(const LightDataSetter &rhs) {
+    if (&rhs != this)
+        LightDataSetter(rhs).swap(*this);
+    return *this;
+}
+
+LightDataSetter& LightDataSetter::operator=(LightDataSetter &&rhs) noexcept {
+    rhs.swap(*this);
+    return *this;
+}
+
+LightDataSetter::~LightDataSetter() {
+    clearDirLightsLocations();
+    clearPointLightsLocations();
+}
+
+void LightDataSetter::swap(LightDataSetter &other) {
+    std::swap(dirLightsCount, other.dirLightsCount);
+    std::swap(pointLightsCount, other.pointLightsCount);
+    std::swap(shadowShaderPos, other.shadowShaderPos);
+    std::swap(shadowShaderFarPlane, other.shadowShaderFarPlane);
+    std::swap(shadowShaderMatrices, other.shadowShaderMatrices);
+    std::swap(lightLocations, other.lightLocations);
+}
+
+void LightDataSetter::clearDirLightsLocations() {
+    for (auto &i : lightLocations[0])
+        delete i;
+    lightLocations[0].clear();
+}
+
+void LightDataSetter::clearPointLightsLocations() {
+    for (auto &i : lightLocations[1])
+        delete i;
+    lightLocations[1].clear();
+}
+
+#define dirLightElem(elem) \
+    ColorShader::DirLights + std::string("[") + std::to_string(i) + "]." + ColorShader::Light::elem
+
+#define pointLightElem(elem) \
+    ColorShader::PointLights + std::string("[") + std::to_string(i) + "]." + ColorShader::Light::elem
+
+void LightDataSetter::indexDirLightLocations(ShaderProgram *const lightShader, const uint lightsCount) {
+    clearDirLightsLocations();
+
+    dirLightsCount = lightShader->getLocation(ColorShader::DirLightsCount);
+
+    lightLocations[0].reserve(lightsCount);
+    for (uint i = 0; i < lightsCount; ++i) {
+        auto locations = new DirLightLocations;
+        locations->kc = lightShader->getLocation(dirLightElem(Kc));
+        locations->kl = lightShader->getLocation(dirLightElem(Kl));
+        locations->kq = lightShader->getLocation(dirLightElem(Kq));
+        locations->pos = lightShader->getLocation(dirLightElem(Pos));
+        locations->color = lightShader->getLocation(dirLightElem(Color));
+        locations->shadowMap = lightShader->getLocation(AlgineNames::ColorShader::DirLightShadowMaps + std::string("[") + std::to_string(i) + "]");
+        locations->minBias = lightShader->getLocation(dirLightElem(MinBias));
+        locations->maxBias = lightShader->getLocation(dirLightElem(MaxBias));
+        locations->lightMatrix = lightShader->getLocation(dirLightElem(LightMatrix));
+        lightLocations[0].push_back(locations);
+    }
+}
+
+void LightDataSetter::indexPointLightLocations(ShaderProgram *const lightShader, ShaderProgram *const shadowShader, const uint lightsCount) {
+    clearPointLightsLocations();
+
+    pointLightsCount = lightShader->getLocation(ColorShader::PointLightsCount);
+
+    if (shadowShader) {
+        shadowShaderPos = shadowShader->getLocation(ShadowShader::PointLight::Pos);
+        shadowShaderFarPlane = shadowShader->getLocation(ShadowShader::PointLight::FarPlane);
+        shadowShaderMatrices = shadowShader->getLocation(ShadowShader::PointLight::ShadowMatrices);
+    }
+
+    lightLocations[1].reserve(lightsCount);
+    for (uint i = 0; i < lightsCount; ++i) {
+        auto locations = new PointLightLocations;
+        locations->kc = lightShader->getLocation(pointLightElem(Kc));
+        locations->kl = lightShader->getLocation(pointLightElem(Kl));
+        locations->kq = lightShader->getLocation(pointLightElem(Kq));
+        locations->pos = lightShader->getLocation(pointLightElem(Pos));
+        locations->color = lightShader->getLocation(pointLightElem(Color));
+        locations->shadowMap = lightShader->getLocation(AlgineNames::ColorShader::PointLightShadowMaps + std::string("[") + std::to_string(i) + "]");
+        locations->farPlane = lightShader->getLocation(pointLightElem(FarPlane));
+        locations->bias = lightShader->getLocation(pointLightElem(Bias));
+        lightLocations[1].push_back(locations);
+    }
+}
+
+void LightDataSetter::setDirLightsCount(const uint count) {
+    ShaderProgram::set(dirLightsCount, count);
+}
+
+void LightDataSetter::setPointLightsCount(const uint count) {
+    ShaderProgram::set(pointLightsCount, count);
+}
+
+void LightDataSetter::setKc(const Light &light, uint index) {
+    ShaderProgram::set(lightLocations[light.type][index]->kc, light.kc);
+}
+
+void LightDataSetter::setKl(const Light &light, uint index) {
+    ShaderProgram::set(lightLocations[light.type][index]->kl, light.kl);
+}
+
+void LightDataSetter::setKq(const Light &light, uint index) {
+    ShaderProgram::set(lightLocations[light.type][index]->kq, light.kq);
+}
+
+void LightDataSetter::setPos(const Light &light, uint index) {
+    ShaderProgram::set(lightLocations[light.type][index]->pos, light.pos);
+}
+
+void LightDataSetter::setColor(const Light &light, uint index) {
+    ShaderProgram::set(lightLocations[light.type][index]->color, light.color);
+}
+
+void LightDataSetter::setShadowMap(const DirLight &light, uint index, uint textureSlot) {
+    ShaderProgram::set(lightLocations[Light::TypeDirLight][index]->shadowMap, (int)textureSlot);
+    glActiveTexture(GL_TEXTURE0 + textureSlot);
+    glBindTexture(GL_TEXTURE_2D, light.depthMap);
+}
+
+void LightDataSetter::setMinBias(const DirLight &light, uint index) {
+    ShaderProgram::set(reinterpret_cast<DirLightLocations*>(lightLocations[Light::TypeDirLight][index])->minBias, light.minBias);
+}
+
+void LightDataSetter::setMaxBias(const DirLight &light, uint index) {
+    ShaderProgram::set(reinterpret_cast<DirLightLocations*>(lightLocations[Light::TypeDirLight][index])->maxBias, light.maxBias);
+}
+
+void LightDataSetter::setLightMatrix(const DirLight &light, uint index) {
+    ShaderProgram::set(reinterpret_cast<DirLightLocations*>(lightLocations[Light::TypeDirLight][index])->lightMatrix, light.lightSpace);
+}
+
+void LightDataSetter::setShadowMap(const PointLight &light, uint index, uint textureSlot) {
+    ShaderProgram::set(lightLocations[Light::TypePointLight][index]->shadowMap, (int)textureSlot);
+    glActiveTexture(GL_TEXTURE0 + textureSlot);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, light.depthMap);
+}
+
+void LightDataSetter::setFarPlane(const PointLight &light, uint index) {
+    ShaderProgram::set(reinterpret_cast<PointLightLocations*>(lightLocations[Light::TypePointLight][index])->farPlane, light.far);
+}
+
+void LightDataSetter::setBias(const PointLight &light, uint index) {
+    ShaderProgram::set(reinterpret_cast<PointLightLocations*>(lightLocations[Light::TypePointLight][index])->bias, light.bias);
+}
+
+void LightDataSetter::setShadowShaderPos(const PointLight &light) {
+    ShaderProgram::set(shadowShaderPos, light.pos);
+}
+
+void LightDataSetter::setShadowShaderFarPlane(const PointLight &light) {
+    ShaderProgram::set(shadowShaderFarPlane, light.far);
+}
+
+void LightDataSetter::setShadowShaderMatrices(const PointLight &light) {
+    for (int i = 0; i < 6; i++)
+        ShaderProgram::set(shadowShaderMatrices + i, light.lightSpaceMatrices[i]);
+}
+
+#define checkIsDirLight \
+    if (lightType != Light::TypeDirLight) { \
+        std::cerr << "Object " << obj << " can only be used with Light::TypeDirLight\n"; \
+        return -1; \
+    }
+
+#define checkIsPointLight \
+    if (lightType != Light::TypePointLight) { \
+        std::cerr << "Object " << obj << " can only be used with Light::TypePointLight\n"; \
+        return -1; \
+    }
+
+int LightDataSetter::getLocation(const uint obj, const uint lightType, const uint lightIndex) {
+    switch (obj) {
+        case DirLightsCount:
+            return dirLightsCount;
+        case PointLightsCount:
+            return pointLightsCount;
+        case Kc:
+            return lightLocations[lightType][lightIndex]->kc;
+        case Kl:
+            return lightLocations[lightType][lightIndex]->kl;
+        case Kq:
+            return lightLocations[lightType][lightIndex]->kq;
+        case Pos:
+            return lightLocations[lightType][lightIndex]->pos;
+        case Color:
+            return lightLocations[lightType][lightIndex]->color;
+        case ShadowMap:
+            return lightLocations[lightType][lightIndex]->shadowMap;
+        case MinBias:
+            checkIsDirLight
+            return reinterpret_cast<DirLightLocations*>(lightLocations[lightType][lightIndex])->minBias;
+        case MaxBias:
+            checkIsDirLight
+            return reinterpret_cast<DirLightLocations*>(lightLocations[lightType][lightIndex])->maxBias;
+        case LightMatrix:
+            checkIsDirLight
+            return reinterpret_cast<DirLightLocations*>(lightLocations[lightType][lightIndex])->lightMatrix;
+        case Bias:
+            checkIsPointLight
+            return reinterpret_cast<PointLightLocations*>(lightLocations[lightType][lightIndex])->bias;
+        case FarPlane:
+            checkIsPointLight
+            return reinterpret_cast<PointLightLocations*>(lightLocations[lightType][lightIndex])->farPlane;
+        case ShadowShaderPos:
+            checkIsPointLight
+            return shadowShaderPos;
+        case ShadowShaderFarPlane:
+            checkIsPointLight
+            return shadowShaderFarPlane;
+        case ShadowShaderMatrices:
+            checkIsPointLight
+            return shadowShaderMatrices;
+        default:
+            std::cerr << "Object " << obj << " not found\n";
+            return -1;
+    }
 }
 
 void PointLamp::setPos(const glm::vec3 &pos) {

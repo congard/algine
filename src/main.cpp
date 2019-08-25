@@ -18,6 +18,9 @@
 #include <assimp/postprocess.h>
 #include <glm/gtc/type_ptr.hpp>
 
+// TODO: Something to do with ALGINE_LOGGING...
+//  This macro appears in some constructors / operators / destructors.
+//  Maybe simply remove?
 #define ALGINE_LOGGING
 
 #include <algine/algine.h>
@@ -35,8 +38,12 @@
 
 #define FULLSCREEN !true
 
-#define POINT_LAMPS_COUNT 1
-#define DIR_LAMPS_COUNT 1
+#define POINT_LAMPS_COUNT 1u
+#define DIR_LAMPS_COUNT 1u
+// point light texture start id
+#define POINT_LIGHT_TSID 6
+// dir light texture start id
+#define DIR_LIGHT_TSID POINT_LIGHT_TSID + POINT_LAMPS_COUNT
 #define SHAPES_COUNT 4
 #define MODELS_COUNT 3
 
@@ -51,7 +58,7 @@ GLuint winWidth = 1366, winHeight = 763;
 GLFWwindow* window;
 
 // matrices
-glm::mat4 *modelMatrix; // model matrix stored in Model::transformation
+const glm::mat4 *modelMatrix; // model matrix stored in Model::transformation
 
 // framebuffers, textures etc for rendering
 using namespace algine;
@@ -64,6 +71,7 @@ Animator manAnimator, astroboyAnimator; // animator for man, astroboy models
 // light
 PointLamp pointLamps[POINT_LAMPS_COUNT];
 DirLamp dirLamps[DIR_LAMPS_COUNT];
+LightDataSetter lightDataSetter;
 
 // renderer
 AlgineRenderer renderer;
@@ -93,18 +101,20 @@ GLuint
     skybox,
     cocTex;
 
-CShader cs;
-SShader ss, ss_dir;
-DOFBlurShader dofBlurH, dofBlurV;
-DOFCoCShader dofCoCShader;
-BlurShader blurBloomH, blurBloomV, blurCoCH, blurCoCV;
-BlendShader blendShader;
-SSRShader ssrs;
-BloomSearchShader bloomSearchShader;
-CubemapShader skyboxShader;
+ShaderProgram *skyboxShader;
+ShaderProgram *colorShader;
+ShaderProgram *pointShadowShader;
+ShaderProgram *dirShadowShader;
+ShaderProgram *dofBlurHorShader, *dofBlurVertShader;
+ShaderProgram *dofCoCShader;
+ShaderProgram *ssrShader;
+ShaderProgram *bloomSearchShader;
+ShaderProgram *bloomBlurHorShader, *bloomBlurVertShader;
+ShaderProgram *cocBlurHorShader, *cocBlurVertShader;
+ShaderProgram *blendShader;
 
-BlurShader *blurBloomShaders[2] = { &blurBloomH, &blurBloomV };
-BlurShader *blurCoCShaders[2] = { &blurCoCH, &blurCoCV };
+ShaderProgram *blurBloomShaders[2];
+ShaderProgram *blurCoCShaders[2];
 
 AlgineParams params;
 ColorShaderParams csp;
@@ -183,19 +193,16 @@ void createPointLamp(PointLamp &result, const glm::vec3 &pos, const glm::vec3 &c
     result.kl = 0.045f;
     result.kq = 0.0075f;
 
-    result.cs = &cs;
-    result.ss = &ss;
-    result.index = id;
     result.initShadowMapping(SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION);
 
-    glUseProgram(cs.programId);
-    result.push_color();
-    result.push_kc();
-    result.push_kl();
-    result.push_kq();
-    result.push_far();
-    result.push_bias();
-    glUseProgram(0);
+    colorShader->use();
+    lightDataSetter.setColor(result, id);
+    lightDataSetter.setKc(result, id);
+    lightDataSetter.setKl(result, id);
+    lightDataSetter.setKq(result, id);
+    lightDataSetter.setFarPlane(result, id);
+    lightDataSetter.setBias(result, id);
+    ShaderProgram::reset();
 }
 
 void createDirLamp(DirLamp &result, const glm::vec3 &pos, const glm::vec3 &color, usize id) {
@@ -205,22 +212,18 @@ void createDirLamp(DirLamp &result, const glm::vec3 &pos, const glm::vec3 &color
     result.kl = 0.045f;
     result.kq = 0.0075f;
 
-    result.cs = &cs;
-    result.ss = &ss;
-    result.index = id;
-    result.textureStartId = 6 + POINT_LAMPS_COUNT;
     result.orthoShadowMapping(-10.0f, 10.0f, -10.0f, 10.0f);
     result.initShadowMapping(SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION);
 
-    glUseProgram(cs.programId);
-    result.push_color();
-    result.push_kc();
-    result.push_kl();
-    result.push_kq();
-    result.push_lightMatrix();
-    result.push_minBias();
-    result.push_maxBias();
-    glUseProgram(0);
+    colorShader->use();
+    lightDataSetter.setColor(result, id);
+    lightDataSetter.setKc(result, id);
+    lightDataSetter.setKl(result, id);
+    lightDataSetter.setKq(result, id);
+    lightDataSetter.setMinBias(result, id);
+    lightDataSetter.setMaxBias(result, id);
+    lightDataSetter.setLightMatrix(result, id);
+    ShaderProgram::reset();
 }
 
 void createShapes(const std::string &path, const uint params, const size_t id, const bool inverseNormals = false, const uint bonesPerVertex = 0) {
@@ -228,8 +231,21 @@ void createShapes(const std::string &path, const uint params, const size_t id, c
     shapes[id].init(path, params);
     if (inverseNormals) shapes[id].inverseNormals();
     shapes[id].genBuffers();
-    shapes[id].createVAO(ss.inPosition, -1, -1, -1, -1, ss.inBoneWeights, ss.inBoneIds); // all shadow shaders have same ids
-    shapes[id].createVAO(cs.inPosition, cs.inTexCoord, cs.inNormal, cs.inTangent, cs.inBitangent, cs.inBoneWeights, cs.inBoneIds);
+    shapes[id].createVAO(
+            pointShadowShader->getLocation(AlgineNames::ShadowShader::InPos),
+            -1, -1, -1, -1,
+            pointShadowShader->getLocation(AlgineNames::ShadowShader::InBoneWeights),
+            pointShadowShader->getLocation(AlgineNames::ShadowShader::InBoneIds)
+    ); // all shadow shaders have same ids
+    shapes[id].createVAO(
+                colorShader->getLocation(AlgineNames::ColorShader::InPos),
+                colorShader->getLocation(AlgineNames::ColorShader::InTexCoord),
+                colorShader->getLocation(AlgineNames::ColorShader::InNormal),
+                colorShader->getLocation(AlgineNames::ColorShader::InTangent),
+                colorShader->getLocation(AlgineNames::ColorShader::InBitangent),
+                colorShader->getLocation(AlgineNames::ColorShader::InBoneWeights),
+                colorShader->getLocation(AlgineNames::ColorShader::InBoneIds)
+    );
 }
 
 /* init code begin */
@@ -277,6 +293,26 @@ void initGL() {
  * Loading and compiling shaders
  */
 void initShaders() {
+    skyboxShader = new ShaderProgram();
+    colorShader = new ShaderProgram();
+    pointShadowShader = new ShaderProgram();
+    dirShadowShader = new ShaderProgram();
+    dofBlurHorShader = new ShaderProgram();
+    dofBlurVertShader = new ShaderProgram();
+    dofCoCShader = new ShaderProgram();
+    ssrShader = new ShaderProgram();
+    bloomSearchShader = new ShaderProgram();
+    bloomBlurHorShader = new ShaderProgram();
+    bloomBlurVertShader = new ShaderProgram();
+    cocBlurHorShader = new ShaderProgram();
+    cocBlurVertShader = new ShaderProgram();
+    blendShader = new ShaderProgram();
+
+    blurBloomShaders[0] = bloomBlurHorShader;
+    blurBloomShaders[1] = bloomBlurVertShader;
+    blurCoCShaders[0] = cocBlurHorShader;
+    blurCoCShaders[1] = cocBlurVertShader;
+
     std::cout << "Compiling algine shaders\n";
 
     #ifdef debug_sm
@@ -293,110 +329,111 @@ void initShaders() {
     dofBlurParams.bleedingEliminationDeltaCoC = ALGINE_ENABLED;
     dofBlurParams.bleedingEliminationFocusCoC = ALGINE_ENABLED;
 
-    cs.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getCS(
+    colorShader->fromSource(scompiler::getCS(
         params, csp,
         "src/resources/shaders/vertex_shader.glsl",
         "src/resources/shaders/fragment_shader.glsl")
-    ));
-    ss.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSS(
+    );
+    pointShadowShader->fromSource(scompiler::getSS(
         params, ssp,
         "src/resources/shaders/shadow/vertex_shadow_shader.glsl",
         "src/resources/shaders/shadow/fragment_shadow_shader.glsl",
         "src/resources/shaders/shadow/geometry_shadow_shader.glsl")
-    ));
+    );
     params.shadowMappingType = ALGINE_SHADOW_MAPPING_TYPE_DIR_LIGHTING;
-    ss_dir.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSS(
+    dirShadowShader->fromSource(scompiler::getSS(
         params, ssp,
         "src/resources/shaders/shadow/vertex_shadow_shader.glsl",
         "src/resources/shaders/shadow/fragment_shadow_shader.glsl")
-    ));
-    ssrs.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getSSRShader(
+    );
+    ssrShader->fromSource(scompiler::getSSRShader(
         "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/ssr/fragment.glsl")
-    ));
+    );
 
     dofBlurParams.type = ALGINE_DOF_FROM_COC_MAP;
-    std::vector<ShadersData> blus = scompiler::getDOFBlurShader(
+    std::vector<ShadersData> dofBlurSources = scompiler::getDOFBlurShader(
         dofBlurParams,
         "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/dof/fragment.glsl"
     );
-    dofBlurH.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(
-        blus[0]
-    ));
-    dofBlurV.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(
-        blus[1]
-    ));
+    dofBlurHorShader->fromSource(dofBlurSources[0]);
+    dofBlurVertShader->fromSource(dofBlurSources[1]);
 
     dofBlurParams.type = ALGINE_CINEMATIC_DOF;
-    dofCoCShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getDOFCoCShader(
+    dofCoCShader->fromSource(scompiler::getDOFCoCShader(
         dofBlurParams,
         "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/dof/coc_fragment.glsl")
-    ));
+    );
 
-    blendShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getBlendShader(
+    blendShader->fromSource(scompiler::getBlendShader(
         params,
         "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/blend/fragment.glsl")
-    ));
+    );
 
-    bloomSearchShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getBloomSearchShader(
+    bloomSearchShader->fromSource(scompiler::getBloomSearchShader(
         "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/bloom/fragment_search.glsl")
-    ));
+    );
 
     std::vector<ShadersData> blur = scompiler::getBlurShader(
         BlurShaderParams { bloomBlurKernelRadius },
         "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/blur/fragment.glsl"
     );
-    blurBloomH.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(blur[0]));
-    blurBloomV.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(blur[1]));
+    bloomBlurHorShader->fromSource(blur[0]);
+    bloomBlurVertShader->fromSource(blur[1]);
 
     blur = scompiler::getBlurShader(
         BlurShaderParams { cocBlurKernelRadius, ALGINE_VEC1, ALGINE_SHADER_TEX_COMPONENT_RED },
         "src/resources/shaders/basic/quad_vertex.glsl",
         "src/resources/shaders/blur/fragment.glsl"
     );
-    blurCoCH.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(blur[0]));
-    blurCoCV.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(blur[1]));
+    cocBlurHorShader->fromSource(blur[0]);
+    cocBlurVertShader->fromSource(blur[1]);
 
     CubemapShaderParams cubemapShaderParams;
     cubemapShaderParams.positionOutput = ALGINE_SPHERE_POSITIONS;
-    skyboxShader.programId = scompiler::createShaderProgramDS(scompiler::compileShaders(scompiler::getCubemapShader(
+    skyboxShader->fromSource(scompiler::getCubemapShader(
         cubemapShaderParams,
         "src/resources/shaders/basic/cubemap_vertex.glsl",
         "src/resources/shaders/basic/cubemap_fragment.glsl")
-    ));
+    );
 
     std::cout << "Compilation done\n";
 
-    scompiler::loadLocations(cs, csp);
-    scompiler::loadLocations(ss);
-    scompiler::loadLocations(ss_dir);
-    scompiler::loadLocations(ssrs);
-    scompiler::loadLocations(dofBlurH);
-    scompiler::loadLocations(dofBlurV);
-    scompiler::loadLocations(dofCoCShader);
-    scompiler::loadLocations(blendShader);
-    scompiler::loadLocations(bloomSearchShader);
-    scompiler::loadLocations(blurBloomH);
-    scompiler::loadLocations(blurBloomV);
-    scompiler::loadLocations(blurCoCH);
-    scompiler::loadLocations(blurCoCV);
-    scompiler::loadLocations(skyboxShader);
+    #define value *
 
-    renderer.ssrs = &ssrs;
-    renderer.blendShader = &blendShader;
-    renderer.dofBlurShaders[0] = &dofBlurH;
-    renderer.dofBlurShaders[1] = &dofBlurV;
-    renderer.bloomSearchShader = &bloomSearchShader;
+    scompiler::loadColorShaderLocations(value colorShader, csp);
+    scompiler::loadShadowShaderLocations(value pointShadowShader);
+    scompiler::loadShadowShaderLocations(value dirShadowShader);
+    scompiler::loadSSRShaderLocations(value ssrShader);
+    scompiler::loadDOFBlurShaderLocations(value dofBlurHorShader);
+    scompiler::loadDOFBlurShaderLocations(value dofBlurVertShader);
+    scompiler::loadDOFCoCShaderLocations(value dofCoCShader);
+    scompiler::loadBlendBloomShaderLocations(value blendShader);
+    scompiler::loadBloomSearchShaderLocations(value bloomSearchShader);
+    scompiler::loadBlurShaderLocations(value bloomBlurHorShader);
+    scompiler::loadBlurShaderLocations(value bloomBlurVertShader);
+    scompiler::loadBlurShaderLocations(value cocBlurHorShader);
+    scompiler::loadBlurShaderLocations(value cocBlurVertShader);
+    scompiler::loadCubemapShaderLocations(value skyboxShader);
+
+    lightDataSetter.indexDirLightLocations(colorShader, csp.maxDirLightsCount);
+    lightDataSetter.indexPointLightLocations(colorShader, pointShadowShader, csp.maxPointLightsCount);
+
+    renderer.ssrShader = ssrShader;
+    renderer.blendShader = blendShader;
+    renderer.dofBlurShaders[0] = dofBlurHorShader;
+    renderer.dofBlurShaders[1] = dofBlurVertShader;
+    renderer.bloomSearchShader = bloomSearchShader;
     renderer.blurShaders = blurBloomShaders;
-    renderer.dofCoCShader = &dofCoCShader;
+    renderer.dofCoCShader = dofCoCShader;
     renderer.quadRenderer = &quadRenderer;
 
-    skyboxRenderer.init(skyboxShader.inPosition);
+    skyboxRenderer.init(skyboxShader->getLocation(AlgineNames::CubemapShader::InPos));
     quadRenderer.init(ALGINE_IN_POS_LOCATION, ALGINE_IN_TEX_COORD_LOCATION);
 
     Framebuffer::create(&displayFB);
@@ -477,23 +514,15 @@ void initShaders() {
     float kernelCoC[cocBlurKernelRadius * 2 - 1];
     getGB1DKernel(kernelBloom, bloomBlurKernelRadius * 2 - 1, bloomBlurKernelSigma);
     getGB1DKernel(kernelCoC, cocBlurKernelRadius * 2 - 1, cocBlurKernelSigma);
-    
-    for (size_t j = 0; j < 2; j++) {
-        glUseProgram(blurBloomShaders[j]->programId);
-        for (uint i = 0; i < bloomBlurKernelRadius; i++) {
-            glUniform1f(
-                j ? blurBloomV.kernel + (bloomBlurKernelRadius - 1 - i) : blurBloomH.kernel + (bloomBlurKernelRadius - 1 - i),
-                kernelBloom[i]
-            );
-        }
 
-        glUseProgram(blurCoCShaders[j]->programId);
-        for (uint i = 0; i < cocBlurKernelRadius; i++) {
-            glUniform1f(
-                j ? blurCoCV.kernel + (cocBlurKernelRadius - 1 - i) : blurCoCH.kernel + (cocBlurKernelRadius - 1 - i),
-                kernelCoC[i]
-            );
-        }
+    for (size_t j = 0; j < 2; j++) {
+        blurBloomShaders[j]->use();
+        for (int i = 0; i < bloomBlurKernelRadius; i++)
+            ShaderProgram::set(blurBloomShaders[j]->getLocation(AlgineNames::BlurShader::Kernel) + (bloomBlurKernelRadius - 1 - i), kernelBloom[i]);
+
+        blurCoCShaders[j]->use();
+        for (int i = 0; i < cocBlurKernelRadius; i++)
+            ShaderProgram::set(blurCoCShaders[j]->getLocation(AlgineNames::BlurShader::Kernel) + (cocBlurKernelRadius - 1 - i), kernelCoC[i]);
     }
 
     glUseProgram(0);
@@ -509,44 +538,44 @@ void initShaders() {
     bindFramebuffer(0);
 
     // configuring CS
-    useShaderProgram(cs.programId);
-    glUniform1i(cs.materialAmbientTex, 0);
-    glUniform1i(cs.materialDiffuseTex, 1);
-    glUniform1i(cs.materialSpecularTex, 2);
-    glUniform1i(cs.materialNormalTex, 3);
-    glUniform1i(cs.materialReflectionStrengthTex, 4);
-    glUniform1i(cs.materialJitterTex, 5);
-    glUniform1f(cs.shadowOpacity, shadowOpacity);
+    colorShader->use();
+    colorShader->set(AlgineNames::ColorShader::Material::AmbientTex, 0);
+    colorShader->set(AlgineNames::ColorShader::Material::DiffuseTex, 1);
+    colorShader->set(AlgineNames::ColorShader::Material::SpecularTex, 2);
+    colorShader->set(AlgineNames::ColorShader::Material::NormalTex, 3);
+    colorShader->set(AlgineNames::ColorShader::Material::ReflectionStrengthTex, 4);
+    colorShader->set(AlgineNames::ColorShader::Material::JitterTex, 5);
+    colorShader->set(AlgineNames::ColorShader::ShadowOpacity, shadowOpacity);
 
     // configuring CubemapShader
-    useShaderProgram(skyboxShader.programId);
-    setVec3(skyboxShader.color, glm::vec3(0.125f));
-    glUniform1f(skyboxShader.positionScaling, 64.0f);
+    skyboxShader->use();
+    skyboxShader->set(AlgineNames::CubemapShader::Color, glm::vec3(0.125f));
+    skyboxShader->set(AlgineNames::CubemapShader::PosScaling, 64.0f);
 
     // blend setting
-    glUseProgram(blendShader.programId);
-    glUniform1i(blendShader.samplerImage, 0);   // GL_TEXTURE0
-    glUniform1i(blendShader.samplerBloom, 1); // GL_TEXTURE1
-    glUniform1f(blendShader.exposure, blendExposure);
-    glUniform1f(blendShader.gamma, blendGamma);
+    blendShader->use();
+    blendShader->set(AlgineNames::BlendBloomShader::BaseImage, 0); // GL_TEXTURE0
+    blendShader->set(AlgineNames::BlendBloomShader::BloomImage, 1); // GL_TEXTURE1
+    blendShader->set(AlgineNames::BlendBloomShader::Exposure, blendExposure);
+    blendShader->set(AlgineNames::BlendBloomShader::Gamma, blendGamma);
 
     // dof blur setting
     for (size_t i = 0; i < 2; i++) {
-        glUseProgram(renderer.dofBlurShaders[i]->programId);
-        glUniform1i(renderer.dofBlurShaders[i]->samplerImage, 0);
-        glUniform1i(renderer.dofBlurShaders[i]->samplerCoCMap, 1);
-        glUniform1i(renderer.dofBlurShaders[i]->samplerPositionMap, 2);
-        glUniform1f(renderer.dofBlurShaders[i]->bleedingEliminationMinDeltaZ, bleedingEliminationMinDeltaZ);
-        glUniform1f(renderer.dofBlurShaders[i]->bleedingEliminationMinDeltaCoC, bleedingEliminationMinDeltaCoC);
-        glUniform1f(renderer.dofBlurShaders[i]->bleedingEliminationMaxFocusCoC, bleedingEliminationMaxFocusCoC);
+        renderer.dofBlurShaders[i]->use();
+        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::BaseImage, 0);
+        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::CoCMap, 1);
+        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::PositionMap, 2);
+        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::BleedingMinDeltaZ, bleedingEliminationMinDeltaZ);
+        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::BleedingMinDeltaCoC, bleedingEliminationMinDeltaCoC);
+        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::BleedingMaxFocusCoC, bleedingEliminationMaxFocusCoC);
     }
 
     // screen space setting
-    glUseProgram(ssrs.programId);
-    glUniform1i(ssrs.samplerNormalMap, 1);
-    glUniform1i(ssrs.samplerSSRValuesMap, 2);
-    glUniform1i(ssrs.samplerPositionMap, 3);
-    useShaderProgram(0);
+    ssrShader->use();
+    ssrShader->set(AlgineNames::SSRShader::NormalMap, 1);
+    ssrShader->set(AlgineNames::SSRShader::SSRValuesMap, 2);
+    ssrShader->set(AlgineNames::SSRShader::PositionMap, 3);
+    glUseProgram(0);
 }
 
 /**
@@ -650,29 +679,32 @@ void initLamps() {
  * Binds to depth cubemaps
  */
 void initShadowMaps() {
-    glUseProgram(cs.programId);
+    colorShader->use();
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
-    for (usize i = 0; i < csp.maxPointLightsCount; i++) {
-        glUniform1i(cs.pointLights[i].shadowMap, pointLamps[0].textureStartId + i);
-		glActiveTexture(GL_TEXTURE0 + pointLamps[0].textureStartId + i);
+    // TODO: maybe move it to LightDataSetter?
+    for (int i = 0; i < csp.maxPointLightsCount; i++) {
+        ShaderProgram::set(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypePointLight, i), POINT_LIGHT_TSID + i);
+		glActiveTexture(GL_TEXTURE0 + POINT_LIGHT_TSID + i);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
-    for (usize i = 0; i < POINT_LAMPS_COUNT; i++) pointLamps[i].push_shadowMap();
+    for (usize i = 0; i < POINT_LAMPS_COUNT; i++)
+        lightDataSetter.setShadowMap(pointLamps[i], i, POINT_LIGHT_TSID + i);
 
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
-    for (usize i = 0; i < csp.maxDirLightsCount; i++) {
-        glUniform1i(cs.dirLights[i].shadowMap, dirLamps[0].textureStartId + i);
-		glActiveTexture(GL_TEXTURE0 + dirLamps[0].textureStartId + i);
+    for (int i = 0; i < csp.maxDirLightsCount; i++) {
+        ShaderProgram::set(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypeDirLight, i), DIR_LIGHT_TSID + i);
+		glActiveTexture(GL_TEXTURE0 + DIR_LIGHT_TSID + i);
 		glBindTexture(GL_TEXTURE_2D, 0);
     }
-    for (usize i = 0; i < DIR_LAMPS_COUNT; i++) dirLamps[i].push_shadowMap();
+    for (usize i = 0; i < DIR_LAMPS_COUNT; i++)
+        lightDataSetter.setShadowMap(dirLamps[i], i, DIR_LIGHT_TSID + i);
     glUseProgram(0);
 }
 
 void initShadowCalculation() {
-    glUseProgram(cs.programId);
-    glUniform1f(cs.shadowDiskRadiusK, diskRadius_k);
-    glUniform1f(cs.shadowDiskRadiusMin, diskRadius_min);
+    colorShader->use();
+    colorShader->set(AlgineNames::ColorShader::ShadowDiskRadiusK, diskRadius_k);
+    colorShader->set(AlgineNames::ColorShader::ShadowDiskRadiusMin, diskRadius_min);
     glUseProgram(0);
 }
 
@@ -680,13 +712,13 @@ void initShadowCalculation() {
  * Initialize Depth of field
  */
 void initDOF() {
-    useShaderProgram(dofCoCShader.programId);
-    glUniform1f(dofCoCShader.sigmaMax, dof_max_sigma);
-    glUniform1f(dofCoCShader.sigmaMin, dof_min_sigma);
-    glUniform1f(dofCoCShader.cinematicDOFAperture, dofAperture);
-    glUniform1f(dofCoCShader.cinematicDOFImageDistance, dofImageDistance);
-    glUniform1f(dofCoCShader.cinematicDOFPlaneInFocus, -1.0f);
-    useShaderProgram(0);
+    dofCoCShader->use();
+    //dofCoCShader->set(ALGINE_DOF_SIGMA_MAX, dof_max_sigma);
+    //dofCoCShader->set(ALGINE_DOF_SIGMA_MIN, dof_min_sigma);
+    dofCoCShader->set(AlgineNames::DOFShader::Aperture, dofAperture);
+    dofCoCShader->set(AlgineNames::DOFShader::ImageDistance, dofImageDistance);
+    dofCoCShader->set(AlgineNames::DOFShader::PlaneInFocus, -1.0f);
+    glUseProgram(0);
 }
 
 /* init code end */
@@ -721,45 +753,46 @@ void recycleAll() {
 }
 
 void sendLampsData() {
-	glUniform1i(cs.pointLightsCount, POINT_LAMPS_COUNT); // point lamps count
-    glUniform1i(cs.dirLightsCount, DIR_LAMPS_COUNT); // dir lamps count
-    setVec3(cs.viewPos, camera.getPosition()); // current camera position
-	for (size_t i = 0; i < POINT_LAMPS_COUNT; i++) pointLamps[i].push_pos();
-    for (size_t i = 0; i < DIR_LAMPS_COUNT; i++) dirLamps[i].push_pos();
+    lightDataSetter.setPointLightsCount(POINT_LAMPS_COUNT);
+    lightDataSetter.setDirLightsCount(DIR_LAMPS_COUNT);
+    colorShader->set(AlgineNames::ColorShader::CameraPos, camera.getPosition());
+    for (size_t i = 0; i < POINT_LAMPS_COUNT; i++)
+        lightDataSetter.setPos(pointLamps[i], i);
+    for (size_t i = 0; i < DIR_LAMPS_COUNT; i++)
+        lightDataSetter.setPos(dirLamps[i], i);
 }
 
 /* --- matrices --- */
-glm::mat4 getPVMMatrix() {
-    return camera.getProjectionMatrix() * camera.getViewMatrix() * *modelMatrix;
+glm::mat4 getMVPMatrix() {
+    return camera.getProjectionMatrix() * camera.getViewMatrix() * value modelMatrix;
 }
 
-glm::mat4 getVMMatrix() {
-    return camera.getViewMatrix() * *modelMatrix;
+glm::mat4 getMVMatrix() {
+    return camera.getViewMatrix() * value modelMatrix;
 }
 
 void updateMatrices() {
-    setMat4(cs.matPVM, getPVMMatrix());
-    setMat4(cs.matVM, getVMMatrix());
-    setMat4(cs.matModel, *modelMatrix);
-    setMat4(cs.matView, camera.getViewMatrix());
+    colorShader->set(AlgineNames::ColorShader::MVPMatrix, getMVPMatrix());
+    colorShader->set(AlgineNames::ColorShader::MVMatrix, getMVMatrix());
+    colorShader->set(AlgineNames::ColorShader::ModelMatrix, value modelMatrix);
+    colorShader->set(AlgineNames::ColorShader::ViewMatrix, camera.getViewMatrix());
 }
 
 /**
- * Draws model in depth map
- * @param model
- * @param ss
+ * Draws model in depth map<br>
+ * if point light, leave mat empty, but if dir light - it must be light space matrix
  */
-void drawModelDM(const Model &model, const SShader &ss) {
+void drawModelDM(const Model &model, ShaderProgram *program, const glm::mat4 &mat = glm::mat4(1.0f)) {
     glBindVertexArray(model.shape->vaos[0]);
 
     if (model.shape->bonesPerVertex != 0) {
-        for (size_t i = 0; i < model.shape->bones.size(); i++) {
-            setMat4(ss.bones + i, model.shape->bones[i].finalTransformation);
+        for (int i = 0; i < model.shape->bones.size(); i++) {
+            program->set(program->getLocation(AlgineNames::ShadowShader::Bones) + i, model.shape->bones[i].finalTransformation);
         }
     }
 
-    glUniform1i(ss.boneAttribsPerVertex, model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1));
-    setMat4(ss.matModel, model.m_transform);
+    program->set(AlgineNames::ShadowShader::BoneAttribsPerVertex, (int)(model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1)));
+    program->set(AlgineNames::ShadowShader::TransformationMatrix, mat * model.m_transform);
     
     for (size_t i = 0; i < model.shape->meshes.size(); i++) {
         glDrawElements(GL_TRIANGLES, model.shape->meshes[i].count, GL_UNSIGNED_INT, reinterpret_cast<void*>(model.shape->meshes[i].start * sizeof(uint)));
@@ -769,16 +802,16 @@ void drawModelDM(const Model &model, const SShader &ss) {
 /**
  * Draws model
  */
-void drawModel(Model &model) {
+void drawModel(const Model &model) {
     glBindVertexArray(model.shape->vaos[1]);
     
     if (model.shape->bonesPerVertex != 0) {
-        for (size_t i = 0; i < model.shape->bones.size(); i++) {
-            setMat4(cs.bones + i, model.shape->bones[i].finalTransformation);
+        for (int i = 0; i < model.shape->bones.size(); i++) {
+            colorShader->set(colorShader->getLocation(AlgineNames::ColorShader::Bones) + i, model.shape->bones[i].finalTransformation);
         }
     }
 
-    glUniform1i(cs.boneAttribsPerVertex, model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1));
+    colorShader->set(AlgineNames::ColorShader::BoneAttribsPerVertex, (int)(model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1)));
     modelMatrix = &model.m_transform;
 	updateMatrices();
     for (size_t i = 0; i < model.shape->meshes.size(); i++) {
@@ -789,10 +822,10 @@ void drawModel(Model &model) {
         texture2DAB(4, model.shape->meshes[i].mat.reflectionTexture);
         texture2DAB(5, model.shape->meshes[i].mat.jitterTexture);
 
-        glUniform1f(cs.materialAmbientStrength, model.shape->meshes[i].mat.ambientStrength);
-        glUniform1f(cs.materialDiffuseStrength, model.shape->meshes[i].mat.diffuseStrength);
-        glUniform1f(cs.materialSpecularStrength, model.shape->meshes[i].mat.specularStrength);
-        glUniform1f(cs.materialShininess, model.shape->meshes[i].mat.shininess);
+        colorShader->set(AlgineNames::ColorShader::Material::AmbientStrength, model.shape->meshes[i].mat.ambientStrength);
+        colorShader->set(AlgineNames::ColorShader::Material::DiffuseStrength, model.shape->meshes[i].mat.diffuseStrength);
+        colorShader->set(AlgineNames::ColorShader::Material::SpecularStrength, model.shape->meshes[i].mat.specularStrength);
+        colorShader->set(AlgineNames::ColorShader::Material::Shininess, model.shape->meshes[i].mat.shininess);
 
         glDrawElements(GL_TRIANGLES, model.shape->meshes[i].count, GL_UNSIGNED_INT, reinterpret_cast<void*>(model.shape->meshes[i].start * sizeof(uint)));
     }
@@ -801,20 +834,21 @@ void drawModel(Model &model) {
 /**
  * Renders to depth cubemap
  */
-void renderToDepthCubemap(uint index) {
+void renderToDepthCubemap(const uint index) {
 	pointLamps[index].begin();
-	pointLamps[index].setLightPosSS();
 	pointLamps[index].updateMatrices();
-	pointLamps[index].setShadowMatricesSS();
+    lightDataSetter.setShadowShaderPos(pointLamps[index]);
+	lightDataSetter.setShadowShaderMatrices(pointLamps[index]);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	// drawing models
-	for (size_t i = 0; i < MODELS_COUNT; i++) drawModelDM(models[i], ss);
+    for (size_t i = 0; i < MODELS_COUNT; i++)
+        drawModelDM(models[i], pointShadowShader);
 
 	// drawing lamps
 	for (GLuint i = 0; i < POINT_LAMPS_COUNT; i++) {
 		if (i == index) continue;
-		drawModelDM(*pointLamps[i].mptr, ss);
+        drawModelDM(*pointLamps[i].mptr, pointShadowShader);
 	}
 
 	pointLamps[index].end();
@@ -825,16 +859,16 @@ void renderToDepthCubemap(uint index) {
  */
 void renderToDepthMap(uint index) {
 	dirLamps[index].begin();
-    setMat4(ss_dir.matLightSpace, dirLamps[index].lightSpace);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	// drawing models
-	for (size_t i = 0; i < MODELS_COUNT; i++) drawModelDM(models[i], ss_dir);
+    for (size_t i = 0; i < MODELS_COUNT; i++)
+        drawModelDM(models[i], dirShadowShader, dirLamps[index].lightSpace);
 
 	// drawing lamps
 	for (GLuint i = 0; i < DIR_LAMPS_COUNT; i++) {
 		if (i == index) continue;
-		drawModelDM(*dirLamps[i].mptr, ss_dir);
+        drawModelDM(*dirLamps[i].mptr, dirShadowShader, dirLamps[index].lightSpace);
 	}
 
 	dirLamps[index].end();
@@ -852,31 +886,31 @@ void render() {
     
 	// view port to window size
 	glViewport(0, 0, winWidth, winHeight);
-	// updating view matrix (because camera position was changed)
-    // createViewMatrix();
 
-    // render skybox
-    glDrawBuffers(3, colorAttachment02);
-    glDepthFunc(GL_LEQUAL);
-    useShaderProgram(skyboxShader.programId);
-    glUniformMatrix3fv(skyboxShader.matView, 1, GL_FALSE, glm::value_ptr(glm::mat3(camera.getViewMatrix())));
-    setMat4(skyboxShader.matTransform, camera.getProjectionMatrix() * glm::mat4(glm::mat3(camera.getViewMatrix())));
-    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
-    skyboxRenderer.render();
-
-    glDepthFunc(GL_LESS);
     glDrawBuffers(4, colorAttachment0123);
-    glUseProgram(cs.programId);
+    colorShader->use();
 
     // sending lamps parameters to fragment shader
 	sendLampsData();
-    
-    // drawing
-    for (size_t i = 0; i < MODELS_COUNT; i++) drawModel(models[i]);
-	for (size_t i = 0; i < POINT_LAMPS_COUNT + DIR_LAMPS_COUNT; i++) drawModel(lamps[i]);
 
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    
+    // drawing
+    for (size_t i = 0; i < MODELS_COUNT; i++)
+        drawModel(models[i]);
+	for (size_t i = 0; i < POINT_LAMPS_COUNT + DIR_LAMPS_COUNT; i++)
+	    drawModel(lamps[i]);
+
+    // render skybox
+    glDepthFunc(GL_LEQUAL);
+    glDrawBuffers(3, colorAttachment02);
+    skyboxShader->use();
+    skyboxShader->set(AlgineNames::CubemapShader::ViewMatrix, glm::mat3(camera.getViewMatrix()));
+    skyboxShader->set(AlgineNames::CubemapShader::TransformationMatrix, camera.getProjectionMatrix() * glm::mat4(glm::mat3(camera.getViewMatrix())));
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
+    skyboxRenderer.render();
+    glDepthFunc(GL_LESS);
+    glDrawBuffers(4, colorAttachment0123);
+
     renderer.quadRenderer->bindVAO();
 
     renderer.screenspacePass(screenspaceFB, colorTex, normalTex, ssrValues, positionTex);
@@ -904,25 +938,25 @@ void display() {
         if (models[i].shape->bonesPerVertex != 0)
             models[i].animator->animate(glfwGetTime());
 
-    /* --- shadow rendering --- */
+    // shadow rendering
     // point lights
-    glUseProgram(ss.programId);
+    pointShadowShader->use();
 	for (uint i = 0; i < POINT_LAMPS_COUNT; i++) {
-        glUniform1f(ss.far, pointLamps[i].far);
+	    lightDataSetter.setShadowShaderFarPlane(pointLamps[i]);
         renderToDepthCubemap(i);
     }
 
     // dir lights
-    glUseProgram(ss_dir.programId);
-	for (uint i = 0; i < DIR_LAMPS_COUNT; i++)
+    dirShadowShader->use();
+    for (uint i = 0; i < DIR_LAMPS_COUNT; i++)
         renderToDepthMap(i);
 	
-    glUseProgram(ssrs.programId);
-    setMat4(ssrs.matProjection, camera.getProjectionMatrix());
-    setMat4(ssrs.matView, camera.getViewMatrix());
+    ssrShader->use();
+    ssrShader->set(AlgineNames::SSRShader::ProjectionMatrix, camera.getProjectionMatrix());
+    ssrShader->set(AlgineNames::SSRShader::ViewMatrix, camera.getViewMatrix());
 
 	/* --- color rendering --- */
-	glClear(GL_DEPTH_BUFFER_BIT); // color will cleared by quad rendering
+    glClear(GL_DEPTH_BUFFER_BIT); // color will cleared by quad rendering
 	render();
 	glUseProgram(0);
 }
@@ -1064,9 +1098,9 @@ void mouse_callback(MouseEventListener::MouseEvent *event) {
         
             std::cout << "x: " << pixels[0] << "; y: " << pixels[1] << "; z: " << pixels[2] << "\n";
         
-            useShaderProgram(dofCoCShader.programId);
-            glUniform1f(dofCoCShader.cinematicDOFPlaneInFocus, pixels[2] == 0 ? FLT_EPSILON : pixels[2]);
-            useShaderProgram(0);
+            dofCoCShader->use();
+            dofCoCShader->set(AlgineNames::DOFShader::PlaneInFocus, pixels[2] == 0 ? FLT_EPSILON : pixels[2]);
+            glUseProgram(0);
         
             delete[] pixels;
             break;

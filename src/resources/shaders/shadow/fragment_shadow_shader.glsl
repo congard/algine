@@ -13,13 +13,13 @@ $ALGINE_DEFINITIONS
 in vec4 fragPos; // world space
 
 uniform vec3 lightPos; // world space
-uniform float far_plane; // shadow matrix far plane
+uniform float farPlane; // shadow matrix far plane
 
 void main() {
     float lightDistance = length(fragPos.xyz - lightPos);
 
-    // map to [0;1] range by dividing by far_plane
-    lightDistance = lightDistance / far_plane;
+    // map to [0;1] range by dividing by farPlane
+    lightDistance = lightDistance / farPlane;
 
     // write this as modified depth
     gl_FragDepth = lightDistance;

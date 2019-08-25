@@ -2,8 +2,8 @@
 
 #version 330 core
 
+uniform sampler2D baseImage;
 uniform sampler2D normalMap; // in view space
-uniform sampler2D colorMap;
 uniform sampler2D ssrValuesMap;
 uniform sampler2D positionMap; // in view space
 uniform mat4 projection, view;
@@ -11,7 +11,7 @@ uniform mat4 projection, view;
 uniform vec3 skyColor = vec3(0.0);
 uniform int binarySearchCount = 10;
 uniform int rayMarchCount = 30; // 60
-uniform float step = 0.05; // 0.025
+uniform float rayStep = 0.05; // 0.025
 uniform float LLimiter = 0.1;
 uniform float minRayStep = 0.2;
 
@@ -53,7 +53,7 @@ vec2 binarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth) {
 }
 
 vec2 rayCast(vec3 dir, inout vec3 hitCoord, out float dDepth) {
-    dir *= step;
+    dir *= rayStep;
     
     for (int i = 0; i < rayMarchCount; i++) {
         hitCoord += dir;
@@ -65,7 +65,8 @@ vec2 rayCast(vec3 dir, inout vec3 hitCoord, out float dDepth) {
         float depth = getPosition(projectedCoord.xy).z;
         dDepth = hitCoord.z - depth;
 
-        if((dir.z - dDepth) < 1.2 && dDepth <= 0.0) return binarySearch(dir, hitCoord, dDepth);
+        if ((dir.z - dDepth) < 1.2 && dDepth <= 0.0)
+            return binarySearch(dir, hitCoord, dDepth);
     }
 
     return vec2(-1.0);
@@ -97,7 +98,7 @@ void main() {
     float reflectionStrength = texture(ssrValuesMap, texCoord).r;
 
     if (reflectionStrength == 0) {
-        fragColor = texture(colorMap, texCoord).rgb;
+        fragColor = texture(baseImage, texCoord).rgb;
         return;
     }
 
@@ -121,15 +122,15 @@ void main() {
 
     float fresnel = fresnel(reflected, normal);
     
-    vec3 color = texture(colorMap, coords.xy).rgb * error * fresnel;
+    vec3 color = texture(baseImage, coords.xy).rgb * error * fresnel;
 
     // fragColor = vec3(fresnel);
     // return;
 
     if (coords.xy != vec2(-1.0)) {
-        fragColor = mix(texture(colorMap, texCoord), vec4(color, 1.0), reflectionStrength).rgb;
+        fragColor = mix(texture(baseImage, texCoord), vec4(color, 1.0), reflectionStrength).rgb;
         return;
     }
     
-    fragColor = mix(texture(colorMap, texCoord), vec4(skyColor, 1.0), reflectionStrength).rgb;
+    fragColor = mix(texture(baseImage, texCoord), vec4(skyColor, 1.0), reflectionStrength).rgb;
 }

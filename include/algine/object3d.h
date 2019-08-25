@@ -23,29 +23,29 @@ public:
     glm::vec3 v_pos, v_scale;
     uint type = Object3DTypePlain;
 
-    Object3D(const uint rotatorType = Rotator::RotatorTypeSimple);
+    explicit Object3D(uint rotatorType = Rotator::RotatorTypeSimple);
     Object3D(const Object3D &src); // copy constructor
-    Object3D(Object3D &&src); // move constructor
-    Object3D& operator= (const Object3D &rhs); // copy operator
-    Object3D& operator= (Object3D &&rhs); // move operator
+    Object3D(Object3D &&src) noexcept; // move constructor
+    Object3D& operator=(const Object3D &rhs); // copy operator
+    Object3D& operator=(Object3D &&rhs) noexcept; // move operator
     ~Object3D();
 
-    void setPitch(const float pitch);
-    void setYaw(const float yaw);
-    void setRoll(const float roll);
-    void setRotate(const float pitch, const float yaw, const float roll);
+    void setPitch(float pitch);
+    void setYaw(float yaw);
+    void setRoll(float roll);
+    void setRotate(float pitch, float yaw, float roll);
     void rotate();
-    void setPos(const float x, const float y, const float z);
+    void setPos(float x, float y, float z);
     void setPos(const glm::vec3 &pos);
-    void setX(const float x);
-    void setY(const float y);
-    void setZ(const float z);
+    void setX(float x);
+    void setY(float y);
+    void setZ(float z);
     void translate();
-    void setScale(const float x, const float y, const float z);
+    void setScale(float x, float y, float z);
     void setScale(const glm::vec3 &scale);
-    void setScaleX(const float x);
-    void setScaleY(const float y);
-    void setScaleZ(const float z);
+    void setScaleX(float x);
+    void setScaleY(float y);
+    void setScaleZ(float z);
     void scale();
     void updateMatrix();
 

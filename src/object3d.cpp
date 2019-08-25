@@ -1,7 +1,6 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <algine/object3d.h>
-#include <iostream>
 #include <core_utils.h>
 
 namespace algine {
@@ -20,25 +19,23 @@ Object3D::Object3D(const Object3D &src) {
     rotator = Rotator::create(src.rotator->type);
 }
 
-Object3D::Object3D(Object3D &&src) {
+Object3D::Object3D(Object3D &&src) noexcept {
     src.swap(*this);
 }
 
-Object3D& Object3D::operator= (const Object3D &rhs) {
+Object3D& Object3D::operator=(const Object3D &rhs) {
     if (&rhs != this)
         Object3D(rhs).swap(*this);
-
     return *this;
 }
 
-Object3D& Object3D::operator= (Object3D &&rhs) {
+Object3D& Object3D::operator=(Object3D &&rhs) noexcept {
     rhs.swap(*this);
-
     return *this;
 }
 
 Object3D::~Object3D() {
-    delete_ptr(rotator);
+    delete_ptr(rotator)
 }
 
 void Object3D::swap(Object3D &other) {

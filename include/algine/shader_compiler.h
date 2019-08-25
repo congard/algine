@@ -4,12 +4,15 @@
 #include <string>
 #include <vector>
 #include <algine/algine_structs.h>
+#include <algine/shader_program.h>
 #include <algine/types.h>
 
-namespace algine {
-// shader compiler
-namespace scompiler {
+// TODO: pick up a new file name. This is far from a shader compiler
+//  Remove get*: it is necessary to give this opportunity to the developer
+//  Create something like ShaderMaker, which containing method define(key, value)
 
+namespace algine {
+namespace scompiler { // shader compiler
 ShadersData readShader(const ShadersPaths &path);
 
 // color shader
@@ -40,34 +43,15 @@ std::vector<ShadersData> getBlurShader(const BlurShaderParams &params, const cha
 ShadersData getCubemapShader(const CubemapShaderParams &params, const char *vertexShaderPath, const char *fragmentShaderPath);
 
 void saveShaders(const ShadersData &shader, const ShadersPaths &path);
-
-uint compileShader(const std::string &shader, const uint type);
-
-// compiles vertex & fragment & geometry (if exists) shaders
-std::vector<GLuint> compileShaders(const ShadersData &shader);
-
-uint createShaderProgram(const std::vector<uint> &shaders);
-
-// DS - delete shaders
-uint createShaderProgramDS(const std::vector<uint> &shaders);
-
-void loadLocations(CShader &shader, const ColorShaderParams &csp);
-
-void loadLocations(SShader &shader);
-
-void loadLocations(DOFBlurShader &shader);
-
-void loadLocations(DOFCoCShader &shader);
-
-void loadLocations(BlendShader &shader);
-
-void loadLocations(SSRShader &shader);
-
-void loadLocations(BloomSearchShader &shader);
-
-void loadLocations(BlurShader &shader);
-
-void loadLocations(CubemapShader &shader);
+void loadColorShaderLocations(ShaderProgram &shader, const ColorShaderParams &csp);
+void loadShadowShaderLocations(ShaderProgram &shader);
+void loadDOFBlurShaderLocations(ShaderProgram &shader);
+void loadDOFCoCShaderLocations(ShaderProgram &shader);
+void loadBlendBloomShaderLocations(ShaderProgram &shader);
+void loadSSRShaderLocations(ShaderProgram &shader);
+void loadBloomSearchShaderLocations(ShaderProgram &shader);
+void loadBlurShaderLocations(ShaderProgram &shader);
+void loadCubemapShaderLocations(ShaderProgram &shader);
 }
 }
 

@@ -1,14 +1,9 @@
 #include <algine/algine_renderer.h>
 
-#include <iostream>
 #include <GL/glew.h>
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <algine/texture.h>
 #include <algine/framebuffer.h>
 #include <algine/renderbuffer.h>
-#include <algine/shader_program.h>
 #include <algine/constants.h>
 
 namespace algine {
@@ -96,7 +91,7 @@ void CubeRenderer::render(const int inPosLocation) {
 }
 
 void CubeRenderer::render(const int programId, const int inPosLocation) {
-    useShaderProgram(programId);
+    glUseProgram(programId);
     render(inPosLocation);
 }
 
@@ -169,7 +164,7 @@ void QuadRenderer::render(const int inPosLocation, const int inTexCoordLocation)
 }
 
 void QuadRenderer::render(const int programId, const int inPosLocation, const int inTexCoordLocation) {
-    useShaderProgram(programId);
+    glUseProgram(programId);
     render(inPosLocation, inTexCoordLocation);
 }
 
@@ -194,7 +189,7 @@ void AlgineRenderer::mainPass(const uint displayFBO) {
 
 void AlgineRenderer::bloomSearchPass(const uint bsFBO, const uint image) {
     bindFramebuffer(bsFBO);
-    useShaderProgram(bloomSearchShader->programId);
+    bloomSearchShader->use();
     texture2DAB(0, image);
     quadRenderer->drawQuad();
 }
@@ -203,7 +198,7 @@ void AlgineRenderer::blurPass(const uint pingpongFBO[2], const uint pingpongBuff
     horizontal = true; 
 	firstIteration = true;
     for (usize i = 0; i < blurAmount; i++) {
-        glUseProgram(blurShaders[horizontal]->programId);
+        blurShaders[horizontal]->use();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
         
@@ -218,7 +213,7 @@ void AlgineRenderer::blurPass(const uint pingpongFBO[2], const uint pingpongBuff
 
 void AlgineRenderer::screenspacePass(const uint ssFBO, const uint colorMap, const uint normalMap, const uint ssrValuesMap, const uint positionMap) {
     glBindFramebuffer(GL_FRAMEBUFFER, ssFBO);
-    glUseProgram(ssrs->programId);
+    ssrShader->use();
     texture2DAB(0, colorMap);
     texture2DAB(1, normalMap);
     texture2DAB(2, ssrValuesMap);
@@ -228,7 +223,7 @@ void AlgineRenderer::screenspacePass(const uint ssFBO, const uint colorMap, cons
 
 void AlgineRenderer::dofCoCPass(const uint cocFBO, const uint positionMap) {
     bindFramebuffer(cocFBO);
-    useShaderProgram(dofCoCShader->programId);
+    dofCoCShader->use();
     texture2DAB(0, positionMap);
     quadRenderer->drawQuad();
 }
@@ -237,7 +232,7 @@ void AlgineRenderer::dofCoCPass(const uint cocFBO, const uint positionMap) {
     horizontal = true;                                                 \
 	firstIteration = true;                                             \
     for (size_t i = 0; i < blurAmount; i++) {                          \
-        glUseProgram(dofBlurShaders[horizontal]->programId);           \
+        dofBlurShaders[horizontal]->use();                             \
 		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);    \
         code_tex_ab                                                    \
         /* rendering */                                                \
@@ -266,7 +261,7 @@ void AlgineRenderer::dofBlurPass(const uint pingpongFBO[2], const uint dofBuffer
 
 void AlgineRenderer::doubleBlendPass(const uint image, const uint bloom) {
     // Do not need to call glClear, because the texture is completely redrawn
-	glUseProgram(blendShader->programId);
+    blendShader->use();
     texture2DAB(0, image);
 	texture2DAB(1, bloom);
 	quadRenderer->drawQuad();
@@ -274,7 +269,7 @@ void AlgineRenderer::doubleBlendPass(const uint image, const uint bloom) {
 
 void AlgineRenderer::blendPass(const uint texture0) {
     // Do not need to call glClear, because the texture is completely redrawn
-	glUseProgram(blendShader->programId);
+    blendShader->use();
     texture2DAB(0, texture0);
 	quadRenderer->drawQuad();
 }

@@ -18,8 +18,8 @@ layout (location = 0) out float fragCoC;
 uniform sampler2D positionMap;
 
 // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
-uniform float max_sigma;
-uniform float min_sigma;
+uniform float maxSigma;
+uniform float minSigma;
 uniform float focalDepth;
 uniform float focalRange;
 
@@ -39,6 +39,6 @@ void main() {
 		fragCoC = sigma;
 	#else
 		float sigma = abs(focalDepth + texture(positionMap, texCoord).z) / focalRange;
-		fragCoC = max_sigma * sigma + min_sigma;
+		fragCoC = maxSigma * sigma + minSigma;
 	#endif
 }

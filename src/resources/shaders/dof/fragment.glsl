@@ -15,13 +15,13 @@ in vec2 texCoord;
 
 layout (location = 0) out vec3 fragColor;
 
-uniform sampler2D image;
+uniform sampler2D baseImage;
 uniform sampler2D positionMap;
 uniform sampler2D cocMap;
 
 // if ALGINE_DOF_MODE == ALGINE_DOF_MODE_ENABLED
-uniform float max_sigma;
-uniform float min_sigma;
+uniform float maxSigma;
+uniform float minSigma;
 uniform float focalDepth;
 uniform float focalRange;
 
@@ -67,7 +67,7 @@ float getCoC(vec2 texCoord) {
 		return sigma;
 	#elif defined ALGINE_LINEAR_DOF
 		float sigma = abs(focalDepth + texture(positionMap, texCoord).z) / focalRange;
-		return max_sigma * sigma + min_sigma;
+		return maxSigma * sigma + minSigma;
 	#else
 		return texture(cocMap, texCoord).r;
 	#endif
@@ -94,12 +94,12 @@ bool isBleeding(vec2 texCoord) {
 }
 
 void main() {
-	vec2 texOffset = 1.0 / textureSize(image, 0); // gets size of single texel
+	vec2 texOffset = 1.0 / textureSize(baseImage, 0); // gets size of single texel
 
 	coc = getCoC(texCoord);
 	makeDofKernel(coc);
 
-	vec3 colorCenter = texture(image, texCoord).rgb;
+	vec3 colorCenter = texture(baseImage, texCoord).rgb;
 	zCenter = texture(positionMap, texCoord).z; // for eliminate bleeding artifact
 
 	fragColor = colorCenter * dof_kernel[0];
@@ -118,8 +118,8 @@ void main() {
 	for(int i = 1; i < KERNEL_RADIUS; i++) {
 		texCoordP = _texCoordP;
 		texCoordM = _texCoordM;
-		colorP = texture(image, texCoordP).rgb;
-		colorM = texture(image, texCoordM).rgb;
+		colorP = texture(baseImage, texCoordP).rgb;
+		colorM = texture(baseImage, texCoordM).rgb;
 
 		#if defined ALGINE_BLEEDING_ELIM_DZ || defined ALGINE_BLEEDING_ELIM_DCOC || defined ALGINE_BLEEDING_ELIM_FCOC
 			if (isBleeding(texCoordP)) colorP = colorCenter;

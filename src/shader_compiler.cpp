@@ -5,8 +5,7 @@
 #include <algine/core_utils.h>
 
 namespace algine {
-// shader compiler
-namespace scompiler {
+namespace scompiler { // shader compiler
 ShadersData readShader(const ShadersPaths &path) {
     char
         *vertexSource = io::read(path.vertex.c_str()),
@@ -209,227 +208,175 @@ void saveShaders(const ShadersData &shader, const ShadersPaths &path) {
     FILE *file = nullptr;
     io::save(file, shader.vertex, path.vertex);
     io::save(file, shader.fragment, path.fragment);
-    if (shader.geometry != "") io::save(file, shader.geometry, path.geometry);
+    if (!shader.geometry.empty())
+        io::save(file, shader.geometry, path.geometry);
 }
 
-uint compileShader(const std::string &shader, const uint type) {
-    GLuint s = Shader::create(type);
-    Shader::compile(s, shader);
-    return s;
-}
+void loadColorShaderLocations(ShaderProgram &shader, const ColorShaderParams &csp) {
+    using namespace AlgineNames::ColorShader;
 
-// compiles vertex & fragment & geometry (if exists) shaders
-std::vector<uint> compileShaders(const ShadersData &shader) {
-    std::vector<GLuint> result;
+    std::vector<std::string> attribs {
+        InPos, InNormal, InTexCoord, InTangent, InBitangent, InBoneIds, InBoneWeights
+    };
 
-    result.push_back(compileShader(shader.vertex, ALGINE_VERTEX_SHADER));
-    result.push_back(compileShader(shader.fragment, ALGINE_FRAGMENT_SHADER));
-    if (shader.geometry != "") result.push_back(compileShader(shader.geometry, ALGINE_GEOMETRY_SHADER));
+    std::vector<std::string> uniforms {
+        // vertex shader
+        ModelMatrix, ViewMatrix, MVPMatrix, MVMatrix, Material::IsNormalMappingEnabled, Bones, BoneAttribsPerVertex,
 
-    return result;
-}
+        // fragment shader
+        CameraPos, PointLightsCount, DirLightsCount, ShadowDiskRadiusK, ShadowDiskRadiusMin, ShadowOpacity, Material::IsTextureMappingEnabled,
+        // material
+        Material::AmbientTex, Material::DiffuseTex, Material::SpecularTex, Material::NormalTex, Material::ReflectionStrengthTex, Material::JitterTex,
+        Material::AmbientColor, Material::DiffuseColor, Material::SpecularColor,
+        Material::AmbientStrength, Material::DiffuseStrength, Material::SpecularStrength, Material::Shininess
+    };
 
-uint createShaderProgram(const std::vector<uint> &shaders) {
-    GLuint result = ShaderProgram::create();
-    for (size_t i = 0; i < shaders.size(); i++) ShaderProgram::attachShader(result, shaders[i]);
-    ShaderProgram::link(result);
-    return result;
-}
+    shader.loadAttribLocations(attribs);
+    shader.loadUniformLocations(uniforms);
 
-// DS - delete shaders
-uint createShaderProgramDS(const std::vector<uint> &shaders) {
-    GLuint sp = createShaderProgram(shaders);
-    for (size_t i = 0; i < shaders.size(); i++) Shader::destroy(shaders[i]);
-    return sp;
-}
+    #define loadLightProp \
+        shader.loadUniformLocation(start + Light::Kc); \
+        shader.loadUniformLocation(start + Light::Kl); \
+        shader.loadUniformLocation(start + Light::Kq); \
+        shader.loadUniformLocation(start + Light::Pos); \
+        shader.loadUniformLocation(start + Light::Color);
 
-void loadLocations(CShader &shader, const ColorShaderParams &csp) {
-    shader.matModel = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_MODEL);
-    shader.matView = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_VIEW);
-    shader.matPVM = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_PVM);
-    shader.matVM = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MAT_VM);
-    shader.bones = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_BONES);
-    shader.normalMappingSwitcher = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SWITCH_NORMAL_MAPPING);
-    shader.boneAttribsPerVertex = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_BONE_ATTRIBS_PER_VERTEX);
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_POSITION);
-    shader.inNormal = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_NORMAL);
-    shader.inTangent = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_TANGENT);
-    shader.inBitangent = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_BITANGENT);
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_TEXCOORD);
-    shader.inBoneIds = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_BONE_IDS);
-    shader.inBoneWeights = glGetAttribLocation(shader.programId, ALGINE_NAME_CS_IN_BONE_WEIGHTS);
-    
-    // fragment shader
-    shader.viewPos = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_VIEW_POSITION);
-    shader.pointLightsCount = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_POINT_LIGHTS_COUNT);
-    shader.dirLightsCount = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_DIR_LIGHTS_COUNT);
-    shader.shadowDiskRadiusK = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_DISKRADIUS_K);
-    shader.shadowDiskRadiusMin = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_DISKRADIUS_MIN);
-    shader.shadowOpacity = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SHADOW_OPACITY);
-    // material
-    shader.materialAmbientTex = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_AMBIENT_TEX);
-    shader.materialDiffuseTex = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_DIFFUSE_TEX);
-    shader.materialSpecularTex = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_SPECULAR_TEX);
-    shader.materialNormalTex = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_NORMAL_TEX);
-    shader.materialReflectionStrengthTex = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_REFLECTIONSTRENGTH_TEX);
-    shader.materialJitterTex = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_JITTER_TEX);
-    shader.materialAmbientColor = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_AMBIENT_COLOR);
-    shader.materialDiffuseColor = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_DIFFUSE_COLOR);
-    shader.materialSpecularColor = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_SPECULAR_COLOR);
-    shader.materialAmbientStrength = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_AMBIENT_STRENGTH);
-    shader.materialDiffuseStrength = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_DIFFUSE_STRENGTH);
-    shader.materialSpecularStrength = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_SPECULAR_STRENGTH);
-    shader.materialShininess = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_MATERIAL_SHININESS);
-    // mapping
-    shader.textureMappingSwitcher = glGetUniformLocation(shader.programId, ALGINE_NAME_CS_SWITCH_TEXTURE_MAPPING);
-    
-    // lights
-    shader.pointLights.reserve(csp.maxPointLightsCount);
-    shader.dirLights.reserve(csp.maxDirLightsCount);
-
-    #define loadLightProp(light) \
-        shader.light.kc = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_KC).c_str()); \
-        shader.light.kl = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_KL).c_str()); \
-        shader.light.kq = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_KQ).c_str()); \
-        shader.light.pos = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_POS).c_str()); \
-        shader.light.color = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_COLOR).c_str());
-
-    // uns - uniform name start
-    std::string uns;
+    // uniform name start
+    std::string start;
 
     // point lights
     for (usize i = 0; i < csp.maxPointLightsCount; i++) {
-        uns = ALGINE_NAME_CS_POINT_LIGHTS + std::string("[") + std::to_string(i) + "].";
-        shader.pointLights.push_back(PointLightIds());
-        loadLightProp(pointLights[i]);
-        shader.pointLights[i].far = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_FAR).c_str());
-        shader.pointLights[i].bias = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_BIAS).c_str());
-        shader.pointLights[i].shadowMap = glGetUniformLocation(shader.programId, (ALGINE_NAME_CS_POINT_LIGHT_SHADOW_MAPS + std::string("[") + std::to_string(i) + "]").c_str());
+        start = PointLights + std::string("[") + std::to_string(i) + "].";
+        loadLightProp
+        shader.loadUniformLocation(start + Light::FarPlane);
+        shader.loadUniformLocation(start + Light::Bias);
+        shader.loadUniformLocation(PointLightShadowMaps + std::string("[") + std::to_string(i) + "]");
     }
 
     // directional lights
     for (usize i = 0; i < csp.maxDirLightsCount; i++) {
-        uns = ALGINE_NAME_CS_DIR_LIGHTS + std::string("[") + std::to_string(i) + "].";
-        shader.dirLights.push_back(DirLightIds());
-        loadLightProp(dirLights[i]);
-        shader.dirLights[i].lightMatrix = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_MATRIX).c_str());
-        shader.dirLights[i].minBias = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_MIN_BIAS).c_str());
-        shader.dirLights[i].maxBias = glGetUniformLocation(shader.programId, (uns + ALGINE_NAME_CS_LIGHT_MAX_BIAS).c_str());
-        shader.dirLights[i].shadowMap = glGetUniformLocation(shader.programId, (ALGINE_NAME_CS_DIR_LIGHT_SHADOW_MAPS + std::string("[") + std::to_string(i) + "]").c_str());
+        start = DirLights + std::string("[") + std::to_string(i) + "].";
+        loadLightProp
+        shader.loadUniformLocation(start + Light::LightMatrix);
+        shader.loadUniformLocation(start + Light::MinBias);
+        shader.loadUniformLocation(start + Light::MaxBias);
+        shader.loadUniformLocation(DirLightShadowMaps + std::string("[") + std::to_string(i) + "]");
     }
 
     #undef loadLightProp
 }
 
-void loadLocations(SShader &shader) {
-    // geometry shader
-    shader.shadowMatrices = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_MAT_SHADOW);
+void loadShadowShaderLocations(ShaderProgram &shader) {
+    using namespace AlgineNames::ShadowShader;
 
-    // vertex shader
-    shader.matLightSpace = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_MAT_LIGHT_SPACE);
-    shader.matModel = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_MAT_MODEL);
-    shader.bones = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_BONES);
-    shader.boneAttribsPerVertex = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_BONE_ATTRIBS_PER_VERTEX);
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_SS_IN_POSITION);
-    shader.inBoneIds = glGetAttribLocation(shader.programId, ALGINE_NAME_SS_IN_BONE_IDS);
-    shader.inBoneWeights = glGetAttribLocation(shader.programId, ALGINE_NAME_SS_IN_BONE_WEIGHTS);
-    
-    // fragment shader
-    shader.lampPos = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_LAMP_POSITION);
-    shader.far = glGetUniformLocation(shader.programId, ALGINE_NAME_SS_FAR_PLANE);
+    std::vector<std::string> uniforms {
+        // geometry shader
+        PointLight::ShadowMatrices,
+
+        // vertex shader
+        TransformationMatrix, Bones, BoneAttribsPerVertex,
+
+        // fragment shader
+        PointLight::Pos, PointLight::FarPlane
+    };
+
+    shader.loadAttribLocation(InPos);
+    shader.loadAttribLocation(InBoneIds);
+    shader.loadAttribLocation(InBoneWeights);
+    shader.loadUniformLocations(uniforms);
 }
 
-#define _loadDOFLocations(shader) \
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_POSITION); \
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_TEXCOORD); \
-    \
+#define _loadDOFAttribLocations(shader) \
+    shader.loadAttribLocation(AlgineNames::QuadShader::InPos); \
+    shader.loadAttribLocation(AlgineNames::QuadShader::InTexCoord);
+
+#define _getDOFUniformLocations \
     /* fragment shader */ \
-    shader.samplerPositionMap = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SAMPLER_MAP_POSITION); \
+    PositionMap, \
     /* linear DOF parameters */ \
-    shader.focalDepth = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_FOCAL_DEPTH); \
-    shader.focalRange = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_FOCAL_RANGE); \
-    shader.sigmaMin = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SIGMA_MIN); \
-    shader.sigmaMax = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SIGMA_MAX); \
+    FocalDepth, FocalRange, MinSigma, MaxSigma, \
     /* cinematic DOF parameters */ \
-    shader.cinematicDOFPlaneInFocus = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_CINEMATIC_DOF_PLANE_IN_FOCUS); \
-    shader.cinematicDOFAperture = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_CINEMATIC_DOF_APERTURE); \
-    shader.cinematicDOFImageDistance = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_CINEMATIC_DOF_IMAGE_DISTANCE);
+    PlaneInFocus, Aperture, ImageDistance
 
-void loadLocations(DOFBlurShader &shader) {
-    _loadDOFLocations(shader)
-    
-    // fragment shader
-    shader.samplerImage = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SAMPLER_IMAGE);
-    shader.samplerCoCMap = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_SAMPLER_MAP_COC);
-    shader.bleedingEliminationMinDeltaZ = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_BLEEDING_ELIM_MIN_DZ);
-    shader.bleedingEliminationMinDeltaCoC = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_BLEEDING_ELIM_MIN_DCOC);
-    shader.bleedingEliminationMaxFocusCoC = glGetUniformLocation(shader.programId, ALGINE_NAME_DOF_BLEEDING_ELIM_MAX_FCOC);
+void loadDOFBlurShaderLocations(ShaderProgram &shader) {
+    using namespace AlgineNames::DOFShader;
+
+    _loadDOFAttribLocations(shader)
+
+    std::vector<std::string> uniforms {
+        _getDOFUniformLocations,
+        BaseImage, CoCMap,
+        BleedingMinDeltaZ, BleedingMinDeltaCoC, BleedingMaxFocusCoC
+    };
+    shader.loadUniformLocations(uniforms);
 }
 
-void loadLocations(DOFCoCShader &shader) {
-    _loadDOFLocations(shader)
+void loadDOFCoCShaderLocations(ShaderProgram &shader) {
+    using namespace AlgineNames::DOFShader;
+
+    _loadDOFAttribLocations(shader)
+
+    std::vector<std::string> uniforms {
+        _getDOFUniformLocations
+    };
+    shader.loadUniformLocations(uniforms);
 }
 
-#undef _loadDOFLocations
-
-void loadLocations(BlendShader &shader) {
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_POSITION);
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_TEXCOORD);
-
-    // fragment shader
-    shader.samplerBloom = glGetUniformLocation(shader.programId, ALGINE_NAME_BLEND_SAMPLER_BLOOM);
-    shader.samplerImage = glGetUniformLocation(shader.programId, ALGINE_NAME_BLEND_SAMPLER_IMAGE);
-    shader.exposure = glGetUniformLocation(shader.programId, ALGINE_NAME_BLEND_EXPOSURE);
-    shader.gamma = glGetUniformLocation(shader.programId, ALGINE_NAME_BLEND_GAMMA);
-}
-
-void loadLocations(SSRShader &shader) {
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_POSITION);
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_TEXCOORD);
-
-    // SSS fragment shader
-    shader.samplerColorMap = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_SAMPLER_MAP_COLOR);
-    shader.samplerNormalMap = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_SAMPLER_MAP_NORMAL);
-    shader.samplerSSRValuesMap = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_SAMPLER_MAP_SSRVALUES);
-    shader.samplerPositionMap = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_SAMPLER_MAP_POSITION);
-    shader.matProjection = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_MAT_PROJECTION);
-    shader.matView = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_MAT_VIEW);
-    shader.skyColor = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_SKYCOLOR);
-    shader.binarySearchCount = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_BINARYSEARCHCOUNT);
-    shader.rayMarchCount = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_RAYMARCHCOUNT);
-    shader.step = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_STEP);
-    shader.LLimiter = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_LLIMITER);
-    shader.minRayStep = glGetUniformLocation(shader.programId, ALGINE_NAME_SSRS_MINRAYSTEP);
-}
-
-void loadLocations(BloomSearchShader &shader) {
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_POSITION);
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_TEXCOORD);
+void loadBlendBloomShaderLocations(ShaderProgram &shader) {
+    shader.loadAttribLocation(AlgineNames::QuadShader::InPos);
+    shader.loadAttribLocation(AlgineNames::QuadShader::InTexCoord);
 
     // fragment shader
-    shader.threshold = glGetUniformLocation(shader.programId, ALGINE_NAME_BLOOM_SEARCH_THRESHOLD);
-    shader.brightnessThreshold = glGetUniformLocation(shader.programId, ALGINE_NAME_BLOOM_SEARCH_BRIGHTNESS_THRESHOLD);
-    shader.image = glGetUniformLocation(shader.programId, ALGINE_NAME_BLOOM_SEARCH_IMAGE);
+    shader.loadUniformLocation(AlgineNames::BlendBloomShader::BloomImage);
+    shader.loadUniformLocation(AlgineNames::BlendBloomShader::BaseImage);
+    shader.loadUniformLocation(AlgineNames::BlendBloomShader::Exposure);
+    shader.loadUniformLocation(AlgineNames::BlendBloomShader::Gamma);
 }
 
-void loadLocations(BlurShader &shader) {
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_POSITION);
-    shader.inTexCoord = glGetAttribLocation(shader.programId, ALGINE_NAME_QUAD_IN_TEXCOORD);
+void loadSSRShaderLocations(ShaderProgram &shader) {
+    using namespace AlgineNames::SSRShader;
+
+    shader.loadAttribLocation(AlgineNames::QuadShader::InPos);
+    shader.loadAttribLocation(AlgineNames::QuadShader::InTexCoord);
 
     // fragment shader
-    shader.image = glGetUniformLocation(shader.programId, ALGINE_NAME_BLUR_IMAGE);
-    shader.kernel = glGetUniformLocation(shader.programId, ALGINE_NAME_BLUR_KERNEL);
+    std::vector<std::string> uniforms {
+        BaseImage, NormalMap, SSRValuesMap, PositionMap,
+        ProjectionMatrix, ViewMatrix, SkyColor, BinarySearchCount, RayMarchCount, RayStep, MinRayStep, LLimiter
+    };
+    shader.loadUniformLocations(uniforms);
 }
 
-void loadLocations(CubemapShader &shader) {
-    shader.inPosition = glGetAttribLocation(shader.programId, ALGINE_NAME_CUBEMAP_IN_POSITION);
-    shader.matTransform = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_MAT_TRANSFORM);
+void loadBloomSearchShaderLocations(ShaderProgram &shader) {
+    shader.loadAttribLocation(AlgineNames::QuadShader::InPos);
+    shader.loadAttribLocation(AlgineNames::QuadShader::InTexCoord);
 
     // fragment shader
-    shader.cubemap = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_CUBEMAP);
-    shader.color = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_COLOR);
-    shader.positionScaling = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_POS_SCALING);
-    shader.matView = glGetUniformLocation(shader.programId, ALGINE_NAME_CUBEMAP_MAT_VIEW);
+    shader.loadUniformLocation(AlgineNames::BloomSearchShader::Threshold);
+    shader.loadUniformLocation(AlgineNames::BloomSearchShader::BrightnessThreshold);
+    shader.loadUniformLocation(AlgineNames::BloomSearchShader::BaseImage);
+}
+
+void loadBlurShaderLocations(ShaderProgram &shader) {
+    shader.loadAttribLocation(AlgineNames::QuadShader::InPos);
+    shader.loadAttribLocation(AlgineNames::QuadShader::InTexCoord);
+
+    // fragment shader
+    shader.loadUniformLocation(AlgineNames::BlurShader::BaseImage);
+    shader.loadUniformLocation(AlgineNames::BlurShader::Kernel);
+}
+
+void loadCubemapShaderLocations(ShaderProgram &shader) {
+    using namespace AlgineNames::CubemapShader;
+
+    shader.loadAttribLocation(InPos);
+    shader.loadUniformLocation(TransformationMatrix);
+
+    // fragment shader
+    shader.loadUniformLocation(CubemapTex);
+    shader.loadUniformLocation(Color);
+    shader.loadUniformLocation(PosScaling);
+    shader.loadUniformLocation(ViewMatrix);
 }
 
 } // namespace scompiler
