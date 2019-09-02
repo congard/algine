@@ -37,35 +37,8 @@ Click on picture to watch video
 
 Take into account, this is a test (alpha) version! All major functions will be added in later versions.
 
-# TODO
-You can find TODO list [here](http://evassmat.com/ZaDr)
-
-# Dependencies
-Engine has next dependencies: `glew`, `glfw`, `glm`, `assimp`.
-
-* Installation on Debian-based systems:
-  <br>`sudo apt install libglew-dev libglfw3-dev libglm-dev`
-  <br>Also you need `pkg-config` to compile using `algine.sh` script: `apt install pkg-config`
-  <br>`pkg-config --libs glfw3 glew` output is `-lglfw -lGLEW -lGLU -lGL` (to compile project without `pkg-config`)
-
-* Installation on ArchLinux-based systems:
-  <br>x11: `pacman -S glew glfw-x11 glm`
-  <br>wayland: `pacman -S glew-wayland glfw-wayland glm`
-  <br>Also you need `pkgconf` to compile using `algine.sh` script: `pacman -S pkgconf`
-
-How to install assimp you can read [here](https://github.com/assimp/assimp/blob/master/Build.md)
-
-# Compilation
-1. `cd algine`
-2. Several methods:
-    1. Via CMake
-    2. Using deprecated script
-        1. `chmod +x algine.sh`
-        2. Execute `./scripts/algine.sh help`
-        
-**Note:** working directory must be the root of the project! Nor \<project\>/cmake-build-debug or something else
-
-**About compilation on Windows you can read [here](build.md)**
+# Building
+About building on Linux and Windows you can read [here](build.md)
 
 # Contact
 You can contact me via telegram or email:
