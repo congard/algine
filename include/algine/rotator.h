@@ -20,22 +20,22 @@ public:
     virtual ~Rotator() = default; // to hide -Wdelete-non-virtual-dtor
 
     virtual void rotate(glm::mat4 &matrix);
-    void setPitch(const float pitch);
-    void setYaw(const float yaw);
-    void setRoll(const float roll);
+    void setPitch(float pitch);
+    void setYaw(float yaw);
+    void setRoll(float roll);
 
     float getPitch();
     float getYaw();
     float getRoll();
 
-    static Rotator* create(const uint type);
+    static Rotator* create(uint type);
 };
 
 class EulerRotator: public Rotator {
 public:
     EulerRotator();
 
-    virtual void rotate(glm::mat4 &matrix);
+    void rotate(glm::mat4 &matrix) override;
 };
 
 class FreeRotator: public Rotator {
@@ -44,7 +44,7 @@ public:
 
     FreeRotator();
 
-    virtual void rotate(glm::mat4 &matrix);
+    void rotate(glm::mat4 &matrix) override;
 };
 }
 
