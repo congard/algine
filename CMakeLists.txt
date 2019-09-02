@@ -134,10 +134,9 @@ elseif(UNIX)
     target_link_libraries(algine
             glfw
             GLEW
-            GLU
             GL
             assimp
             pthread)
     target_link_directories(algine
-            /usr/local/lib)
+            PUBLIC /usr/local/lib)
 endif()
