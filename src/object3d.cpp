@@ -1,7 +1,7 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <algine/object3d.h>
-#include <core_utils.h>
+#include <algine/core_utils.h>
 
 namespace algine {
 Object3D::Object3D(const uint rotatorType) {
