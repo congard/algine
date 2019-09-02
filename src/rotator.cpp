@@ -1,7 +1,6 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <algine/rotator.h>
-#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
 namespace algine {
