@@ -1,11 +1,16 @@
 # Build scripts output, debug pictures
 out
 
+# contrib libs (must be installed via contrib/contrib.py)
+contrib/*
+!contrib/contrib.py
+
 # Visual Studio Code dir
 .vscode
 
 # CLion Dirs
 cmake-build-debug
+cmake-build-release
 .idea
 
 # QtCreator files
