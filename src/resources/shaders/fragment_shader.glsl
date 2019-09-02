@@ -56,7 +56,7 @@ uniform struct PointLight {
 	float bias;
 	vec3 pos; // in world space
 	vec3 color;
-}, pointLights[MAX_POINT_LIGHTS_COUNT];
+} pointLights[MAX_POINT_LIGHTS_COUNT];
 uniform samplerCube pointLightShadowMaps[MAX_POINT_LIGHTS_COUNT];
 
 uniform struct DirLight {
@@ -67,7 +67,7 @@ uniform struct DirLight {
 	vec3 pos; // in world space
 	vec3 color;
 	mat4 lightMatrix;
-}, dirLights[MAX_DIR_LIGHTS_COUNT];
+} dirLights[MAX_DIR_LIGHTS_COUNT];
 uniform sampler2D dirLightShadowMaps[MAX_DIR_LIGHTS_COUNT];
 
 vec3 lampEyePos; // Transformed lamp position into eye space
