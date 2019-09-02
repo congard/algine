@@ -3,55 +3,46 @@ project(algine)
 
 set(CMAKE_CXX_STANDARD 14)
 
-if (CMAKE_BUILD_TYPE EQUAL "Debug")
-    message("Debug mode - adding -g option")
+# Under Windows you can compile this project using GNU compiler (for example by using MinGW-w64)
+# You can use CLion or QtCreator as IDE
+
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    message(STATUS "Algine debug mode - adding -g option")
     add_compile_options("-g")
-elseif (CMAKE_BUILD_TYPE EQUAL "Release")
-    message("Release mode")
+elseif (CMAKE_BUILD_TYPE MATCHES Release)
+    message(STATUS "Algine release mode")
+else()
+    message(FATAL_ERROR "CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}\nBut you can choose only Debug or Release build type")
 endif()
 
-# note: compiling on Windows only tested under MinGW-w64
-# most likely it will not work with Microsoft Visual Studio
-# for working use CLion, QtCreator etc instead
-
+# adding / finding libs
 if (WIN32)
-    set(LIBS_DIR "C:\\Program\ Files\ (x86)\\")
+    set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+    set(ASSIMP_BUILD_TESTS OFF)
 
-    set(GLEW_INCLUDE_DIR "${LIBS_DIR}glew\\include")
-    set(GLEW_LIBRARY "${LIBS_DIR}glew\\bin")
+    if (ALGINE_LINK_LIBS_STATICALLY)
+        add_definitions(-DGLEW_STATIC)
+        set(BUILD_SHARED_LIBS OFF)
+    else()
+        set(BUILD_SHARED_LIBS ON)
+    endif()
 
-    set(glfw3_DIR "${LIBS_DIR}GLFW\\lib\\cmake\\glfw3")
-    set(GLFW3_INCLUDE_DIRS "${LIBS_DIR}GLFW\\include")
-    set(GLFW3_LIBRARIES "${LIBS_DIR}GLFW\\lib")
-
-    set(GLM_INCLUDE_DIRS "${LIBS_DIR}glm\\include")
-
-    set(ASSIMP_LIBS "${LIBS_DIR}Assimp\\bin")
-endif()
-
-find_package(glfw3 REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(glm REQUIRED)
-find_package(assimp REQUIRED)
-
-if (WIN32)
-    include_directories(${GLFW3_INCLUDE_DIRS})
-    include_directories(${GLEW_INCLUDE_DIRS})
-    include_directories(${ASSIMP_INCLUDE_DIRS})
-    include_directories(${GLM_INCLUDE_DIRS})
-
-    link_libraries(assimp glew32 glfw3 opengl32)
-    link_directories(${GLFW3_LIBRARIES} ${GLEW_LIBRARIES} ${ASSIMP_LIBS})
+    add_subdirectory(contrib/assimp)
+    add_subdirectory(contrib/glfw)
+    add_subdirectory(contrib/glew/build/cmake)
+    include_directories(contrib/glew/include)
+    include_directories(contrib/glfw/include)
+    include_directories(contrib/glm)
+    include_directories(contrib/assimp/include)
 elseif (UNIX)
-    link_libraries(glfw GLEW GLU GL assimp pthread)
-    link_directories(/usr/local/lib)
+    find_package(GLEW REQUIRED)
+    find_package(assimp REQUIRED)
+    find_package(glfw3 REQUIRED)
+    find_package(glm REQUIRED)
 endif()
 
 include_directories(contrib)
-include_directories(contrib/nlohmann)
-include_directories(contrib/stb)
 include_directories(include)
-include_directories(include/algine)
 
 add_executable(algine
         contrib/nlohmann/json.hpp
@@ -101,3 +92,52 @@ add_executable(algine
         src/event.cpp
         src/object3d.cpp
         src/rotator.cpp)
+
+# linking
+if (WIN32)
+    if (ALGINE_LINK_LIBS_STATICALLY)
+        target_link_libraries(algine
+                assimp
+                glew_s
+                glfw
+                opengl32
+                pthread)
+    else()
+        target_link_libraries(algine
+                assimp
+                glew
+                glfw
+                opengl32
+                pthread)
+
+        if (CMAKE_BUILD_TYPE MATCHES Debug)
+            add_custom_command(TARGET algine POST_BUILD
+                    COMMENT "Creating symlinks to libs..."
+                    # assimp
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/contrib/assimp/code/libassimpd.dll ${CMAKE_CURRENT_BINARY_DIR}/libassimpd.dll
+                    # glew
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/bin/glew32d.dll ${CMAKE_CURRENT_BINARY_DIR}/glew32d.dll
+                    # glfw
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/contrib/glfw/src/glfw3d.dll ${CMAKE_CURRENT_BINARY_DIR}/glfw3d.dll)
+        else() # if not Debug or Release CMake must throw an error in the very beginning
+            add_custom_command(TARGET algine POST_BUILD
+                    COMMENT "Creating symlinks to libs..."
+                    # assimp
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/contrib/assimp/code/libassimp.dll ${CMAKE_CURRENT_BINARY_DIR}/libassimp.dll
+                    # glew
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/bin/glew32.dll ${CMAKE_CURRENT_BINARY_DIR}/glew32.dll
+                    # glfw
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/contrib/glfw/src/glfw3.dll ${CMAKE_CURRENT_BINARY_DIR}/glfw3.dll)
+        endif()
+    endif()
+elseif(UNIX)
+    target_link_libraries(algine
+            glfw
+            GLEW
+            GLU
+            GL
+            assimp
+            pthread)
+    target_link_directories(algine
+            /usr/local/lib)
+endif()
