@@ -5,6 +5,9 @@ out
 contrib/*
 !contrib/contrib.py
 
+# PyCharm
+scripts/.idea
+
 # Visual Studio Code dir
 .vscode
 
