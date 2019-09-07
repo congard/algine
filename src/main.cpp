@@ -692,7 +692,8 @@ void initShadowMaps() {
 
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
     for (int i = 0; i < csp.maxDirLightsCount; i++) {
-        ShaderProgram::set(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypeDirLight, i), DIR_LIGHT_TSID + i);
+        ShaderProgram::set(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypeDirLight, i),
+                           static_cast<int>(DIR_LIGHT_TSID) + i); // Mesa drivers require int as sampler, not uint
 		glActiveTexture(GL_TEXTURE0 + DIR_LIGHT_TSID + i);
 		glBindTexture(GL_TEXTURE_2D, 0);
     }
