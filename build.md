@@ -3,17 +3,17 @@ The engine is currently tested on Linux with gcc 9.1.0-2 and Windows 10 with Min
 <br>Note: only the GNU compiler is recommended. Using MSVC you will not able to compile a project.
 
 # Building on Linux systems
-1. The engine has next dependencies: `glew`, `glfw`, `glm`, `assimp` which must be installed in the system.
+1. The engine has next dependencies: `glew`, `glfw`, `assimp` which must be installed in the system.
    * Installation on Debian-based systems:
-     <br>`sudo apt install libglew-dev libglfw3-dev libglm-dev`
+     <br>`sudo apt install libglew-dev libglfw3-dev`
    * Installation on ArchLinux-based systems:
-     <br>x11: `pacman -S glew glfw-x11 glm`
-     <br>wayland: `pacman -S glew-wayland glfw-wayland glm`
+     <br>x11: `pacman -S glew glfw-x11`
+     <br>wayland: `pacman -S glew-wayland glfw-wayland`
 
    How to install assimp you can read [here](https://github.com/assimp/assimp/blob/master/Build.md)
 2. You need to install the needed libraries.
    In `contrib` folder there is a Python script called `contrib.py`.
-   You must execute it and install `nlohmann/json.hpp`, `stb/stb_image.h`, `stb/std_image_write.h`.
+   You must execute it and install `glm`, `nlohmann/json.hpp`, `stb/stb_image.h`, `stb/std_image_write.h`.
    This script WILL NOT install libraries in System directories, ONLY in `contrib` folder!
    <br>This script MUST be launched directly from `contrib` folder!
 3. Now you able to build engine via CMake

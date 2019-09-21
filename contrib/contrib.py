@@ -13,7 +13,7 @@ def index(x):
 
 # src file, dst folder
 libs = [
-      ["https://github.com/g-truc/glm/releases/download/0.9.9.5/glm-0.9.9.5.zip", "glm"],
+      ["https://github.com/g-truc/glm/releases/download/0.9.9.6/glm-0.9.9.6.zip", "glm"],
       ["https://github.com/nlohmann/json/releases/download/v3.7.0/json.hpp", "nlohmann"],
       ["https://raw.githubusercontent.com/nothings/stb/master/stb_image.h", "stb"],
       ["https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h", "stb"],
