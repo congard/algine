@@ -1,5 +1,5 @@
-#ifndef ALGINE_SCONSTANTS_H
-#define ALGINE_SCONSTANTS_H
+#ifndef ALGINE_CONSTANTS_H
+#define ALGINE_CONSTANTS_H
 
 /**
  * sconstants - shader constants
@@ -234,4 +234,4 @@ namespace algine {
 }
 
 #undef constant
-#endif // ALGINE_SCONSTANTS_H
+#endif //ALGINE_CONSTANTS_H

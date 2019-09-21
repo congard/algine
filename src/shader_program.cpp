@@ -5,7 +5,7 @@
 #include <algine/texture.h>
 #include <algine/io.h>
 #include <algine/core_utils.h>
-#include <algine/sconstants.h>
+#include <algine/constants.h>
 
 namespace algine {
 void getShaderInfoLog(int shader, int type) {

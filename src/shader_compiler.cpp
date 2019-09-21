@@ -1,6 +1,6 @@
 #include <algine/shader_compiler.h>
 #include <algine/shader_program.h>
-#include <algine/sconstants.h>
+#include <algine/constants.h>
 #include <algine/io.h>
 #include <algine/core_utils.h>
 

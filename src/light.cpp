@@ -10,7 +10,7 @@
 #include <algine/framebuffer.h>
 #include <algine/texture.h>
 #include <algine/core_utils.h>
-#include <algine/sconstants.h>
+#include <algine/constants.h>
 
 #define empty { /* empty */ }
 

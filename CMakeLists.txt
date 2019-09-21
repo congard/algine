@@ -60,7 +60,7 @@ add_executable(algine
         include/algine/model.h
         include/algine/node.h
         include/algine/renderbuffer.h
-        include/algine/sconstants.h
+        include/algine/constants.h
         include/algine/shader_compiler.h
         include/algine/shader_program.h
         include/algine/texture.h

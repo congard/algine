@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <nlohmann/json.hpp>
 #include <algine/io.h>
-#include <algine/sconstants.h>
+#include <algine/constants.h>
 
 namespace algine {
 // struct Material
