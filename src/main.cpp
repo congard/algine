@@ -38,12 +38,16 @@
 
 #define FULLSCREEN !true
 
-#define POINT_LAMPS_COUNT 1u
-#define DIR_LAMPS_COUNT 1u
+#define pointLampsCount 1u
+#define dirLampsCount 1u
+#define pointLightsLimit 8u
+#define dirLightsLimit 8u
+#define maxBoneAttribsPerVertex 1u
+#define maxBones 64u
 // point light texture start id
 #define POINT_LIGHT_TSID 6
 // dir light texture start id
-#define DIR_LIGHT_TSID POINT_LIGHT_TSID + POINT_LAMPS_COUNT
+#define DIR_LIGHT_TSID POINT_LIGHT_TSID + pointLampsCount
 #define SHAPES_COUNT 4
 #define MODELS_COUNT 3
 
@@ -65,12 +69,12 @@ using namespace algine;
 
 // models
 Shape shapes[SHAPES_COUNT];
-Model models[MODELS_COUNT], lamps[POINT_LAMPS_COUNT + DIR_LAMPS_COUNT];
+Model models[MODELS_COUNT], lamps[pointLampsCount + dirLampsCount];
 Animator manAnimator, astroboyAnimator; // animator for man, astroboy models
 
 // light
-PointLamp pointLamps[POINT_LAMPS_COUNT];
-DirLamp dirLamps[DIR_LAMPS_COUNT];
+PointLamp pointLamps[pointLampsCount];
+DirLamp dirLamps[dirLampsCount];
 LightDataSetter lightDataSetter;
 
 // renderer
@@ -112,14 +116,8 @@ ShaderProgram *bloomSearchShader;
 ShaderProgram *bloomBlurHorShader, *bloomBlurVertShader;
 ShaderProgram *cocBlurHorShader, *cocBlurVertShader;
 ShaderProgram *blendShader;
-
 ShaderProgram *blurBloomShaders[2];
 ShaderProgram *blurCoCShaders[2];
-
-AlgineParams params;
-ColorShaderParams csp;
-ShadowShaderParams ssp;
-DOFBlurShaderParams dofBlurParams;
 
 MouseEventListener mouseEventListener;
 
@@ -315,98 +313,143 @@ void initShaders() {
 
     std::cout << "Compiling algine shaders\n";
 
-    #ifdef debug_sm
-    params.shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_DISABLED;
-    #endif
-    #ifdef pcf
-    params.shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_ENABLED;
-    #else
-    params.shadowMappingMode = ALGINE_SHADOW_MAPPING_MODE_SIMPLE;
-    #endif
-    params.boneSystemMode = ALGINE_BONE_SYSTEM_ENABLED;
-    dofBlurParams.blurKernelRadius = dofBlurKernelRadius;
-    dofBlurParams.bleedingEliminationDeltaZ = ALGINE_ENABLED;
-    dofBlurParams.bleedingEliminationDeltaCoC = ALGINE_ENABLED;
-    dofBlurParams.bleedingEliminationFocusCoC = ALGINE_ENABLED;
+    {
+        using namespace AlgineNames::ShaderDefinitions;
 
-    colorShader->fromSource(scompiler::getCS(
-        params, csp,
-        "src/resources/shaders/vertex_shader.glsl",
-        "src/resources/shaders/fragment_shader.glsl")
-    );
-    pointShadowShader->fromSource(scompiler::getSS(
-        params, ssp,
-        "src/resources/shaders/shadow/vertex_shadow_shader.glsl",
-        "src/resources/shaders/shadow/fragment_shadow_shader.glsl",
-        "src/resources/shaders/shadow/geometry_shadow_shader.glsl")
-    );
-    params.shadowMappingType = ALGINE_SHADOW_MAPPING_TYPE_DIR_LIGHTING;
-    dirShadowShader->fromSource(scompiler::getSS(
-        params, ssp,
-        "src/resources/shaders/shadow/vertex_shadow_shader.glsl",
-        "src/resources/shaders/shadow/fragment_shadow_shader.glsl")
-    );
-    ssrShader->fromSource(scompiler::getSSRShader(
-        "src/resources/shaders/basic/quad_vertex.glsl",
-        "src/resources/shaders/ssr/fragment.glsl")
-    );
+        ShaderManager manager;
 
-    dofBlurParams.type = ALGINE_DOF_FROM_COC_MAP;
-    std::vector<ShadersData> dofBlurSources = scompiler::getDOFBlurShader(
-        dofBlurParams,
-        "src/resources/shaders/basic/quad_vertex.glsl",
-        "src/resources/shaders/dof/fragment.glsl"
-    );
-    dofBlurHorShader->fromSource(dofBlurSources[0]);
-    dofBlurVertShader->fromSource(dofBlurSources[1]);
+        // color shader
+        manager.fromFile("src/resources/shaders/vertex_shader.glsl",
+                         "src/resources/shaders/fragment_shader.glsl");
+        manager.define(Lighting::Lighting);
+        manager.define(Lighting::LightingAttenuation);
+        manager.define(Lighting::NormalMapping);
+        manager.define(Lighting::ShadowMappingPCF);
+        manager.define(TextureMapping);
+        manager.define(BoneSystem);
+        manager.define(SSR);
+        manager.define(Lighting::PointLightsLimit, std::to_string(pointLightsLimit));
+        manager.define(Lighting::DirLightsLimit, std::to_string(dirLightsLimit));
+        manager.define(MaxBoneAttribsPerVertex, std::to_string(maxBoneAttribsPerVertex));
+        manager.define(MaxBones, std::to_string(maxBones));
+        manager.generate();
+        colorShader->fromSource(manager.getGenerated());
 
-    dofBlurParams.type = ALGINE_CINEMATIC_DOF;
-    dofCoCShader->fromSource(scompiler::getDOFCoCShader(
-        dofBlurParams,
-        "src/resources/shaders/basic/quad_vertex.glsl",
-        "src/resources/shaders/dof/coc_fragment.glsl")
-    );
+        // point shadow shader
+        manager.fromFile("src/resources/shaders/shadow/vertex_shadow_shader.glsl",
+                         "src/resources/shaders/shadow/fragment_shadow_shader.glsl",
+                         "src/resources/shaders/shadow/geometry_shadow_shader.glsl");
+        manager.resetDefinitions();
+        manager.define(BoneSystem);
+        manager.define(MaxBoneAttribsPerVertex, std::to_string(maxBoneAttribsPerVertex));
+        manager.define(MaxBones, std::to_string(maxBones));
+        manager.define(ShadowShader::PointLightShadowMapping);
+        manager.generate();
+        pointShadowShader->fromSource(manager.getGenerated());
 
-    blendShader->fromSource(scompiler::getBlendShader(
-        params,
-        "src/resources/shaders/basic/quad_vertex.glsl",
-        "src/resources/shaders/blend/fragment.glsl")
-    );
+        // dir shadow shader
+        ShadersData shadowShaderTemplate = manager.getTemplate();
+        shadowShaderTemplate.geometry = std::string(); // we don't need geometry shader for dir light shadows
+        manager.fromSource(shadowShaderTemplate);
+        manager.removeDefinition(ShadowShader::PointLightShadowMapping);
+        manager.define(ShadowShader::DirLightShadowMapping);
+        manager.generate();
+        dirShadowShader->fromSource(manager.getGenerated());
 
-    bloomSearchShader->fromSource(scompiler::getBloomSearchShader(
-        "src/resources/shaders/basic/quad_vertex.glsl",
-        "src/resources/shaders/bloom/fragment_search.glsl")
-    );
+        // SSR shader
+        ssrShader->fromFile("src/resources/shaders/basic/quad_vertex.glsl",
+                            "src/resources/shaders/ssr/fragment.glsl");
 
-    std::vector<ShadersData> blur = scompiler::getBlurShader(
-        BlurShaderParams { bloomBlurKernelRadius },
-        "src/resources/shaders/basic/quad_vertex.glsl",
-        "src/resources/shaders/blur/fragment.glsl"
-    );
-    bloomBlurHorShader->fromSource(blur[0]);
-    bloomBlurVertShader->fromSource(blur[1]);
+        // bloom search shader
+        bloomSearchShader->fromFile("src/resources/shaders/basic/quad_vertex.glsl",
+                                    "src/resources/shaders/bloom/fragment_search.glsl");
 
-    blur = scompiler::getBlurShader(
-        BlurShaderParams { cocBlurKernelRadius, ALGINE_VEC1, ALGINE_SHADER_TEX_COMPONENT_RED },
-        "src/resources/shaders/basic/quad_vertex.glsl",
-        "src/resources/shaders/blur/fragment.glsl"
-    );
-    cocBlurHorShader->fromSource(blur[0]);
-    cocBlurVertShader->fromSource(blur[1]);
+        // TODO: remove "dof blur shaders", replace with only blur + blend steps
+        // DOF blur shaders
+        manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
+                         "src/resources/shaders/dof/fragment.glsl");
+        manager.resetDefinitions();
+        manager.define(Dof::DofCocMap);
+        manager.define(Blur::KernelRadius, std::to_string(dofBlurKernelRadius));
+        manager.define(Dof::BleedingMinDeltaZ);
+        manager.define(Dof::BleedingMinDeltaCoC);
+        manager.define(Dof::BleedingMaxFocusCoC);
+        manager.define(Blur::Horizontal);
+        manager.generate();
+        dofBlurHorShader->fromSource(manager.getGenerated());
 
-    CubemapShaderParams cubemapShaderParams;
-    cubemapShaderParams.positionOutput = ALGINE_SPHERE_POSITIONS;
-    skyboxShader->fromSource(scompiler::getCubemapShader(
-        cubemapShaderParams,
-        "src/resources/shaders/basic/cubemap_vertex.glsl",
-        "src/resources/shaders/basic/cubemap_fragment.glsl")
-    );
+        manager.resetGenerated();
+        manager.removeDefinition(Blur::Horizontal);
+        manager.define(Blur::Vertical);
+        manager.generate();
+        dofBlurVertShader->fromSource(manager.getGenerated());
+
+        // DOF CoC shader
+        manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
+                         "src/resources/shaders/dof/coc_fragment.glsl");
+        manager.resetDefinitions();
+        manager.define(Dof::CinematicDof);
+        manager.generate();
+        dofCoCShader->fromSource(manager.getGenerated());
+
+        // blend shader
+        manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
+                         "src/resources/shaders/blend/fragment.glsl");
+        manager.resetDefinitions();
+        manager.define(Bloom::BloomAdd);
+        manager.generate();
+        blendShader->fromSource(manager.getGenerated());
+
+        // bloom blur shaders
+        manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
+                         "src/resources/shaders/blur/fragment.glsl");
+        manager.resetDefinitions();
+        manager.define(Blur::KernelRadius, std::to_string(bloomBlurKernelRadius));
+        manager.define(OutputType, "vec3");
+        manager.define(TexComponent, "rgb");
+        manager.define(Blur::Horizontal);
+        manager.generate();
+        bloomBlurHorShader->fromSource(manager.getGenerated());
+
+        manager.resetGenerated();
+        manager.removeDefinition(Blur::Horizontal);
+        manager.define(Blur::Vertical);
+        manager.generate();
+        bloomBlurVertShader->fromSource(manager.getGenerated());
+
+        // CoC blur shaders
+        manager.resetGenerated();
+        manager.resetDefinitions();
+        manager.define(Blur::KernelRadius, std::to_string(cocBlurKernelRadius));
+        manager.define(OutputType, "float");
+        manager.define(TexComponent, "r");
+        manager.define(Blur::Horizontal);
+        manager.generate();
+        cocBlurHorShader->fromSource(manager.getGenerated());
+
+        manager.resetGenerated();
+        manager.removeDefinition(Blur::Horizontal);
+        manager.define(Blur::Vertical);
+        manager.generate();
+        cocBlurVertShader->fromSource(manager.getGenerated());
+
+        // cubemap shader
+        manager.fromFile("src/resources/shaders/basic/cubemap_vertex.glsl",
+                         "src/resources/shaders/basic/cubemap_fragment.glsl");
+        manager.resetDefinitions();
+        manager.define(CubemapShader::SpherePositions);
+        manager.define(CubemapShader::ColorOut, "0"); // TODO: create constants
+        manager.define(CubemapShader::PosOut, "2");
+        manager.define(OutputType, "vec3");
+        manager.generate();
+        skyboxShader->fromSource(manager.getGenerated());
+    }
 
     std::cout << "Compilation done\n";
 
     #define value *
 
-    scompiler::loadColorShaderLocations(value colorShader, csp);
+    scompiler::loadColorShaderLocations(value colorShader, dirLightsLimit, pointLightsLimit);
     scompiler::loadShadowShaderLocations(value pointShadowShader);
     scompiler::loadShadowShaderLocations(value dirShadowShader);
     scompiler::loadSSRShaderLocations(value ssrShader);
@@ -421,8 +464,8 @@ void initShaders() {
     scompiler::loadBlurShaderLocations(value cocBlurVertShader);
     scompiler::loadCubemapShaderLocations(value skyboxShader);
 
-    lightDataSetter.indexDirLightLocations(colorShader, csp.maxDirLightsCount);
-    lightDataSetter.indexPointLightLocations(colorShader, pointShadowShader, csp.maxPointLightsCount);
+    lightDataSetter.indexDirLightLocations(colorShader, dirLightsLimit);
+    lightDataSetter.indexPointLightLocations(colorShader, pointShadowShader, pointLightsLimit);
 
     renderer.ssrShader = ssrShader;
     renderer.blendShader = blendShader;
@@ -434,7 +477,7 @@ void initShaders() {
     renderer.quadRenderer = &quadRenderer;
 
     skyboxRenderer.init(skyboxShader->getLocation(AlgineNames::CubemapShader::InPos));
-    quadRenderer.init(ALGINE_IN_POS_LOCATION, ALGINE_IN_TEX_COORD_LOCATION);
+    quadRenderer.init(0, 1); // inPosLocation in quad shader is 0, inTexCoordLocation is 1
 
     Framebuffer::create(&displayFB);
     Framebuffer::create(&screenspaceFB);
@@ -682,22 +725,22 @@ void initShadowMaps() {
     colorShader->use();
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
     // TODO: maybe move it to LightDataSetter?
-    for (int i = 0; i < csp.maxPointLightsCount; i++) {
+    for (int i = 0; i < pointLightsLimit; i++) {
         ShaderProgram::set(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypePointLight, i), POINT_LIGHT_TSID + i);
 		glActiveTexture(GL_TEXTURE0 + POINT_LIGHT_TSID + i);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
-    for (usize i = 0; i < POINT_LAMPS_COUNT; i++)
+    for (usize i = 0; i < pointLampsCount; i++)
         lightDataSetter.setShadowMap(pointLamps[i], i, POINT_LIGHT_TSID + i);
 
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
-    for (int i = 0; i < csp.maxDirLightsCount; i++) {
+    for (int i = 0; i < dirLightsLimit; i++) {
         ShaderProgram::set(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypeDirLight, i),
                            static_cast<int>(DIR_LIGHT_TSID) + i); // Mesa drivers require int as sampler, not uint
 		glActiveTexture(GL_TEXTURE0 + DIR_LIGHT_TSID + i);
 		glBindTexture(GL_TEXTURE_2D, 0);
     }
-    for (usize i = 0; i < DIR_LAMPS_COUNT; i++)
+    for (usize i = 0; i < dirLampsCount; i++)
         lightDataSetter.setShadowMap(dirLamps[i], i, DIR_LIGHT_TSID + i);
     glUseProgram(0);
 }
@@ -754,12 +797,12 @@ void recycleAll() {
 }
 
 void sendLampsData() {
-    lightDataSetter.setPointLightsCount(POINT_LAMPS_COUNT);
-    lightDataSetter.setDirLightsCount(DIR_LAMPS_COUNT);
+    lightDataSetter.setPointLightsCount(pointLampsCount);
+    lightDataSetter.setDirLightsCount(dirLampsCount);
     colorShader->set(AlgineNames::ColorShader::CameraPos, camera.getPosition());
-    for (size_t i = 0; i < POINT_LAMPS_COUNT; i++)
+    for (size_t i = 0; i < pointLampsCount; i++)
         lightDataSetter.setPos(pointLamps[i], i);
-    for (size_t i = 0; i < DIR_LAMPS_COUNT; i++)
+    for (size_t i = 0; i < dirLampsCount; i++)
         lightDataSetter.setPos(dirLamps[i], i);
 }
 
@@ -847,7 +890,7 @@ void renderToDepthCubemap(const uint index) {
         drawModelDM(models[i], pointShadowShader);
 
 	// drawing lamps
-	for (GLuint i = 0; i < POINT_LAMPS_COUNT; i++) {
+	for (GLuint i = 0; i < pointLampsCount; i++) {
 		if (i == index) continue;
         drawModelDM(*pointLamps[i].mptr, pointShadowShader);
 	}
@@ -867,7 +910,7 @@ void renderToDepthMap(uint index) {
         drawModelDM(models[i], dirShadowShader, dirLamps[index].lightSpace);
 
 	// drawing lamps
-	for (GLuint i = 0; i < DIR_LAMPS_COUNT; i++) {
+	for (GLuint i = 0; i < dirLampsCount; i++) {
 		if (i == index) continue;
         drawModelDM(*dirLamps[i].mptr, dirShadowShader, dirLamps[index].lightSpace);
 	}
@@ -897,7 +940,7 @@ void render() {
     // drawing
     for (size_t i = 0; i < MODELS_COUNT; i++)
         drawModel(models[i]);
-	for (size_t i = 0; i < POINT_LAMPS_COUNT + DIR_LAMPS_COUNT; i++)
+	for (size_t i = 0; i < pointLampsCount + dirLampsCount; i++)
 	    drawModel(lamps[i]);
 
     // render skybox
@@ -942,14 +985,14 @@ void display() {
     // shadow rendering
     // point lights
     pointShadowShader->use();
-	for (uint i = 0; i < POINT_LAMPS_COUNT; i++) {
+	for (uint i = 0; i < pointLampsCount; i++) {
 	    lightDataSetter.setShadowShaderFarPlane(pointLamps[i]);
         renderToDepthCubemap(i);
     }
 
     // dir lights
     dirShadowShader->use();
-    for (uint i = 0; i < DIR_LAMPS_COUNT; i++)
+    for (uint i = 0; i < dirLampsCount; i++)
         renderToDepthMap(i);
 	
     ssrShader->use();
