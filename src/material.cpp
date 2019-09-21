@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <nlohmann/json.hpp>
 #include <algine/io.h>
-#include <algine/constants.h>
+#include <algine/sconstants.h>
 
 namespace algine {
 // struct Material
@@ -35,6 +35,8 @@ bool AlgineMTL::load(const std::string &path) {
      *      }
      * ]
      **/
+    using namespace AlgineConstants::AMTL;
+
     nlohmann::json j = nlohmann::json::parse(io::read(path));
 
     for (size_t i = 0; i < j.size(); i++) {
@@ -43,22 +45,22 @@ bool AlgineMTL::load(const std::string &path) {
             if (j[i].find(key) != j[i].end()) var = j[i][key]
 
         AlgineMT amt;
-        amt.name = j[i][ALGINE_MATERIAL_NAME];
+        amt.name = j[i][Name];
 
-        sie(ALGINE_MATERIAL_AMBIENT_TEX, amt.texAmbientPath);
-        sie(ALGINE_MATERIAL_DIFFUSE_TEX, amt.texDiffusePath);
-        sie(ALGINE_MATERIAL_SPECULAR_TEX, amt.texSpecularPath);
-        sie(ALGINE_MATERIAL_NORMAL_TEX, amt.texNormalPath);
-        sie(ALGINE_MATERIAL_REFLECTION_TEX, amt.texReflectionPath);
-        sie(ALGINE_MATERIAL_JITTER_TEX, amt.texJitterPath);
+        sie(AmbientTex, amt.texAmbientPath);
+        sie(DiffuseTex, amt.texDiffusePath);
+        sie(SpecularTex, amt.texSpecularPath);
+        sie(NormalTex, amt.texNormalPath);
+        sie(ReflectionTex, amt.texReflectionPath);
+        sie(JitterTex, amt.texJitterPath);
 
-        sie(ALGINE_MATERIAL_REFLECTION, amt.reflection);
-        sie(ALGINE_MATERIAL_JITTER, amt.jitter);
+        sie(Reflection, amt.reflection);
+        sie(Jitter, amt.jitter);
 
-        sie(ALGINE_MATERIAL_AMBIENT_STRENGTH, amt.ambientStrength);
-        sie(ALGINE_MATERIAL_DIFFUSE_STRENGTH, amt.diffuseStrength);
-        sie(ALGINE_MATERIAL_SPECULAR_STRENGTH, amt.specularStrength);
-        sie(ALGINE_MATERIAL_SHININESS, amt.shininess);
+        sie(AmbientStrength, amt.ambientStrength);
+        sie(DiffuseStrength, amt.diffuseStrength);
+        sie(SpecularStrength, amt.specularStrength);
+        sie(Shininess, amt.shininess);
 
         materials.push_back(amt);
 

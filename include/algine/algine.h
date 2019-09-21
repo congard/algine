@@ -8,12 +8,10 @@
 
 #include <algine/algine_renderer.h>
 #include <algine/shader_compiler.h>
-#include <algine/algine_structs.h>
 #include <algine/animation.h>
 #include <algine/bone.h>
 #include <algine/camera.h>
 #include <algine/core_utils.h>
-#include <algine/constants.h>
 #include <algine/event.h>
 #include <algine/framebuffer.h>
 #include <algine/io.h>

@@ -4,7 +4,6 @@
 #include <algine/texture.h>
 #include <algine/framebuffer.h>
 #include <algine/renderbuffer.h>
-#include <algine/constants.h>
 
 namespace algine {
 void pointer(const int location, const int count, const uint buffer, const uint stride, const void *offset) {
@@ -177,8 +176,8 @@ QuadRenderer::~QuadRenderer() {
 // note: this function will bind empty renderbuffer (`bindRenderbuffer(0)`)
 void AlgineRenderer::configureMainPassRenderbuffer(const uint renderbuffer, const uint width, const uint height) {
     bindRenderbuffer(renderbuffer);
-    Renderbuffer::setupStorage(ALGINE_DEPTH_COMPONENT, width, height);
-    Framebuffer::attachRenderbuffer(ALGINE_DEPTH_ATTACHMENT, renderbuffer);
+    Renderbuffer::setupStorage(GL_DEPTH_COMPONENT, width, height);
+    Framebuffer::attachRenderbuffer(GL_DEPTH_ATTACHMENT, renderbuffer);
     bindRenderbuffer(0);
 }
 

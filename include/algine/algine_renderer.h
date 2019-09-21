@@ -2,7 +2,6 @@
 #define ALGINE_RENDERER_H
 
 #include <algine/types.h>
-#include <algine/algine_structs.h>
 #include <algine/shader_program.h>
 
 namespace algine {
