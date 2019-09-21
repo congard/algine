@@ -26,9 +26,6 @@ std::vector<std::string> split(const std::string &in, const std::string &delimit
 // replaces first found occurrence
 std::string replace(const std::string &src, const std::string &target, const std::string &replacement);
 
-// returns shader string. `val` can be `ALGINE_VEC1..ALGINE_VEC4`, `ALGINE_SHADER_TEX_COMPONENT_RED..ALGINE_SHADER_TEX_COMPONENT_RGB`
-std::string getShaderStr(const uint &val);
-
 // returns current time in milliseconds
 long getTime();
 
