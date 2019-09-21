@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <utility>
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
 
@@ -22,15 +23,50 @@ struct ShadersData {
 #define ShadersSources ShadersData
 #define ShadersPaths ShadersData
 
-class Shader {
-public:
+namespace ShaderType {
     enum {
         Vertex,
         Fragment,
         Geometry
     };
+}
 
-    uint id;
+// TODO: maybe add function makeGenerated (generate + getGenerated)?
+class ShaderManager {
+public:
+    enum {
+        RemoveFirst,
+        RemoveLast,
+        RemoveAll
+    };
+
+    void fromFile(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string());
+    void fromFile(const ShadersData &paths);
+    void fromSource(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string());
+    void fromSource(const ShadersData &sources);
+
+    void insert(uint shaderType, const std::string &key, const std::string &code);
+    void define(uint shaderType, const std::string &macro, const std::string &value = std::string());
+    void define(const std::string &macro, const std::string &value = std::string()); // defines in all shaders
+    void removeDefinition(uint shaderType, const std::string &macro, uint type = RemoveLast);
+    void removeDefinition(const std::string &macro, uint type = RemoveLast); // removes in all shaders
+
+    void resetGenerated();
+    void resetDefinitions();
+    void generate();
+
+    ShadersData getTemplate();
+    ShadersData getGenerated();
+
+private:
+    std::vector<std::pair<std::string, std::string>> definitions[3]; // 3 because vertex, fragment and geometry
+    std::string vertexTemp, fragmentTemp, geometryTemp; // shaders; temp - template
+    std::string vertexGen, fragmentGen, geometryGen; // gen - generated
+};
+
+class Shader {
+public:
+    uint id = 0;
 
     explicit Shader(uint type); // calls create(type)
     Shader();
