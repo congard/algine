@@ -2,6 +2,6 @@
     {
         "name":"desk",
         "reflectionTex":"desk_texture_reflection_strength_jitter.jpg",
-        "jitterTex":"desk_texture_reflection_strength_jitter.jpg"
+        "jitterTex":"jitter.jpg"
     }
 ] 
