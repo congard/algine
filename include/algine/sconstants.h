@@ -7,16 +7,90 @@
 
 #define constant(name, val) constexpr char name[] = val;
 
-// TODO: merge with constants.h
-//  constants.h + sconstants.h = constants.h
-//  remove ALGINE_BLAH_BLAH_ENABLED_DISABLED in current constants.h
-//  ...and remove sconstants.h
-
 // TODO: modules: Lighting, SSR (note: have own values in Color Shader), BloomSearch (uses 2nd color component...),
 //  BlendBloom, BlendDOF (Coming Soon)
 
 namespace algine {
+    namespace AlgineConstants {
+        namespace ShaderGeneratorKeys {
+            constant(Definitions, "$ALGINE_DEFINITIONS") // TODO: replace with #pragma algine definitions
+        }
+
+        namespace AMTL {
+            constant(Name, "name")
+            constant(AmbientTex, "ambientTex")
+            constant(DiffuseTex, "diffuseTex")
+            constant(SpecularTex, "specularTex")
+            constant(NormalTex, "normalTex")
+            constant(ReflectionTex, "reflectionTex")
+            constant(JitterTex, "jitterTex")
+            constant(Reflection, "reflection")
+            constant(Jitter, "jitter")
+            constant(AmbientStrength, "ambientStrength")
+            constant(DiffuseStrength, "diffuseStrength")
+            constant(SpecularStrength, "specularStrength")
+            constant(Shininess, "shininess")
+        }
+    }
+
     namespace AlgineNames {
+        // TODO: remove MODE_XXX
+        //  rename definitions
+        // TODO: modules as namespaces
+        namespace ShaderDefinitions {
+            constant(TextureMapping, "ALGINE_TEXTURE_MAPPING_MODE_ENABLED")
+            constant(TextureMappingSwitcher, "ALGINE_TEXTURE_MAPPING_MODE_DUAL")
+            constant(BoneSystem, "ALGINE_BONE_SYSTEM_ENABLED")
+            constant(MaxBoneAttribsPerVertex, "MAX_BONE_ATTRIBS_PER_VERTEX")
+            constant(MaxBones, "MAX_BONES")
+            constant(OutputType, "vecout")
+            constant(TexComponent, "texComponent")
+            constant(SSR, "ALGINE_SSR_MODE_ENABLED") // TODO: remove from fragment_shader.glsl
+
+            namespace Lighting {
+                constant(Lighting, "ALGINE_LIGHTING_MODE_ENABLED")
+                constant(LightingAttenuation, "ALGINE_ATTENUATION_MODE_ENABLED")
+                constant(NormalMapping, "ALGINE_NORMAL_MAPPING_MODE_ENABLED")
+                constant(NormalMappingSwitcher, "ALGINE_NORMAL_MAPPING_MODE_DUAL")
+                constant(PointLightsLimit, "MAX_POINT_LIGHTS_COUNT")
+                constant(DirLightsLimit, "MAX_DIR_LIGHTS_COUNT")
+                constant(ShadowMappingPCF, "ALGINE_SHADOW_MAPPING_MODE_ENABLED")
+                constant(ShadowMapping, "ALGINE_SHADOW_MAPPING_MODE_SIMPLE")
+            }
+
+            namespace ShadowShader {
+                constant(PointLightShadowMapping, "ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING")
+                constant(DirLightShadowMapping, "ALGINE_SHADOW_MAPPING_TYPE_DIR_LIGHTING")
+            }
+
+            namespace Blur {
+                constant(Vertical, "ALGINE_VERTICAL")
+                constant(Horizontal, "ALGINE_HORIZONTAL")
+                constant(KernelRadius, "KERNEL_RADIUS")
+            }
+
+            namespace Dof {
+                constant(Dof, "ALGINE_LINEAR_DOF")
+                constant(CinematicDof, "ALGINE_CINEMATIC_DOF")
+                constant(DofCocMap, "ALGINE_DOF_FROM_COC_MAP")
+                constant(BleedingMinDeltaZ, "ALGINE_BLEEDING_ELIM_DZ")
+                constant(BleedingMinDeltaCoC, "ALGINE_BLEEDING_ELIM_DCOC")
+                constant(BleedingMaxFocusCoC, "ALGINE_BLEEDING_ELIM_FCOC")
+            }
+
+            namespace Bloom {
+                constant(BloomAdd, "ALGINE_BLOOM_TYPE_ADD")
+                constant(BloomScreen, "ALGINE_BLOOM_TYPE_SCREEN")
+            }
+
+            namespace CubemapShader {
+                constant(CubePositions, "ALGINE_CUBE_POSITIONS")
+                constant(SpherePositions, "ALGINE_SPHERE_POSITIONS")
+                constant(ColorOut, "ALGINE_CUBEMAP_COLOR_OUT_COLOR_COMPONENT")
+                constant(PosOut, "ALGINE_POS_OUT_COLOR_COMPONENT")
+            }
+        }
+
         namespace ColorShader {
             constant(ModelMatrix, "modelMatrix")
             constant(ViewMatrix, "viewMatrix")
@@ -160,4 +234,4 @@ namespace algine {
 }
 
 #undef constant
-#endif
+#endif // ALGINE_SCONSTANTS_H
