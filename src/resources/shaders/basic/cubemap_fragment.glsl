@@ -16,7 +16,8 @@ uniform vecout color = vecout(1.0);
 uniform float scaling = 1.0;
 
 void main() {
-    #ifdef ALGINE_CUBEMAP_COLOR
+    // if defined output color component then color rendering enabled
+    #ifdef ALGINE_CUBEMAP_COLOR_OUT_COLOR_COMPONENT
         fragColor = vecout(texture(cubemap, texCoords)) * color;
     #endif
 

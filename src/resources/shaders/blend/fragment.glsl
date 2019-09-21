@@ -13,12 +13,10 @@ uniform float exposure;
 uniform float gamma;
 
 void main() {
-	#ifdef ALGINE_BLOOM_ENABLED
-		#ifdef ALGINE_BLOOM_TYPE_ADD // additive blending
-			vec3 color = texture(bloom, texCoord).rgb + texture(image, texCoord).rgb;
-		#else // screen blending
-			vec3 color = 1 - (1 - texture(bloom, texCoord).rgb) * (1 - texture(image, texCoord).rgb);
-		#endif
+	#ifdef ALGINE_BLOOM_TYPE_ADD // additive blending
+		vec3 color = texture(bloom, texCoord).rgb + texture(image, texCoord).rgb;
+	#elif defined ALGINE_BLOOM_TYPE_SCREEN // screen blending
+		vec3 color = 1 - (1 - texture(bloom, texCoord).rgb) * (1 - texture(image, texCoord).rgb);
 	#else
 		vec3 color = texture(image, texCoord).rgb;
 	#endif
