@@ -49,10 +49,8 @@ add_executable(algine
         contrib/stb/stb_image_write.h
         include/algine/algine.h
         include/algine/algine_renderer.h
-        include/algine/algine_structs.h
         include/algine/animation.h
         include/algine/bone.h
-        include/algine/constants.h
         include/algine/core_utils.h
         include/algine/framebuffer.h
         include/algine/io.h
