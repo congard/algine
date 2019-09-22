@@ -7,6 +7,7 @@
 
 #define delete_ptr(ptr) if (ptr != nullptr) { delete ptr; ptr = nullptr; }
 #define delete_ptr_arr(ptr) if (ptr != nullptr) { delete[] ptr; ptr = nullptr; }
+#define getArraySize(array) (sizeof(array) / sizeof(array[0]))
 
 namespace algine {
 // returns GPU Vendor name
