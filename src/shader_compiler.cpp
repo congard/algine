@@ -47,22 +47,22 @@ void loadColorShaderLocations(ShaderProgram &shader, const uint maxDirLightsCoun
     std::string start;
 
     // point lights
+    shader.loadUniformLocation(PointLightShadowMaps);
     for (uint i = 0; i < maxPointLightsCount; i++) {
         start = PointLights + std::string("[") + std::to_string(i) + "].";
         loadLightProp
         shader.loadUniformLocation(start + Light::FarPlane);
         shader.loadUniformLocation(start + Light::Bias);
-        shader.loadUniformLocation(PointLightShadowMaps + std::string("[") + std::to_string(i) + "]");
     }
 
     // directional lights
+    shader.loadUniformLocation(DirLightShadowMaps);
     for (uint i = 0; i < maxDirLightsCount; i++) {
         start = DirLights + std::string("[") + std::to_string(i) + "].";
         loadLightProp
         shader.loadUniformLocation(start + Light::LightMatrix);
         shader.loadUniformLocation(start + Light::MinBias);
         shader.loadUniformLocation(start + Light::MaxBias);
-        shader.loadUniformLocation(DirLightShadowMaps + std::string("[") + std::to_string(i) + "]");
     }
 
     #undef loadLightProp

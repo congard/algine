@@ -225,7 +225,7 @@ void LightDataSetter::indexDirLightLocations(ShaderProgram *const lightShader, c
         locations->kq = lightShader->getLocation(dirLightElem(Kq));
         locations->pos = lightShader->getLocation(dirLightElem(Pos));
         locations->color = lightShader->getLocation(dirLightElem(Color));
-        locations->shadowMap = lightShader->getLocation(AlgineNames::ColorShader::DirLightShadowMaps + std::string("[") + std::to_string(i) + "]");
+        locations->shadowMap = lightShader->getLocation(AlgineNames::ColorShader::DirLightShadowMaps) + i;
         locations->minBias = lightShader->getLocation(dirLightElem(MinBias));
         locations->maxBias = lightShader->getLocation(dirLightElem(MaxBias));
         locations->lightMatrix = lightShader->getLocation(dirLightElem(LightMatrix));
@@ -252,7 +252,7 @@ void LightDataSetter::indexPointLightLocations(ShaderProgram *const lightShader,
         locations->kq = lightShader->getLocation(pointLightElem(Kq));
         locations->pos = lightShader->getLocation(pointLightElem(Pos));
         locations->color = lightShader->getLocation(pointLightElem(Color));
-        locations->shadowMap = lightShader->getLocation(AlgineNames::ColorShader::PointLightShadowMaps + std::string("[") + std::to_string(i) + "]");
+        locations->shadowMap = lightShader->getLocation(AlgineNames::ColorShader::PointLightShadowMaps) + i;
         locations->farPlane = lightShader->getLocation(pointLightElem(FarPlane));
         locations->bias = lightShader->getLocation(pointLightElem(Bias));
         lightLocations[1].push_back(locations);

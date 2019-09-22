@@ -1,10 +1,6 @@
 #ifndef ALGINE_CONSTANTS_H
 #define ALGINE_CONSTANTS_H
 
-/**
- * sconstants - shader constants
- */
-
 #define constant(name, val) constexpr char name[] = val;
 
 // TODO: modules: Lighting, SSR (note: have own values in Color Shader), BloomSearch (uses 2nd color component...),
@@ -133,8 +129,8 @@ namespace algine {
 
             constant(PointLights, "pointLights")
             constant(DirLights, "dirLights")
-            constant(PointLightShadowMaps, "pointLightShadowMaps")
-            constant(DirLightShadowMaps, "dirLightShadowMaps")
+            constant(PointLightShadowMaps, "pointLightShadowMaps[0]")
+            constant(DirLightShadowMaps, "dirLightShadowMaps[0]")
 
             namespace Light {
                 constant(Pos, "pos")
