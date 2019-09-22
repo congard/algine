@@ -61,7 +61,6 @@ add_executable(algine
         include/algine/node.h
         include/algine/renderbuffer.h
         include/algine/constants.h
-        include/algine/shader_compiler.h
         include/algine/shader_program.h
         include/algine/texture.h
         include/algine/types.h
@@ -82,7 +81,6 @@ add_executable(algine
         src/model.cpp
         src/node.cpp
         src/renderbuffer.cpp
-        src/shader_compiler.cpp
         src/shader_program.cpp
         src/texture.cpp
         src/camera.cpp

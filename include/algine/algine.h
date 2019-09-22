@@ -7,7 +7,6 @@
 #include <glm/glm.hpp>
 
 #include <algine/algine_renderer.h>
-#include <algine/shader_compiler.h>
 #include <algine/animation.h>
 #include <algine/bone.h>
 #include <algine/camera.h>
