@@ -291,20 +291,10 @@ void initGL() {
  * Loading and compiling shaders
  */
 void initShaders() {
-    skyboxShader = new ShaderProgram();
-    colorShader = new ShaderProgram();
-    pointShadowShader = new ShaderProgram();
-    dirShadowShader = new ShaderProgram();
-    dofBlurHorShader = new ShaderProgram();
-    dofBlurVertShader = new ShaderProgram();
-    dofCoCShader = new ShaderProgram();
-    ssrShader = new ShaderProgram();
-    bloomSearchShader = new ShaderProgram();
-    bloomBlurHorShader = new ShaderProgram();
-    bloomBlurVertShader = new ShaderProgram();
-    cocBlurHorShader = new ShaderProgram();
-    cocBlurVertShader = new ShaderProgram();
-    blendShader = new ShaderProgram();
+    ShaderProgram::create(skyboxShader, colorShader, pointShadowShader, dirShadowShader,
+                          dofBlurHorShader, dofBlurVertShader, dofCoCShader, ssrShader,
+                          bloomSearchShader, bloomBlurHorShader, bloomBlurVertShader,
+                          cocBlurHorShader, cocBlurVertShader, blendShader);
 
     blurBloomShaders[0] = bloomBlurHorShader;
     blurBloomShaders[1] = bloomBlurVertShader;
@@ -334,6 +324,7 @@ void initShaders() {
         manager.define(MaxBones, std::to_string(maxBones));
         manager.generate();
         colorShader->fromSource(manager.getGenerated());
+        colorShader->loadActiveLocations();
 
         // point shadow shader
         manager.fromFile("src/resources/shaders/shadow/vertex_shadow_shader.glsl",
@@ -346,6 +337,7 @@ void initShaders() {
         manager.define(ShadowShader::PointLightShadowMapping);
         manager.generate();
         pointShadowShader->fromSource(manager.getGenerated());
+        pointShadowShader->loadActiveLocations();
 
         // dir shadow shader
         ShadersData shadowShaderTemplate = manager.getTemplate();
@@ -355,14 +347,17 @@ void initShaders() {
         manager.define(ShadowShader::DirLightShadowMapping);
         manager.generate();
         dirShadowShader->fromSource(manager.getGenerated());
+        dirShadowShader->loadActiveLocations();
 
         // SSR shader
         ssrShader->fromFile("src/resources/shaders/basic/quad_vertex.glsl",
                             "src/resources/shaders/ssr/fragment.glsl");
+        ssrShader->loadActiveLocations();
 
         // bloom search shader
         bloomSearchShader->fromFile("src/resources/shaders/basic/quad_vertex.glsl",
                                     "src/resources/shaders/bloom/fragment_search.glsl");
+        bloomSearchShader->loadActiveLocations();
 
         // TODO: remove "dof blur shaders", replace with only blur + blend steps
         // DOF blur shaders
@@ -377,12 +372,14 @@ void initShaders() {
         manager.define(Blur::Horizontal);
         manager.generate();
         dofBlurHorShader->fromSource(manager.getGenerated());
+        dofBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
         manager.removeDefinition(Blur::Horizontal);
         manager.define(Blur::Vertical);
         manager.generate();
         dofBlurVertShader->fromSource(manager.getGenerated());
+        dofBlurVertShader->loadActiveLocations();
 
         // DOF CoC shader
         manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
@@ -391,6 +388,7 @@ void initShaders() {
         manager.define(Dof::CinematicDof);
         manager.generate();
         dofCoCShader->fromSource(manager.getGenerated());
+        dofCoCShader->loadActiveLocations();
 
         // blend shader
         manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
@@ -399,6 +397,7 @@ void initShaders() {
         manager.define(Bloom::BloomAdd);
         manager.generate();
         blendShader->fromSource(manager.getGenerated());
+        blendShader->loadActiveLocations();
 
         // bloom blur shaders
         manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
@@ -410,12 +409,14 @@ void initShaders() {
         manager.define(Blur::Horizontal);
         manager.generate();
         bloomBlurHorShader->fromSource(manager.getGenerated());
+        bloomBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
         manager.removeDefinition(Blur::Horizontal);
         manager.define(Blur::Vertical);
         manager.generate();
         bloomBlurVertShader->fromSource(manager.getGenerated());
+        bloomBlurVertShader->loadActiveLocations();
 
         // CoC blur shaders
         manager.resetGenerated();
@@ -426,12 +427,14 @@ void initShaders() {
         manager.define(Blur::Horizontal);
         manager.generate();
         cocBlurHorShader->fromSource(manager.getGenerated());
+        cocBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
         manager.removeDefinition(Blur::Horizontal);
         manager.define(Blur::Vertical);
         manager.generate();
         cocBlurVertShader->fromSource(manager.getGenerated());
+        cocBlurVertShader->loadActiveLocations();
 
         // cubemap shader
         manager.fromFile("src/resources/shaders/basic/cubemap_vertex.glsl",
@@ -443,26 +446,12 @@ void initShaders() {
         manager.define(OutputType, "vec3");
         manager.generate();
         skyboxShader->fromSource(manager.getGenerated());
+        skyboxShader->loadActiveLocations();
     }
 
     std::cout << "Compilation done\n";
 
     #define value *
-
-    scompiler::loadColorShaderLocations(value colorShader, dirLightsLimit, pointLightsLimit);
-    scompiler::loadShadowShaderLocations(value pointShadowShader);
-    scompiler::loadShadowShaderLocations(value dirShadowShader);
-    scompiler::loadSSRShaderLocations(value ssrShader);
-    scompiler::loadDOFBlurShaderLocations(value dofBlurHorShader);
-    scompiler::loadDOFBlurShaderLocations(value dofBlurVertShader);
-    scompiler::loadDOFCoCShaderLocations(value dofCoCShader);
-    scompiler::loadBlendBloomShaderLocations(value blendShader);
-    scompiler::loadBloomSearchShaderLocations(value bloomSearchShader);
-    scompiler::loadBlurShaderLocations(value bloomBlurHorShader);
-    scompiler::loadBlurShaderLocations(value bloomBlurVertShader);
-    scompiler::loadBlurShaderLocations(value cocBlurHorShader);
-    scompiler::loadBlurShaderLocations(value cocBlurVertShader);
-    scompiler::loadCubemapShaderLocations(value skyboxShader);
 
     lightDataSetter.indexDirLightLocations(colorShader, dirLightsLimit);
     lightDataSetter.indexPointLightLocations(colorShader, pointShadowShader, pointLightsLimit);

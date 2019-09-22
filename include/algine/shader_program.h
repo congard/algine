@@ -96,6 +96,7 @@ public:
     void loadUniformLocations(const std::vector<std::string> &names);
     void loadAttribLocation(const std::string &name);
     void loadAttribLocations(const std::vector<std::string> &names);
+    void loadActiveLocations();
     int getLocation(const std::string &name);
 
     void use();
@@ -108,6 +109,13 @@ public:
     static void set(int location, const glm::vec4 &p);
     static void set(int location, const glm::mat3 &p);
     static void set(int location, const glm::mat4 &p);
+
+    template<typename...Args>
+    static void create(Args&...args) {
+        ShaderProgram** arr[] = {&args...};
+        for (usize i = 0; i < sizeof...(args); i++)
+            *arr[i] = new ShaderProgram();
+    }
 
     template<typename T>
     void set(const std::string &location, const T &p) {

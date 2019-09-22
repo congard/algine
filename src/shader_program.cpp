@@ -277,6 +277,37 @@ void ShaderProgram::loadAttribLocations(const std::vector<std::string> &names) {
         loadAttribLocation(name);
 }
 
+void ShaderProgram::loadActiveLocations() {
+    int numActiveAttribs = 0;
+    int numActiveUniforms = 0;
+    glGetProgramInterfaceiv(id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numActiveAttribs);
+    glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
+
+    std::vector<char> nameData(256);
+    uint properties[] = {GL_NAME_LENGTH};
+    int values[getArraySize(properties)];
+
+    for (int i = 0; i < numActiveAttribs; ++i) {
+        glGetProgramResourceiv(id, GL_PROGRAM_INPUT, i, getArraySize(properties),
+                               &properties[0], getArraySize(values), nullptr, &values[0]);
+
+        nameData.resize(values[0]); //The length of the name.
+        glGetProgramResourceName(id, GL_PROGRAM_INPUT, i, nameData.size(), nullptr, &nameData[0]);
+        std::string name(&nameData[0], nameData.size() - 1);
+        loadAttribLocation(name);
+    }
+
+    for (int i = 0; i < numActiveUniforms; ++i) {
+        glGetProgramResourceiv(id, GL_UNIFORM, i, getArraySize(properties),
+                               &properties[0], getArraySize(values), nullptr, &values[0]);
+
+        nameData.resize(values[0]); //The length of the name.
+        glGetProgramResourceName(id, GL_UNIFORM, i, nameData.size(), nullptr, &nameData[0]);
+        std::string name(&nameData[0], nameData.size() - 1);
+        loadUniformLocation(name);
+    }
+}
+
 int ShaderProgram::getLocation(const std::string &name) {
     return locations[name];
 }
