@@ -2,7 +2,7 @@
 #define ALGINE_RENDERER_H
 
 #include <algine/types.h>
-#include <algine/shader_program.h>
+#include <algine/shader.h>
 
 namespace algine {
 void pointer(int location, int count, uint buffer, uint stride = 0, const void *offset = nullptr);

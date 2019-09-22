@@ -1,5 +1,5 @@
-#ifndef ALGINE_SHADERPROGRAM_H
-#define ALGINE_SHADERPROGRAM_H
+#ifndef ALGINE_SHADER_H
+#define ALGINE_SHADER_H
 
 #include <algine/types.h>
 #include <iostream>
@@ -124,4 +124,4 @@ public:
 };
 }
 
-#endif
+#endif // ALGINE_SHADER_H

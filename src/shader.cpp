@@ -1,4 +1,4 @@
-#include <algine/shader_program.h>
+#include <algine/shader.h>
 
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>

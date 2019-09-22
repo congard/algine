@@ -11,7 +11,7 @@
 
 #include <algine/types.h>
 #include <algine/model.h>
-#include <algine/shader_program.h>
+#include <algine/shader.h>
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
