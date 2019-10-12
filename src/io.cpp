@@ -65,10 +65,10 @@ std::string getAbsolutePath(const std::string &path) {
     return isAbsolutePath(path) ? path : merge(getCurrentDir(), path);
 }
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__MINGW32__)
 #define _fileSeparator '/'
-#elif defined(__MINGW32__)
-#define _fileSeparator '\\'
+#else
+#error "Only linux and mingw supported!"
 #endif
 
 std::string merge(const std::string &path1, const std::string &path2) {
