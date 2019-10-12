@@ -62,7 +62,33 @@ std::string getCurrentDir() {
 }
 
 std::string getAbsolutePath(const std::string &path) {
-    return isAbsolutePath(path) ? path : getCurrentDir() + "/" + path;
+    return isAbsolutePath(path) ? path : merge(getCurrentDir(), path);
+}
+
+#ifdef __linux__
+#define _fileSeparator '/'
+#elif defined(__MINGW32__)
+#define _fileSeparator '\\'
+#endif
+
+std::string merge(const std::string &path1, const std::string &path2) {
+    std::string first = path1;
+    std::string second = path2;
+
+    if (first.back() != _fileSeparator)
+        first += _fileSeparator;
+
+    if (second.front() == _fileSeparator)
+        second.erase(0, 1);
+
+    return first + second;
+}
+
+std::string upDir(const std::string &dir) {
+    if (dir.find_last_of(_fileSeparator) == std::string::npos)
+        return dir;
+
+    return std::string(dir).erase(dir.find_last_of(_fileSeparator), dir.size());
 }
 
 }
