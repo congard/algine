@@ -322,8 +322,7 @@ void initShaders() {
         manager.define(Lighting::DirLightsLimit, std::to_string(dirLightsLimit));
         manager.define(MaxBoneAttribsPerVertex, std::to_string(maxBoneAttribsPerVertex));
         manager.define(MaxBones, std::to_string(maxBones));
-        manager.generate();
-        colorShader->fromSource(manager.getGenerated());
+        colorShader->fromSource(manager.makeGenerated());
         colorShader->loadActiveLocations();
 
         // point shadow shader
@@ -335,8 +334,7 @@ void initShaders() {
         manager.define(MaxBoneAttribsPerVertex, std::to_string(maxBoneAttribsPerVertex));
         manager.define(MaxBones, std::to_string(maxBones));
         manager.define(ShadowShader::PointLightShadowMapping);
-        manager.generate();
-        pointShadowShader->fromSource(manager.getGenerated());
+        pointShadowShader->fromSource(manager.makeGenerated());
         pointShadowShader->loadActiveLocations();
 
         // dir shadow shader
@@ -345,8 +343,7 @@ void initShaders() {
         manager.fromSource(shadowShaderTemplate);
         manager.removeDefinition(ShadowShader::PointLightShadowMapping);
         manager.define(ShadowShader::DirLightShadowMapping);
-        manager.generate();
-        dirShadowShader->fromSource(manager.getGenerated());
+        dirShadowShader->fromSource(manager.makeGenerated());
         dirShadowShader->loadActiveLocations();
 
         // SSR shader
@@ -370,15 +367,13 @@ void initShaders() {
         manager.define(Dof::BleedingMinDeltaCoC);
         manager.define(Dof::BleedingMaxFocusCoC);
         manager.define(Blur::Horizontal);
-        manager.generate();
-        dofBlurHorShader->fromSource(manager.getGenerated());
+        dofBlurHorShader->fromSource(manager.makeGenerated());
         dofBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
         manager.removeDefinition(Blur::Horizontal);
         manager.define(Blur::Vertical);
-        manager.generate();
-        dofBlurVertShader->fromSource(manager.getGenerated());
+        dofBlurVertShader->fromSource(manager.makeGenerated());
         dofBlurVertShader->loadActiveLocations();
 
         // DOF CoC shader
@@ -386,8 +381,7 @@ void initShaders() {
                          "src/resources/shaders/dof/coc_fragment.glsl");
         manager.resetDefinitions();
         manager.define(Dof::CinematicDof);
-        manager.generate();
-        dofCoCShader->fromSource(manager.getGenerated());
+        dofCoCShader->fromSource(manager.makeGenerated());
         dofCoCShader->loadActiveLocations();
 
         // blend shader
@@ -395,8 +389,7 @@ void initShaders() {
                          "src/resources/shaders/blend/fragment.glsl");
         manager.resetDefinitions();
         manager.define(Bloom::BloomAdd);
-        manager.generate();
-        blendShader->fromSource(manager.getGenerated());
+        blendShader->fromSource(manager.makeGenerated());
         blendShader->loadActiveLocations();
 
         // bloom blur shaders
@@ -407,15 +400,13 @@ void initShaders() {
         manager.define(OutputType, "vec3");
         manager.define(TexComponent, "rgb");
         manager.define(Blur::Horizontal);
-        manager.generate();
-        bloomBlurHorShader->fromSource(manager.getGenerated());
+        bloomBlurHorShader->fromSource(manager.makeGenerated());
         bloomBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
         manager.removeDefinition(Blur::Horizontal);
         manager.define(Blur::Vertical);
-        manager.generate();
-        bloomBlurVertShader->fromSource(manager.getGenerated());
+        bloomBlurVertShader->fromSource(manager.makeGenerated());
         bloomBlurVertShader->loadActiveLocations();
 
         // CoC blur shaders
@@ -425,15 +416,13 @@ void initShaders() {
         manager.define(OutputType, "float");
         manager.define(TexComponent, "r");
         manager.define(Blur::Horizontal);
-        manager.generate();
-        cocBlurHorShader->fromSource(manager.getGenerated());
+        cocBlurHorShader->fromSource(manager.makeGenerated());
         cocBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
         manager.removeDefinition(Blur::Horizontal);
         manager.define(Blur::Vertical);
-        manager.generate();
-        cocBlurVertShader->fromSource(manager.getGenerated());
+        cocBlurVertShader->fromSource(manager.makeGenerated());
         cocBlurVertShader->loadActiveLocations();
 
         // cubemap shader
@@ -444,8 +433,7 @@ void initShaders() {
         manager.define(CubemapShader::ColorOut, "0"); // TODO: create constants
         manager.define(CubemapShader::PosOut, "2");
         manager.define(OutputType, "vec3");
-        manager.generate();
-        skyboxShader->fromSource(manager.getGenerated());
+        skyboxShader->fromSource(manager.makeGenerated());
         skyboxShader->loadActiveLocations();
     }
 
