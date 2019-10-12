@@ -2,8 +2,6 @@
 
 #version 330
 
-$ALGINE_DEFINITIONS
-
 out vec3 fragColor;
 in vec2 texCoord;
 

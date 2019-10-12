@@ -10,8 +10,6 @@
 // some GPUs can work with 330 (basically Nvidia)
 #version 400 core
 
-$ALGINE_DEFINITIONS
-
 uniform mat4 viewMatrix;
 uniform vec3 cameraPos;
 uniform bool textureMappingEnabled;	// ALGINE_TEXTURE_MAPPING_MODE_DUAL

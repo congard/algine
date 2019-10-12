@@ -9,8 +9,6 @@
 
 #version 330
 
-$ALGINE_DEFINITIONS
-
 uniform mat4 MVPMatrix, modelMatrix, viewMatrix, MVMatrix;
 uniform mat4 bones[MAX_BONES];
 uniform bool u_NormalMapping;

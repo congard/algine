@@ -8,8 +8,8 @@
 
 namespace algine {
     namespace AlgineConstants {
-        namespace ShaderGeneratorKeys {
-            constant(Definitions, "$ALGINE_DEFINITIONS") // TODO: replace with #pragma algine definitions
+        namespace ShaderManager {
+            constant(Include, "include")
         }
 
         namespace AMTL {

@@ -39,6 +39,10 @@ void getProgramInfoLog(int program, int type) {
 }
 
 void ShaderManager::fromFile(const std::string &vertex, const std::string &fragment, const std::string &geometry) {
+    setBaseIncludePath(io::upDir(vertex), ShaderType::Vertex);
+    setBaseIncludePath(io::upDir(fragment), ShaderType::Fragment);
+    setBaseIncludePath(io::upDir(geometry), ShaderType::Geometry);
+
     if (geometry.empty())
         fromSource(io::read(vertex), io::read(fragment));
     else
@@ -60,36 +64,36 @@ void ShaderManager::fromSource(const algine::ShadersData &sources) {
     fromSource(sources.vertex, sources.fragment, sources.geometry);
 }
 
-void ShaderManager::insert(const uint shaderType, const std::string &key, const std::string &code) {
-    switch (shaderType) {
-        case ShaderType::Vertex:
-            vertexGen = replace(vertexGen, key, code);
-            break;
-        case ShaderType::Fragment:
-            fragmentGen = replace(fragmentGen, key, code);
-            break;
-        case ShaderType::Geometry:
-            geometryGen = replace(geometryGen, key, code);
-            break;
-        default:
-            std::cerr << "Unknown shader type " << shaderType << "\n";
-            return;
-    }
+#define _checkShaderType \
+if (shaderType > ShaderType::Geometry || shaderType < -1) { \
+    std::cerr << "Unknown shader type " << shaderType << "\n"; \
+    return; \
 }
 
-void ShaderManager::define(const uint shaderType, const std::string &macro, const std::string &value) {
-    if (shaderType > ShaderType::Geometry) {
-        std::cerr << "Unknown shader type " << shaderType << "\n";
-        return;
-    }
+void ShaderManager::setBaseIncludePath(const std::string &path, const int shaderType) {
+    _checkShaderType
 
-    definitions[shaderType].emplace_back(macro, value);
+    if (shaderType == -1) {
+        baseIncludePath[ShaderType::Vertex] = path;
+        baseIncludePath[ShaderType::Fragment] = path;
+        baseIncludePath[ShaderType::Geometry] = path;
+    } else
+        baseIncludePath[shaderType] = path;
 }
 
-void ShaderManager::define(const std::string &macro, const std::string &value) {
-    define(ShaderType::Vertex, macro, value);
-    define(ShaderType::Fragment, macro, value);
-    define(ShaderType::Geometry, macro, value);
+void ShaderManager::addIncludePath(const std::string &includePath) {
+    includePaths.push_back(includePath);
+}
+
+void ShaderManager::define(const std::string &macro, const std::string &value, const int shaderType) {
+    _checkShaderType
+
+    if (shaderType == -1) {
+        definitions[ShaderType::Vertex].emplace_back(macro, value);
+        definitions[ShaderType::Fragment].emplace_back(macro, value);
+        definitions[ShaderType::Geometry].emplace_back(macro, value);
+    } else
+        definitions[shaderType].emplace_back(macro, value);
 }
 
 void ShaderManager::removeDefinition(const uint shaderType, const std::string &macro, const uint type) {
@@ -136,20 +140,23 @@ void ShaderManager::resetDefinitions() {
 }
 
 void ShaderManager::generate() {
-    using namespace AlgineConstants;
+    constexpr char versionRegex[] = R"~([ \t]*#[ \t]*version[ \t]+[0-9]+(?:[ \t]+[a-z]+|[ \t]*)(?:\r\n|\n|$))~";
+    std::string *shaders[3] {&vertexGen, &fragmentGen, &geometryGen};
 
-    // generate definitions code
-    std::string definitionsCode[3];
     for (uint i = 0; i < 3; i++) {
-        for (uint j = 0; j < static_cast<uint>(definitions[i].size()); j++) {
-            definitionsCode[i] += "#define " + definitions[i][j].first + " " + definitions[i][j].second + "\n";
-        }
-    }
+        // generate definitions code
+        std::vector<Matches> version = find(*shaders[i], versionRegex);
+        if (version.empty())
+            continue;
 
-    // insert definitions code
-    insert(ShaderType::Vertex, ShaderGeneratorKeys::Definitions, definitionsCode[ShaderType::Vertex]);
-    insert(ShaderType::Fragment, ShaderGeneratorKeys::Definitions, definitionsCode[ShaderType::Fragment]);
-    insert(ShaderType::Geometry, ShaderGeneratorKeys::Definitions, definitionsCode[ShaderType::Geometry]);
+        std::string definitionsCode = "\n";
+        for (auto & j : definitions[i])
+            definitionsCode += "#define " + j.first + " " + j.second + "\n";
+        shaders[i]->insert(version[0].pos + version[0].size, definitionsCode);
+
+        // expand includes
+        *shaders[i] = processDirectives(*shaders[i], baseIncludePath[i]);
+    }
 }
 
 ShadersData ShaderManager::getTemplate() {
@@ -166,6 +173,73 @@ ShadersData ShaderManager::getGenerated() {
         fragmentGen,
         geometryGen
     };
+}
+
+ShadersData ShaderManager::makeGenerated() {
+    generate();
+    return getGenerated();
+}
+
+// src: where to insert
+// srcPos: position to start erase
+// srcSize: count of symbols to erase
+// data: what to insert, will be inserted in srcPos position
+#define _insert(src, srcPos, srcSize, data) \
+    src = src.erase(srcPos, srcSize); \
+    src.insert(srcPos, data);
+
+#define _errFileNotFound \
+{ \
+    std::cerr << "Err: file " << filePath << " not found\n" << matches.matches[0] << "\n\n"; \
+    continue; \
+}
+
+std::string ShaderManager::processDirectives(const std::string &src, const std::string &baseIncludePath) {
+    std::string result = src;
+    constexpr char regex[] = R"~((\w+)[ \t]+"(.+)"[ \t]*)~"; // include "file"
+
+    // We process from the end because if we start from the beginning -
+    // Matches::pos will be violated because we insert new data
+    std::vector<Matches> pragmas = findPragmas(result, regex);
+    for (int j = static_cast<int>(pragmas.size()) - 1; j >= 0; j--) { // if pragmas empty, j can be -1
+        Matches &matches = pragmas[j];
+        std::string &pragmaName = matches.matches[1];
+
+        if (pragmaName == AlgineConstants::ShaderManager::Include) {
+            std::string &filePath = matches.matches[2];
+
+            if (!io::isAbsolutePath(filePath)) {
+                if (io::exists(io::merge(baseIncludePath, filePath).c_str())) { // try to find included file in base file folder
+                    filePath = io::merge(baseIncludePath, filePath);
+                } else {
+                    bool found = false;
+                    for (std::string &i : includePaths) { // i - include path
+                        if (io::exists(io::merge(i, filePath).c_str())) {
+                            filePath = io::merge(i, filePath);
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                        _errFileNotFound
+                }
+            } else if (!io::exists(filePath.c_str()))
+                _errFileNotFound
+
+            _insert(result, matches.pos, matches.size, processDirectives(io::read(filePath), io::upDir(filePath)))
+        } else {
+            std::cerr << "Unknown pragma " << pragmaName << "\n" << matches.matches[0] << "\n\n";
+        }
+    }
+
+    return result;
+}
+
+#undef _errFileNotFound
+
+std::vector<Matches> ShaderManager::findPragmas(const std::string &src, const std::string &regex) {
+    return find(src, std::regex(R"([ \t]*#[ \t]*pragma[ \t]+algine[ \t]+)" + regex));
 }
 
 Shader::Shader(const uint type) {

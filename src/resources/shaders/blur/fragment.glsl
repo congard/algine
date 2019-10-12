@@ -2,8 +2,6 @@
 
 #version 330
 
-$ALGINE_DEFINITIONS
-
 in vec2 texCoord;
 
 uniform sampler2D image;

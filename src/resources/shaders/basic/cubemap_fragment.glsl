@@ -1,7 +1,5 @@
 #version 330 core
 
-$ALGINE_DEFINITIONS
-
 // #define vecout vec3
 
 in vec3 texCoords;

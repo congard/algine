@@ -9,8 +9,6 @@
 
 #version 330
 
-$ALGINE_DEFINITIONS
-
 in vec2 texCoord;
 
 layout (location = 0) out float fragCoC;
