@@ -13,13 +13,14 @@ def index(x):
 
 # src file, dst folder
 libs = [
-      ["https://github.com/g-truc/glm/releases/download/0.9.9.6/glm-0.9.9.6.zip", "glm"],
-      ["https://github.com/nlohmann/json/releases/download/v3.7.0/json.hpp", "nlohmann"],
-      ["https://raw.githubusercontent.com/nothings/stb/master/stb_image.h", "stb"],
-      ["https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h", "stb"],
-      ["https://github.com/assimp/assimp/archive/v.5.0.0.rc1.zip", "assimp"],
-      ["https://github.com/nigels-com/glew/releases/download/glew-2.1.0/glew-2.1.0.zip", "glew"],
-      ["https://github.com/glfw/glfw/releases/download/3.3/glfw-3.3.zip", "glfw"]
+    ["https://github.com/g-truc/glm/releases/download/0.9.9.6/glm-0.9.9.6.zip", "glm"],
+    ["https://github.com/nlohmann/json/releases/download/v3.7.0/json.hpp", "nlohmann"],
+    ["https://raw.githubusercontent.com/nothings/stb/master/stb_image.h", "stb"],
+    ["https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h", "stb"],
+    ["https://github.com/congard/tulz/archive/v1.0-alpha.1.zip", "tulz"],
+    ["https://github.com/assimp/assimp/archive/v.5.0.0.rc1.zip", "assimp"],
+    ["https://github.com/nigels-com/glew/releases/download/glew-2.1.0/glew-2.1.0.zip", "glew"],
+    ["https://github.com/glfw/glfw/releases/download/3.3/glfw-3.3.zip", "glfw"],
 ]
 
 print("=== Contrib installer ===")
@@ -27,16 +28,23 @@ print("One header libs:")
 print("1) glm\n"
       "2) nlohmann/json.hpp\n"
       "3) stb/stb_image.h\n"
-      "4) stb/std_image_write.h")
+      "4) stb/std_image_write.h\n"
+      "5) tulz")
 print("Non one header libs:")
-print("5) assimp\n"
-      "6) glew\n"
-      "7) glfw")
+print("6) assimp\n"
+      "7) glew\n"
+      "8) glfw")
 installLibs = input("What libs you want to install? Separate with spaces (default=all): ").split(" ")
+
+# check the correctness of the entered data
+for lib in installLibs:
+    if index(lib) not in range(0, len(libs)):
+        print("Error: " + lib + " not in range [1; " + str(len(libs)) + "]")
+        exit(1)
 
 # [''] if pressed enter (all)
 if len(installLibs) == 1 and installLibs[0] == '':
-    installLibs = [l for l in range(1, 8)]
+    installLibs = [l for l in range(1, len(libs) + 1)]
 
 print("Removing old libs (if exists)")
 for lib in installLibs:
