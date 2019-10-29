@@ -13,7 +13,6 @@
 #include <algine/core_utils.h>
 #include <algine/event.h>
 #include <algine/framebuffer.h>
-#include <algine/io.h>
 #include <algine/light.h>
 #include <algine/material.h>
 #include <algine/math.h>

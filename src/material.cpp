@@ -1,12 +1,15 @@
 #include <algine/material.h>
 
+#include <iostream>
 #include <GL/glew.h>
 #include <nlohmann/json.hpp>
-#include <algine/io.h>
 #include <algine/constants.h>
+#include <tulz/Path>
+#include <tulz/File>
+
+using namespace tulz;
 
 namespace algine {
-// struct Material
 void Material::recycle() {
     glDeleteTextures(1, &ambientTexture);
     glDeleteTextures(1, &diffuseTexture);
@@ -16,9 +19,8 @@ void Material::recycle() {
     glDeleteTextures(1, &jitterTexture);
 }
 
-// struct AlgineMTL
 bool AlgineMTL::load(const std::string &path) {
-    if (!io::exists(path.c_str())) {
+    if (!Path(path).exists()) {
         std::cout << "AlgineMTL::load: " << path << " not found\n";
         return false;
     }
@@ -37,7 +39,7 @@ bool AlgineMTL::load(const std::string &path) {
      **/
     using namespace AlgineConstants::AMTL;
 
-    nlohmann::json j = nlohmann::json::parse(io::read(path));
+    nlohmann::json j = nlohmann::json::parse(File(path, File::ReadText).readStr());
 
     for (size_t i = 0; i < j.size(); i++) {
         // sie - set if exists

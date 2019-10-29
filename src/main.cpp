@@ -7,7 +7,6 @@
  */
 
 // #define debug_sm
-#define pcf // for soft shadows
 
 #define GLM_FORCE_CTOR_INIT
 

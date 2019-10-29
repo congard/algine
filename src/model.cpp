@@ -11,7 +11,9 @@
 #include <algine/texture.h>
 #include <algine/node.h>
 #include <algine/algine_renderer.h>
-#include <algine/io.h>
+#include <tulz/Path>
+
+using namespace tulz;
 
 namespace algine {
 void Mesh::delMaterial() {
@@ -134,9 +136,10 @@ Mesh Mesh::processMesh(const aiMesh *aimesh, const aiScene *scene, Geometry &geo
 }
 
 uint Shape::loadTex(const std::string &fullpath, const std::string &path) {
-    std::string absolutePath = io::isAbsolutePath(path) ? path : fullpath + path;
+    std::string absolutePath = Path(path).isAbsolute() ? path : Path::join(fullpath, path);
     
-    if (loadedTextures.find(absolutePath) != loadedTextures.end()) return loadedTextures[absolutePath]; // texture already loaded
+    if (loadedTextures.find(absolutePath) != loadedTextures.end())
+        return loadedTextures[absolutePath]; // texture already loaded
     else {
         GLuint id = loadTexture(absolutePath.c_str());
         loadedTextures[absolutePath] = id;
@@ -158,7 +161,7 @@ void Shape::loadBones(const aiMesh *aimesh) {
     
     // filling array
     for (size_t i = 0; i < aimesh->mNumVertices; i++)
-        binfos.push_back(BoneInfo(bonesPerVertex));
+        binfos.emplace_back(bonesPerVertex);
 
     // loading bone data
     aiBone *bone;
@@ -170,7 +173,7 @@ void Shape::loadBones(const aiMesh *aimesh) {
 
         if ((boneIndex = getBoneIndex(boneName)) == -1) {
             boneIndex = bones.size();
-            bones.push_back(Bone(boneName, getMat4(bone->mOffsetMatrix)));
+            bones.emplace_back(boneName, getMat4(bone->mOffsetMatrix));
         }
 
         for (usize j = 0; j < bone->mNumWeights; j++) {
@@ -222,11 +225,11 @@ void Shape::loadTextures(const std::string &_fullpath) {
 
 // load texture with full path = current path
 void Shape::loadTextures() {
-    loadTextures(io::getCurrentDir());
+    loadTextures(Path::getWorkingDirectory());
 }
 
 void Shape::genBuffers() {
-    #define genBufferForArray(buffer, array) if (array.size() > 0) { glGenBuffers(1, &buffer); }
+    #define genBufferForArray(buffer, array) if (!array.empty()) { glGenBuffers(1, &buffer); }
     
     genBufferForArray(buffers.vertices, geometry.vertices); // vertices
     genBufferForArray(buffers.normals, geometry.normals); // normals
@@ -240,8 +243,8 @@ void Shape::genBuffers() {
         glBindBuffer(GL_ARRAY_BUFFER, buffer); \
         glBufferData(GL_ARRAY_BUFFER, sizeof(type) * array.size(), &array[0], GL_STATIC_DRAW);
 
-    #define mkArrayBufferf(buffer, array) if (array.size() > 0) { mkArrayBuffer(buffer, array, float) }
-    #define mkArrayBufferui(buffer, array) if (array.size() > 0) { mkArrayBuffer(buffer, array, uint) }
+    #define mkArrayBufferf(buffer, array) if (!array.empty()) { mkArrayBuffer(buffer, array, float) }
+    #define mkArrayBufferui(buffer, array) if (!array.empty()) { mkArrayBuffer(buffer, array, uint) }
 
     mkArrayBufferf(buffers.vertices, geometry.vertices); // vertices
     mkArrayBufferf(buffers.normals, geometry.normals); // normals
@@ -272,7 +275,8 @@ void Shape::delBuffers() {
 }
 
 void Shape::recycleMeshes() {
-    for (size_t i = 0; i < meshes.size(); i++) meshes[i].recycle();
+    for (auto & mesh : meshes)
+        mesh.recycle();
 }
 
 void Shape::init(const std::string &path, const uint params) {
@@ -291,9 +295,10 @@ void Shape::init(const std::string &path, const uint params) {
 
     rootNode = Node(scene->mRootNode);
     animations.reserve(scene->mNumAnimations); // allocate space for animations
-    for (size_t i = 0; i < scene->mNumAnimations; i++) animations.push_back(scene->mAnimations[i]);
+    for (size_t i = 0; i < scene->mNumAnimations; i++)
+        animations.emplace_back(scene->mAnimations[i]);
 
-    std::string amtlPath = path.substr(0, path.find_last_of(".")) + ".amtl";
+    std::string amtlPath = path.substr(0, path.find_last_of('.')) + ".amtl";
     AlgineMTL amtl;
     if (amtl.load(amtlPath)) processNode(scene->mRootNode, scene, &amtl);
     else processNode(scene->mRootNode, scene);

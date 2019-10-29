@@ -9,6 +9,7 @@
 #include <utility>
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
+#include <tulz/StringUtils>
 
 namespace algine {
 void getShaderInfoLog(int shader, int type);
@@ -68,7 +69,7 @@ protected:
     std::string vertexGen, fragmentGen, geometryGen; // gen - generated
 
     std::string processDirectives(const std::string &src, const std::string &baseIncludePath);
-    static std::vector<Matches> findPragmas(const std::string &src, const std::string &regex);
+    static std::vector<tulz::StringUtils::Matches> findPragmas(const std::string &src, const std::string &regex);
 };
 
 class Shader {

@@ -39,6 +39,9 @@ elseif (UNIX)
     find_package(glfw3 REQUIRED)
 endif()
 
+add_subdirectory(contrib/tulz)
+
+include_directories(contrib/tulz/include)
 include_directories(contrib/glm)
 include_directories(contrib)
 include_directories(include)
@@ -53,7 +56,6 @@ add_executable(algine
         include/algine/bone.h
         include/algine/core_utils.h
         include/algine/framebuffer.h
-        include/algine/io.h
         include/algine/light.h
         include/algine/material.h
         include/algine/math.h
@@ -73,7 +75,6 @@ add_executable(algine
         src/bone.cpp
         src/core_utils.cpp
         src/framebuffer.cpp
-        src/io.cpp
         src/light.cpp
         src/main.cpp
         src/material.cpp
@@ -96,14 +97,16 @@ if (WIN32)
                 glew_s
                 glfw
                 opengl32
-                pthread)
+                pthread
+                tulz)
     else()
         target_link_libraries(algine
                 assimp
                 glew
                 glfw
                 opengl32
-                pthread)
+                pthread
+                tulz)
 
         if (CMAKE_BUILD_TYPE MATCHES Debug)
             add_custom_command(TARGET algine POST_BUILD
@@ -131,7 +134,8 @@ elseif(UNIX)
             GLEW
             GL
             assimp
-            pthread)
+            pthread
+            tulz)
     target_link_directories(algine
             PUBLIC /usr/local/lib)
 endif()

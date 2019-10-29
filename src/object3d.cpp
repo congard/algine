@@ -2,6 +2,7 @@
 
 #include <algine/object3d.h>
 #include <algine/core_utils.h>
+#include <tulz/macros.h>
 
 namespace algine {
 Object3D::Object3D(const uint rotatorType) {
@@ -35,7 +36,7 @@ Object3D& Object3D::operator=(Object3D &&rhs) noexcept {
 }
 
 Object3D::~Object3D() {
-    delete_ptr(rotator)
+    deletePtr(rotator)
 }
 
 void Object3D::swap(Object3D &other) {

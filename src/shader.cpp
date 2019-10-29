@@ -3,9 +3,13 @@
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <algine/texture.h>
-#include <algine/io.h>
-#include <algine/core_utils.h>
 #include <algine/constants.h>
+#include <tulz/File>
+#include <tulz/Path>
+#include <tulz/macros.h>
+
+using namespace tulz;
+using namespace tulz::StringUtils;
 
 namespace algine {
 void getShaderInfoLog(int shader, int type) {
@@ -39,14 +43,20 @@ void getProgramInfoLog(int program, int type) {
 }
 
 void ShaderManager::fromFile(const std::string &vertex, const std::string &fragment, const std::string &geometry) {
-    setBaseIncludePath(io::upDir(vertex), ShaderType::Vertex);
-    setBaseIncludePath(io::upDir(fragment), ShaderType::Fragment);
-    setBaseIncludePath(io::upDir(geometry), ShaderType::Geometry);
+    setBaseIncludePath(Path(vertex).getParentDirectory(), ShaderType::Vertex);
+    setBaseIncludePath(Path(fragment).getParentDirectory(), ShaderType::Fragment);
 
-    if (geometry.empty())
-        fromSource(io::read(vertex), io::read(fragment));
-    else
-        fromSource(io::read(vertex), io::read(fragment), io::read(geometry));
+    if (geometry.empty()) {
+        fromSource(
+                File(vertex, File::ReadText).readStr(),
+                File(fragment, File::ReadText).readStr());
+    } else {
+        setBaseIncludePath(Path(geometry).getParentDirectory(), ShaderType::Geometry);
+        fromSource(
+                File(vertex, File::ReadText).readStr(),
+                File(fragment, File::ReadText).readStr(),
+                File(geometry, File::ReadText).readStr());
+    }
 }
 
 void ShaderManager::fromFile(const algine::ShadersData &paths) {
@@ -145,7 +155,7 @@ void ShaderManager::generate() {
 
     for (uint i = 0; i < 3; i++) {
         // generate definitions code
-        std::vector<Matches> version = find(*shaders[i], versionRegex);
+        std::vector<Matches> version = findRegex(*shaders[i], versionRegex);
         if (version.empty())
             continue;
 
@@ -208,14 +218,14 @@ std::string ShaderManager::processDirectives(const std::string &src, const std::
         if (pragmaName == AlgineConstants::ShaderManager::Include) {
             std::string &filePath = matches.matches[2];
 
-            if (!io::isAbsolutePath(filePath)) {
-                if (io::exists(io::merge(baseIncludePath, filePath).c_str())) { // try to find included file in base file folder
-                    filePath = io::merge(baseIncludePath, filePath);
+            if (!Path(filePath).isAbsolute()) {
+                if (Path(Path::join(baseIncludePath, filePath)).exists()) { // try to find included file in base file folder
+                    filePath = Path::join(baseIncludePath, filePath);
                 } else {
                     bool found = false;
                     for (std::string &i : includePaths) { // i - include path
-                        if (io::exists(io::merge(i, filePath).c_str())) {
-                            filePath = io::merge(i, filePath);
+                        if (Path(Path::join(i, filePath)).exists()) {
+                            filePath = Path::join(i, filePath);
                             found = true;
                             break;
                         }
@@ -224,10 +234,11 @@ std::string ShaderManager::processDirectives(const std::string &src, const std::
                     if (!found)
                         _errFileNotFound
                 }
-            } else if (!io::exists(filePath.c_str()))
+            } else if (!Path(filePath).exists())
                 _errFileNotFound
 
-            _insert(result, matches.pos, matches.size, processDirectives(io::read(filePath), io::upDir(filePath)))
+            _insert(result, matches.pos, matches.size,
+                    processDirectives(File(filePath, File::ReadText).readStr(), Path(filePath).getParentDirectory()))
         } else {
             std::cerr << "Unknown pragma " << pragmaName << "\n" << matches.matches[0] << "\n\n";
         }
@@ -238,8 +249,8 @@ std::string ShaderManager::processDirectives(const std::string &src, const std::
 
 #undef _errFileNotFound
 
-std::vector<Matches> ShaderManager::findPragmas(const std::string &src, const std::string &regex) {
-    return find(src, std::regex(R"([ \t]*#[ \t]*pragma[ \t]+algine[ \t]+)" + regex));
+std::vector<tulz::StringUtils::Matches> ShaderManager::findPragmas(const std::string &src, const std::string &regex) {
+    return tulz::StringUtils::findRegex(src, R"([ \t]*#[ \t]*pragma[ \t]+algine[ \t]+)" + regex);
 }
 
 Shader::Shader(const uint type) {
@@ -276,7 +287,7 @@ void Shader::fromSource(const std::string &source) {
 }
 
 void Shader::fromFile(const std::string &path) {
-    fromSource(io::read(path));
+    fromSource(File(path, File::ReadText).readStr());
 }
 
 ShaderProgram::ShaderProgram() {
@@ -314,9 +325,9 @@ void ShaderProgram::fromSource(const ShadersSources &shaders) {
 }
 
 void ShaderProgram::fromFile(const std::string &vertex, const std::string &fragment, const std::string &geometry) {
-    std::string vertexSource = vertex.empty() ? "" : io::read(vertex);
-    std::string fragmentSource = fragment.empty() ? "" : io::read(fragment);
-    std::string geometrySource = geometry.empty() ? "" : io::read(geometry);
+    std::string vertexSource = vertex.empty() ? "" : File(vertex, File::ReadText).readStr();
+    std::string fragmentSource = fragment.empty() ? "" : File(fragment, File::ReadText).readStr();
+    std::string geometrySource = geometry.empty() ? "" : File(geometry, File::ReadText).readStr();
     fromSource(vertexSource, fragmentSource, geometrySource);
 }
 

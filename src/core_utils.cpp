@@ -1,16 +1,8 @@
 #include <algine/core_utils.h>
 #include <GL/glew.h>
 #include <chrono>
-#include <regex>
-#include <iostream>
 
 namespace algine {
-Matches::Matches(const uint pos, const uint size, const std::vector<std::string> &matches) {
-    this->pos = pos;
-    this->size = size;
-    this->matches = matches;
-}
-
 // returns GPU Vendor name
 // for example `NVIDIA Corporation`
 const uchar* getGPUVendor() {
@@ -21,58 +13,6 @@ const uchar* getGPUVendor() {
 // for example `GeForce 920MX/PCIe/SSE2`
 const uchar* getGPURenderer() {
     return glGetString(GL_RENDERER);
-}
-
-// splits `in` by `delimiter`
-std::vector<std::string> split(std::string &in, const std::string &delimiter) {
-    std::vector<std::string> result;
-
-    size_t pos = 0;
-    std::string token;
-    while ((pos = in.find(delimiter)) != std::string::npos) {
-        token = in.substr(0, pos);
-        result.push_back(token);
-        in.erase(0, pos + delimiter.length());
-    }
-    result.push_back(in);
-
-    return result;
-}
-
-// splits `in` by `delimiter`
-std::vector<std::string> split(const std::string &in, const std::string &delimiter) {
-    std::string _in = in;
-    return split(_in, delimiter);
-}
-
-// replaces first found occurrence
-std::string replace(const std::string &src, const std::string &target, const std::string &replacement) {
-    std::string _src = src;
-    std::size_t pos = _src.find(target);
-    if (pos == std::string::npos)
-        return _src;
-    return _src.replace(pos, target.length(), replacement);
-}
-
-std::vector<Matches> find(const std::string &src, const std::regex &regex) {
-    std::vector<Matches> matches;
-
-    for (auto i = std::sregex_iterator(src.begin(), src.end(), regex); i != std::sregex_iterator(); ++i) {
-        std::vector<std::string> strings;
-        for (size_t j = 0; j < i->size(); j++) {
-            if (i->operator[](j).str().empty())
-                continue; // ignore empty matches
-            strings.emplace_back(i->operator[](j).str());
-        }
-
-        matches.emplace_back(i->position(), i->str().size(), strings);
-    }
-
-    return matches;
-}
-
-std::vector<Matches> find(const std::string &src, const std::string &regex) {
-    return find(src, std::regex(regex));
 }
 
 long getTime() {
