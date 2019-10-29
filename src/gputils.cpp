@@ -1,4 +1,4 @@
-#include <algine/core_utils.h>
+#include <algine/gputils.h>
 #include <GL/glew.h>
 #include <chrono>
 

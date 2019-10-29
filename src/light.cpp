@@ -2,14 +2,11 @@
 #include <algine/light.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
 #include <iostream>
 #include <algine/algine_renderer.h>
 #include <algine/framebuffer.h>
 #include <algine/texture.h>
-#include <algine/core_utils.h>
 #include <algine/constants.h>
 
 #define empty { /* empty */ }

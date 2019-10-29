@@ -1,5 +1,5 @@
-#ifndef ALGINE_CORE_UTILS_H
-#define ALGINE_CORE_UTILS_H
+#ifndef ALGINE_GPUTILS_H
+#define ALGINE_GPUTILS_H
 
 #include <algine/types.h>
 #include <vector>
@@ -20,4 +20,4 @@ long getTime();
 
 }
 
-#endif /* ALGINE_CORE_UTILS_H */
+#endif /*ALGINE_GPUTILS_H*/

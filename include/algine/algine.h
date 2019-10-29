@@ -10,7 +10,7 @@
 #include <algine/animation.h>
 #include <algine/bone.h>
 #include <algine/camera.h>
-#include <algine/core_utils.h>
+#include <algine/gputils.h>
 #include <algine/event.h>
 #include <algine/framebuffer.h>
 #include <algine/light.h>

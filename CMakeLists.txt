@@ -54,7 +54,7 @@ add_executable(algine
         include/algine/algine_renderer.h
         include/algine/animation.h
         include/algine/bone.h
-        include/algine/core_utils.h
+        include/algine/gputils.h
         include/algine/framebuffer.h
         include/algine/light.h
         include/algine/material.h
@@ -73,7 +73,7 @@ add_executable(algine
         src/algine_renderer.cpp
         src/animation.cpp
         src/bone.cpp
-        src/core_utils.cpp
+        src/gputils.cpp
         src/framebuffer.cpp
         src/light.cpp
         src/main.cpp

@@ -1,5 +1,5 @@
 #include <algine/event.h>
-#include <algine/core_utils.h>
+#include <algine/gputils.h>
 #include <cmath>
 
 namespace algine {

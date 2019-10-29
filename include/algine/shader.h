@@ -2,7 +2,6 @@
 #define ALGINE_SHADER_H
 
 #include <algine/types.h>
-#include <algine/core_utils.h>
 #include <iostream>
 #include <vector>
 #include <unordered_map>

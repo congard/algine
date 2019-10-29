@@ -7,7 +7,6 @@
 
 #include <assimp/Importer.hpp>  // C++ importer interface
 
-#include <algine/core_utils.h>
 #include <algine/texture.h>
 #include <algine/node.h>
 #include <algine/algine_renderer.h>
