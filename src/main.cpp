@@ -91,18 +91,17 @@ GLuint
     cocFB,
     rbo;
 
-GLuint
-    colorTex,
-    normalTex,
-    ssrValues,
-    positionTex,
-    screenspaceTex,
-    bloomTex,
-    pingpongDofTex[2],
-    pingpongBlurTex[2],
-    pingpongBlurCoCTex[2],
-    skybox,
-    cocTex;
+Texture2D *colorTex;
+Texture2D *normalTex;
+Texture2D *ssrValues;
+Texture2D *positionTex;
+Texture2D *screenspaceTex;
+Texture2D *bloomTex;
+Texture2D *pingpongDofTex[2];
+Texture2D *pingpongBlurTex[2];
+Texture2D *pingpongBlurCoCTex[2];
+Texture2D *cocTex;
+TextureCube *skybox;
 
 ShaderProgram *skyboxShader;
 ShaderProgram *colorShader;
@@ -144,23 +143,27 @@ float
     // shadow opacity: 1.0 - opaque shadow (by default), 0.0 - transparent
     shadowOpacity = 0.65f;
 
+inline void updateTexture(Texture *const texture, const uint width, const uint height) {
+    texture->setWidthHeight(width, height);
+    texture->bind();
+    texture->update();
+}
+
 void updateRenderTextures() {
-    cfgtex2D(colorTex, GL_RGB16F, GL_RGB, winWidth, winHeight);
-    cfgtex2D(normalTex, GL_RGB16F, GL_RGB, winWidth, winHeight);
-    cfgtex2D(ssrValues, GL_RG16F, GL_RG, winWidth, winHeight);
-    cfgtex2D(positionTex, GL_RGB16F, GL_RGB, winWidth, winHeight);
-
-    cfgtex2D(screenspaceTex, GL_RGB16F, GL_RGB, winWidth, winHeight);
-
-    cfgtex2D(bloomTex, GL_RGB16F, GL_RGB, winWidth * bloomK, winHeight * bloomK);
+    updateTexture(colorTex, winWidth, winHeight);
+    updateTexture(normalTex, winWidth, winHeight);
+    updateTexture(ssrValues, winWidth, winHeight);
+    updateTexture(positionTex, winWidth, winHeight);
+    updateTexture(screenspaceTex, winWidth, winHeight); // TODO: make small sst + blend pass in the future
+    updateTexture(bloomTex, winWidth * bloomK, winHeight * bloomK);
 
     for (size_t i = 0; i < 2; i++) {
-        cfgtex2D(pingpongBlurTex[i], GL_RGB16F, GL_RGB, winWidth * bloomK, winHeight * bloomK);
-        cfgtex2D(pingpongDofTex[i], GL_RGB16F, GL_RGB, winWidth, winHeight);
-        cfgtex2D(pingpongBlurCoCTex[i], GL_R16F, GL_RED, winWidth, winHeight);
+        updateTexture(pingpongBlurTex[i], winWidth * bloomK, winHeight * bloomK);
+        updateTexture(pingpongDofTex[i], winWidth, winHeight);
+        updateTexture(pingpongBlurCoCTex[i], winWidth, winHeight);
     }
 
-    cfgtex2D(cocTex, GL_R16F, GL_RED, winWidth, winHeight);
+    updateTexture(cocTex, winWidth, winHeight);
 }
 
 /**
@@ -465,42 +468,30 @@ void initShaders() {
 
     Renderbuffer::create(&rbo);
 
-    Texture::create(&colorTex);
-    Texture::create(&normalTex);
-    Texture::create(&ssrValues);
-    Texture::create(&positionTex);
-    Texture::create(&screenspaceTex);
-    Texture::create(&bloomTex);
-    Texture::create(pingpongDofTex, 2);
-    Texture::create(pingpongBlurTex, 2);
-    Texture::create(pingpongBlurCoCTex, 2);
-    Texture::create(&cocTex);
+    Texture2D::create(colorTex, normalTex, ssrValues, positionTex, screenspaceTex, bloomTex,
+                      pingpongDofTex[0], pingpongDofTex[1], pingpongBlurTex[0], pingpongBlurTex[1],
+                      pingpongBlurCoCTex[0], pingpongBlurCoCTex[1], cocTex);
+    ssrValues->setFormat(Texture::RG16F);
+    pingpongBlurCoCTex[0]->setFormat(Texture::Red16F);
+    pingpongBlurCoCTex[1]->setFormat(Texture::Red16F);
+    cocTex->setFormat(Texture::Red16F);
 
-    TextureCube::create(&skybox);
-    TextureCube::CubePaths paths(
-        "src/resources/skybox/right.tga", "src/resources/skybox/left.tga",
-        "src/resources/skybox/top.jpg", "src/resources/skybox/bottom.tga",
-        "src/resources/skybox/back.tga", "src/resources/skybox/front.tga"
-    );
-    TextureParams params;
-    params.internalformat = GL_RGB;
-    params.format = GL_RGB;
-    params.type = GL_UNSIGNED_BYTE;
-    bindTextureCube(skybox);
-    TextureCube::loadFaces(params, paths);
-    applyDefaultTextureCubeParams();
-    bindTextureCube(0);
+    TextureCube::create(skybox);
+    skybox->setFormat(Texture::RGB);
+    skybox->bind();
+    skybox->fromFile("src/resources/skybox/right.tga", TextureCube::Right);
+    skybox->fromFile("src/resources/skybox/left.tga", TextureCube::Left);
+    skybox->fromFile("src/resources/skybox/top.jpg", TextureCube::Top);
+    skybox->fromFile("src/resources/skybox/bottom.tga", TextureCube::Bottom);
+    skybox->fromFile("src/resources/skybox/front.tga", TextureCube::Front);
+    skybox->fromFile("src/resources/skybox/back.tga", TextureCube::Back);
+    skybox->setParams(TextureCube::defaultParams());
+    skybox->unbind();
 
-    applyDefaultTexture2DParams(colorTex);
-    applyDefaultTexture2DParams(normalTex);
-    applyDefaultTexture2DParams(ssrValues);
-    applyDefaultTexture2DParams(positionTex);
-    applyDefaultTexture2DParams(screenspaceTex);
-    applyDefaultTexture2DParams(bloomTex);
-    applyDefaultTexture2DParams(pingpongDofTex, 2);
-    applyDefaultTexture2DParams(pingpongBlurTex, 2);
-    applyDefaultTexture2DParams(pingpongBlurCoCTex, 2);
-    applyDefaultTexture2DParams(cocTex);
+    Texture2D::setParamsMultiple(Texture2D::defaultParams(),
+                                 colorTex, normalTex, ssrValues, positionTex, screenspaceTex, bloomTex,
+                                 pingpongDofTex[0], pingpongDofTex[1], pingpongBlurTex[0], pingpongBlurTex[1],
+                                 pingpongBlurCoCTex[0], pingpongBlurCoCTex[1], cocTex);
 
     updateRenderTextures();
 
@@ -509,23 +500,23 @@ void initShaders() {
     renderer.configureMainPassRenderbuffer(rbo, winWidth, winHeight);
     glDrawBuffers(4, displayColorAttachments);
 
-    Framebuffer::attachTexture2D(colorTex, COLOR_ATTACHMENT(0));
-    Framebuffer::attachTexture2D(normalTex, COLOR_ATTACHMENT(1));
-    Framebuffer::attachTexture2D(positionTex, COLOR_ATTACHMENT(2));
-    Framebuffer::attachTexture2D(ssrValues, COLOR_ATTACHMENT(3));
+    Framebuffer::attachTexture2D(colorTex->getId(), COLOR_ATTACHMENT(0));
+    Framebuffer::attachTexture2D(normalTex->getId(), COLOR_ATTACHMENT(1));
+    Framebuffer::attachTexture2D(positionTex->getId(), COLOR_ATTACHMENT(2));
+    Framebuffer::attachTexture2D(ssrValues->getId(), COLOR_ATTACHMENT(3));
 
     for (size_t i = 0; i < 2; i++) {
         // configuring ping-pong (blur)
         glBindFramebuffer(GL_FRAMEBUFFER, pingpongFB[i]);
-        Framebuffer::attachTexture2D(pingpongDofTex[i], COLOR_ATTACHMENT(0));
+        Framebuffer::attachTexture2D(pingpongDofTex[i]->getId(), COLOR_ATTACHMENT(0));
 
         // configuring ping-pong (blur)
         glBindFramebuffer(GL_FRAMEBUFFER, pingpongBlurBloomFB[i]);
-        Framebuffer::attachTexture2D(pingpongBlurTex[i], COLOR_ATTACHMENT(0));
+        Framebuffer::attachTexture2D(pingpongBlurTex[i]->getId(), COLOR_ATTACHMENT(0));
 
         // configuring ping-pong (blur CoC)
         glBindFramebuffer(GL_FRAMEBUFFER, pingpongBlurCoCFB[i]);
-        Framebuffer::attachTexture2D(pingpongBlurCoCTex[i], COLOR_ATTACHMENT(0));
+        Framebuffer::attachTexture2D(pingpongBlurCoCTex[i]->getId(), COLOR_ATTACHMENT(0));
     }
 
     // sending to shader center of kernel and right part
@@ -547,13 +538,13 @@ void initShaders() {
     glUseProgram(0);
 
     bindFramebuffer(screenspaceFB);
-    Framebuffer::attachTexture2D(screenspaceTex, COLOR_ATTACHMENT(0));
+    Framebuffer::attachTexture2D(screenspaceTex->getId(), COLOR_ATTACHMENT(0));
     
     bindFramebuffer(bloomSearchFB);
-    Framebuffer::attachTexture2D(bloomTex, COLOR_ATTACHMENT(0));
+    Framebuffer::attachTexture2D(bloomTex->getId(), COLOR_ATTACHMENT(0));
 
     bindFramebuffer(cocFB);
-    Framebuffer::attachTexture2D(cocTex, COLOR_ATTACHMENT(0));
+    Framebuffer::attachTexture2D(cocTex->getId(), COLOR_ATTACHMENT(0));
     bindFramebuffer(0);
 
     // configuring CS
@@ -757,17 +748,10 @@ void recycleAll() {
     Framebuffer::destroy(pingpongBlurCoCFB, 2);
     Framebuffer::destroy(&cocFB);
 
-    Texture::destroy(&colorTex);
-    Texture::destroy(&normalTex);
-    Texture::destroy(&ssrValues);
-    Texture::destroy(&positionTex);
-    Texture::destroy(&screenspaceTex);
-    Texture::destroy(&bloomTex);
-    Texture::destroy(pingpongDofTex, 2);
-    Texture::destroy(pingpongBlurTex, 2);
-    Texture::destroy(pingpongBlurCoCTex, 2);
-    Texture::destroy(&skybox);
-    Texture::destroy(&cocTex);
+    Texture2D::destroy(colorTex, normalTex, ssrValues, positionTex, screenspaceTex, bloomTex,
+                      pingpongDofTex[0], pingpongDofTex[1], pingpongBlurTex[0], pingpongBlurTex[1],
+                      pingpongBlurCoCTex[0], pingpongBlurCoCTex[1], cocTex);
+    TextureCube::destroy(skybox);
 
     Renderbuffer::destroy(&rbo);
 }
@@ -925,31 +909,38 @@ void render() {
     skyboxShader->use();
     skyboxShader->set(AlgineNames::CubemapShader::ViewMatrix, glm::mat3(camera.getViewMatrix()));
     skyboxShader->set(AlgineNames::CubemapShader::TransformationMatrix, camera.getProjectionMatrix() * glm::mat4(glm::mat3(camera.getViewMatrix())));
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox);
+    skybox->use(0);
     skyboxRenderer.render();
     glDepthFunc(GL_LESS);
     glDrawBuffers(4, colorAttachment0123);
 
     renderer.quadRenderer->bindVAO();
 
-    renderer.screenspacePass(screenspaceFB, colorTex, normalTex, ssrValues, positionTex);
+    renderer.screenspacePass(screenspaceFB, colorTex->getId(), normalTex->getId(), ssrValues->getId(), positionTex->getId());
+
+    // TODO: tmp, AlgineRenderer must be eliminated !!!!!!
+    // Now it looks like shit code... Oh I know
+    uint ids[] = {pingpongBlurTex[0]->getId(), pingpongBlurTex[1]->getId()};
 
     glViewport(0, 0, winWidth * bloomK, winHeight * bloomK);
-    renderer.bloomSearchPass(bloomSearchFB, screenspaceTex);
+    renderer.bloomSearchPass(bloomSearchFB, screenspaceTex->getId());
     renderer.blurShaders = blurBloomShaders;
-    renderer.blurPass(pingpongBlurBloomFB, pingpongBlurTex, bloomTex, bloomBlurAmount);
+    renderer.blurPass(pingpongBlurBloomFB, ids, bloomTex->getId(), bloomBlurAmount);
     glViewport(0, 0, winWidth, winHeight);
 
-    renderer.dofCoCPass(cocFB, positionTex);
+    renderer.dofCoCPass(cocFB, positionTex->getId());
 
+    ids[0] = pingpongBlurCoCTex[0]->getId();
+    ids[1] = pingpongBlurCoCTex[1]->getId();
     renderer.blurShaders = blurCoCShaders;
-    renderer.blurPass(pingpongBlurCoCFB, pingpongBlurCoCTex, cocTex, bloomBlurAmount);
+    renderer.blurPass(pingpongBlurCoCFB, ids, cocTex->getId(), bloomBlurAmount);
 
-    renderer.dofBlurPass(pingpongFB, pingpongDofTex, screenspaceTex, pingpongBlurCoCTex[!renderer.horizontal], positionTex, dofBlurAmount);
+    ids[0] = pingpongDofTex[0]->getId();
+    ids[1] = pingpongDofTex[1]->getId();
+    renderer.dofBlurPass(pingpongFB, ids, screenspaceTex->getId(), pingpongBlurCoCTex[!renderer.horizontal]->getId(), positionTex->getId(), dofBlurAmount);
 
     bindFramebuffer(0);
-    renderer.doubleBlendPass(pingpongDofTex[!renderer.horizontal], pingpongBlurTex[!renderer.horizontal]);
+    renderer.doubleBlendPass(pingpongDofTex[!renderer.horizontal]->getId(), pingpongBlurTex[!renderer.horizontal]->getId());
 }
 
 void display() {
@@ -1114,7 +1105,7 @@ void mouse_callback(MouseEventListener::MouseEvent *event) {
         case MouseEventListener::ActionClick:
             std::cout << "x: " << event->getX() << "; y: " << event->getY() << "\n";
         
-            GLfloat *pixels = getPixels(positionTex, (size_t)event->getX(), winHeight - (size_t)event->getY(), 1, 1, GL_RGB);
+            GLfloat *pixels = getPixels(positionTex->getId(), (size_t)event->getX(), winHeight - (size_t)event->getY(), 1, 1, GL_RGB);
         
             std::cout << "x: " << pixels[0] << "; y: " << pixels[1] << "; z: " << pixels[2] << "\n";
         

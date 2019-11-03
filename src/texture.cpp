@@ -9,6 +9,8 @@
 #include <iostream>
 #include <algine/types.h>
 
+using namespace std;
+
 namespace algine {
 void activeTexture(const uint &index) {
     glActiveTexture(TEXTURE(index));
@@ -22,18 +24,6 @@ void bindTexture2D(const uint &texture) {
 void texture2DAB(const uint &index, const uint &texture) {
     activeTexture(index);
 	bindTexture2D(texture);
-}
-
-void bindTextureCube(const uint &texture) {
-    glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-}
-
-void cfgtex2D(const uint &texture, const int &internalformat, const uint &format, const uint &width, const uint &height) {
-    _cfgtex(GL_TEXTURE_2D, texture, 0, internalformat, format, width, height, GL_FLOAT);
-}
-
-void fillbtex(const TextureParams &tp, const void *data) {
-    _fillbtex(tp.target, tp.level, tp.internalformat, tp.format, tp.width, tp.height, tp.type, data);
 }
 
 /**
@@ -64,52 +54,6 @@ uint loadTexture(const char *path, int internalformat, uint format, uint type) {
     stbi_image_free(data);
 
     return texture;
-}
-
-/**
- * Default params for bound texture
- */
-void applyDefaultTexture2DParams() {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
-
-/**
- * Default params for bound texture
- */
-void applyDefaultTextureCubeParams() {
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-}
-
-/**
- * Default params for specified texture
- */
-void applyDefaultTexture2DParams(const uint &texture) {
-    bindTexture2D(texture);
-    applyDefaultTexture2DParams();
-    bindTexture2D(0);   
-}
-
-/**
- * Default params for textures
- */
-void applyDefaultTexture2DParams(uint *textures, size_t count) {
-    for (size_t i = 0; i < count; i++) applyDefaultTexture2DParams(textures[i]);
-}
-
-/**
- * Default params for specified cube texture
- */
-void applyDefaultTextureCubeParams(const uint &texture) {
-    bindTextureCube(texture);
-    applyDefaultTextureCubeParams();
-    bindTextureCube(0);   
 }
 
 size_t getTexComponentsCount(uint format) {
@@ -197,65 +141,150 @@ void saveTexImage(const float *image, size_t width, size_t height, size_t inComp
     delete[] data;
 }
 
-// struct Texture
-void Texture::create(uint *id) {
-    glGenTextures(1, id);
+Texture::Texture() {
+    glGenTextures(1, &id);
 }
 
-void Texture::create(uint *id, const uint &count) {
-    glGenTextures(count, id);
+Texture::Texture(const uint target): Texture() {
+    this->target = target;
+}
+
+Texture::~Texture() {
+    glDeleteTextures(1, &id);
+}
+
+void Texture::bind() {
+    glBindTexture(target, id);
+}
+
+void Texture::use(const uint slot) {
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(target, id);
+}
+
+void Texture::setParams(const std::map<uint, uint> &params) {
+    for(const auto & key : params)
+        glTexParameteri(target, key.first, key.second);
+}
+
+void Texture::setParams(const std::map<uint, float> &params) {
+    for(const auto & key : params)
+        glTexParameterf(target, key.first, key.second);
+}
+
+void Texture::setLOD(const uint _lod) {
+    lod = _lod;
+}
+
+void Texture::setFormat(const uint _format) {
+    format = _format;
+}
+
+void Texture::setWidth(const uint _width) {
+    width = _width;
+}
+
+void Texture::setHeight(const uint _height) {
+    height = _height;
+}
+
+void Texture::setWidthHeight(const uint _width, const uint _height) {
+    width = _width;
+    height = _height;
+}
+
+void Texture::update() {
+    // last 3 params never used, but must be correct:
+    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
+    glTexImage2D(target, lod, format, width, height, 0, Red, GL_BYTE, nullptr);
+}
+
+void Texture::update(const uint dataFormat, const uint dataType, const void *const data) {
+    glTexImage2D(target, lod, format, width, height, 0, dataFormat, dataType, data);
+}
+
+void Texture::unbind() {
+    glBindTexture(target, 0);
+}
+
+uint Texture::getLOD() {
+    return lod;
+}
+
+uint Texture::getFormat() {
+    return format;
+}
+
+uint Texture::getWidth() {
+    return width;
+}
+
+uint Texture::getHeight() {
+    return height;
+}
+
+uint Texture::getId() {
+    return id;
+}
+
+void Texture::texFromFile(const std::string &path, uint _target, uint dataType, bool flipImage) {
+    int channels;
+    stbi_set_flip_vertically_on_load(flipImage);
+    unsigned char *data = stbi_load(path.c_str(),
+                                    reinterpret_cast<int *>(&width), reinterpret_cast<int *>(&height), &channels, 0);
+
+    int formats[] = {Red, RG, RGB, RGBA};
+    int dataFormat = formats[channels - 1];
+
+    if (data) {
+        glTexImage2D(_target, lod, format, width, height, 0, dataFormat, dataType, data);
+        glGenerateMipmap(target);
+    } else {
+        std::cerr << "Failed to load texture " << path << std::endl;
+        return;
+    }
+
+    stbi_image_free(data);
+}
+
+// TODO: remove
+void Texture::create(uint *id) {
+    glGenTextures(1, id);
 }
 
 void Texture::destroy(uint *id) {
     glDeleteTextures(1, id);
 }
 
-void Texture::destroy(uint *id, const uint &count) {
-    glDeleteTextures(count, id);
+Texture2D::Texture2D(): Texture(GL_TEXTURE_2D) {}
+
+void Texture2D::fromFile(const std::string &path, const uint dataType, const bool flipImage) {
+    texFromFile(path, GL_TEXTURE_2D, dataType, flipImage);
 }
 
-// struct TextureCube::CubePaths
-TextureCube::CubePaths::CubePaths(
-    const std::string &right, const std::string &left,
-    const std::string &top, const std::string &bottom,
-    const std::string &back, const std::string &front
-) {
-    this->right = right;
-    this->left = left;
-    this->top = top;
-    this->bottom = bottom;
-    this->back = back;
-    this->front = front;
+map<uint, uint> Texture2D::defaultParams() {
+    return map<uint, uint> {
+        pair<uint, uint> {MinFilter, Linear},
+        pair<uint, uint> {MagFilter, Linear},
+        pair<uint, uint> {WrapU, ClampToEdge},
+        pair<uint, uint> {WrapV, ClampToEdge}
+    };
 }
 
-TextureCube::CubePaths::CubePaths() {}
+TextureCube::TextureCube(): Texture(GL_TEXTURE_CUBE_MAP) {}
 
-// struct TextureCube
-void TextureCube::setFace(const TextureParams &params, const void *data) {
-    fillbtex(params, data);
+void TextureCube::fromFile(const std::string &path, uint face, uint dataType, bool flipImage) {
+    texFromFile(path, face, dataType, flipImage);
 }
 
-void TextureCube::setFace(const TextureParams &params, const uint &texCube, const void *data) {
-    glBindTexture(GL_TEXTURE_CUBE_MAP, texCube);
-    fillbtex(params, data);
-}
-
-void TextureCube::loadFaces(const TextureParams &_params, const CubePaths &paths) {
-    TextureParams params = _params;
-
-    int width, height, nrChannels;
-
-    for (uint i = 0; i < 6; i++) {
-        ubyte *data = stbi_load((*(&paths.right + i)).c_str(), &width, &height, &nrChannels, 0);
-
-        params.width = width;
-        params.height = height;
-        params.target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
-
-        setFace(params, data);
-            
-        stbi_image_free(data);
-    }
+map<uint, uint> TextureCube::defaultParams() {
+    return map<uint, uint> {
+            pair<uint, uint> {MinFilter, Linear},
+            pair<uint, uint> {MagFilter, Linear},
+            pair<uint, uint> {WrapU, ClampToEdge},
+            pair<uint, uint> {WrapV, ClampToEdge},
+            pair<uint, uint> {WrapW, ClampToEdge}
+    };
 }
 
 } // namespace algine
