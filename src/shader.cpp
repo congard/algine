@@ -48,14 +48,14 @@ void ShaderManager::fromFile(const std::string &vertex, const std::string &fragm
 
     if (geometry.empty()) {
         fromSource(
-                File(vertex, File::ReadText).readStr(),
-                File(fragment, File::ReadText).readStr());
+                File(vertex, File::Read).readStr(),
+                File(fragment, File::Read).readStr());
     } else {
         setBaseIncludePath(Path(geometry).getParentDirectory(), ShaderType::Geometry);
         fromSource(
-                File(vertex, File::ReadText).readStr(),
-                File(fragment, File::ReadText).readStr(),
-                File(geometry, File::ReadText).readStr());
+                File(vertex, File::Read).readStr(),
+                File(fragment, File::Read).readStr(),
+                File(geometry, File::Read).readStr());
     }
 }
 
@@ -238,7 +238,7 @@ std::string ShaderManager::processDirectives(const std::string &src, const std::
                 _errFileNotFound
 
             _insert(result, matches.pos, matches.size,
-                    processDirectives(File(filePath, File::ReadText).readStr(), Path(filePath).getParentDirectory()))
+                    processDirectives(File(filePath, File::Read).readStr(), Path(filePath).getParentDirectory()))
         } else {
             std::cerr << "Unknown pragma " << pragmaName << "\n" << matches.matches[0] << "\n\n";
         }
@@ -287,7 +287,7 @@ void Shader::fromSource(const std::string &source) {
 }
 
 void Shader::fromFile(const std::string &path) {
-    fromSource(File(path, File::ReadText).readStr());
+    fromSource(File(path, File::Read).readStr());
 }
 
 ShaderProgram::ShaderProgram() {
@@ -325,9 +325,9 @@ void ShaderProgram::fromSource(const ShadersSources &shaders) {
 }
 
 void ShaderProgram::fromFile(const std::string &vertex, const std::string &fragment, const std::string &geometry) {
-    std::string vertexSource = vertex.empty() ? "" : File(vertex, File::ReadText).readStr();
-    std::string fragmentSource = fragment.empty() ? "" : File(fragment, File::ReadText).readStr();
-    std::string geometrySource = geometry.empty() ? "" : File(geometry, File::ReadText).readStr();
+    std::string vertexSource = vertex.empty() ? "" : File(vertex, File::Read).readStr();
+    std::string fragmentSource = fragment.empty() ? "" : File(fragment, File::Read).readStr();
+    std::string geometrySource = geometry.empty() ? "" : File(geometry, File::Read).readStr();
     fromSource(vertexSource, fragmentSource, geometrySource);
 }
 

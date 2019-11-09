@@ -39,7 +39,7 @@ bool AlgineMTL::load(const std::string &path) {
      **/
     using namespace AlgineConstants::AMTL;
 
-    nlohmann::json j = nlohmann::json::parse(File(path, File::ReadText).readStr());
+    nlohmann::json j = nlohmann::json::parse(File(path, File::Read).readStr());
 
     for (size_t i = 0; i < j.size(); i++) {
         // sie - set if exists
