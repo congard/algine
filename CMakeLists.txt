@@ -70,6 +70,7 @@ add_executable(algine
         include/algine/event.h
         include/algine/object3d.h
         include/algine/rotator.h
+        include/algine/templates.h
         src/algine_renderer.cpp
         src/animation.cpp
         src/bone.cpp
