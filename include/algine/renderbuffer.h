@@ -2,20 +2,44 @@
 #define ALGINE_RENDERBUFFER_H
 
 #include <algine/types.h>
-
-#define bindRenderbuffer(renderbuffer) glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer)
+#include <algine/texture.h>
+#include <algine/templates.h>
 
 namespace algine {
-struct Renderbuffer {
-    static void create(uint *id);
+class Renderbuffer {
+public:
+    Renderbuffer();
+    ~Renderbuffer();
 
-    static void create(uint *id, const uint &count);
+    void bind();
 
-    static void setupStorage(const uint &internalformat, const uint &width, const uint &height);
+    /**
+     * Specifies the number of color components and format of the renderbuffer
+     * @param format
+     */
+    void setFormat(uint format);
 
-    static void destroy(uint *id);
+    void setWidth(uint width);
+    void setHeight(uint height);
+    void setWidthHeight(uint width, uint height);
 
-    static void destroy(uint *id, const uint &count);
+    void update();
+    void unbind();
+
+    uint getFormat() const;
+    uint getWidth() const;
+    uint getHeight() const;
+    uint getId() const;
+
+    implementVariadicCreate(Renderbuffer)
+    implementVariadicDestroy(Renderbuffer)
+
+protected:
+    uint id = 0;
+    uint
+        format = Texture::DepthComponent,
+        width = 512,
+        height = 512;
 };
 
 }

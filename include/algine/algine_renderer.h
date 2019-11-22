@@ -37,6 +37,7 @@ public:
     ~QuadRenderer();
 };
 
+// TODO: clean up AlgineRenderer
 class AlgineRenderer {
 public:
     ShaderProgram *ssrShader = nullptr;
@@ -49,10 +50,6 @@ public:
     QuadRenderer *quadRenderer = nullptr;
 
     bool horizontal = true, firstIteration = true; // blur variables
-
-    // configures renderbuffer for main pass rendering
-    // note: this function will bind empty renderbuffer (`bindRenderbuffer(0)`)
-    void configureMainPassRenderbuffer(uint renderbuffer, uint width, uint height);
 
     void mainPass(uint displayFBO);
     void bloomSearchPass(uint bsFBO, uint image);

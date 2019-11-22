@@ -172,15 +172,6 @@ QuadRenderer::~QuadRenderer() {
     glDeleteVertexArrays(1, &quadVAO);
 }
 
-// configures renderbuffer for main pass rendering
-// note: this function will bind empty renderbuffer (`bindRenderbuffer(0)`)
-void AlgineRenderer::configureMainPassRenderbuffer(const uint renderbuffer, const uint width, const uint height) {
-    bindRenderbuffer(renderbuffer);
-    Renderbuffer::setupStorage(GL_DEPTH_COMPONENT, width, height);
-    Framebuffer::attachRenderbuffer(GL_DEPTH_ATTACHMENT, renderbuffer);
-    bindRenderbuffer(0);
-}
-
 void AlgineRenderer::mainPass(const uint displayFBO) {
     glBindFramebuffer(GL_FRAMEBUFFER, displayFBO);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

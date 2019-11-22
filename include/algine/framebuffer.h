@@ -2,22 +2,43 @@
 #define ALGINE_FRAMEBUFFER_H
 
 #include <algine/types.h>
+#include <algine/texture.h>
+#include <algine/renderbuffer.h>
+#include <algine/templates.h>
 
 #define bindFramebuffer(framebuffer) glBindFramebuffer(GL_FRAMEBUFFER, framebuffer)
 
 namespace algine {
-struct Framebuffer {
+class Framebuffer {
+public:
+    enum Attachments {
+        ColorAttachmentZero = GL_COLOR_ATTACHMENT0,
+        DepthAttachment = GL_DEPTH_ATTACHMENT,
+        StencilAttachment = GL_STENCIL_ATTACHMENT,
+        DepthStencilAttachment = GL_DEPTH_STENCIL_ATTACHMENT
+    };
+
+    Framebuffer();
+    ~Framebuffer();
+
+    void bind();
+    void attachTexture(const Texture2D *texture, uint attachment);
+    void attachTexture(const TextureCube *texture, uint attachment);
+    void attachRenderbuffer(const Renderbuffer *renderbuffer, uint attachment);
+    void unbind();
+
+    uint getId() const;
+
+    implementVariadicCreate(Framebuffer)
+    implementVariadicDestroy(Framebuffer)
+
+    // TODO: remove
     static void create(uint *id);
-
-    static void create(uint *id, const uint &count);
-
     static void attachTexture2D(const uint &textureId, const uint &colorAttachment);
-
-    static void attachRenderbuffer(const uint &attachment, const uint &renderbuffer);
-
     static void destroy(uint *id);
 
-    static void destroy(uint *id, const uint &count);
+protected:
+    uint id = 0;
 };
 
 }
