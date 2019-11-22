@@ -207,23 +207,23 @@ void Texture::unbind() {
     glBindTexture(target, 0);
 }
 
-uint Texture::getLOD() {
+uint Texture::getLOD() const {
     return lod;
 }
 
-uint Texture::getFormat() {
+uint Texture::getFormat() const {
     return format;
 }
 
-uint Texture::getWidth() {
+uint Texture::getWidth() const {
     return width;
 }
 
-uint Texture::getHeight() {
+uint Texture::getHeight() const {
     return height;
 }
 
-uint Texture::getId() {
+uint Texture::getId() const {
     return id;
 }
 

@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <string>
 #include <map>
+#include <algine/templates.h>
 #include <tulz/macros.h>
 
 #define COLOR_ATTACHMENT(n) (GL_COLOR_ATTACHMENT0 + n)
@@ -50,15 +51,7 @@ float* getPixels(uint texture, size_t x, size_t y, size_t width, size_t height, 
 
 void saveTexImage(const float *image, size_t width, size_t height, size_t inComponents, const std::string &path, size_t outComponents, bool flip = true);
 
-#define _implementVariadicCreate(T) \
-template<typename...Args> \
-static void create(Args&...args) { \
-    T** arr[] = {&args...}; \
-    for (usize i = 0; i < sizeof...(args); i++) \
-        *arr[i] = new T(); \
-}
-
-#define _implementVariadicSetParams(Type) \
+#define implementVariadicSetParams(Type) \
 template<typename T, typename...Args> \
 static void setParamsMultiple(const std::map<uint, T> &params, Args&...args) { \
     Type** arr[] = {&args...}; \
@@ -66,14 +59,6 @@ static void setParamsMultiple(const std::map<uint, T> &params, Args&...args) { \
         (*arr[i])->bind(); \
         (*arr[i])->setParams(params); \
     } \
-}
-
-#define _implementVariadicDestroy(T) \
-template<typename...Args> \
-static void destroy(Args&...args) { \
-    T** arr[] = {&args...}; \
-    for (usize i = 0; i < sizeof...(args); i++) \
-        deletePtr(*arr[i]); \
 }
 
 class Texture {
@@ -164,15 +149,15 @@ public:
     // TODO: shader: rename > unbind
     void unbind();
 
-    uint getLOD();
-    uint getFormat();
-    uint getWidth();
-    uint getHeight();
-    uint getId();
+    uint getLOD() const;
+    uint getFormat() const;
+    uint getWidth() const;
+    uint getHeight() const;
+    uint getId() const;
 
-    _implementVariadicCreate(Texture)
-    _implementVariadicSetParams(Texture)
-    _implementVariadicDestroy(Texture)
+    implementVariadicCreate(Texture)
+    implementVariadicSetParams(Texture)
+    implementVariadicDestroy(Texture)
 
     // TODO: remove
     static void create(uint *id);
@@ -199,12 +184,13 @@ public:
     void fromFile(const std::string &path, uint dataType = GL_UNSIGNED_BYTE, bool flipImage = true);
     static std::map<uint, uint> defaultParams();
 
-    _implementVariadicCreate(Texture2D)
-    _implementVariadicSetParams(Texture2D)
-    _implementVariadicDestroy(Texture2D)
+    implementVariadicCreate(Texture2D)
+    implementVariadicSetParams(Texture2D)
+    implementVariadicDestroy(Texture2D)
 };
 
-struct TextureCube: public Texture {
+class TextureCube: public Texture {
+public:
     enum Faces {
         Right = GL_TEXTURE_CUBE_MAP_POSITIVE_X,
         Left = GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -219,14 +205,12 @@ struct TextureCube: public Texture {
     void fromFile(const std::string &path, uint face, uint dataType = GL_UNSIGNED_BYTE, bool flipImage = false);
     static std::map<uint, uint> defaultParams();
 
-    _implementVariadicCreate(TextureCube)
-    _implementVariadicSetParams(TextureCube)
-    _implementVariadicDestroy(TextureCube)
+    implementVariadicCreate(TextureCube)
+    implementVariadicSetParams(TextureCube)
+    implementVariadicDestroy(TextureCube)
 };
 
-#undef _implementVariadicCreate
-#undef _implementVariadicSetParams
-#undef _implementVariadicDestroy
+#undef implementVariadicSetParams
 
 }
 
