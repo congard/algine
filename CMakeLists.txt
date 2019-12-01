@@ -15,32 +15,49 @@ else()
     message(FATAL_ERROR "CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}\nBut you can choose only Debug or Release build type")
 endif()
 
-# adding / finding libs
-if (WIN32)
-    set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-    set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+set(ASSIMP_BUILD_TESTS OFF)
+set(GLFW_BUILD_DOCS OFF)
+set(GLFW_BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_TESTS OFF)
+set(BUILD_UTILS OFF) # glew flag
 
-    if (ALGINE_LINK_LIBS_STATICALLY)
-        add_definitions(-DGLEW_STATIC)
-        set(BUILD_SHARED_LIBS OFF)
-    else()
-        set(BUILD_SHARED_LIBS ON)
-    endif()
+if (ALGINE_LINK_LIBS_STATICALLY)
+    add_definitions(-DGLEW_STATIC)
+    set(BUILD_SHARED_LIBS OFF)
+else()
+    set(BUILD_SHARED_LIBS ON)
+endif()
 
+if (ALGINE_USE_SYSTEM_ASSIMP)
+    find_package(assimp REQUIRED)
+    message(STATUS "Algine: use system Assimp")
+else()
     add_subdirectory(contrib/assimp)
+    include_directories(contrib/assimp/include)
+endif()
+if (ALGINE_USE_SYSTEM_GLFW)
+    find_package(glfw3 REQUIRED)
+    message(STATUS "Algine: use system GLFW")
+else()
     add_subdirectory(contrib/glfw)
+    include_directories(contrib/glfw/include)
+endif()
+if (ALGINE_USE_SYSTEM_GLEW)
+    find_package(GLEW REQUIRED)
+    set(GLEW_LIBRARY GLEW)
+    message(STATUS "Algine: use system GLEW")
+else()
     add_subdirectory(contrib/glew/build/cmake)
     include_directories(contrib/glew/include)
-    include_directories(contrib/glfw/include)
-    include_directories(contrib/assimp/include)
-elseif (UNIX)
-    find_package(GLEW REQUIRED)
-    find_package(assimp REQUIRED)
-    find_package(glfw3 REQUIRED)
+    if (ALGINE_LINK_LIBS_STATICALLY)
+        set(GLEW_LIBRARY glew_s)
+    else()
+        set(GLEW_LIBRARY glew)
+    endif()
 endif()
 
 add_subdirectory(contrib/tulz)
-
 include_directories(contrib/tulz/include)
 include_directories(contrib/glm)
 include_directories(contrib)
@@ -92,23 +109,8 @@ add_executable(algine
 
 # linking
 if (WIN32)
-    if (ALGINE_LINK_LIBS_STATICALLY)
-        target_link_libraries(algine
-                assimp
-                glew_s
-                glfw
-                opengl32
-                pthread
-                tulz)
-    else()
-        target_link_libraries(algine
-                assimp
-                glew
-                glfw
-                opengl32
-                pthread
-                tulz)
-
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 pthread tulz)
+    if (ALGINE_LINK_LIBS_STATICALLY OFF)
         if (CMAKE_BUILD_TYPE MATCHES Debug)
             add_custom_command(TARGET algine POST_BUILD
                     COMMENT "Creating symlinks to libs..."
@@ -134,13 +136,9 @@ if (WIN32)
         endif()
     endif()
 elseif(UNIX)
-    target_link_libraries(algine
-            glfw
-            GLEW
-            GL
-            assimp
-            pthread
-            tulz)
-    target_link_directories(algine
-            PUBLIC /usr/local/lib)
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw GL pthread tulz)
+    if (ALGINE_USE_SYSTEM_ASSIMP)
+        target_link_directories(algine
+                PUBLIC /usr/local/lib)
+    endif()
 endif()
