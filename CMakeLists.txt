@@ -110,7 +110,7 @@ add_executable(algine
 # linking
 if (WIN32)
     target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 pthread tulz)
-    if (ALGINE_LINK_LIBS_STATICALLY OFF)
+    if (NOT ALGINE_LINK_LIBS_STATICALLY)
         if (CMAKE_BUILD_TYPE MATCHES Debug)
             add_custom_command(TARGET algine POST_BUILD
                     COMMENT "Creating symlinks to libs..."
