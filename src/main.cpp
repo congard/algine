@@ -23,6 +23,7 @@
 #define ALGINE_LOGGING
 
 #include <algine/algine.h>
+#include <tulz/Path>
 
 #define SHADOW_MAP_RESOLUTION 1024
 #define bloomK 0.5f
@@ -179,7 +180,7 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
 
     updateRenderTextures();
 
-    camera.aspectRatio = (float)winWidth / (float)winHeight;
+    camera.setAspectRatio((float)winWidth / (float)winHeight);
     camera.perspective();
 }
 
@@ -187,13 +188,16 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
  * Creates Lamp with default params
  */
 void createPointLamp(PointLamp &result, const glm::vec3 &pos, const glm::vec3 &color, usize id) {
-    result.pos = pos;
-    result.color = color;
-    result.kc = 1;
-    result.kl = 0.045f;
-    result.kq = 0.0075f;
+    result.setPos(pos);
+    result.translate();
+    result.setColor(color);
+    result.setKc(1.0f);
+    result.setKl(0.045f);
+    result.setKq(0.0075f);
 
-    result.initShadowMapping(SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION);
+    result.perspectiveShadows();
+    result.updateMatrix();
+    result.initShadows(SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION);
 
     colorShader->use();
     lightDataSetter.setColor(result, id);
@@ -205,15 +209,24 @@ void createPointLamp(PointLamp &result, const glm::vec3 &pos, const glm::vec3 &c
     ShaderProgram::reset();
 }
 
-void createDirLamp(DirLamp &result, const glm::vec3 &pos, const glm::vec3 &color, usize id) {
-    result.pos = pos;
-    result.color = color;
-    result.kc = 1;
-    result.kl = 0.045f;
-    result.kq = 0.0075f;
+void createDirLamp(DirLamp &result,
+        const glm::vec3 &pos, const glm::vec3 &rotate,
+        const glm::vec3 &color,
+        usize id) {
+    result.setPos(pos);
+    result.translate();
+    result.setRotate(rotate.y, rotate.x, rotate.z);
+    result.rotate();
+    result.updateMatrix();
 
-    result.orthoShadowMapping(-10.0f, 10.0f, -10.0f, 10.0f);
-    result.initShadowMapping(SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION);
+    result.setColor(color);
+    result.setKc(1.0f);
+    result.setKl(0.045f);
+    result.setKq(0.0075f);
+
+    result.orthoShadows(-10.0f, 10.0f, -10.0f, 10.0f);
+    result.updateMatrix();
+    result.initShadows(SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION);
 
     colorShader->use();
     lightDataSetter.setColor(result, id);
@@ -229,7 +242,8 @@ void createDirLamp(DirLamp &result, const glm::vec3 &pos, const glm::vec3 &color
 void createShapes(const std::string &path, const uint params, const size_t id, const bool inverseNormals = false, const uint bonesPerVertex = 0) {
     shapes[id].bonesPerVertex = bonesPerVertex;
     shapes[id].init(path, params);
-    if (inverseNormals) shapes[id].inverseNormals();
+    if (inverseNormals)
+        shapes[id].inverseNormals();
     shapes[id].genBuffers();
     shapes[id].createVAO(
             pointShadowShader->getLocation(AlgineNames::ShadowShader::InPos),
@@ -256,7 +270,8 @@ void createShapes(const std::string &path, const uint params, const size_t id, c
 void initGL() {
     std::cout << "Starting GLFW context, OpenGL 3.3" << std::endl;
     // Init GLFW
-    if (!glfwInit()) std::cout << "GLFW init failed";
+    if (!glfwInit())
+        std::cout << "GLFW init failed";
     // Set all the required options for GLFW
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -592,9 +607,9 @@ void initShaders() {
  * Creating matrices
  */
 void initCamera() {
-    camera.far = 64.0f;
-    camera.fov = glm::radians(60.0f);
-    camera.aspectRatio = (float)winWidth / (float)winHeight;
+    camera.setFar(64.0f);
+    camera.setFieldOfView(glm::radians(60.0f));
+    camera.setAspectRatio((float)winWidth / (float)winHeight);
     camera.perspective();
     
     camera.setPitch(glm::radians(30.0f));
@@ -668,19 +683,20 @@ void createModels() {
  * Creating light sources
  */
 void initLamps() {
-    createPointLamp(pointLamps[0], glm::vec3(0.0f, 8.0f, 15.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0);
     lamps[0] = Model(Rotator::RotatorTypeSimple);
     lamps[0].shape = &shapes[1];
     pointLamps[0].mptr = &lamps[0];
-    lamps[0].setPos(pointLamps[0].pos);
+    createPointLamp(pointLamps[0], glm::vec3(0.0f, 8.0f, 15.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0);
     lamps[0].translate();
     lamps[0].updateMatrix();
 
-    createDirLamp(dirLamps[0], glm::vec3(0.0f, 8.0f, -15.0f), glm::vec3(253.0f / 255.0f, 184.0f / 255.0f, 19.0f / 255.0f), 0);
     lamps[1] = Model(Rotator::RotatorTypeSimple);
     lamps[1].shape = &shapes[1];
     dirLamps[0].mptr = &lamps[1];
-    lamps[1].setPos(dirLamps[0].pos);
+    createDirLamp(dirLamps[0],
+            glm::vec3(0.0f, 8.0f, -15.0f),
+            glm::vec3(glm::radians(180.0f), glm::radians(30.0f), 0.0f),
+            glm::vec3(253.0f / 255.0f, 184.0f / 255.0f, 19.0f / 255.0f), 0);
     lamps[1].translate();
     lamps[1].updateMatrix();
 }
@@ -756,7 +772,7 @@ void recycleAll() {
 void sendLampsData() {
     lightDataSetter.setPointLightsCount(pointLampsCount);
     lightDataSetter.setDirLightsCount(dirLampsCount);
-    colorShader->set(AlgineNames::ColorShader::CameraPos, camera.getPosition());
+    colorShader->set(AlgineNames::ColorShader::CameraPos, camera.getPos());
     for (size_t i = 0; i < pointLampsCount; i++)
         lightDataSetter.setPos(pointLamps[i], i);
     for (size_t i = 0; i < dirLampsCount; i++)
@@ -837,7 +853,7 @@ void drawModel(const Model &model) {
  */
 void renderToDepthCubemap(const uint index) {
 	pointLamps[index].begin();
-	pointLamps[index].updateMatrices();
+    pointLamps[index].updateMatrix();
     lightDataSetter.setShadowShaderPos(pointLamps[index]);
 	lightDataSetter.setShadowShaderMatrices(pointLamps[index]);
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -864,12 +880,12 @@ void renderToDepthMap(uint index) {
 
 	// drawing models
     for (size_t i = 0; i < MODELS_COUNT; i++)
-        drawModelDM(models[i], dirShadowShader, dirLamps[index].lightSpace);
+        drawModelDM(models[i], dirShadowShader, dirLamps[index].m_lightSpace);
 
 	// drawing lamps
 	for (GLuint i = 0; i < dirLampsCount; i++) {
 		if (i == index) continue;
-        drawModelDM(*dirLamps[i].mptr, dirShadowShader, dirLamps[index].lightSpace);
+        drawModelDM(*dirLamps[i].mptr, dirShadowShader, dirLamps[index].m_lightSpace);
 	}
 
 	dirLamps[index].end();
@@ -978,7 +994,8 @@ void animate_scene() {
     glm::mat3 rotate = glm::mat3(glm::rotate(glm::mat4(), glm::radians(0.01f), glm::vec3(0, 1, 0)));
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        pointLamps[0].setPos(pointLamps[0].pos * rotate);
+        pointLamps[0].setPos(pointLamps[0].m_pos * rotate);
+        pointLamps[0].translate();
         pointLamps[0].mptr->updateMatrix();
     }
 }
@@ -1036,7 +1053,13 @@ int main() {
 
 // Is called whenever a key is pressed/released via GLFW
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
+    if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+        GLfloat *pixels = getTexImage2D(dirLamps[0].shadowMap->id, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, GL_DEPTH_COMPONENT);
+        saveTexImage(pixels, SHADOW_MAP_RESOLUTION, SHADOW_MAP_RESOLUTION, 1, tulz::Path::getWorkingDirectory() + "/out/dir_depth.bmp", 3);
+        delete[] pixels;
+        std::cout << "Depth map data saved\n";
+    }
+    else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) glfwSetWindowShouldClose(window, GL_TRUE);
     else if (action == GLFW_REPEAT || action == GLFW_RELEASE) {
         if (key == GLFW_KEY_W || key == GLFW_KEY_S || key == GLFW_KEY_A || key == GLFW_KEY_D) {
             if (key == GLFW_KEY_W)
