@@ -7,27 +7,31 @@
 #include <algine/object3d.h>
 
 namespace algine {
-class Camera: public Object3D {
+class Camera: public rotatable, public translatable, public scalable {
 public:
-    glm::mat4 m_projection;
-    float fov, aspectRatio, near = 1.0f, far = 32.0f;
+    explicit Camera(uint rotatorType = Rotator::RotatorTypeEuler);
 
-    Camera(const uint rotatorType = Rotator::RotatorTypeEuler);
-
-    void translate();
+    void translate() override;
     void updateMatrix();
-    void setFieldOfView(const float fov);
-    void setAspectRatio(const float aspectRatio);
-    void setNear(const float near);
-    void setFar(const float far);
+    void setFieldOfView(float fov);
+    void setAspectRatio(float aspectRatio);
+    void setNear(float near);
+    void setFar(float far);
     void perspective();
 
-    glm::mat4 getProjectionMatrix();
-    glm::mat4 getViewMatrix(); // calls Object3D::getMatrix()
-    float getFieldOfView();
-    float getAspectRatio();
-    float getNear();
-    float getFar();
+    glm::mat4 getProjectionMatrix() const;
+    glm::mat4 getViewMatrix() const;
+    float getFieldOfView() const;
+    float getAspectRatio() const;
+    float getNear() const;
+    float getFar() const;
+
+public:
+    glm::mat4 m_projection, m_transform; // m_transform is view matrix
+    float m_fov = 1.5708f, // 90 degrees
+          m_aspectRatio = 1.0f,
+          m_near = 1.0f,
+          m_far = 32.0f;
 };
 
 class BaseCameraController {
@@ -36,8 +40,8 @@ public:
     float sensitivityPitch = 0.0025f, sensitivityYaw = 0.0025f, sensitivityRoll = 0.0025f;
     float speedf = 1.0f, speedb = 1.0f, speedr = 1.0f, speedl = 1.0f;
     
-    void setMousePos(const float x, const float y, const float z = 0);
-    void mouseMove(const float x, const float y, const float z = 0);
+    void setMousePos(float x, float y, float z = 0);
+    void mouseMove(float x, float y, float z = 0);
     void goForward();
     void goBack();
     void goRight();
@@ -49,12 +53,12 @@ protected:
 
 class FreeCameraController : public BaseCameraController {
 public:
-    void mouseMove(const float x, const float y, const float z = 0);
+    void mouseMove(float x, float y, float z = 0);
 };
 
 class FPSCameraController : public BaseCameraController {
 public:
-    void mouseMove(const float x, const float y, const float z = 0);
+    void mouseMove(float x, float y, float z = 0);
 };
 }
 

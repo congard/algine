@@ -4,12 +4,12 @@
 #include <iostream>
 
 namespace algine {
-Camera::Camera(const uint rotatorType) : Object3D (rotatorType) {
-    type = Object3DTypeCamera;
+Camera::Camera(const uint rotatorType): rotatable(rotatorType) {
+    /* empty */
 }
 
 void Camera::translate() {
-    m_translation = glm::translate(glm::mat4(), -v_pos);
+    m_translation = glm::translate(glm::mat4(), -m_pos);
 }
 
 void Camera::updateMatrix() {
@@ -17,47 +17,47 @@ void Camera::updateMatrix() {
 }
 
 void Camera::setFieldOfView(const float fov) {
-    this->fov = fov;
+    m_fov = fov;
 }
 
 void Camera::setAspectRatio(const float aspectRatio) {
-    this->aspectRatio = aspectRatio;
+    m_aspectRatio = aspectRatio;
 }
 
 void Camera::setNear(const float near) {
-    this->near = near;
+    m_near = near;
 }
 
 void Camera::setFar(const float far) {
-    this->far = far;
+    m_far = far;
 }
 
 void Camera::perspective() {
-    m_projection = glm::perspective(fov, aspectRatio, near, far);
+    m_projection = glm::perspective(m_fov, m_aspectRatio, m_near, m_far);
 }
 
-glm::mat4 Camera::getProjectionMatrix() {
+glm::mat4 Camera::getProjectionMatrix() const {
     return m_projection;
 }
 
-glm::mat4 Camera::getViewMatrix() {
-    return getMatrix();
+glm::mat4 Camera::getViewMatrix() const {
+    return m_transform;
 }
 
-float Camera::getFieldOfView() {
-    return fov;
+float Camera::getFieldOfView() const {
+    return m_fov;
 }
 
-float Camera::getAspectRatio() {
-    return aspectRatio;
+float Camera::getAspectRatio() const {
+    return m_aspectRatio;
 }
 
-float Camera::getNear() {
-    return near;
+float Camera::getNear() const {
+    return m_near;
 }
 
-float Camera::getFar() {
-    return far;
+float Camera::getFar() const {
+    return m_far;
 }
 
 void BaseCameraController::setMousePos(const float x, const float y, const float z) {
@@ -69,19 +69,19 @@ void BaseCameraController::mouseMove(const float x, const float y, const float z
 }
 
 void BaseCameraController::goForward() {
-    camera->v_pos += camera->getForward() * speedf;
+    camera->m_pos += camera->getForward() * speedf;
 }
 
 void BaseCameraController::goBack() {
-    camera->v_pos += camera->getBack() * speedb;
+    camera->m_pos += camera->getBack() * speedb;
 }
 
 void BaseCameraController::goRight() {
-    camera->v_pos += camera->getRight() * speedr;
+    camera->m_pos += camera->getRight() * speedr;
 }
 
 void BaseCameraController::goLeft() {
-    camera->v_pos += camera->getLeft() * speedl;
+    camera->m_pos += camera->getLeft() * speedl;
 }
 
 void FreeCameraController::mouseMove(const float x, const float y, const float z) {
