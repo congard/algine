@@ -12,71 +12,101 @@
 #include <algine/types.h>
 #include <algine/model.h>
 #include <algine/shader.h>
+#include <algine/texture.h>
+#include <algine/framebuffer.h>
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
 namespace algine {
-class Light {
+class Light: public translatable {
 public:
     enum {
         TypeDirLight,
         TypePointLight
     };
 
-    int type = -1;
-
-    glm::vec3 pos, color;
-    float kc; // constant term; usually kept at 1.0
-    float kl; // linear term
-    float kq; // quadratic term
-    usize shadowMapWidth, shadowMapHeight;
-    uint depthMapFBO, depthMap;
-    glm::mat4 lightProjection;
-
-    virtual void updateMatrices();
-    virtual void initShadowMapping(usize shadowMapWidth, usize shadowMapHeight);
-    virtual void createDepthMapFBO();
-    virtual void createDepthMap();
-    virtual void configureDepthMap();
-    virtual void begin();
-	virtual void end();
-
-    Light();
     ~Light();
+
+    void translate() override;
+
+    virtual void initShadows(uint shadowMapWidth = 512, uint shadowMapHeight = 512) = 0;
+    virtual void updateMatrix() = 0;
+    virtual void begin() = 0;
+	void end();
+
+	void setKc(float kc);
+	void setKl(float kl);
+	void setKq(float kq);
+	void setColor(const glm::vec3 &color);
+	void setColor(float red, float green, float blue);
+
+	float getKc();
+    float getKl();
+    float getKq();
+    glm::vec3 getColor();
+
+public:
+    int type = -1;
+    float m_kc; // constant term; usually kept at 1.0
+    float m_kl; // linear term
+    float m_kq; // quadratic term
+    Framebuffer *shadowMapFb = nullptr;
+    glm::mat4 m_lightProjection;
+    glm::vec3 m_color;
 };
 
-class DirLight : public Light {
+class DirLight: public Light, public rotatable {
 public:
-    glm::mat4 lightView, lightSpace;
-    glm::vec3 lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
-    float minBias = 0.005f, maxBias = 0.05f;
+    explicit DirLight(uint rotatorType = Rotator::RotatorTypeSimple);
+    ~DirLight();
 
-    DirLight();
+    void orthoShadows(float left, float right, float bottom, float top, float near = 1.0f, float far = 32.0f);
+    void perspectiveShadows(float fovy, float aspect, float near = 1.0f, float far = 32.0f);
 
-    void orthoShadowMapping(float left, float right, float bottom, float top, float near = 1.0f, float far = 32.0f);
-    void perspectiveShadowMapping(float fovy, float aspect, float near = 1.0f, float far = 32.0f);
-    void viewMatrixLookAt();
-    void updateLightSpaceMatrix();
-    void updateMatrices() override;
-    void configureDepthMap() override;
+    void initShadows(uint shadowMapWidth = 512, uint shadowMapHeight = 512) override;
+
+    /// updates light space matrix
+    void updateMatrix() override;
     void begin() override;
-	void end() override;
+
+    void setMinBias(float minBias);
+    void setMaxBias(float maxBias);
+
+    float getMinBias() const;
+    float getMaxBias() const;
+
+public:
+    Texture2D *shadowMap = nullptr;
+    glm::mat4 m_lightSpace;
+    float m_minBias = 0.005f, m_maxBias = 0.05f;
 };
 
-class PointLight : public Light {
+class PointLight: public Light {
 public:
-    // far plane
-    float far = 32.0f;
-    float bias = 0.4f;
-    glm::mat4 lightViews[6], lightSpaceMatrices[6];
-
     PointLight();
+    ~PointLight();
 
-    void updateMatrices() override;
-    void configureDepthMap() override;
+    void initShadows(uint shadowMapWidth = 512, uint shadowMapHeight = 512) override;
+    void updateMatrix() override;
     void begin() override;
-	void end() override;
+
+    void perspectiveShadows();
+
+    void setFar(float far);
+    void setNear(float near);
+    void setBias(float bias);
+
+    float getFar() const;
+    float getNear() const;
+    float getBias() const;
+
+public:
+    TextureCube *shadowMap = nullptr;
+    glm::mat4 m_lightSpaceMatrices[6];
+    float m_far = 32.0f, m_near = 1.0f;
+    float m_bias = 0.4f;
+
+    static const glm::mat4 m_lightViews[6];
 };
 
 // in setters we don't using stride to get uniform location
