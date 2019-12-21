@@ -230,13 +230,13 @@ void Shape::loadTextures() {
 void Shape::genBuffers() {
     #define genBufferForArray(buffer, array) if (!array.empty()) { glGenBuffers(1, &buffer); }
     
-    genBufferForArray(buffers.vertices, geometry.vertices); // vertices
-    genBufferForArray(buffers.normals, geometry.normals); // normals
-    genBufferForArray(buffers.texCoords, geometry.texCoords); // texCoords
-    genBufferForArray(buffers.tangents, geometry.tangents); // tangents
-    genBufferForArray(buffers.bitangents, geometry.bitangents); // bitangents
-    genBufferForArray(buffers.boneWeights, geometry.boneWeights); // bone weights
-    genBufferForArray(buffers.boneIds, geometry.boneIds); // bone ids
+    genBufferForArray(buffers.vertices, geometry.vertices) // vertices
+    genBufferForArray(buffers.normals, geometry.normals) // normals
+    genBufferForArray(buffers.texCoords, geometry.texCoords) // texCoords
+    genBufferForArray(buffers.tangents, geometry.tangents) // tangents
+    genBufferForArray(buffers.bitangents, geometry.bitangents) // bitangents
+    genBufferForArray(buffers.boneWeights, geometry.boneWeights) // bone weights
+    genBufferForArray(buffers.boneIds, geometry.boneIds) // bone ids
 
     #define mkArrayBuffer(buffer, array, type) \
         glBindBuffer(GL_ARRAY_BUFFER, buffer); \
@@ -245,13 +245,13 @@ void Shape::genBuffers() {
     #define mkArrayBufferf(buffer, array) if (!array.empty()) { mkArrayBuffer(buffer, array, float) }
     #define mkArrayBufferui(buffer, array) if (!array.empty()) { mkArrayBuffer(buffer, array, uint) }
 
-    mkArrayBufferf(buffers.vertices, geometry.vertices); // vertices
-    mkArrayBufferf(buffers.normals, geometry.normals); // normals
-    mkArrayBufferf(buffers.texCoords, geometry.texCoords); // texCoords
-    mkArrayBufferf(buffers.tangents, geometry.tangents); // tangents
-    mkArrayBufferf(buffers.bitangents, geometry.bitangents); // bitangents
-    mkArrayBufferf(buffers.boneWeights, geometry.boneWeights); // bone weights
-    mkArrayBufferui(buffers.boneIds, geometry.boneIds); // bone ids
+    mkArrayBufferf(buffers.vertices, geometry.vertices) // vertices
+    mkArrayBufferf(buffers.normals, geometry.normals) // normals
+    mkArrayBufferf(buffers.texCoords, geometry.texCoords) // texCoords
+    mkArrayBufferf(buffers.tangents, geometry.tangents) // tangents
+    mkArrayBufferf(buffers.bitangents, geometry.bitangents) // bitangents
+    mkArrayBufferf(buffers.boneWeights, geometry.boneWeights) // bone weights
+    mkArrayBufferui(buffers.boneIds, geometry.boneIds) // bone ids
 
     // indices
     glGenBuffers(1, &buffers.indices);
@@ -318,15 +318,15 @@ void Shape::createVAO(
     #define _pointer(location, count, buffer) if (location != -1) { glEnableVertexAttribArray(location); pointer(location, count, buffer); }
     #define _pointerui(location, count, buffer) if (location != -1) { glEnableVertexAttribArray(location); pointerui(location, count, buffer); }
     
-    _pointer(inPosition, 3, buffers.vertices);
-    _pointer(inNormal, 3, buffers.normals);
-    _pointer(inTangent, 3, buffers.tangents);
-    _pointer(inBitangent, 3, buffers.bitangents);
-    _pointer(inTexCoord, 2, buffers.texCoords);
+    _pointer(inPosition, 3, buffers.vertices)
+    _pointer(inNormal, 3, buffers.normals)
+    _pointer(inTangent, 3, buffers.tangents)
+    _pointer(inBitangent, 3, buffers.bitangents)
+    _pointer(inTexCoord, 2, buffers.texCoords)
 
     if (bonesPerVertex != 0) {
-        _pointer(inBoneWeights, 4, buffers.boneWeights);
-        _pointerui(inBoneIds, 4, buffers.boneIds);
+        _pointer(inBoneWeights, 4, buffers.boneWeights)
+        _pointerui(inBoneIds, 4, buffers.boneIds)
     }
 
     #undef _pointer
@@ -354,9 +354,12 @@ void Shape::recycle() {
 
 std::map<std::string, uint> Shape::loadedTextures;
 
-// `Model` is a container for `Shape`, that have own `Animator` and transformations
-Model::Model(const uint rotatorType) : Object3D (rotatorType) {
-    type = Object3DTypeModel;
+Model::Model(const uint rotatorType): rotatable(rotatorType) {
+    /* empty */
+}
+
+void Model::updateMatrix() {
+    m_transform = m_translation * m_rotation * m_scaling;
 }
 
 } // namespace algine

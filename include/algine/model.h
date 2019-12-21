@@ -79,12 +79,16 @@ public:
 };
 
 // `Model` is a container for `Shape`, that have own `Animator` and transformations
-class Model: public Object3D {
+class Model: public rotatable, public translatable, public scalable {
+public:
+    explicit Model(uint rotatorType = Rotator::RotatorTypeSimple);
+
+    void updateMatrix();
+
 public:
     Shape *shape = nullptr;
     Animator *animator = nullptr;
-
-    Model(const uint rotatorType = Rotator::RotatorTypeSimple);
+    glm::mat4 m_transform;
 };
 
 } // namespace algine
