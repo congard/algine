@@ -132,19 +132,8 @@ public:
     void setHeight(uint height);
     void setWidthHeight(uint width, uint height);
 
-    // TODO: update and TextureCube are not very compatible, TextureCube has 6 targets, not 1 like Texture2D.
-    //  Perhaps the 1st function should be made virtual, and the 2nd should be hidden?
-
     /// updates width / height, lod, format
-    void update();
-
-    /**
-     * updates width / height, lod, format
-     * @param dataFormat
-     * @param dataType
-     * @param data
-     */
-    void update(uint dataFormat, uint dataType, const void *data);
+    virtual void update() = 0;
 
     // TODO: shader: rename > unbind
     void unbind();
@@ -154,10 +143,6 @@ public:
     uint getWidth() const;
     uint getHeight() const;
     uint getId() const;
-
-    implementVariadicCreate(Texture)
-    implementVariadicSetParams(Texture)
-    implementVariadicDestroy(Texture)
 
     // TODO: remove
     static void create(uint *id);
@@ -182,6 +167,16 @@ public:
     Texture2D();
 
     void fromFile(const std::string &path, uint dataType = GL_UNSIGNED_BYTE, bool flipImage = true);
+    void update() override;
+
+    /**
+     * updates width / height, lod, format
+     * @param dataFormat
+     * @param dataType
+     * @param data
+     */
+    void update(uint dataFormat, uint dataType, const void *data);
+
     static std::map<uint, uint> defaultParams();
 
     implementVariadicCreate(Texture2D)
@@ -203,6 +198,8 @@ public:
     TextureCube();
 
     void fromFile(const std::string &path, uint face, uint dataType = GL_UNSIGNED_BYTE, bool flipImage = false);
+    void update() override;
+
     static std::map<uint, uint> defaultParams();
 
     implementVariadicCreate(TextureCube)

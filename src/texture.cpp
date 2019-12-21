@@ -193,16 +193,6 @@ void Texture::setWidthHeight(const uint _width, const uint _height) {
     height = _height;
 }
 
-void Texture::update() {
-    // last 3 params never used, but must be correct:
-    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
-    glTexImage2D(target, lod, format, width, height, 0, Red, GL_BYTE, nullptr);
-}
-
-void Texture::update(const uint dataFormat, const uint dataType, const void *const data) {
-    glTexImage2D(target, lod, format, width, height, 0, dataFormat, dataType, data);
-}
-
 void Texture::unbind() {
     glBindTexture(target, 0);
 }
@@ -262,6 +252,25 @@ void Texture2D::fromFile(const std::string &path, const uint dataType, const boo
     texFromFile(path, GL_TEXTURE_2D, dataType, flipImage);
 }
 
+// GL_INVALID_OPERATION is generated if internalformat is GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16,
+// GL_DEPTH_COMPONENT24, or GL_DEPTH_COMPONENT32F, and format is not GL_DEPTH_COMPONENT
+// https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
+#define _findCorrectDataFormat \
+uint dataFormat = Red; \
+if (format == DepthComponent) \
+    dataFormat = DepthComponent;
+
+void Texture2D::update() {
+    // last 3 params never used, but must be correct:
+    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
+    _findCorrectDataFormat
+    glTexImage2D(target, lod, format, width, height, 0, dataFormat, GL_BYTE, nullptr);
+}
+
+void Texture2D::update(const uint dataFormat, const uint dataType, const void *const data) {
+    glTexImage2D(target, lod, format, width, height, 0, dataFormat, dataType, data);
+}
+
 map<uint, uint> Texture2D::defaultParams() {
     return map<uint, uint> {
         pair<uint, uint> {MinFilter, Linear},
@@ -275,6 +284,14 @@ TextureCube::TextureCube(): Texture(GL_TEXTURE_CUBE_MAP) {}
 
 void TextureCube::fromFile(const std::string &path, uint face, uint dataType, bool flipImage) {
     texFromFile(path, face, dataType, flipImage);
+}
+
+void TextureCube::update() {
+    // last 3 params never used, but must be correct:
+    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
+    _findCorrectDataFormat
+    for (uint i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, lod, format, width, height, 0, dataFormat, GL_BYTE, nullptr);
 }
 
 map<uint, uint> TextureCube::defaultParams() {
