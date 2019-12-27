@@ -6,7 +6,7 @@
     call; \
     int err = glGetError(); \
     if (err != 0) \
-        std::cerr << "Error " << err << " in " << #call << "\n\n"; \
+        std::cerr << "Error " << err << " in " #call "\n\n"; \
 }
 
 namespace algine {
