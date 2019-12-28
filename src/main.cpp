@@ -560,11 +560,11 @@ void initShaders() {
     for (size_t j = 0; j < 2; j++) {
         blurBloomShaders[j]->use();
         for (int i = 0; i < bloomBlurKernelRadius; i++)
-            ShaderProgram::set(blurBloomShaders[j]->getLocation(AlgineNames::BlurShader::Kernel) + (bloomBlurKernelRadius - 1 - i), kernelBloom[i]);
+            ShaderProgram::setFloat(blurBloomShaders[j]->getLocation(AlgineNames::BlurShader::Kernel) + (bloomBlurKernelRadius - 1 - i), kernelBloom[i]);
 
         blurCoCShaders[j]->use();
         for (int i = 0; i < cocBlurKernelRadius; i++)
-            ShaderProgram::set(blurCoCShaders[j]->getLocation(AlgineNames::BlurShader::Kernel) + (cocBlurKernelRadius - 1 - i), kernelCoC[i]);
+            ShaderProgram::setFloat(blurCoCShaders[j]->getLocation(AlgineNames::BlurShader::Kernel) + (cocBlurKernelRadius - 1 - i), kernelCoC[i]);
     }
 
     glUseProgram(0);
@@ -581,43 +581,43 @@ void initShaders() {
 
     // configuring CS
     colorShader->use();
-    colorShader->set(AlgineNames::ColorShader::Material::AmbientTex, 0);
-    colorShader->set(AlgineNames::ColorShader::Material::DiffuseTex, 1);
-    colorShader->set(AlgineNames::ColorShader::Material::SpecularTex, 2);
-    colorShader->set(AlgineNames::ColorShader::Material::NormalTex, 3);
-    colorShader->set(AlgineNames::ColorShader::Material::ReflectionStrengthTex, 4);
-    colorShader->set(AlgineNames::ColorShader::Material::JitterTex, 5);
-    colorShader->set(AlgineNames::ColorShader::ShadowOpacity, shadowOpacity);
+    colorShader->setInt(AlgineNames::ColorShader::Material::AmbientTex, 0);
+    colorShader->setInt(AlgineNames::ColorShader::Material::DiffuseTex, 1);
+    colorShader->setInt(AlgineNames::ColorShader::Material::SpecularTex, 2);
+    colorShader->setInt(AlgineNames::ColorShader::Material::NormalTex, 3);
+    colorShader->setInt(AlgineNames::ColorShader::Material::ReflectionStrengthTex, 4);
+    colorShader->setInt(AlgineNames::ColorShader::Material::JitterTex, 5);
+    colorShader->setFloat(AlgineNames::ColorShader::ShadowOpacity, shadowOpacity);
 
     // configuring CubemapShader
     skyboxShader->use();
-    skyboxShader->set(AlgineNames::CubemapShader::Color, glm::vec3(0.125f));
-    skyboxShader->set(AlgineNames::CubemapShader::PosScaling, 64.0f);
+    skyboxShader->setVec3(AlgineNames::CubemapShader::Color, glm::vec3(0.125f));
+    skyboxShader->setFloat(AlgineNames::CubemapShader::PosScaling, 64.0f);
 
     // blend setting
     blendShader->use();
-    blendShader->set(AlgineNames::BlendBloomShader::BaseImage, 0); // GL_TEXTURE0
-    blendShader->set(AlgineNames::BlendBloomShader::BloomImage, 1); // GL_TEXTURE1
-    blendShader->set(AlgineNames::BlendBloomShader::Exposure, blendExposure);
-    blendShader->set(AlgineNames::BlendBloomShader::Gamma, blendGamma);
+    blendShader->setInt(AlgineNames::BlendBloomShader::BaseImage, 0); // GL_TEXTURE0
+    blendShader->setInt(AlgineNames::BlendBloomShader::BloomImage, 1); // GL_TEXTURE1
+    blendShader->setFloat(AlgineNames::BlendBloomShader::Exposure, blendExposure);
+    blendShader->setFloat(AlgineNames::BlendBloomShader::Gamma, blendGamma);
 
     // dof blur setting
     for (size_t i = 0; i < 2; i++) {
         renderer.dofBlurShaders[i]->use();
-        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::BaseImage, 0);
-        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::CoCMap, 1);
-        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::PositionMap, 2);
-        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::BleedingMinDeltaZ, bleedingEliminationMinDeltaZ);
-        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::BleedingMinDeltaCoC, bleedingEliminationMinDeltaCoC);
-        renderer.dofBlurShaders[i]->set(AlgineNames::DOFShader::BleedingMaxFocusCoC, bleedingEliminationMaxFocusCoC);
+        renderer.dofBlurShaders[i]->setInt(AlgineNames::DOFShader::BaseImage, 0);
+        renderer.dofBlurShaders[i]->setInt(AlgineNames::DOFShader::CoCMap, 1);
+        renderer.dofBlurShaders[i]->setInt(AlgineNames::DOFShader::PositionMap, 2);
+        renderer.dofBlurShaders[i]->setFloat(AlgineNames::DOFShader::BleedingMinDeltaZ, bleedingEliminationMinDeltaZ);
+        renderer.dofBlurShaders[i]->setFloat(AlgineNames::DOFShader::BleedingMinDeltaCoC, bleedingEliminationMinDeltaCoC);
+        renderer.dofBlurShaders[i]->setFloat(AlgineNames::DOFShader::BleedingMaxFocusCoC, bleedingEliminationMaxFocusCoC);
     }
 
     // screen space setting
     ssrShader->use();
-    ssrShader->set(AlgineNames::SSRShader::NormalMap, 1);
-    ssrShader->set(AlgineNames::SSRShader::SSRValuesMap, 2);
-    ssrShader->set(AlgineNames::SSRShader::PositionMap, 3);
-    glUseProgram(0);
+    ssrShader->setInt(AlgineNames::SSRShader::NormalMap, 1);
+    ssrShader->setInt(AlgineNames::SSRShader::SSRValuesMap, 2);
+    ssrShader->setInt(AlgineNames::SSRShader::PositionMap, 3);
+    ssrShader->reset();
 }
 
 /**
@@ -726,7 +726,7 @@ void initShadowMaps() {
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
     // TODO: maybe move it to LightDataSetter?
     for (int i = 0; i < pointLightsLimit; i++) {
-        ShaderProgram::set(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypePointLight, i), POINT_LIGHT_TSID + i);
+        ShaderProgram::setInt(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypePointLight, i), POINT_LIGHT_TSID + i);
 		glActiveTexture(GL_TEXTURE0 + POINT_LIGHT_TSID + i);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
@@ -736,7 +736,7 @@ void initShadowMaps() {
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
     // Note: Mesa drivers require int as sampler, not uint
     for (int i = 0; i < dirLightsLimit; i++) {
-        ShaderProgram::set(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypeDirLight, i), DIR_LIGHT_TSID + i);
+        ShaderProgram::setInt(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypeDirLight, i), DIR_LIGHT_TSID + i);
 		glActiveTexture(GL_TEXTURE0 + DIR_LIGHT_TSID + i);
 		glBindTexture(GL_TEXTURE_2D, 0);
     }
@@ -747,8 +747,8 @@ void initShadowMaps() {
 
 void initShadowCalculation() {
     colorShader->use();
-    colorShader->set(AlgineNames::ColorShader::ShadowDiskRadiusK, diskRadius_k);
-    colorShader->set(AlgineNames::ColorShader::ShadowDiskRadiusMin, diskRadius_min);
+    colorShader->setFloat(AlgineNames::ColorShader::ShadowDiskRadiusK, diskRadius_k);
+    colorShader->setFloat(AlgineNames::ColorShader::ShadowDiskRadiusMin, diskRadius_min);
     glUseProgram(0);
 }
 
@@ -759,9 +759,9 @@ void initDOF() {
     dofCoCShader->use();
     //dofCoCShader->set(ALGINE_DOF_SIGMA_MAX, dof_max_sigma);
     //dofCoCShader->set(ALGINE_DOF_SIGMA_MIN, dof_min_sigma);
-    dofCoCShader->set(AlgineNames::DOFShader::Aperture, dofAperture);
-    dofCoCShader->set(AlgineNames::DOFShader::ImageDistance, dofImageDistance);
-    dofCoCShader->set(AlgineNames::DOFShader::PlaneInFocus, -1.0f);
+    dofCoCShader->setFloat(AlgineNames::DOFShader::Aperture, dofAperture);
+    dofCoCShader->setFloat(AlgineNames::DOFShader::ImageDistance, dofImageDistance);
+    dofCoCShader->setFloat(AlgineNames::DOFShader::PlaneInFocus, -1.0f);
     glUseProgram(0);
 }
 
@@ -789,7 +789,7 @@ void recycleAll() {
 void sendLampsData() {
     lightDataSetter.setPointLightsCount(pointLampsCount);
     lightDataSetter.setDirLightsCount(dirLampsCount);
-    colorShader->set(AlgineNames::ColorShader::CameraPos, camera.getPos());
+    colorShader->setVec3(AlgineNames::ColorShader::CameraPos, camera.getPos());
     for (size_t i = 0; i < pointLampsCount; i++)
         lightDataSetter.setPos(pointLamps[i], i);
     for (size_t i = 0; i < dirLampsCount; i++)
@@ -806,10 +806,10 @@ glm::mat4 getMVMatrix() {
 }
 
 void updateMatrices() {
-    colorShader->set(AlgineNames::ColorShader::MVPMatrix, getMVPMatrix());
-    colorShader->set(AlgineNames::ColorShader::MVMatrix, getMVMatrix());
-    colorShader->set(AlgineNames::ColorShader::ModelMatrix, value modelMatrix);
-    colorShader->set(AlgineNames::ColorShader::ViewMatrix, camera.getViewMatrix());
+    colorShader->setMat4(AlgineNames::ColorShader::MVPMatrix, getMVPMatrix());
+    colorShader->setMat4(AlgineNames::ColorShader::MVMatrix, getMVMatrix());
+    colorShader->setMat4(AlgineNames::ColorShader::ModelMatrix, value modelMatrix);
+    colorShader->setMat4(AlgineNames::ColorShader::ViewMatrix, camera.getViewMatrix());
 }
 
 /**
@@ -821,12 +821,12 @@ void drawModelDM(const Model &model, ShaderProgram *program, const glm::mat4 &ma
 
     if (model.shape->bonesPerVertex != 0) {
         for (int i = 0; i < model.shape->bones.size(); i++) {
-            program->set(program->getLocation(AlgineNames::ShadowShader::Bones) + i, model.shape->bones[i].finalTransformation);
+            program->setMat4(program->getLocation(AlgineNames::ShadowShader::Bones) + i, model.shape->bones[i].finalTransformation);
         }
     }
 
-    program->set(AlgineNames::ShadowShader::BoneAttribsPerVertex, (int)(model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1)));
-    program->set(AlgineNames::ShadowShader::TransformationMatrix, mat * model.m_transform);
+    program->setInt(AlgineNames::ShadowShader::BoneAttribsPerVertex, (int)(model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1)));
+    program->setMat4(AlgineNames::ShadowShader::TransformationMatrix, mat * model.m_transform);
     
     for (size_t i = 0; i < model.shape->meshes.size(); i++) {
         glDrawElements(GL_TRIANGLES, model.shape->meshes[i].count, GL_UNSIGNED_INT, reinterpret_cast<void*>(model.shape->meshes[i].start * sizeof(uint)));
@@ -841,11 +841,11 @@ void drawModel(const Model &model) {
     
     if (model.shape->bonesPerVertex != 0) {
         for (int i = 0; i < model.shape->bones.size(); i++) {
-            colorShader->set(colorShader->getLocation(AlgineNames::ColorShader::Bones) + i, model.shape->bones[i].finalTransformation);
+            colorShader->setMat4(colorShader->getLocation(AlgineNames::ColorShader::Bones) + i, model.shape->bones[i].finalTransformation);
         }
     }
 
-    colorShader->set(AlgineNames::ColorShader::BoneAttribsPerVertex, (int)(model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1)));
+    colorShader->setInt(AlgineNames::ColorShader::BoneAttribsPerVertex, (int)(model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1)));
     modelMatrix = &model.m_transform;
 	updateMatrices();
     for (size_t i = 0; i < model.shape->meshes.size(); i++) {
@@ -856,10 +856,10 @@ void drawModel(const Model &model) {
         texture2DAB(4, model.shape->meshes[i].mat.reflectionTexture);
         texture2DAB(5, model.shape->meshes[i].mat.jitterTexture);
 
-        colorShader->set(AlgineNames::ColorShader::Material::AmbientStrength, model.shape->meshes[i].mat.ambientStrength);
-        colorShader->set(AlgineNames::ColorShader::Material::DiffuseStrength, model.shape->meshes[i].mat.diffuseStrength);
-        colorShader->set(AlgineNames::ColorShader::Material::SpecularStrength, model.shape->meshes[i].mat.specularStrength);
-        colorShader->set(AlgineNames::ColorShader::Material::Shininess, model.shape->meshes[i].mat.shininess);
+        colorShader->setFloat(AlgineNames::ColorShader::Material::AmbientStrength, model.shape->meshes[i].mat.ambientStrength);
+        colorShader->setFloat(AlgineNames::ColorShader::Material::DiffuseStrength, model.shape->meshes[i].mat.diffuseStrength);
+        colorShader->setFloat(AlgineNames::ColorShader::Material::SpecularStrength, model.shape->meshes[i].mat.specularStrength);
+        colorShader->setFloat(AlgineNames::ColorShader::Material::Shininess, model.shape->meshes[i].mat.shininess);
 
         glDrawElements(GL_TRIANGLES, model.shape->meshes[i].count, GL_UNSIGNED_INT, reinterpret_cast<void*>(model.shape->meshes[i].start * sizeof(uint)));
     }
@@ -937,8 +937,8 @@ void render() {
     glDepthFunc(GL_LEQUAL);
     glDrawBuffers(3, colorAttachment02);
     skyboxShader->use();
-    skyboxShader->set(AlgineNames::CubemapShader::ViewMatrix, glm::mat3(camera.getViewMatrix()));
-    skyboxShader->set(AlgineNames::CubemapShader::TransformationMatrix, camera.getProjectionMatrix() * glm::mat4(glm::mat3(camera.getViewMatrix())));
+    skyboxShader->setMat3(AlgineNames::CubemapShader::ViewMatrix, glm::mat3(camera.getViewMatrix()));
+    skyboxShader->setMat4(AlgineNames::CubemapShader::TransformationMatrix, camera.getProjectionMatrix() * glm::mat4(glm::mat3(camera.getViewMatrix())));
     skybox->use(0);
     skyboxRenderer.render();
     glDepthFunc(GL_LESS);
@@ -998,8 +998,8 @@ void display() {
         renderToDepthMap(i);
 	
     ssrShader->use();
-    ssrShader->set(AlgineNames::SSRShader::ProjectionMatrix, camera.getProjectionMatrix());
-    ssrShader->set(AlgineNames::SSRShader::ViewMatrix, camera.getViewMatrix());
+    ssrShader->setMat4(AlgineNames::SSRShader::ProjectionMatrix, camera.getProjectionMatrix());
+    ssrShader->setMat4(AlgineNames::SSRShader::ViewMatrix, camera.getViewMatrix());
 
 	/* --- color rendering --- */
     glClear(GL_DEPTH_BUFFER_BIT); // color will cleared by quad rendering
@@ -1145,7 +1145,7 @@ void mouse_callback(MouseEventListener::MouseEvent *event) {
             std::cout << "x: " << pixels[0] << "; y: " << pixels[1] << "; z: " << pixels[2] << "\n";
         
             dofCoCShader->use();
-            dofCoCShader->set(AlgineNames::DOFShader::PlaneInFocus, pixels[2] == 0 ? FLT_EPSILON : pixels[2]);
+            dofCoCShader->setFloat(AlgineNames::DOFShader::PlaneInFocus, pixels[2] == 0 ? FLT_EPSILON : pixels[2]);
             glUseProgram(0);
         
             delete[] pixels;

@@ -325,74 +325,74 @@ void LightDataSetter::indexPointLightLocations(ShaderProgram *const lightShader,
 }
 
 void LightDataSetter::setDirLightsCount(const uint count) {
-    ShaderProgram::set(dirLightsCount, count);
+    ShaderProgram::setUint(dirLightsCount, count);
 }
 
 void LightDataSetter::setPointLightsCount(const uint count) {
-    ShaderProgram::set(pointLightsCount, count);
+    ShaderProgram::setUint(pointLightsCount, count);
 }
 
 void LightDataSetter::setKc(const Light &light, uint index) {
-    ShaderProgram::set(lightLocations[light.type][index]->kc, light.m_kc);
+    ShaderProgram::setFloat(lightLocations[light.type][index]->kc, light.m_kc);
 }
 
 void LightDataSetter::setKl(const Light &light, uint index) {
-    ShaderProgram::set(lightLocations[light.type][index]->kl, light.m_kl);
+    ShaderProgram::setFloat(lightLocations[light.type][index]->kl, light.m_kl);
 }
 
 void LightDataSetter::setKq(const Light &light, uint index) {
-    ShaderProgram::set(lightLocations[light.type][index]->kq, light.m_kq);
+    ShaderProgram::setFloat(lightLocations[light.type][index]->kq, light.m_kq);
 }
 
 void LightDataSetter::setPos(const Light &light, uint index) {
-    ShaderProgram::set(lightLocations[light.type][index]->pos, light.m_pos);
+    ShaderProgram::setVec3(lightLocations[light.type][index]->pos, light.m_pos);
 }
 
 void LightDataSetter::setColor(const Light &light, uint index) {
-    ShaderProgram::set(lightLocations[light.type][index]->color, light.m_color);
+    ShaderProgram::setVec3(lightLocations[light.type][index]->color, light.m_color);
 }
 
 void LightDataSetter::setShadowMap(const DirLight &light, uint index, uint textureSlot) {
-    ShaderProgram::set(lightLocations[Light::TypeDirLight][index]->shadowMap, (int)textureSlot);
+    ShaderProgram::setInt(lightLocations[Light::TypeDirLight][index]->shadowMap, textureSlot);
     light.shadowMap->use(textureSlot);
 }
 
 void LightDataSetter::setMinBias(const DirLight &light, uint index) {
-    ShaderProgram::set(reinterpret_cast<DirLightLocations*>(lightLocations[Light::TypeDirLight][index])->minBias, light.m_minBias);
+    ShaderProgram::setFloat(reinterpret_cast<DirLightLocations*>(lightLocations[Light::TypeDirLight][index])->minBias, light.m_minBias);
 }
 
 void LightDataSetter::setMaxBias(const DirLight &light, uint index) {
-    ShaderProgram::set(reinterpret_cast<DirLightLocations*>(lightLocations[Light::TypeDirLight][index])->maxBias, light.m_maxBias);
+    ShaderProgram::setFloat(reinterpret_cast<DirLightLocations*>(lightLocations[Light::TypeDirLight][index])->maxBias, light.m_maxBias);
 }
 
 void LightDataSetter::setLightMatrix(const DirLight &light, uint index) {
-    ShaderProgram::set(reinterpret_cast<DirLightLocations*>(lightLocations[Light::TypeDirLight][index])->lightMatrix, light.m_lightSpace);
+    ShaderProgram::setMat4(reinterpret_cast<DirLightLocations*>(lightLocations[Light::TypeDirLight][index])->lightMatrix, light.m_lightSpace);
 }
 
 void LightDataSetter::setShadowMap(const PointLight &light, uint index, uint textureSlot) {
-    ShaderProgram::set(lightLocations[Light::TypePointLight][index]->shadowMap, (int)textureSlot);
+    ShaderProgram::setInt(lightLocations[Light::TypePointLight][index]->shadowMap, textureSlot);
     light.shadowMap->use(textureSlot);
 }
 
 void LightDataSetter::setFarPlane(const PointLight &light, uint index) {
-    ShaderProgram::set(reinterpret_cast<PointLightLocations*>(lightLocations[Light::TypePointLight][index])->farPlane, light.m_far);
+    ShaderProgram::setFloat(reinterpret_cast<PointLightLocations*>(lightLocations[Light::TypePointLight][index])->farPlane, light.m_far);
 }
 
 void LightDataSetter::setBias(const PointLight &light, uint index) {
-    ShaderProgram::set(reinterpret_cast<PointLightLocations*>(lightLocations[Light::TypePointLight][index])->bias, light.m_bias);
+    ShaderProgram::setFloat(reinterpret_cast<PointLightLocations*>(lightLocations[Light::TypePointLight][index])->bias, light.m_bias);
 }
 
 void LightDataSetter::setShadowShaderPos(const PointLight &light) {
-    ShaderProgram::set(shadowShaderPos, light.m_pos);
+    ShaderProgram::setVec3(shadowShaderPos, light.m_pos);
 }
 
 void LightDataSetter::setShadowShaderFarPlane(const PointLight &light) {
-    ShaderProgram::set(shadowShaderFarPlane, light.m_far);
+    ShaderProgram::setFloat(shadowShaderFarPlane, light.m_far);
 }
 
 void LightDataSetter::setShadowShaderMatrices(const PointLight &light) {
     for (int i = 0; i < 6; i++)
-        ShaderProgram::set(shadowShaderMatrices + i, light.m_lightSpaceMatrices[i]);
+        ShaderProgram::setMat4(shadowShaderMatrices + i, light.m_lightSpaceMatrices[i]);
 }
 
 #define checkIsDirLight \

@@ -405,35 +405,67 @@ void ShaderProgram::reset() {
     glUseProgram(0);
 }
 
-void ShaderProgram::set(const int location, const bool p) {
+void ShaderProgram::setBool(const int location, const bool p) {
     glUniform1i(location, p);
 }
 
-void ShaderProgram::set(const int location, const int p) {
+void ShaderProgram::setInt(const int location, const int p) {
     glUniform1i(location, p);
 }
 
-void ShaderProgram::set(const int location, const uint p) {
+void ShaderProgram::setUint(const int location, const uint p) {
     glUniform1ui(location, p);
 }
 
-void ShaderProgram::set(const int location, const float p) {
+void ShaderProgram::setFloat(const int location, const float p) {
     glUniform1f(location, p);
 }
 
-void ShaderProgram::set(const int location, const glm::vec3 &p) {
+void ShaderProgram::setVec3(const int location, const glm::vec3 &p) {
     glUniform3fv(location, 1, glm::value_ptr(p));
 }
 
-void ShaderProgram::set(const int location, const glm::vec4 &p) {
+void ShaderProgram::setVec4(const int location, const glm::vec4 &p) {
     glUniform4fv(location, 1, glm::value_ptr(p));
 }
 
-void ShaderProgram::set(const int location, const glm::mat3 &p) {
+void ShaderProgram::setMat3(const int location, const glm::mat3 &p) {
     glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(p));
 }
 
-void ShaderProgram::set(const int location, const glm::mat4 &p) {
+void ShaderProgram::setMat4(const int location, const glm::mat4 &p) {
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(p));
+}
+
+void ShaderProgram::setBool(const std::string &location, const bool p) {
+    setBool(getLocation(location), p);
+}
+
+void ShaderProgram::setInt(const std::string &location, const int p) {
+    setInt(getLocation(location), p);
+}
+
+void ShaderProgram::setUint(const std::string &location, const uint p) {
+    setUint(getLocation(location), p);
+}
+
+void ShaderProgram::setFloat(const std::string &location, const float p) {
+    setFloat(getLocation(location), p);
+}
+
+void ShaderProgram::setVec3(const std::string &location, const glm::vec3 &p) {
+    setVec3(getLocation(location), p);
+}
+
+void ShaderProgram::setVec4(const std::string &location, const glm::vec4 &p) {
+    setVec4(getLocation(location), p);
+}
+
+void ShaderProgram::setMat3(const std::string &location, const glm::mat3 &p) {
+    setMat3(getLocation(location), p);
+}
+
+void ShaderProgram::setMat4(const std::string &location, const glm::mat4 &p) {
+    setMat4(getLocation(location), p);
 }
 }

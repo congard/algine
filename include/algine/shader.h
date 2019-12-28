@@ -108,25 +108,29 @@ public:
 
     void use();
     static void reset();
-    static void set(int location, bool p);
-    static void set(int location, int p);
-    static void set(int location, uint p);
-    static void set(int location, float p);
-    static void set(int location, const glm::vec3 &p);
-    static void set(int location, const glm::vec4 &p);
-    static void set(int location, const glm::mat3 &p);
-    static void set(int location, const glm::mat4 &p);
+    static void setBool(int location, bool p);
+    static void setInt(int location, int p);
+    static void setUint(int location, uint p);
+    static void setFloat(int location, float p);
+    static void setVec3(int location, const glm::vec3 &p);
+    static void setVec4(int location, const glm::vec4 &p);
+    static void setMat3(int location, const glm::mat3 &p);
+    static void setMat4(int location, const glm::mat4 &p);
+
+    void setBool(const std::string &location, bool p);
+    void setInt(const std::string &location, int p);
+    void setUint(const std::string &location, uint p);
+    void setFloat(const std::string &location, float p);
+    void setVec3(const std::string &location, const glm::vec3 &p);
+    void setVec4(const std::string &location, const glm::vec4 &p);
+    void setMat3(const std::string &location, const glm::mat3 &p);
+    void setMat4(const std::string &location, const glm::mat4 &p);
 
     template<typename...Args>
     static void create(Args&...args) {
         ShaderProgram** arr[] = {&args...};
         for (usize i = 0; i < sizeof...(args); i++)
             *arr[i] = new ShaderProgram();
-    }
-
-    template<typename T>
-    void set(const std::string &location, const T &p) {
-        set(getLocation(location), p);
     }
 };
 }
