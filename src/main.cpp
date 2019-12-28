@@ -47,7 +47,7 @@
 // point light texture start id
 #define POINT_LIGHT_TSID 6
 // dir light texture start id
-#define DIR_LIGHT_TSID POINT_LIGHT_TSID + pointLampsCount
+#define DIR_LIGHT_TSID (int)(POINT_LIGHT_TSID + pointLightsLimit)
 #define SHAPES_COUNT 4
 #define MODELS_COUNT 3
 
@@ -264,6 +264,11 @@ void createShapes(const std::string &path, const uint params, const size_t id, c
 
 /* init code begin */
 
+// NOTE: uncomment if you have issues
+// send report to mailto:dbcongard@gmail.com
+// or create new issue: https://github.com/congard/algine
+// #define DEBUG_OUTPUT
+
 /**
  * Init GL: creating window, etc.
  */
@@ -277,6 +282,9 @@ void initGL() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+#ifdef DEBUG_OUTPUT
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
 
     // Create a GLFWwindow object that we can use for GLFW's functions
     window = FULLSCREEN ?
@@ -300,6 +308,10 @@ void initGL() {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 	glDepthMask(true);
+
+#ifdef DEBUG_OUTPUT
+    enableGLDebugOutput();
+#endif
 
     std::cout << "Your GPU vendor: " << getGPUVendor() << "\nYour GPU renderer: " << getGPURenderer() << "\n";
 }
@@ -717,9 +729,9 @@ void initShadowMaps() {
         lightDataSetter.setShadowMap(pointLamps[i], i, POINT_LIGHT_TSID + i);
 
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
+    // Note: Mesa drivers require int as sampler, not uint
     for (int i = 0; i < dirLightsLimit; i++) {
-        ShaderProgram::set(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypeDirLight, i),
-                           static_cast<int>(DIR_LIGHT_TSID) + i); // Mesa drivers require int as sampler, not uint
+        ShaderProgram::set(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypeDirLight, i), DIR_LIGHT_TSID + i);
 		glActiveTexture(GL_TEXTURE0 + DIR_LIGHT_TSID + i);
 		glBindTexture(GL_TEXTURE_2D, 0);
     }
