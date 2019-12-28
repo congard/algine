@@ -6,24 +6,29 @@
  * @author congard
  */
 
-// #define debug_sm
-
 #define GLM_FORCE_CTOR_INIT
 
 #include <iostream>
 #include <thread>
 #include <chrono>
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include <assimp/postprocess.h>
-#include <glm/gtc/type_ptr.hpp>
-
-// TODO: Something to do with ALGINE_LOGGING...
-//  This macro appears in some constructors / operators / destructors.
-//  Maybe simply remove?
-#define ALGINE_LOGGING
-
-#include <algine/algine.h>
 #include <tulz/Path>
+
+#include <algine/algine_renderer.h>
+#include <algine/framebuffer.h>
+#include <algine/light.h>
+#include <algine/constants.h>
+#include <algine/camera.h>
+#include <algine/renderbuffer.h>
+#include <algine/debug.h>
+#include <algine/gputils.h>
+#include <algine/event.h>
+#include <algine/shader.h>
+#include <algine/texture.h>
 
 #define SHADOW_MAP_RESOLUTION 1024
 #define bloomK 0.5f
@@ -1026,9 +1031,7 @@ int main() {
     
     mouseEventListener.setCallback(mouse_callback);
 
-    #ifndef debug_sm
     std::thread animate_scene_th(animate_scene);
-    #endif
 
     double currentTime, previousTime = glfwGetTime();
     size_t frameCount = 0;
@@ -1049,14 +1052,9 @@ int main() {
         glfwSwapBuffers(window);
     }
 
-    #ifndef debug_sm
     animate_scene_th.detach();
-    #endif
-
     recycleAll();
-
-    // Terminate GLFW, clearing any resources allocated by GLFW.
-    glfwTerminate();
+    glfwTerminate(); // Terminate GLFW, clearing any resources allocated by GLFW.
     
     std::cout << "Exit with exit code 0\n";
 

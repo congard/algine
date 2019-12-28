@@ -64,10 +64,6 @@ include_directories(contrib)
 include_directories(include)
 
 add_executable(algine
-        contrib/nlohmann/json.hpp
-        contrib/stb/stb_image.h
-        contrib/stb/stb_image_write.h
-        include/algine/algine.h
         include/algine/algine_renderer.h
         include/algine/animation.h
         include/algine/bone.h
