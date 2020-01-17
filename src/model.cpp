@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include <assimp/Importer.hpp>  // C++ importer interface
+#include <assimp/postprocess.h>
 
 #include <algine/texture.h>
 #include <algine/node.h>
@@ -13,294 +14,12 @@
 #include <tulz/Path>
 
 using namespace tulz;
+using namespace std;
 
 namespace algine {
-void Mesh::delMaterial() {
-    mat.recycle();
-}
-
-void Mesh::recycle() {
-    delMaterial();
-}
-
-Mesh Mesh::processMesh(const aiMesh *aimesh, const aiScene *scene, Geometry &geometry, AlgineMTL *amtl) {
-    Mesh mesh;
-    mesh.start = geometry.indices.size();
-    uint verticesAtBeggining = geometry.vertices.size() / 3;
-    
-    // allocating space for vertices, normals, texCoords, tangents and bitangents
-    geometry.vertices.reserve(aimesh->mNumVertices * 3);
-    if (aimesh->HasNormals()) geometry.normals.reserve(aimesh->mNumVertices * 3);
-    if (aimesh->HasTextureCoords(0)) geometry.texCoords.reserve(aimesh->mNumVertices * 2);
-    if (aimesh->HasTangentsAndBitangents()) {
-        geometry.tangents.reserve(aimesh->mNumVertices * 3);
-        geometry.bitangents.reserve(aimesh->mNumVertices * 3);
-    }
-
-    for (size_t i = 0; i < aimesh->mNumVertices; i++) {
-        // vertices
-        geometry.vertices.push_back(aimesh->mVertices[i].x);
-        geometry.vertices.push_back(aimesh->mVertices[i].y);
-        geometry.vertices.push_back(aimesh->mVertices[i].z);
-
-        // normals
-        if (aimesh->HasNormals()) {
-            geometry.normals.push_back(aimesh->mNormals[i].x);
-            geometry.normals.push_back(aimesh->mNormals[i].y);
-            geometry.normals.push_back(aimesh->mNormals[i].z);
-        }
-
-        // texCoords
-        if (aimesh->HasTextureCoords(0)) {
-            geometry.texCoords.push_back(aimesh->mTextureCoords[0][i].x);
-            geometry.texCoords.push_back(aimesh->mTextureCoords[0][i].y);
-        }
-
-        // tangents and bitangents
-        if (aimesh->HasTangentsAndBitangents()) {
-            geometry.tangents.push_back(aimesh->mTangents[i].x);
-            geometry.tangents.push_back(aimesh->mTangents[i].y);
-            geometry.tangents.push_back(aimesh->mTangents[i].z);
-
-            geometry.bitangents.push_back(aimesh->mBitangents[i].x);
-            geometry.bitangents.push_back(aimesh->mBitangents[i].y);
-            geometry.bitangents.push_back(aimesh->mBitangents[i].z);
-        }
-    }
-
-    // faces
-    for (size_t i = 0; i < aimesh->mNumFaces; i++) {
-        for (size_t j = 0; j < aimesh->mFaces[i].mNumIndices; j++) {
-            geometry.indices.push_back(aimesh->mFaces[i].mIndices[j] + verticesAtBeggining);
-        }
-    }
-
-    mesh.count = geometry.indices.size() - mesh.start;
-
-    // material
-    aiString tmp_str;
-    aiMaterial *aimat = scene->mMaterials[aimesh->mMaterialIndex];
-
-    mesh.mat.name = aimat->GetName().C_Str();
-
-    aimat->GetTexture(aiTextureType_AMBIENT, 0, &tmp_str);
-    mesh.mat.texAmbientPath = tmp_str.C_Str();
-
-    aimat->GetTexture(aiTextureType_DIFFUSE, 0, &tmp_str);
-    mesh.mat.texDiffusePath = tmp_str.C_Str();
-
-    aimat->GetTexture(aiTextureType_SPECULAR, 0, &tmp_str);
-    mesh.mat.texSpecularPath = tmp_str.C_Str();
-
-    aimat->GetTexture(aiTextureType_NORMALS, 0, &tmp_str);
-    mesh.mat.texNormalPath = tmp_str.C_Str();
-
-    aimat->Get(AI_MATKEY_SHININESS, mesh.mat.shininess);
-
-    if (amtl != nullptr) {
-        tmp_str = aimat->GetName();
-        int index = amtl->forName(tmp_str.C_Str());
-        if (index >= 0) {
-            AlgineMT amt = amtl->materials[index];
-
-            // algine specific material params
-            mesh.mat.texReflectionPath = amt.texReflectionPath;
-            mesh.mat.texJitterPath = amt.texJitterPath;
-            mesh.mat.ambientStrength = amt.ambientStrength;
-            mesh.mat.diffuseStrength = amt.diffuseStrength;
-            mesh.mat.specularStrength = amt.specularStrength;
-            mesh.mat.reflection = amt.reflection;
-            mesh.mat.jitter = amt.jitter;
-
-            // material params
-            // sine - set if not empty
-            #define sine(name) \
-                if (!amt.name.empty()) mesh.mat.name = amt.name
-            sine(texAmbientPath);
-            sine(texDiffusePath);
-            sine(texSpecularPath);
-            sine(texNormalPath);
-            if (amt.shininess != -1)
-                mesh.mat.shininess = amt.shininess;
-            #undef sine
-        }
-    }
-
-    // the result is undefined if shininess ≤ 0
-    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/pow.xhtml
-    // FLT_EPSILON - min positive value for float
-    if (mesh.mat.shininess == 0) mesh.mat.shininess = FLT_EPSILON;
-
-    return mesh;
-}
-
-uint Shape::loadTex(const std::string &fullpath, const std::string &path) {
-    std::string absolutePath = Path(path).isAbsolute() ? path : Path::join(fullpath, path);
-    
-    if (loadedTextures.find(absolutePath) != loadedTextures.end())
-        return loadedTextures[absolutePath]; // texture already loaded
-    else {
-        GLuint id = loadTexture(absolutePath.c_str());
-        loadedTextures[absolutePath] = id;
-        return id;
-    }
-}
-
-size Shape::getBoneIndex(const std::string &name) {
-    for (usize i = 0; i < bones.size(); i++)
-        if (bones[i].name == name)
-            return i;
-
-    return -1;
-}
-
-void Shape::loadBones(const aiMesh *aimesh) {
-    std::vector<BoneInfo> binfos; // bone infos
-    binfos.reserve(aimesh->mNumVertices); // allocating space
-    
-    // filling array
-    for (size_t i = 0; i < aimesh->mNumVertices; i++)
-        binfos.emplace_back(bonesPerVertex);
-
-    // loading bone data
-    aiBone *bone;
-    aiVertexWeight *vertexWeight;
-    size boneIndex;
-    for (usize i = 0; i < aimesh->mNumBones; i++) {
-        bone = aimesh->mBones[i];
-        std::string boneName(bone->mName.data);
-
-        if ((boneIndex = getBoneIndex(boneName)) == -1) {
-            boneIndex = bones.size();
-            bones.emplace_back(boneName, getMat4(bone->mOffsetMatrix));
-        }
-
-        for (usize j = 0; j < bone->mNumWeights; j++) {
-            vertexWeight = &(bone->mWeights[j]);
-            binfos[vertexWeight->mVertexId].add(boneIndex, vertexWeight->mWeight);
-        }
-    }
-
-    // converting to a suitable view
-    for (size_t i = 0; i < binfos.size(); i++) {
-        for (size_t j = 0; j < binfos[i].size; j++) {
-            geometry.boneIds.push_back(binfos[i].ids[j]);
-            geometry.boneWeights.push_back(binfos[i].weights[j]);
-        }
-    }
-}
-
-void Shape::processNode(const aiNode *node, const aiScene *scene, AlgineMTL *amtl) {
-    // обработать все полигональные сетки в узле(если есть)
-    for (size_t i = 0; i < node->mNumMeshes; i++) {
-        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes.push_back(Mesh::processMesh(mesh, scene, geometry, amtl));
-        if (bonesPerVertex != 0) loadBones(mesh);
-    }
-    
-    // выполнить ту же обработку и для каждого потомка узла
-    for(size_t i = 0; i < node->mNumChildren; i++) {
-        processNode(node->mChildren[i], scene, amtl);
-    }
-}
-
-// _fullpath - path with textures, not necessary to ends with '/'
-void Shape::loadTextures(const std::string &_fullpath) {
-    // for loadTex we need path ends with '/'. If _fullpath empty, fullpath will be empty too
-    std::string fullpath = _fullpath;
-    if ((_fullpath.find_last_of('/') != (_fullpath.size() - 1)) && !fullpath.empty()) fullpath += '/';
-
-    for (size_t i = 0; i < meshes.size(); i++) {
-        #define mat meshes[i].mat
-        if (!mat.texAmbientPath.empty()) mat.ambientTexture = loadTex(fullpath, mat.texAmbientPath);
-        if (!mat.texDiffusePath.empty()) mat.diffuseTexture = loadTex(fullpath, mat.texDiffusePath);
-        if (!mat.texSpecularPath.empty()) mat.specularTexture = loadTex(fullpath, mat.texSpecularPath);
-        if (!mat.texNormalPath.empty()) mat.normalTexture = loadTex(fullpath, mat.texNormalPath);
-        if (!mat.texReflectionPath.empty()) mat.reflectionTexture = loadTex(fullpath, mat.texReflectionPath);
-        if (!mat.texJitterPath.empty()) mat.jitterTexture = loadTex(fullpath, mat.texJitterPath);
-        #undef mat
-    }
-}
-
-// load texture with full path = current path
-void Shape::loadTextures() {
-    loadTextures(Path::getWorkingDirectory());
-}
-
-void Shape::genBuffers() {
-    #define genBufferForArray(buffer, array) if (!array.empty()) { glGenBuffers(1, &buffer); }
-    
-    genBufferForArray(buffers.vertices, geometry.vertices) // vertices
-    genBufferForArray(buffers.normals, geometry.normals) // normals
-    genBufferForArray(buffers.texCoords, geometry.texCoords) // texCoords
-    genBufferForArray(buffers.tangents, geometry.tangents) // tangents
-    genBufferForArray(buffers.bitangents, geometry.bitangents) // bitangents
-    genBufferForArray(buffers.boneWeights, geometry.boneWeights) // bone weights
-    genBufferForArray(buffers.boneIds, geometry.boneIds) // bone ids
-
-    #define mkArrayBuffer(buffer, array, type) \
-        glBindBuffer(GL_ARRAY_BUFFER, buffer); \
-        glBufferData(GL_ARRAY_BUFFER, sizeof(type) * array.size(), &array[0], GL_STATIC_DRAW);
-
-    #define mkArrayBufferf(buffer, array) if (!array.empty()) { mkArrayBuffer(buffer, array, float) }
-    #define mkArrayBufferui(buffer, array) if (!array.empty()) { mkArrayBuffer(buffer, array, uint) }
-
-    mkArrayBufferf(buffers.vertices, geometry.vertices) // vertices
-    mkArrayBufferf(buffers.normals, geometry.normals) // normals
-    mkArrayBufferf(buffers.texCoords, geometry.texCoords) // texCoords
-    mkArrayBufferf(buffers.tangents, geometry.tangents) // tangents
-    mkArrayBufferf(buffers.bitangents, geometry.bitangents) // bitangents
-    mkArrayBufferf(buffers.boneWeights, geometry.boneWeights) // bone weights
-    mkArrayBufferui(buffers.boneIds, geometry.boneIds) // bone ids
-
-    // indices
-    glGenBuffers(1, &buffers.indices);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.indices);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * geometry.indices.size(), &geometry.indices[0], GL_STATIC_DRAW);
-
-    // to default
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    #undef mkArrayBuffer
-    #undef mkArrayBufferf
-    #undef mkArrayBufferui
-    #undef genBufferForArray
-}
-
 void Shape::delBuffers() {
     glDeleteVertexArrays(vaos.size(), &vaos[0]);
     glDeleteBuffers(8, &buffers.vertices); // deletes ALL buffers from structure `buffers`
-}
-
-void Shape::recycleMeshes() {
-    for (auto & mesh : meshes)
-        mesh.recycle();
-}
-
-void Shape::init(const std::string &path, const uint params) {
-    // Create an instance of the Importer class
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(path, params);
-
-    // If the import failed, report it
-    if (!scene) {
-        std::cout << importer.GetErrorString() << "\n";
-        return;
-    }
-
-    globalInverseTransform = getMat4(scene->mRootNode->mTransformation);
-    glm::inverse(globalInverseTransform);
-
-    rootNode = Node(scene->mRootNode);
-    animations.reserve(scene->mNumAnimations); // allocate space for animations
-    for (size_t i = 0; i < scene->mNumAnimations; i++)
-        animations.emplace_back(scene->mAnimations[i]);
-
-    std::string amtlPath = path.substr(0, path.find_last_of('.')) + ".amtl";
-    AlgineMTL amtl;
-    if (amtl.load(amtlPath)) processNode(scene->mRootNode, scene, &amtl);
-    else processNode(scene->mRootNode, scene);
 }
 
 // creates VAO and adds it into `vaos` array
@@ -337,22 +56,13 @@ void Shape::createVAO(
     glBindVertexArray(0);
 }
 
-void Shape::inverseNormals() {
-    for (size_t i = 0; i < geometry.normals.size(); i++)
-        geometry.normals[i] *= -1;
-}
-
 void Shape::setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation) {
     rootNode.getNode(nodeName)->transformation = transformation;
 }
 
 void Shape::recycle() {
-    // delete all materials and meshes
-    recycleMeshes();
     delBuffers();
 }
-
-std::map<std::string, uint> Shape::loadedTextures;
 
 Model::Model(const uint rotatorType): rotatable(rotatorType) {
     /* empty */
@@ -362,4 +72,353 @@ void Model::updateMatrix() {
     m_transform = m_translation * m_rotation * m_scaling;
 }
 
+inline int getBoneIndex(const Shape *shape, const std::string &name) {
+    for (usize i = 0; i < shape->bones.size(); i++)
+        if (shape->bones[i].name == name)
+            return i;
+
+    return -1;
+}
+
+void ShapeLoader::loadBones(const aiMesh *aimesh) {
+    std::vector<BoneInfo> binfos; // bone infos
+    binfos.reserve(aimesh->mNumVertices); // allocating space
+
+    // filling array
+    for (size_t i = 0; i < aimesh->mNumVertices; i++)
+        binfos.emplace_back(m_shape->bonesPerVertex);
+
+    // loading bone data
+    for (usize i = 0; i < aimesh->mNumBones; i++) {
+        aiBone *bone = aimesh->mBones[i];
+        std::string boneName(bone->mName.data);
+        int boneIndex = getBoneIndex(m_shape, boneName);
+
+        if (boneIndex == -1) {
+            boneIndex = m_shape->bones.size();
+            m_shape->bones.emplace_back(boneName, getMat4(bone->mOffsetMatrix));
+        }
+
+        for (usize j = 0; j < bone->mNumWeights; j++) {
+            aiVertexWeight *vertexWeight = &(bone->mWeights[j]);
+            binfos[vertexWeight->mVertexId].add(boneIndex, vertexWeight->mWeight);
+        }
+    }
+
+    // converting to a suitable view
+    for (size_t i = 0; i < binfos.size(); i++) {
+        for (size_t j = 0; j < binfos[i].size; j++) {
+            m_shape->geometry.boneIds.push_back(binfos[i].ids[j]);
+            m_shape->geometry.boneWeights.push_back(binfos[i].weights[j]);
+        }
+    }
+}
+
+void ShapeLoader::processNode(const aiNode *node, const aiScene *scene, AMTLLoader *amtl) {
+    // обработать все полигональные сетки в узле (если есть)
+    for (size_t i = 0; i < node->mNumMeshes; i++) {
+        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+        processMesh(mesh, scene, amtl);
+        if (m_shape->bonesPerVertex != 0)
+            loadBones(mesh);
+    }
+
+    // выполнить ту же обработку и для каждого потомка узла
+    for (size_t i = 0; i < node->mNumChildren; i++) {
+        processNode(node->mChildren[i], scene, amtl);
+    }
+}
+
+inline void mergeTexturePath(std::string &saveTo, AMTLLoader::MaterialObject &amtlMaterialObject, const uint key) {
+    if (amtlMaterialObject.textures.find(key) != amtlMaterialObject.textures.end())
+        saveTo = amtlMaterialObject.textures[key].path;
+}
+
+void ShapeLoader::processMesh(const aiMesh *aimesh, const aiScene *scene, AMTLLoader *amtlLoader) {
+    Mesh mesh;
+    mesh.start = m_shape->geometry.indices.size();
+    uint verticesAtBeggining = m_shape->geometry.vertices.size() / 3;
+
+    // allocating space for vertices, normals, texCoords, tangents and bitangents
+    m_shape->geometry.vertices.reserve(aimesh->mNumVertices * 3);
+    if (aimesh->HasNormals())
+        m_shape->geometry.normals.reserve(aimesh->mNumVertices * 3);
+    if (aimesh->HasTextureCoords(0))
+        m_shape->geometry.texCoords.reserve(aimesh->mNumVertices * 2);
+    if (aimesh->HasTangentsAndBitangents()) {
+        m_shape->geometry.tangents.reserve(aimesh->mNumVertices * 3);
+        m_shape->geometry.bitangents.reserve(aimesh->mNumVertices * 3);
+    }
+
+    for (size_t i = 0; i < aimesh->mNumVertices; i++) {
+        // vertices
+        m_shape->geometry.vertices.push_back(aimesh->mVertices[i].x);
+        m_shape->geometry.vertices.push_back(aimesh->mVertices[i].y);
+        m_shape->geometry.vertices.push_back(aimesh->mVertices[i].z);
+
+        // normals
+        if (aimesh->HasNormals()) {
+            m_shape->geometry.normals.push_back(aimesh->mNormals[i].x);
+            m_shape->geometry.normals.push_back(aimesh->mNormals[i].y);
+            m_shape->geometry.normals.push_back(aimesh->mNormals[i].z);
+        }
+
+        // texCoords
+        if (aimesh->HasTextureCoords(0)) {
+            m_shape->geometry.texCoords.push_back(aimesh->mTextureCoords[0][i].x);
+            m_shape->geometry.texCoords.push_back(aimesh->mTextureCoords[0][i].y);
+        }
+
+        // tangents and bitangents
+        if (aimesh->HasTangentsAndBitangents()) {
+            m_shape->geometry.tangents.push_back(aimesh->mTangents[i].x);
+            m_shape->geometry.tangents.push_back(aimesh->mTangents[i].y);
+            m_shape->geometry.tangents.push_back(aimesh->mTangents[i].z);
+
+            m_shape->geometry.bitangents.push_back(aimesh->mBitangents[i].x);
+            m_shape->geometry.bitangents.push_back(aimesh->mBitangents[i].y);
+            m_shape->geometry.bitangents.push_back(aimesh->mBitangents[i].z);
+        }
+    }
+
+    // faces
+    for (size_t i = 0; i < aimesh->mNumFaces; i++) {
+        for (size_t j = 0; j < aimesh->mFaces[i].mNumIndices; j++) {
+            m_shape->geometry.indices.push_back(aimesh->mFaces[i].mIndices[j] + verticesAtBeggining);
+        }
+    }
+
+    mesh.count = m_shape->geometry.indices.size() - mesh.start;
+
+    // load classic material & merge with AMTL
+    aiString tmp_str;
+    aiMaterial *material = scene->mMaterials[aimesh->mMaterialIndex];
+
+    mesh.material.name = material->GetName().C_Str();
+
+    MaterialTexPaths materialTexPaths;
+
+    material->GetTexture(aiTextureType_AMBIENT, 0, &tmp_str);
+    materialTexPaths.ambient = tmp_str.C_Str();
+
+    material->GetTexture(aiTextureType_DIFFUSE, 0, &tmp_str);
+    materialTexPaths.diffuse = tmp_str.C_Str();
+
+    material->GetTexture(aiTextureType_SPECULAR, 0, &tmp_str);
+    materialTexPaths.specular = tmp_str.C_Str();
+
+    material->GetTexture(aiTextureType_NORMALS, 0, &tmp_str);
+    materialTexPaths.normal = tmp_str.C_Str();
+
+    material->Get(AI_MATKEY_SHININESS, mesh.material.shininess);
+
+    if (amtlLoader) {
+        tmp_str = material->GetName();
+        if (amtlLoader->m_materials.find(tmp_str.C_Str()) != amtlLoader->m_materials.end()) {
+            AMTLLoader::MaterialObject amtlMaterial = amtlLoader->m_materials[tmp_str.C_Str()];
+
+            // merge classic material with AMTL:
+            //  * some data is written immediately to the final material (such as *Strength, reflection, jitter, shininess);
+            //  * some (such as texture path) are merged and written to a separate array;
+            //  * some are used from AMTLLoader (such as texture parameters and their shared level);
+            // AMTL has the highest priority, so if the value is in AMTL,
+            // then it is used, and the value of the classical material is ignored
+            // Note: classic material means the one that comes with the model by default
+            mergeTexturePath(materialTexPaths.ambient, amtlMaterial, AMTLLoader::AmbientTexture);
+            mergeTexturePath(materialTexPaths.diffuse, amtlMaterial, AMTLLoader::DiffuseTexture);
+            mergeTexturePath(materialTexPaths.specular, amtlMaterial, AMTLLoader::SpecularTexture);
+            mergeTexturePath(materialTexPaths.normal, amtlMaterial, AMTLLoader::NormalTexture);
+            mergeTexturePath(materialTexPaths.reflection, amtlMaterial, AMTLLoader::ReflectionTexture);
+            mergeTexturePath(materialTexPaths.jitter, amtlMaterial, AMTLLoader::JitterTexture);
+            mesh.material.ambientStrength = amtlMaterial.ambientStrength;
+            mesh.material.diffuseStrength = amtlMaterial.diffuseStrength;
+            mesh.material.specularStrength = amtlMaterial.specularStrength;
+            mesh.material.reflection = amtlMaterial.reflection;
+            mesh.material.jitter = amtlMaterial.jitter;
+            if (amtlMaterial.shininess != -1)
+                mesh.material.shininess = amtlMaterial.shininess;
+        }
+    }
+
+    // the result is undefined if shininess ≤ 0
+    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/pow.xhtml
+    // FLT_EPSILON - min positive value for float
+    if (mesh.material.shininess == 0)
+        mesh.material.shininess = FLT_EPSILON;
+
+    m_materialTexPaths.push_back(materialTexPaths);
+    m_shape->meshes.push_back(mesh);
+}
+
+inline shared_ptr<Texture2D> loadTex(const ShapeLoader *const shapeLoader, const string &path) {
+    std::string absolutePath = Path(path).isAbsolute() ? path : Path::join(shapeLoader->m_texturesPath, path);
+
+    if (ShapeLoader::m_globalLoadedTextures.find(absolutePath) != ShapeLoader::m_globalLoadedTextures.end())
+        return ShapeLoader::m_globalLoadedTextures[absolutePath]; // texture already loaded
+    else {
+        shared_ptr<Texture2D> texture2D = make_shared<Texture2D>();
+        texture2D->bind();
+        texture2D->fromFile(absolutePath);
+        texture2D->setParams(shapeLoader->m_defaultTexturesParams);
+        texture2D->unbind();
+        ShapeLoader::m_globalLoadedTextures[absolutePath] = texture2D;
+        return texture2D;
+    }
+}
+
+void ShapeLoader::loadTextures() {
+    if (m_texturesPath.empty())
+        m_texturesPath = tulz::Path(m_modelPath).getParentDirectory();
+
+    for (size_t i = 0; i < m_shape->meshes.size(); i++) {
+#define mat m_shape->meshes[i].material
+#define texPaths m_materialTexPaths[i]
+        if (!texPaths.ambient.empty())
+            mat.ambientTexture = loadTex(this, texPaths.ambient);
+        if (!texPaths.diffuse.empty())
+            mat.diffuseTexture = loadTex(this, texPaths.diffuse);
+        if (!texPaths.specular.empty())
+            mat.specularTexture = loadTex(this, texPaths.specular);
+        if (!texPaths.normal.empty())
+            mat.normalTexture = loadTex(this, texPaths.normal);
+        if (!texPaths.reflection.empty())
+            mat.reflectionTexture = loadTex(this, texPaths.reflection);
+        if (!texPaths.jitter.empty())
+            mat.jitterTexture = loadTex(this, texPaths.jitter);
+#undef mat
+#undef texPaths
+    }
+}
+
+// TODO: create classes Buffer, ArrayBuffer, ElementArrayBuffer
+
+#define genBufferForArray(buffer, array) \
+if (!array.empty()) { \
+    glGenBuffers(1, &buffer); \
+}
+
+#define mkArrayBuffer(buffer, array) \
+if (!array.empty()) { \
+    glBindBuffer(GL_ARRAY_BUFFER, buffer); \
+    glBufferData(GL_ARRAY_BUFFER, sizeof(array[0]) * array.size(), &array[0], GL_STATIC_DRAW); \
+}
+
+void ShapeLoader::genBuffers() {
+    genBufferForArray(m_shape->buffers.vertices, m_shape->geometry.vertices) // vertices
+    genBufferForArray(m_shape->buffers.normals, m_shape->geometry.normals) // normals
+    genBufferForArray(m_shape->buffers.texCoords, m_shape->geometry.texCoords) // texCoords
+    genBufferForArray(m_shape->buffers.tangents, m_shape->geometry.tangents) // tangents
+    genBufferForArray(m_shape->buffers.bitangents, m_shape->geometry.bitangents) // bitangents
+    genBufferForArray(m_shape->buffers.boneWeights, m_shape->geometry.boneWeights) // bone weights
+    genBufferForArray(m_shape->buffers.boneIds, m_shape->geometry.boneIds) // bone ids
+
+    mkArrayBuffer(m_shape->buffers.vertices, m_shape->geometry.vertices) // vertices
+    mkArrayBuffer(m_shape->buffers.normals, m_shape->geometry.normals) // normals
+    mkArrayBuffer(m_shape->buffers.texCoords, m_shape->geometry.texCoords) // texCoords
+    mkArrayBuffer(m_shape->buffers.tangents, m_shape->geometry.tangents) // tangents
+    mkArrayBuffer(m_shape->buffers.bitangents, m_shape->geometry.bitangents) // bitangents
+    mkArrayBuffer(m_shape->buffers.boneWeights, m_shape->geometry.boneWeights) // bone weights
+    mkArrayBuffer(m_shape->buffers.boneIds, m_shape->geometry.boneIds) // bone ids
+
+    // indices
+    glGenBuffers(1, &m_shape->buffers.indices);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_shape->buffers.indices);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_shape->geometry.indices.size(),
+                 &m_shape->geometry.indices[0], GL_STATIC_DRAW);
+
+    // to default
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+#undef mkArrayBuffer
+#undef genBufferForArray
+
+ShapeLoader::ShapeLoader() {
+    m_shape = new Shape();
+}
+
+#define ASSIMP_PARAMS_MAX_INDEX JoinIdenticalVertices
+#define isAssimpParam(param) param <= ASSIMP_PARAMS_MAX_INDEX
+void ShapeLoader::load() {
+    uint assimpParams[] = {
+            aiProcess_Triangulate,
+            aiProcess_SortByPType,
+            aiProcess_CalcTangentSpace,
+            aiProcess_JoinIdenticalVertices
+    }, completeAssimpParams = 0;
+
+    vector<int> algineParams;
+
+    for (const uint p : m_params)
+        if (isAssimpParam(p))
+            completeAssimpParams |= assimpParams[p];
+        else
+            algineParams.emplace_back(p);
+
+    // Create an instance of the Importer class
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(m_modelPath, completeAssimpParams);
+
+    // If the import failed, report it
+    if (!scene) {
+        std::cerr << "Assimp error: " << importer.GetErrorString() << "\n";
+        return;
+    }
+
+    m_shape->globalInverseTransform = getMat4(scene->mRootNode->mTransformation);
+    m_shape->globalInverseTransform = glm::inverse(m_shape->globalInverseTransform);
+
+    m_shape->rootNode = Node(scene->mRootNode);
+    m_shape->animations.reserve(scene->mNumAnimations); // allocate space for animations
+    for (size_t i = 0; i < scene->mNumAnimations; i++)
+        m_shape->animations.emplace_back(scene->mAnimations[i]);
+
+    std::string amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
+    AMTLLoader amtl;
+    if (amtl.load(amtlPath))
+        processNode(scene->mRootNode, scene, &amtl);
+    else
+        processNode(scene->mRootNode, scene);
+
+    // apply algine params
+    for (const uint p : algineParams) {
+        switch (p) {
+            case InverseNormals:
+                for (float &normal : m_shape->geometry.normals)
+                    normal *= -1;
+                break;
+            default:
+                std::cerr << "Unknown algine param " << p << "\n";
+                break;
+        }
+    }
+
+    // load textures
+    loadTextures();
+
+    // generate buffers
+    genBuffers();
+}
+
+void ShapeLoader::addParam(uint param) {
+    m_params.push_back(param);
+}
+
+void ShapeLoader::setModelPath(const std::string &path) {
+    m_modelPath = path;
+}
+
+void ShapeLoader::setTexturesPath(const std::string &path) {
+    m_texturesPath = path;
+}
+
+void ShapeLoader::setDefaultTexturesParams(const std::map<uint, uint> &params) {
+    m_defaultTexturesParams = params;
+}
+
+Shape *ShapeLoader::getShape() const {
+    return m_shape;
+}
+
+std::map<std::string, shared_ptr<Texture2D>> ShapeLoader::m_globalLoadedTextures;
 } // namespace algine

@@ -71,9 +71,10 @@ const glm::mat4 *modelMatrix; // model matrix stored in Model::transformation
 
 // framebuffers, textures etc for rendering
 using namespace algine;
+using namespace std;
 
 // models
-Shape shapes[SHAPES_COUNT];
+shared_ptr<Shape> shapes[SHAPES_COUNT];
 Model models[MODELS_COUNT], lamps[pointLampsCount + dirLampsCount];
 Animator manAnimator, astroboyAnimator; // animator for man, astroboy models
 
@@ -244,19 +245,27 @@ void createDirLamp(DirLamp &result,
     ShaderProgram::reset();
 }
 
-void createShapes(const std::string &path, const uint params, const size_t id, const bool inverseNormals = false, const uint bonesPerVertex = 0) {
-    shapes[id].bonesPerVertex = bonesPerVertex;
-    shapes[id].init(path, params);
+void
+createShapes(const string &path, const string &texPath, const size_t id, const bool inverseNormals = false,
+             uint bonesPerVertex = 0) {
+    ShapeLoader shapeLoader;
+    shapeLoader.setModelPath(path);
+    shapeLoader.setTexturesPath(texPath);
     if (inverseNormals)
-        shapes[id].inverseNormals();
-    shapes[id].genBuffers();
-    shapes[id].createVAO(
+        shapeLoader.addParam(ShapeLoader::InverseNormals);
+    shapeLoader.addParams(ShapeLoader::Triangulate, ShapeLoader::SortByPolygonType,
+            ShapeLoader::CalcTangentSpace, ShapeLoader::JoinIdenticalVertices);
+    shapeLoader.getShape()->bonesPerVertex = bonesPerVertex;
+    shapeLoader.load();
+
+    shapes[id].reset(shapeLoader.getShape());
+    shapes[id]->createVAO(
             pointShadowShader->getLocation(AlgineNames::ShadowShader::InPos),
             -1, -1, -1, -1,
             pointShadowShader->getLocation(AlgineNames::ShadowShader::InBoneWeights),
             pointShadowShader->getLocation(AlgineNames::ShadowShader::InBoneIds)
     ); // all shadow shaders have same ids
-    shapes[id].createVAO(
+    shapes[id]->createVAO(
                 colorShader->getLocation(AlgineNames::ColorShader::InPos),
                 colorShader->getLocation(AlgineNames::ColorShader::InTexCoord),
                 colorShader->getLocation(AlgineNames::ColorShader::InNormal),
@@ -644,23 +653,12 @@ void initCamera() {
  * Creating shapes and loading textures
  */
 void initShapes() {
-    uint params = aiProcess_Triangulate | aiProcess_SortByPType | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices;
-    std::string path = "src/resources/models/";
+    string path = "src/resources/models/";
 
-    // classic chess
-    createShapes(path + "chess/Classic Chess small.obj", params, 0);
-    shapes[0].loadTextures(path + "chess");
-
-    // Japanese lamp
-    createShapes(path + "japanese_lamp/japanese_lamp.obj", params, 1, true);
-    shapes[1].loadTextures(path + "japanese_lamp");
-
-    // animated man
-    createShapes(path + "man/man.dae", params, 2, false, 4);
-    shapes[2].loadTextures(path + "man");
-
-    createShapes(path + "astroboy/astroboy_walk.dae", params, 3, false, 4);
-    shapes[3].loadTextures(path + "astroboy");
+    createShapes(path + "chess/Classic Chess small.obj", path + "chess", 0, false, 0); // classic chess
+    createShapes(path + "japanese_lamp/japanese_lamp.obj", path + "japanese_lamp", 1, true, 0); // Japanese lamp
+    createShapes(path + "man/man.dae", path + "man", 2, false, 4); // animated man
+    createShapes(path + "astroboy/astroboy_walk.dae", path + "astroboy", 3, false, 4);
 }
 
 /**
@@ -669,13 +667,13 @@ void initShapes() {
 void createModels() {
     // classic chess
     models[0] = Model(Rotator::RotatorTypeSimple);
-    models[0].shape = &shapes[0];
+    models[0].shape = shapes[0].get();
 
     // animated man
-    manAnimator = Animator(AnimShape(&shapes[2].animations, &shapes[2].bones, &shapes[2].globalInverseTransform, &shapes[2].rootNode));
+    manAnimator = Animator(AnimShape(&shapes[2]->animations, &shapes[2]->bones, &shapes[2]->globalInverseTransform, &shapes[2]->rootNode));
     models[1] = Model(Rotator::RotatorTypeSimple);
-    models[1].shape = &shapes[2];
-    models[1].setPitch(glm::radians(90.0f));
+    models[1].shape = shapes[2].get();
+    models[1].setPitch(glm::radians(-90.0f));
     models[1].rotate();
     models[1].setX(-2.0f);
     models[1].translate();
@@ -683,10 +681,10 @@ void createModels() {
     models[1].animator = &manAnimator;
 
     // animated astroboy
-    astroboyAnimator = Animator(AnimShape(&shapes[3].animations, &shapes[3].bones, &shapes[3].globalInverseTransform, &shapes[3].rootNode));
+    astroboyAnimator = Animator(AnimShape(&shapes[3]->animations, &shapes[3]->bones, &shapes[3]->globalInverseTransform, &shapes[3]->rootNode));
     models[2] = Model(Rotator::RotatorTypeSimple);
-    models[2].shape = &shapes[3];
-    models[2].setPitch(glm::radians(90.0f));
+    models[2].shape = shapes[3].get();
+    models[2].setPitch(glm::radians(-90.0f));
     models[2].rotate();
     models[2].setScale(glm::vec3(50.0f));
     models[2].scale();
@@ -701,14 +699,14 @@ void createModels() {
  */
 void initLamps() {
     lamps[0] = Model(Rotator::RotatorTypeSimple);
-    lamps[0].shape = &shapes[1];
+    lamps[0].shape = shapes[1].get();
     pointLamps[0].mptr = &lamps[0];
     createPointLamp(pointLamps[0], glm::vec3(0.0f, 8.0f, 15.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0);
     lamps[0].translate();
     lamps[0].updateMatrix();
 
     lamps[1] = Model(Rotator::RotatorTypeSimple);
-    lamps[1].shape = &shapes[1];
+    lamps[1].shape = shapes[1].get();
     dirLamps[0].mptr = &lamps[1];
     createDirLamp(dirLamps[0],
             glm::vec3(0.0f, 8.0f, -15.0f),
@@ -725,6 +723,7 @@ void initShadowMaps() {
     colorShader->use();
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
     // TODO: maybe move it to LightDataSetter?
+    // TODO: move it to LightDataSetter
     for (int i = 0; i < pointLightsLimit; i++) {
         ShaderProgram::setInt(lightDataSetter.getLocation(LightDataSetter::ShadowMap, Light::TypePointLight, i), POINT_LIGHT_TSID + i);
 		glActiveTexture(GL_TEXTURE0 + POINT_LIGHT_TSID + i);
@@ -772,7 +771,7 @@ void initDOF() {
  */
 void recycleAll() {
     for (size_t i = 0; i < SHAPES_COUNT; i++)
-        shapes[i].recycle();
+        shapes[i]->recycle();
 
     Framebuffer::destroy(displayFb, screenspaceFb, bloomSearchFb, pingpongFb[0], pingpongFb[1],
                          pingpongBlurBloomFb[0], pingpongBlurBloomFb[1],
@@ -836,6 +835,11 @@ void drawModelDM(const Model &model, ShaderProgram *program, const glm::mat4 &ma
 /**
  * Draws model
  */
+#define useNotNull(tex, slot) \
+if (tex != nullptr) \
+    tex->use(slot); \
+else \
+    texture2DAB(slot, 0);
 void drawModel(const Model &model) {
     glBindVertexArray(model.shape->vaos[1]);
     
@@ -845,21 +849,21 @@ void drawModel(const Model &model) {
         }
     }
 
-    colorShader->setInt(AlgineNames::ColorShader::BoneAttribsPerVertex, (int)(model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1)));
+    colorShader->setInt(AlgineNames::ColorShader::BoneAttribsPerVertex, model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1));
     modelMatrix = &model.m_transform;
 	updateMatrices();
     for (size_t i = 0; i < model.shape->meshes.size(); i++) {
-        texture2DAB(0, model.shape->meshes[i].mat.ambientTexture);
-        texture2DAB(1, model.shape->meshes[i].mat.diffuseTexture);
-        texture2DAB(2, model.shape->meshes[i].mat.specularTexture);
-        texture2DAB(3, model.shape->meshes[i].mat.normalTexture);
-        texture2DAB(4, model.shape->meshes[i].mat.reflectionTexture);
-        texture2DAB(5, model.shape->meshes[i].mat.jitterTexture);
+        useNotNull(model.shape->meshes[i].material.ambientTexture, 0);
+        useNotNull(model.shape->meshes[i].material.diffuseTexture, 1);
+        useNotNull(model.shape->meshes[i].material.specularTexture, 2);
+        useNotNull(model.shape->meshes[i].material.normalTexture, 3);
+        useNotNull(model.shape->meshes[i].material.reflectionTexture, 4);
+        useNotNull(model.shape->meshes[i].material.jitterTexture, 5);
 
-        colorShader->setFloat(AlgineNames::ColorShader::Material::AmbientStrength, model.shape->meshes[i].mat.ambientStrength);
-        colorShader->setFloat(AlgineNames::ColorShader::Material::DiffuseStrength, model.shape->meshes[i].mat.diffuseStrength);
-        colorShader->setFloat(AlgineNames::ColorShader::Material::SpecularStrength, model.shape->meshes[i].mat.specularStrength);
-        colorShader->setFloat(AlgineNames::ColorShader::Material::Shininess, model.shape->meshes[i].mat.shininess);
+        colorShader->setFloat(AlgineNames::ColorShader::Material::AmbientStrength, model.shape->meshes[i].material.ambientStrength);
+        colorShader->setFloat(AlgineNames::ColorShader::Material::DiffuseStrength, model.shape->meshes[i].material.diffuseStrength);
+        colorShader->setFloat(AlgineNames::ColorShader::Material::SpecularStrength, model.shape->meshes[i].material.specularStrength);
+        colorShader->setFloat(AlgineNames::ColorShader::Material::Shininess, model.shape->meshes[i].material.shininess);
 
         glDrawElements(GL_TRIANGLES, model.shape->meshes[i].count, GL_UNSIGNED_INT, reinterpret_cast<void*>(model.shape->meshes[i].start * sizeof(uint)));
     }
@@ -1095,7 +1099,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                 manHeadRotator.setPitch(manHeadRotator.getPitch() - glm::radians(5.0f));
 
             manHeadRotator.rotate(r);
-            shapes[2].setNodeTransform("Armature_Head", r);
+            shapes[2]->setNodeTransform("Armature_Head", r);
         }
     }
 }

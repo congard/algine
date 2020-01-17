@@ -14,18 +14,22 @@ namespace algine {
 
         namespace AMTL {
             constant(Name, "name")
-            constant(AmbientTex, "ambientTex")
-            constant(DiffuseTex, "diffuseTex")
-            constant(SpecularTex, "specularTex")
-            constant(NormalTex, "normalTex")
-            constant(ReflectionTex, "reflectionTex")
-            constant(JitterTex, "jitterTex")
             constant(Reflection, "reflection")
             constant(Jitter, "jitter")
             constant(AmbientStrength, "ambientStrength")
             constant(DiffuseStrength, "diffuseStrength")
             constant(SpecularStrength, "specularStrength")
             constant(Shininess, "shininess")
+
+            namespace Texture {
+                constant(Path, "path")
+                constant(Ambient, "ambientTex")
+                constant(Diffuse, "diffuseTex")
+                constant(Specular, "specularTex")
+                constant(Normal, "normalTex")
+                constant(Reflection, "reflectionTex")
+                constant(Jitter, "jitterTex")
+            }
         }
     }
 
