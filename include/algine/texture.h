@@ -20,12 +20,6 @@ void bindTexture2D(const uint &texture);
 // Activate & Bind 2D texture
 void texture2DAB(const uint &index, const uint &texture);
 
-/**
- * Loading texture using stb_image.h
- * `path` - full path to texture
- */
-uint loadTexture(const char *path, int internalformat = GL_RGB, uint format = GL_RGB, uint type = GL_UNSIGNED_BYTE);
-
 size_t getTexComponentsCount(uint format);
 
 /**
@@ -143,10 +137,6 @@ public:
     uint getWidth() const;
     uint getHeight() const;
     uint getId() const;
-
-    // TODO: remove
-    static void create(uint *id);
-    static void destroy(uint *id);
 
 public:
     uint target = 0; // texture 2d, texture cube etc

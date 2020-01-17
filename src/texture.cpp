@@ -26,36 +26,6 @@ void texture2DAB(const uint &index, const uint &texture) {
 	bindTexture2D(texture);
 }
 
-/**
- * Loading texture using stb_image.h
- * `path` - full path to texture
- */
-uint loadTexture(const char *path, int internalformat, uint format, uint type) {
-    GLuint texture = 0;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    // flip texture
-    stbi_set_flip_vertically_on_load(true);
-
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load and generate the texture
-    int width, height, nrChannels;
-    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
-    if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else std::cout << "Failed to load texture " << path << std::endl;
-
-    stbi_image_free(data);
-
-    return texture;
-}
-
 size_t getTexComponentsCount(uint format) {
     switch (format) {
         case GL_RG:
@@ -237,15 +207,6 @@ void Texture::texFromFile(const std::string &path, uint _target, uint dataType, 
     stbi_image_free(data);
 }
 
-// TODO: remove
-void Texture::create(uint *id) {
-    glGenTextures(1, id);
-}
-
-void Texture::destroy(uint *id) {
-    glDeleteTextures(1, id);
-}
-
 Texture2D::Texture2D(): Texture(GL_TEXTURE_2D) {}
 
 void Texture2D::fromFile(const std::string &path, const uint dataType, const bool flipImage) {
@@ -296,11 +257,11 @@ void TextureCube::update() {
 
 map<uint, uint> TextureCube::defaultParams() {
     return map<uint, uint> {
-            pair<uint, uint> {MinFilter, Linear},
-            pair<uint, uint> {MagFilter, Linear},
-            pair<uint, uint> {WrapU, ClampToEdge},
-            pair<uint, uint> {WrapV, ClampToEdge},
-            pair<uint, uint> {WrapW, ClampToEdge}
+        pair<uint, uint> {MinFilter, Linear},
+        pair<uint, uint> {MagFilter, Linear},
+        pair<uint, uint> {WrapU, ClampToEdge},
+        pair<uint, uint> {WrapV, ClampToEdge},
+        pair<uint, uint> {WrapW, ClampToEdge}
     };
 }
 
