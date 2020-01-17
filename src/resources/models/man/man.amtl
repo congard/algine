@@ -1,10 +1,18 @@
 [
-    {
-        "name":"material",
-        "ambientTex":"tex.jpg",
-        "diffuseTex":"tex.jpg",
-        "specularTex":"tex.jpg",
-        "normalTex":"norm.png"
+  {
+    "name": "material",
+    "ambientTex": {
+      "path": "tex.jpg"
+    },
+    "diffuseTex": {
+      "path": "tex.jpg"
+    },
+    "specularTex": {
+      "path": "tex.jpg"
+    },
+    "normalTex": {
+      "path": "norm.png"
     }
+  }
 ] 
  

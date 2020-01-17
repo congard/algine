@@ -1,7 +1,11 @@
 [
-    {
-        "name":"desk",
-        "reflectionTex":"desk_texture_reflection_strength_jitter.jpg",
-        "jitterTex":"jitter.jpg"
+  {
+    "name": "desk",
+    "reflectionTex": {
+      "path": "desk_texture_reflection_strength_jitter.jpg"
+    },
+    "jitterTex": {
+      "path": "jitter.jpg"
     }
-] 
+  }
+]

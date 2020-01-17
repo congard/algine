@@ -1,34 +1,62 @@
 [
-    {
-        "name":"face",
-        "ambientTex":"boy.jpg",
-        "diffuseTex":"boy.jpg",
-        "specularTex":"boy.jpg",
-        "normalTex":"norm.png"
+  {
+    "name": "face",
+    "ambientTex": {
+      "path": "boy.jpg"
     },
-    
-    {
-        "name":"glass",
-        "ambientTex":"boy.jpg",
-        "diffuseTex":"boy.jpg",
-        "specularTex":"boy.jpg",
-        "normalTex":"norm.png"
+    "diffuseTex": {
+      "path": "boy.jpg"
     },
-    
-    {
-        "name":"shiny",
-        "ambientTex":"boy.jpg",
-        "diffuseTex":"boy.jpg",
-        "specularTex":"boy.jpg",
-        "normalTex":"norm.png"
+    "specularTex": {
+      "path": "boy.jpg"
     },
-    
-    {
-        "name":"matte",
-        "ambientTex":"boy.jpg",
-        "diffuseTex":"boy.jpg",
-        "specularTex":"boy.jpg",
-        "normalTex":"norm.png"
+    "normalTex": {
+      "path": "norm.png"
     }
-] 
- 
+  },
+  {
+    "name": "glass",
+    "ambientTex": {
+      "path": "boy.jpg"
+    },
+    "diffuseTex": {
+      "path": "boy.jpg"
+    },
+    "specularTex": {
+      "path": "boy.jpg"
+    },
+    "normalTex": {
+      "path": "norm.png"
+    }
+  },
+  {
+    "name": "shiny",
+    "ambientTex": {
+      "path": "boy.jpg"
+    },
+    "diffuseTex": {
+      "path": "boy.jpg"
+    },
+    "specularTex": {
+      "path": "boy.jpg"
+    },
+    "normalTex": {
+      "path": "norm.png"
+    }
+  },
+  {
+    "name": "matte",
+    "ambientTex": {
+      "path": "boy.jpg"
+    },
+    "diffuseTex": {
+      "path": "boy.jpg"
+    },
+    "specularTex": {
+      "path": "boy.jpg"
+    },
+    "normalTex": {
+      "path": "norm.png"
+    }
+  }
+]
