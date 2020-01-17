@@ -85,6 +85,7 @@ add_executable(algine
         include/algine/rotator.h
         include/algine/templates.h
         include/algine/debug.h
+        include/algine/AMTLLoader.h
         src/algine_renderer.cpp
         src/animation.cpp
         src/bone.cpp
@@ -103,7 +104,8 @@ add_executable(algine
         src/event.cpp
         src/object3d.cpp
         src/rotator.cpp
-        src/debug.cpp)
+        src/debug.cpp
+        src/AMTLLoader.cpp)
 
 # linking
 if (WIN32)
