@@ -29,6 +29,27 @@ namespace algine {
                 constant(Normal, "normalTex")
                 constant(Reflection, "reflectionTex")
                 constant(Jitter, "jitterTex")
+
+                namespace Params {
+                    constant(Params, "params")
+
+                    namespace Keys {
+                        constant(WrapU, "wrapU")
+                        constant(WrapV, "wrapV")
+                        constant(MinFilter, "minFilter")
+                        constant(MagFilter, "magFilter")
+                    }
+
+                    namespace Values {
+                        constant(Repeat, "repeat")
+                        constant(ClampToEdge, "clampToEdge")
+                        constant(ClampToBorder, "clampToBorder")
+                        constant(MirroredRepeat, "mirroredRepeat")
+                        constant(MirrorClampToEdge, "mirrorClampToEdge")
+                        constant(Nearest, "nearest")
+                        constant(Linear, "linear")
+                    }
+                }
             }
         }
     }

@@ -11,6 +11,7 @@ public:
     struct MaterialObject {
         struct TextureObject {
             std::string path;
+            std::map<uint, uint> params;
         };
 
         std::map<uint, TextureObject> textures; // type, TextureObject

@@ -114,27 +114,30 @@ void ShapeLoader::loadBones(const aiMesh *aimesh) {
     }
 }
 
-void ShapeLoader::processNode(const aiNode *node, const aiScene *scene, AMTLLoader *amtl) {
+void ShapeLoader::processNode(const aiNode *node, const aiScene *scene) {
     // обработать все полигональные сетки в узле (если есть)
     for (size_t i = 0; i < node->mNumMeshes; i++) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        processMesh(mesh, scene, amtl);
+        processMesh(mesh, scene);
         if (m_shape->bonesPerVertex != 0)
             loadBones(mesh);
     }
 
     // выполнить ту же обработку и для каждого потомка узла
     for (size_t i = 0; i < node->mNumChildren; i++) {
-        processNode(node->mChildren[i], scene, amtl);
+        processNode(node->mChildren[i], scene);
     }
 }
 
 inline void mergeTexturePath(std::string &saveTo, AMTLLoader::MaterialObject &amtlMaterialObject, const uint key) {
-    if (amtlMaterialObject.textures.find(key) != amtlMaterialObject.textures.end())
+    if (amtlMaterialObject.textures.find(key) != amtlMaterialObject.textures.end() &&
+        !amtlMaterialObject.textures[key].path.empty())
+    {
         saveTo = amtlMaterialObject.textures[key].path;
+    }
 }
 
-void ShapeLoader::processMesh(const aiMesh *aimesh, const aiScene *scene, AMTLLoader *amtlLoader) {
+void ShapeLoader::processMesh(const aiMesh *aimesh, const aiScene *scene) {
     Mesh mesh;
     mesh.start = m_shape->geometry.indices.size();
     uint verticesAtBeggining = m_shape->geometry.vertices.size() / 3;
@@ -212,10 +215,10 @@ void ShapeLoader::processMesh(const aiMesh *aimesh, const aiScene *scene, AMTLLo
 
     material->Get(AI_MATKEY_SHININESS, mesh.material.shininess);
 
-    if (amtlLoader) {
+    if (m_amtlLoader) {
         tmp_str = material->GetName();
-        if (amtlLoader->m_materials.find(tmp_str.C_Str()) != amtlLoader->m_materials.end()) {
-            AMTLLoader::MaterialObject amtlMaterial = amtlLoader->m_materials[tmp_str.C_Str()];
+        if (m_amtlLoader->m_materials.find(tmp_str.C_Str()) != m_amtlLoader->m_materials.end()) {
+            AMTLLoader::MaterialObject amtlMaterial = m_amtlLoader->m_materials[tmp_str.C_Str()];
 
             // merge classic material with AMTL:
             //  * some data is written immediately to the final material (such as *Strength, reflection, jitter, shininess);
@@ -250,43 +253,61 @@ void ShapeLoader::processMesh(const aiMesh *aimesh, const aiScene *scene, AMTLLo
     m_shape->meshes.push_back(mesh);
 }
 
-inline shared_ptr<Texture2D> loadTex(const ShapeLoader *const shapeLoader, const string &path) {
-    std::string absolutePath = Path(path).isAbsolute() ? path : Path::join(shapeLoader->m_texturesPath, path);
-
-    if (ShapeLoader::m_globalLoadedTextures.find(absolutePath) != ShapeLoader::m_globalLoadedTextures.end())
-        return ShapeLoader::m_globalLoadedTextures[absolutePath]; // texture already loaded
-    else {
-        shared_ptr<Texture2D> texture2D = make_shared<Texture2D>();
-        texture2D->bind();
-        texture2D->fromFile(absolutePath);
-        texture2D->setParams(shapeLoader->m_defaultTexturesParams);
-        texture2D->unbind();
-        ShapeLoader::m_globalLoadedTextures[absolutePath] = texture2D;
-        return texture2D;
-    }
-}
-
+#define textureTypesCount 6
 void ShapeLoader::loadTextures() {
     if (m_texturesPath.empty())
         m_texturesPath = tulz::Path(m_modelPath).getParentDirectory();
 
     for (size_t i = 0; i < m_shape->meshes.size(); i++) {
-#define mat m_shape->meshes[i].material
-#define texPaths m_materialTexPaths[i]
-        if (!texPaths.ambient.empty())
-            mat.ambientTexture = loadTex(this, texPaths.ambient);
-        if (!texPaths.diffuse.empty())
-            mat.diffuseTexture = loadTex(this, texPaths.diffuse);
-        if (!texPaths.specular.empty())
-            mat.specularTexture = loadTex(this, texPaths.specular);
-        if (!texPaths.normal.empty())
-            mat.normalTexture = loadTex(this, texPaths.normal);
-        if (!texPaths.reflection.empty())
-            mat.reflectionTexture = loadTex(this, texPaths.reflection);
-        if (!texPaths.jitter.empty())
-            mat.jitterTexture = loadTex(this, texPaths.jitter);
-#undef mat
-#undef texPaths
+        Material &material = m_shape->meshes[i].material;
+        MaterialTexPaths &texPaths = m_materialTexPaths[i];
+
+        // arrays for 100% certainty that nothing will go wrong
+        // http://www.cplusplus.com/forum/general/267546/#msg1151147
+        string *const texPathsArr[textureTypesCount] = {
+                &texPaths.ambient, &texPaths.diffuse, &texPaths.specular,
+                &texPaths.normal, &texPaths.reflection, &texPaths.jitter
+        };
+
+        shared_ptr<Texture2D> *const textures[textureTypesCount] = {
+                &material.ambientTexture, &material.diffuseTexture, &material.specularTexture,
+                &material.normalTexture, &material.reflectionTexture, &material.jitterTexture
+        };
+
+        // texIndex from AMTLLoader::AmbientTexture to AMTLLoader::JitterTexture
+        for (uint texIndex = 0; texIndex < textureTypesCount; ++texIndex) {
+            if (!texPathsArr[texIndex]->empty()) {
+                string absolutePath = Path(*texPathsArr[texIndex]).isAbsolute() ?
+                        *texPathsArr[texIndex] : Path::join(m_texturesPath, *texPathsArr[texIndex]);
+                auto &currentTexture = *textures[texIndex];
+
+                // merging params: default + AMTL
+                map<uint, uint> params = m_defaultTexturesParams;
+                if (m_amtlLoader != nullptr &&
+                    m_amtlLoader->m_materials.find(material.name) != m_amtlLoader->m_materials.end())
+                {
+                    AMTLLoader::MaterialObject &materialObject = m_amtlLoader->m_materials[material.name];
+                    if (materialObject.textures.find(texIndex) != materialObject.textures.end()) {
+                        for (const auto &key : materialObject.textures[texIndex].params)
+                            params[key.first] = key.second;
+                    }
+                }
+
+                // loading texture
+                int index = getLoadedTextureIndex(m_globalLoadedTextures, absolutePath, params);
+                if (index != -1) {
+                    currentTexture = m_globalLoadedTextures[index].texture; // texture already loaded
+                } else {
+                    shared_ptr<Texture2D> texture2D = make_shared<Texture2D>();
+                    texture2D->bind();
+                    texture2D->fromFile(absolutePath);
+                    texture2D->setParams(params);
+                    texture2D->unbind();
+                    m_globalLoadedTextures.emplace_back(absolutePath, texture2D, params);
+                    currentTexture = texture2D;
+                }
+            }
+        }
     }
 }
 
@@ -333,6 +354,29 @@ void ShapeLoader::genBuffers() {
 #undef mkArrayBuffer
 #undef genBufferForArray
 
+ShapeLoader::LoadedTexture::LoadedTexture(
+        const string &path, const shared_ptr<Texture2D> &texture,
+        const map<uint, uint> &params)
+{
+    this->path = path;
+    this->texture = texture;
+    this->params = params;
+}
+
+// using vector instead of map since the same texture may have different params
+vector<ShapeLoader::LoadedTexture> ShapeLoader::m_globalLoadedTextures;
+
+int ShapeLoader::getLoadedTextureIndex(
+        const vector<LoadedTexture> &loadedTextures, const string &path,
+        const map<uint, uint> &params)
+{
+    for (int i = 0; i < loadedTextures.size(); ++i)
+        if (loadedTextures[i].path == path && loadedTextures[i].params == params)
+            return i;
+
+    return -1;
+}
+
 ShapeLoader::ShapeLoader() {
     m_shape = new Shape();
 }
@@ -376,9 +420,15 @@ void ShapeLoader::load() {
     std::string amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
     AMTLLoader amtl;
     if (amtl.load(amtlPath))
-        processNode(scene->mRootNode, scene, &amtl);
-    else
-        processNode(scene->mRootNode, scene);
+       m_amtlLoader = &amtl;
+    else {
+        // if load is called again and the AMTL file does not exist,
+        // while the previous load() AMTL existed, the pointer will
+        // point to the deleted memory
+        m_amtlLoader = nullptr;
+    }
+
+    processNode(scene->mRootNode, scene);
 
     // apply algine params
     for (const uint p : algineParams) {
@@ -419,6 +469,4 @@ void ShapeLoader::setDefaultTexturesParams(const std::map<uint, uint> &params) {
 Shape *ShapeLoader::getShape() const {
     return m_shape;
 }
-
-std::map<std::string, shared_ptr<Texture2D>> ShapeLoader::m_globalLoadedTextures;
 } // namespace algine

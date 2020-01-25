@@ -70,8 +70,8 @@ public:
 class ShapeLoader {
 protected:
     void loadBones(const aiMesh *aimesh);
-    void processNode(const aiNode *node, const aiScene *scene, AMTLLoader *amtl = nullptr);
-    void processMesh(const aiMesh *aimesh, const aiScene *scene, AMTLLoader *amtl = nullptr);
+    void processNode(const aiNode *node, const aiScene *scene);
+    void processMesh(const aiMesh *aimesh, const aiScene *scene);
     void loadTextures();
     void genBuffers();
 
@@ -81,6 +81,20 @@ protected:
     };
 
     std::vector<MaterialTexPaths> m_materialTexPaths;
+    AMTLLoader *m_amtlLoader = nullptr; // NOTE: exists only during load()!
+
+    struct LoadedTexture {
+        std::string path;
+        std::shared_ptr<Texture2D> texture;
+        std::map<uint, uint> params;
+
+        LoadedTexture(const std::string &path, const std::shared_ptr<Texture2D> &texture,
+                const std::map<uint, uint> &params);
+    };
+
+    static std::vector<LoadedTexture> m_globalLoadedTextures;
+    static int getLoadedTextureIndex(const std::vector<LoadedTexture> &loadedTextures, const std::string &path,
+            const std::map<uint, uint> &params);
 
 public:
     enum Params {
@@ -120,8 +134,6 @@ public:
             std::pair<uint, uint> {Texture::MinFilter, Texture::Linear},
             std::pair<uint, uint> {Texture::MagFilter, Texture::Linear}
     };
-
-    static std::map<std::string, std::shared_ptr<Texture2D>> m_globalLoadedTextures;
 };
 
 } // namespace algine

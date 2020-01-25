@@ -1,5 +1,6 @@
 #include <algine/AMTLLoader.h>
 #include <algine/constants.h>
+#include <algine/texture.h>
 #include <nlohmann/json.hpp>
 #include <tulz/Path>
 #include <tulz/File>
@@ -10,6 +11,37 @@ using namespace tulz;
 using namespace algine::AlgineConstants;
 
 namespace algine {
+inline pair<uint, uint> getTexParam(const string &key, const string &value) {
+    using namespace AMTL::Texture::Params;
+    pair<uint, uint> param;
+
+    if (key == Keys::WrapU)
+        param.first = Texture::WrapU;
+    else if (key == Keys::WrapV)
+        param.first = Texture::WrapV;
+    else if (key == Keys::MinFilter)
+        param.first = Texture::MinFilter;
+    else if (key == Keys::MagFilter)
+        param.first = Texture::MagFilter;
+
+    if (value == Values::Repeat)
+        param.second = Texture::Repeat;
+    else if (value == Values::ClampToEdge)
+        param.second = Texture::ClampToEdge;
+    else if (value == Values::ClampToBorder)
+        param.second = Texture::ClampToBorder;
+    else if (value == Values::MirroredRepeat)
+        param.second = Texture::MirroredRepeat;
+    else if (value == Values::MirrorClampToEdge)
+        param.second = Texture::MirrorClampToEdge;
+    else if (value == Values::Nearest)
+        param.second = Texture::Nearest;
+    else if (value == Values::Linear)
+        param.second = Texture::Linear;
+
+    return param;
+}
+
 inline void processTextureObject(const string &type_str, const nlohmann::json &materialJSONObject,
                                  AMTLLoader::MaterialObject &materialObject) {
     AMTLLoader::MaterialObject::TextureObject materialTextureObject = AMTLLoader::MaterialObject::TextureObject();
@@ -32,15 +64,19 @@ inline void processTextureObject(const string &type_str, const nlohmann::json &m
         return;
     }
 
-    cout << "name: " << type_str << "\n";
+    // reading texture block data
     auto textureJSONObject = materialJSONObject[type_str];
-
     for (auto &el : textureJSONObject.items()) {
-        const string &key = el.key();
-        cout << "key: " <<  key << "\n";
+        using namespace AMTL::Texture;
 
-        if (key == AMTL::Texture::Path)
+        const string &key = el.key();
+        if (key == Path)
             materialTextureObject.path = el.value();
+        else if (key == Params::Params) {
+            auto paramsObject = el.value();
+            for (auto &pPair : paramsObject.items())
+                materialTextureObject.params.insert(getTexParam(pPair.key(), pPair.value()));
+        }
     }
 
     materialObject.textures[type] = materialTextureObject;
