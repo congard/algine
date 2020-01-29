@@ -12,6 +12,7 @@ public:
         struct TextureObject {
             std::string path;
             std::map<uint, uint> params;
+            uint sharedLevel = Shared;
         };
 
         std::map<uint, TextureObject> textures; // type, TextureObject
@@ -33,6 +34,12 @@ public:
         NormalTexture,
         ReflectionTexture,
         JitterTexture
+    };
+
+    enum TextureSharedLevels {
+        Unique,
+        ModelShared,
+        Shared
     };
 
     bool load(const std::string &path);

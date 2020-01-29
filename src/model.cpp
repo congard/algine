@@ -281,30 +281,50 @@ void ShapeLoader::loadTextures() {
                         *texPathsArr[texIndex] : Path::join(m_texturesPath, *texPathsArr[texIndex]);
                 auto &currentTexture = *textures[texIndex];
 
-                // merging params: default + AMTL
                 map<uint, uint> params = m_defaultTexturesParams;
+                uint sharedLevel = AMTLLoader::Shared;
+
                 if (m_amtlLoader != nullptr &&
                     m_amtlLoader->m_materials.find(material.name) != m_amtlLoader->m_materials.end())
                 {
                     AMTLLoader::MaterialObject &materialObject = m_amtlLoader->m_materials[material.name];
                     if (materialObject.textures.find(texIndex) != materialObject.textures.end()) {
-                        for (const auto &key : materialObject.textures[texIndex].params)
+                        auto textureObject = materialObject.textures[texIndex];
+
+                        sharedLevel = textureObject.sharedLevel;
+
+                        // merging params: default + AMTL
+                        for (const auto &key : textureObject.params)
                             params[key.first] = key.second;
                     }
                 }
 
                 // loading texture
-                int index = getLoadedTextureIndex(m_globalLoadedTextures, absolutePath, params);
+                vector<LoadedTexture> *loadedTextures = nullptr;
+                switch (sharedLevel) {
+                    case AMTLLoader::Shared:
+                        loadedTextures = &m_globalLoadedTextures;
+                        break;
+                    case AMTLLoader::ModelShared:
+                        loadedTextures = &m_modelLoadedTextures;
+                        break;
+                    default:
+                        break;
+                }
+
+                int index = getLoadedTextureIndex(loadedTextures, absolutePath, params);
                 if (index != -1) {
-                    currentTexture = m_globalLoadedTextures[index].texture; // texture already loaded
+                    currentTexture = loadedTextures->operator[](index).texture; // texture already loaded
                 } else {
                     shared_ptr<Texture2D> texture2D = make_shared<Texture2D>();
                     texture2D->bind();
                     texture2D->fromFile(absolutePath);
                     texture2D->setParams(params);
                     texture2D->unbind();
-                    m_globalLoadedTextures.emplace_back(absolutePath, texture2D, params);
                     currentTexture = texture2D;
+
+                    if (sharedLevel != AMTLLoader::Unique)
+                        loadedTextures->emplace_back(absolutePath, texture2D, params);
                 }
             }
         }
@@ -367,11 +387,14 @@ ShapeLoader::LoadedTexture::LoadedTexture(
 vector<ShapeLoader::LoadedTexture> ShapeLoader::m_globalLoadedTextures;
 
 int ShapeLoader::getLoadedTextureIndex(
-        const vector<LoadedTexture> &loadedTextures, const string &path,
+        const vector<LoadedTexture> *const loadedTextures, const string &path,
         const map<uint, uint> &params)
 {
-    for (int i = 0; i < loadedTextures.size(); ++i)
-        if (loadedTextures[i].path == path && loadedTextures[i].params == params)
+    if (!loadedTextures)
+        return -1;
+
+    for (int i = 0; i < loadedTextures->size(); ++i)
+        if (loadedTextures->operator[](i).path == path && loadedTextures->operator[](i).params == params)
             return i;
 
     return -1;

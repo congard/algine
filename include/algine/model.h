@@ -92,8 +92,9 @@ protected:
                 const std::map<uint, uint> &params);
     };
 
+    std::vector<LoadedTexture> m_modelLoadedTextures;
     static std::vector<LoadedTexture> m_globalLoadedTextures;
-    static int getLoadedTextureIndex(const std::vector<LoadedTexture> &loadedTextures, const std::string &path,
+    static int getLoadedTextureIndex(const std::vector<LoadedTexture> *loadedTextures, const std::string &path,
             const std::map<uint, uint> &params);
 
 public:

@@ -29,6 +29,10 @@ namespace algine {
                 constant(Normal, "normalTex")
                 constant(Reflection, "reflectionTex")
                 constant(Jitter, "jitterTex")
+                constant(SharedLevel, "sharedLevel")
+                constant(Unique, "unique")
+                constant(ModelShared, "modelShared")
+                constant(Shared, "shared")
 
                 namespace Params {
                     constant(Params, "params")

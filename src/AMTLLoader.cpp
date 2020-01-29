@@ -42,6 +42,20 @@ inline pair<uint, uint> getTexParam(const string &key, const string &value) {
     return param;
 }
 
+inline uint getSharedLevel(const string &str) {
+    using namespace AMTL::Texture;
+
+    if (str == Unique)
+        return AMTLLoader::Unique;
+    if (str == ModelShared)
+        return AMTLLoader::ModelShared;
+    if (str == Shared)
+        return AMTLLoader::Shared;
+
+    cerr << "Unknown texture shared level \"" << str << "\"\n";
+    return AMTLLoader::Shared;
+}
+
 inline void processTextureObject(const string &type_str, const nlohmann::json &materialJSONObject,
                                  AMTLLoader::MaterialObject &materialObject) {
     AMTLLoader::MaterialObject::TextureObject materialTextureObject = AMTLLoader::MaterialObject::TextureObject();
@@ -72,6 +86,8 @@ inline void processTextureObject(const string &type_str, const nlohmann::json &m
         const string &key = el.key();
         if (key == Path)
             materialTextureObject.path = el.value();
+        else if (key == SharedLevel)
+            materialTextureObject.sharedLevel = getSharedLevel(el.value());
         else if (key == Params::Params) {
             auto paramsObject = el.value();
             for (auto &pPair : paramsObject.items())
