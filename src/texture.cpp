@@ -100,7 +100,12 @@ void saveTexImage(const float *image, size_t width, size_t height, size_t inComp
     for (size_t y = 0; y < height; y++) {
         for (size_t x = 0; x < width; x++) {
             for (size_t c = 0; c < components; c++) {
-                data[(y * width + x) * outComponents + c] = 255 * image[(y * width + x) * inComponents + c];
+                int val = 255 * image[(y * width + x) * inComponents + c];
+                if (val > 255)
+                    val = 255;
+                if (val < 0)
+                    val = 0;
+                data[(y * width + x) * outComponents + c] = val;
             }
         }
     }
