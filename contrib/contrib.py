@@ -17,7 +17,7 @@ libs = [
     ["https://github.com/nlohmann/json/releases/download/v3.7.0/json.hpp", "nlohmann"],
     ["https://raw.githubusercontent.com/nothings/stb/master/stb_image.h", "stb"],
     ["https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h", "stb"],
-    ["https://github.com/congard/tulz/archive/v1.0-alpha.1.zip", "tulz"],
+    ["https://github.com/congard/tulz/archive/v1.0-alpha.2.zip", "tulz"],
     ["https://github.com/assimp/assimp/archive/v.5.0.0.rc1.zip", "assimp"],
     ["https://github.com/nigels-com/glew/releases/download/glew-2.1.0/glew-2.1.0.zip", "glew"],
     ["https://github.com/glfw/glfw/releases/download/3.3/glfw-3.3.zip", "glfw"],
