@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <tulz/Path>
 #include <tulz/File>
+#include <tulz/macros.h>
 #include <iostream>
 
 using namespace std;
@@ -15,29 +16,33 @@ inline pair<uint, uint> getTexParam(const string &key, const string &value) {
     using namespace AMTL::Texture::Params;
     pair<uint, uint> param;
 
-    if (key == Keys::WrapU)
+    switch_t(key)
+    case_t(Keys::WrapU)
         param.first = Texture::WrapU;
-    else if (key == Keys::WrapV)
+    case_t(Keys::WrapV)
         param.first = Texture::WrapV;
-    else if (key == Keys::MinFilter)
+    case_t(Keys::MinFilter)
         param.first = Texture::MinFilter;
-    else if (key == Keys::MagFilter)
+    case_t(Keys::MagFilter)
         param.first = Texture::MagFilter;
+    switch_t_end
 
-    if (value == Values::Repeat)
+    switch_t(value)
+    case_t(Values::Repeat)
         param.second = Texture::Repeat;
-    else if (value == Values::ClampToEdge)
+    case_t(Values::ClampToEdge)
         param.second = Texture::ClampToEdge;
-    else if (value == Values::ClampToBorder)
+    case_t(Values::ClampToBorder)
         param.second = Texture::ClampToBorder;
-    else if (value == Values::MirroredRepeat)
+    case_t(Values::MirroredRepeat)
         param.second = Texture::MirroredRepeat;
-    else if (value == Values::MirrorClampToEdge)
+    case_t(Values::MirrorClampToEdge)
         param.second = Texture::MirrorClampToEdge;
-    else if (value == Values::Nearest)
+    case_t(Values::Nearest)
         param.second = Texture::Nearest;
-    else if (value == Values::Linear)
+    case_t(Values::Linear)
         param.second = Texture::Linear;
+    switch_t_end
 
     return param;
 }
@@ -45,12 +50,14 @@ inline pair<uint, uint> getTexParam(const string &key, const string &value) {
 inline uint getSharedLevel(const string &str) {
     using namespace AMTL::Texture;
 
-    if (str == Unique)
+    switch_t(str)
+    case_t(Unique)
         return AMTLLoader::Unique;
-    if (str == ModelShared)
+    case_t(ModelShared)
         return AMTLLoader::ModelShared;
-    if (str == Shared)
+    case_t(Shared)
         return AMTLLoader::Shared;
+    switch_t_end
 
     cerr << "Unknown texture shared level \"" << str << "\"\n";
     return AMTLLoader::Shared;
@@ -61,38 +68,41 @@ inline void processTextureObject(const string &type_str, const nlohmann::json &m
     AMTLLoader::MaterialObject::TextureObject materialTextureObject = AMTLLoader::MaterialObject::TextureObject();
     uint type;
 
-    if (type_str == AMTL::Texture::Ambient)
+    switch_t(type_str)
+    case_t(AMTL::Texture::Ambient)
         type = AMTLLoader::AmbientTexture;
-    else if (type_str == AMTL::Texture::Diffuse)
+    case_t(AMTL::Texture::Diffuse)
         type = AMTLLoader::DiffuseTexture;
-    else if (type_str == AMTL::Texture::Specular)
+    case_t(AMTL::Texture::Specular)
         type = AMTLLoader::SpecularTexture;
-    else if (type_str == AMTL::Texture::Normal)
+    case_t(AMTL::Texture::Normal)
         type = AMTLLoader::NormalTexture;
-    else if (type_str == AMTL::Texture::Reflection)
+    case_t(AMTL::Texture::Reflection)
         type = AMTLLoader::ReflectionTexture;
-    else if (type_str == AMTL::Texture::Jitter)
+    case_t(AMTL::Texture::Jitter)
         type = AMTLLoader::JitterTexture;
-    else {
+    default_t {
         cerr << "Error: unknown texture type " << type_str << "\n";
         return;
     }
+    switch_t_end
 
     // reading texture block data
     auto textureJSONObject = materialJSONObject[type_str];
     for (auto &el : textureJSONObject.items()) {
         using namespace AMTL::Texture;
 
-        const string &key = el.key();
-        if (key == Path)
+        switch_t(el.key())
+        case_t(Path)
             materialTextureObject.path = el.value();
-        else if (key == SharedLevel)
+        case_t(SharedLevel)
             materialTextureObject.sharedLevel = getSharedLevel(el.value());
-        else if (key == Params::Params) {
+        case_t(Params::Params) {
             auto paramsObject = el.value();
             for (auto &pPair : paramsObject.items())
                 materialTextureObject.params.insert(getTexParam(pPair.key(), pPair.value()));
         }
+        switch_t_end
     }
 
     materialObject.textures[type] = materialTextureObject;
@@ -111,22 +121,24 @@ bool AMTLLoader::load(const std::string &path) {
         MaterialObject materialObject = MaterialObject();
 
         for (auto &el : materialJSONObject.items()) {
-            if (el.key() == AMTL::Name)
+            switch_t(el.key())
+            case_t(AMTL::Name)
                 continue;
-            else if (el.key() == AMTL::AmbientStrength)
+            case_t(AMTL::AmbientStrength)
                 materialObject.ambientStrength = el.value();
-            else if (el.key() == AMTL::DiffuseStrength)
+            case_t(AMTL::DiffuseStrength)
                 materialObject.diffuseStrength = el.value();
-            else if (el.key() == AMTL::SpecularStrength)
+            case_t(AMTL::SpecularStrength)
                 materialObject.specularStrength = el.value();
-            else if (el.key() == AMTL::Shininess)
+            case_t(AMTL::Shininess)
                 materialObject.shininess = el.value();
-            else if (el.key() == AMTL::Jitter)
+            case_t(AMTL::Jitter)
                 materialObject.jitter = el.value();
-            else if (el.key() == AMTL::Reflection)
+            case_t(AMTL::Reflection)
                 materialObject.reflection = el.value();
-            else
+            default_t
                 processTextureObject(el.key(), materialJSONObject, materialObject);
+            switch_t_end
         }
 
         m_materials[name] = materialObject;
