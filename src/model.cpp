@@ -19,7 +19,10 @@ using namespace std;
 namespace algine {
 void Shape::delBuffers() {
     glDeleteVertexArrays(vaos.size(), &vaos[0]);
-    glDeleteBuffers(8, &buffers.vertices); // deletes ALL buffers from structure `buffers`
+
+    ArrayBuffer::destroy(buffers.vertices, buffers.normals, buffers.texCoords,
+            buffers.tangents, buffers.bitangents, buffers.boneWeights, buffers.boneIds);
+    ElementArrayBuffer::destroy(buffers.indices);
 }
 
 // creates VAO and adds it into `vaos` array
@@ -34,8 +37,9 @@ void Shape::createVAO(
     glGenVertexArrays(1, &vaos[vaos.size() - 1]);
     glBindVertexArray(vaos[vaos.size() - 1]);
 
-    #define _pointer(location, count, buffer) if (location != -1) { glEnableVertexAttribArray(location); pointer(location, count, buffer); }
-    #define _pointerui(location, count, buffer) if (location != -1) { glEnableVertexAttribArray(location); pointerui(location, count, buffer); }
+    // TODO: create class VertexArray (or VertexAttribArray). It must have (as minimum) enable() and setBuffer() (or setPointer?)
+    #define _pointer(location, count, buffer) if (buffer != nullptr && location != -1) { glEnableVertexAttribArray(location); pointer(location, count, buffer->m_id); }
+    #define _pointerui(location, count, buffer) if (buffer != nullptr && location != -1) { glEnableVertexAttribArray(location); pointerui(location, count, buffer->m_id); }
     
     _pointer(inPosition, 3, buffers.vertices)
     _pointer(inNormal, 3, buffers.normals)
@@ -52,7 +56,7 @@ void Shape::createVAO(
     #undef _pointerui
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.indices);
+    buffers.indices->bind();
     glBindVertexArray(0);
 }
 
@@ -331,48 +335,30 @@ void ShapeLoader::loadTextures() {
     }
 }
 
-// TODO: create classes Buffer, ArrayBuffer, ElementArrayBuffer
+template<typename BufferType, typename DataType>
+inline BufferType* createBuffer(const std::vector<DataType> &data) {
+    if (!data.empty()) {
+        auto *bufferType = new BufferType();
+        bufferType->bind();
+        bufferType->setData(sizeof(data[0]) * data.size(), &data[0], Buffer::StaticDraw);
+        bufferType->unbind();
+        return bufferType;
+    }
 
-#define genBufferForArray(buffer, array) \
-if (!array.empty()) { \
-    glGenBuffers(1, &buffer); \
-}
-
-#define mkArrayBuffer(buffer, array) \
-if (!array.empty()) { \
-    glBindBuffer(GL_ARRAY_BUFFER, buffer); \
-    glBufferData(GL_ARRAY_BUFFER, sizeof(array[0]) * array.size(), &array[0], GL_STATIC_DRAW); \
+    return nullptr;
 }
 
 void ShapeLoader::genBuffers() {
-    genBufferForArray(m_shape->buffers.vertices, m_shape->geometry.vertices) // vertices
-    genBufferForArray(m_shape->buffers.normals, m_shape->geometry.normals) // normals
-    genBufferForArray(m_shape->buffers.texCoords, m_shape->geometry.texCoords) // texCoords
-    genBufferForArray(m_shape->buffers.tangents, m_shape->geometry.tangents) // tangents
-    genBufferForArray(m_shape->buffers.bitangents, m_shape->geometry.bitangents) // bitangents
-    genBufferForArray(m_shape->buffers.boneWeights, m_shape->geometry.boneWeights) // bone weights
-    genBufferForArray(m_shape->buffers.boneIds, m_shape->geometry.boneIds) // bone ids
+    m_shape->buffers.vertices = createBuffer<ArrayBuffer>(m_shape->geometry.vertices);
+    m_shape->buffers.normals = createBuffer<ArrayBuffer>(m_shape->geometry.normals);
+    m_shape->buffers.texCoords = createBuffer<ArrayBuffer>(m_shape->geometry.texCoords);
+    m_shape->buffers.tangents = createBuffer<ArrayBuffer>(m_shape->geometry.tangents);
+    m_shape->buffers.bitangents = createBuffer<ArrayBuffer>(m_shape->geometry.bitangents);
+    m_shape->buffers.boneWeights = createBuffer<ArrayBuffer>(m_shape->geometry.boneWeights);
+    m_shape->buffers.boneIds = createBuffer<ArrayBuffer>(m_shape->geometry.boneIds);
 
-    mkArrayBuffer(m_shape->buffers.vertices, m_shape->geometry.vertices) // vertices
-    mkArrayBuffer(m_shape->buffers.normals, m_shape->geometry.normals) // normals
-    mkArrayBuffer(m_shape->buffers.texCoords, m_shape->geometry.texCoords) // texCoords
-    mkArrayBuffer(m_shape->buffers.tangents, m_shape->geometry.tangents) // tangents
-    mkArrayBuffer(m_shape->buffers.bitangents, m_shape->geometry.bitangents) // bitangents
-    mkArrayBuffer(m_shape->buffers.boneWeights, m_shape->geometry.boneWeights) // bone weights
-    mkArrayBuffer(m_shape->buffers.boneIds, m_shape->geometry.boneIds) // bone ids
-
-    // indices
-    glGenBuffers(1, &m_shape->buffers.indices);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_shape->buffers.indices);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_shape->geometry.indices.size(),
-                 &m_shape->geometry.indices[0], GL_STATIC_DRAW);
-
-    // to default
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    m_shape->buffers.indices = createBuffer<ElementArrayBuffer>(m_shape->geometry.indices);
 }
-#undef mkArrayBuffer
-#undef genBufferForArray
 
 ShapeLoader::LoadedTexture::LoadedTexture(
         const string &path, const shared_ptr<Texture2D> &texture,

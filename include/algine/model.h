@@ -7,6 +7,8 @@
 #include <algine/bone.h>
 #include <algine/animation.h>
 #include <algine/object3d.h>
+#include <algine/ArrayBuffer.h>
+#include <algine/ElementArrayBuffer.h>
 #include <vector>
 #include <map>
 #include <assimp/scene.h> // Output data structure
@@ -50,7 +52,8 @@ public:
     uint bonesPerVertex = 0;
 
     struct Buffers {
-        uint vertices, normals, texCoords, tangents, bitangents, indices, boneWeights, boneIds;
+        ArrayBuffer *vertices, *normals, *texCoords, *tangents, *bitangents, *boneWeights, *boneIds;
+        ElementArrayBuffer *indices;
     } buffers;
 };
 
