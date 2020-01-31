@@ -64,48 +64,32 @@ include_directories(contrib)
 include_directories(include)
 
 add_executable(algine
-        include/algine/algine_renderer.h
-        include/algine/animation.h
-        include/algine/bone.h
-        include/algine/gputils.h
-        include/algine/framebuffer.h
-        include/algine/light.h
-        include/algine/material.h
-        include/algine/math.h
-        include/algine/model.h
-        include/algine/node.h
-        include/algine/renderbuffer.h
         include/algine/constants.h
-        include/algine/shader.h
-        include/algine/texture.h
         include/algine/types.h
-        include/algine/camera.h
-        include/algine/event.h
-        include/algine/object3d.h
-        include/algine/rotator.h
         include/algine/templates.h
-        include/algine/debug.h
-        include/algine/AMTLLoader.h
-        src/algine_renderer.cpp
-        src/animation.cpp
-        src/bone.cpp
-        src/gputils.cpp
-        src/framebuffer.cpp
-        src/light.cpp
         src/main.cpp
-        src/material.cpp
-        src/math.cpp
-        src/model.cpp
-        src/node.cpp
-        src/renderbuffer.cpp
-        src/shader.cpp
-        src/texture.cpp
-        src/camera.cpp
-        src/event.cpp
-        src/object3d.cpp
-        src/rotator.cpp
-        src/debug.cpp
-        src/AMTLLoader.cpp)
+        src/algine_renderer.cpp include/algine/algine_renderer.h
+        src/animation.cpp include/algine/animation.h
+        src/bone.cpp include/algine/bone.h
+        src/gputils.cpp include/algine/gputils.h
+        src/framebuffer.cpp include/algine/framebuffer.h
+        src/light.cpp include/algine/light.h
+        src/material.cpp include/algine/material.h
+        src/math.cpp include/algine/math.h
+        src/model.cpp include/algine/model.h
+        src/node.cpp include/algine/node.h
+        src/renderbuffer.cpp include/algine/renderbuffer.h
+        src/shader.cpp include/algine/shader.h
+        src/texture.cpp include/algine/texture.h
+        src/camera.cpp include/algine/camera.h
+        src/event.cpp include/algine/event.h
+        src/object3d.cpp include/algine/object3d.h
+        src/rotator.cpp include/algine/rotator.h
+        src/debug.cpp include/algine/debug.h
+        src/AMTLLoader.cpp include/algine/AMTLLoader.h
+        src/Buffer.cpp include/algine/Buffer.h
+        src/ArrayBuffer.cpp include/algine/ArrayBuffer.h
+        src/ElementArrayBuffer.cpp include/algine/ElementArrayBuffer.h)
 
 # linking
 if (WIN32)
