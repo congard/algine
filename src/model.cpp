@@ -22,7 +22,7 @@ void Shape::delBuffers() {
 
     ArrayBuffer::destroy(buffers.vertices, buffers.normals, buffers.texCoords,
             buffers.tangents, buffers.bitangents, buffers.boneWeights, buffers.boneIds);
-    ElementArrayBuffer::destroy(buffers.indices);
+    IndexBuffer::destroy(buffers.indices);
 }
 
 // creates VAO and adds it into `vaos` array
@@ -357,7 +357,7 @@ void ShapeLoader::genBuffers() {
     m_shape->buffers.boneWeights = createBuffer<ArrayBuffer>(m_shape->geometry.boneWeights);
     m_shape->buffers.boneIds = createBuffer<ArrayBuffer>(m_shape->geometry.boneIds);
 
-    m_shape->buffers.indices = createBuffer<ElementArrayBuffer>(m_shape->geometry.indices);
+    m_shape->buffers.indices = createBuffer<IndexBuffer>(m_shape->geometry.indices);
 }
 
 ShapeLoader::LoadedTexture::LoadedTexture(
