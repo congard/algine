@@ -89,7 +89,9 @@ add_executable(algine
         src/AMTLLoader.cpp include/algine/AMTLLoader.h
         src/Buffer.cpp include/algine/Buffer.h
         src/ArrayBuffer.cpp include/algine/ArrayBuffer.h
-        src/IndexBuffer.cpp include/algine/IndexBuffer.h)
+        src/IndexBuffer.cpp include/algine/IndexBuffer.h
+        src/InputLayout.cpp include/algine/InputLayout.h
+        src/InputAttributeDescription.cpp include/algine/InputAttributeDescription.h)
 
 # linking
 if (WIN32)
