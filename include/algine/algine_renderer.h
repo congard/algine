@@ -4,9 +4,10 @@
 #include <algine/types.h>
 #include <algine/shader.h>
 
+// TODO: move CubeRenderer and QuadRenderer into separate files
+//  remove pointer function
 namespace algine {
 void pointer(int location, int count, uint buffer, uint stride = 0, const void *offset = nullptr);
-void pointerui(int location, int count, uint buffer, uint stride = 0, const void *offset = nullptr);
 
 class CubeRenderer {
 public:

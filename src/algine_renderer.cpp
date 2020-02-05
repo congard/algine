@@ -3,7 +3,6 @@
 #include <GL/glew.h>
 #include <algine/texture.h>
 #include <algine/framebuffer.h>
-#include <algine/renderbuffer.h>
 
 namespace algine {
 void pointer(const int location, const int count, const uint buffer, const uint stride, const void *offset) {
@@ -15,17 +14,6 @@ void pointer(const int location, const int count, const uint buffer, const uint 
         GL_FALSE, // is normalized?
         stride,   // step
         offset    // offset
-    );
-}
-
-void pointerui(const int location, const int count, const uint buffer, const uint stride, const void *offset) {
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glVertexAttribIPointer(
-        location,        // attribute location
-        count,           // count (1, 2, 3 or 4)
-        GL_UNSIGNED_INT, // type
-        stride,          // step
-        offset           // offset
     );
 }
 
