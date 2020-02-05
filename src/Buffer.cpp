@@ -10,11 +10,11 @@ Buffer::~Buffer() {
     glDeleteBuffers(1, &m_id);
 }
 
-void Buffer::bind() {
+void Buffer::bind() const {
     glBindBuffer(m_target, m_id);
 }
 
-void Buffer::unbind() {
+void Buffer::unbind() const {
     glBindBuffer(m_target, 0);
 }
 

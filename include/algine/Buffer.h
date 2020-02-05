@@ -14,8 +14,8 @@ public:
     Buffer();
     ~Buffer();
 
-    void bind();
-    void unbind();
+    void bind() const;
+    void unbind() const;
     void setData(uint size, const void *data, uint usage);
 
     uint getId() const;
