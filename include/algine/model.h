@@ -9,6 +9,7 @@
 #include <algine/object3d.h>
 #include <algine/ArrayBuffer.h>
 #include <algine/IndexBuffer.h>
+#include <algine/InputLayout.h>
 #include <vector>
 #include <map>
 #include <assimp/scene.h> // Output data structure
@@ -29,10 +30,10 @@ public:
     void delBuffers();
 
     // TODO: move it to ShapeLoader
-    // creates VAO and adds it into `vaos` array
+    // creates InputLayout and adds it into inputLayouts array
     // note: this function will limit max bones per vertex to 4
-    // if you need more, you will have to create VAO manually
-    void createVAO(
+    // if you need more, you will have to create InputLayout manually
+    void createInputLayout(
             int inPosition, int inTexCoord = -1, int inNormal = -1,
             int inTangent = -1, int inBitangent = -1,
             int inBoneWeights = -1, int inBoneIds = -1
@@ -46,7 +47,7 @@ public:
     std::vector<Bone> bones;
     std::vector<Animation> animations;
     glm::mat4 globalInverseTransform;
-    std::vector<uint> vaos;
+    std::vector<InputLayout*> inputLayouts;
     Node rootNode;
     Geometry geometry;
     uint bonesPerVertex = 0;

@@ -10,7 +10,6 @@
 
 #include <algine/texture.h>
 #include <algine/node.h>
-#include <algine/algine_renderer.h>
 #include <tulz/Path>
 
 using namespace tulz;
@@ -18,46 +17,65 @@ using namespace std;
 
 namespace algine {
 void Shape::delBuffers() {
-    glDeleteVertexArrays(vaos.size(), &vaos[0]);
+    for (auto &item : inputLayouts)
+        InputLayout::destroy(item);
 
     ArrayBuffer::destroy(buffers.vertices, buffers.normals, buffers.texCoords,
             buffers.tangents, buffers.bitangents, buffers.boneWeights, buffers.boneIds);
     IndexBuffer::destroy(buffers.indices);
 }
 
-// creates VAO and adds it into `vaos` array
-// note: this function will limit max bones per vertex to 4
-// if you need more, you will have to create VAO manually
-void Shape::createVAO(
+inline void
+addAttribute(
+        const InputLayout *inputLayout,
+        const InputAttributeDescription &inputAttributeDescription,
+        const ArrayBuffer *arrayBuffer)
+{
+    if (inputAttributeDescription.m_location != InputAttributeDescription::LocationAbsent && arrayBuffer != nullptr)
+        inputLayout->addAttribute(inputAttributeDescription, arrayBuffer);
+}
+
+void Shape::createInputLayout(
         int inPosition, int inTexCoord, int inNormal,
         int inTangent, int inBitangent,
         int inBoneWeights, int inBoneIds
     ) {
-    vaos.push_back(0); // allocate memory
-    glGenVertexArrays(1, &vaos[vaos.size() - 1]);
-    glBindVertexArray(vaos[vaos.size() - 1]);
+    auto *inputLayout = new InputLayout();
+    inputLayout->bind();
+    inputLayouts.push_back(inputLayout);
 
-    // TODO: create class VertexArray (or VertexAttribArray). It must have (as minimum) enable() and setBuffer() (or setPointer?)
-    #define _pointer(location, count, buffer) if (buffer != nullptr && location != -1) { glEnableVertexAttribArray(location); pointer(location, count, buffer->m_id); }
-    #define _pointerui(location, count, buffer) if (buffer != nullptr && location != -1) { glEnableVertexAttribArray(location); pointerui(location, count, buffer->m_id); }
-    
-    _pointer(inPosition, 3, buffers.vertices)
-    _pointer(inNormal, 3, buffers.normals)
-    _pointer(inTangent, 3, buffers.tangents)
-    _pointer(inBitangent, 3, buffers.bitangents)
-    _pointer(inTexCoord, 2, buffers.texCoords)
+    InputAttributeDescription attribDescription;
+    attribDescription.setCount(3);
+
+    attribDescription.setLocation(inPosition);
+    addAttribute(inputLayout, attribDescription, buffers.vertices);
+
+    attribDescription.setLocation(inNormal);
+    addAttribute(inputLayout, attribDescription, buffers.normals);
+
+    attribDescription.setLocation(inTangent);
+    addAttribute(inputLayout, attribDescription, buffers.tangents);
+
+    attribDescription.setLocation(inBitangent);
+    addAttribute(inputLayout, attribDescription, buffers.bitangents);
+
+    attribDescription.setLocation(inTexCoord);
+    attribDescription.setCount(2);
+    addAttribute(inputLayout, attribDescription, buffers.texCoords);
 
     if (bonesPerVertex != 0) {
-        _pointer(inBoneWeights, 4, buffers.boneWeights)
-        _pointerui(inBoneIds, 4, buffers.boneIds)
+        attribDescription.setCount(4);
+
+        attribDescription.setLocation(inBoneWeights);
+        addAttribute(inputLayout, attribDescription, buffers.boneWeights);
+
+        attribDescription.setLocation(inBoneIds);
+        attribDescription.setFormat(GL_UNSIGNED_INT); // TODO
+        addAttribute(inputLayout, attribDescription, buffers.boneIds);
     }
 
-    #undef _pointer
-    #undef _pointerui
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    buffers.indices->bind();
-    glBindVertexArray(0);
+    inputLayout->setIndexBuffer(buffers.indices);
+    inputLayout->unbind();
 }
 
 void Shape::setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation) {

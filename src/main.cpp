@@ -259,20 +259,20 @@ createShapes(const string &path, const string &texPath, const size_t id, const b
     shapeLoader.load();
 
     shapes[id].reset(shapeLoader.getShape());
-    shapes[id]->createVAO(
+    shapes[id]->createInputLayout(
             pointShadowShader->getLocation(AlgineNames::ShadowShader::InPos),
             -1, -1, -1, -1,
             pointShadowShader->getLocation(AlgineNames::ShadowShader::InBoneWeights),
             pointShadowShader->getLocation(AlgineNames::ShadowShader::InBoneIds)
     ); // all shadow shaders have same ids
-    shapes[id]->createVAO(
-                colorShader->getLocation(AlgineNames::ColorShader::InPos),
-                colorShader->getLocation(AlgineNames::ColorShader::InTexCoord),
-                colorShader->getLocation(AlgineNames::ColorShader::InNormal),
-                colorShader->getLocation(AlgineNames::ColorShader::InTangent),
-                colorShader->getLocation(AlgineNames::ColorShader::InBitangent),
-                colorShader->getLocation(AlgineNames::ColorShader::InBoneWeights),
-                colorShader->getLocation(AlgineNames::ColorShader::InBoneIds)
+    shapes[id]->createInputLayout(
+            colorShader->getLocation(AlgineNames::ColorShader::InPos),
+            colorShader->getLocation(AlgineNames::ColorShader::InTexCoord),
+            colorShader->getLocation(AlgineNames::ColorShader::InNormal),
+            colorShader->getLocation(AlgineNames::ColorShader::InTangent),
+            colorShader->getLocation(AlgineNames::ColorShader::InBitangent),
+            colorShader->getLocation(AlgineNames::ColorShader::InBoneWeights),
+            colorShader->getLocation(AlgineNames::ColorShader::InBoneIds)
     );
 }
 
@@ -816,7 +816,7 @@ void updateMatrices() {
  * if point light, leave mat empty, but if dir light - it must be light space matrix
  */
 void drawModelDM(const Model &model, ShaderProgram *program, const glm::mat4 &mat = glm::mat4(1.0f)) {
-    glBindVertexArray(model.shape->vaos[0]);
+    model.shape->inputLayouts[0]->bind();
 
     if (model.shape->bonesPerVertex != 0) {
         for (int i = 0; i < model.shape->bones.size(); i++) {
@@ -841,7 +841,7 @@ if (tex != nullptr) \
 else \
     texture2DAB(slot, 0);
 void drawModel(const Model &model) {
-    glBindVertexArray(model.shape->vaos[1]);
+    model.shape->inputLayouts[1]->bind();
     
     if (model.shape->bonesPerVertex != 0) {
         for (int i = 0; i < model.shape->bones.size(); i++) {
