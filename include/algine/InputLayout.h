@@ -5,6 +5,7 @@
 #include <algine/IndexBuffer.h>
 #include <algine/InputAttributeDescription.h>
 #include <algine/templates.h>
+#include <tulz/macros.h>
 
 namespace algine {
 class InputLayout {
