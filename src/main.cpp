@@ -30,6 +30,7 @@
 #include <algine/shader.h>
 #include <algine/texture.h>
 #include <algine/CubeRenderer.h>
+#include <algine/QuadRenderer.h>
 
 #define SHADOW_MAP_RESOLUTION 1024
 #define bloomK 0.5f
@@ -87,7 +88,7 @@ LightDataSetter lightDataSetter;
 // renderer
 AlgineRenderer renderer;
 shared_ptr<CubeRenderer> skyboxRenderer;
-QuadRenderer quadRenderer;
+shared_ptr<QuadRenderer> quadRenderer;
 
 Renderbuffer *rbo;
 Framebuffer *displayFb;
@@ -495,10 +496,10 @@ void initShaders() {
     renderer.bloomSearchShader = bloomSearchShader;
     renderer.blurShaders = blurBloomShaders;
     renderer.dofCoCShader = dofCoCShader;
-    renderer.quadRenderer = &quadRenderer;
+    renderer.quadRenderer = quadRenderer.get();
 
     skyboxRenderer = make_shared<CubeRenderer>(skyboxShader->getLocation(AlgineNames::CubemapShader::InPos));
-    quadRenderer.init(0, 1); // inPosLocation in quad shader is 0, inTexCoordLocation is 1
+    quadRenderer = make_shared<QuadRenderer>(0, 1); // inPosLocation in quad shader is 0, inTexCoordLocation is 1
 
     Framebuffer::create(displayFb, screenspaceFb, bloomSearchFb, pingpongFb[0], pingpongFb[1],
                         pingpongBlurBloomFb[0], pingpongBlurBloomFb[1],
@@ -950,7 +951,7 @@ void render() {
     glDepthFunc(GL_LESS);
     glDrawBuffers(4, colorAttachment0123);
 
-    renderer.quadRenderer->bindVAO();
+    quadRenderer->getInputLayout()->bind();
 
     renderer.screenspacePass(screenspaceFb->getId(), colorTex->getId(), normalTex->getId(), ssrValues->getId(), positionTex->getId());
 

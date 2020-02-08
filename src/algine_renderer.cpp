@@ -5,91 +5,6 @@
 #include <algine/framebuffer.h>
 
 namespace algine {
-void pointer(const int location, const int count, const uint buffer, const uint stride, const void *offset) {
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glVertexAttribPointer(
-        location, // attribute location
-        count,    // count (1, 2, 3 or 4)
-        GL_FLOAT, // type
-        GL_FALSE, // is normalized?
-        stride,   // step
-        offset    // offset
-    );
-}
-
-void QuadRenderer::init(const int inPosLocation, const int inTexCoordLocation) {
-    // creating buffers for quad rendering
-    static float
-        vertices[12] = {
-            -1.0f, 1.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f
-        },
-
-        texCoords[8] = {
-            0.0f, 1.0f,
-            0.0f, 0.0f,
-            1.0f, 1.0f,
-            1.0f, 0.0f
-        };
-
-    glGenBuffers(2, quadBuffers);
-    glBindBuffer(GL_ARRAY_BUFFER, quadBuffers[0]); // vertices
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, quadBuffers[1]); // texCoords
-    glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
-
-    if (inPosLocation == -1 || inTexCoordLocation == -1) return;
-
-    // create & configure VAO
-    glGenVertexArrays(1, &quadVAO);
-    glBindVertexArray(quadVAO);
-
-    glEnableVertexAttribArray(inPosLocation);
-    glEnableVertexAttribArray(inTexCoordLocation);
-    pointer(inPosLocation, 3, quadBuffers[0]);
-	pointer(inTexCoordLocation, 2, quadBuffers[1]);
-
-    glBindVertexArray(0);
-}
-
-void QuadRenderer::bindVAO() {
-    glBindVertexArray(quadVAO);
-}
-
-// just calls `glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)`
-void QuadRenderer::drawQuad() {
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-}
-
-void QuadRenderer::render() {
-    bindVAO();
-    drawQuad();
-}
-
-void QuadRenderer::render(const int inPosLocation, const int inTexCoordLocation) {
-	glEnableVertexAttribArray(inPosLocation);
-    glEnableVertexAttribArray(inTexCoordLocation);
-    pointer(inPosLocation, 3, quadBuffers[0]);
-	pointer(inTexCoordLocation, 2, quadBuffers[1]);
-	
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		
-	glDisableVertexAttribArray(inPosLocation);
-    glDisableVertexAttribArray(inTexCoordLocation);
-}
-
-void QuadRenderer::render(const int programId, const int inPosLocation, const int inTexCoordLocation) {
-    glUseProgram(programId);
-    render(inPosLocation, inTexCoordLocation);
-}
-
-QuadRenderer::~QuadRenderer() {
-    glDeleteBuffers(2, quadBuffers);
-    glDeleteVertexArrays(1, &quadVAO);
-}
-
 void AlgineRenderer::mainPass(const uint displayFBO) {
     glBindFramebuffer(GL_FRAMEBUFFER, displayFBO);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -99,7 +14,7 @@ void AlgineRenderer::bloomSearchPass(const uint bsFBO, const uint image) {
     bindFramebuffer(bsFBO);
     bloomSearchShader->use();
     texture2DAB(0, image);
-    quadRenderer->drawQuad();
+    quadRenderer->draw();
 }
 
 void AlgineRenderer::blurPass(const uint pingpongFBO[2], const uint pingpongBuffers[2], const uint image, const uint blurAmount) {
@@ -113,7 +28,7 @@ void AlgineRenderer::blurPass(const uint pingpongFBO[2], const uint pingpongBuff
         texture2DAB(0, firstIteration ? image : pingpongBuffers[!horizontal]); // bloom
         
         // rendering
-		quadRenderer->drawQuad();
+		quadRenderer->draw();
 		horizontal = !horizontal;
 		if (firstIteration) firstIteration = false;
 	}
@@ -126,14 +41,14 @@ void AlgineRenderer::screenspacePass(const uint ssFBO, const uint colorMap, cons
     texture2DAB(1, normalMap);
     texture2DAB(2, ssrValuesMap);
     texture2DAB(3, positionMap);
-    quadRenderer->drawQuad();
+    quadRenderer->draw();
 }
 
 void AlgineRenderer::dofCoCPass(const uint cocFBO, const uint positionMap) {
     bindFramebuffer(cocFBO);
     dofCoCShader->use();
     texture2DAB(0, positionMap);
-    quadRenderer->drawQuad();
+    quadRenderer->draw();
 }
 
 #define _dofBlurPass(pingpongFBO, dofBuffers, blurAmount, code_tex_ab) \
@@ -144,7 +59,7 @@ void AlgineRenderer::dofCoCPass(const uint cocFBO, const uint positionMap) {
 		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);    \
         code_tex_ab                                                    \
         /* rendering */                                                \
-		quadRenderer->drawQuad();                                      \
+		quadRenderer->draw();                                          \
 		horizontal = !horizontal;                                      \
 		if (firstIteration) firstIteration = false;                    \
 	}
@@ -172,20 +87,13 @@ void AlgineRenderer::doubleBlendPass(const uint image, const uint bloom) {
     blendShader->use();
     texture2DAB(0, image);
 	texture2DAB(1, bloom);
-	quadRenderer->drawQuad();
+	quadRenderer->draw();
 }
 
 void AlgineRenderer::blendPass(const uint texture0) {
     // Do not need to call glClear, because the texture is completely redrawn
     blendShader->use();
     texture2DAB(0, texture0);
-	quadRenderer->drawQuad();
+	quadRenderer->draw();
 }
-
-AlgineRenderer::~AlgineRenderer() {
-    #ifdef ALGINE_LOGGING
-    std::cout << "~AlgineRenderer() " << this << "\n";
-    #endif
-}
-
 }

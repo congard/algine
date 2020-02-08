@@ -3,27 +3,9 @@
 
 #include <algine/types.h>
 #include <algine/shader.h>
+#include <algine/QuadRenderer.h>
 
-// TODO: move CubeRenderer and QuadRenderer into separate files
-//  remove pointer function
 namespace algine {
-void pointer(int location, int count, uint buffer, uint stride = 0, const void *offset = nullptr);
-
-class QuadRenderer {
-public:
-    uint quadBuffers[2]; // vertexBuffer and texCoordsBuffer
-    uint quadVAO;
-
-    void init(int inPosLocation = -1, int inTexCoordLocation = -1);
-    void bindVAO();
-    void drawQuad(); // just calls `glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)`
-    void render();
-    void render(int inPosLocation, int inTexCoordLocation);
-    void render(int programId, int inPosLocation, int inTexCoordLocation);
-
-    ~QuadRenderer();
-};
-
 // TODO: clean up AlgineRenderer
 class AlgineRenderer {
 public:
@@ -50,8 +32,6 @@ public:
     void dofBlurPass(const uint pingpongFBO[2], const uint dofBuffers[2], uint image, uint cocMap, uint positionMap, uint blurAmount);
     void doubleBlendPass(uint image, uint bloom);
     void blendPass(uint texture0);
-
-    ~AlgineRenderer();
 };
 
 } /* namespace algine */
