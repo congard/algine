@@ -29,6 +29,7 @@
 #include <algine/event.h>
 #include <algine/shader.h>
 #include <algine/texture.h>
+#include <algine/CubeRenderer.h>
 
 #define SHADOW_MAP_RESOLUTION 1024
 #define bloomK 0.5f
@@ -85,7 +86,7 @@ LightDataSetter lightDataSetter;
 
 // renderer
 AlgineRenderer renderer;
-CubeRenderer skyboxRenderer;
+shared_ptr<CubeRenderer> skyboxRenderer;
 QuadRenderer quadRenderer;
 
 Renderbuffer *rbo;
@@ -496,7 +497,7 @@ void initShaders() {
     renderer.dofCoCShader = dofCoCShader;
     renderer.quadRenderer = &quadRenderer;
 
-    skyboxRenderer.init(skyboxShader->getLocation(AlgineNames::CubemapShader::InPos));
+    skyboxRenderer = make_shared<CubeRenderer>(skyboxShader->getLocation(AlgineNames::CubemapShader::InPos));
     quadRenderer.init(0, 1); // inPosLocation in quad shader is 0, inTexCoordLocation is 1
 
     Framebuffer::create(displayFb, screenspaceFb, bloomSearchFb, pingpongFb[0], pingpongFb[1],
@@ -944,7 +945,8 @@ void render() {
     skyboxShader->setMat3(AlgineNames::CubemapShader::ViewMatrix, glm::mat3(camera.getViewMatrix()));
     skyboxShader->setMat4(AlgineNames::CubemapShader::TransformationMatrix, camera.getProjectionMatrix() * glm::mat4(glm::mat3(camera.getViewMatrix())));
     skybox->use(0);
-    skyboxRenderer.render();
+    skyboxRenderer->getInputLayout()->bind();
+    skyboxRenderer->draw();
     glDepthFunc(GL_LESS);
     glDrawBuffers(4, colorAttachment0123);
 

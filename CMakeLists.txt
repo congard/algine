@@ -91,7 +91,8 @@ add_executable(algine
         src/ArrayBuffer.cpp include/algine/ArrayBuffer.h
         src/IndexBuffer.cpp include/algine/IndexBuffer.h
         src/InputLayout.cpp include/algine/InputLayout.h
-        src/InputAttributeDescription.cpp include/algine/InputAttributeDescription.h)
+        src/InputAttributeDescription.cpp include/algine/InputAttributeDescription.h
+        src/CubeRenderer.cpp include/algine/CubeRenderer.h)
 
 # linking
 if (WIN32)

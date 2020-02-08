@@ -9,20 +9,6 @@
 namespace algine {
 void pointer(int location, int count, uint buffer, uint stride = 0, const void *offset = nullptr);
 
-class CubeRenderer {
-public:
-    uint cubeBuffer, cubeVAO;
-
-    void init(int inPosLocation = -1); // if `inPosLocation` != -1, VAO will be created
-    void bindVAO();
-    void drawCube(); // just calls `glDrawArrays(GL_TRIANGLE_STRIP, 0, 14)`
-    void render();
-    void render(int inPosLocation);
-    void render(int programId, int inPosLocation);
-
-    ~CubeRenderer();
-};
-
 class QuadRenderer {
 public:
     uint quadBuffers[2]; // vertexBuffer and texCoordsBuffer
