@@ -1,7 +1,7 @@
 #include <algine/CubeRenderer.h>
 
 namespace algine {
-CubeRenderer::CubeRenderer(const int inPosLocation) {
+CubeRenderer::CubeRenderer(const uint inPosLocation) {
     // source: https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
     const float vertices[] = {
             -1.0f,  1.0f,  1.0f,    // Front-top-left

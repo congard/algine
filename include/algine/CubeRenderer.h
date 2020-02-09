@@ -8,7 +8,7 @@
 namespace algine {
 class CubeRenderer {
 public:
-    explicit CubeRenderer(int inPosLocation = 0);
+    explicit CubeRenderer(uint inPosLocation = 0);
     ~CubeRenderer();
 
     void draw();
