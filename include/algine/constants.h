@@ -193,7 +193,6 @@ namespace algine {
         // only vertex shader variables
         namespace QuadShader {
             constant(InPos, "inPos")
-            constant(InTexCoord, "inTexCoord")
         }
 
         // Screen Space Reflections Shader, only fragment shader variables

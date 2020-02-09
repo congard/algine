@@ -499,7 +499,7 @@ void initShaders() {
     renderer.quadRenderer = quadRenderer.get();
 
     skyboxRenderer = make_shared<CubeRenderer>(skyboxShader->getLocation(AlgineNames::CubemapShader::InPos));
-    quadRenderer = make_shared<QuadRenderer>(0, 1); // inPosLocation in quad shader is 0, inTexCoordLocation is 1
+    quadRenderer = make_shared<QuadRenderer>(0); // inPosLocation in quad shader is 0
 
     Framebuffer::create(displayFb, screenspaceFb, bloomSearchFb, pingpongFb[0], pingpongFb[1],
                         pingpongBlurBloomFb[0], pingpongBlurBloomFb[1],

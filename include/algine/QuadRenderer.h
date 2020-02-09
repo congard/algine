@@ -8,21 +8,20 @@
 namespace algine {
 class QuadRenderer {
 public:
-    // TODO: remove inTexCoordLocation. It must be calculated automatically
-    //  add getter for m_arrayBuffer (after removal m_vertexArrayBuffer and m_texCoordArrayBuffer)
-    QuadRenderer(int inPosLocation, int inTexCoordLocation);
+    explicit QuadRenderer(uint inPosLocation = 0);
     ~QuadRenderer();
 
     void draw();
 
     InputLayout *getInputLayout() const;
+    ArrayBuffer *getArrayBuffer() const;
 
-    // implementVariadicCreate(QuadRenderer) // TODO: add after removal inTexCoordLocation
+    implementVariadicCreate(QuadRenderer)
     implementVariadicDestroy(QuadRenderer)
 
 public:
     InputLayout *m_inputLayout;
-    ArrayBuffer *m_vertexArrayBuffer, *m_texCoordArrayBuffer;
+    ArrayBuffer *m_arrayBuffer;
 };
 }
 
