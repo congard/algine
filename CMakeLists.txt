@@ -67,6 +67,7 @@ add_executable(algine
         include/algine/constants.h
         include/algine/types.h
         include/algine/templates.h
+        include/algine/constants/AMTL.h
         src/main.cpp
         src/algine_renderer.cpp include/algine/algine_renderer.h
         src/animation.cpp include/algine/animation.h

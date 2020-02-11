@@ -1,6 +1,6 @@
 #include <algine/AMTLLoader.h>
-#include <algine/constants.h>
 #include <algine/texture.h>
+#include <algine/constants/AMTL.h>
 #include <nlohmann/json.hpp>
 #include <tulz/Path>
 #include <tulz/File>
@@ -9,7 +9,7 @@
 
 using namespace std;
 using namespace tulz;
-using namespace algine::AlgineConstants;
+using namespace algine::constants;
 
 namespace algine {
 inline pair<uint, uint> getTexParam(const string &key, const string &value) {
