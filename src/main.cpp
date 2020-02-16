@@ -15,7 +15,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <assimp/postprocess.h>
 #include <tulz/Path>
 
 #include <algine/algine_renderer.h>
@@ -31,10 +30,11 @@
 #include <algine/texture.h>
 #include <algine/CubeRenderer.h>
 #include <algine/QuadRenderer.h>
+#include <algine/ext/Blur.h>
+#include <algine/ext/constants/Blur.h>
 
 #define SHADOW_MAP_RESOLUTION 1024
 #define bloomK 0.5f
-#define bloomBlurAmount 4
 #define bloomBlurKernelRadius 15
 #define bloomBlurKernelSigma 16
 #define dofBlurAmount 4
@@ -90,13 +90,14 @@ AlgineRenderer renderer;
 shared_ptr<CubeRenderer> skyboxRenderer;
 shared_ptr<QuadRenderer> quadRenderer;
 
+shared_ptr<Blur> bloomBlur;
+shared_ptr<Blur> cocBlur;
+
 Renderbuffer *rbo;
 Framebuffer *displayFb;
 Framebuffer *screenspaceFb;
 Framebuffer *bloomSearchFb;
 Framebuffer *pingpongFb[2];
-Framebuffer *pingpongBlurBloomFb[2];
-Framebuffer *pingpongBlurCoCFb[2];
 Framebuffer *cocFb;
 
 Texture2D *colorTex;
@@ -106,8 +107,6 @@ Texture2D *positionTex;
 Texture2D *screenspaceTex;
 Texture2D *bloomTex;
 Texture2D *pingpongDofTex[2];
-Texture2D *pingpongBlurTex[2];
-Texture2D *pingpongBlurCoCTex[2];
 Texture2D *cocTex;
 TextureCube *skybox;
 
@@ -122,8 +121,6 @@ ShaderProgram *bloomSearchShader;
 ShaderProgram *bloomBlurHorShader, *bloomBlurVertShader;
 ShaderProgram *cocBlurHorShader, *cocBlurVertShader;
 ShaderProgram *blendShader;
-ShaderProgram *blurBloomShaders[2];
-ShaderProgram *blurCoCShaders[2];
 
 MouseEventListener mouseEventListener;
 
@@ -165,10 +162,10 @@ void updateRenderTextures() {
     updateTexture(screenspaceTex, winWidth, winHeight); // TODO: make small sst + blend pass in the future
     updateTexture(bloomTex, winWidth * bloomK, winHeight * bloomK);
 
-    for (size_t i = 0; i < 2; i++) {
-        updateTexture(pingpongBlurTex[i], winWidth * bloomK, winHeight * bloomK);
+    for (size_t i = 0; i < 2; ++i) {
+        updateTexture(bloomBlur->getPingPongTextures()[i], winWidth * bloomK, winHeight * bloomK);
         updateTexture(pingpongDofTex[i], winWidth, winHeight);
-        updateTexture(pingpongBlurCoCTex[i], winWidth, winHeight);
+        updateTexture(cocBlur->getPingPongTextures()[i], winWidth, winHeight);
     }
 
     updateTexture(cocTex, winWidth, winHeight);
@@ -341,11 +338,6 @@ void initShaders() {
                           bloomSearchShader, bloomBlurHorShader, bloomBlurVertShader,
                           cocBlurHorShader, cocBlurVertShader, blendShader);
 
-    blurBloomShaders[0] = bloomBlurHorShader;
-    blurBloomShaders[1] = bloomBlurVertShader;
-    blurCoCShaders[0] = cocBlurHorShader;
-    blurCoCShaders[1] = cocBlurVertShader;
-
     std::cout << "Compiling algine shaders\n";
 
     {
@@ -407,17 +399,17 @@ void initShaders() {
                          "src/resources/shaders/dof/fragment.glsl");
         manager.resetDefinitions();
         manager.define(Dof::DofCocMap);
-        manager.define(Blur::KernelRadius, std::to_string(dofBlurKernelRadius));
+        manager.define(constants::Blur::KernelRadius, std::to_string(dofBlurKernelRadius));
         manager.define(Dof::BleedingMinDeltaZ);
         manager.define(Dof::BleedingMinDeltaCoC);
         manager.define(Dof::BleedingMaxFocusCoC);
-        manager.define(Blur::Horizontal);
+        manager.define(constants::Blur::Horizontal);
         dofBlurHorShader->fromSource(manager.makeGenerated());
         dofBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
-        manager.removeDefinition(Blur::Horizontal);
-        manager.define(Blur::Vertical);
+        manager.removeDefinition(constants::Blur::Horizontal);
+        manager.define(constants::Blur::Vertical);
         dofBlurVertShader->fromSource(manager.makeGenerated());
         dofBlurVertShader->loadActiveLocations();
 
@@ -441,32 +433,32 @@ void initShaders() {
         manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
                          "src/resources/shaders/blur/fragment.glsl");
         manager.resetDefinitions();
-        manager.define(Blur::KernelRadius, std::to_string(bloomBlurKernelRadius));
+        manager.define(constants::Blur::KernelRadius, std::to_string(bloomBlurKernelRadius));
         manager.define(OutputType, "vec3");
         manager.define(TexComponent, "rgb");
-        manager.define(Blur::Horizontal);
+        manager.define(constants::Blur::Horizontal);
         bloomBlurHorShader->fromSource(manager.makeGenerated());
         bloomBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
-        manager.removeDefinition(Blur::Horizontal);
-        manager.define(Blur::Vertical);
+        manager.removeDefinition(constants::Blur::Horizontal);
+        manager.define(constants::Blur::Vertical);
         bloomBlurVertShader->fromSource(manager.makeGenerated());
         bloomBlurVertShader->loadActiveLocations();
 
         // CoC blur shaders
         manager.resetGenerated();
         manager.resetDefinitions();
-        manager.define(Blur::KernelRadius, std::to_string(cocBlurKernelRadius));
+        manager.define(constants::Blur::KernelRadius, std::to_string(cocBlurKernelRadius));
         manager.define(OutputType, "float");
         manager.define(TexComponent, "r");
-        manager.define(Blur::Horizontal);
+        manager.define(constants::Blur::Horizontal);
         cocBlurHorShader->fromSource(manager.makeGenerated());
         cocBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
-        manager.removeDefinition(Blur::Horizontal);
-        manager.define(Blur::Vertical);
+        manager.removeDefinition(constants::Blur::Horizontal);
+        manager.define(constants::Blur::Vertical);
         cocBlurVertShader->fromSource(manager.makeGenerated());
         cocBlurVertShader->loadActiveLocations();
 
@@ -489,30 +481,24 @@ void initShaders() {
     lightDataSetter.indexDirLightLocations(colorShader, dirLightsLimit);
     lightDataSetter.indexPointLightLocations(colorShader, pointShadowShader, pointLightsLimit);
 
+    skyboxRenderer = make_shared<CubeRenderer>(skyboxShader->getLocation(AlgineNames::CubemapShader::InPos));
+    quadRenderer = make_shared<QuadRenderer>(0); // inPosLocation in quad shader is 0
+
     renderer.ssrShader = ssrShader;
     renderer.blendShader = blendShader;
     renderer.dofBlurShaders[0] = dofBlurHorShader;
     renderer.dofBlurShaders[1] = dofBlurVertShader;
     renderer.bloomSearchShader = bloomSearchShader;
-    renderer.blurShaders = blurBloomShaders;
     renderer.dofCoCShader = dofCoCShader;
     renderer.quadRenderer = quadRenderer.get();
 
-    skyboxRenderer = make_shared<CubeRenderer>(skyboxShader->getLocation(AlgineNames::CubemapShader::InPos));
-    quadRenderer = make_shared<QuadRenderer>(0); // inPosLocation in quad shader is 0
-
-    Framebuffer::create(displayFb, screenspaceFb, bloomSearchFb, pingpongFb[0], pingpongFb[1],
-                        pingpongBlurBloomFb[0], pingpongBlurBloomFb[1],
-                        pingpongBlurCoCFb[0], pingpongBlurCoCFb[1], cocFb);
+    Framebuffer::create(displayFb, screenspaceFb, bloomSearchFb, pingpongFb[0], pingpongFb[1], cocFb);
 
     Renderbuffer::create(rbo);
 
     Texture2D::create(colorTex, normalTex, ssrValues, positionTex, screenspaceTex, bloomTex,
-                      pingpongDofTex[0], pingpongDofTex[1], pingpongBlurTex[0], pingpongBlurTex[1],
-                      pingpongBlurCoCTex[0], pingpongBlurCoCTex[1], cocTex);
+                      pingpongDofTex[0], pingpongDofTex[1], cocTex);
     ssrValues->setFormat(Texture::RG16F);
-    pingpongBlurCoCTex[0]->setFormat(Texture::Red16F);
-    pingpongBlurCoCTex[1]->setFormat(Texture::Red16F);
     cocTex->setFormat(Texture::Red16F);
 
     TextureCube::create(skybox);
@@ -529,8 +515,27 @@ void initShaders() {
 
     Texture2D::setParamsMultiple(Texture2D::defaultParams(),
                                  colorTex, normalTex, ssrValues, positionTex, screenspaceTex, bloomTex,
-                                 pingpongDofTex[0], pingpongDofTex[1], pingpongBlurTex[0], pingpongBlurTex[1],
-                                 pingpongBlurCoCTex[0], pingpongBlurCoCTex[1], cocTex);
+                                 pingpongDofTex[0], pingpongDofTex[1], cocTex);
+
+    TextureCreateInfo createInfo;
+    createInfo.format = Texture::RGB16F;
+    createInfo.width = winWidth * bloomK;
+    createInfo.height = winHeight * bloomK;
+    createInfo.params = Texture2D::defaultParams();
+
+    bloomBlur = make_shared<Blur>(createInfo);
+    bloomBlur->setPingPongShaders(bloomBlurHorShader, bloomBlurVertShader);
+    bloomBlur->setQuadRenderer(quadRenderer.get());
+    bloomBlur->configureKernel(bloomBlurKernelRadius, bloomBlurKernelSigma);
+
+    createInfo.format = Texture::Red16F;
+    createInfo.width = winWidth;
+    createInfo.height = winHeight;
+
+    cocBlur = make_shared<Blur>(createInfo);
+    cocBlur->setPingPongShaders(cocBlurHorShader, cocBlurVertShader);
+    cocBlur->setQuadRenderer(quadRenderer.get());
+    cocBlur->configureKernel(cocBlurKernelRadius, cocBlurKernelSigma);
 
     updateRenderTextures();
 
@@ -552,33 +557,7 @@ void initShaders() {
         // configuring ping-pong (blur)
         pingpongFb[i]->bind();
         pingpongFb[i]->attachTexture(pingpongDofTex[i], Framebuffer::ColorAttachmentZero);
-
-        // configuring ping-pong (blur)
-        pingpongBlurBloomFb[i]->bind();
-        pingpongBlurBloomFb[i]->attachTexture(pingpongBlurTex[i], Framebuffer::ColorAttachmentZero);
-
-        // configuring ping-pong (blur CoC)
-        pingpongBlurCoCFb[i]->bind();
-        pingpongBlurCoCFb[i]->attachTexture(pingpongBlurCoCTex[i], Framebuffer::ColorAttachmentZero);
     }
-
-    // sending to shader center of kernel and right part
-    float kernelBloom[bloomBlurKernelRadius * 2 - 1];
-    float kernelCoC[cocBlurKernelRadius * 2 - 1];
-    getGB1DKernel(kernelBloom, bloomBlurKernelRadius * 2 - 1, bloomBlurKernelSigma);
-    getGB1DKernel(kernelCoC, cocBlurKernelRadius * 2 - 1, cocBlurKernelSigma);
-
-    for (size_t j = 0; j < 2; j++) {
-        blurBloomShaders[j]->use();
-        for (int i = 0; i < bloomBlurKernelRadius; i++)
-            ShaderProgram::setFloat(blurBloomShaders[j]->getLocation(AlgineNames::BlurShader::Kernel) + (bloomBlurKernelRadius - 1 - i), kernelBloom[i]);
-
-        blurCoCShaders[j]->use();
-        for (int i = 0; i < cocBlurKernelRadius; i++)
-            ShaderProgram::setFloat(blurCoCShaders[j]->getLocation(AlgineNames::BlurShader::Kernel) + (cocBlurKernelRadius - 1 - i), kernelCoC[i]);
-    }
-
-    glUseProgram(0);
 
     screenspaceFb->bind();
     screenspaceFb->attachTexture(screenspaceTex, Framebuffer::ColorAttachmentZero);
@@ -775,13 +754,10 @@ void recycleAll() {
     for (size_t i = 0; i < SHAPES_COUNT; i++)
         shapes[i]->recycle();
 
-    Framebuffer::destroy(displayFb, screenspaceFb, bloomSearchFb, pingpongFb[0], pingpongFb[1],
-                         pingpongBlurBloomFb[0], pingpongBlurBloomFb[1],
-                         pingpongBlurCoCFb[0], pingpongBlurCoCFb[1], cocFb);
+    Framebuffer::destroy(displayFb, screenspaceFb, bloomSearchFb, pingpongFb[0], pingpongFb[1], cocFb);
 
     Texture2D::destroy(colorTex, normalTex, ssrValues, positionTex, screenspaceTex, bloomTex,
-                      pingpongDofTex[0], pingpongDofTex[1], pingpongBlurTex[0], pingpongBlurTex[1],
-                      pingpongBlurCoCTex[0], pingpongBlurCoCTex[1], cocTex);
+                       pingpongDofTex[0], pingpongDofTex[1], cocTex);
     TextureCube::destroy(skybox);
 
     Renderbuffer::destroy(rbo);
@@ -957,32 +933,22 @@ void render() {
 
     // TODO: tmp, AlgineRenderer must be eliminated !!!!!!
     // Now it looks like shit code... Oh I know
-    uint ids[] = {pingpongBlurTex[0]->getId(), pingpongBlurTex[1]->getId()};
-    uint fbos[] = {pingpongBlurBloomFb[0]->getId(), pingpongBlurBloomFb[1]->getId()};
 
     glViewport(0, 0, winWidth * bloomK, winHeight * bloomK);
     renderer.bloomSearchPass(bloomSearchFb->getId(), screenspaceTex->getId());
-    renderer.blurShaders = blurBloomShaders;
-    renderer.blurPass(fbos, ids, bloomTex->getId(), bloomBlurAmount);
+    bloomBlur->makeBlur(bloomTex);
     glViewport(0, 0, winWidth, winHeight);
 
     renderer.dofCoCPass(cocFb->getId(), positionTex->getId());
 
-    ids[0] = pingpongBlurCoCTex[0]->getId();
-    ids[1] = pingpongBlurCoCTex[1]->getId();
-    fbos[0] = pingpongBlurCoCFb[0]->getId();
-    fbos[1] = pingpongBlurCoCFb[1]->getId();
-    renderer.blurShaders = blurCoCShaders;
-    renderer.blurPass(fbos, ids, cocTex->getId(), bloomBlurAmount);
+    cocBlur->makeBlur(cocTex);
 
-    ids[0] = pingpongDofTex[0]->getId();
-    ids[1] = pingpongDofTex[1]->getId();
-    fbos[0] = pingpongFb[0]->getId();
-    fbos[1] = pingpongFb[1]->getId();
-    renderer.dofBlurPass(fbos, ids, screenspaceTex->getId(), pingpongBlurCoCTex[!renderer.horizontal]->getId(), positionTex->getId(), dofBlurAmount);
+    uint ids[] = {pingpongDofTex[0]->getId(), pingpongDofTex[1]->getId()};
+    uint fbos[] = {pingpongFb[0]->getId(), pingpongFb[1]->getId()};
+    renderer.dofBlurPass(fbos, ids, screenspaceTex->getId(), cocBlur->get()->getId(), positionTex->getId(), dofBlurAmount);
 
     bindFramebuffer(0);
-    renderer.doubleBlendPass(pingpongDofTex[!renderer.horizontal]->getId(), pingpongBlurTex[!renderer.horizontal]->getId());
+    renderer.doubleBlendPass(pingpongDofTex[!renderer.horizontal]->getId(), bloomBlur->get()->getId());
 }
 
 void display() {
