@@ -8,15 +8,8 @@
 #include <algine/templates.h>
 #include <tulz/macros.h>
 
-#define COLOR_ATTACHMENT(n) (GL_COLOR_ATTACHMENT0 + n)
-#define TEXTURE(n) (GL_TEXTURE0 + n)
-
 namespace algine {
 // TODO: remove this functions
-void activeTexture(const uint &index);
-
-void bindTexture2D(const uint &texture);
-
 // Activate & Bind 2D texture
 void texture2DAB(const uint &index, const uint &texture);
 
@@ -54,6 +47,13 @@ static void setParamsMultiple(const std::map<uint, T> &params, Args&...args) { \
         (*arr[i])->setParams(params); \
     } \
 }
+
+struct TextureCreateInfo {
+    uint lod = 0;
+    uint format = 0;
+    uint width = 0, height = 0;
+    std::map<uint, uint> params;
+};
 
 class Texture {
 public:
@@ -105,10 +105,11 @@ public:
     Texture();
     ~Texture();
 
-    void bind();
-    void use(uint slot); // activate + bind
+    void bind() const;
+    void use(uint slot) const; // activate + bind
     void setParams(const std::map<uint, uint> &params);
     void setParams(const std::map<uint, float> &params);
+    void applyTextureCreateInfo(const TextureCreateInfo &createInfo);
 
     /**
      * LOD - level of detail
@@ -130,7 +131,7 @@ public:
     virtual void update() = 0;
 
     // TODO: shader: rename > unbind
-    void unbind();
+    void unbind() const;
 
     uint getLOD() const;
     uint getFormat() const;

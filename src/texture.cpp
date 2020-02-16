@@ -12,18 +12,9 @@
 using namespace std;
 
 namespace algine {
-void activeTexture(const uint &index) {
-    glActiveTexture(TEXTURE(index));
-}
-
-void bindTexture2D(const uint &texture) {
-    glBindTexture(GL_TEXTURE_2D, texture);
-}
-
-// Activate & Bind 2D texture
 void texture2DAB(const uint &index, const uint &texture) {
-    activeTexture(index);
-	bindTexture2D(texture);
+    glActiveTexture(GL_TEXTURE0 + index);
+    glBindTexture(GL_TEXTURE_2D, texture);
 }
 
 size_t getTexComponentsCount(uint format) {
@@ -85,7 +76,7 @@ float* getPixels(uint texture, size_t x, size_t y, size_t width, size_t height, 
     GLuint framebuffer;
     Framebuffer::create(&framebuffer);
     bindFramebuffer(framebuffer);
-    Framebuffer::attachTexture2D(texture, COLOR_ATTACHMENT(0));
+    Framebuffer::attachTexture2D(texture, Framebuffer::ColorAttachmentZero);
     GLfloat* pixels = getPixelsFB(framebuffer, x, y, width, height, format);
     Framebuffer::destroy(&framebuffer);
     return pixels;
@@ -128,11 +119,11 @@ Texture::~Texture() {
     glDeleteTextures(1, &id);
 }
 
-void Texture::bind() {
+void Texture::bind() const {
     glBindTexture(target, id);
 }
 
-void Texture::use(const uint slot) {
+void Texture::use(const uint slot) const {
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(target, id);
 }
@@ -145,6 +136,18 @@ void Texture::setParams(const std::map<uint, uint> &params) {
 void Texture::setParams(const std::map<uint, float> &params) {
     for(const auto & key : params)
         glTexParameterf(target, key.first, key.second);
+}
+
+void Texture::applyTextureCreateInfo(const TextureCreateInfo &createInfo) {
+    lod = createInfo.lod;
+    format = createInfo.format;
+    width = createInfo.width;
+    height = createInfo.height;
+
+    bind();
+    setParams(createInfo.params);
+    update();
+    unbind();
 }
 
 void Texture::setLOD(const uint _lod) {
@@ -168,7 +171,7 @@ void Texture::setWidthHeight(const uint _width, const uint _height) {
     height = _height;
 }
 
-void Texture::unbind() {
+void Texture::unbind() const {
     glBindTexture(target, 0);
 }
 
