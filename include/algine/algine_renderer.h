@@ -6,12 +6,11 @@
 #include <algine/QuadRenderer.h>
 
 namespace algine {
-// TODO: clean up AlgineRenderer
+// TODO: completely remove AlgineRenderer
 class AlgineRenderer {
 public:
     ShaderProgram *ssrShader = nullptr;
     ShaderProgram *bloomSearchShader = nullptr;
-    ShaderProgram **blurShaders = nullptr; // { horizontal, vertical }
     ShaderProgram *blendShader = nullptr;
     ShaderProgram *dofBlurShaders[2] = {nullptr, nullptr}; // { horizontal, vertical }
     ShaderProgram *dofCoCShader = nullptr;
@@ -22,7 +21,6 @@ public:
 
     void mainPass(uint displayFBO);
     void bloomSearchPass(uint bsFBO, uint image);
-    void blurPass(const uint pingpongFBO[2], const uint pingpongBuffers[2], uint image, uint blurAmount);
     void screenspacePass(uint ssFBO, uint colorMap, uint normalMap, uint ssrValuesMap, uint positionMap);
     void dofCoCPass(uint cocFBO, uint positionMap);
 

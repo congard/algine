@@ -17,23 +17,6 @@ void AlgineRenderer::bloomSearchPass(const uint bsFBO, const uint image) {
     quadRenderer->draw();
 }
 
-void AlgineRenderer::blurPass(const uint pingpongFBO[2], const uint pingpongBuffers[2], const uint image, const uint blurAmount) {
-    horizontal = true; 
-	firstIteration = true;
-    for (usize i = 0; i < blurAmount; i++) {
-        blurShaders[horizontal]->use();
-
-		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
-        
-        texture2DAB(0, firstIteration ? image : pingpongBuffers[!horizontal]); // bloom
-        
-        // rendering
-		quadRenderer->draw();
-		horizontal = !horizontal;
-		if (firstIteration) firstIteration = false;
-	}
-}
-
 void AlgineRenderer::screenspacePass(const uint ssFBO, const uint colorMap, const uint normalMap, const uint ssrValuesMap, const uint positionMap) {
     glBindFramebuffer(GL_FRAMEBUFFER, ssFBO);
     ssrShader->use();
