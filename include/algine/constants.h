@@ -43,12 +43,6 @@ namespace algine {
                 constant(DirLightShadowMapping, "ALGINE_SHADOW_MAPPING_TYPE_DIR_LIGHTING")
             }
 
-            namespace Blur {
-                constant(Vertical, "ALGINE_VERTICAL")
-                constant(Horizontal, "ALGINE_HORIZONTAL")
-                constant(KernelRadius, "KERNEL_RADIUS")
-            }
-
             namespace Dof {
                 constant(Dof, "ALGINE_LINEAR_DOF")
                 constant(CinematicDof, "ALGINE_CINEMATIC_DOF")
@@ -186,11 +180,6 @@ namespace algine {
             constant(BaseImage, "image")
             constant(Threshold, "threshold")
             constant(BrightnessThreshold, "brightnessThreshold")
-        }
-
-        namespace BlurShader {
-            constant(BaseImage, "image")
-            constant(Kernel, "kernel[0]")
         }
 
         namespace BlendBloomShader {
