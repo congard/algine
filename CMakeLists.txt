@@ -94,7 +94,8 @@ add_executable(algine
         src/InputLayout.cpp include/algine/InputLayout.h
         src/InputAttributeDescription.cpp include/algine/InputAttributeDescription.h
         src/CubeRenderer.cpp include/algine/CubeRenderer.h
-        src/QuadRenderer.cpp include/algine/QuadRenderer.h)
+        src/QuadRenderer.cpp include/algine/QuadRenderer.h
+        src/ext/Blur.cpp include/algine/ext/Blur.h include/algine/ext/constants/Blur.h)
 
 # linking
 if (WIN32)
