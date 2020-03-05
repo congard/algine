@@ -484,11 +484,9 @@ void initShaders() {
     skyboxRenderer = make_shared<CubeRenderer>(skyboxShader->getLocation(AlgineNames::CubemapShader::InPos));
     quadRenderer = make_shared<QuadRenderer>(0); // inPosLocation in quad shader is 0
 
-    renderer.ssrShader = ssrShader;
     renderer.blendShader = blendShader;
     renderer.dofBlurShaders[0] = dofBlurHorShader;
     renderer.dofBlurShaders[1] = dofBlurVertShader;
-    renderer.bloomSearchShader = bloomSearchShader;
     renderer.dofCoCShader = dofCoCShader;
     renderer.quadRenderer = quadRenderer.get();
 
@@ -539,15 +537,26 @@ void initShaders() {
 
     updateRenderTextures();
 
-    GLuint displayColorAttachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     rbo->bind();
     rbo->setWidthHeight(winWidth, winHeight);
     rbo->setFormat(Texture::DepthComponent);
     rbo->update();
     rbo->unbind();
+
     displayFb->bind();
     displayFb->attachRenderbuffer(rbo, Framebuffer::DepthAttachment);
-    glDrawBuffers(4, displayColorAttachments);
+
+    displayFb->addOutput(0, Framebuffer::ColorAttachmentZero + 0);
+    displayFb->addOutput(1, Framebuffer::ColorAttachmentZero + 1);
+    displayFb->addOutput(2, Framebuffer::ColorAttachmentZero + 2);
+    displayFb->addOutput(3, Framebuffer::ColorAttachmentZero + 3);
+
+    displayFb->addAttachmentsList();
+    displayFb->setActiveAttachmentsList(1);
+    displayFb->addOutput(0, Framebuffer::ColorAttachmentZero + 0);
+    displayFb->addOutput(2, Framebuffer::ColorAttachmentZero + 2);
+    // displayFb->update(); // not need here because it will be called each frame
+
     displayFb->attachTexture(colorTex, Framebuffer::ColorAttachmentZero + 0);
     displayFb->attachTexture(normalTex, Framebuffer::ColorAttachmentZero + 1);
     displayFb->attachTexture(positionTex, Framebuffer::ColorAttachmentZero + 2);
@@ -893,17 +902,15 @@ void renderToDepthMap(uint index) {
 /**
  * Color rendering
  */
-uint colorAttachment02[3] = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_COLOR_ATTACHMENT2 };
-uint colorAttachment0123[4] = {
-    GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3
-};
 void render() {
-    renderer.mainPass(displayFb->getId());
-    
-	// view port to window size
+    displayFb->bind();
+    displayFb->setActiveAttachmentsList(0);
+    displayFb->update();
+
+    // TODO: glClear, glViewport etc must be part of Application (or AlgineApplication?) class
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, winWidth, winHeight);
 
-    glDrawBuffers(4, colorAttachment0123);
     colorShader->use();
 
     // sending lamps parameters to fragment shader
@@ -916,8 +923,10 @@ void render() {
 	    drawModel(lamps[i]);
 
     // render skybox
+    displayFb->setActiveAttachmentsList(1);
+    displayFb->update();
+
     glDepthFunc(GL_LEQUAL);
-    glDrawBuffers(3, colorAttachment02);
     skyboxShader->use();
     skyboxShader->setMat3(AlgineNames::CubemapShader::ViewMatrix, glm::mat3(camera.getViewMatrix()));
     skyboxShader->setMat4(AlgineNames::CubemapShader::TransformationMatrix, camera.getProjectionMatrix() * glm::mat4(glm::mat3(camera.getViewMatrix())));
@@ -925,19 +934,28 @@ void render() {
     skyboxRenderer->getInputLayout()->bind();
     skyboxRenderer->draw();
     glDepthFunc(GL_LESS);
-    glDrawBuffers(4, colorAttachment0123);
 
+    // postprocessing
     quadRenderer->getInputLayout()->bind();
 
-    renderer.screenspacePass(screenspaceFb->getId(), colorTex->getId(), normalTex->getId(), ssrValues->getId(), positionTex->getId());
+    screenspaceFb->bind();
+    ssrShader->use();
+    colorTex->use(0);
+    normalTex->use(1);
+    ssrValues->use(2);
+    positionTex->use(3);
+    quadRenderer->draw();
+
+    glViewport(0, 0, winWidth * bloomK, winHeight * bloomK);
+    bloomSearchFb->bind();
+    bloomSearchShader->use();
+    screenspaceTex->use(0);
+    quadRenderer->draw();
+    bloomBlur->makeBlur(bloomTex);
+    glViewport(0, 0, winWidth, winHeight);
 
     // TODO: tmp, AlgineRenderer must be eliminated !!!!!!
     // Now it looks like shit code... Oh I know
-
-    glViewport(0, 0, winWidth * bloomK, winHeight * bloomK);
-    renderer.bloomSearchPass(bloomSearchFb->getId(), screenspaceTex->getId());
-    bloomBlur->makeBlur(bloomTex);
-    glViewport(0, 0, winWidth, winHeight);
 
     renderer.dofCoCPass(cocFb->getId(), positionTex->getId());
 
@@ -948,6 +966,7 @@ void render() {
     renderer.dofBlurPass(fbos, ids, screenspaceTex->getId(), cocBlur->get()->getId(), positionTex->getId(), dofBlurAmount);
 
     bindFramebuffer(0);
+    glClear(GL_DEPTH_BUFFER_BIT); // color will cleared by quad rendering
     renderer.doubleBlendPass(pingpongDofTex[!renderer.horizontal]->getId(), bloomBlur->get()->getId());
 }
 
@@ -975,7 +994,6 @@ void display() {
     ssrShader->setMat4(AlgineNames::SSRShader::ViewMatrix, camera.getViewMatrix());
 
 	/* --- color rendering --- */
-    glClear(GL_DEPTH_BUFFER_BIT); // color will cleared by quad rendering
 	render();
 	glUseProgram(0);
 }
