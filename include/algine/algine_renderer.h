@@ -9,8 +9,6 @@ namespace algine {
 // TODO: completely remove AlgineRenderer
 class AlgineRenderer {
 public:
-    ShaderProgram *ssrShader = nullptr;
-    ShaderProgram *bloomSearchShader = nullptr;
     ShaderProgram *blendShader = nullptr;
     ShaderProgram *dofBlurShaders[2] = {nullptr, nullptr}; // { horizontal, vertical }
     ShaderProgram *dofCoCShader = nullptr;
@@ -19,9 +17,6 @@ public:
 
     bool horizontal = true, firstIteration = true; // blur variables
 
-    void mainPass(uint displayFBO);
-    void bloomSearchPass(uint bsFBO, uint image);
-    void screenspacePass(uint ssFBO, uint colorMap, uint normalMap, uint ssrValuesMap, uint positionMap);
     void dofCoCPass(uint cocFBO, uint positionMap);
 
     // dofMap may be position map or coc map depending on the method you use

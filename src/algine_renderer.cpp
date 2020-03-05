@@ -5,28 +5,6 @@
 #include <algine/framebuffer.h>
 
 namespace algine {
-void AlgineRenderer::mainPass(const uint displayFBO) {
-    glBindFramebuffer(GL_FRAMEBUFFER, displayFBO);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void AlgineRenderer::bloomSearchPass(const uint bsFBO, const uint image) {
-    bindFramebuffer(bsFBO);
-    bloomSearchShader->use();
-    texture2DAB(0, image);
-    quadRenderer->draw();
-}
-
-void AlgineRenderer::screenspacePass(const uint ssFBO, const uint colorMap, const uint normalMap, const uint ssrValuesMap, const uint positionMap) {
-    glBindFramebuffer(GL_FRAMEBUFFER, ssFBO);
-    ssrShader->use();
-    texture2DAB(0, colorMap);
-    texture2DAB(1, normalMap);
-    texture2DAB(2, ssrValuesMap);
-    texture2DAB(3, positionMap);
-    quadRenderer->draw();
-}
-
 void AlgineRenderer::dofCoCPass(const uint cocFBO, const uint positionMap) {
     bindFramebuffer(cocFBO);
     dofCoCShader->use();
