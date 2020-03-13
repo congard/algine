@@ -68,6 +68,16 @@ add_executable(algine
         include/algine/types.h
         include/algine/templates.h
         include/algine/constants/AMTL.h
+        include/algine/constants/BoneSystem.h
+        include/algine/constants/ColorShader.h
+        include/algine/constants/ShadowShader.h
+        include/algine/constants/QuadShader.h
+        include/algine/constants/CubemapShader.h
+        include/algine/ext/constants/BlurShader.h
+        include/algine/ext/constants/SSRShader.h
+        include/algine/ext/constants/BlendBloomModule.h
+        include/algine/ext/constants/BloomSearchShader.h
+        include/algine/ext/constants/DOFShaders.h
         src/main.cpp
         src/algine_renderer.cpp include/algine/algine_renderer.h
         src/animation.cpp include/algine/animation.h
@@ -95,7 +105,7 @@ add_executable(algine
         src/InputAttributeDescription.cpp include/algine/InputAttributeDescription.h
         src/CubeRenderer.cpp include/algine/CubeRenderer.h
         src/QuadRenderer.cpp include/algine/QuadRenderer.h
-        src/ext/Blur.cpp include/algine/ext/Blur.h include/algine/ext/constants/Blur.h)
+        src/ext/Blur.cpp include/algine/ext/Blur.h)
 
 # linking
 if (WIN32)
