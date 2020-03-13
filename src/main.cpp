@@ -70,16 +70,16 @@ void mouse_callback(GLFWwindow* window, int button, int action, int mods);
 void mouse_callback(algine::MouseEventListener::MouseEvent *event);
 void cursor_pos_callback(GLFWwindow* window, double x, double y);
 
+// framebuffers, textures etc for rendering
+using namespace algine;
+using namespace std;
+
 // Window dimensions
 uint winWidth = 1366, winHeight = 763;
 GLFWwindow* window;
 
 // matrices
 const glm::mat4 *modelMatrix; // model matrix stored in Model::transformation
-
-// framebuffers, textures etc for rendering
-using namespace algine;
-using namespace std;
 
 // models
 shared_ptr<Shape> shapes[SHAPES_COUNT];
