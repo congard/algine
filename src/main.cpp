@@ -20,7 +20,13 @@
 #include <algine/algine_renderer.h>
 #include <algine/framebuffer.h>
 #include <algine/light.h>
-#include <algine/constants.h>
+#include <algine/constants/BoneSystem.h>
+#include <algine/constants/ColorShader.h>
+#include <algine/constants/ShadowShader.h>
+#include <algine/constants/CubemapShader.h>
+#include <algine/ext/constants/SSRShader.h>
+#include <algine/ext/constants/BlendBloomModule.h>
+#include <algine/ext/constants/DOFShaders.h>
 #include <algine/camera.h>
 #include <algine/renderbuffer.h>
 #include <algine/debug.h>
@@ -31,7 +37,7 @@
 #include <algine/CubeRenderer.h>
 #include <algine/QuadRenderer.h>
 #include <algine/ext/Blur.h>
-#include <algine/ext/constants/Blur.h>
+#include <algine/ext/constants/BlurShader.h>
 
 #define SHADOW_MAP_RESOLUTION 1024
 #define bloomK 0.5f
@@ -65,7 +71,7 @@ void mouse_callback(algine::MouseEventListener::MouseEvent *event);
 void cursor_pos_callback(GLFWwindow* window, double x, double y);
 
 // Window dimensions
-GLuint winWidth = 1366, winHeight = 763;
+uint winWidth = 1366, winHeight = 763;
 GLFWwindow* window;
 
 // matrices
@@ -259,19 +265,19 @@ createShapes(const string &path, const string &texPath, const size_t id, const b
 
     shapes[id].reset(shapeLoader.getShape());
     shapes[id]->createInputLayout(
-            pointShadowShader->getLocation(AlgineNames::ShadowShader::InPos),
+            pointShadowShader->getLocation(ShadowShader::Vars::InPos),
             -1, -1, -1, -1,
-            pointShadowShader->getLocation(AlgineNames::ShadowShader::InBoneWeights),
-            pointShadowShader->getLocation(AlgineNames::ShadowShader::InBoneIds)
+            pointShadowShader->getLocation(BoneSystem::Vars::InBoneWeights),
+            pointShadowShader->getLocation(BoneSystem::Vars::InBoneIds)
     ); // all shadow shaders have same ids
     shapes[id]->createInputLayout(
-            colorShader->getLocation(AlgineNames::ColorShader::InPos),
-            colorShader->getLocation(AlgineNames::ColorShader::InTexCoord),
-            colorShader->getLocation(AlgineNames::ColorShader::InNormal),
-            colorShader->getLocation(AlgineNames::ColorShader::InTangent),
-            colorShader->getLocation(AlgineNames::ColorShader::InBitangent),
-            colorShader->getLocation(AlgineNames::ColorShader::InBoneWeights),
-            colorShader->getLocation(AlgineNames::ColorShader::InBoneIds)
+            colorShader->getLocation(ColorShader::Vars::InPos),
+            colorShader->getLocation(ColorShader::Vars::InTexCoord),
+            colorShader->getLocation(ColorShader::Vars::InNormal),
+            colorShader->getLocation(ColorShader::Vars::InTangent),
+            colorShader->getLocation(ColorShader::Vars::InBitangent),
+            colorShader->getLocation(BoneSystem::Vars::InBoneWeights),
+            colorShader->getLocation(BoneSystem::Vars::InBoneIds)
     );
 }
 
@@ -341,24 +347,22 @@ void initShaders() {
     std::cout << "Compiling algine shaders\n";
 
     {
-        using namespace AlgineNames::ShaderDefinitions;
-
         ShaderManager manager;
 
         // color shader
         manager.fromFile("src/resources/shaders/vertex_shader.glsl",
                          "src/resources/shaders/fragment_shader.glsl");
-        manager.define(Lighting::Lighting);
-        manager.define(Lighting::LightingAttenuation);
-        manager.define(Lighting::NormalMapping);
-        manager.define(Lighting::ShadowMappingPCF);
-        manager.define(TextureMapping);
-        manager.define(BoneSystem);
-        manager.define(SSR);
-        manager.define(Lighting::PointLightsLimit, std::to_string(pointLightsLimit));
-        manager.define(Lighting::DirLightsLimit, std::to_string(dirLightsLimit));
-        manager.define(MaxBoneAttribsPerVertex, std::to_string(maxBoneAttribsPerVertex));
-        manager.define(MaxBones, std::to_string(maxBones));
+        manager.define(ColorShader::Settings::Lighting);
+        manager.define(ColorShader::Settings::LightingAttenuation);
+        manager.define(ColorShader::Settings::NormalMapping);
+        manager.define(ColorShader::Settings::ShadowMappingPCF);
+        manager.define(ColorShader::Settings::TextureMapping);
+        manager.define(BoneSystem::Settings::BoneSystem);
+        manager.define(ColorShader::Settings::SSR);
+        manager.define(ColorShader::Settings::PointLightsLimit, std::to_string(pointLightsLimit));
+        manager.define(ColorShader::Settings::DirLightsLimit, std::to_string(dirLightsLimit));
+        manager.define(BoneSystem::Settings::MaxBoneAttribsPerVertex, std::to_string(maxBoneAttribsPerVertex));
+        manager.define(BoneSystem::Settings::MaxBones, std::to_string(maxBones));
         colorShader->fromSource(manager.makeGenerated());
         colorShader->loadActiveLocations();
 
@@ -367,10 +371,10 @@ void initShaders() {
                          "src/resources/shaders/shadow/fragment_shadow_shader.glsl",
                          "src/resources/shaders/shadow/geometry_shadow_shader.glsl");
         manager.resetDefinitions();
-        manager.define(BoneSystem);
-        manager.define(MaxBoneAttribsPerVertex, std::to_string(maxBoneAttribsPerVertex));
-        manager.define(MaxBones, std::to_string(maxBones));
-        manager.define(ShadowShader::PointLightShadowMapping);
+        manager.define(BoneSystem::Settings::BoneSystem);
+        manager.define(BoneSystem::Settings::MaxBoneAttribsPerVertex, std::to_string(maxBoneAttribsPerVertex));
+        manager.define(BoneSystem::Settings::MaxBones, std::to_string(maxBones));
+        manager.define(ShadowShader::Settings::PointLightShadowMapping);
         pointShadowShader->fromSource(manager.makeGenerated());
         pointShadowShader->loadActiveLocations();
 
@@ -378,8 +382,8 @@ void initShaders() {
         ShadersData shadowShaderTemplate = manager.getTemplate();
         shadowShaderTemplate.geometry = std::string(); // we don't need geometry shader for dir light shadows
         manager.fromSource(shadowShaderTemplate);
-        manager.removeDefinition(ShadowShader::PointLightShadowMapping);
-        manager.define(ShadowShader::DirLightShadowMapping);
+        manager.removeDefinition(ShadowShader::Settings::PointLightShadowMapping);
+        manager.define(ShadowShader::Settings::DirLightShadowMapping);
         dirShadowShader->fromSource(manager.makeGenerated());
         dirShadowShader->loadActiveLocations();
 
@@ -398,18 +402,18 @@ void initShaders() {
         manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
                          "src/resources/shaders/dof/fragment.glsl");
         manager.resetDefinitions();
-        manager.define(Dof::DofCocMap);
-        manager.define(constants::Blur::KernelRadius, std::to_string(dofBlurKernelRadius));
-        manager.define(Dof::BleedingMinDeltaZ);
-        manager.define(Dof::BleedingMinDeltaCoC);
-        manager.define(Dof::BleedingMaxFocusCoC);
-        manager.define(constants::Blur::Horizontal);
+        manager.define(DOFShaders::Settings::DofCocMap);
+        manager.define(BlurShader::Settings::KernelRadius, std::to_string(dofBlurKernelRadius));
+        manager.define(DOFShaders::Settings::BleedingMinDeltaZ);
+        manager.define(DOFShaders::Settings::BleedingMinDeltaCoC);
+        manager.define(DOFShaders::Settings::BleedingMaxFocusCoC);
+        manager.define(BlurShader::Settings::Horizontal);
         dofBlurHorShader->fromSource(manager.makeGenerated());
         dofBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
-        manager.removeDefinition(constants::Blur::Horizontal);
-        manager.define(constants::Blur::Vertical);
+        manager.removeDefinition(BlurShader::Settings::Horizontal);
+        manager.define(BlurShader::Settings::Vertical);
         dofBlurVertShader->fromSource(manager.makeGenerated());
         dofBlurVertShader->loadActiveLocations();
 
@@ -417,7 +421,7 @@ void initShaders() {
         manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
                          "src/resources/shaders/dof/coc_fragment.glsl");
         manager.resetDefinitions();
-        manager.define(Dof::CinematicDof);
+        manager.define(DOFShaders::Settings::CinematicDof);
         dofCoCShader->fromSource(manager.makeGenerated());
         dofCoCShader->loadActiveLocations();
 
@@ -425,7 +429,7 @@ void initShaders() {
         manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
                          "src/resources/shaders/blend/fragment.glsl");
         manager.resetDefinitions();
-        manager.define(Bloom::BloomAdd);
+        manager.define(BlendBloomModule::Settings::BloomAdd);
         blendShader->fromSource(manager.makeGenerated());
         blendShader->loadActiveLocations();
 
@@ -433,32 +437,32 @@ void initShaders() {
         manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
                          "src/resources/shaders/blur/fragment.glsl");
         manager.resetDefinitions();
-        manager.define(constants::Blur::KernelRadius, std::to_string(bloomBlurKernelRadius));
-        manager.define(OutputType, "vec3");
-        manager.define(TexComponent, "rgb");
-        manager.define(constants::Blur::Horizontal);
+        manager.define(BlurShader::Settings::KernelRadius, std::to_string(bloomBlurKernelRadius));
+        manager.define(BlurShader::Settings::OutputType, "vec3");
+        manager.define(BlurShader::Settings::TexComponent, "rgb");
+        manager.define(BlurShader::Settings::Horizontal);
         bloomBlurHorShader->fromSource(manager.makeGenerated());
         bloomBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
-        manager.removeDefinition(constants::Blur::Horizontal);
-        manager.define(constants::Blur::Vertical);
+        manager.removeDefinition(BlurShader::Settings::Horizontal);
+        manager.define(BlurShader::Settings::Vertical);
         bloomBlurVertShader->fromSource(manager.makeGenerated());
         bloomBlurVertShader->loadActiveLocations();
 
         // CoC blur shaders
         manager.resetGenerated();
         manager.resetDefinitions();
-        manager.define(constants::Blur::KernelRadius, std::to_string(cocBlurKernelRadius));
-        manager.define(OutputType, "float");
-        manager.define(TexComponent, "r");
-        manager.define(constants::Blur::Horizontal);
+        manager.define(BlurShader::Settings::KernelRadius, std::to_string(cocBlurKernelRadius));
+        manager.define(BlurShader::Settings::OutputType, "float");
+        manager.define(BlurShader::Settings::TexComponent, "r");
+        manager.define(BlurShader::Settings::Horizontal);
         cocBlurHorShader->fromSource(manager.makeGenerated());
         cocBlurHorShader->loadActiveLocations();
 
         manager.resetGenerated();
-        manager.removeDefinition(constants::Blur::Horizontal);
-        manager.define(constants::Blur::Vertical);
+        manager.removeDefinition(BlurShader::Settings::Horizontal);
+        manager.define(BlurShader::Settings::Vertical);
         cocBlurVertShader->fromSource(manager.makeGenerated());
         cocBlurVertShader->loadActiveLocations();
 
@@ -466,10 +470,10 @@ void initShaders() {
         manager.fromFile("src/resources/shaders/basic/cubemap_vertex.glsl",
                          "src/resources/shaders/basic/cubemap_fragment.glsl");
         manager.resetDefinitions();
-        manager.define(CubemapShader::SpherePositions);
-        manager.define(CubemapShader::ColorOut, "0"); // TODO: create constants
-        manager.define(CubemapShader::PosOut, "2");
-        manager.define(OutputType, "vec3");
+        manager.define(CubemapShader::Settings::SpherePositions);
+        manager.define(CubemapShader::Settings::ColorOut, "0"); // TODO: create constants
+        manager.define(CubemapShader::Settings::PosOut, "2");
+        manager.define(CubemapShader::Settings::OutputType, "vec3");
         skyboxShader->fromSource(manager.makeGenerated());
         skyboxShader->loadActiveLocations();
     }
@@ -481,7 +485,7 @@ void initShaders() {
     lightDataSetter.indexDirLightLocations(colorShader, dirLightsLimit);
     lightDataSetter.indexPointLightLocations(colorShader, pointShadowShader, pointLightsLimit);
 
-    skyboxRenderer = make_shared<CubeRenderer>(skyboxShader->getLocation(AlgineNames::CubemapShader::InPos));
+    skyboxRenderer = make_shared<CubeRenderer>(skyboxShader->getLocation(CubemapShader::Vars::InPos));
     quadRenderer = make_shared<QuadRenderer>(0); // inPosLocation in quad shader is 0
 
     renderer.blendShader = blendShader;
@@ -580,42 +584,42 @@ void initShaders() {
 
     // configuring CS
     colorShader->use();
-    colorShader->setInt(AlgineNames::ColorShader::Material::AmbientTex, 0);
-    colorShader->setInt(AlgineNames::ColorShader::Material::DiffuseTex, 1);
-    colorShader->setInt(AlgineNames::ColorShader::Material::SpecularTex, 2);
-    colorShader->setInt(AlgineNames::ColorShader::Material::NormalTex, 3);
-    colorShader->setInt(AlgineNames::ColorShader::Material::ReflectionStrengthTex, 4);
-    colorShader->setInt(AlgineNames::ColorShader::Material::JitterTex, 5);
-    colorShader->setFloat(AlgineNames::ColorShader::ShadowOpacity, shadowOpacity);
+    colorShader->setInt(ColorShader::Vars::Material::AmbientTex, 0);
+    colorShader->setInt(ColorShader::Vars::Material::DiffuseTex, 1);
+    colorShader->setInt(ColorShader::Vars::Material::SpecularTex, 2);
+    colorShader->setInt(ColorShader::Vars::Material::NormalTex, 3);
+    colorShader->setInt(ColorShader::Vars::Material::ReflectionStrengthTex, 4);
+    colorShader->setInt(ColorShader::Vars::Material::JitterTex, 5);
+    colorShader->setFloat(ColorShader::Vars::ShadowOpacity, shadowOpacity);
 
     // configuring CubemapShader
     skyboxShader->use();
-    skyboxShader->setVec3(AlgineNames::CubemapShader::Color, glm::vec3(0.125f));
-    skyboxShader->setFloat(AlgineNames::CubemapShader::PosScaling, 64.0f);
+    skyboxShader->setVec3(CubemapShader::Vars::Color, glm::vec3(0.125f));
+    skyboxShader->setFloat(CubemapShader::Vars::PosScaling, 64.0f);
 
     // blend setting
     blendShader->use();
-    blendShader->setInt(AlgineNames::BlendBloomShader::BaseImage, 0); // GL_TEXTURE0
-    blendShader->setInt(AlgineNames::BlendBloomShader::BloomImage, 1); // GL_TEXTURE1
-    blendShader->setFloat(AlgineNames::BlendBloomShader::Exposure, blendExposure);
-    blendShader->setFloat(AlgineNames::BlendBloomShader::Gamma, blendGamma);
+    blendShader->setInt(BlendBloomModule::Vars::BaseImage, 0); // GL_TEXTURE0
+    blendShader->setInt(BlendBloomModule::Vars::BloomImage, 1); // GL_TEXTURE1
+    blendShader->setFloat(BlendBloomModule::Vars::Exposure, blendExposure);
+    blendShader->setFloat(BlendBloomModule::Vars::Gamma, blendGamma);
 
     // dof blur setting
     for (size_t i = 0; i < 2; i++) {
         renderer.dofBlurShaders[i]->use();
-        renderer.dofBlurShaders[i]->setInt(AlgineNames::DOFShader::BaseImage, 0);
-        renderer.dofBlurShaders[i]->setInt(AlgineNames::DOFShader::CoCMap, 1);
-        renderer.dofBlurShaders[i]->setInt(AlgineNames::DOFShader::PositionMap, 2);
-        renderer.dofBlurShaders[i]->setFloat(AlgineNames::DOFShader::BleedingMinDeltaZ, bleedingEliminationMinDeltaZ);
-        renderer.dofBlurShaders[i]->setFloat(AlgineNames::DOFShader::BleedingMinDeltaCoC, bleedingEliminationMinDeltaCoC);
-        renderer.dofBlurShaders[i]->setFloat(AlgineNames::DOFShader::BleedingMaxFocusCoC, bleedingEliminationMaxFocusCoC);
+        renderer.dofBlurShaders[i]->setInt(DOFShaders::Vars::BaseImage, 0);
+        renderer.dofBlurShaders[i]->setInt(DOFShaders::Vars::CoCMap, 1);
+        renderer.dofBlurShaders[i]->setInt(DOFShaders::Vars::PositionMap, 2);
+        renderer.dofBlurShaders[i]->setFloat(DOFShaders::Vars::BleedingMinDeltaZ, bleedingEliminationMinDeltaZ);
+        renderer.dofBlurShaders[i]->setFloat(DOFShaders::Vars::BleedingMinDeltaCoC, bleedingEliminationMinDeltaCoC);
+        renderer.dofBlurShaders[i]->setFloat(DOFShaders::Vars::BleedingMaxFocusCoC, bleedingEliminationMaxFocusCoC);
     }
 
     // screen space setting
     ssrShader->use();
-    ssrShader->setInt(AlgineNames::SSRShader::NormalMap, 1);
-    ssrShader->setInt(AlgineNames::SSRShader::SSRValuesMap, 2);
-    ssrShader->setInt(AlgineNames::SSRShader::PositionMap, 3);
+    ssrShader->setInt(SSRShader::Vars::NormalMap, 1);
+    ssrShader->setInt(SSRShader::Vars::SSRValuesMap, 2);
+    ssrShader->setInt(SSRShader::Vars::PositionMap, 3);
     ssrShader->reset();
 }
 
@@ -736,8 +740,8 @@ void initShadowMaps() {
 
 void initShadowCalculation() {
     colorShader->use();
-    colorShader->setFloat(AlgineNames::ColorShader::ShadowDiskRadiusK, diskRadius_k);
-    colorShader->setFloat(AlgineNames::ColorShader::ShadowDiskRadiusMin, diskRadius_min);
+    colorShader->setFloat(ColorShader::Vars::ShadowDiskRadiusK, diskRadius_k);
+    colorShader->setFloat(ColorShader::Vars::ShadowDiskRadiusMin, diskRadius_min);
     glUseProgram(0);
 }
 
@@ -748,9 +752,9 @@ void initDOF() {
     dofCoCShader->use();
     //dofCoCShader->set(ALGINE_DOF_SIGMA_MAX, dof_max_sigma);
     //dofCoCShader->set(ALGINE_DOF_SIGMA_MIN, dof_min_sigma);
-    dofCoCShader->setFloat(AlgineNames::DOFShader::Aperture, dofAperture);
-    dofCoCShader->setFloat(AlgineNames::DOFShader::ImageDistance, dofImageDistance);
-    dofCoCShader->setFloat(AlgineNames::DOFShader::PlaneInFocus, -1.0f);
+    dofCoCShader->setFloat(DOFShaders::Vars::Aperture, dofAperture);
+    dofCoCShader->setFloat(DOFShaders::Vars::ImageDistance, dofImageDistance);
+    dofCoCShader->setFloat(DOFShaders::Vars::PlaneInFocus, -1.0f);
     glUseProgram(0);
 }
 
@@ -775,7 +779,7 @@ void recycleAll() {
 void sendLampsData() {
     lightDataSetter.setPointLightsCount(pointLampsCount);
     lightDataSetter.setDirLightsCount(dirLampsCount);
-    colorShader->setVec3(AlgineNames::ColorShader::CameraPos, camera.getPos());
+    colorShader->setVec3(ColorShader::Vars::CameraPos, camera.getPos());
     for (size_t i = 0; i < pointLampsCount; i++)
         lightDataSetter.setPos(pointLamps[i], i);
     for (size_t i = 0; i < dirLampsCount; i++)
@@ -792,10 +796,10 @@ glm::mat4 getMVMatrix() {
 }
 
 void updateMatrices() {
-    colorShader->setMat4(AlgineNames::ColorShader::MVPMatrix, getMVPMatrix());
-    colorShader->setMat4(AlgineNames::ColorShader::MVMatrix, getMVMatrix());
-    colorShader->setMat4(AlgineNames::ColorShader::ModelMatrix, value modelMatrix);
-    colorShader->setMat4(AlgineNames::ColorShader::ViewMatrix, camera.getViewMatrix());
+    colorShader->setMat4(ColorShader::Vars::MVPMatrix, getMVPMatrix());
+    colorShader->setMat4(ColorShader::Vars::MVMatrix, getMVMatrix());
+    colorShader->setMat4(ColorShader::Vars::ModelMatrix, value modelMatrix);
+    colorShader->setMat4(ColorShader::Vars::ViewMatrix, camera.getViewMatrix());
 }
 
 /**
@@ -807,12 +811,12 @@ void drawModelDM(const Model &model, ShaderProgram *program, const glm::mat4 &ma
 
     if (model.shape->bonesPerVertex != 0) {
         for (int i = 0; i < model.shape->bones.size(); i++) {
-            program->setMat4(program->getLocation(AlgineNames::ShadowShader::Bones) + i, model.shape->bones[i].finalTransformation);
+            program->setMat4(program->getLocation(BoneSystem::Vars::Bones) + i, model.shape->bones[i].finalTransformation);
         }
     }
 
-    program->setInt(AlgineNames::ShadowShader::BoneAttribsPerVertex, (int)(model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1)));
-    program->setMat4(AlgineNames::ShadowShader::TransformationMatrix, mat * model.m_transform);
+    program->setInt(BoneSystem::Vars::BoneAttribsPerVertex, (int)(model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1)));
+    program->setMat4(ShadowShader::Vars::TransformationMatrix, mat * model.m_transform);
     
     for (size_t i = 0; i < model.shape->meshes.size(); i++) {
         glDrawElements(GL_TRIANGLES, model.shape->meshes[i].count, GL_UNSIGNED_INT, reinterpret_cast<void*>(model.shape->meshes[i].start * sizeof(uint)));
@@ -832,11 +836,11 @@ void drawModel(const Model &model) {
     
     if (model.shape->bonesPerVertex != 0) {
         for (int i = 0; i < model.shape->bones.size(); i++) {
-            colorShader->setMat4(colorShader->getLocation(AlgineNames::ColorShader::Bones) + i, model.shape->bones[i].finalTransformation);
+            colorShader->setMat4(colorShader->getLocation(BoneSystem::Vars::Bones) + i, model.shape->bones[i].finalTransformation);
         }
     }
 
-    colorShader->setInt(AlgineNames::ColorShader::BoneAttribsPerVertex, model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1));
+    colorShader->setInt(BoneSystem::Vars::BoneAttribsPerVertex, model.shape->bonesPerVertex / 4 + (model.shape->bonesPerVertex % 4 == 0 ? 0 : 1));
     modelMatrix = &model.m_transform;
 	updateMatrices();
     for (size_t i = 0; i < model.shape->meshes.size(); i++) {
@@ -847,10 +851,10 @@ void drawModel(const Model &model) {
         useNotNull(model.shape->meshes[i].material.reflectionTexture, 4);
         useNotNull(model.shape->meshes[i].material.jitterTexture, 5);
 
-        colorShader->setFloat(AlgineNames::ColorShader::Material::AmbientStrength, model.shape->meshes[i].material.ambientStrength);
-        colorShader->setFloat(AlgineNames::ColorShader::Material::DiffuseStrength, model.shape->meshes[i].material.diffuseStrength);
-        colorShader->setFloat(AlgineNames::ColorShader::Material::SpecularStrength, model.shape->meshes[i].material.specularStrength);
-        colorShader->setFloat(AlgineNames::ColorShader::Material::Shininess, model.shape->meshes[i].material.shininess);
+        colorShader->setFloat(ColorShader::Vars::Material::AmbientStrength, model.shape->meshes[i].material.ambientStrength);
+        colorShader->setFloat(ColorShader::Vars::Material::DiffuseStrength, model.shape->meshes[i].material.diffuseStrength);
+        colorShader->setFloat(ColorShader::Vars::Material::SpecularStrength, model.shape->meshes[i].material.specularStrength);
+        colorShader->setFloat(ColorShader::Vars::Material::Shininess, model.shape->meshes[i].material.shininess);
 
         glDrawElements(GL_TRIANGLES, model.shape->meshes[i].count, GL_UNSIGNED_INT, reinterpret_cast<void*>(model.shape->meshes[i].start * sizeof(uint)));
     }
@@ -928,8 +932,8 @@ void render() {
 
     glDepthFunc(GL_LEQUAL);
     skyboxShader->use();
-    skyboxShader->setMat3(AlgineNames::CubemapShader::ViewMatrix, glm::mat3(camera.getViewMatrix()));
-    skyboxShader->setMat4(AlgineNames::CubemapShader::TransformationMatrix, camera.getProjectionMatrix() * glm::mat4(glm::mat3(camera.getViewMatrix())));
+    skyboxShader->setMat3(CubemapShader::Vars::ViewMatrix, glm::mat3(camera.getViewMatrix()));
+    skyboxShader->setMat4(CubemapShader::Vars::TransformationMatrix, camera.getProjectionMatrix() * glm::mat4(glm::mat3(camera.getViewMatrix())));
     skybox->use(0);
     skyboxRenderer->getInputLayout()->bind();
     skyboxRenderer->draw();
@@ -990,8 +994,8 @@ void display() {
         renderToDepthMap(i);
 	
     ssrShader->use();
-    ssrShader->setMat4(AlgineNames::SSRShader::ProjectionMatrix, camera.getProjectionMatrix());
-    ssrShader->setMat4(AlgineNames::SSRShader::ViewMatrix, camera.getViewMatrix());
+    ssrShader->setMat4(SSRShader::Vars::ProjectionMatrix, camera.getProjectionMatrix());
+    ssrShader->setMat4(SSRShader::Vars::ViewMatrix, camera.getViewMatrix());
 
 	/* --- color rendering --- */
 	render();
@@ -1136,7 +1140,7 @@ void mouse_callback(MouseEventListener::MouseEvent *event) {
             std::cout << "x: " << pixels[0] << "; y: " << pixels[1] << "; z: " << pixels[2] << "\n";
         
             dofCoCShader->use();
-            dofCoCShader->setFloat(AlgineNames::DOFShader::PlaneInFocus, pixels[2] == 0 ? FLT_EPSILON : pixels[2]);
+            dofCoCShader->setFloat(DOFShaders::Vars::PlaneInFocus, pixels[2] == 0 ? FLT_EPSILON : pixels[2]);
             glUseProgram(0);
         
             delete[] pixels;

@@ -3,10 +3,17 @@
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <algine/texture.h>
-#include <algine/constants.h>
 #include <tulz/File>
 #include <tulz/Path>
 #include <tulz/macros.h>
+
+// constants begin
+#define constant(name, val) constexpr char name[] = val;
+
+namespace ShaderManager {
+    constant(Include, "include")
+}
+// constants end
 
 using namespace tulz;
 using namespace tulz::StringUtils;
@@ -215,7 +222,7 @@ std::string ShaderManager::processDirectives(const std::string &src, const std::
         Matches &matches = pragmas[j];
         std::string &pragmaName = matches.matches[1];
 
-        if (pragmaName == AlgineConstants::ShaderManager::Include) {
+        if (pragmaName == ::ShaderManager::Include) {
             std::string &filePath = matches.matches[2];
 
             if (!Path(filePath).isAbsolute()) {
