@@ -73,6 +73,7 @@ void cursor_pos_callback(GLFWwindow* window, double x, double y);
 // framebuffers, textures etc for rendering
 using namespace algine;
 using namespace std;
+using namespace tulz;
 
 // Window dimensions
 uint winWidth = 1366, winHeight = 763;
@@ -348,6 +349,7 @@ void initShaders() {
 
     {
         ShaderManager manager;
+        manager.addIncludePath(Path::join(Path::getWorkingDirectory(), "resources"));
 
         // color shader
         manager.fromFile("resources/shaders/vertex_shader.glsl",
