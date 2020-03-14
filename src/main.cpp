@@ -350,8 +350,8 @@ void initShaders() {
         ShaderManager manager;
 
         // color shader
-        manager.fromFile("src/resources/shaders/vertex_shader.glsl",
-                         "src/resources/shaders/fragment_shader.glsl");
+        manager.fromFile("resources/shaders/vertex_shader.glsl",
+                         "resources/shaders/fragment_shader.glsl");
         manager.define(ColorShader::Settings::Lighting);
         manager.define(ColorShader::Settings::LightingAttenuation);
         manager.define(ColorShader::Settings::NormalMapping);
@@ -367,9 +367,9 @@ void initShaders() {
         colorShader->loadActiveLocations();
 
         // point shadow shader
-        manager.fromFile("src/resources/shaders/shadow/vertex_shadow_shader.glsl",
-                         "src/resources/shaders/shadow/fragment_shadow_shader.glsl",
-                         "src/resources/shaders/shadow/geometry_shadow_shader.glsl");
+        manager.fromFile("resources/shaders/shadow/vertex_shadow_shader.glsl",
+                         "resources/shaders/shadow/fragment_shadow_shader.glsl",
+                         "resources/shaders/shadow/geometry_shadow_shader.glsl");
         manager.resetDefinitions();
         manager.define(BoneSystem::Settings::BoneSystem);
         manager.define(BoneSystem::Settings::MaxBoneAttribsPerVertex, std::to_string(maxBoneAttribsPerVertex));
@@ -388,19 +388,19 @@ void initShaders() {
         dirShadowShader->loadActiveLocations();
 
         // SSR shader
-        ssrShader->fromFile("src/resources/shaders/basic/quad_vertex.glsl",
-                            "src/resources/shaders/ssr/fragment.glsl");
+        ssrShader->fromFile("resources/shaders/basic/quad_vertex.glsl",
+                            "resources/shaders/ssr/fragment.glsl");
         ssrShader->loadActiveLocations();
 
         // bloom search shader
-        bloomSearchShader->fromFile("src/resources/shaders/basic/quad_vertex.glsl",
-                                    "src/resources/shaders/bloom/fragment_search.glsl");
+        bloomSearchShader->fromFile("resources/shaders/basic/quad_vertex.glsl",
+                                    "resources/shaders/bloom/fragment_search.glsl");
         bloomSearchShader->loadActiveLocations();
 
         // TODO: remove "dof blur shaders", replace with only blur + blend steps
         // DOF blur shaders
-        manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
-                         "src/resources/shaders/dof/fragment.glsl");
+        manager.fromFile("resources/shaders/basic/quad_vertex.glsl",
+                         "resources/shaders/dof/fragment.glsl");
         manager.resetDefinitions();
         manager.define(DOFShaders::Settings::DofCocMap);
         manager.define(BlurShader::Settings::KernelRadius, std::to_string(dofBlurKernelRadius));
@@ -418,24 +418,24 @@ void initShaders() {
         dofBlurVertShader->loadActiveLocations();
 
         // DOF CoC shader
-        manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
-                         "src/resources/shaders/dof/coc_fragment.glsl");
+        manager.fromFile("resources/shaders/basic/quad_vertex.glsl",
+                         "resources/shaders/dof/coc_fragment.glsl");
         manager.resetDefinitions();
         manager.define(DOFShaders::Settings::CinematicDof);
         dofCoCShader->fromSource(manager.makeGenerated());
         dofCoCShader->loadActiveLocations();
 
         // blend shader
-        manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
-                         "src/resources/shaders/blend/fragment.glsl");
+        manager.fromFile("resources/shaders/basic/quad_vertex.glsl",
+                         "resources/shaders/blend/fragment.glsl");
         manager.resetDefinitions();
         manager.define(BlendBloomModule::Settings::BloomAdd);
         blendShader->fromSource(manager.makeGenerated());
         blendShader->loadActiveLocations();
 
         // bloom blur shaders
-        manager.fromFile("src/resources/shaders/basic/quad_vertex.glsl",
-                         "src/resources/shaders/blur/fragment.glsl");
+        manager.fromFile("resources/shaders/basic/quad_vertex.glsl",
+                         "resources/shaders/blur/fragment.glsl");
         manager.resetDefinitions();
         manager.define(BlurShader::Settings::KernelRadius, std::to_string(bloomBlurKernelRadius));
         manager.define(BlurShader::Settings::OutputType, "vec3");
@@ -467,8 +467,8 @@ void initShaders() {
         cocBlurVertShader->loadActiveLocations();
 
         // cubemap shader
-        manager.fromFile("src/resources/shaders/basic/cubemap_vertex.glsl",
-                         "src/resources/shaders/basic/cubemap_fragment.glsl");
+        manager.fromFile("resources/shaders/basic/cubemap_vertex.glsl",
+                         "resources/shaders/basic/cubemap_fragment.glsl");
         manager.resetDefinitions();
         manager.define(CubemapShader::Settings::SpherePositions);
         manager.define(CubemapShader::Settings::ColorOut, "0"); // TODO: create constants
@@ -506,12 +506,12 @@ void initShaders() {
     TextureCube::create(skybox);
     skybox->setFormat(Texture::RGB);
     skybox->bind();
-    skybox->fromFile("src/resources/skybox/right.tga", TextureCube::Right);
-    skybox->fromFile("src/resources/skybox/left.tga", TextureCube::Left);
-    skybox->fromFile("src/resources/skybox/top.jpg", TextureCube::Top);
-    skybox->fromFile("src/resources/skybox/bottom.tga", TextureCube::Bottom);
-    skybox->fromFile("src/resources/skybox/front.tga", TextureCube::Front);
-    skybox->fromFile("src/resources/skybox/back.tga", TextureCube::Back);
+    skybox->fromFile("resources/skybox/right.tga", TextureCube::Right);
+    skybox->fromFile("resources/skybox/left.tga", TextureCube::Left);
+    skybox->fromFile("resources/skybox/top.jpg", TextureCube::Top);
+    skybox->fromFile("resources/skybox/bottom.tga", TextureCube::Bottom);
+    skybox->fromFile("resources/skybox/front.tga", TextureCube::Front);
+    skybox->fromFile("resources/skybox/back.tga", TextureCube::Back);
     skybox->setParams(TextureCube::defaultParams());
     skybox->unbind();
 
@@ -647,7 +647,7 @@ void initCamera() {
  * Creating shapes and loading textures
  */
 void initShapes() {
-    string path = "src/resources/models/";
+    string path = "resources/models/";
 
     createShapes(path + "chess/Classic Chess small.obj", path + "chess", 0, false, 0); // classic chess
     createShapes(path + "japanese_lamp/japanese_lamp.obj", path + "japanese_lamp", 1, true, 0); // Japanese lamp
