@@ -2,21 +2,19 @@
  * @author Congard
  * dbcongard@gmail.com
  * t.me/congard
- * gitlab.com/congard
+ * github.com/congard
 
   COMPILER WILL REMOVE UNUSED VARIABLES
  */
 
 #version 330
 
+#pragma algine include "modules/BoneSystem.glsl"
+
 uniform mat4 MVPMatrix, modelMatrix, viewMatrix, MVMatrix;
-uniform mat4 bones[MAX_BONES];
 uniform bool u_NormalMapping;
-uniform int boneAttribsPerVertex = 0;
 
 in vec4 inPos; // Per-vertex position information we will pass in.
-in vec4 inBoneWeights[MAX_BONE_ATTRIBS_PER_VERTEX];
-in ivec4 inBoneIds[MAX_BONE_ATTRIBS_PER_VERTEX];
 in vec3 inNormal;
 in vec3 inTangent;
 in vec3 inBitangent;
@@ -37,15 +35,8 @@ void main() {
     vec3 normal = inNormal;
 
     #ifdef ALGINE_BONE_SYSTEM_ENABLED
-    if (boneAttribsPerVertex != 0) {
-        mat4 finalTransform = mat4(0.0);
-        for (int i = 0; i < boneAttribsPerVertex; i++) {
-            finalTransform += bones[inBoneIds[i].x] * inBoneWeights[i].x;
-            finalTransform += bones[inBoneIds[i].y] * inBoneWeights[i].y;
-            finalTransform += bones[inBoneIds[i].z] * inBoneWeights[i].z;
-            finalTransform += bones[inBoneIds[i].w] * inBoneWeights[i].w;
-        }
-
+    if (isBonesPresent()) {
+        mat4 finalTransform = getBoneTransformMatrix();
         position = finalTransform * position;
         normal = mat3(finalTransform) * normal;
     }
