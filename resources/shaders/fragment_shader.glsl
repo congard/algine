@@ -2,9 +2,7 @@
  * @author Congard
  * dbcongard@gmail.com
  * t.me/congard
- * gitlab.com/congard
-
-  COMPILER WILL REMOVE UNUSED VARIABLES
+ * github.com/congard
  */
 
 // some GPUs can work with 330 (basically Nvidia)
@@ -68,9 +66,20 @@ uniform struct DirLight {
 } dirLights[MAX_DIR_LIGHTS_COUNT];
 uniform sampler2D dirLightShadowMaps[MAX_DIR_LIGHTS_COUNT];
 
-vec3 lampEyePos; // Transformed lamp position into eye space
-vec3 norm;
-vec3 ambient, diffuse, specular, viewDir, lightDir; // base lighting variables
+struct LightingVars {
+	vec3 viewDir;
+	vec3 ambientResult; // result of ambient lighting for all lights
+	vec3 diffuseResult; // result of diffuse lighting for all lights
+	vec3 specularResult; // result of specular lighting for all lights
+
+	// base lighting output variables
+	vec3 lampEyePos; // Transformed lamp position into eye space
+	vec3 ambient, diffuse, specular, lightDir;
+} lighting;
+
+struct NormalMappingVars {
+	vec3 viewNormal;
+} normalMapping;
 
 // output colors
 layout(location = 0) out vec4 fragColor;
@@ -79,8 +88,6 @@ layout(location = 2) out vec3 positionBuffer;
 layout(location = 3) out vec2 ssrValuesBuffer;
 
 #if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED && defined ALGINE_LIGHTING_MODE_ENABLED
-float shadow;
-
 #ifdef ALGINE_SHADOW_MAPPING_MODE_ENABLED
 uniform float diskRadius_k;
 uniform float diskRadius_min;
@@ -102,6 +109,7 @@ float calculatePointLightShadow(uint index) {
 	float currentDepth = length(fragToLight);
 	// use the light to fragment vector to sample from the depth map
 	float closestDepth;
+	float shadow = 0;
 
 	// PCF
 	#ifdef ALGINE_SHADOW_MAPPING_MODE_ENABLED
@@ -111,7 +119,8 @@ float calculatePointLightShadow(uint index) {
 		closestDepth = texture(pointLightShadowMaps[index], fragToLight + sampleOffsetDirections[i] * diskRadius).r;
 		closestDepth *= pointLights[index].far; // Undo mapping [0;1]
 		// now test for shadows
-		if(currentDepth - pointLights[index].bias > closestDepth) shadow += 1.0;
+		if (currentDepth - pointLights[index].bias > closestDepth)
+			shadow += 1.0;
 	}
 	return shadow /= 20;
 	#else
@@ -138,12 +147,12 @@ float calculateDirLightShadow(uint index) {
 	 * light direction. This way surfaces like the floor that are almost perpendicular to the light source get a small
 	 * bias, while surfaces like the cube’s side-faces get a much larger bias.
 	*/
-	float bias = max(dirLights[index].maxBias * (1.0 - dot(norm, lightDir)), dirLights[index].minBias);
+	float bias = max(dirLights[index].maxBias * (1.0 - dot(normalMapping.viewNormal, lighting.lightDir)), dirLights[index].minBias);
 
 	// soft shadow pcf 3*3
 	#ifdef ALGINE_SHADOW_MAPPING_MODE_ENABLED // PCF
 	vec2 texelSize = 1.0 / textureSize(dirLightShadowMaps[index], 0);
-	shadow = 0;
+	float shadow = 0;
 	for (int x = -1; x <= 1; x++) {
 		for (int y = -1; y <= 1; y++) {
 			float pcfDepth = texture(dirLightShadowMaps[index], projCoords.xy + vec2(x, y) * texelSize).r;
@@ -160,7 +169,7 @@ float calculateDirLightShadow(uint index) {
 #endif
 
 float calculateAttenuation(float kc, float kl, float kq) {
-	float distance = length(lampEyePos - viewPosition);
+	float distance = length(lighting.lampEyePos - viewPosition);
 	return 1.0 / (
 					kc +
 					kl * distance +
@@ -168,110 +177,119 @@ float calculateAttenuation(float kc, float kl, float kq) {
 			);
 }
 
-#define toVec4(v) vec4(v, 1.0)
-
-// kclq: vec3(kc, kl, kq)
 void calculateBaseLighting(vec3 pos, vec3 color, float kc, float kl, float kq) {
-	lampEyePos = vec3(viewMatrix * toVec4(pos));
+	lighting.lampEyePos = vec3(viewMatrix * vec4(pos, 1.0));
+
+	float attenuation = 1.0;
 
 	#ifdef ALGINE_ATTENUATION_MODE_ENABLED
-	// attenuation
-	float attenuation = calculateAttenuation(kc, kl, kq);
-	#else
-	#define attenuation 1.0
-	#endif /* ALGINE_ATTENUATION_MODE_ENABLED */
+	attenuation = calculateAttenuation(kc, kl, kq);
+	#endif
 
 	// ambient
-	ambient = material.ambientStrength * color * attenuation;
+	lighting.ambient = material.ambientStrength * color * attenuation;
 
 	// diffuse
-	lightDir = normalize(lampEyePos - viewPosition);
-	float diff = max(dot(norm, lightDir), 0.0);
-	diffuse = material.diffuseStrength * diff * color * attenuation;
+	lighting.lightDir = normalize(lighting.lampEyePos - viewPosition);
+	float diff = max(dot(normalMapping.viewNormal, lighting.lightDir), 0.0);
+	lighting.diffuse = material.diffuseStrength * diff * color * attenuation;
 
 	// specular
-	vec3 reflectDir = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	specular = material.specularStrength * spec * color * attenuation;
+	vec3 reflectDir = reflect(-lighting.lightDir, normalMapping.viewNormal);
+	float spec = pow(max(dot(lighting.viewDir, reflectDir), 0.0), material.shininess);
+	lighting.specular = material.specularStrength * spec * color * attenuation;
+}
+
+void initLighting() {
+	lighting.ambientResult = vec3(0.0);
+	lighting.diffuseResult = vec3(0.0);
+	lighting.specularResult = vec3(0.0);
+	lighting.viewDir = normalize(mat3(viewMatrix) * cameraPos - viewPosition);
+}
+
+void calculateDirLighting() {
+	for (uint i = 0; i < pointLightsCount; i++) {
+		calculateBaseLighting(pointLights[i].pos, pointLights[i].color, pointLights[i].kc, pointLights[i].kl, pointLights[i].kq);
+		
+		float shadow = 0;
+
+		#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
+		shadow = calculatePointLightShadow(i) * shadowOpacity;
+		#endif
+		
+		lighting.ambientResult += lighting.ambient;
+		lighting.diffuseResult += lighting.diffuse * (1 - shadow);
+		lighting.specularResult += lighting.specular * (1 - shadow);
+	}
+}
+
+void calculatePointLighting() {
+	for (uint i = 0; i < dirLightsCount; i++) {
+		calculateBaseLighting(dirLights[i].pos, dirLights[i].color, dirLights[i].kc, dirLights[i].kl, dirLights[i].kq);
+
+		float shadow = 0;
+
+		#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
+		shadow = calculateDirLightShadow(i) * shadowOpacity;
+		#endif
+
+		lighting.ambientResult += lighting.ambient;
+		lighting.diffuseResult += lighting.diffuse * (1 - shadow);
+		lighting.specularResult += lighting.specular * (1 - shadow);
+	}
+}
+
+void initNormalMapping() {
+	#ifdef ALGINE_LIGHTING_MODE_ENABLED
+	#ifdef ALGINE_NORMAL_MAPPING_MODE_DUAL
+	if (u_NormalMapping == 0)
+		normalMapping.viewNormal = viewNormal;
+	else { // using normal map if normal mapping enabled
+		normalMapping.viewNormal = texture2D(material.normal, texCoord).rgb;
+		normalMapping.viewNormal = normalize(normalMapping.viewNormal * 2.0 - 1.0); // from [0; 1] to [-1; 1]
+		normalMapping.viewNormal = normalize(v_TBN * normalMapping.viewNormal);
+	}
+	#elif defined ALGINE_NORMAL_MAPPING_MODE_ENABLED
+	normalMapping.viewNormal = texture2D(material.normal, texCoord).rgb;
+	normalMapping.viewNormal = normalize(normalMapping.viewNormal * 2.0 - 1.0); // from [0; 1] to [-1; 1]
+	normalMapping.viewNormal = normalize(v_TBN * normalMapping.viewNormal);
+	#else
+	normalMapping.viewNormal = viewNormal;
+	#endif /* ALGINE_NORMAL_MAPPING_MODE_DUAL */
+	#endif
 }
 
 // The entry point for our fragment shader.
 void main() {
-	#ifdef ALGINE_LIGHTING_MODE_ENABLED
-	#ifdef ALGINE_NORMAL_MAPPING_MODE_DUAL
-	if (u_NormalMapping == 0) norm = viewNormal;
-	else { // using normal map if normal mapping enabled
-		norm = texture2D(material.normal, texCoord).rgb;
-		norm = normalize(norm * 2.0 - 1.0); // from [0; 1] to [-1; 1]
-		norm = normalize(v_TBN * norm);
-	}
-	#elif defined ALGINE_NORMAL_MAPPING_MODE_ENABLED
-	norm = texture2D(material.normal, texCoord).rgb;
-	norm = normalize(norm * 2.0 - 1.0); // from [0; 1] to [-1; 1]
-	norm = normalize(v_TBN * norm);
-	#else
-	norm = viewNormal;
-	#endif /* ALGINE_NORMAL_MAPPING_MODE_DUAL */
-	#endif
+	initNormalMapping();
 
 	#ifdef ALGINE_LIGHTING_MODE_ENABLED
-	viewDir = normalize(mat3(viewMatrix) * cameraPos - viewPosition);
+	initLighting();
+	calculateDirLighting();
+	calculatePointLighting();
 
-	vec3 ambientResult = vec3(0, 0, 0); // result of ambient lighting for all lights
-	vec3 diffuseResult = vec3(0, 0, 0); // result of diffuse lighting for all lights
-	vec3 specularResult = vec3(0, 0, 0); // result of specular lighting for all lights
-
-	for (uint i = 0; i < pointLightsCount; i++) {
-		calculateBaseLighting(pointLights[i].pos, pointLights[i].color, pointLights[i].kc, pointLights[i].kl, pointLights[i].kq);
-		
-		#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
-		// calculate shadow
-		shadow = calculatePointLightShadow(i) * shadowOpacity;
-		#else
-		shadow = 0;
-		#endif
-		
-		ambientResult += ambient;
-		diffuseResult += diffuse * (1 - shadow);
-		specularResult += specular * (1 - shadow);
-	}
-
-	for (uint i = 0; i < dirLightsCount; i++) {
-		calculateBaseLighting(dirLights[i].pos, dirLights[i].color, dirLights[i].kc, dirLights[i].kl, dirLights[i].kq);
-
-		#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
-		// calculate shadow
-		shadow = calculateDirLightShadow(i) * shadowOpacity;
-		#else
-		shadow = 0;
-		#endif
-
-		ambientResult += ambient;
-		diffuseResult += diffuse * (1 - shadow);
-		specularResult += specular * (1 - shadow);
-	}
-
+	#define toVec4(v) vec4(v, 1.0)
 	#ifdef ALGINE_TEXTURE_MAPPING_MODE_ENABLED
 	fragColor =
-			toVec4(ambientResult) * texture(material.ambient, texCoord) +
-			toVec4(diffuseResult) * texture(material.diffuse, texCoord) +
-			toVec4(specularResult) * texture(material.specular, texCoord);
+			toVec4(lighting.ambientResult) * texture(material.ambient, texCoord) +
+			toVec4(lighting.diffuseResult) * texture(material.diffuse, texCoord) +
+			toVec4(lighting.specularResult) * texture(material.specular, texCoord);
 	#elif defined ALGINE_TEXTURE_MAPPING_MODE_DISABLED
 	fragColor =
-			toVec4(ambientResult) * material.cambient +
-			toVec4(diffuseResult) * material.cdiffuse +
-			toVec4(specularResult) * material.cspecular;
+			toVec4(lighting.ambientResult) * material.cambient +
+			toVec4(lighting.diffuseResult) * material.cdiffuse +
+			toVec4(lighting.specularResult) * material.cspecular;
 	#else
 	if (textureMappingEnabled)
 		fragColor =
-				toVec4(ambientResult) * texture(material.ambient, texCoord) +
-				toVec4(diffuseResult) * texture(material.diffuse, texCoord) +
-				toVec4(specularResult) * texture(material.specular, texCoord);
+				toVec4(lighting.ambientResult) * texture(material.ambient, texCoord) +
+				toVec4(lighting.diffuseResult) * texture(material.diffuse, texCoord) +
+				toVec4(lighting.specularResult) * texture(material.specular, texCoord);
 	else
 		fragColor =
-				toVec4(ambientResult) * material.cambient +
-				toVec4(diffuseResult) * material.cdiffuse +
-				toVec4(specularResult) * material.cspecular;
+				toVec4(lighting.ambientResult) * material.cambient +
+				toVec4(lighting.diffuseResult) * material.cdiffuse +
+				toVec4(lighting.specularResult) * material.cspecular;
 	#endif /* ALGINE_TEXTURE_MAPPING_MODE_ENABLED */
 
 	#else /* ALGINE_LIGHTING_MODE_DISABLED */
@@ -286,7 +304,7 @@ void main() {
 	#endif /* ALGINE_LIGHTING_MODE_XXX */
 
 	#ifdef ALGINE_SSR_MODE_ENABLED
-	normalBuffer = norm;
+	normalBuffer = normalMapping.viewNormal;
 	positionBuffer = viewPosition;
 	ssrValuesBuffer.r = texture(material.reflectionStrength, texCoord).r;
 	ssrValuesBuffer.g = texture(material.jitter, texCoord).r;
