@@ -6,8 +6,6 @@ Version: 1.6 alpha
 
 Supported systems: Linux, Windows (with MinGW-w64)
 
-Example of using given in `main.cpp` file
-
 Engine tested on Asus x302uv (Intel Core I5-6200U, Nvidia GeForce 920mx, 8GB RAM, Debian GNU/Linux buster/sid, ArchLinux, 1920x1080 screen) and showed good results
 
 If you find any errors or you have recommendations for improving the project - a big one please let me know!
@@ -15,7 +13,7 @@ If you find any errors or you have recommendations for improving the project - a
 Click on picture to watch video
 [![Algine v1.6 alpha](pictures/1.png)](https://youtu.be/pYUXtRl-LTs)
 
-# Functionality
+## Functionality
  * Textures
  * Mapping (ambient, diffuse, specular, normal)
  * Lighting (with a huge number of properties)
@@ -37,15 +35,18 @@ Click on picture to watch video
 
 Take into account, this is a test (alpha) version! All major functions will be added in later versions.
 
-# Building
+## Examples
+Here the repository with examples of usage: [algine-examples](https://github.com/congard/algine-examples)
+
+## Building
 About building on Linux and Windows you can read [here](build.md)
 
-# Contact
+## Contact
 You can contact me via telegram or email:
- * [@congard](https://t.me/congard)
- * [dbcongard@gmail.com](mailto:dbcongard@gmail.com)
+ * Telegram: [congard](https://t.me/congard)
+ * Email: [dbcongard@gmail.com](mailto:dbcongard@gmail.com)
 
-# You can support me financially
+## You can support me financially
 <b>Payeer:</b> P36281059
 
 Or you can do it even without finance. Just open [this](http://fainbory.com/8aWY) link
