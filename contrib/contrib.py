@@ -19,8 +19,7 @@ libs = [
     ["https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h", "stb"],
     ["https://github.com/congard/tulz/archive/v1.0-alpha.2.zip", "tulz"],
     ["https://github.com/assimp/assimp/archive/v.5.0.0.rc1.zip", "assimp"],
-    ["https://github.com/nigels-com/glew/releases/download/glew-2.1.0/glew-2.1.0.zip", "glew"],
-    ["https://github.com/glfw/glfw/releases/download/3.3/glfw-3.3.zip", "glfw"],
+    ["https://github.com/nigels-com/glew/releases/download/glew-2.1.0/glew-2.1.0.zip", "glew"]
 ]
 
 print("=== Contrib installer ===")
@@ -32,8 +31,7 @@ print("1) glm\n"
       "5) tulz")
 print("Non one header libs:")
 print("6) assimp\n"
-      "7) glew\n"
-      "8) glfw")
+      "7) glew")
 installLibs = input("What libs you want to install? Separate with spaces (default=all): ").split(" ")
 
 # check the correctness of the entered data
