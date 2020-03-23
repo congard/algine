@@ -98,36 +98,9 @@ add_library(algine
 
 # linking
 if (WIN32)
-    target_link_libraries(algine assimp ${GLEW_LIBRARY} opengl32 pthread tulz)
-
-    # TODO: rewrite on Windows
-#    if (NOT ALGINE_LINK_LIBS_STATICALLY)
-#        if (CMAKE_BUILD_TYPE MATCHES Debug)
-#            add_custom_command(TARGET algine POST_BUILD
-#                    COMMENT "Creating symlinks to libs..."
-#                    # assimp
-#                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/contrib/assimp/code/libassimpd.dll ${CMAKE_CURRENT_BINARY_DIR}/libassimpd.dll
-#                    # glew
-#                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/bin/glew32d.dll ${CMAKE_CURRENT_BINARY_DIR}/glew32d.dll
-#                    # glfw
-#                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/contrib/glfw/src/glfw3d.dll ${CMAKE_CURRENT_BINARY_DIR}/glfw3d.dll
-#                    # tulz
-#                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/contrib/tulz/libtulzd.dll ${CMAKE_CURRENT_BINARY_DIR}/libtulzd.dll)
-#        else() # if not Debug or Release CMake must throw an error in the very beginning
-#            add_custom_command(TARGET algine POST_BUILD
-#                    COMMENT "Creating symlinks to libs..."
-#                    # assimp
-#                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/contrib/assimp/code/libassimp.dll ${CMAKE_CURRENT_BINARY_DIR}/libassimp.dll
-#                    # glew
-#                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/bin/glew32.dll ${CMAKE_CURRENT_BINARY_DIR}/glew32.dll
-#                    # glfw
-#                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/contrib/glfw/src/glfw3.dll ${CMAKE_CURRENT_BINARY_DIR}/glfw3.dll
-#                    # tulz
-#                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/contrib/tulz/libtulz.dll ${CMAKE_CURRENT_BINARY_DIR}/libtulz.dll)
-#        endif()
-#    endif()
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} opengl32 tulz)
 elseif(UNIX)
-    target_link_libraries(algine assimp ${GLEW_LIBRARY} GL pthread tulz)
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} GL tulz)
     if (ALGINE_USE_SYSTEM_ASSIMP)
         target_link_directories(algine
                 PUBLIC /usr/local/lib)
