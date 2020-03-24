@@ -12,6 +12,7 @@
 
 namespace ShaderManager {
     constant(Include, "include")
+    constant(Link, "link")
 }
 // constants end
 
@@ -223,7 +224,8 @@ string ShaderManager::processDirectives(const string &src, const string &baseInc
         Matches &matches = pragmas[j];
         string &pragmaName = matches.matches[1];
 
-        if (pragmaName == ::ShaderManager::Include) {
+        switch_t(pragmaName)
+        case_t(::ShaderManager::Include) {
             auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~("(.+)")~"); // "file"
             string &filePath = fileMatches[0].matches[1];
 
@@ -248,9 +250,16 @@ string ShaderManager::processDirectives(const string &src, const string &baseInc
 
             _insert(result, matches.pos, matches.size,
                     processDirectives(File(filePath, File::Read).readStr(), Path(filePath).getParentDirectory()))
-        } else {
+        } case_t(::ShaderManager::Link) {
+            auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~((.+)[ \t]+(.+))~");
+
+            // #alp link base link
+            _insert(result, matches.pos, matches.size,
+                    "#define " + fileMatches[0].matches[2] + " " + fileMatches[0].matches[1])
+        } default_t {
             cerr << "Unknown pragma " << pragmaName << "\n" << matches.matches[0] << "\n\n";
         }
+        switch_t_end
     }
 
     return result;
