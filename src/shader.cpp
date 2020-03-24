@@ -15,6 +15,7 @@ namespace ShaderManager {
 }
 // constants end
 
+using namespace std;
 using namespace tulz;
 using namespace tulz::StringUtils;
 
@@ -30,7 +31,7 @@ void getShaderInfoLog(int shader, int type) {
 
     if (!success) {
         glGetShaderInfoLog(shader, infoLogSize, nullptr, infoLog);
-        std::cout << "Shader info log (for shader id " << shader << "): " << infoLog << "\n";
+        cout << "Shader info log (for shader id " << shader << "): " << infoLog << "\n";
     }
 }
 
@@ -45,11 +46,11 @@ void getProgramInfoLog(int program, int type) {
 
     if (!success) {
         glGetProgramInfoLog(program, infoLogSize, nullptr, infoLog);
-        std::cout << "Program info log (for program id " << program << "): " << infoLog << "\n";
+        cout << "Program info log (for program id " << program << "): " << infoLog << "\n";
     }
 }
 
-void ShaderManager::fromFile(const std::string &vertex, const std::string &fragment, const std::string &geometry) {
+void ShaderManager::fromFile(const string &vertex, const string &fragment, const string &geometry) {
     setBaseIncludePath(Path(vertex).getParentDirectory(), ShaderType::Vertex);
     setBaseIncludePath(Path(fragment).getParentDirectory(), ShaderType::Fragment);
 
@@ -70,7 +71,7 @@ void ShaderManager::fromFile(const algine::ShadersData &paths) {
     fromFile(paths.vertex, paths.fragment, paths.geometry);
 }
 
-void ShaderManager::fromSource(const std::string &vertex, const std::string &fragment, const std::string &geometry) {
+void ShaderManager::fromSource(const string &vertex, const string &fragment, const string &geometry) {
     vertexTemp = vertex;
     fragmentTemp = fragment;
     geometryTemp = geometry;
@@ -83,11 +84,11 @@ void ShaderManager::fromSource(const algine::ShadersData &sources) {
 
 #define _checkShaderType \
 if (shaderType > ShaderType::Geometry || shaderType < -1) { \
-    std::cerr << "Unknown shader type " << shaderType << "\n"; \
+    cerr << "Unknown shader type " << shaderType << "\n"; \
     return; \
 }
 
-void ShaderManager::setBaseIncludePath(const std::string &path, const int shaderType) {
+void ShaderManager::setBaseIncludePath(const string &path, const int shaderType) {
     _checkShaderType
 
     if (shaderType == -1) {
@@ -98,11 +99,11 @@ void ShaderManager::setBaseIncludePath(const std::string &path, const int shader
         baseIncludePath[shaderType] = path;
 }
 
-void ShaderManager::addIncludePath(const std::string &includePath) {
+void ShaderManager::addIncludePath(const string &includePath) {
     includePaths.push_back(includePath);
 }
 
-void ShaderManager::define(const std::string &macro, const std::string &value, const int shaderType) {
+void ShaderManager::define(const string &macro, const string &value, const int shaderType) {
     _checkShaderType
 
     if (shaderType == -1) {
@@ -113,7 +114,7 @@ void ShaderManager::define(const std::string &macro, const std::string &value, c
         definitions[shaderType].emplace_back(macro, value);
 }
 
-void ShaderManager::removeDefinition(const uint shaderType, const std::string &macro, const uint type) {
+void ShaderManager::removeDefinition(const uint shaderType, const string &macro, const uint type) {
     switch (type) {
         case RemoveFirst:
         case RemoveAll:
@@ -133,12 +134,12 @@ void ShaderManager::removeDefinition(const uint shaderType, const std::string &m
                 }
             break;
         default:
-            std::cerr << "Unknown shader type " << shaderType << "\n";
+            cerr << "Unknown shader type " << shaderType << "\n";
             break;
     }
 }
 
-void ShaderManager::removeDefinition(const std::string &macro, const uint type) {
+void ShaderManager::removeDefinition(const string &macro, const uint type) {
     removeDefinition(ShaderType::Vertex, macro, type);
     removeDefinition(ShaderType::Fragment, macro, type);
     removeDefinition(ShaderType::Geometry, macro, type);
@@ -158,15 +159,15 @@ void ShaderManager::resetDefinitions() {
 
 void ShaderManager::generate() {
     constexpr char versionRegex[] = R"~([ \t]*#[ \t]*version[ \t]+[0-9]+(?:[ \t]+[a-z]+|[ \t]*)(?:\r\n|\n|$))~";
-    std::string *shaders[3] {&vertexGen, &fragmentGen, &geometryGen};
+    string *shaders[3] {&vertexGen, &fragmentGen, &geometryGen};
 
     for (uint i = 0; i < 3; i++) {
         // generate definitions code
-        std::vector<Matches> version = findRegex(*shaders[i], versionRegex);
+        vector<Matches> version = findRegex(*shaders[i], versionRegex);
         if (version.empty())
             continue;
 
-        std::string definitionsCode = "\n";
+        string definitionsCode = "\n";
         for (auto & j : definitions[i])
             definitionsCode += "#define " + j.first + " " + j.second + "\n";
         shaders[i]->insert(version[0].pos + version[0].size, definitionsCode);
@@ -207,30 +208,31 @@ ShadersData ShaderManager::makeGenerated() {
 
 #define _errFileNotFound \
 { \
-    std::cerr << "Err: file " << filePath << " not found\n" << matches.matches[0] << "\n\n"; \
+    cerr << "Err: file " << filePath << " not found\n" << matches.matches[0] << "\n\n"; \
     continue; \
 }
 
-std::string ShaderManager::processDirectives(const std::string &src, const std::string &baseIncludePath) {
-    std::string result = src;
-    constexpr char regex[] = R"~((\w+)[ \t]+"(.+)"[ \t]*)~"; // include "file"
+string ShaderManager::processDirectives(const string &src, const string &baseIncludePath) {
+    string result = src;
+    constexpr char regex[] = R"~((\w+)[ \t]+(.+))~";
 
     // We process from the end because if we start from the beginning -
     // Matches::pos will be violated because we insert new data
-    std::vector<Matches> pragmas = findPragmas(result, regex);
+    vector<Matches> pragmas = findPragmas(result, regex);
     for (int j = static_cast<int>(pragmas.size()) - 1; j >= 0; j--) { // if pragmas empty, j can be -1
         Matches &matches = pragmas[j];
-        std::string &pragmaName = matches.matches[1];
+        string &pragmaName = matches.matches[1];
 
         if (pragmaName == ::ShaderManager::Include) {
-            std::string &filePath = matches.matches[2];
+            auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~("(.+)")~"); // "file"
+            string &filePath = fileMatches[0].matches[1];
 
             if (!Path(filePath).isAbsolute()) {
                 if (Path(Path::join(baseIncludePath, filePath)).exists()) { // try to find included file in base file folder
                     filePath = Path::join(baseIncludePath, filePath);
                 } else {
                     bool found = false;
-                    for (std::string &i : includePaths) { // i - include path
+                    for (string &i : includePaths) { // i - include path
                         if (Path(Path::join(i, filePath)).exists()) {
                             filePath = Path::join(i, filePath);
                             found = true;
@@ -247,7 +249,7 @@ std::string ShaderManager::processDirectives(const std::string &src, const std::
             _insert(result, matches.pos, matches.size,
                     processDirectives(File(filePath, File::Read).readStr(), Path(filePath).getParentDirectory()))
         } else {
-            std::cerr << "Unknown pragma " << pragmaName << "\n" << matches.matches[0] << "\n\n";
+            cerr << "Unknown pragma " << pragmaName << "\n" << matches.matches[0] << "\n\n";
         }
     }
 
@@ -256,8 +258,10 @@ std::string ShaderManager::processDirectives(const std::string &src, const std::
 
 #undef _errFileNotFound
 
-std::vector<tulz::StringUtils::Matches> ShaderManager::findPragmas(const std::string &src, const std::string &regex) {
-    return tulz::StringUtils::findRegex(src, R"([ \t]*#[ \t]*pragma[ \t]+algine[ \t]+)" + regex);
+vector<StringUtils::Matches> ShaderManager::findPragmas(const string &src, const string &regex) {
+    return StringUtils::findRegex(src,
+            R"([ \t]*#[ \t]*pragma[ \t]+algine[ \t]+)" + regex +
+            R"(|[ \t]*#[ \t]*alp[ \t]+)" + regex);
 }
 
 Shader::Shader(const uint type) {
@@ -282,18 +286,18 @@ void Shader::create(const uint type) {
             id = glCreateShader(GL_GEOMETRY_SHADER);
             break;
         default:
-            std::cerr << "Unknown shader type " << type << "\n";
+            cerr << "Unknown shader type " << type << "\n";
     }
 }
 
-void Shader::fromSource(const std::string &source) {
+void Shader::fromSource(const string &source) {
     const char *c_str = source.c_str();
     glShaderSource(id, 1, &c_str, nullptr);
     glCompileShader(id);
     getShaderInfoLog(id, GL_COMPILE_STATUS);
 }
 
-void Shader::fromFile(const std::string &path) {
+void Shader::fromFile(const string &path) {
     fromSource(File(path, File::Read).readStr());
 }
 
@@ -305,7 +309,7 @@ ShaderProgram::~ShaderProgram() {
     glDeleteProgram(id);
 }
 
-void ShaderProgram::fromSource(const std::string &vertex, const std::string &fragment, const std::string &geometry) {
+void ShaderProgram::fromSource(const string &vertex, const string &fragment, const string &geometry) {
     if (!vertex.empty()) {
         Shader s_vertex(ShaderType::Vertex);
         s_vertex.fromSource(vertex);
@@ -331,10 +335,10 @@ void ShaderProgram::fromSource(const ShadersSources &shaders) {
     fromSource(shaders.vertex, shaders.fragment, shaders.geometry);
 }
 
-void ShaderProgram::fromFile(const std::string &vertex, const std::string &fragment, const std::string &geometry) {
-    std::string vertexSource = vertex.empty() ? "" : File(vertex, File::Read).readStr();
-    std::string fragmentSource = fragment.empty() ? "" : File(fragment, File::Read).readStr();
-    std::string geometrySource = geometry.empty() ? "" : File(geometry, File::Read).readStr();
+void ShaderProgram::fromFile(const string &vertex, const string &fragment, const string &geometry) {
+    string vertexSource = vertex.empty() ? "" : File(vertex, File::Read).readStr();
+    string fragmentSource = fragment.empty() ? "" : File(fragment, File::Read).readStr();
+    string geometrySource = geometry.empty() ? "" : File(geometry, File::Read).readStr();
     fromSource(vertexSource, fragmentSource, geometrySource);
 }
 
@@ -351,21 +355,21 @@ void ShaderProgram::link() {
     getProgramInfoLog(id, GL_LINK_STATUS);
 }
 
-void ShaderProgram::loadUniformLocation(const std::string &name) {
+void ShaderProgram::loadUniformLocation(const string &name) {
     locations[name] = glGetUniformLocation(id, name.c_str());
 }
 
-void ShaderProgram::loadUniformLocations(const std::vector<std::string> &names) {
-    for (const std::string &name : names)
+void ShaderProgram::loadUniformLocations(const vector<string> &names) {
+    for (const string &name : names)
         loadUniformLocation(name);
 }
 
-void ShaderProgram::loadAttribLocation(const std::string &name) {
+void ShaderProgram::loadAttribLocation(const string &name) {
     locations[name] = glGetAttribLocation(id, name.c_str());
 }
 
-void ShaderProgram::loadAttribLocations(const std::vector<std::string> &names) {
-    for (const std::string &name : names)
+void ShaderProgram::loadAttribLocations(const vector<string> &names) {
+    for (const string &name : names)
         loadAttribLocation(name);
 }
 
@@ -375,7 +379,7 @@ void ShaderProgram::loadActiveLocations() {
     glGetProgramInterfaceiv(id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numActiveAttribs);
     glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
 
-    std::vector<char> nameData(256);
+    vector<char> nameData(256);
     uint properties[] = {GL_NAME_LENGTH};
     int values[getArraySize(properties)];
 
@@ -385,7 +389,7 @@ void ShaderProgram::loadActiveLocations() {
 
         nameData.resize(values[0]); //The length of the name.
         glGetProgramResourceName(id, GL_PROGRAM_INPUT, i, nameData.size(), nullptr, &nameData[0]);
-        std::string name(&nameData[0], nameData.size() - 1);
+        string name(&nameData[0], nameData.size() - 1);
         loadAttribLocation(name);
     }
 
@@ -395,12 +399,12 @@ void ShaderProgram::loadActiveLocations() {
 
         nameData.resize(values[0]); //The length of the name.
         glGetProgramResourceName(id, GL_UNIFORM, i, nameData.size(), nullptr, &nameData[0]);
-        std::string name(&nameData[0], nameData.size() - 1);
+        string name(&nameData[0], nameData.size() - 1);
         loadUniformLocation(name);
     }
 }
 
-int ShaderProgram::getLocation(const std::string &name) {
+int ShaderProgram::getLocation(const string &name) {
     return locations[name];
 }
 
@@ -444,35 +448,35 @@ void ShaderProgram::setMat4(const int location, const glm::mat4 &p) {
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(p));
 }
 
-void ShaderProgram::setBool(const std::string &location, const bool p) {
+void ShaderProgram::setBool(const string &location, const bool p) {
     setBool(getLocation(location), p);
 }
 
-void ShaderProgram::setInt(const std::string &location, const int p) {
+void ShaderProgram::setInt(const string &location, const int p) {
     setInt(getLocation(location), p);
 }
 
-void ShaderProgram::setUint(const std::string &location, const uint p) {
+void ShaderProgram::setUint(const string &location, const uint p) {
     setUint(getLocation(location), p);
 }
 
-void ShaderProgram::setFloat(const std::string &location, const float p) {
+void ShaderProgram::setFloat(const string &location, const float p) {
     setFloat(getLocation(location), p);
 }
 
-void ShaderProgram::setVec3(const std::string &location, const glm::vec3 &p) {
+void ShaderProgram::setVec3(const string &location, const glm::vec3 &p) {
     setVec3(getLocation(location), p);
 }
 
-void ShaderProgram::setVec4(const std::string &location, const glm::vec4 &p) {
+void ShaderProgram::setVec4(const string &location, const glm::vec4 &p) {
     setVec4(getLocation(location), p);
 }
 
-void ShaderProgram::setMat3(const std::string &location, const glm::mat3 &p) {
+void ShaderProgram::setMat3(const string &location, const glm::mat3 &p) {
     setMat3(getLocation(location), p);
 }
 
-void ShaderProgram::setMat4(const std::string &location, const glm::mat4 &p) {
+void ShaderProgram::setMat4(const string &location, const glm::mat4 &p) {
     setMat4(getLocation(location), p);
 }
 }
