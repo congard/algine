@@ -68,7 +68,6 @@ protected:
     std::string vertexGen, fragmentGen, geometryGen; // gen - generated
 
     std::string processDirectives(const std::string &src, const std::string &baseIncludePath);
-    static std::vector<tulz::StringUtils::Matches> findPragmas(const std::string &src, const std::string &regex);
 };
 
 class Shader {

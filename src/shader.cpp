@@ -213,13 +213,40 @@ ShadersData ShaderManager::makeGenerated() {
     continue; \
 }
 
+inline vector<Matches> findPragmas(const string &src, const string &regex, const vector<pair<uint, uint>> &excludes) {
+    auto matches = StringUtils::findRegex(src,
+            R"([ \t]*#[ \t]*pragma[ \t]+algine[ \t]+)" + regex +
+            R"(|[ \t]*#[ \t]*alp[ \t]+)" + regex);
+
+    for (int i = static_cast<int>(matches.size()) - 1; i >= 0; i--) {
+        for (auto &exclude : excludes) {
+            if (matches[i].pos > exclude.first && matches[i].pos + matches[i].size <= exclude.first + exclude.second) {
+                matches.erase(matches.begin() + i);
+            }
+        }
+    }
+
+    return matches;
+}
+
+inline vector<pair<uint, uint>> findComments(const string &src) {
+    constexpr char regex[] = R"(//.*|/\*(?:.|\n)*?\*/)"; // line and block comments
+    auto matches = StringUtils::findRegex(src, regex);
+    vector<pair<uint, uint>> result;
+    result.reserve(matches.size());
+
+    for (const auto &match : matches)
+        result.emplace_back(match.pos, match.size);
+    return result;
+}
+
 string ShaderManager::processDirectives(const string &src, const string &baseIncludePath) {
     string result = src;
     constexpr char regex[] = R"~((\w+)[ \t]+(.+))~";
 
     // We process from the end because if we start from the beginning -
     // Matches::pos will be violated because we insert new data
-    vector<Matches> pragmas = findPragmas(result, regex);
+    vector<Matches> pragmas = findPragmas(result, regex, findComments(src));
     for (int j = static_cast<int>(pragmas.size()) - 1; j >= 0; j--) { // if pragmas empty, j can be -1
         Matches &matches = pragmas[j];
         string &pragmaName = matches.matches[1];
@@ -266,12 +293,6 @@ string ShaderManager::processDirectives(const string &src, const string &baseInc
 }
 
 #undef _errFileNotFound
-
-vector<StringUtils::Matches> ShaderManager::findPragmas(const string &src, const string &regex) {
-    return StringUtils::findRegex(src,
-            R"([ \t]*#[ \t]*pragma[ \t]+algine[ \t]+)" + regex +
-            R"(|[ \t]*#[ \t]*alp[ \t]+)" + regex);
-}
 
 Shader::Shader(const uint type) {
     create(type);
