@@ -4,6 +4,7 @@ out
 # contrib libs (must be installed via contrib/contrib.py)
 contrib/*
 !contrib/contrib.py
+!contrib/tulz
 
 # PyCharm
 scripts/.idea

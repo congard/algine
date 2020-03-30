@@ -17,7 +17,6 @@ libs = [
     ["https://github.com/nlohmann/json/releases/download/v3.7.0/json.hpp", "nlohmann"],
     ["https://raw.githubusercontent.com/nothings/stb/master/stb_image.h", "stb"],
     ["https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h", "stb"],
-    ["https://github.com/congard/tulz/archive/v1.0-alpha.3.zip", "tulz"],
     ["https://github.com/assimp/assimp/archive/v.5.0.0.rc1.zip", "assimp"],
     ["https://github.com/nigels-com/glew/releases/download/glew-2.1.0/glew-2.1.0.zip", "glew"]
 ]
@@ -27,11 +26,10 @@ print("One header libs:")
 print("1) glm\n"
       "2) nlohmann/json.hpp\n"
       "3) stb/stb_image.h\n"
-      "4) stb/std_image_write.h\n"
-      "5) tulz")
+      "4) stb/std_image_write.h")
 print("Non one header libs:")
-print("6) assimp\n"
-      "7) glew")
+print("5) assimp\n"
+      "6) glew")
 installLibs = input("What libs you want to install? Separate with spaces (default=all): ").split(" ")
 
 # check the correctness of the entered data
