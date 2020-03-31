@@ -6,7 +6,6 @@
 namespace algine {
     namespace BoneSystem {
         namespace Settings {
-            constant(BoneSystem, "ALGINE_BONE_SYSTEM_ENABLED")
             constant(MaxBoneAttribsPerVertex, "MAX_BONE_ATTRIBS_PER_VERTEX")
             constant(MaxBones, "MAX_BONES")
         }
