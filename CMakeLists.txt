@@ -59,10 +59,12 @@ add_library(algine
         include/algine/templates.h
         include/algine/constants/AMTL.h
         include/algine/constants/BoneSystem.h
-        include/algine/constants/ColorShader.h
         include/algine/constants/ShadowShader.h
         include/algine/constants/QuadShader.h
         include/algine/constants/CubemapShader.h
+        include/algine/constants/Lighting.h
+        include/algine/constants/Material.h
+        include/algine/constants/NormalMapping.h
         include/algine/ext/constants/BlurShader.h
         include/algine/ext/constants/SSRShader.h
         include/algine/ext/constants/BlendBloomModule.h
