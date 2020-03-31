@@ -1,8 +1,8 @@
 /**
  * Bone System
  * It is module, not shader
- * Add it in your shader via pragma
- * algine include "modules/BoneSystem.glsl"
+ * Add it in your shader via
+ * #alp include "modules/BoneSystem.glsl"
  */
 
 uniform mat4 bones[MAX_BONES];

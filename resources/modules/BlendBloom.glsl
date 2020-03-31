@@ -1,8 +1,8 @@
 /**
  * Blend Bloom
  * It is module, not shader
- * Add it in your shader via pragma
- * algine include "modules/BlendBloom.glsl"
+ * Add it in your shader via
+ * #alp include "modules/BlendBloom.glsl"
  */
 
 #if defined(ALGINE_BLOOM_TYPE_ADD) || defined(ALGINE_BLOOM_TYPE_SCREEN)
