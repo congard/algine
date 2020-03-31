@@ -18,7 +18,7 @@ uniform mat4 transformationMatrix;
 void main() {
 	vec4 position = a_Position;
 
-	#ifdef ALGINE_BONE_SYSTEM_ENABLED
+	#ifdef ALGINE_BONE_SYSTEM
     if (isBonesPresent())
         position = getBoneTransformMatrix() * position;
     #endif

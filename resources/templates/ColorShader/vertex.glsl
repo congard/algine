@@ -27,7 +27,7 @@ void main() {
     vec4 position = inPos;
     vec3 normal = inNormal;
 
-    #ifdef ALGINE_BONE_SYSTEM_ENABLED
+    #ifdef ALGINE_BONE_SYSTEM
     if (isBonesPresent()) {
         mat4 finalTransform = getBoneTransformMatrix();
         position = finalTransform * position;
@@ -41,10 +41,10 @@ void main() {
 
     /* Lighting module code */
     // creating TBN (tangent-bitangent-normal) matrix if normal mapping enabled
-    #ifdef ALGINE_NORMAL_MAPPING_MODE_DUAL
+    #ifdef ALGINE_NORMAL_MAPPING_DUAL
 	if (isNormalMappingEnabled())
         passTBN(MVMatrix, inTangent, inBitangent, normal);
-    #elif defined ALGINE_NORMAL_MAPPING_MODE_ENABLED
+    #elif defined ALGINE_NORMAL_MAPPING_FROM_MAP
 	passTBN(MVMatrix, inTangent, inBitangent, normal);
     #endif
 
