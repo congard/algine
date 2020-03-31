@@ -6,6 +6,7 @@
 namespace algine {
     namespace ShadowShader {
         namespace Settings {
+            constant(BoneSystem, "ALGINE_BONE_SYSTEM")
             constant(PointLightShadowMapping, "ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING")
             constant(DirLightShadowMapping, "ALGINE_SHADOW_MAPPING_TYPE_DIR_LIGHTING")
         }
