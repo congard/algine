@@ -1,22 +1,27 @@
 #version 330
 
-#pragma algine include "modules/BlendBloom.glsl"
+#alp include "modules/BlendBloom.glsl"
+#alp include "modules/BlendDOF.glsl"
 
 out vec3 fragColor;
 in vec2 texCoord;
 
 uniform sampler2D bloom;
+uniform sampler2D dof;
 uniform sampler2D image;
 uniform float exposure;
 uniform float gamma;
 
 void main() {
-	vec3 color;
-	if (isBloomEnabled())
-		color = blendBloom(texture(bloom, texCoord).rgb, texture(image, texCoord).rgb);
-	else
-		color = texture(image, texCoord).rgb;
-	
-	fragColor = vec3(1.0) - exp(-color * exposure); // tone mapping
-	fragColor = pow(fragColor, vec3(1.0 / gamma)); // gamma correction
+    vec3 color = blendDOF(
+        texture(image, texCoord).rgb,
+        texture(dof, texCoord).rgb,
+        texCoord
+    );
+    
+    if (isBloomEnabled())
+        color = blendBloom(texture(bloom, texCoord).rgb, color);
+    
+    fragColor = vec3(1.0) - exp(-color * exposure); // tone mapping
+    fragColor = pow(fragColor, vec3(1.0 / gamma)); // gamma correction
 }
