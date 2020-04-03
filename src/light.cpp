@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 #include <iostream>
-#include <algine/algine_renderer.h>
 #include <algine/framebuffer.h>
 #include <algine/texture.h>
 #include <algine/constants/Lighting.h>
