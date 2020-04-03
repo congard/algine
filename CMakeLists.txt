@@ -67,10 +67,10 @@ add_library(algine
         include/algine/constants/NormalMapping.h
         include/algine/ext/constants/BlurShader.h
         include/algine/ext/constants/SSRShader.h
-        include/algine/ext/constants/BlendBloomModule.h
+        include/algine/ext/constants/BlendBloom.h
         include/algine/ext/constants/BloomSearchShader.h
-        include/algine/ext/constants/DOFShaders.h
-        src/algine_renderer.cpp include/algine/algine_renderer.h
+        include/algine/ext/constants/COCShader.h
+        include/algine/ext/constants/BlendDOF.h
         src/animation.cpp include/algine/animation.h
         src/bone.cpp include/algine/bone.h
         src/gputils.cpp include/algine/gputils.h
