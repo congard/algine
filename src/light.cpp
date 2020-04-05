@@ -323,6 +323,28 @@ void LightDataSetter::indexPointLightLocations(ShaderProgram *const lightShader,
     }
 }
 
+void LightDataSetter::configureShadowMapping(
+        const uint maxDirLightsCount, const uint dirLightsStart,
+        const uint maxPointLightsCount, const uint pointLightsStart)
+{
+    // to avoid black screen on AMD GPUs and old Intel HD Graphics
+    // Note: Mesa drivers require sampler as int, not uint
+
+    for (uint i = 0; i < maxDirLightsCount; i++) {
+        ShaderProgram::setInt(getLocation(LightDataSetter::ShadowMap, Light::TypeDirLight, i),
+                              static_cast<int>(dirLightsStart + i));
+        glActiveTexture(GL_TEXTURE0 + dirLightsStart + i);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    for (uint i = 0; i < maxPointLightsCount; i++) {
+        ShaderProgram::setInt(getLocation(LightDataSetter::ShadowMap, Light::TypePointLight, i),
+                              static_cast<int>(pointLightsStart + i));
+        glActiveTexture(GL_TEXTURE0 + pointLightsStart + i);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
+}
+
 void LightDataSetter::setDirLightsCount(const uint count) {
     ShaderProgram::setUint(dirLightsCount, count);
 }

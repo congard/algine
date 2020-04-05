@@ -114,6 +114,8 @@ public:
 // instead we loading it's location from shader's hash map
 // because of https://stackoverflow.com/questions/57535432/glsl-array-of-struct-members-locations
 
+// TODO: there should be two parts: one that sends data to the shader (setKc, setKq, setShadowMap etc.),
+//  the other that stores data (for example, the maximum number of sources, initial light source id, etc.)
 /**
  * <b>Sets lighting values in shaders</b><br>
  * setVar sets value in Light Shader<br>
@@ -137,6 +139,9 @@ public:
 
     void indexDirLightLocations(ShaderProgram *lightShader, uint lightsCount);
     void indexPointLightLocations(ShaderProgram *lightShader, ShaderProgram *shadowShader, uint lightsCount); // shadowShader can be nullptr
+
+    void configureShadowMapping(uint maxDirLightsCount, uint dirLightsStart,
+            uint maxPointLightsCount, uint pointLightsStart);
 
     void setDirLightsCount(uint count);
     void setPointLightsCount(uint count);
