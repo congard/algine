@@ -230,7 +230,7 @@ inline vector<Matches> findPragmas(const string &src, const string &regex, const
 }
 
 inline vector<pair<uint, uint>> findComments(const string &src) {
-    constexpr char regex[] = R"(//.*|/\*(?:.|\n)*?\*/)"; // line and block comments
+    constexpr char regex[] = R"(//.*|/\*(?:.|\n|\r\n)*?\*/)"; // line and block comments
     auto matches = StringUtils::findRegex(src, regex);
     vector<pair<uint, uint>> result;
     result.reserve(matches.size());
