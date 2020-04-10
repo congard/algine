@@ -96,7 +96,9 @@ add_library(algine
         src/InputAttributeDescription.cpp include/algine/InputAttributeDescription.h
         src/CubeRenderer.cpp include/algine/CubeRenderer.h
         src/QuadRenderer.cpp include/algine/QuadRenderer.h
-        src/ext/Blur.cpp include/algine/ext/Blur.h)
+        src/ext/Blur.cpp include/algine/ext/Blur.h
+        src/lighting/Manager.cpp include/algine/lighting/Manager.h
+        src/lighting/Transmitter.cpp include/algine/lighting/Transmitter.h)
 
 # linking
 if (WIN32)
