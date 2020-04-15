@@ -5,9 +5,8 @@
 #include <algine/texture.h>
 #include <algine/renderbuffer.h>
 #include <algine/templates.h>
+#include <algine/texture/PixelData.h>
 #include <vector>
-
-#define bindFramebuffer(framebuffer) glBindFramebuffer(GL_FRAMEBUFFER, framebuffer)
 
 namespace algine {
 class Framebuffer {
@@ -37,6 +36,10 @@ public:
     void setActiveAttachmentsList(uint index);
     void setAttachmentsList(uint index, const std::vector<uint> &list);
     void setAttachmentsLists(const std::vector<std::vector<uint>> &lists);
+
+    PixelData getPixels2D(uint mode, uint x, uint y, uint width, uint height, int format = -1);
+    PixelData getAllPixels2D(uint attachment, int format = -1);
+    PixelData getAllPixelsCube(uint face, uint attachment, int format = -1);
 
     uint getActiveAttachmentsList() const;
     uint getId() const;
