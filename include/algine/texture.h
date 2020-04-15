@@ -9,33 +9,7 @@
 #include <tulz/macros.h>
 
 namespace algine {
-// TODO: remove this functions
-// Activate & Bind 2D texture
-void texture2DAB(const uint &index, const uint &texture);
-
-size_t getTexComponentsCount(uint format);
-
-/**
- * Reads whole texture
- */
-float* getTexImage2D(uint texture, size_t width, size_t height, uint format);
-
-/**
- * Reads whole texture
- * `target` - `GL_TEXTURE_CUBE_MAP_POSITIVE_X` and others
- */
-float* getTexImageCube(GLenum target, GLuint texture, size_t width, size_t height, GLuint format);
-
-/**
- * Reads pixels from framebuffer
- */
-float* getPixelsFB(uint framebuffer, size_t x, size_t y, size_t width, size_t height, uint format);
-
-/**
- * Reads pixels from texture
- */
-float* getPixels(uint texture, size_t x, size_t y, size_t width, size_t height, uint format);
-
+// TODO: move to TextureTools
 void saveTexImage(const float *image, size_t width, size_t height, size_t inComponents, const std::string &path, size_t outComponents, bool flip = true);
 
 #define implementVariadicSetParams(Type) \

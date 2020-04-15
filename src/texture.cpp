@@ -5,85 +5,14 @@
 
 #include <stb/stb_image.h>
 #include <stb/stb_image_write.h>
-#include <algine/framebuffer.h>
 #include <iostream>
 #include <algine/types.h>
 
 using namespace std;
 
 namespace algine {
-void texture2DAB(const uint &index, const uint &texture) {
-    glActiveTexture(GL_TEXTURE0 + index);
-    glBindTexture(GL_TEXTURE_2D, texture);
-}
-
-size_t getTexComponentsCount(uint format) {
-    switch (format) {
-        case GL_RG:
-            return 2;
-        case GL_RGB:
-        case GL_BGR:
-            return 3;
-        case GL_RGBA:
-        case GL_BGRA:
-            return 4;
-        default:
-            return 1;
-    }
-}
-
-#define getTexImage(textureType, target, texture, width, height, format) \
-    GLfloat* pixels = new GLfloat[width * height * getTexComponentsCount(format)]; \
-    glActiveTexture(GL_TEXTURE0); \
-    glBindTexture(textureType, texture); \
-    glGetTexImage(target, 0, format, GL_FLOAT, pixels); \
-    glBindTexture(textureType, 0); \
-
-/**
- * Reads whole texture
- */
-float* getTexImage2D(uint texture, size_t width, size_t height, uint format) {
-    getTexImage(GL_TEXTURE_2D, GL_TEXTURE_2D, texture, width, height, format);
-    return pixels;
-}
-
-/**
- * Reads whole texture
- * `target` - `GL_TEXTURE_CUBE_MAP_POSITIVE_X` and others
- */
-float* getTexImageCube(GLenum target, GLuint texture, size_t width, size_t height, GLuint format) {
-    getTexImage(GL_TEXTURE_CUBE_MAP, target, texture, width, height, format);
-    return pixels;
-}
-
-#undef getTexImage
-
-/**
- * Reads pixels from framebuffer
- */
-float* getPixelsFB(uint framebuffer, size_t x, size_t y, size_t width, size_t height, uint format) {
-    bindFramebuffer(framebuffer);
-    GLfloat* pixels = new GLfloat(width * height * getTexComponentsCount(format));
-    glReadPixels(x, y, width, height, format, GL_FLOAT, pixels);
-    bindFramebuffer(0);
-    return pixels;
-}
-
-/**
- * Reads pixels from texture
- */
-float* getPixels(uint texture, size_t x, size_t y, size_t width, size_t height, uint format) {
-    GLuint framebuffer;
-    Framebuffer::create(&framebuffer);
-    bindFramebuffer(framebuffer);
-    Framebuffer::attachTexture2D(texture, Framebuffer::ColorAttachmentZero);
-    GLfloat* pixels = getPixelsFB(framebuffer, x, y, width, height, format);
-    Framebuffer::destroy(&framebuffer);
-    return pixels;
-}
-
 void saveTexImage(const float *image, size_t width, size_t height, size_t inComponents, const std::string &path, size_t outComponents, bool flip) {
-    unsigned char *data = new unsigned char[width * height * outComponents];
+    auto *data = new unsigned char[width * height * outComponents];
     for (size_t i = 0; i < width * height * outComponents; i++) data[i] = 0;
 
     size_t components = inComponents > outComponents ? outComponents : inComponents;
