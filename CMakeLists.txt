@@ -98,7 +98,8 @@ add_library(algine
         src/QuadRenderer.cpp include/algine/QuadRenderer.h
         src/ext/Blur.cpp include/algine/ext/Blur.h
         src/lighting/Manager.cpp include/algine/lighting/Manager.h
-        src/lighting/Transmitter.cpp include/algine/lighting/Transmitter.h)
+        src/lighting/Transmitter.cpp include/algine/lighting/Transmitter.h
+        include/algine/texture/PixelData.h)
 
 # linking
 if (WIN32)
