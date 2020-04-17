@@ -152,13 +152,13 @@ ShaderProgram *Manager::getPointLightShadowShader() const {
 }
 
 #define checkIsDirLight \
-    if (lightType != algine::Light::TypeDirLight) { \
+    if (lightType != algine::Lighting::Light::TypeDirLight) { \
         std::cerr << "Object " << obj << " can only be used with Light::TypeDirLight\n"; \
         return -1; \
     }
 
 #define checkIsPointLight \
-    if (lightType != algine::Light::TypePointLight) { \
+    if (lightType != algine::Lighting::Light::TypePointLight) { \
         std::cerr << "Object " << obj << " can only be used with Light::TypePointLight\n"; \
         return -1; \
     }

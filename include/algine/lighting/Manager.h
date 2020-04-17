@@ -2,7 +2,6 @@
 #define ALGINE_MODULE_H
 
 #include <algine/shader.h>
-#include <algine/light.h>
 #include <algine/types.h>
 #include <algine/lighting/Transmitter.h>
 

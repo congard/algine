@@ -75,7 +75,6 @@ add_library(algine
         src/bone.cpp include/algine/bone.h
         src/gputils.cpp include/algine/gputils.h
         src/framebuffer.cpp include/algine/framebuffer.h
-        src/light.cpp include/algine/light.h
         src/material.cpp include/algine/material.h
         src/math.cpp include/algine/math.h
         src/model.cpp include/algine/model.h
@@ -99,6 +98,11 @@ add_library(algine
         src/ext/Blur.cpp include/algine/ext/Blur.h
         src/lighting/Manager.cpp include/algine/lighting/Manager.h
         src/lighting/Transmitter.cpp include/algine/lighting/Transmitter.h
+        src/lighting/Light.cpp include/algine/lighting/Light.h
+        src/lighting/PointLight.cpp include/algine/lighting/PointLight.h
+        src/lighting/DirLight.cpp include/algine/lighting/DirLight.h
+        src/lighting/PointLamp.cpp include/algine/lighting/PointLamp.h
+        src/lighting/DirLamp.cpp include/algine/lighting/DirLamp.h
         include/algine/texture/PixelData.h)
 
 # linking

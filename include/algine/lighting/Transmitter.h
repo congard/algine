@@ -2,7 +2,9 @@
 #define ALGINE_TRANSMITTER_H
 
 #include <algine/types.h>
-#include <algine/light.h>
+#include <algine/lighting/Light.h>
+#include <algine/lighting/DirLight.h>
+#include <algine/lighting/PointLight.h>
 
 namespace algine {
 namespace Lighting {
