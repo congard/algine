@@ -81,7 +81,6 @@ add_library(algine
         src/node.cpp include/algine/node.h
         src/renderbuffer.cpp include/algine/renderbuffer.h
         src/shader.cpp include/algine/shader.h
-        src/texture.cpp include/algine/texture.h
         src/camera.cpp include/algine/camera.h
         src/event.cpp include/algine/event.h
         src/object3d.cpp include/algine/object3d.h
@@ -103,7 +102,12 @@ add_library(algine
         src/lighting/DirLight.cpp include/algine/lighting/DirLight.h
         src/lighting/PointLamp.cpp include/algine/lighting/PointLamp.h
         src/lighting/DirLamp.cpp include/algine/lighting/DirLamp.h
-        include/algine/texture/PixelData.h)
+        include/algine/texture/PixelData.h
+        src/texture/Texture.cpp include/algine/texture/Texture.h
+        include/algine/texture/TextureCreateInfo.h
+        src/texture/Texture2D.cpp include/algine/texture/Texture2D.h
+        src/texture/TextureCube.cpp include/algine/texture/TextureCube.h
+        src/texture/TextureTools.cpp include/algine/texture/TextureTools.h)
 
 # linking
 if (WIN32)

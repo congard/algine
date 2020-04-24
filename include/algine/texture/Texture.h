@@ -1,34 +1,13 @@
 #ifndef ALGINE_TEXTURE_H
 #define ALGINE_TEXTURE_H
 
-#include <algine/types.h>
 #include <GL/glew.h>
-#include <string>
 #include <map>
-#include <algine/templates.h>
-#include <tulz/macros.h>
+
+#include <algine/types.h>
+#include <algine/texture/TextureCreateInfo.h>
 
 namespace algine {
-// TODO: move to TextureTools
-void saveTexImage(const float *image, size_t width, size_t height, size_t inComponents, const std::string &path, size_t outComponents, bool flip = true);
-
-#define implementVariadicSetParams(Type) \
-template<typename T, typename...Args> \
-static void setParamsMultiple(const std::map<uint, T> &params, Args&...args) { \
-    Type** arr[] = {&args...}; \
-    for (usize i = 0; i < sizeof...(args); i++) { \
-        (*arr[i])->bind(); \
-        (*arr[i])->setParams(params); \
-    } \
-}
-
-struct TextureCreateInfo {
-    uint lod = 0;
-    uint format = 0;
-    uint width = 0, height = 0;
-    std::map<uint, uint> params;
-};
-
 class Texture {
 public:
     enum Params {
@@ -126,54 +105,6 @@ protected:
     explicit Texture(uint target);
     void texFromFile(const std::string &path, uint target, uint dataType = GL_UNSIGNED_BYTE, bool flipImage = true);
 };
-
-class Texture2D: public Texture {
-public:
-    Texture2D();
-
-    void fromFile(const std::string &path, uint dataType = GL_UNSIGNED_BYTE, bool flipImage = true);
-    void update() override;
-
-    /**
-     * updates width / height, lod, format
-     * @param dataFormat
-     * @param dataType
-     * @param data
-     */
-    void update(uint dataFormat, uint dataType, const void *data);
-
-    static std::map<uint, uint> defaultParams();
-
-    implementVariadicCreate(Texture2D)
-    implementVariadicSetParams(Texture2D)
-    implementVariadicDestroy(Texture2D)
-};
-
-class TextureCube: public Texture {
-public:
-    enum Faces {
-        Right = GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-        Left = GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-        Top = GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-        Bottom = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-        Back = GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-        Front = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-    };
-
-    TextureCube();
-
-    void fromFile(const std::string &path, uint face, uint dataType = GL_UNSIGNED_BYTE, bool flipImage = false);
-    void update() override;
-
-    static std::map<uint, uint> defaultParams();
-
-    implementVariadicCreate(TextureCube)
-    implementVariadicSetParams(TextureCube)
-    implementVariadicDestroy(TextureCube)
-};
-
-#undef implementVariadicSetParams
-
 }
 
-#endif
+#endif //ALGINE_TEXTURE_H
