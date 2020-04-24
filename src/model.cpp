@@ -8,7 +8,6 @@
 #include <assimp/Importer.hpp>  // C++ importer interface
 #include <assimp/postprocess.h>
 
-#include <algine/texture.h>
 #include <algine/node.h>
 #include <tulz/Path>
 

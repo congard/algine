@@ -2,7 +2,7 @@
 #define ALGINE_RENDERBUFFER_H
 
 #include <algine/types.h>
-#include <algine/texture.h>
+#include <algine/texture/Texture.h>
 #include <algine/templates.h>
 
 namespace algine {

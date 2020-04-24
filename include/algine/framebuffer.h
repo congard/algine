@@ -2,7 +2,8 @@
 #define ALGINE_FRAMEBUFFER_H
 
 #include <algine/types.h>
-#include <algine/texture.h>
+#include <algine/texture/Texture2D.h>
+#include <algine/texture/TextureCube.h>
 #include <algine/renderbuffer.h>
 #include <algine/templates.h>
 #include <algine/texture/PixelData.h>

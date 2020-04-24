@@ -3,6 +3,8 @@
 #ifndef ALGINE_TEMPLATES_H
 #define ALGINE_TEMPLATES_H
 
+#include <tulz/macros.h>
+
 #define implementVariadicCreate(T) \
 template<typename...Args> \
 static void create(Args&...args) { \
