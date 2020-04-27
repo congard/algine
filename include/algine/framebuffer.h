@@ -50,11 +50,6 @@ public:
     implementVariadicCreate(Framebuffer)
     implementVariadicDestroy(Framebuffer)
 
-    // TODO: remove
-    static void create(uint *id);
-    static void attachTexture2D(const uint &textureId, const uint &colorAttachment);
-    static void destroy(uint *id);
-
 protected:
     uint m_id = 0;
     uint m_activeList = 0;

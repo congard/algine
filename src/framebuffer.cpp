@@ -223,16 +223,4 @@ vector<vector<uint>> Framebuffer::getAttachmentsLists() const {
 uint Framebuffer::getId() const {
     return m_id;
 }
-
-void Framebuffer::create(uint *id) {
-    glGenFramebuffers(1, id);
-}
-
-void Framebuffer::attachTexture2D(const uint &textureId, const uint &colorAttachment) {
-    glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachment, GL_TEXTURE_2D, textureId, 0);
-}
-
-void Framebuffer::destroy(uint *id) {
-    glDeleteFramebuffers(1, id);
-}
 }
