@@ -2,7 +2,7 @@
 #define ALGINE_ANIMSHAPE_H
 
 #include <algine/animation/Animation.h>
-#include <algine/bone.h>
+#include <algine/animation/Bone.h>
 #include <algine/node.h>
 
 namespace algine {

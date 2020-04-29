@@ -71,7 +71,6 @@ add_library(algine
         include/algine/ext/constants/BloomSearchShader.h
         include/algine/ext/constants/COCShader.h
         include/algine/ext/constants/BlendDOF.h
-        src/bone.cpp include/algine/bone.h
         src/gputils.cpp include/algine/gputils.h
         src/framebuffer.cpp include/algine/framebuffer.h
         src/material.cpp include/algine/material.h
@@ -112,7 +111,9 @@ add_library(algine
         src/animation/AnimNode.cpp include/algine/animation/AnimNode.h
         src/animation/Animation.cpp include/algine/animation/Animation.h
         src/animation/AnimShape.cpp include/algine/animation/AnimShape.h
-        src/animation/Animator.cpp include/algine/animation/Animator.h)
+        src/animation/Animator.cpp include/algine/animation/Animator.h
+        src/animation/Bone.cpp include/algine/animation/Bone.h
+        src/animation/BoneInfo.cpp include/algine/animation/BoneInfo.h)
 
 # linking
 if (WIN32)

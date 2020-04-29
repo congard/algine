@@ -4,12 +4,12 @@
 #include <algine/types.h>
 #include <algine/material.h>
 #include <algine/AMTLLoader.h>
-#include <algine/bone.h>
 #include <algine/object3d.h>
 #include <algine/ArrayBuffer.h>
 #include <algine/IndexBuffer.h>
 #include <algine/InputLayout.h>
 #include <algine/animation/Animator.h>
+#include <algine/animation/Bone.h>
 
 #include <vector>
 #include <map>

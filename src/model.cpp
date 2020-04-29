@@ -10,6 +10,7 @@
 #include <assimp/scene.h>
 
 #include <algine/node.h>
+#include <algine/animation/BoneInfo.h>
 #include <tulz/Path>
 
 using namespace tulz;
@@ -129,7 +130,7 @@ void ShapeLoader::loadBones(const aiMesh *aimesh) {
 
     // converting to a suitable view
     for (size_t i = 0; i < binfos.size(); i++) {
-        for (size_t j = 0; j < binfos[i].size; j++) {
+        for (size_t j = 0; j < binfos[i].size(); j++) {
             m_shape->geometry.boneIds.push_back(binfos[i].ids[j]);
             m_shape->geometry.boneWeights.push_back(binfos[i].weights[j]);
         }
