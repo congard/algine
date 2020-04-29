@@ -2,6 +2,7 @@
 #define ALGINE_ANIMATOR_H
 
 #include <algine/animation/AnimShape.h>
+#include <algine/types.h>
 
 namespace algine {
 class Animator {
