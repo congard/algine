@@ -5,8 +5,9 @@
 #include <glm/glm.hpp>
 #include <iostream>
 
-#include <assimp/Importer.hpp>  // C++ importer interface
+#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 #include <algine/node.h>
 #include <tulz/Path>

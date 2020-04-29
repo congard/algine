@@ -4,8 +4,9 @@
 #include <string>
 #include <vector>
 #include <glm/mat4x4.hpp>
-#include <assimp/scene.h>
 #include <algine/math.h>
+
+class aiNode;
 
 namespace algine {
 class Node {

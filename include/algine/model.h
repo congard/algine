@@ -13,7 +13,9 @@
 
 #include <vector>
 #include <map>
-#include <assimp/scene.h> // Output data structure
+
+class aiMesh;
+class aiScene;
 
 namespace algine {
 struct Geometry {
