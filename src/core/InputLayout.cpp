@@ -1,4 +1,4 @@
-#include <algine/InputLayout.h>
+#include <algine/core/InputLayout.h>
 #include <GL/glew.h>
 #include <iostream>
 

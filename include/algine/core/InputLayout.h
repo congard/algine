@@ -1,9 +1,9 @@
 #ifndef ALGINE_INPUTLAYOUT_H
 #define ALGINE_INPUTLAYOUT_H
 
-#include <algine/ArrayBuffer.h>
-#include <algine/IndexBuffer.h>
-#include <algine/InputAttributeDescription.h>
+#include <algine/core/ArrayBuffer.h>
+#include <algine/core/IndexBuffer.h>
+#include <algine/core/InputAttributeDescription.h>
 #include <algine/templates.h>
 #include <tulz/macros.h>
 

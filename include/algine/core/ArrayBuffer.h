@@ -1,7 +1,7 @@
 #ifndef ALGINE_ARRAYBUFFER_H
 #define ALGINE_ARRAYBUFFER_H
 
-#include <algine/Buffer.h>
+#include <algine/core/Buffer.h>
 #include <algine/templates.h>
 #include <tulz/macros.h>
 

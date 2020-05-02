@@ -84,11 +84,11 @@ add_library(algine
         src/rotator.cpp include/algine/rotator.h
         src/debug.cpp include/algine/debug.h
         src/AMTLLoader.cpp include/algine/AMTLLoader.h
-        src/Buffer.cpp include/algine/Buffer.h
-        src/ArrayBuffer.cpp include/algine/ArrayBuffer.h
-        src/IndexBuffer.cpp include/algine/IndexBuffer.h
-        src/InputLayout.cpp include/algine/InputLayout.h
-        src/InputAttributeDescription.cpp include/algine/InputAttributeDescription.h
+        src/core/Buffer.cpp include/algine/core/Buffer.h
+        src/core/ArrayBuffer.cpp include/algine/core/ArrayBuffer.h
+        src/core/IndexBuffer.cpp include/algine/core/IndexBuffer.h
+        src/core/InputLayout.cpp include/algine/core/InputLayout.h
+        src/core/InputAttributeDescription.cpp include/algine/core/InputAttributeDescription.h
         src/CubeRenderer.cpp include/algine/CubeRenderer.h
         src/QuadRenderer.cpp include/algine/QuadRenderer.h
         src/ext/Blur.cpp include/algine/ext/Blur.h

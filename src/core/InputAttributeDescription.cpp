@@ -1,4 +1,4 @@
-#include <algine/InputAttributeDescription.h>
+#include <algine/core/InputAttributeDescription.h>
 
 namespace algine {
 uint InputAttributeDescription::getLocation() const {
