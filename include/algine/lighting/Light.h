@@ -2,7 +2,7 @@
 #define ALGINE_LIGHT_H
 
 #include <algine/types.h>
-#include <algine/framebuffer.h>
+#include <algine/core/Framebuffer.h>
 #include <algine/object3d.h>
 
 namespace algine {

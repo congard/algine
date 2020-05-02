@@ -1,4 +1,4 @@
-#include <algine/framebuffer.h>
+#include <algine/core/Framebuffer.h>
 #include <GL/glew.h>
 
 using namespace std;

@@ -72,7 +72,7 @@ add_library(algine
         include/algine/ext/constants/COCShader.h
         include/algine/ext/constants/BlendDOF.h
         src/gputils.cpp include/algine/gputils.h
-        src/framebuffer.cpp include/algine/framebuffer.h
+        src/core/Framebuffer.cpp include/algine/core/Framebuffer.h
         src/material.cpp include/algine/material.h
         src/math.cpp include/algine/math.h
         src/model.cpp include/algine/model.h

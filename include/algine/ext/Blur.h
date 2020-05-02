@@ -2,7 +2,7 @@
 #define ALGINE_BLUR_H
 
 #include <algine/texture/Texture2D.h>
-#include <algine/framebuffer.h>
+#include <algine/core/Framebuffer.h>
 #include <algine/QuadRenderer.h>
 #include <algine/core/ShaderProgram.h>
 
