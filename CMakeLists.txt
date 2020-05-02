@@ -78,7 +78,6 @@ add_library(algine
         src/model.cpp include/algine/model.h
         src/node.cpp include/algine/node.h
         src/renderbuffer.cpp include/algine/renderbuffer.h
-        src/shader.cpp include/algine/shader.h
         src/camera.cpp include/algine/camera.h
         src/event.cpp include/algine/event.h
         src/object3d.cpp include/algine/object3d.h
@@ -113,7 +112,12 @@ add_library(algine
         src/animation/AnimShape.cpp include/algine/animation/AnimShape.h
         src/animation/Animator.cpp include/algine/animation/Animator.h
         src/animation/Bone.cpp include/algine/animation/Bone.h
-        src/animation/BoneInfo.cpp include/algine/animation/BoneInfo.h)
+        src/animation/BoneInfo.cpp include/algine/animation/BoneInfo.h
+        include/algine/core/ShadersInfo.h
+        src/core/ShaderTools.cpp include/algine/core/ShaderTools.h
+        src/core/Shader.cpp include/algine/core/Shader.h
+        src/core/ShaderManager.cpp include/algine/core/ShaderManager.h
+        src/core/ShaderProgram.cpp include/algine/core/ShaderProgram.h)
 
 # linking
 if (WIN32)

@@ -2,6 +2,8 @@
 #include <algine/constants/Lighting.h>
 #include <algine/constants/ShadowShader.h>
 
+#include <iostream>
+
 namespace LightingVars = algine::Module::Lighting::Vars;
 
 namespace algine {

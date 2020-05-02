@@ -4,7 +4,7 @@
 #include <algine/texture/Texture2D.h>
 #include <algine/framebuffer.h>
 #include <algine/QuadRenderer.h>
-#include <algine/shader.h>
+#include <algine/core/ShaderProgram.h>
 
 namespace algine {
 class Blur {
