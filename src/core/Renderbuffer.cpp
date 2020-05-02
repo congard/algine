@@ -1,4 +1,4 @@
-#include <algine/renderbuffer.h>
+#include <algine/core/Renderbuffer.h>
 #include <GL/glew.h>
 
 namespace algine {

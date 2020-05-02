@@ -4,7 +4,7 @@
 #include <algine/types.h>
 #include <algine/texture/Texture2D.h>
 #include <algine/texture/TextureCube.h>
-#include <algine/renderbuffer.h>
+#include <algine/core/Renderbuffer.h>
 #include <algine/templates.h>
 #include <algine/texture/PixelData.h>
 #include <vector>

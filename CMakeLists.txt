@@ -77,7 +77,7 @@ add_library(algine
         src/math.cpp include/algine/math.h
         src/model.cpp include/algine/model.h
         src/node.cpp include/algine/node.h
-        src/renderbuffer.cpp include/algine/renderbuffer.h
+        src/core/Renderbuffer.cpp include/algine/core/Renderbuffer.h
         src/camera.cpp include/algine/camera.h
         src/event.cpp include/algine/event.h
         src/object3d.cpp include/algine/object3d.h
