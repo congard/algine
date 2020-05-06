@@ -11,6 +11,8 @@
 
 namespace algine {
 class Framebuffer {
+    friend class Engine;
+
 public:
     enum Attachments {
         ColorAttachmentZero = GL_COLOR_ATTACHMENT0,
@@ -53,7 +55,7 @@ public:
 protected:
     uint m_id = 0;
     uint m_activeList = 0;
-    std::vector<std::vector<uint>> m_attachmentsLists;
+    std::vector<std::vector<uint>> m_attachmentsLists = {std::vector<uint> {ColorAttachmentZero}};
 };
 
 }

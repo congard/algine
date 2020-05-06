@@ -1,6 +1,15 @@
 #include <algine/texture/TextureCube.h>
 
+#include <algine/core/Engine.h>
+
 #include <map>
+
+#define SOP_BOUND_PTR Engine::getBoundTextureCube()
+#define SOP_OBJECT_TYPE SOPConstants::TextureCubeObject
+#define SOP_OBJECT_ID id
+#define SOP_OBJECT_NAME SOPConstants::TextureCubeStr
+#include "../core/SOP.h"
+#include "../core/SOPConstants.h"
 
 using namespace std;
 
@@ -8,6 +17,7 @@ namespace algine {
 TextureCube::TextureCube(): Texture(GL_TEXTURE_CUBE_MAP) {}
 
 void TextureCube::fromFile(const std::string &path, uint face, uint dataType, bool flipImage) {
+    checkBinding()
     texFromFile(path, face, dataType, flipImage);
 }
 
@@ -22,6 +32,7 @@ if (format == DepthComponent) \
 void TextureCube::update() {
     // last 3 params never used, but must be correct:
     // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
+    checkBinding()
     _findCorrectDataFormat
     for (uint i = 0; i < 6; ++i)
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, lod, format, width, height, 0, dataFormat, GL_BYTE, nullptr);

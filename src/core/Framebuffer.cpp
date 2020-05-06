@@ -1,5 +1,15 @@
 #include <algine/core/Framebuffer.h>
+
+#include <algine/core/Engine.h>
+
 #include <GL/glew.h>
+
+#define SOP_BOUND_PTR Engine::m_boundFramebuffer
+#define SOP_OBJECT_TYPE SOPConstants::FramebufferObject
+#define SOP_OBJECT_ID m_id
+#define SOP_OBJECT_NAME SOPConstants::FramebufferStr
+#include "SOP.h"
+#include "SOPConstants.h"
 
 using namespace std;
 using namespace tulz;
@@ -9,8 +19,6 @@ namespace algine {
 
 Framebuffer::Framebuffer() {
     glGenFramebuffers(1, &m_id);
-
-    m_attachmentsLists.emplace_back(std::vector<uint> {ColorAttachmentZero});
 }
 
 Framebuffer::~Framebuffer() {
@@ -18,20 +26,22 @@ Framebuffer::~Framebuffer() {
 }
 
 void Framebuffer::bind() {
+    commitBinding()
     glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 }
 
-// TODO: not marked static because will be implemented "secure operations" check, which needs this pointer
-
 void Framebuffer::attachTexture(const Texture2D *const texture, const uint attachment) {
+    checkBinding()
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->getId(), 0);
 }
 
 void Framebuffer::attachTexture(const TextureCube *const texture, const uint attachment) {
+    checkBinding()
     glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->getId(), 0);
 }
 
 void Framebuffer::attachRenderbuffer(const Renderbuffer *const renderbuffer, const uint attachment) {
+    checkBinding()
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderbuffer->getId());
 }
 
@@ -85,10 +95,13 @@ void Framebuffer::optimizeAttachmentsList() {
 }
 
 void Framebuffer::update() {
+    checkBinding()
     glDrawBuffers(attachmentsList.size(), &attachmentsList[0]);
 }
 
 void Framebuffer::unbind() {
+    checkBinding()
+    commitUnbinding()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -166,6 +179,8 @@ inline PixelData getPixels2D(const uint mode, const uint x, const uint y,
 PixelData Framebuffer::getPixels2D(const uint mode, const uint x, const uint y,
         const uint width, const uint height, int format)
 {
+    checkBinding()
+
     if (format == -1) {
         glBindTexture(GL_TEXTURE_2D, getAttachedTexId(mode));
         format = getTex2DParam(GL_TEXTURE_INTERNAL_FORMAT);
@@ -176,6 +191,8 @@ PixelData Framebuffer::getPixels2D(const uint mode, const uint x, const uint y,
 }
 
 PixelData Framebuffer::getAllPixels2D(const uint attachment, int format) {
+    checkBinding()
+
     uint width, height;
 
     glBindTexture(GL_TEXTURE_2D, getAttachedTexId(attachment));
@@ -189,6 +206,7 @@ PixelData Framebuffer::getAllPixels2D(const uint attachment, int format) {
 }
 
 PixelData Framebuffer::getAllPixelsCube(const uint face, const uint attachment, int format) {
+    checkBinding()
     glBindTexture(GL_TEXTURE_CUBE_MAP, getAttachedTexId(attachment));
 
     if (format == -1)
