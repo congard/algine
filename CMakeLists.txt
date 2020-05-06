@@ -9,8 +9,18 @@ set(CMAKE_CXX_STANDARD 14)
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "Algine debug mode - adding -g option")
     add_compile_options("-g")
+
+    if (NOT DEFINED ALGINE_SECURE_OPERATIONS)
+        message(STATUS "Algine SOP set to ON")
+        set(ALGINE_SECURE_OPERATIONS ON)
+    endif()
 elseif (CMAKE_BUILD_TYPE MATCHES Release)
     message(STATUS "Algine release mode")
+
+    if (NOT DEFINED ALGINE_SECURE_OPERATIONS)
+        message(STATUS "Algine SOP set to OFF")
+        set(ALGINE_SECURE_OPERATIONS OFF)
+    endif()
 else()
     message(FATAL_ERROR "CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}\nBut you can choose only Debug or Release build type")
 endif()
@@ -53,6 +63,16 @@ include_directories(contrib/glm)
 include_directories(contrib)
 include_directories(include)
 
+if (ALGINE_SECURE_OPERATIONS)
+    if (NOT DEFINED ALGINE_SOP_LEVEL)
+        set(ALGINE_SOP_LEVEL 0)
+    endif()
+
+    add_compile_definitions(ALGINE_SECURE_OPERATIONS)
+    add_compile_definitions(ALGINE_SOP_LEVEL=${ALGINE_SOP_LEVEL})
+    message(STATUS "Algine SOP level is ${ALGINE_SOP_LEVEL}")
+endif()
+
 add_library(algine
         include/algine/constants.h
         include/algine/types.h
@@ -71,7 +91,6 @@ add_library(algine
         include/algine/ext/constants/BloomSearchShader.h
         include/algine/ext/constants/COCShader.h
         include/algine/ext/constants/BlendDOF.h
-        src/gputils.cpp include/algine/gputils.h
         src/core/Framebuffer.cpp include/algine/core/Framebuffer.h
         src/material.cpp include/algine/material.h
         src/math.cpp include/algine/math.h
@@ -117,7 +136,9 @@ add_library(algine
         src/core/ShaderTools.cpp include/algine/core/ShaderTools.h
         src/core/Shader.cpp include/algine/core/Shader.h
         src/core/ShaderManager.cpp include/algine/core/ShaderManager.h
-        src/core/ShaderProgram.cpp include/algine/core/ShaderProgram.h)
+        src/core/ShaderProgram.cpp include/algine/core/ShaderProgram.h
+        src/core/Engine.cpp include/algine/core/Engine.h
+        src/core/SOP.h src/core/SOPConstants.h)
 
 # linking
 if (WIN32)
