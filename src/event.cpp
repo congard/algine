@@ -1,10 +1,16 @@
 #include <algine/event.h>
-#include <algine/gputils.h>
 #include <cmath>
+#include <chrono>
+
+using namespace std;
+
+inline long getTime() {
+    return chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
+}
 
 namespace algine {
 void MouseEventListener::createCallback(const uint action, const uint button) {
-    MouseEvent *event = new MouseEvent;
+    auto event = new MouseEvent;
     event->action = action;
     event->button = button;
     event->listener = this;
