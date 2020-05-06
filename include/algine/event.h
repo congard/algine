@@ -24,8 +24,8 @@ struct MouseEventListener {
         uint action;
         uint button;
         
-        inline float getX() { return listener->x; };
-        inline float getY() { return listener->y; };
+        inline float getX() const { return listener->x; };
+        inline float getY() const { return listener->y; };
     };
     
     struct MouseButton {
@@ -39,15 +39,15 @@ struct MouseEventListener {
     float clickRadius = 2.0f;
     long longClickTime = 2000; // in ms
     
-    void buttonDown(const float x, const float y, const uint button = ButtonLeft);
-    void buttonUp(const float x, const float y, const uint button = ButtonLeft);
-    void mouseMove(const float x, const float y);
+    void buttonDown(float x, float y, uint button = ButtonLeft);
+    void buttonUp(float x, float y, uint button = ButtonLeft);
+    void mouseMove(float x, float y);
     void setCallback(void (*callback)(MouseEvent *event));
     
 private:
     void (*callback)(MouseEvent *event);
     
-    void createCallback(const uint action, const uint button);
+    void createCallback(uint action, uint button);
 };
 }
 
