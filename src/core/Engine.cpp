@@ -40,18 +40,6 @@ void Engine::destroy() {
     Framebuffer::destroy(m_defaultFramebuffer);
 }
 
-Framebuffer* Engine::defaultFramebuffer() {
-    return m_defaultFramebuffer;
-}
-
-Texture2D* Engine::defaultTexture2D() {
-    return m_defaultTexture2D;
-}
-
-TextureCube* Engine::defaultTextureCube() {
-    return m_defaultTextureCube;
-}
-
 #ifdef ALGINE_SECURE_OPERATIONS
 Framebuffer* Engine::getBoundFramebuffer() {
     return m_boundFramebuffer == nullptr ? m_defaultFramebuffer : m_boundFramebuffer;
