@@ -16,7 +16,7 @@
 
 #       define checkBinding() \
             if (v_cast(SOP_BOUND_PTR) != v_cast(this)) { \
-                std::cerr << "Warning: non-bonded " << SOP_OBJECT_NAME << " (id " + to_string(SOP_OBJECT_ID) + ") state change\n"; \
+                std::cerr << "Warning: non-bonded " << SOP_OBJECT_NAME << " (id " + std::to_string(SOP_OBJECT_ID) + ") state change\n"; \
             }
 #   elif ALGINE_SOP_LEVEL == 1
 #       include <exception>
