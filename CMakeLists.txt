@@ -17,6 +17,9 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
 elseif (CMAKE_BUILD_TYPE MATCHES Release)
     message(STATUS "Algine release mode")
 
+    # should inline functions like bind(), unbind() etc
+    add_compile_options("-flto")
+
     if (NOT DEFINED ALGINE_SECURE_OPERATIONS)
         message(STATUS "Algine SOP set to OFF")
         set(ALGINE_SECURE_OPERATIONS OFF)
