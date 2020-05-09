@@ -5,11 +5,13 @@
 
 namespace algine {
 class Framebuffer;
+class Renderbuffer;
 class Texture2D;
 class TextureCube;
 
 class Engine {
     friend class Framebuffer;
+    friend class Renderbuffer;
     friend class Texture;
     friend class Texture2D;
     friend class TextureCube;
@@ -19,6 +21,7 @@ public:
     static void destroy();
 
     static Framebuffer* getBoundFramebuffer();
+    static Renderbuffer* getBoundRenderbuffer();
     static Texture2D* getBoundTexture2D();
     static TextureCube* getBoundTextureCube();
 
@@ -28,6 +31,10 @@ public:
 public:
     static inline Framebuffer* defaultFramebuffer() {
         return m_defaultFramebuffer;
+    }
+
+    static inline Renderbuffer* defaultRenderbuffer() {
+        return m_defaultRenderbuffer;
     }
 
     static inline Texture2D* defaultTexture2D() {
@@ -40,6 +47,7 @@ public:
 
 private:
     static Framebuffer *m_defaultFramebuffer;
+    static Renderbuffer *m_defaultRenderbuffer;
     static Texture2D *m_defaultTexture2D;
     static TextureCube *m_defaultTextureCube;
 
@@ -48,6 +56,7 @@ private:
 
 private:
     static Framebuffer *m_boundFramebuffer;
+    static Renderbuffer *m_boundRenderbuffer;
     static Texture2D *m_boundTexture2D;
     static TextureCube *m_boundTextureCube;
 };

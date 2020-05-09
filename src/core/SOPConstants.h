@@ -6,11 +6,13 @@
 namespace SOPConstants {
 enum {
     FramebufferObject,
+    RenderbufferObject,
     Texture2DObject,
     TextureCubeObject
 };
 
 constant(FramebufferStr, "Framebuffer")
+constant(RenderbufferStr, "Renderbuffer")
 constant(Texture2DStr, "Texture2D")
 constant(TextureCubeStr, "TextureCube")
 }

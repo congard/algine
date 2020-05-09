@@ -10,10 +10,12 @@ using namespace std;
 
 namespace algine {
 Framebuffer* Engine::m_defaultFramebuffer;
+Renderbuffer* Engine::m_defaultRenderbuffer;
 Texture2D* Engine::m_defaultTexture2D;
 TextureCube* Engine::m_defaultTextureCube;
 
 Framebuffer* Engine::m_boundFramebuffer;
+Renderbuffer* Engine::m_boundRenderbuffer;
 Texture2D* Engine::m_boundTexture2D;
 TextureCube* Engine::m_boundTextureCube;
 
@@ -32,17 +34,25 @@ void Engine::init() {
 
     m_defaultFramebuffer = (Framebuffer*) malloc(sizeof(Framebuffer));
     m_defaultFramebuffer->m_id = 0;
+
+    m_defaultRenderbuffer = (Renderbuffer*) malloc(sizeof(Renderbuffer));
+    m_defaultRenderbuffer->id = 0;
 }
 
 void Engine::destroy() {
     Texture2D::destroy(m_defaultTexture2D);
     TextureCube::destroy(m_defaultTextureCube);
     Framebuffer::destroy(m_defaultFramebuffer);
+    Renderbuffer::destroy(m_defaultRenderbuffer);
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS
 Framebuffer* Engine::getBoundFramebuffer() {
     return m_boundFramebuffer == nullptr ? m_defaultFramebuffer : m_boundFramebuffer;
+}
+
+Renderbuffer* Engine::getBoundRenderbuffer() {
+    return m_boundRenderbuffer == nullptr ? m_defaultRenderbuffer : m_boundRenderbuffer;
 }
 
 Texture2D* Engine::getBoundTexture2D() {
@@ -56,6 +66,7 @@ TextureCube* Engine::getBoundTextureCube() {
 #define retnull(type, name) type* Engine::name() { return nullptr; }
 
 retnull(Framebuffer, getBoundFramebuffer)
+retnull(Renderbuffer, getBoundRenderbuffer)
 retnull(Texture2D, getBoundTexture2D)
 retnull(TextureCube, getBoundTextureCube)
 #endif
@@ -76,6 +87,8 @@ void Engine::setBoundObject(uint type, const void *obj) {
         case SOPConstants::FramebufferObject:
             m_boundFramebuffer = (Framebuffer*) obj;
             break;
+        case SOPConstants::RenderbufferObject:
+            m_boundRenderbuffer = (Renderbuffer*) obj;
         case SOPConstants::Texture2DObject:
             m_boundTexture2D = (Texture2D*) obj;
             break;

@@ -7,6 +7,8 @@
 
 namespace algine {
 class Renderbuffer {
+    friend class Engine;
+
 public:
     Renderbuffer();
     ~Renderbuffer();
