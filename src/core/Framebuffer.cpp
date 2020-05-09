@@ -184,7 +184,7 @@ PixelData Framebuffer::getPixels2D(const uint mode, const uint x, const uint y,
     if (format == -1) {
         glBindTexture(GL_TEXTURE_2D, getAttachedTexId(mode));
         format = getTex2DParam(GL_TEXTURE_INTERNAL_FORMAT);
-        glBindTexture(GL_TEXTURE_2D, 0); // TODO: should be like Engine::defaultTexture2D->bind()
+        Engine::defaultTexture2D()->bind();
     }
 
     return algine::getPixels2D(mode, x, y, width, height, getTexFormatInfo(format));
@@ -200,7 +200,7 @@ PixelData Framebuffer::getAllPixels2D(const uint attachment, int format) {
         format = getTex2DParam(GL_TEXTURE_INTERNAL_FORMAT);
     width = getTex2DParam(GL_TEXTURE_WIDTH);
     height = getTex2DParam(GL_TEXTURE_HEIGHT);
-    glBindTexture(GL_TEXTURE_2D, 0); // TODO: should be like Engine::defaultTexture2D->bind()
+    Engine::defaultTexture2D()->bind();
 
     return algine::getPixels2D(attachment, 0, 0, width, height, getTexFormatInfo(format));
 }
@@ -221,7 +221,7 @@ PixelData Framebuffer::getAllPixelsCube(const uint face, const uint attachment, 
     pixelData.pixels = Array<float>(pixelData.width * pixelData.height * pixelData.componentsCount);
 
     glGetTexImage(face, 0, formatInfo.first, GL_FLOAT, pixelData.pixels.m_array);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0); // TODO: should be like Engine::defaultTextureCube->bind()
+    Engine::defaultTextureCube()->bind();
 
     return pixelData;
 }
