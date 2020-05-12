@@ -2,8 +2,8 @@
 #define ALGINE_SHADERPROGRAM_H
 
 #include <algine/types.h>
-#include <algine/core/ShadersInfo.h>
-#include <algine/core/Shader.h>
+#include <algine/core/shader/ShadersInfo.h>
+#include <algine/core/shader/Shader.h>
 
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>

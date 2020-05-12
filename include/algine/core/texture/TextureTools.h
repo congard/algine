@@ -1,7 +1,7 @@
 #ifndef ALGINE_TEXTURETOOLS_H
 #define ALGINE_TEXTURETOOLS_H
 
-#include <algine/texture/PixelData.h>
+#include <algine/core/texture/PixelData.h>
 #include <algine/types.h>
 
 #include <string>

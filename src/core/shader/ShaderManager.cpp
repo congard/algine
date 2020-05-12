@@ -1,6 +1,6 @@
-#include <algine/core/ShaderManager.h>
+#include <algine/core/shader/ShaderManager.h>
 
-#include <algine/core/Shader.h>
+#include <algine/core/shader/Shader.h>
 
 #include <tulz/Path>
 #include <tulz/File>

@@ -106,9 +106,9 @@ add_library(algine
         src/rotator.cpp include/algine/rotator.h
         src/debug.cpp include/algine/debug.h
         src/AMTLLoader.cpp include/algine/AMTLLoader.h
-        src/core/Buffer.cpp include/algine/core/Buffer.h
-        src/core/ArrayBuffer.cpp include/algine/core/ArrayBuffer.h
-        src/core/IndexBuffer.cpp include/algine/core/IndexBuffer.h
+        src/core/buffers/Buffer.cpp include/algine/core/buffers/Buffer.h
+        src/core/buffers/ArrayBuffer.cpp include/algine/core/buffers/ArrayBuffer.h
+        src/core/buffers/IndexBuffer.cpp include/algine/core/buffers/IndexBuffer.h
         src/core/InputLayout.cpp include/algine/core/InputLayout.h
         src/core/InputAttributeDescription.cpp include/algine/core/InputAttributeDescription.h
         src/CubeRenderer.cpp include/algine/CubeRenderer.h
@@ -121,12 +121,12 @@ add_library(algine
         src/lighting/DirLight.cpp include/algine/lighting/DirLight.h
         src/lighting/PointLamp.cpp include/algine/lighting/PointLamp.h
         src/lighting/DirLamp.cpp include/algine/lighting/DirLamp.h
-        include/algine/texture/PixelData.h
-        src/texture/Texture.cpp include/algine/texture/Texture.h
-        include/algine/texture/TextureCreateInfo.h
-        src/texture/Texture2D.cpp include/algine/texture/Texture2D.h
-        src/texture/TextureCube.cpp include/algine/texture/TextureCube.h
-        src/texture/TextureTools.cpp include/algine/texture/TextureTools.h
+        include/algine/core/texture/PixelData.h
+        src/core/texture/Texture.cpp include/algine/core/texture/Texture.h
+        include/algine/core/texture/TextureCreateInfo.h
+        src/core/texture/Texture2D.cpp include/algine/core/texture/Texture2D.h
+        src/core/texture/TextureCube.cpp include/algine/core/texture/TextureCube.h
+        src/core/texture/TextureTools.cpp include/algine/core/texture/TextureTools.h
         src/animation/VecAnimKey.cpp include/algine/animation/VecAnimKey.h
         src/animation/QuatAnimKey.cpp include/algine/animation/QuatAnimKey.h
         src/animation/AnimNode.cpp include/algine/animation/AnimNode.h
@@ -135,11 +135,11 @@ add_library(algine
         src/animation/Animator.cpp include/algine/animation/Animator.h
         src/animation/Bone.cpp include/algine/animation/Bone.h
         src/animation/BoneInfo.cpp include/algine/animation/BoneInfo.h
-        include/algine/core/ShadersInfo.h
-        src/core/ShaderTools.cpp include/algine/core/ShaderTools.h
-        src/core/Shader.cpp include/algine/core/Shader.h
-        src/core/ShaderManager.cpp include/algine/core/ShaderManager.h
-        src/core/ShaderProgram.cpp include/algine/core/ShaderProgram.h
+        include/algine/core/shader/ShadersInfo.h
+        src/core/shader/ShaderTools.cpp include/algine/core/shader/ShaderTools.h
+        src/core/shader/Shader.cpp include/algine/core/shader/Shader.h
+        src/core/shader/ShaderManager.cpp include/algine/core/shader/ShaderManager.h
+        src/core/shader/ShaderProgram.cpp include/algine/core/shader/ShaderProgram.h
         src/core/Engine.cpp include/algine/core/Engine.h
         src/core/SOP.h src/core/SOPConstants.h)
 

@@ -1,6 +1,6 @@
-#include <algine/core/Shader.h>
+#include <algine/core/shader/Shader.h>
 
-#include <algine/core/ShaderTools.h>
+#include <algine/core/shader/ShaderTools.h>
 
 #include <tulz/File>
 #include <GL/glew.h>

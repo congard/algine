@@ -1,10 +1,10 @@
 #ifndef ALGINE_BLUR_H
 #define ALGINE_BLUR_H
 
-#include <algine/texture/Texture2D.h>
+#include <algine/core/texture/Texture2D.h>
 #include <algine/core/Framebuffer.h>
+#include <algine/core/shader/ShaderProgram.h>
 #include <algine/QuadRenderer.h>
-#include <algine/core/ShaderProgram.h>
 
 namespace algine {
 class Blur {

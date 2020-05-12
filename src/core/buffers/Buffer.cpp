@@ -1,4 +1,4 @@
-#include <algine/core/Buffer.h>
+#include <algine/core/buffers/Buffer.h>
 
 namespace algine {
 

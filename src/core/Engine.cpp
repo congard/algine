@@ -1,8 +1,8 @@
 #include <algine/core/Engine.h>
 
 #include <algine/core/Framebuffer.h>
-#include <algine/texture/Texture2D.h>
-#include <algine/texture/TextureCube.h>
+#include <algine/core/texture/Texture2D.h>
+#include <algine/core/texture/TextureCube.h>
 
 #include <GL/glew.h>
 

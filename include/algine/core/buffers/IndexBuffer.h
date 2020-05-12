@@ -1,7 +1,7 @@
 #ifndef ALGINE_INDEXBUFFER_H
 #define ALGINE_INDEXBUFFER_H
 
-#include <algine/core/Buffer.h>
+#include <algine/core/buffers/Buffer.h>
 #include <algine/templates.h>
 
 namespace algine {

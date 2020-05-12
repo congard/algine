@@ -1,7 +1,7 @@
 #ifndef ALGINE_MODULE_H
 #define ALGINE_MODULE_H
 
-#include <algine/core/ShaderProgram.h>
+#include <algine/core/shader/ShaderProgram.h>
 #include <algine/types.h>
 #include <algine/lighting/Transmitter.h>
 

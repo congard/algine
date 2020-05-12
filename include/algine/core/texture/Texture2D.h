@@ -3,7 +3,7 @@
 
 #include <algine/templates.h>
 #include <algine/types.h>
-#include <algine/texture/Texture.h>
+#include <algine/core/texture/Texture.h>
 
 namespace algine {
 class Texture2D: public Texture {

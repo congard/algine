@@ -1,4 +1,4 @@
-#include <algine/texture/Texture.h>
+#include <algine/core/texture/Texture.h>
 
 #include <algine/core/Engine.h>
 
@@ -7,13 +7,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-#include "../core/SOP.h"
+#include "../SOP.h"
 
 using namespace algine;
 using namespace std;
 
 #ifdef ALGINE_SECURE_OPERATIONS
-#include "../core/SOPConstants.h"
+#include "../SOPConstants.h"
 #define SOP_BOUND_PTR getBoundTexture(target)
 #define SOP_OBJECT_TYPE getTextureObject(target)
 #define SOP_OBJECT_ID id

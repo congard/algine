@@ -1,24 +1,24 @@
-#include <algine/texture/TextureCube.h>
+#include <algine/core/texture/Texture2D.h>
 
 #include <algine/core/Engine.h>
 
 #include <map>
 
-#define SOP_BOUND_PTR Engine::getBoundTextureCube()
-#define SOP_OBJECT_TYPE SOPConstants::TextureCubeObject
+#define SOP_BOUND_PTR Engine::getBoundTexture2D()
+#define SOP_OBJECT_TYPE SOPConstants::Texture2DObject
 #define SOP_OBJECT_ID id
-#define SOP_OBJECT_NAME SOPConstants::TextureCubeStr
-#include "../core/SOP.h"
-#include "../core/SOPConstants.h"
+#define SOP_OBJECT_NAME SOPConstants::Texture2DStr
+#include "../SOP.h"
+#include "../SOPConstants.h"
 
 using namespace std;
 
 namespace algine {
-TextureCube::TextureCube(): Texture(GL_TEXTURE_CUBE_MAP) {}
+Texture2D::Texture2D(): Texture(GL_TEXTURE_2D) {}
 
-void TextureCube::fromFile(const std::string &path, uint face, uint dataType, bool flipImage) {
+void Texture2D::fromFile(const std::string &path, const uint dataType, const bool flipImage) {
     checkBinding()
-    texFromFile(path, face, dataType, flipImage);
+    texFromFile(path, GL_TEXTURE_2D, dataType, flipImage);
 }
 
 // GL_INVALID_OPERATION is generated if internalformat is GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16,
@@ -29,22 +29,25 @@ uint dataFormat = Red; \
 if (format == DepthComponent) \
     dataFormat = DepthComponent;
 
-void TextureCube::update() {
+void Texture2D::update() {
     // last 3 params never used, but must be correct:
     // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
     checkBinding()
     _findCorrectDataFormat
-    for (uint i = 0; i < 6; ++i)
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, lod, format, width, height, 0, dataFormat, GL_BYTE, nullptr);
+    glTexImage2D(target, lod, format, width, height, 0, dataFormat, GL_BYTE, nullptr);
 }
 
-map<uint, uint> TextureCube::defaultParams() {
+void Texture2D::update(const uint dataFormat, const uint dataType, const void *const data) {
+    checkBinding()
+    glTexImage2D(target, lod, format, width, height, 0, dataFormat, dataType, data);
+}
+
+map<uint, uint> Texture2D::defaultParams() {
     return map<uint, uint> {
         pair<uint, uint> {MinFilter, Linear},
         pair<uint, uint> {MagFilter, Linear},
         pair<uint, uint> {WrapU, ClampToEdge},
-        pair<uint, uint> {WrapV, ClampToEdge},
-        pair<uint, uint> {WrapW, ClampToEdge}
+        pair<uint, uint> {WrapV, ClampToEdge}
     };
 }
 }

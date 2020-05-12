@@ -1,4 +1,4 @@
-#include <algine/texture/TextureTools.h>
+#include <algine/core/texture/TextureTools.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb/stb_image_write.h>

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <memory>
-#include <algine/texture/Texture2D.h>
+#include <algine/core/texture/Texture2D.h>
 
 namespace algine {
 struct Material {

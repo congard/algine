@@ -1,7 +1,7 @@
 #ifndef ALGINE_SHADERMANAGER_H
 #define ALGINE_SHADERMANAGER_H
 
-#include <algine/core/ShadersInfo.h>
+#include <algine/core/shader/ShadersInfo.h>
 
 #include <vector>
 

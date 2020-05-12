@@ -5,7 +5,7 @@
 #include <map>
 
 #include <algine/types.h>
-#include <algine/texture/TextureCreateInfo.h>
+#include <algine/core/texture/TextureCreateInfo.h>
 
 namespace algine {
 class Texture {

@@ -5,8 +5,8 @@
 #include <algine/material.h>
 #include <algine/AMTLLoader.h>
 #include <algine/object3d.h>
-#include <algine/core/ArrayBuffer.h>
-#include <algine/core/IndexBuffer.h>
+#include <algine/core/buffers/ArrayBuffer.h>
+#include <algine/core/buffers/IndexBuffer.h>
 #include <algine/core/InputLayout.h>
 #include <algine/animation/Animator.h>
 #include <algine/animation/Bone.h>

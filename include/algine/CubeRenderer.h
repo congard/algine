@@ -2,7 +2,7 @@
 #define ALGINE_CUBERENDERER_H
 
 #include <algine/core/InputLayout.h>
-#include <algine/core/ArrayBuffer.h>
+#include <algine/core/buffers/ArrayBuffer.h>
 #include <tulz/macros.h>
 
 namespace algine {

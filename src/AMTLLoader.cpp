@@ -1,5 +1,5 @@
 #include <algine/AMTLLoader.h>
-#include <algine/texture/Texture.h>
+#include <algine/core/texture/Texture.h>
 #include <algine/constants/AMTL.h>
 
 #include <nlohmann/json.hpp>
