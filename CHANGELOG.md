@@ -1,10 +1,10 @@
 # Algine changelog
 
-## 1.0 alpha:
+## 1.0 alpha
 
 1.  Project created
 
-## 1.1 alpha:
+## 1.1 alpha
 
 1.  Added Depth of field support
 2.  Added large models support
@@ -14,7 +14,7 @@
 6.  Added support for arguments to the compilation-run script (`make.sh`)
 7.  Fixed `recycle()` in `advanced_rendering.cpp`: added removal of `quadBuffers`
 
-## 1.2 alpha:
+## 1.2 alpha
 
 1.  Optimization
 2.  Added ability to manage effects (bloom, dof etc) (enable and disable, you must perform before compiling shaders; all effects are activated by default)
@@ -26,7 +26,7 @@
 8.  Added FPS meter in the sample scene
 9.  Other improvements and fixes
 
-## 1.3 beta-candidate:
+## 1.3 beta-candidate
 
 1.  Optimization;
 2.  Completely changed the architecture of the engine. Now everything is divided into separate modules;
@@ -56,7 +56,7 @@
 
 **If this new architecture is approved, then the process of creating documentation will begin, and the engine will move to the beta stage.**
 
-## 1.4 beta-candidate:
+## 1.4 beta-candidate
 
 1.  Algine now uses the [Assimp](https://github.com/assimp/assimp) - Open Asset Import Library. It can load 40+ model formats;
 2.  Added support for materials. In addition to those that come with the model itself, which Assimp loads, additional materials have been added - AMTL - Algine Material Library. Which can be used simultaneously with the standard ones, but AMTL has a higher priority. AMTL is used to transfer parameters that are not usually provided by standard materials, such as `{ambient, diffuse, specular}Strength`, ` reflectionStrengthMap`, `jitterMap`; AMTL is a simple JSON array, which consists of JSON objects. Note that the AMTL name of the material must match the model name: `model.obj => model.amtl`;
@@ -79,19 +79,19 @@
 19. New example scene;
 20. Minor fixes, other changes and improvements.
 
-## 1.4.1 beta-candidate:
+## 1.4.1 beta-candidate
 
 1.  Fixed: shadow mapping not working on some GPUs (tested on Intel HD Graphics 520)
 2.  Fixed: flickering on some GPUs (tested on Intel HD Graphics 520)
 3.  Created `make.bat` and `run.bat` files for Windows, written instructions for compiling on Windows
 
-## 1.4.2 beta-candidate:
+## 1.4.2 beta-candidate
 
 1.  Fixed: black screen when shadow mapping enabled on AMD GPUs
 2.  Fixed: make.sh not working on old debian systems
 3.  Now shadow mapping by default without PCF
 
-## 1.5 alpha:
+## 1.5 alpha
 
 1.  `Mesh::genBuffers` segmentation fault fix (if gen without normals/texCoords/etc)
 2.  Removed src/utils dir. `math.cpp` replaced to src
@@ -109,7 +109,7 @@
     <br>`node.cpp`: node structures (only `Node`)
 12. Minor fixes, other changes and improvements.
 
-## 1.6 alpha:
+## 1.6 alpha
 
 1.  Created headers for all source files
 2.  Now using CMake. Supports Linux and MinGW-w64
