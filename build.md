@@ -2,7 +2,7 @@
 The engine is currently tested on Linux with gcc 9.1.0-2 and Windows 10 with MinGW (gcc 8.1.0 x86_64-posix-seh-rev0, Built by MinGW-W64 project)
 <br>Note: only the GNU compiler is recommended. Using MSVC you will not able to compile a project.
 
-# Building on Linux systems
+## Building on Linux systems
 1. The engine has next dependencies: `glew`, `glfw`, `assimp` which must be installed in the system.
    * Installation on Debian-based systems:
      <br>`sudo apt install libglew-dev libglfw3-dev`
@@ -18,7 +18,7 @@ The engine is currently tested on Linux with gcc 9.1.0-2 and Windows 10 with Min
    <br>This script MUST be launched directly from `contrib` folder!
 3. Now you able to build engine via CMake
 
-# Building on Windows
+## Building on Windows
 1. First, you must download and install [MinGW-w64](https://sourceforge.net/projects/mingw-w64/). This is required for compilation. Also you need to install [CMake](https://cmake.org/download/);
 2. After successful installation, you need to add the `bin` folder to your `PATH`.
    For example, if you installed MinGW in `C:\mingw-w64`, then the path to the `bin` folder will look like this: `C:\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin`.

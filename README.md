@@ -1,5 +1,5 @@
 # Algine
-Algine [Al'gine] - OpenGL 3.3+ engine written in C++
+Algine - OpenGL 3.3+ engine written in C++
 
 Version: 1.6 alpha
 <br>Note: at the moment, new versions are released only for updating changelog
@@ -14,24 +14,24 @@ Click on picture to watch video
 [![Algine v1.6 alpha](pictures/1.png)](https://youtu.be/pYUXtRl-LTs)
 
 ## Functionality
- * Textures
- * Mapping (ambient, diffuse, specular, normal)
- * Lighting (with a huge number of properties)
- * Colorful lighting
- * Unlimited count of light sources
- * Shadow mapping
- * Soft shadows
- * Directional lighting (shadow mapping)
- * Point lighting
- * Bloom
- * Depth of field (DOF)
- * SSR (Screen Space Reflections)
- * Cinematic Depth of field
- * Support of 40+ 3D model formats (thanks to [Assimp](https://github.com/assimp/assimp))
- * Support of materials
- * Skeletal animations / bone system. Limitations on the *number of bones* / *number of bones per vertex* are **hardware only**.
- * Effect management
- * Etc.
+* Textures
+* Mapping (ambient, diffuse, specular, normal)
+* Lighting (with a huge number of properties)
+* Colorful lighting
+* Unlimited count of light sources
+* Shadow mapping
+* Soft shadows
+* Directional lighting (shadow mapping)
+* Point lighting
+* Bloom
+* Depth of field (DOF)
+* SSR (Screen Space Reflections)
+* Cinematic Depth of field
+* Support of 40+ 3D model formats (thanks to [Assimp](https://github.com/assimp/assimp))
+* Support of materials
+* Skeletal animations / bone system. Limitations on the *number of bones* / *number of bones per vertex* are **hardware only**.
+* Effect management
+* Etc.
 
 Take into account, this is a test (alpha) version! All major functions will be added in later versions.
 
@@ -43,8 +43,8 @@ About building on Linux and Windows you can read [here](build.md)
 
 ## Contact
 You can contact me via telegram or email:
- * Telegram: [congard](https://t.me/congard)
- * Email: [dbcongard@gmail.com](mailto:dbcongard@gmail.com)
+* Telegram: [congard](https://t.me/congard)
+* Email: [dbcongard@gmail.com](mailto:dbcongard@gmail.com)
 
 ## You can support me financially
 <b>Payeer:</b> P36281059
