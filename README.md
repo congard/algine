@@ -12,6 +12,7 @@ Engine tested on Asus x302uv (Intel Core I5-6200U, Nvidia GeForce 920mx, 8GB RAM
 If you find any errors or you have recommendations for improving the project - a big one please let me know!
 
 Click on picture to watch video
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9b2afa964c5446729b80c14eb7dfe4a9)](https://app.codacy.com/manual/congard/algine?utm_source=github.com&utm_medium=referral&utm_content=congard/algine&utm_campaign=Badge_Grade_Dashboard)
 [![Algine v1.6 alpha](pictures/1.png)](https://youtu.be/pYUXtRl-LTs)
 
 ## Functionality
