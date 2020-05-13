@@ -2,6 +2,8 @@
 
 Algine - OpenGL 3.3+ engine written in C++
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/40d3479da92040c79c5570336aff3697)](https://www.codacy.com/manual/congard/algine?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=congard/algine&amp;utm_campaign=Badge_Grade)
+
 Version: 1.6 alpha
 <br>Note: at the moment, new versions are released only for updating changelog
 
