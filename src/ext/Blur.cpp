@@ -1,6 +1,6 @@
 #include <algine/ext/Blur.h>
 #include <algine/ext/constants/BlurShader.h>
-#include <algine/math.h>
+#include <algine/std/math.h>
 
 namespace algine {
 Blur::Blur(const TextureCreateInfo &textureCreateInfo) {

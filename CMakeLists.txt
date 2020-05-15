@@ -94,54 +94,57 @@ add_library(algine
         include/algine/ext/constants/BloomSearchShader.h
         include/algine/ext/constants/COCShader.h
         include/algine/ext/constants/BlendDOF.h
+        include/algine/core/texture/PixelData.h
+        include/algine/core/texture/TextureCreateInfo.h
+        include/algine/core/shader/ShadersInfo.h
+
         src/core/Framebuffer.cpp include/algine/core/Framebuffer.h
-        src/material.cpp include/algine/material.h
-        src/math.cpp include/algine/math.h
-        src/model.cpp include/algine/model.h
-        src/node.cpp include/algine/node.h
         src/core/Renderbuffer.cpp include/algine/core/Renderbuffer.h
-        src/camera.cpp include/algine/camera.h
-        src/event.cpp include/algine/event.h
-        src/object3d.cpp include/algine/object3d.h
-        src/rotator.cpp include/algine/rotator.h
-        src/debug.cpp include/algine/debug.h
-        src/AMTLLoader.cpp include/algine/AMTLLoader.h
         src/core/buffers/Buffer.cpp include/algine/core/buffers/Buffer.h
         src/core/buffers/ArrayBuffer.cpp include/algine/core/buffers/ArrayBuffer.h
         src/core/buffers/IndexBuffer.cpp include/algine/core/buffers/IndexBuffer.h
         src/core/InputLayout.cpp include/algine/core/InputLayout.h
         src/core/InputAttributeDescription.cpp include/algine/core/InputAttributeDescription.h
-        src/CubeRenderer.cpp include/algine/CubeRenderer.h
-        src/QuadRenderer.cpp include/algine/QuadRenderer.h
-        src/ext/Blur.cpp include/algine/ext/Blur.h
-        src/lighting/Manager.cpp include/algine/lighting/Manager.h
-        src/lighting/Transmitter.cpp include/algine/lighting/Transmitter.h
-        src/lighting/Light.cpp include/algine/lighting/Light.h
-        src/lighting/PointLight.cpp include/algine/lighting/PointLight.h
-        src/lighting/DirLight.cpp include/algine/lighting/DirLight.h
-        src/lighting/PointLamp.cpp include/algine/lighting/PointLamp.h
-        src/lighting/DirLamp.cpp include/algine/lighting/DirLamp.h
-        include/algine/core/texture/PixelData.h
         src/core/texture/Texture.cpp include/algine/core/texture/Texture.h
-        include/algine/core/texture/TextureCreateInfo.h
         src/core/texture/Texture2D.cpp include/algine/core/texture/Texture2D.h
         src/core/texture/TextureCube.cpp include/algine/core/texture/TextureCube.h
         src/core/texture/TextureTools.cpp include/algine/core/texture/TextureTools.h
-        src/animation/VecAnimKey.cpp include/algine/animation/VecAnimKey.h
-        src/animation/QuatAnimKey.cpp include/algine/animation/QuatAnimKey.h
-        src/animation/AnimNode.cpp include/algine/animation/AnimNode.h
-        src/animation/Animation.cpp include/algine/animation/Animation.h
-        src/animation/AnimShape.cpp include/algine/animation/AnimShape.h
-        src/animation/Animator.cpp include/algine/animation/Animator.h
-        src/animation/Bone.cpp include/algine/animation/Bone.h
-        src/animation/BoneInfo.cpp include/algine/animation/BoneInfo.h
-        include/algine/core/shader/ShadersInfo.h
         src/core/shader/ShaderTools.cpp include/algine/core/shader/ShaderTools.h
         src/core/shader/Shader.cpp include/algine/core/shader/Shader.h
         src/core/shader/ShaderManager.cpp include/algine/core/shader/ShaderManager.h
         src/core/shader/ShaderProgram.cpp include/algine/core/shader/ShaderProgram.h
         src/core/Engine.cpp include/algine/core/Engine.h
-        src/core/SOP.h src/core/SOPConstants.h)
+        src/core/SOP.h src/core/SOPConstants.h
+
+        src/std/material.cpp include/algine/std/material.h
+        src/std/math.cpp include/algine/std/math.h
+        src/std/model.cpp include/algine/std/model.h
+        src/std/node.cpp include/algine/std/node.h
+        src/std/camera.cpp include/algine/std/camera.h
+        src/std/object3d.cpp include/algine/std/object3d.h
+        src/std/rotator.cpp include/algine/std/rotator.h
+        src/std/AMTLLoader.cpp include/algine/std/AMTLLoader.h
+        src/std/lighting/Manager.cpp include/algine/std/lighting/Manager.h
+        src/std/lighting/Transmitter.cpp include/algine/std/lighting/Transmitter.h
+        src/std/lighting/Light.cpp include/algine/std/lighting/Light.h
+        src/std/lighting/PointLight.cpp include/algine/std/lighting/PointLight.h
+        src/std/lighting/DirLight.cpp include/algine/std/lighting/DirLight.h
+        src/std/lighting/PointLamp.cpp include/algine/std/lighting/PointLamp.h
+        src/std/lighting/DirLamp.cpp include/algine/std/lighting/DirLamp.h
+        src/std/animation/VecAnimKey.cpp include/algine/std/animation/VecAnimKey.h
+        src/std/animation/QuatAnimKey.cpp include/algine/std/animation/QuatAnimKey.h
+        src/std/animation/AnimNode.cpp include/algine/std/animation/AnimNode.h
+        src/std/animation/Animation.cpp include/algine/std/animation/Animation.h
+        src/std/animation/AnimShape.cpp include/algine/std/animation/AnimShape.h
+        src/std/animation/Animator.cpp include/algine/std/animation/Animator.h
+        src/std/animation/Bone.cpp include/algine/std/animation/Bone.h
+        src/std/animation/BoneInfo.cpp include/algine/std/animation/BoneInfo.h
+        src/std/CubeRenderer.cpp include/algine/std/CubeRenderer.h
+        src/std/QuadRenderer.cpp include/algine/std/QuadRenderer.h
+
+        src/ext/Blur.cpp include/algine/ext/Blur.h
+        src/ext/event.cpp include/algine/ext/event.h
+        src/ext/debug.cpp include/algine/ext/debug.h)
 
 # linking
 if (WIN32)
