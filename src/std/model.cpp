@@ -13,6 +13,8 @@
 #include <algine/std/animation/BoneInfo.h>
 #include <tulz/Path>
 
+#include "assimp2glm.h"
+
 using namespace tulz;
 using namespace std;
 

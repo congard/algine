@@ -2,6 +2,8 @@
 
 #include <assimp/scene.h>
 
+#include "assimp2glm.h"
+
 namespace algine {
 Node::Node() = default;
 
