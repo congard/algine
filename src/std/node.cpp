@@ -1,5 +1,4 @@
 #include <algine/std/node.h>
-#include <algine/types.h>
 
 #include <assimp/scene.h>
 
@@ -9,20 +8,20 @@ Node::Node() = default;
 Node::Node(const aiNode *node) {
     name = node->mName.data;
     defaultTransform = getMat4(node->mTransformation);
+
     childs.reserve(node->mNumChildren); // allocating memory
     for (size_t i = 0; i < node->mNumChildren; i++)
         childs.emplace_back(node->mChildren[i]);
 }
 
-Node* Node::getNode(const std::string &name) {
-    for (usize i = 0; i < childs.size(); i++) {
-        if (childs[i].name == name)
-            return &childs[i];
+Node* Node::getNode(const std::string &nodeName) {
+    for (auto &child : childs) {
+        if (child.name == nodeName)
+            return &child;
     }
 
-    Node *node;
-    for (usize i = 0; i < childs.size(); i++) {
-        node = childs[i].getNode(name);
+    for (auto &child : childs) {
+        Node *node = child.getNode(nodeName);
         if (node != nullptr)
             return node;
     }

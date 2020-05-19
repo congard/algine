@@ -11,14 +11,15 @@ class aiNode;
 namespace algine {
 class Node {
 public:
+    Node();
+    explicit Node(const aiNode *node);
+
+    Node* getNode(const std::string &nodeName);
+
+public:
     std::string name;
     std::vector<Node> childs;
-    glm::mat4 defaultTransform, transformation = glm::mat4(1.0f);
-
-    Node();
-    Node(const aiNode *node);
-
-    Node* getNode(const std::string &name);
+    glm::mat4 defaultTransform = glm::mat4(1.0f), transformation = glm::mat4(1.0f);
 };
 
 } /* namespace algine */
