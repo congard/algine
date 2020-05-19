@@ -6,7 +6,7 @@
  * @author congard
  */
 #include <tgmath.h>
-#include <algine/std/math.h>
+#include <algine/std/MathTools.h>
 
 namespace algine {
 /**

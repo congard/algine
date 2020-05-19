@@ -1,5 +1,5 @@
-#ifndef ALGINE_MATH_H
-#define ALGINE_MATH_H
+#ifndef ALGINE_MATHTOOLS_H
+#define ALGINE_MATHTOOLS_H
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
