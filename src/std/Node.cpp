@@ -1,4 +1,4 @@
-#include <algine/std/node.h>
+#include <algine/std/Node.h>
 
 #include <assimp/scene.h>
 

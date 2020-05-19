@@ -3,7 +3,7 @@
 
 #include <algine/std/animation/Animation.h>
 #include <algine/std/animation/Bone.h>
-#include <algine/std/node.h>
+#include <algine/std/Node.h>
 
 namespace algine {
 class AnimShape {

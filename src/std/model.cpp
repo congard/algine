@@ -9,7 +9,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <algine/std/node.h>
+#include <algine/std/Node.h>
 #include <algine/std/animation/BoneInfo.h>
 #include <tulz/Path>
 

@@ -119,7 +119,7 @@ add_library(algine
         src/std/material.cpp include/algine/std/material.h
         src/std/math.cpp include/algine/std/math.h
         src/std/model.cpp include/algine/std/model.h
-        src/std/node.cpp include/algine/std/node.h
+        src/std/Node.cpp include/algine/std/Node.h
         src/std/camera.cpp include/algine/std/camera.h
         src/std/object3d.cpp include/algine/std/object3d.h
         src/std/rotator.cpp include/algine/std/rotator.h
