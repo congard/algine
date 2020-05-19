@@ -116,7 +116,7 @@ add_library(algine
         src/core/Engine.cpp include/algine/core/Engine.h
         src/core/SOP.h src/core/SOPConstants.h
 
-        src/std/material.cpp include/algine/std/material.h
+        include/algine/std/Material.h
         src/std/MathTools.cpp include/algine/std/MathTools.h
         src/std/model.cpp include/algine/std/model.h
         src/std/Node.cpp include/algine/std/Node.h

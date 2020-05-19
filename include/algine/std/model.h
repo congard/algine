@@ -2,7 +2,7 @@
 #define ALGINE_MODEL_H
 
 #include <algine/types.h>
-#include <algine/std/material.h>
+#include <algine/std/Material.h>
 #include <algine/std/AMTLLoader.h>
 #include <algine/std/object3d.h>
 #include <algine/std/animation/Animator.h>
