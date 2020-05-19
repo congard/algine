@@ -25,7 +25,7 @@ Blur::~Blur() {
 void Blur::configureKernel(const uint radius, const float sigma) {
     uint kernelSize = radius * 2 - 1;
     float kernel[kernelSize];
-    getGB1DKernel(kernel, kernelSize, sigma);
+    MathTools::getBlurKernel(kernel, kernelSize, sigma);
 
     // sending to shader center of kernel and right part
     for (auto & pingpongShader : pingpongShaders) {

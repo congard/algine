@@ -144,7 +144,7 @@ add_library(algine
 
         src/ext/Blur.cpp include/algine/ext/Blur.h
         src/ext/event.cpp include/algine/ext/event.h
-        src/ext/debug.cpp include/algine/ext/debug.h)
+        src/ext/debug.cpp include/algine/ext/debug.h src/std/assimp2glm.h)
 
 # linking
 if (WIN32)
