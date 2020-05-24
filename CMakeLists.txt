@@ -117,10 +117,10 @@ add_library(algine
         src/core/SOP.h src/core/SOPConstants.h
 
         include/algine/std/Material.h
+        src/std/assimp2glm.h
         src/std/MathTools.cpp include/algine/std/MathTools.h
         src/std/model.cpp include/algine/std/model.h
         src/std/Node.cpp include/algine/std/Node.h
-        src/std/camera.cpp include/algine/std/camera.h
         src/std/object3d.cpp include/algine/std/object3d.h
         src/std/rotator.cpp include/algine/std/rotator.h
         src/std/AMTLLoader.cpp include/algine/std/AMTLLoader.h
@@ -139,12 +139,16 @@ add_library(algine
         src/std/animation/Animator.cpp include/algine/std/animation/Animator.h
         src/std/animation/Bone.cpp include/algine/std/animation/Bone.h
         src/std/animation/BoneInfo.cpp include/algine/std/animation/BoneInfo.h
+        src/std/camera/Camera.cpp include/algine/std/camera/Camera.h
+        src/std/camera/BaseCameraController.cpp include/algine/std/camera/BaseCameraController.h
+        src/std/camera/FreeCameraController.cpp include/algine/std/camera/FreeCameraController.h
+        src/std/camera/FPSCameraController.cpp include/algine/std/camera/FPSCameraController.h
         src/std/CubeRenderer.cpp include/algine/std/CubeRenderer.h
         src/std/QuadRenderer.cpp include/algine/std/QuadRenderer.h
 
         src/ext/Blur.cpp include/algine/ext/Blur.h
         src/ext/event.cpp include/algine/ext/event.h
-        src/ext/debug.cpp include/algine/ext/debug.h src/std/assimp2glm.h)
+        src/ext/debug.cpp include/algine/ext/debug.h)
 
 # linking
 if (WIN32)

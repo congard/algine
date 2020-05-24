@@ -1,10 +1,8 @@
 #ifndef ALGINE_CAMERA_H
 #define ALGINE_CAMERA_H
 
-#include <glm/mat4x4.hpp>
-#include <glm/vec3.hpp>
-#include <glm/gtc/quaternion.hpp>
 #include <algine/std/object3d.h>
+#include <glm/mat4x4.hpp>
 
 namespace algine {
 class Camera: public rotatable, public translatable, public scalable {
@@ -33,33 +31,6 @@ public:
           m_near = 1.0f,
           m_far = 32.0f;
 };
-
-class BaseCameraController {
-public:
-    Camera *camera;
-    float sensitivityPitch = 0.0025f, sensitivityYaw = 0.0025f, sensitivityRoll = 0.0025f;
-    float speedf = 1.0f, speedb = 1.0f, speedr = 1.0f, speedl = 1.0f;
-    
-    void setMousePos(float x, float y, float z = 0);
-    void mouseMove(float x, float y, float z = 0);
-    void goForward();
-    void goBack();
-    void goRight();
-    void goLeft();
-
-protected:
-    glm::vec3 lastMousePos = glm::vec3(0.0f);
-};
-
-class FreeCameraController : public BaseCameraController {
-public:
-    void mouseMove(float x, float y, float z = 0);
-};
-
-class FPSCameraController : public BaseCameraController {
-public:
-    void mouseMove(float x, float y, float z = 0);
-};
 }
 
-#endif // ALGINE_CAMERA_H
+#endif //ALGINE_CAMERA_H
