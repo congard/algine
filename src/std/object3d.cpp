@@ -1,6 +1,8 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <algine/std/object3d.h>
+
+#include <glm/gtc/matrix_transform.hpp>
 #include <tulz/macros.h>
 #include <algorithm>
 

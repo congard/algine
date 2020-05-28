@@ -1,11 +1,12 @@
 #ifndef ALGINE_TEXTURE_H
 #define ALGINE_TEXTURE_H
 
-#include <GL/glew.h>
-#include <map>
-
 #include <algine/types.h>
 #include <algine/core/texture/TextureCreateInfo.h>
+
+#include <GL/glew.h>
+#include <map>
+#include <string>
 
 namespace algine {
 class Texture {

@@ -1,7 +1,7 @@
 #ifndef ALGINE_OBJECT3D_H
 #define ALGINE_OBJECT3D_H
 
-#include <algine/std/rotator.h>
+#include <algine/std/rotator/Rotator.h>
 #include <algine/types.h>
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>

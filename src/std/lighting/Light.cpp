@@ -2,6 +2,8 @@
 
 #include <algine/std/lighting/Light.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace algine {
 namespace Lighting {
 Light::~Light() {

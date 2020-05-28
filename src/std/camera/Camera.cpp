@@ -1,6 +1,8 @@
 #define GLM_FORCE_CTOR_INIT
 #include <algine/std/camera/Camera.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace algine {
 Camera::Camera(const uint rotatorType): rotatable(rotatorType) {
     /* empty */

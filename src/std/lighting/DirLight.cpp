@@ -1,6 +1,8 @@
 #define GLM_FORCE_CTOR_INIT
 
 #include <algine/std/lighting/DirLight.h>
+
+#include <glm/gtc/matrix_transform.hpp>
 #include <map>
 
 using namespace std;
