@@ -2,7 +2,6 @@
 #define ALGINE_ROTATOR_H
 
 #include <glm/mat4x4.hpp>
-#include <glm/gtc/quaternion.hpp>
 #include <algine/types.h>
 
 namespace algine {
@@ -13,9 +12,6 @@ public:
         RotatorTypeEuler,
         RotatorTypeFree
     };
-
-    float pitch = 0, yaw = 0, roll = 0;
-    uint type = RotatorTypeSimple;
 
     virtual ~Rotator() = default; // to hide -Wdelete-non-virtual-dtor
 
@@ -29,23 +25,11 @@ public:
     float getRoll();
 
     static Rotator* create(uint type);
-};
 
-class EulerRotator: public Rotator {
 public:
-    EulerRotator();
-
-    void rotate(glm::mat4 &matrix) override;
-};
-
-class FreeRotator: public Rotator {
-public:
-    glm::quat qRotation;
-
-    FreeRotator();
-
-    void rotate(glm::mat4 &matrix) override;
+    float pitch = 0, yaw = 0, roll = 0;
+    uint type = RotatorTypeSimple;
 };
 }
 
-#endif // ALGINE_ROTATOR_H
+#endif //ALGINE_ROTATOR_H

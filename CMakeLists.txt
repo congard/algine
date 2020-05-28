@@ -122,7 +122,6 @@ add_library(algine
         src/std/model.cpp include/algine/std/model.h
         src/std/Node.cpp include/algine/std/Node.h
         src/std/object3d.cpp include/algine/std/object3d.h
-        src/std/rotator.cpp include/algine/std/rotator.h
         src/std/AMTLLoader.cpp include/algine/std/AMTLLoader.h
         src/std/lighting/Manager.cpp include/algine/std/lighting/Manager.h
         src/std/lighting/Transmitter.cpp include/algine/std/lighting/Transmitter.h
@@ -143,6 +142,9 @@ add_library(algine
         src/std/camera/BaseCameraController.cpp include/algine/std/camera/BaseCameraController.h
         src/std/camera/FreeCameraController.cpp include/algine/std/camera/FreeCameraController.h
         src/std/camera/FPSCameraController.cpp include/algine/std/camera/FPSCameraController.h
+        src/std/rotator/Rotator.cpp include/algine/std/rotator/Rotator.h
+        src/std/rotator/EulerRotator.cpp include/algine/std/rotator/EulerRotator.h
+        src/std/rotator/FreeRotator.cpp include/algine/std/rotator/FreeRotator.h
         src/std/CubeRenderer.cpp include/algine/std/CubeRenderer.h
         src/std/QuadRenderer.cpp include/algine/std/QuadRenderer.h
 
