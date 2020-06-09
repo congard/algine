@@ -89,7 +89,7 @@ void Shape::recycle() {
     delBuffers();
 }
 
-Model::Model(const uint rotatorType): rotatable(rotatorType) {
+Model::Model(const uint rotatorType): Rotatable(rotatorType) {
     /* empty */
 }
 

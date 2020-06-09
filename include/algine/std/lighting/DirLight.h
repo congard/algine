@@ -2,10 +2,11 @@
 #define ALGINE_DIRLIGHT_H
 
 #include <algine/std/lighting/Light.h>
+#include <algine/std/Rotatable.h>
 
 namespace algine {
 namespace Lighting {
-class DirLight: public Light, public rotatable {
+class DirLight: public Light, public Rotatable {
 public:
     explicit DirLight(uint rotatorType = Rotator::RotatorTypeSimple);
     ~DirLight();
@@ -13,7 +14,7 @@ public:
     void orthoShadows(float left, float right, float bottom, float top, float near = 1.0f, float far = 32.0f);
     void perspectiveShadows(float fovy, float aspect, float near = 1.0f, float far = 32.0f);
 
-    void initShadows(uint shadowMapWidth = 512, uint shadowMapHeight = 512) override;
+    void initShadows(uint shadowMapWidth, uint shadowMapHeight) override;
 
     /// updates light space matrix
     void updateMatrix() override;

@@ -4,9 +4,11 @@
 #include <algine/types.h>
 #include <algine/std/Material.h>
 #include <algine/std/AMTLLoader.h>
-#include <algine/std/object3d.h>
 #include <algine/std/animation/Animator.h>
 #include <algine/std/animation/Bone.h>
+#include <algine/std/Translatable.h>
+#include <algine/std/Scalable.h>
+#include <algine/std/Rotatable.h>
 #include <algine/core/buffers/ArrayBuffer.h>
 #include <algine/core/buffers/IndexBuffer.h>
 #include <algine/core/InputLayout.h>
@@ -62,7 +64,7 @@ public:
 };
 
 // `Model` is a container for `Shape`, that have own `Animator` and transformations
-class Model: public rotatable, public translatable, public scalable {
+class Model: public Rotatable, public Translatable, public Scalable {
 public:
     explicit Model(uint rotatorType = Rotator::RotatorTypeSimple);
 

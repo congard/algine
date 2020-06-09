@@ -9,7 +9,7 @@ using namespace std;
 
 namespace algine {
 namespace Lighting {
-DirLight::DirLight(const uint rotatorType): rotatable(rotatorType) {
+DirLight::DirLight(const uint rotatorType): Rotatable(rotatorType) {
     type = TypeDirLight;
 }
 

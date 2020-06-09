@@ -1,11 +1,13 @@
 #ifndef ALGINE_CAMERA_H
 #define ALGINE_CAMERA_H
 
-#include <algine/std/object3d.h>
+#include <algine/std/Rotatable.h>
+#include <algine/std/Translatable.h>
+#include <algine/std/Scalable.h>
 #include <glm/mat4x4.hpp>
 
 namespace algine {
-class Camera: public rotatable, public translatable, public scalable {
+class Camera: public Rotatable, public Translatable, public Scalable {
 public:
     explicit Camera(uint rotatorType = Rotator::RotatorTypeEuler);
 

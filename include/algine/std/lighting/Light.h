@@ -3,11 +3,11 @@
 
 #include <algine/types.h>
 #include <algine/core/Framebuffer.h>
-#include <algine/std/object3d.h>
+#include <algine/std/Translatable.h>
 
 namespace algine {
 namespace Lighting {
-class Light: public translatable {
+class Light: public Translatable {
 public:
     enum {
         TypeDirLight,
@@ -18,7 +18,7 @@ public:
 
     void translate() override;
 
-    virtual void initShadows(uint shadowMapWidth = 512, uint shadowMapHeight = 512) = 0;
+    virtual void initShadows(uint shadowMapWidth, uint shadowMapHeight) = 0;
     virtual void updateMatrix() = 0;
     virtual void begin() = 0;
     void end();

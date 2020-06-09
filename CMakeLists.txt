@@ -121,7 +121,6 @@ add_library(algine
         src/std/MathTools.cpp include/algine/std/MathTools.h
         src/std/model.cpp include/algine/std/model.h
         src/std/Node.cpp include/algine/std/Node.h
-        src/std/object3d.cpp include/algine/std/object3d.h
         src/std/AMTLLoader.cpp include/algine/std/AMTLLoader.h
         src/std/lighting/Manager.cpp include/algine/std/lighting/Manager.h
         src/std/lighting/Transmitter.cpp include/algine/std/lighting/Transmitter.h
@@ -147,6 +146,9 @@ add_library(algine
         src/std/rotator/FreeRotator.cpp include/algine/std/rotator/FreeRotator.h
         src/std/CubeRenderer.cpp include/algine/std/CubeRenderer.h
         src/std/QuadRenderer.cpp include/algine/std/QuadRenderer.h
+        src/std/Rotatable.cpp include/algine/std/Rotatable.h
+        src/std/Translatable.cpp include/algine/std/Translatable.h
+        src/std/Scalable.cpp include/algine/std/Scalable.h
 
         src/ext/Blur.cpp include/algine/ext/Blur.h
         src/ext/event.cpp include/algine/ext/event.h

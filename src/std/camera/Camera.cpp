@@ -4,7 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace algine {
-Camera::Camera(const uint rotatorType): rotatable(rotatorType) {
+Camera::Camera(const uint rotatorType): Rotatable(rotatorType) {
     /* empty */
 }
 
