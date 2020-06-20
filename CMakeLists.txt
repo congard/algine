@@ -151,7 +151,8 @@ add_library(algine
         src/std/Scalable.cpp include/algine/std/Scalable.h
 
         src/ext/Blur.cpp include/algine/ext/Blur.h
-        src/ext/event.cpp include/algine/ext/event.h
+        src/ext/event/MouseEventListener.cpp include/algine/ext/event/MouseEventListener.h
+        src/ext/event/MouseEvent.cpp include/algine/ext/event/MouseEvent.h include/algine/ext/event/MouseButton.h
         src/ext/debug.cpp include/algine/ext/debug.h)
 
 # linking
