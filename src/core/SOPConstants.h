@@ -8,13 +8,17 @@ enum {
     FramebufferObject,
     RenderbufferObject,
     Texture2DObject,
-    TextureCubeObject
+    TextureCubeObject,
+    ArrayBufferObject,
+    IndexBufferObject
 };
 
 constant(FramebufferStr, "Framebuffer")
 constant(RenderbufferStr, "Renderbuffer")
 constant(Texture2DStr, "Texture2D")
 constant(TextureCubeStr, "TextureCube")
+constant(ArrayBufferStr, "ArrayBuffer")
+constant(IndexBufferStr, "IndexBuffer")
 }
 
 #undef constant
