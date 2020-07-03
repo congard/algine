@@ -126,12 +126,12 @@ int ShaderProgram::getLocation(const string &name) {
     return locations[name];
 }
 
-void ShaderProgram::use() {
+void ShaderProgram::bind() {
     commitBinding()
     glUseProgram(id);
 }
 
-void ShaderProgram::reset() {
+void ShaderProgram::unbind() {
     checkBinding()
     commitUnbinding()
     glUseProgram(0);

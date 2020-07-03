@@ -30,7 +30,7 @@ void Blur::configureKernel(const uint radius, const float sigma) {
 
     // sending to shader center of kernel and right part
     for (auto & pingpongShader : pingpongShaders) {
-        pingpongShader->use();
+        pingpongShader->bind();
         for (uint j = 0; j < radius; ++j) {
             ShaderProgram::setFloat(
                 pingpongShader->getLocation(BlurShader::Vars::Kernel) + (radius - 1 - j), kernel[j]
@@ -38,14 +38,14 @@ void Blur::configureKernel(const uint radius, const float sigma) {
         }
     }
 
-    Engine::defaultShaderProgram()->use();
+    Engine::defaultShaderProgram()->bind();
 }
 
 void Blur::makeBlur(const Texture2D *const image) {
     horizontal = true;
     firstIteration = true;
     for (uint i = 0; i < amount * 2; ++i) {
-        pingpongShaders[horizontal]->use();
+        pingpongShaders[horizontal]->bind();
         pingpongFb[horizontal]->bind();
 
         if (firstIteration) {

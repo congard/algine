@@ -33,8 +33,8 @@ public:
     void loadActiveLocations();
     int getLocation(const std::string &name);
 
-    void use();
-    void reset();
+    void bind();
+    void unbind();
     static void setBool(int location, bool p);
     static void setInt(int location, int p);
     static void setUint(int location, uint p);
