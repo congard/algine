@@ -1,6 +1,7 @@
 #include <algine/ext/Blur.h>
 #include <algine/ext/constants/BlurShader.h>
 #include <algine/std/MathTools.h>
+#include <algine/core/Engine.h>
 
 namespace algine {
 Blur::Blur(const TextureCreateInfo &textureCreateInfo) {
@@ -37,7 +38,7 @@ void Blur::configureKernel(const uint radius, const float sigma) {
         }
     }
 
-    ShaderProgram::reset();
+    Engine::defaultShaderProgram()->use();
 }
 
 void Blur::makeBlur(const Texture2D *const image) {

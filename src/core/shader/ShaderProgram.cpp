@@ -1,11 +1,19 @@
 #include <algine/core/shader/ShaderProgram.h>
 
 #include <algine/core/shader/ShaderTools.h>
+#include <algine/core/Engine.h>
 
 #include <tulz/File>
 #include <tulz/macros.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
+
+#define SOP_BOUND_PTR Engine::m_boundShaderProgram
+#define SOP_OBJECT_TYPE SOPConstants::ShaderProgramObject
+#define SOP_OBJECT_ID id
+#define SOP_OBJECT_NAME SOPConstants::ShaderProgramStr
+#include "../SOP.h"
+#include "../SOPConstants.h"
 
 using namespace std;
 using namespace tulz;
@@ -119,10 +127,13 @@ int ShaderProgram::getLocation(const string &name) {
 }
 
 void ShaderProgram::use() {
+    commitBinding()
     glUseProgram(id);
 }
 
 void ShaderProgram::reset() {
+    checkBinding()
+    commitUnbinding()
     glUseProgram(0);
 }
 
@@ -159,34 +170,42 @@ void ShaderProgram::setMat4(const int location, const glm::mat4 &p) {
 }
 
 void ShaderProgram::setBool(const string &location, const bool p) {
+    checkBinding()
     setBool(getLocation(location), p);
 }
 
 void ShaderProgram::setInt(const string &location, const int p) {
+    checkBinding()
     setInt(getLocation(location), p);
 }
 
 void ShaderProgram::setUint(const string &location, const uint p) {
+    checkBinding()
     setUint(getLocation(location), p);
 }
 
 void ShaderProgram::setFloat(const string &location, const float p) {
+    checkBinding()
     setFloat(getLocation(location), p);
 }
 
 void ShaderProgram::setVec3(const string &location, const glm::vec3 &p) {
+    checkBinding()
     setVec3(getLocation(location), p);
 }
 
 void ShaderProgram::setVec4(const string &location, const glm::vec4 &p) {
+    checkBinding()
     setVec4(getLocation(location), p);
 }
 
 void ShaderProgram::setMat3(const string &location, const glm::mat3 &p) {
+    checkBinding()
     setMat3(getLocation(location), p);
 }
 
 void ShaderProgram::setMat4(const string &location, const glm::mat4 &p) {
+    checkBinding()
     setMat4(getLocation(location), p);
 }
 }

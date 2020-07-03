@@ -5,6 +5,7 @@
 #include <algine/core/texture/TextureCube.h>
 #include <algine/core/buffers/ArrayBuffer.h>
 #include <algine/core/buffers/IndexBuffer.h>
+#include <algine/core/shader/ShaderProgram.h>
 
 #include <GL/glew.h>
 
@@ -17,6 +18,7 @@ Texture2D* Engine::m_defaultTexture2D;
 TextureCube* Engine::m_defaultTextureCube;
 ArrayBuffer* Engine::m_defaultArrayBuffer;
 IndexBuffer* Engine::m_defaultIndexBuffer;
+ShaderProgram* Engine::m_defaultShaderProgram;
 
 Framebuffer* Engine::m_boundFramebuffer;
 Renderbuffer* Engine::m_boundRenderbuffer;
@@ -24,6 +26,7 @@ Texture2D* Engine::m_boundTexture2D;
 TextureCube* Engine::m_boundTextureCube;
 ArrayBuffer* Engine::m_boundArrayBuffer;
 IndexBuffer* Engine::m_boundIndexBuffer;
+ShaderProgram* Engine::m_boundShaderProgram;
 
 void Engine::init() {
     // We use malloc instead of new since we don't want the ctor to be
@@ -51,6 +54,9 @@ void Engine::init() {
     m_defaultIndexBuffer = (IndexBuffer*) malloc(sizeof(IndexBuffer));
     m_defaultIndexBuffer->m_id = 0;
     m_defaultIndexBuffer->m_target = GL_ELEMENT_ARRAY_BUFFER;
+
+    m_defaultShaderProgram = (ShaderProgram*) malloc(sizeof(ShaderProgram));
+    m_defaultShaderProgram->id = 0;
 }
 
 void Engine::destroy() {
@@ -60,6 +66,7 @@ void Engine::destroy() {
     TextureCube::destroy(m_defaultTextureCube);
     ArrayBuffer::destroy(m_defaultArrayBuffer);
     IndexBuffer::destroy(m_defaultIndexBuffer);
+    ShaderProgram::destroy(m_defaultShaderProgram);
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS
@@ -72,6 +79,7 @@ returnBound(Texture2D, getBoundTexture2D, m_boundTexture2D, m_defaultTexture2D)
 returnBound(TextureCube, getBoundTextureCube, m_boundTextureCube, m_defaultTextureCube)
 returnBound(ArrayBuffer, getBoundArrayBuffer, m_boundArrayBuffer, m_defaultArrayBuffer)
 returnBound(IndexBuffer, getBoundIndexBuffer, m_boundIndexBuffer, m_defaultIndexBuffer)
+returnBound(ShaderProgram, getBoundShaderProgram, m_boundShaderProgram, m_defaultShaderProgram)
 #else
 #define returnNull(type, name) type* Engine::name() { return nullptr; }
 
@@ -81,6 +89,7 @@ returnNull(Texture2D, getBoundTexture2D)
 returnNull(TextureCube, getBoundTextureCube)
 returnNull(ArrayBuffer, getBoundArrayBuffer)
 returnNull(IndexBuffer, getBoundIndexBuffer)
+returnNull(ShaderProgram, getBoundShaderProgram)
 #endif
 
 string Engine::getGPUVendor() {
@@ -91,29 +100,15 @@ string Engine::getGPURenderer() {
     return reinterpret_cast<char const*>(glGetString(GL_RENDERER));
 }
 
-Framebuffer* Engine::defaultFramebuffer() {
-    return m_defaultFramebuffer;
-}
+#define returnDefault(type, name, obj) type* Engine::name() { return obj; }
 
-Renderbuffer* Engine::defaultRenderbuffer() {
-    return m_defaultRenderbuffer;
-}
-
-Texture2D* Engine::defaultTexture2D() {
-    return m_defaultTexture2D;
-}
-
-TextureCube* Engine::defaultTextureCube() {
-    return m_defaultTextureCube;
-}
-
-ArrayBuffer* Engine::defaultArrayBuffer() {
-    return m_defaultArrayBuffer;
-}
-
-IndexBuffer* Engine::defaultIndexBuffer() {
-    return m_defaultIndexBuffer;
-}
+returnDefault(Framebuffer, defaultFramebuffer, m_defaultFramebuffer)
+returnDefault(Renderbuffer, defaultRenderbuffer, m_defaultRenderbuffer)
+returnDefault(Texture2D, defaultTexture2D, m_defaultTexture2D)
+returnDefault(TextureCube, defaultTextureCube, m_defaultTextureCube)
+returnDefault(ArrayBuffer, defaultArrayBuffer, m_defaultArrayBuffer)
+returnDefault(IndexBuffer, defaultIndexBuffer, m_defaultIndexBuffer)
+returnDefault(ShaderProgram, defaultShaderProgram, m_defaultShaderProgram)
 
 #ifdef ALGINE_SECURE_OPERATIONS
 #include "SOPConstants.h"
@@ -137,6 +132,9 @@ void Engine::setBoundObject(const uint type, const void *const obj) {
             break;
         case SOPConstants::IndexBufferObject:
             m_boundIndexBuffer = (IndexBuffer*) obj;
+            break;
+        case SOPConstants::ShaderProgramObject:
+            m_boundShaderProgram = (ShaderProgram*) obj;
             break;
         default:
             break;

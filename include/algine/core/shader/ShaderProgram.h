@@ -2,6 +2,7 @@
 #define ALGINE_SHADERPROGRAM_H
 
 #include <algine/types.h>
+#include <algine/templates.h>
 #include <algine/core/shader/ShadersInfo.h>
 #include <algine/core/shader/Shader.h>
 
@@ -33,7 +34,7 @@ public:
     int getLocation(const std::string &name);
 
     void use();
-    static void reset();
+    void reset();
     static void setBool(int location, bool p);
     static void setInt(int location, int p);
     static void setUint(int location, uint p);
@@ -52,12 +53,8 @@ public:
     void setMat3(const std::string &location, const glm::mat3 &p);
     void setMat4(const std::string &location, const glm::mat4 &p);
 
-    template<typename...Args>
-    static void create(Args&...args) {
-        ShaderProgram** arr[] = {&args...};
-        for (usize i = 0; i < sizeof...(args); i++)
-            *arr[i] = new ShaderProgram();
-    }
+    implementVariadicCreate(ShaderProgram)
+    implementVariadicDestroy(ShaderProgram)
 
 public:
     uint id;

@@ -10,6 +10,7 @@ class Texture2D;
 class TextureCube;
 class ArrayBuffer;
 class IndexBuffer;
+class ShaderProgram;
 
 class Engine {
     friend class Framebuffer;
@@ -18,6 +19,7 @@ class Engine {
     friend class Texture2D;
     friend class TextureCube;
     friend class Buffer;
+    friend class ShaderProgram;
 
 public:
     static void init();
@@ -29,6 +31,7 @@ public:
     static TextureCube* getBoundTextureCube();
     static ArrayBuffer* getBoundArrayBuffer();
     static IndexBuffer* getBoundIndexBuffer();
+    static ShaderProgram* getBoundShaderProgram();
 
     static std::string getGPUVendor();
     static std::string getGPURenderer();
@@ -40,6 +43,7 @@ public:
     static TextureCube* defaultTextureCube();
     static ArrayBuffer* defaultArrayBuffer();
     static IndexBuffer* defaultIndexBuffer();
+    static ShaderProgram *defaultShaderProgram();
 
 private:
     static Framebuffer *m_defaultFramebuffer;
@@ -48,6 +52,7 @@ private:
     static TextureCube *m_defaultTextureCube;
     static ArrayBuffer *m_defaultArrayBuffer;
     static IndexBuffer *m_defaultIndexBuffer;
+    static ShaderProgram *m_defaultShaderProgram;
 
 private:
     static void setBoundObject(uint type, const void *obj);
@@ -59,6 +64,7 @@ private:
     static TextureCube *m_boundTextureCube;
     static ArrayBuffer *m_boundArrayBuffer;
     static IndexBuffer *m_boundIndexBuffer;
+    static ShaderProgram *m_boundShaderProgram;
 };
 }
 
