@@ -1,15 +1,6 @@
 #include <algine/std/model/Shape.h>
 
 namespace algine {
-void Shape::delBuffers() {
-    for (auto &item : inputLayouts)
-        InputLayout::destroy(item);
-
-    ArrayBuffer::destroy(buffers.vertices, buffers.normals, buffers.texCoords,
-                         buffers.tangents, buffers.bitangents, buffers.boneWeights, buffers.boneIds);
-    IndexBuffer::destroy(buffers.indices);
-}
-
 inline void
 addAttribute(
         const InputLayout *inputLayout,
@@ -68,6 +59,11 @@ void Shape::setNodeTransform(const std::string &nodeName, const glm::mat4 &trans
 }
 
 void Shape::recycle() {
-    delBuffers();
+    for (auto &item : inputLayouts)
+        InputLayout::destroy(item);
+
+    ArrayBuffer::destroy(buffers.vertices, buffers.normals, buffers.texCoords,
+                         buffers.tangents, buffers.bitangents, buffers.boneWeights, buffers.boneIds);
+    IndexBuffer::destroy(buffers.indices);
 }
 }

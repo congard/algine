@@ -10,8 +10,6 @@
 namespace algine {
 class Shape {
 public:
-    void delBuffers();
-
     // TODO: move it to ShapeLoader
     // creates InputLayout and adds it into inputLayouts array
     // note: this function will limit max bones per vertex to 4
