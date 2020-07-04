@@ -2,7 +2,7 @@
 #define ALGINE_POINTLAMP_H
 
 #include <algine/std/lighting/PointLight.h>
-#include <algine/std/model.h>
+#include <algine/std/model/Model.h>
 
 namespace algine {
 namespace Lighting {

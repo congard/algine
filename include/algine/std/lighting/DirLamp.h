@@ -2,7 +2,7 @@
 #define ALGINE_DIRLAMP_H
 
 #include <algine/std/lighting/DirLight.h>
-#include <algine/std/model.h>
+#include <algine/std/model/Model.h>
 
 namespace algine {
 namespace Lighting {

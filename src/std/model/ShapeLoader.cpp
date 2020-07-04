@@ -1,100 +1,116 @@
 #define GLM_FORCE_CTOR_INIT
-#include <algine/std/model.h>
+#include <algine/std/model/ShapeLoader.h>
 
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-#include <iostream>
+#include <algine/std/AMTLLoader.h>
+#include <algine/std/animation/BoneInfo.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <algine/std/Node.h>
-#include <algine/std/animation/BoneInfo.h>
 #include <tulz/Path>
 
-#include "assimp2glm.h"
+#include <iostream>
+#include <vector>
+#include <cfloat>
+
+#include "../assimp2glm.h"
 
 using namespace tulz;
 using namespace std;
 
 namespace algine {
-void Shape::delBuffers() {
-    for (auto &item : inputLayouts)
-        InputLayout::destroy(item);
-
-    ArrayBuffer::destroy(buffers.vertices, buffers.normals, buffers.texCoords,
-            buffers.tangents, buffers.bitangents, buffers.boneWeights, buffers.boneIds);
-    IndexBuffer::destroy(buffers.indices);
+ShapeLoader::ShapeLoader() {
+    m_shape = new Shape();
 }
 
-inline void
-addAttribute(
-        const InputLayout *inputLayout,
-        const InputAttributeDescription &inputAttributeDescription,
-        const ArrayBuffer *arrayBuffer)
-{
-    if (inputAttributeDescription.m_location != InputAttributeDescription::LocationAbsent && arrayBuffer != nullptr)
-        inputLayout->addAttribute(inputAttributeDescription, arrayBuffer);
-}
+#define ASSIMP_PARAMS_MAX_INDEX JoinIdenticalVertices
+#define isAssimpParam(param) param <= ASSIMP_PARAMS_MAX_INDEX
+void ShapeLoader::load() {
+    uint assimpParams[] = {
+            aiProcess_Triangulate,
+            aiProcess_SortByPType,
+            aiProcess_CalcTangentSpace,
+            aiProcess_JoinIdenticalVertices
+    }, completeAssimpParams = 0;
 
-void Shape::createInputLayout(
-        int inPosition, int inTexCoord, int inNormal,
-        int inTangent, int inBitangent,
-        int inBoneWeights, int inBoneIds
-    ) {
-    auto *inputLayout = new InputLayout();
-    inputLayout->bind();
-    inputLayouts.push_back(inputLayout);
+    vector<int> algineParams;
 
-    InputAttributeDescription attribDescription;
-    attribDescription.setCount(3);
+    for (const uint p : m_params)
+        if (isAssimpParam(p))
+            completeAssimpParams |= assimpParams[p];
+        else
+            algineParams.emplace_back(p);
 
-    attribDescription.setLocation(inPosition);
-    addAttribute(inputLayout, attribDescription, buffers.vertices);
+    // Create an instance of the Importer class
+    Assimp::Importer importer;
+    const aiScene *scene = importer.ReadFile(m_modelPath, completeAssimpParams);
 
-    attribDescription.setLocation(inNormal);
-    addAttribute(inputLayout, attribDescription, buffers.normals);
-
-    attribDescription.setLocation(inTangent);
-    addAttribute(inputLayout, attribDescription, buffers.tangents);
-
-    attribDescription.setLocation(inBitangent);
-    addAttribute(inputLayout, attribDescription, buffers.bitangents);
-
-    attribDescription.setLocation(inTexCoord);
-    attribDescription.setCount(2);
-    addAttribute(inputLayout, attribDescription, buffers.texCoords);
-
-    if (bonesPerVertex != 0) {
-        attribDescription.setCount(4);
-
-        attribDescription.setLocation(inBoneWeights);
-        addAttribute(inputLayout, attribDescription, buffers.boneWeights);
-
-        attribDescription.setLocation(inBoneIds);
-        attribDescription.setFormat(GL_UNSIGNED_INT); // TODO
-        addAttribute(inputLayout, attribDescription, buffers.boneIds);
+    // If the import failed, report it
+    if (!scene) {
+        std::cerr << "Assimp error: " << importer.GetErrorString() << "\n";
+        return;
     }
 
-    inputLayout->setIndexBuffer(buffers.indices);
-    inputLayout->unbind();
+    m_shape->globalInverseTransform = getMat4(scene->mRootNode->mTransformation);
+    m_shape->globalInverseTransform = glm::inverse(m_shape->globalInverseTransform);
+
+    m_shape->rootNode = Node(scene->mRootNode);
+    m_shape->animations.reserve(scene->mNumAnimations); // allocate space for animations
+    for (size_t i = 0; i < scene->mNumAnimations; i++)
+        m_shape->animations.emplace_back(scene->mAnimations[i]);
+
+    std::string amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
+    AMTLLoader amtl;
+    if (amtl.load(amtlPath))
+       m_amtlLoader = &amtl;
+    else {
+        // if load is called again and the AMTL file does not exist,
+        // while the previous load() AMTL existed, the pointer will
+        // point to the deleted memory
+        m_amtlLoader = nullptr;
+    }
+
+    processNode(scene->mRootNode, scene);
+
+    // apply algine params
+    for (const uint p : algineParams) {
+        switch (p) {
+            case InverseNormals:
+                for (float &normal : m_shape->geometry.normals)
+                    normal *= -1;
+                break;
+            default:
+                std::cerr << "Unknown algine param " << p << "\n";
+                break;
+        }
+    }
+
+    // load textures
+    loadTextures();
+
+    // generate buffers
+    genBuffers();
 }
 
-void Shape::setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation) {
-    rootNode.getNode(nodeName)->transformation = transformation;
+void ShapeLoader::addParam(uint param) {
+    m_params.push_back(param);
 }
 
-void Shape::recycle() {
-    delBuffers();
+void ShapeLoader::setModelPath(const std::string &path) {
+    m_modelPath = path;
 }
 
-Model::Model(const uint rotatorType): Rotatable(rotatorType) {
-    /* empty */
+void ShapeLoader::setTexturesPath(const std::string &path) {
+    m_texturesPath = path;
 }
 
-void Model::updateMatrix() {
-    m_transform = m_translation * m_rotation * m_scaling;
+void ShapeLoader::setDefaultTexturesParams(const std::map<uint, uint> &params) {
+    m_defaultTexturesParams = params;
+}
+
+Shape *ShapeLoader::getShape() const {
+    return m_shape;
 }
 
 inline int getBoneIndex(const Shape *shape, const std::string &name) {
@@ -103,6 +119,15 @@ inline int getBoneIndex(const Shape *shape, const std::string &name) {
             return i;
 
     return -1;
+}
+
+ShapeLoader::LoadedTexture::LoadedTexture(
+        const string &path, const shared_ptr<Texture2D> &texture,
+        const map<uint, uint> &params)
+{
+    this->path = path;
+    this->texture = texture;
+    this->params = params;
 }
 
 void ShapeLoader::loadBones(const aiMesh *aimesh) {
@@ -381,15 +406,6 @@ void ShapeLoader::genBuffers() {
     m_shape->buffers.indices = createBuffer<IndexBuffer>(m_shape->geometry.indices);
 }
 
-ShapeLoader::LoadedTexture::LoadedTexture(
-        const string &path, const shared_ptr<Texture2D> &texture,
-        const map<uint, uint> &params)
-{
-    this->path = path;
-    this->texture = texture;
-    this->params = params;
-}
-
 // using vector instead of map since the same texture may have different params
 vector<ShapeLoader::LoadedTexture> ShapeLoader::m_globalLoadedTextures;
 
@@ -406,97 +422,4 @@ int ShapeLoader::getLoadedTextureIndex(
 
     return -1;
 }
-
-ShapeLoader::ShapeLoader() {
-    m_shape = new Shape();
 }
-
-#define ASSIMP_PARAMS_MAX_INDEX JoinIdenticalVertices
-#define isAssimpParam(param) param <= ASSIMP_PARAMS_MAX_INDEX
-void ShapeLoader::load() {
-    uint assimpParams[] = {
-            aiProcess_Triangulate,
-            aiProcess_SortByPType,
-            aiProcess_CalcTangentSpace,
-            aiProcess_JoinIdenticalVertices
-    }, completeAssimpParams = 0;
-
-    vector<int> algineParams;
-
-    for (const uint p : m_params)
-        if (isAssimpParam(p))
-            completeAssimpParams |= assimpParams[p];
-        else
-            algineParams.emplace_back(p);
-
-    // Create an instance of the Importer class
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(m_modelPath, completeAssimpParams);
-
-    // If the import failed, report it
-    if (!scene) {
-        std::cerr << "Assimp error: " << importer.GetErrorString() << "\n";
-        return;
-    }
-
-    m_shape->globalInverseTransform = getMat4(scene->mRootNode->mTransformation);
-    m_shape->globalInverseTransform = glm::inverse(m_shape->globalInverseTransform);
-
-    m_shape->rootNode = Node(scene->mRootNode);
-    m_shape->animations.reserve(scene->mNumAnimations); // allocate space for animations
-    for (size_t i = 0; i < scene->mNumAnimations; i++)
-        m_shape->animations.emplace_back(scene->mAnimations[i]);
-
-    std::string amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
-    AMTLLoader amtl;
-    if (amtl.load(amtlPath))
-       m_amtlLoader = &amtl;
-    else {
-        // if load is called again and the AMTL file does not exist,
-        // while the previous load() AMTL existed, the pointer will
-        // point to the deleted memory
-        m_amtlLoader = nullptr;
-    }
-
-    processNode(scene->mRootNode, scene);
-
-    // apply algine params
-    for (const uint p : algineParams) {
-        switch (p) {
-            case InverseNormals:
-                for (float &normal : m_shape->geometry.normals)
-                    normal *= -1;
-                break;
-            default:
-                std::cerr << "Unknown algine param " << p << "\n";
-                break;
-        }
-    }
-
-    // load textures
-    loadTextures();
-
-    // generate buffers
-    genBuffers();
-}
-
-void ShapeLoader::addParam(uint param) {
-    m_params.push_back(param);
-}
-
-void ShapeLoader::setModelPath(const std::string &path) {
-    m_modelPath = path;
-}
-
-void ShapeLoader::setTexturesPath(const std::string &path) {
-    m_texturesPath = path;
-}
-
-void ShapeLoader::setDefaultTexturesParams(const std::map<uint, uint> &params) {
-    m_defaultTexturesParams = params;
-}
-
-Shape *ShapeLoader::getShape() const {
-    return m_shape;
-}
-} // namespace algine

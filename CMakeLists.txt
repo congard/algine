@@ -97,6 +97,7 @@ add_library(algine
         include/algine/core/texture/PixelData.h
         include/algine/core/texture/TextureCreateInfo.h
         include/algine/core/shader/ShadersInfo.h
+        include/algine/std/model/Mesh.h
 
         src/core/Framebuffer.cpp include/algine/core/Framebuffer.h
         src/core/Renderbuffer.cpp include/algine/core/Renderbuffer.h
@@ -119,7 +120,9 @@ add_library(algine
         include/algine/std/Material.h
         src/std/assimp2glm.h
         src/std/MathTools.cpp include/algine/std/MathTools.h
-        src/std/model.cpp include/algine/std/model.h
+        src/std/model/Model.cpp include/algine/std/model/Model.h
+        src/std/model/Shape.cpp include/algine/std/model/Shape.h
+        src/std/model/ShapeLoader.cpp include/algine/std/model/ShapeLoader.h
         src/std/Node.cpp include/algine/std/Node.h
         src/std/AMTLLoader.cpp include/algine/std/AMTLLoader.h
         src/std/lighting/Manager.cpp include/algine/std/lighting/Manager.h
