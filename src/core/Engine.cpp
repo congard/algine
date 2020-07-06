@@ -110,6 +110,46 @@ returnDefault(ArrayBuffer, defaultArrayBuffer, m_defaultArrayBuffer)
 returnDefault(IndexBuffer, defaultIndexBuffer, m_defaultIndexBuffer)
 returnDefault(ShaderProgram, defaultShaderProgram, m_defaultShaderProgram)
 
+void Engine::enableDepthTest() {
+    glEnable(GL_DEPTH_TEST);
+}
+
+void Engine::enableFaceCulling() {
+    glEnable(GL_CULL_FACE);
+}
+
+void Engine::enableDepthMask() {
+    glDepthMask(true);
+}
+
+void Engine::disableDepthTest() {
+    glDisable(GL_DEPTH_TEST);
+}
+
+void Engine::disableFaceCulling() {
+    glDisable(GL_CULL_FACE);
+}
+
+void Engine::disableDepthMask() {
+    glDepthMask(false);
+}
+
+void Engine::drawElements(const uint start, const uint count, const uint polyType) {
+    glDrawElements(polyType, count, GL_UNSIGNED_INT, reinterpret_cast<void*>(start * sizeof(uint)));
+}
+
+void Engine::setDepthTestMode(const uint mode) {
+    glDepthFunc(mode);
+}
+
+void Engine::setFaceCullingMode(const uint mode) {
+    glCullFace(mode);
+}
+
+void Engine::setViewport(const uint width, const uint height, const uint x, const uint y) {
+    glViewport(x, y, width, height);
+}
+
 #ifdef ALGINE_SECURE_OPERATIONS
 #include "SOPConstants.h"
 

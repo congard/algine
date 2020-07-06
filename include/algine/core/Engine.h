@@ -43,7 +43,43 @@ public:
     static TextureCube* defaultTextureCube();
     static ArrayBuffer* defaultArrayBuffer();
     static IndexBuffer* defaultIndexBuffer();
-    static ShaderProgram *defaultShaderProgram();
+    static ShaderProgram* defaultShaderProgram();
+
+public:
+    enum DepthTestModes {
+        DepthTestNever = 0x0200,
+        DepthTestLess,
+        DepthTestEqual,
+        DepthTestLessOrEqual,
+        DepthTestGreater,
+        DepthTestNotEqual,
+        DepthTestGreaterOrEqual,
+        DepthTestAlways
+    };
+
+    enum FaceCullingOptions {
+        CullFaceFront = 0x0404,
+        CullFaceBack = 0x0405,
+        CullFaceFrontAndBack = 0x0408
+    };
+
+    enum PolyTypes {
+        Triangle = 0x0004
+    };
+
+public:
+    static void enableDepthTest();
+    static void enableFaceCulling();
+    static void enableDepthMask();
+
+    static void disableDepthTest();
+    static void disableFaceCulling();
+    static void disableDepthMask();
+
+    static void drawElements(uint start, uint count, uint polyType = Triangle);
+    static void setDepthTestMode(uint mode);
+    static void setFaceCullingMode(uint mode);
+    static void setViewport(uint width, uint height, uint x = 0, uint y = 0);
 
 private:
     static Framebuffer *m_defaultFramebuffer;
