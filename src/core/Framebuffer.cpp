@@ -99,6 +99,23 @@ void Framebuffer::update() {
     glDrawBuffers(attachmentsList.size(), &attachmentsList[0]);
 }
 
+void Framebuffer::clear(const uint buffersMask) {
+    checkBinding()
+    glClear(buffersMask);
+}
+
+void Framebuffer::clearColorBuffer() {
+    clear(ColorBuffer);
+}
+
+void Framebuffer::clearDepthBuffer() {
+    clear(DepthBuffer);
+}
+
+void Framebuffer::clearStencilBuffer() {
+    clear(StencilBuffer);
+}
+
 void Framebuffer::unbind() {
     checkBinding()
     commitUnbinding()
@@ -240,5 +257,17 @@ vector<vector<uint>> Framebuffer::getAttachmentsLists() const {
 
 uint Framebuffer::getId() const {
     return m_id;
+}
+
+void Framebuffer::setClearColor(const float red, const float green, const float blue, const float alpha) {
+    glClearColor(red, green, blue, alpha);
+}
+
+void Framebuffer::setClearDepth(const float depth) {
+    glClearDepthf(depth);
+}
+
+void Framebuffer::setClearStencil(const int s) {
+    glClearStencil(s);
 }
 }

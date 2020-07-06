@@ -22,6 +22,13 @@ public:
         EmptyAttachment = GL_NONE
     };
 
+    enum BuffersMasks {
+        ColorBuffer = 0x00004000,
+        DepthBuffer = 0x00000100,
+        StencilBuffer = 0x00000400
+    };
+
+public:
     Framebuffer();
     ~Framebuffer();
 
@@ -34,6 +41,10 @@ public:
     void removeOutput(uint outIndex, bool optimizeList = true);
     void optimizeAttachmentsList();
     void update();
+    void clear(uint buffersMask);
+    void clearColorBuffer();
+    void clearDepthBuffer();
+    void clearStencilBuffer();
     void unbind();
 
     void setActiveAttachmentsList(uint index);
@@ -48,6 +59,10 @@ public:
     uint getId() const;
     std::vector<uint> getAttachmentsList(uint index) const;
     std::vector<std::vector<uint>> getAttachmentsLists() const;
+
+    static void setClearColor(float red, float green, float blue, float alpha = 1.0f);
+    static void setClearDepth(float depth);
+    static void setClearStencil(int s);
 
     implementVariadicCreate(Framebuffer)
     implementVariadicDestroy(Framebuffer)
