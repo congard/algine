@@ -8,7 +8,7 @@ using namespace std;
 
 namespace algine {
 namespace ShaderTools {
-inline string getShaderInfoLogById(const uint shader, const uint type) {
+string getShaderInfoLogById(const uint shader, const uint type) {
     GLint infoLogSize, success;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogSize);
 
@@ -26,7 +26,7 @@ inline string getShaderInfoLogById(const uint shader, const uint type) {
     return string();
 }
 
-inline string getProgramInfoLogById(const uint program, const uint type) {
+string getProgramInfoLogById(const uint program, const uint type) {
     GLint infoLogSize, success;
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogSize);
 
