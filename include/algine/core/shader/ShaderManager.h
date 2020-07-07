@@ -2,6 +2,7 @@
 #define ALGINE_SHADERMANAGER_H
 
 #include <algine/core/shader/ShadersInfo.h>
+#include <algine/types.h>
 
 #include <vector>
 

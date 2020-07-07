@@ -1,4 +1,6 @@
 #include <algine/std/animation/Animation.h>
+#include <algine/types.h>
+
 #include <assimp/anim.h>
 
 namespace algine {

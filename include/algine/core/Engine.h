@@ -2,6 +2,7 @@
 #define ALGINE_ENGINE_H
 
 #include <string>
+#include <algine/types.h>
 
 namespace algine {
 class Framebuffer;
