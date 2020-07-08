@@ -5,7 +5,7 @@
 #include <algine/core/Framebuffer.h>
 #include <algine/core/shader/ShaderProgram.h>
 #include <algine/std/QuadRenderer.h>
-#include <tulz/Array>
+#include <tulz/Array.h>
 
 namespace algine {
 class Blur {

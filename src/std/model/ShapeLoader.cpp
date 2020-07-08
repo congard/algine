@@ -8,7 +8,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <tulz/Path>
+#include <tulz/Path.h>
 
 #include <iostream>
 #include <vector>

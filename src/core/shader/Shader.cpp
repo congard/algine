@@ -2,7 +2,7 @@
 
 #include <algine/core/shader/ShaderTools.h>
 
-#include <tulz/File>
+#include <tulz/File.h>
 #include <GL/glew.h>
 #include <iostream>
 

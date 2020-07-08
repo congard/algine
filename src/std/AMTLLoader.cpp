@@ -3,8 +3,8 @@
 #include <algine/constants/AMTL.h>
 
 #include <nlohmann/json.hpp>
-#include <tulz/Path>
-#include <tulz/File>
+#include <tulz/Path.h>
+#include <tulz/File.h>
 #include <tulz/macros.h>
 #include <iostream>
 

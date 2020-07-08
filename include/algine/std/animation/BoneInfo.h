@@ -3,7 +3,7 @@
 
 #include <algine/types.h>
 
-#include <tulz/Array>
+#include <tulz/Array.h>
 
 namespace algine {
 class BoneInfo {

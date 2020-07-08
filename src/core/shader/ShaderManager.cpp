@@ -2,9 +2,9 @@
 
 #include <algine/core/shader/Shader.h>
 
-#include <tulz/Path>
-#include <tulz/File>
-#include <tulz/StringUtils>
+#include <tulz/Path.h>
+#include <tulz/File.h>
+#include <tulz/StringUtils.h>
 #include <tulz/macros.h>
 #include <iostream>
 
