@@ -7,7 +7,7 @@
 namespace algine {
 Animator::Animator() = default;
 
-Animator::Animator(const AnimShape &shape, const usize animationIndex) {
+Animator::Animator(Shape *const shape, const usize animationIndex) {
     this->shape = shape;
     this->animationIndex = animationIndex;
 }
@@ -15,12 +15,13 @@ Animator::Animator(const AnimShape &shape, const usize animationIndex) {
 void Animator::animate(const float timeInSeconds) {
     glm::mat4 identity;
 
-    float ticksPerSecond = shape.animations->operator[](animationIndex).ticksPerSecond != 0 ? shape.animations->operator[](0).ticksPerSecond : 25.0f;
+    const float animTicksPerSecond = shape->animations[animationIndex].ticksPerSecond;
+    float ticksPerSecond = animTicksPerSecond != 0 ? animTicksPerSecond : 25.0f;
 
     float timeInTicks = timeInSeconds * ticksPerSecond;
-    float animationTime = fmodf(timeInTicks, static_cast<float>(shape.animations->operator[](animationIndex).duration));
+    float animationTime = fmodf(timeInTicks, static_cast<float>(shape->animations[animationIndex].duration));
 
-    readNodeHeirarchy(animationTime, *shape.rootNode, identity);
+    readNodeHeirarchy(animationTime, shape->rootNode, identity);
 }
 
 usize Animator::findPosition(const float animationTime, const AnimNode *animNode) {
@@ -133,7 +134,7 @@ const AnimNode* Animator::findNodeAnim(const Animation *animation, const std::st
 
 void Animator::readNodeHeirarchy(const float animationTime, const Node &node, const glm::mat4 &parentTransform) {
     const std::string &nodeName = node.name;
-    const Animation &animation = shape.animations->operator[](animationIndex);
+    const Animation &animation = shape->animations[animationIndex];
     glm::mat4 nodeTransformation = node.defaultTransform * node.transformation; // WARNING: experimental feature "node.transformation"
     const AnimNode *animNode = findNodeAnim(&animation, nodeName);
 
@@ -163,9 +164,9 @@ void Animator::readNodeHeirarchy(const float animationTime, const Node &node, co
     // WARNING: experimental feature "node.transformation"
     glm::mat4 globalTransformation = parentTransform * nodeTransformation * node.transformation;
 
-    for (usize i = 0; i < shape.bones->size(); i++) {
-        if (shape.bones->operator[](i).name == nodeName) {
-            shape.bones->operator[](i).finalTransformation = *shape.globalInverseTransform * globalTransformation * shape.bones->operator[](i).offsetMatrix;
+    for (usize i = 0; i < shape->bones.size(); i++) {
+        if (shape->bones[i].name == nodeName) {
+            shape->bones[i].finalTransformation = shape->globalInverseTransform * globalTransformation * shape->bones[i].offsetMatrix;
             break;
         }
     }

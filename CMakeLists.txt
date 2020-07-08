@@ -135,7 +135,6 @@ add_library(algine
         src/std/animation/QuatAnimKey.cpp include/algine/std/animation/QuatAnimKey.h
         src/std/animation/AnimNode.cpp include/algine/std/animation/AnimNode.h
         src/std/animation/Animation.cpp include/algine/std/animation/Animation.h
-        src/std/animation/AnimShape.cpp include/algine/std/animation/AnimShape.h
         src/std/animation/Animator.cpp include/algine/std/animation/Animator.h
         src/std/animation/Bone.cpp include/algine/std/animation/Bone.h
         src/std/animation/BoneInfo.cpp include/algine/std/animation/BoneInfo.h

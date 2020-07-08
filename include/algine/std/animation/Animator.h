@@ -1,14 +1,14 @@
 #ifndef ALGINE_ANIMATOR_H
 #define ALGINE_ANIMATOR_H
 
-#include <algine/std/animation/AnimShape.h>
+#include <algine/std/model/Shape.h>
 #include <algine/types.h>
 
 namespace algine {
 class Animator {
 public:
     Animator();
-    explicit Animator(const AnimShape &shape, usize animationIndex = 0);
+    explicit Animator(Shape *shape, usize animationIndex = 0);
 
     void animate(float timeInSeconds);
     void readNodeHeirarchy(float animationTime, const Node &node, const glm::mat4 &parentTransform);
@@ -22,7 +22,7 @@ public:
     static const AnimNode* findNodeAnim(const Animation *animation, const std::string &nodeName);
 
 public:
-    AnimShape shape;
+    Shape *shape;
     usize animationIndex;
 };
 }
