@@ -1,7 +1,8 @@
 #include <algine/ext/Blur.h>
 #include <algine/ext/constants/BlurShader.h>
-#include <algine/std/MathTools.h>
 #include <algine/core/Engine.h>
+
+using namespace tulz;
 
 namespace algine {
 Blur::Blur(const TextureCreateInfo &textureCreateInfo) {
@@ -25,15 +26,14 @@ Blur::~Blur() {
 
 void Blur::configureKernel(const uint radius, const float sigma) {
     uint kernelSize = radius * 2 - 1;
-    float kernel[kernelSize];
-    MathTools::getBlurKernel(kernel, kernelSize, sigma);
+    Array<float> kernel = getKernel(kernelSize, sigma);
 
     // sending to shader center of kernel and right part
     for (auto & pingpongShader : pingpongShaders) {
         pingpongShader->bind();
         for (uint j = 0; j < radius; ++j) {
             ShaderProgram::setFloat(
-                pingpongShader->getLocation(BlurShader::Vars::Kernel) + (radius - 1 - j), kernel[j]
+                pingpongShader->getLocation(BlurShader::Vars::Kernel) + static_cast<int>((radius - 1 - j)), kernel[j]
             );
         }
     }
@@ -95,5 +95,22 @@ Texture2D *const *Blur::getPingPongTextures() const {
 
 Framebuffer *const *Blur::getPingPongFramebuffers() const {
     return pingpongFb;
+}
+
+Array<float> Blur::getKernel(const int size, const float sigma) {
+    Array<float> kernel(size);
+    int mean = size / 2;
+    float sum = 0; // For accumulating the kernel values
+
+    for (int x = 0; x < size; x++)  {
+        kernel[x] = expf(-0.5f * powf((float)(x - mean) / sigma, 2.0));
+        sum += kernel[x]; // Accumulate the kernel value
+    }
+
+    // Normalize the kernel
+    for (int x = 0; x < size; x++)
+        kernel[x] /= sum;
+
+    return kernel;
 }
 }

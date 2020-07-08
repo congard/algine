@@ -5,6 +5,7 @@
 #include <algine/core/Framebuffer.h>
 #include <algine/core/shader/ShaderProgram.h>
 #include <algine/std/QuadRenderer.h>
+#include <tulz/Array>
 
 namespace algine {
 class Blur {
@@ -35,6 +36,8 @@ public:
     Texture2D* get() const;
     Texture2D *const *getPingPongTextures() const;
     Framebuffer *const *getPingPongFramebuffers() const;
+
+    static tulz::Array<float> getKernel(int size, float sigma);
 
 protected:
     Texture2D *pingpongTex[2] {nullptr, nullptr};
