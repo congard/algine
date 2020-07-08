@@ -11,19 +11,19 @@ public:
     explicit Animator(Shape *shape, usize animationIndex = 0);
 
     void animate(float timeInSeconds);
-    void readNodeHeirarchy(float animationTime, const Node &node, const glm::mat4 &parentTransform);
 
-    static usize findPosition(float animationTime, const AnimNode *animNode);
-    static usize findRotation(float animationTime, const AnimNode *animNode);
-    static usize findScaling(float animationTime, const AnimNode *animNode);
-    static void calcInterpolatedPosition(glm::vec3 &out, float animationTime, const AnimNode *animNode);
-    static void calcInterpolatedRotation(glm::quat &out, float animationTime, const AnimNode *animNode);
-    static void calcInterpolatedScaling(glm::vec3 &out, float animationTime, const AnimNode *animNode);
-    static const AnimNode* findNodeAnim(const Animation *animation, const std::string &nodeName);
+    void setShape(Shape *shape);
+    void setAnimationIndex(usize animationIndex);
 
-public:
-    Shape *shape;
-    usize animationIndex;
+    Shape* getShape() const;
+    usize getAnimationIndex() const;
+
+private:
+    void readNodeHierarchy(float animationTime, const Node &node, const glm::mat4 &parentTransform);
+
+private:
+    Shape *m_shape = nullptr;
+    usize m_animationIndex = 0;
 };
 }
 

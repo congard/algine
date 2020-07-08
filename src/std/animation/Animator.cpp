@@ -1,5 +1,4 @@
 #define GLM_FORCE_CTOR_INIT
-
 #include <algine/std/animation/Animator.h>
 
 #include <glm/gtx/quaternion.hpp>
@@ -8,23 +7,39 @@ namespace algine {
 Animator::Animator() = default;
 
 Animator::Animator(Shape *const shape, const usize animationIndex) {
-    this->shape = shape;
-    this->animationIndex = animationIndex;
+    m_shape = shape;
+    m_animationIndex = animationIndex;
 }
 
 void Animator::animate(const float timeInSeconds) {
     glm::mat4 identity;
 
-    const float animTicksPerSecond = shape->animations[animationIndex].ticksPerSecond;
+    const auto animTicksPerSecond = static_cast<float>(m_shape->animations[m_animationIndex].ticksPerSecond);
     float ticksPerSecond = animTicksPerSecond != 0 ? animTicksPerSecond : 25.0f;
 
     float timeInTicks = timeInSeconds * ticksPerSecond;
-    float animationTime = fmodf(timeInTicks, static_cast<float>(shape->animations[animationIndex].duration));
+    float animationTime = fmodf(timeInTicks, static_cast<float>(m_shape->animations[m_animationIndex].duration));
 
-    readNodeHeirarchy(animationTime, shape->rootNode, identity);
+    readNodeHierarchy(animationTime, m_shape->rootNode, identity);
 }
 
-usize Animator::findPosition(const float animationTime, const AnimNode *animNode) {
+void Animator::setShape(Shape *const shape) {
+    m_shape = shape;
+}
+
+void Animator::setAnimationIndex(const usize animationIndex) {
+    m_animationIndex = animationIndex;
+}
+
+Shape* Animator::getShape() const {
+    return m_shape;
+}
+
+usize Animator::getAnimationIndex() const {
+    return m_animationIndex;
+}
+
+inline usize findPosition(const float animationTime, const AnimNode *animNode) {
     assert(!animNode->positionKeys.empty());
 
     for (usize i = 0; i < animNode->positionKeys.size() - 1; i++) {
@@ -36,7 +51,7 @@ usize Animator::findPosition(const float animationTime, const AnimNode *animNode
     assert(0);
 }
 
-void Animator::calcInterpolatedPosition(glm::vec3 &out, const float animationTime, const AnimNode *animNode) {
+inline void calcInterpolatedPosition(glm::vec3 &out, const float animationTime, const AnimNode *animNode) {
     if (animNode->positionKeys.size() == 1) {
         out = animNode->positionKeys[0].value;
         return;
@@ -45,8 +60,8 @@ void Animator::calcInterpolatedPosition(glm::vec3 &out, const float animationTim
     usize positionIndex = findPosition(animationTime, animNode);
     usize nextPositionIndex = positionIndex + 1;
     assert(nextPositionIndex < animNode->positionKeys.size());
-    float deltaTime = (float)(animNode->positionKeys[nextPositionIndex].time - animNode->positionKeys[positionIndex].time);
-    float factor = (animationTime - (float)animNode->positionKeys[positionIndex].time) / deltaTime;
+    auto deltaTime = (float)(animNode->positionKeys[nextPositionIndex].time - animNode->positionKeys[positionIndex].time);
+    auto factor = (animationTime - (float)animNode->positionKeys[positionIndex].time) / deltaTime;
 #ifdef mkAssert
     assert(factor >= 0.0f && factor <= 1.0f);
 #endif
@@ -56,7 +71,7 @@ void Animator::calcInterpolatedPosition(glm::vec3 &out, const float animationTim
     out = start + factor * delta;
 }
 
-usize Animator::findRotation(const float animationTime, const AnimNode *animNode) {
+inline usize findRotation(const float animationTime, const AnimNode *animNode) {
     assert(!animNode->rotationKeys.empty());
 
     for (usize i = 0; i < animNode->rotationKeys.size() - 1; i++) {
@@ -68,7 +83,7 @@ usize Animator::findRotation(const float animationTime, const AnimNode *animNode
     assert(0);
 }
 
-void Animator::calcInterpolatedRotation(glm::quat &out, const float animationTime, const AnimNode *animNode) {
+inline void calcInterpolatedRotation(glm::quat &out, const float animationTime, const AnimNode *animNode) {
     // we need at least two values to interpolate...
     if (animNode->rotationKeys.size() == 1) {
         out = animNode->rotationKeys[0].value;
@@ -78,8 +93,8 @@ void Animator::calcInterpolatedRotation(glm::quat &out, const float animationTim
     usize rotationIndex = findRotation(animationTime, animNode);
     usize nextRotationIndex = rotationIndex + 1;
     assert(nextRotationIndex < animNode->rotationKeys.size());
-    float deltaTime = (float)(animNode->rotationKeys[nextRotationIndex].time - animNode->rotationKeys[rotationIndex].time);
-    float factor = (animationTime - (float)animNode->rotationKeys[rotationIndex].time) / deltaTime;
+    auto deltaTime = (float)(animNode->rotationKeys[nextRotationIndex].time - animNode->rotationKeys[rotationIndex].time);
+    auto factor = (animationTime - (float)animNode->rotationKeys[rotationIndex].time) / deltaTime;
 #ifdef mkAssert
     assert(factor >= 0.0f && factor <= 1.0f);
 #endif
@@ -89,7 +104,7 @@ void Animator::calcInterpolatedRotation(glm::quat &out, const float animationTim
     out = glm::normalize(out);
 }
 
-usize Animator::findScaling(const float animationTime, const AnimNode *animNode) {
+inline usize findScaling(const float animationTime, const AnimNode *animNode) {
     assert(!animNode->scalingKeys.empty());
 
     for (usize i = 0; i < animNode->scalingKeys.size() - 1; i++) {
@@ -101,7 +116,7 @@ usize Animator::findScaling(const float animationTime, const AnimNode *animNode)
     assert(0);
 }
 
-void Animator::calcInterpolatedScaling(glm::vec3 &out, const float animationTime, const AnimNode *animNode) {
+inline void calcInterpolatedScaling(glm::vec3 &out, const float animationTime, const AnimNode *animNode) {
     if (animNode->scalingKeys.size() == 1) {
         out = animNode->scalingKeys[0].value;
         return;
@@ -110,8 +125,8 @@ void Animator::calcInterpolatedScaling(glm::vec3 &out, const float animationTime
     usize scalingIndex = findScaling(animationTime, animNode);
     usize nextScalingIndex = scalingIndex + 1;
     assert(nextScalingIndex < animNode->scalingKeys.size());
-    float deltaTime = (float)(animNode->scalingKeys[nextScalingIndex].time - animNode->scalingKeys[scalingIndex].time);
-    float factor = (animationTime - (float)animNode->scalingKeys[scalingIndex].time) / deltaTime;
+    auto deltaTime = (float)(animNode->scalingKeys[nextScalingIndex].time - animNode->scalingKeys[scalingIndex].time);
+    auto factor = (animationTime - (float)animNode->scalingKeys[scalingIndex].time) / deltaTime;
 #ifdef mkAssert
     assert(factor >= 0.0f && factor <= 1.0f);
 #endif
@@ -121,7 +136,7 @@ void Animator::calcInterpolatedScaling(glm::vec3 &out, const float animationTime
     out = start + factor * delta;
 }
 
-const AnimNode* Animator::findNodeAnim(const Animation *animation, const std::string &nodeName) {
+inline const AnimNode* findNodeAnim(const Animation *animation, const std::string &nodeName) {
     for (usize i = 0 ; i < animation->channels.size(); i++) {
         const AnimNode *channel = &animation->channels[i];
 
@@ -132,9 +147,9 @@ const AnimNode* Animator::findNodeAnim(const Animation *animation, const std::st
     return nullptr;
 }
 
-void Animator::readNodeHeirarchy(const float animationTime, const Node &node, const glm::mat4 &parentTransform) {
+void Animator::readNodeHierarchy(const float animationTime, const Node &node, const glm::mat4 &parentTransform) {
     const std::string &nodeName = node.name;
-    const Animation &animation = shape->animations[animationIndex];
+    const Animation &animation = m_shape->animations[m_animationIndex];
     glm::mat4 nodeTransformation = node.defaultTransform * node.transformation; // WARNING: experimental feature "node.transformation"
     const AnimNode *animNode = findNodeAnim(&animation, nodeName);
 
@@ -164,14 +179,14 @@ void Animator::readNodeHeirarchy(const float animationTime, const Node &node, co
     // WARNING: experimental feature "node.transformation"
     glm::mat4 globalTransformation = parentTransform * nodeTransformation * node.transformation;
 
-    for (usize i = 0; i < shape->bones.size(); i++) {
-        if (shape->bones[i].name == nodeName) {
-            shape->bones[i].finalTransformation = shape->globalInverseTransform * globalTransformation * shape->bones[i].offsetMatrix;
+    for (auto & bone : m_shape->bones) {
+        if (bone.name == nodeName) {
+            bone.finalTransformation = m_shape->globalInverseTransform * globalTransformation * bone.offsetMatrix;
             break;
         }
     }
 
-    for (usize i = 0; i < node.childs.size(); i++)
-        readNodeHeirarchy(animationTime, node.childs[i], globalTransformation);
+    for (const auto & child : node.childs)
+        readNodeHierarchy(animationTime, child, globalTransformation);
 }
 }
