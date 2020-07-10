@@ -66,4 +66,12 @@ void Shape::recycle() {
                          buffers.tangents, buffers.bitangents, buffers.boneWeights, buffers.boneIds);
     IndexBuffer::destroy(buffers.indices);
 }
+
+usize Shape::getAnimationIndexByName(const std::string &name) {
+    for (usize i = 0; i < animations.size(); i++)
+        if (animations[i].name == name)
+            return i;
+
+    return AnimationNotFound;
+}
 }

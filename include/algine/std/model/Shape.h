@@ -10,6 +10,9 @@
 namespace algine {
 class Shape {
 public:
+    constexpr static usize AnimationNotFound = -1;
+
+public:
     // TODO: move it to ShapeLoader
     // creates InputLayout and adds it into inputLayouts array
     // note: this function will limit max bones per vertex to 4
@@ -22,6 +25,8 @@ public:
 
     void setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation);
     void recycle();
+
+    usize getAnimationIndexByName(const std::string &name);
 
 public:
     std::vector<Mesh> meshes;
