@@ -1,10 +1,18 @@
 #define GLM_FORCE_CTOR_INIT
 #include <algine/std/animation/Animator.h>
 
+#include <stdexcept>
 #include <glm/gtx/quaternion.hpp>
+
+using namespace std;
 
 namespace algine {
 Animator::Animator() = default;
+
+Animator::Animator(Shape *const shape, const std::string &animationName) {
+    m_shape = shape;
+    setAnimation(animationName);
+}
 
 Animator::Animator(Shape *const shape, const usize animationIndex) {
     m_shape = shape;
@@ -29,6 +37,19 @@ void Animator::setShape(Shape *const shape) {
 
 void Animator::setAnimationIndex(const usize animationIndex) {
     m_animationIndex = animationIndex;
+}
+
+void Animator::setAnimation(const std::string &name) {
+    m_animationIndex = m_shape->getAnimationIndexByName(name);
+
+    if (m_animationIndex == Shape::AnimationNotFound) {
+        string available;
+
+        for (uint i = 0; i < m_shape->animations.size(); i++)
+            available += "  " + to_string(i) + ". '" + m_shape->animations[i].name + "'\n";
+
+        throw runtime_error("Animation '" + name + "' not found\nAvailable animations:\n" + available);
+    }
 }
 
 Shape* Animator::getShape() const {

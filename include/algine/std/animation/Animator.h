@@ -8,12 +8,14 @@ namespace algine {
 class Animator {
 public:
     Animator();
+    Animator(Shape *shape, const std::string &animationName);
     explicit Animator(Shape *shape, usize animationIndex = 0);
 
     void animate(float timeInSeconds);
 
     void setShape(Shape *shape);
     void setAnimationIndex(usize animationIndex);
+    void setAnimation(const std::string &name);
 
     Shape* getShape() const;
     usize getAnimationIndex() const;
