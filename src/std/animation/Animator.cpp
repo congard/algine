@@ -200,11 +200,10 @@ void Animator::readNodeHierarchy(const float animationTime, const Node &node, co
     // WARNING: experimental feature "node.transformation"
     glm::mat4 globalTransformation = parentTransform * nodeTransformation * node.transformation;
 
-    for (auto & bone : m_shape->bones) {
-        if (bone.name == nodeName) {
-            bone.finalTransformation = m_shape->globalInverseTransform * globalTransformation * bone.offsetMatrix;
-            break;
-        }
+    uint index = m_shape->bonesStorage.getIndex(nodeName);
+    if (index != BonesStorage::BoneNotFound) {
+        auto &bone = m_shape->bonesStorage.bones[index];
+        bone.finalTransformation = m_shape->globalInverseTransform * globalTransformation * bone.boneMatrix;
     }
 
     for (const auto & child : node.childs)

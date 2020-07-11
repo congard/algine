@@ -113,14 +113,6 @@ Shape *ShapeLoader::getShape() const {
     return m_shape;
 }
 
-inline int getBoneIndex(const Shape *shape, const std::string &name) {
-    for (usize i = 0; i < shape->bones.size(); i++)
-        if (shape->bones[i].name == name)
-            return i;
-
-    return -1;
-}
-
 ShapeLoader::LoadedTexture::LoadedTexture(
         const string &path, const shared_ptr<Texture2D> &texture,
         const map<uint, uint> &params)
@@ -131,7 +123,7 @@ ShapeLoader::LoadedTexture::LoadedTexture(
 }
 
 void ShapeLoader::loadBones(const aiMesh *aimesh) {
-    std::vector<BoneInfo> binfos; // bone infos
+    vector<BoneInfo> binfos; // bone infos
     binfos.reserve(aimesh->mNumVertices); // allocating space
 
     // filling array
@@ -141,12 +133,12 @@ void ShapeLoader::loadBones(const aiMesh *aimesh) {
     // loading bone data
     for (usize i = 0; i < aimesh->mNumBones; i++) {
         aiBone *bone = aimesh->mBones[i];
-        std::string boneName(bone->mName.data);
-        int boneIndex = getBoneIndex(m_shape, boneName);
+        string boneName(bone->mName.data);
+        int boneIndex = m_shape->bonesStorage.getIndex(boneName);
 
-        if (boneIndex == -1) {
-            boneIndex = m_shape->bones.size();
-            m_shape->bones.emplace_back(boneName, getMat4(bone->mOffsetMatrix));
+        if (boneIndex == BonesStorage::BoneNotFound) {
+            boneIndex = m_shape->bonesStorage.count();
+            m_shape->bonesStorage.bones.emplace_back(boneName, getMat4(bone->mOffsetMatrix));
         }
 
         for (usize j = 0; j < bone->mNumWeights; j++) {
@@ -156,10 +148,10 @@ void ShapeLoader::loadBones(const aiMesh *aimesh) {
     }
 
     // converting to a suitable view
-    for (size_t i = 0; i < binfos.size(); i++) {
-        for (size_t j = 0; j < binfos[i].size(); j++) {
-            m_shape->geometry.boneIds.push_back(binfos[i].ids[j]);
-            m_shape->geometry.boneWeights.push_back(binfos[i].weights[j]);
+    for (auto & binfo : binfos) {
+        for (size_t j = 0; j < binfo.size(); j++) {
+            m_shape->geometry.boneIds.push_back(binfo.ids[j]);
+            m_shape->geometry.boneWeights.push_back(binfo.weights[j]);
         }
     }
 }

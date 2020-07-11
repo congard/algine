@@ -3,7 +3,7 @@
 
 #include <algine/std/Node.h>
 #include <algine/std/animation/Animation.h>
-#include <algine/std/animation/Bone.h>
+#include <algine/std/animation/BonesStorage.h>
 #include <algine/std/model/Mesh.h>
 #include <algine/core/InputLayout.h>
 
@@ -30,10 +30,10 @@ public:
 
 public:
     std::vector<Mesh> meshes;
-    std::vector<Bone> bones;
     std::vector<Animation> animations;
     glm::mat4 globalInverseTransform;
     std::vector<InputLayout*> inputLayouts;
+    BonesStorage bonesStorage;
     Node rootNode;
     uint bonesPerVertex = 0;
 
