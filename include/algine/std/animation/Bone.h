@@ -7,11 +7,11 @@
 namespace algine {
 class Bone {
 public:
-    Bone(const std::string &name, const glm::mat4 &offsetMatrix);
+    Bone(const std::string &name, const glm::mat4 &matrix);
 
 public:
     std::string name;
-    glm::mat4 offsetMatrix, finalTransformation;
+    glm::mat4 boneMatrix, finalTransformation;
 };
 }
 
