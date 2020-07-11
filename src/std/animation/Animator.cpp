@@ -171,7 +171,7 @@ inline const AnimNode* findNodeAnim(const Animation *animation, const std::strin
 void Animator::readNodeHierarchy(const float animationTime, const Node &node, const glm::mat4 &parentTransform) {
     const std::string &nodeName = node.name;
     const Animation &animation = m_shape->animations[m_animationIndex];
-    glm::mat4 nodeTransformation = node.defaultTransform * node.transformation; // WARNING: experimental feature "node.transformation"
+    glm::mat4 nodeTransformation = node.defaultTransform;
     const AnimNode *animNode = findNodeAnim(&animation, nodeName);
 
     if (animNode) {
