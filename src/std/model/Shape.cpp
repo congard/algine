@@ -67,6 +67,18 @@ void Shape::recycle() {
     IndexBuffer::destroy(buffers.indices);
 }
 
+void Shape::prepareAnimation(const uint index) {
+    animations[index].bones.resize(bonesStorage.count());
+}
+
+void Shape::invalidateAnimation(const uint index) {
+    animations[index].bones.clear();
+}
+
+bool Shape::isAnimationValid(const uint index) {
+    return animations[index].bones.size() == bonesStorage.count();
+}
+
 usize Shape::getAnimationIndexByName(const std::string &name) {
     for (usize i = 0; i < animations.size(); i++)
         if (animations[i].name == name)

@@ -26,6 +26,10 @@ public:
     void setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation);
     void recycle();
 
+    void prepareAnimation(uint index);
+    void invalidateAnimation(uint index);
+    bool isAnimationValid(uint index);
+
     usize getAnimationIndexByName(const std::string &name);
 
 public:
