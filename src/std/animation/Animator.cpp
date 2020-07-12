@@ -203,7 +203,8 @@ void Animator::readNodeHierarchy(const float animationTime, const Node &node, co
     uint index = m_shape->bonesStorage.getIndex(nodeName);
     if (index != BonesStorage::BoneNotFound) {
         auto &bone = m_shape->bonesStorage.bones[index];
-        bone.finalTransformation = m_shape->globalInverseTransform * globalTransformation * bone.boneMatrix;
+        auto &dstBone = m_shape->animations[m_animationIndex].bones[index];
+        dstBone = m_shape->globalInverseTransform * globalTransformation * bone.boneMatrix;
     }
 
     for (const auto & child : node.childs)
