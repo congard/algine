@@ -55,11 +55,6 @@ void ShapeLoader::load() {
     m_shape->globalInverseTransform = getMat4(scene->mRootNode->mTransformation);
     m_shape->globalInverseTransform = glm::inverse(m_shape->globalInverseTransform);
 
-    m_shape->rootNode = Node(scene->mRootNode);
-    m_shape->animations.reserve(scene->mNumAnimations); // allocate space for animations
-    for (size_t i = 0; i < scene->mNumAnimations; i++)
-        m_shape->animations.emplace_back(scene->mAnimations[i]);
-
     std::string amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
     AMTLLoader amtl;
     if (amtl.load(amtlPath))
@@ -73,12 +68,22 @@ void ShapeLoader::load() {
 
     processNode(scene->mRootNode, scene);
 
+    // load animations
+    m_shape->rootNode = Node(scene->mRootNode);
+    m_shape->animations.reserve(scene->mNumAnimations); // allocate space for animations
+    for (size_t i = 0; i < scene->mNumAnimations; i++)
+        m_shape->animations.emplace_back(scene->mAnimations[i]);
+
     // apply algine params
     for (const uint p : algineParams) {
         switch (p) {
             case InverseNormals:
                 for (float &normal : m_shape->geometry.normals)
                     normal *= -1;
+                break;
+            case PrepareAllAnimations:
+                for (auto & animation : m_shape->animations)
+                    animation.bones.resize(m_shape->bonesStorage.count());
                 break;
             default:
                 std::cerr << "Unknown algine param " << p << "\n";

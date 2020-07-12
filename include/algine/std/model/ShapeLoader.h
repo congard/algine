@@ -17,7 +17,8 @@ public:
         SortByPolygonType,
         CalcTangentSpace,
         JoinIdenticalVertices,
-        InverseNormals
+        InverseNormals,
+        PrepareAllAnimations
     };
 
     ShapeLoader();
