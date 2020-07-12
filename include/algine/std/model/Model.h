@@ -14,10 +14,25 @@ public:
 
     void updateMatrix();
 
+    void setShape(Shape *shape);
+    void setAnimator(Animator *animator);
+    void setBones(std::vector<glm::mat4> *bones);
+    void setBonesFromAnimation(uint animationIndex);
+    void setBonesFromAnimation(const std::string &animationName);
+
+    Shape* getShape() const;
+    Animator* getAnimator() const;
+    std::vector<glm::mat4>* getBones() const;
+    glm::mat4& getBone(uint index) const;
+    glm::mat4& transformation();
+
 public:
-    Shape *shape = nullptr;
-    Animator *animator = nullptr;
     glm::mat4 m_transform;
+
+private:
+    Shape *m_shape = nullptr;
+    Animator *m_animator = nullptr;
+    std::vector<glm::mat4> *m_bones = nullptr;
 };
 }
 
