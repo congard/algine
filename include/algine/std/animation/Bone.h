@@ -11,7 +11,7 @@ public:
 
 public:
     std::string name;
-    glm::mat4 boneMatrix, finalTransformation;
+    glm::mat4 boneMatrix;
 };
 }
 
