@@ -16,15 +16,15 @@ public:
 
     void setShape(Shape *shape);
     void setAnimator(Animator *animator);
-    void setBones(std::vector<glm::mat4> *bones);
+    void setBones(const std::vector<glm::mat4> *bones);
     void setBonesFromAnimation(uint animationIndex);
     void setBonesFromAnimation(const std::string &animationName);
 
     Shape* getShape() const;
     Animator* getAnimator() const;
-    std::vector<glm::mat4>* getBones() const;
-    glm::mat4& getBone(uint index) const;
     glm::mat4& transformation();
+    const std::vector<glm::mat4>* getBones() const;
+    const glm::mat4& getBone(uint index) const;
 
 public:
     glm::mat4 m_transform;
@@ -32,7 +32,7 @@ public:
 private:
     Shape *m_shape = nullptr;
     Animator *m_animator = nullptr;
-    std::vector<glm::mat4> *m_bones = nullptr;
+    const std::vector<glm::mat4> *m_bones = nullptr;
 };
 }
 

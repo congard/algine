@@ -25,7 +25,7 @@ void Model::setAnimator(Animator *animator) {
     m_animator = animator;
 }
 
-void Model::setBones(vector<mat4> *bones) {
+void Model::setBones(const vector<mat4> *bones) {
     m_bones = bones;
 }
 
@@ -45,15 +45,15 @@ Animator* Model::getAnimator() const {
     return m_animator;
 }
 
-vector<mat4>* Model::getBones() const {
+mat4& Model::transformation() {
+    return m_transform;
+}
+
+const vector<mat4>* Model::getBones() const {
     return m_bones;
 }
 
-mat4& Model::getBone(const uint index) const {
+const mat4& Model::getBone(const uint index) const {
     return m_bones->operator[](index);
-}
-
-mat4& Model::transformation() {
-    return m_transform;
 }
 }
