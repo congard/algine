@@ -98,6 +98,7 @@ add_library(algine
         include/algine/core/texture/TextureCreateInfo.h
         include/algine/core/shader/ShadersInfo.h
         include/algine/std/model/Mesh.h
+        include/algine/std/model/InputLayoutShapeLocations.h
 
         src/core/Framebuffer.cpp include/algine/core/Framebuffer.h
         src/core/Renderbuffer.cpp include/algine/core/Renderbuffer.h
