@@ -12,6 +12,7 @@ class TextureCube;
 class ArrayBuffer;
 class IndexBuffer;
 class ShaderProgram;
+class InputLayout;
 
 class Engine {
     friend class Framebuffer;
@@ -21,6 +22,7 @@ class Engine {
     friend class TextureCube;
     friend class Buffer;
     friend class ShaderProgram;
+    friend class InputLayout;
 
 public:
     static void init();
@@ -33,6 +35,7 @@ public:
     static ArrayBuffer* getBoundArrayBuffer();
     static IndexBuffer* getBoundIndexBuffer();
     static ShaderProgram* getBoundShaderProgram();
+    static InputLayout* getBoundInputLayout();
 
     static std::string getGPUVendor();
     static std::string getGPURenderer();
@@ -45,6 +48,7 @@ public:
     static ArrayBuffer* defaultArrayBuffer();
     static IndexBuffer* defaultIndexBuffer();
     static ShaderProgram* defaultShaderProgram();
+    static InputLayout* defaultInputLayout();
 
 public:
     enum DepthTestModes {
@@ -90,6 +94,7 @@ private:
     static ArrayBuffer *m_defaultArrayBuffer;
     static IndexBuffer *m_defaultIndexBuffer;
     static ShaderProgram *m_defaultShaderProgram;
+    static InputLayout *m_defaultInputLayout;
 
 private:
     static void setBoundObject(uint type, const void *obj);
@@ -102,6 +107,7 @@ private:
     static ArrayBuffer *m_boundArrayBuffer;
     static IndexBuffer *m_boundIndexBuffer;
     static ShaderProgram *m_boundShaderProgram;
+    static InputLayout *m_boundInputLayout;
 };
 }
 

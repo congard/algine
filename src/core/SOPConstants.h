@@ -11,7 +11,8 @@ enum {
     TextureCubeObject,
     ArrayBufferObject,
     IndexBufferObject,
-    ShaderProgramObject
+    ShaderProgramObject,
+    InputLayoutObject
 };
 
 constant(FramebufferStr, "Framebuffer")
@@ -21,6 +22,7 @@ constant(TextureCubeStr, "TextureCube")
 constant(ArrayBufferStr, "ArrayBuffer")
 constant(IndexBufferStr, "IndexBuffer")
 constant(ShaderProgramStr, "ShaderProgram")
+constant(InputLayoutStr, "InputLayout")
 }
 
 #undef constant

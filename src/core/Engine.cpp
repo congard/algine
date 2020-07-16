@@ -6,6 +6,7 @@
 #include <algine/core/buffers/ArrayBuffer.h>
 #include <algine/core/buffers/IndexBuffer.h>
 #include <algine/core/shader/ShaderProgram.h>
+#include <algine/core/InputLayout.h>
 
 #include <GL/glew.h>
 
@@ -19,6 +20,7 @@ TextureCube* Engine::m_defaultTextureCube;
 ArrayBuffer* Engine::m_defaultArrayBuffer;
 IndexBuffer* Engine::m_defaultIndexBuffer;
 ShaderProgram* Engine::m_defaultShaderProgram;
+InputLayout* Engine::m_defaultInputLayout;
 
 Framebuffer* Engine::m_boundFramebuffer;
 Renderbuffer* Engine::m_boundRenderbuffer;
@@ -27,6 +29,7 @@ TextureCube* Engine::m_boundTextureCube;
 ArrayBuffer* Engine::m_boundArrayBuffer;
 IndexBuffer* Engine::m_boundIndexBuffer;
 ShaderProgram* Engine::m_boundShaderProgram;
+InputLayout* Engine::m_boundInputLayout;
 
 void Engine::init() {
     // We use malloc instead of new since we don't want the ctor to be
@@ -57,6 +60,9 @@ void Engine::init() {
 
     m_defaultShaderProgram = (ShaderProgram*) malloc(sizeof(ShaderProgram));
     m_defaultShaderProgram->id = 0;
+
+    m_defaultInputLayout = (InputLayout*) malloc(sizeof(InputLayout));
+    m_defaultInputLayout->m_id = 0;
 }
 
 void Engine::destroy() {
@@ -67,6 +73,7 @@ void Engine::destroy() {
     ArrayBuffer::destroy(m_defaultArrayBuffer);
     IndexBuffer::destroy(m_defaultIndexBuffer);
     ShaderProgram::destroy(m_defaultShaderProgram);
+    InputLayout::destroy(m_defaultInputLayout);
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS
@@ -80,6 +87,7 @@ returnBound(TextureCube, getBoundTextureCube, m_boundTextureCube, m_defaultTextu
 returnBound(ArrayBuffer, getBoundArrayBuffer, m_boundArrayBuffer, m_defaultArrayBuffer)
 returnBound(IndexBuffer, getBoundIndexBuffer, m_boundIndexBuffer, m_defaultIndexBuffer)
 returnBound(ShaderProgram, getBoundShaderProgram, m_boundShaderProgram, m_defaultShaderProgram)
+returnBound(InputLayout, getBoundInputLayout, m_boundInputLayout, m_defaultInputLayout)
 #else
 #define returnNull(type, name) type* Engine::name() { return nullptr; }
 
@@ -90,6 +98,7 @@ returnNull(TextureCube, getBoundTextureCube)
 returnNull(ArrayBuffer, getBoundArrayBuffer)
 returnNull(IndexBuffer, getBoundIndexBuffer)
 returnNull(ShaderProgram, getBoundShaderProgram)
+returnNull(InputLayout, getBoundInputLayout)
 #endif
 
 string Engine::getGPUVendor() {
@@ -109,6 +118,7 @@ returnDefault(TextureCube, defaultTextureCube, m_defaultTextureCube)
 returnDefault(ArrayBuffer, defaultArrayBuffer, m_defaultArrayBuffer)
 returnDefault(IndexBuffer, defaultIndexBuffer, m_defaultIndexBuffer)
 returnDefault(ShaderProgram, defaultShaderProgram, m_defaultShaderProgram)
+returnDefault(InputLayout, defaultInputLayout, m_defaultInputLayout)
 
 void Engine::enableDepthTest() {
     glEnable(GL_DEPTH_TEST);
@@ -175,6 +185,9 @@ void Engine::setBoundObject(const uint type, const void *const obj) {
             break;
         case SOPConstants::ShaderProgramObject:
             m_boundShaderProgram = (ShaderProgram*) obj;
+            break;
+        case SOPConstants::InputLayoutObject:
+            m_boundInputLayout = (InputLayout*) obj;
             break;
         default:
             break;

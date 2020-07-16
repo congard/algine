@@ -1,6 +1,15 @@
 #include <algine/core/InputLayout.h>
+#include <algine/core/Engine.h>
+
 #include <GL/glew.h>
 #include <iostream>
+
+#define SOP_BOUND_PTR Engine::m_boundInputLayout
+#define SOP_OBJECT_TYPE SOPConstants::InputLayoutObject
+#define SOP_OBJECT_ID m_id
+#define SOP_OBJECT_NAME SOPConstants::InputLayoutStr
+#include "SOP.h"
+#include "SOPConstants.h"
 
 using namespace std;
 
@@ -14,10 +23,13 @@ InputLayout::~InputLayout() {
 }
 
 void InputLayout::bind() const {
+    commitBinding()
     glBindVertexArray(m_id);
 }
 
 void InputLayout::unbind() const {
+    checkBinding()
+    commitUnbinding()
     glBindVertexArray(0);
 }
 
@@ -27,6 +39,8 @@ InputLayout::addAttribute(
         const InputAttributeDescription &inputAttributeDescription,
         const ArrayBuffer *arrayBuffer) const
 {
+    checkBinding()
+
     glEnableVertexAttribArray(inputAttributeDescription.m_location);
     arrayBuffer->bind();
 
@@ -64,6 +78,7 @@ InputLayout::addAttribute(
 }
 
 void InputLayout::setIndexBuffer(const IndexBuffer *indexBuffer) const {
+    checkBinding()
     indexBuffer->bind();
 }
 }
