@@ -1,59 +1,6 @@
 #include <algine/std/model/Shape.h>
 
 namespace algine {
-inline void
-addAttribute(
-        const InputLayout *inputLayout,
-        const InputAttributeDescription &inputAttributeDescription,
-        const ArrayBuffer *arrayBuffer)
-{
-    if (inputAttributeDescription.m_location != InputAttributeDescription::LocationAbsent && arrayBuffer != nullptr)
-        inputLayout->addAttribute(inputAttributeDescription, arrayBuffer);
-}
-
-void Shape::createInputLayout(
-        int inPosition, int inTexCoord, int inNormal,
-        int inTangent, int inBitangent,
-        int inBoneWeights, int inBoneIds
-) {
-    auto *inputLayout = new InputLayout();
-    inputLayout->bind();
-    inputLayouts.push_back(inputLayout);
-
-    InputAttributeDescription attribDescription;
-    attribDescription.setCount(3);
-
-    attribDescription.setLocation(inPosition);
-    addAttribute(inputLayout, attribDescription, buffers.vertices);
-
-    attribDescription.setLocation(inNormal);
-    addAttribute(inputLayout, attribDescription, buffers.normals);
-
-    attribDescription.setLocation(inTangent);
-    addAttribute(inputLayout, attribDescription, buffers.tangents);
-
-    attribDescription.setLocation(inBitangent);
-    addAttribute(inputLayout, attribDescription, buffers.bitangents);
-
-    attribDescription.setLocation(inTexCoord);
-    attribDescription.setCount(2);
-    addAttribute(inputLayout, attribDescription, buffers.texCoords);
-
-    if (bonesPerVertex != 0) {
-        attribDescription.setCount(4);
-
-        attribDescription.setLocation(inBoneWeights);
-        addAttribute(inputLayout, attribDescription, buffers.boneWeights);
-
-        attribDescription.setLocation(inBoneIds);
-        attribDescription.setFormat(GL_UNSIGNED_INT); // TODO
-        addAttribute(inputLayout, attribDescription, buffers.boneIds);
-    }
-
-    inputLayout->setIndexBuffer(buffers.indices);
-    inputLayout->unbind();
-}
-
 void Shape::setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation) {
     rootNode.getNode(nodeName)->transformation = transformation;
 }
@@ -65,6 +12,55 @@ void Shape::recycle() {
     ArrayBuffer::destroy(buffers.vertices, buffers.normals, buffers.texCoords,
                          buffers.tangents, buffers.bitangents, buffers.boneWeights, buffers.boneIds);
     IndexBuffer::destroy(buffers.indices);
+}
+
+inline void
+addAttribute(
+        const InputLayout *inputLayout,
+        const InputAttributeDescription &inputAttributeDescription,
+        const ArrayBuffer *arrayBuffer)
+{
+    if (inputAttributeDescription.m_location != InputAttributeDescription::LocationAbsent && arrayBuffer != nullptr)
+        inputLayout->addAttribute(inputAttributeDescription, arrayBuffer);
+}
+
+void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
+    auto *inputLayout = new InputLayout();
+    inputLayout->bind();
+    inputLayouts.push_back(inputLayout);
+
+    InputAttributeDescription attribDescription;
+    attribDescription.setCount(3);
+
+    attribDescription.setLocation(locations.inPosition);
+    addAttribute(inputLayout, attribDescription, buffers.vertices);
+
+    attribDescription.setLocation(locations.inNormal);
+    addAttribute(inputLayout, attribDescription, buffers.normals);
+
+    attribDescription.setLocation(locations.inTangent);
+    addAttribute(inputLayout, attribDescription, buffers.tangents);
+
+    attribDescription.setLocation(locations.inBitangent);
+    addAttribute(inputLayout, attribDescription, buffers.bitangents);
+
+    attribDescription.setLocation(locations.inTexCoord);
+    attribDescription.setCount(2);
+    addAttribute(inputLayout, attribDescription, buffers.texCoords);
+
+    if (bonesPerVertex != 0) {
+        attribDescription.setCount(4);
+
+        attribDescription.setLocation(locations.inBoneWeights);
+        addAttribute(inputLayout, attribDescription, buffers.boneWeights);
+
+        attribDescription.setLocation(locations.inBoneIds);
+        attribDescription.setFormat(GL_UNSIGNED_INT); // TODO
+        addAttribute(inputLayout, attribDescription, buffers.boneIds);
+    }
+
+    inputLayout->setIndexBuffer(buffers.indices);
+    inputLayout->unbind();
 }
 
 void Shape::prepareAnimation(const uint index) {

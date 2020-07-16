@@ -5,6 +5,7 @@
 #include <algine/std/animation/Animation.h>
 #include <algine/std/animation/BonesStorage.h>
 #include <algine/std/model/Mesh.h>
+#include <algine/std/model/InputLayoutShapeLocations.h>
 #include <algine/core/InputLayout.h>
 
 namespace algine {
@@ -13,18 +14,13 @@ public:
     constexpr static usize AnimationNotFound = -1;
 
 public:
-    // TODO: move it to ShapeLoader
-    // creates InputLayout and adds it into inputLayouts array
-    // note: this function will limit max bones per vertex to 4
-    // if you need more, you will have to create InputLayout manually
-    void createInputLayout(
-            int inPosition, int inTexCoord = -1, int inNormal = -1,
-            int inTangent = -1, int inBitangent = -1,
-            int inBoneWeights = -1, int inBoneIds = -1
-    );
-
     void setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation);
     void recycle();
+
+    /// creates InputLayout and adds it into inputLayouts array
+    /// <br>note: this function will limit max bones per vertex to 4
+    /// <br>if you need more, you will have to create InputLayout manually
+    void createInputLayout(const InputLayoutShapeLocations &locations);
 
     void prepareAnimation(uint index);
     void invalidateAnimation(uint index);
