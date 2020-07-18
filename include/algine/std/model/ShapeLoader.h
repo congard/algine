@@ -64,6 +64,11 @@ private:
                       const std::map<uint, uint> &params);
     };
 
+    struct Geometry {
+        std::vector<float> vertices, normals, texCoords, tangents, bitangents, boneWeights;
+        std::vector<uint> indices, boneIds;
+    } geometry;
+
 private:
     void loadBones(const aiMesh *aimesh);
     void processNode(const aiNode *node, const aiScene *scene);

@@ -1,13 +1,9 @@
 #include <algine/std/model/Shape.h>
 
 namespace algine {
-void Shape::setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation) {
-    rootNode.getNode(nodeName)->transformation = transformation;
-}
-
-void Shape::recycle() {
-    for (auto &item : inputLayouts)
-        InputLayout::destroy(item);
+Shape::~Shape() {
+    for (auto &inputLayout : inputLayouts)
+        InputLayout::destroy(inputLayout);
 
     ArrayBuffer::destroy(buffers.vertices, buffers.normals, buffers.texCoords,
                          buffers.tangents, buffers.bitangents, buffers.boneWeights, buffers.boneIds);
@@ -61,6 +57,10 @@ void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
 
     inputLayout->setIndexBuffer(buffers.indices);
     inputLayout->unbind();
+}
+
+void Shape::setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation) {
+    rootNode.getNode(nodeName)->transformation = transformation;
 }
 
 void Shape::prepareAnimation(const uint index) {

@@ -52,8 +52,7 @@ void ShapeLoader::load() {
         return;
     }
 
-    m_shape->globalInverseTransform = getMat4(scene->mRootNode->mTransformation);
-    m_shape->globalInverseTransform = glm::inverse(m_shape->globalInverseTransform);
+    m_shape->globalInverseTransform = glm::inverse(getMat4(scene->mRootNode->mTransformation));
 
     std::string amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
     AMTLLoader amtl;
@@ -78,7 +77,7 @@ void ShapeLoader::load() {
     for (const uint p : algineParams) {
         switch (p) {
             case InverseNormals:
-                for (float &normal : m_shape->geometry.normals)
+                for (float &normal : geometry.normals)
                     normal *= -1;
                 break;
             case PrepareAllAnimations:
@@ -155,8 +154,8 @@ void ShapeLoader::loadBones(const aiMesh *aimesh) {
     // converting to a suitable view
     for (auto & binfo : binfos) {
         for (size_t j = 0; j < binfo.size(); j++) {
-            m_shape->geometry.boneIds.push_back(binfo.ids[j]);
-            m_shape->geometry.boneWeights.push_back(binfo.weights[j]);
+            geometry.boneIds.push_back(binfo.ids[j]);
+            geometry.boneWeights.push_back(binfo.weights[j]);
         }
     }
 }
@@ -186,59 +185,59 @@ inline void mergeTexturePath(std::string &saveTo, AMTLLoader::MaterialObject &am
 
 void ShapeLoader::processMesh(const aiMesh *aimesh, const aiScene *scene) {
     Mesh mesh;
-    mesh.start = m_shape->geometry.indices.size();
-    uint verticesAtBeggining = m_shape->geometry.vertices.size() / 3;
+    mesh.start = geometry.indices.size();
+    uint verticesAtBeggining = geometry.vertices.size() / 3;
 
     // allocating space for vertices, normals, texCoords, tangents and bitangents
-    m_shape->geometry.vertices.reserve(aimesh->mNumVertices * 3);
+    geometry.vertices.reserve(aimesh->mNumVertices * 3);
     if (aimesh->HasNormals())
-        m_shape->geometry.normals.reserve(aimesh->mNumVertices * 3);
+        geometry.normals.reserve(aimesh->mNumVertices * 3);
     if (aimesh->HasTextureCoords(0))
-        m_shape->geometry.texCoords.reserve(aimesh->mNumVertices * 2);
+        geometry.texCoords.reserve(aimesh->mNumVertices * 2);
     if (aimesh->HasTangentsAndBitangents()) {
-        m_shape->geometry.tangents.reserve(aimesh->mNumVertices * 3);
-        m_shape->geometry.bitangents.reserve(aimesh->mNumVertices * 3);
+        geometry.tangents.reserve(aimesh->mNumVertices * 3);
+        geometry.bitangents.reserve(aimesh->mNumVertices * 3);
     }
 
     for (size_t i = 0; i < aimesh->mNumVertices; i++) {
         // vertices
-        m_shape->geometry.vertices.push_back(aimesh->mVertices[i].x);
-        m_shape->geometry.vertices.push_back(aimesh->mVertices[i].y);
-        m_shape->geometry.vertices.push_back(aimesh->mVertices[i].z);
+        geometry.vertices.push_back(aimesh->mVertices[i].x);
+        geometry.vertices.push_back(aimesh->mVertices[i].y);
+        geometry.vertices.push_back(aimesh->mVertices[i].z);
 
         // normals
         if (aimesh->HasNormals()) {
-            m_shape->geometry.normals.push_back(aimesh->mNormals[i].x);
-            m_shape->geometry.normals.push_back(aimesh->mNormals[i].y);
-            m_shape->geometry.normals.push_back(aimesh->mNormals[i].z);
+            geometry.normals.push_back(aimesh->mNormals[i].x);
+            geometry.normals.push_back(aimesh->mNormals[i].y);
+            geometry.normals.push_back(aimesh->mNormals[i].z);
         }
 
         // texCoords
         if (aimesh->HasTextureCoords(0)) {
-            m_shape->geometry.texCoords.push_back(aimesh->mTextureCoords[0][i].x);
-            m_shape->geometry.texCoords.push_back(aimesh->mTextureCoords[0][i].y);
+            geometry.texCoords.push_back(aimesh->mTextureCoords[0][i].x);
+            geometry.texCoords.push_back(aimesh->mTextureCoords[0][i].y);
         }
 
         // tangents and bitangents
         if (aimesh->HasTangentsAndBitangents()) {
-            m_shape->geometry.tangents.push_back(aimesh->mTangents[i].x);
-            m_shape->geometry.tangents.push_back(aimesh->mTangents[i].y);
-            m_shape->geometry.tangents.push_back(aimesh->mTangents[i].z);
+            geometry.tangents.push_back(aimesh->mTangents[i].x);
+            geometry.tangents.push_back(aimesh->mTangents[i].y);
+            geometry.tangents.push_back(aimesh->mTangents[i].z);
 
-            m_shape->geometry.bitangents.push_back(aimesh->mBitangents[i].x);
-            m_shape->geometry.bitangents.push_back(aimesh->mBitangents[i].y);
-            m_shape->geometry.bitangents.push_back(aimesh->mBitangents[i].z);
+            geometry.bitangents.push_back(aimesh->mBitangents[i].x);
+            geometry.bitangents.push_back(aimesh->mBitangents[i].y);
+            geometry.bitangents.push_back(aimesh->mBitangents[i].z);
         }
     }
 
     // faces
     for (size_t i = 0; i < aimesh->mNumFaces; i++) {
         for (size_t j = 0; j < aimesh->mFaces[i].mNumIndices; j++) {
-            m_shape->geometry.indices.push_back(aimesh->mFaces[i].mIndices[j] + verticesAtBeggining);
+            geometry.indices.push_back(aimesh->mFaces[i].mIndices[j] + verticesAtBeggining);
         }
     }
 
-    mesh.count = m_shape->geometry.indices.size() - mesh.start;
+    mesh.count = geometry.indices.size() - mesh.start;
 
     // load classic material & merge with AMTL
     aiString tmp_str;
@@ -392,15 +391,15 @@ inline BufferType* createBuffer(const std::vector<DataType> &data) {
 }
 
 void ShapeLoader::genBuffers() {
-    m_shape->buffers.vertices = createBuffer<ArrayBuffer>(m_shape->geometry.vertices);
-    m_shape->buffers.normals = createBuffer<ArrayBuffer>(m_shape->geometry.normals);
-    m_shape->buffers.texCoords = createBuffer<ArrayBuffer>(m_shape->geometry.texCoords);
-    m_shape->buffers.tangents = createBuffer<ArrayBuffer>(m_shape->geometry.tangents);
-    m_shape->buffers.bitangents = createBuffer<ArrayBuffer>(m_shape->geometry.bitangents);
-    m_shape->buffers.boneWeights = createBuffer<ArrayBuffer>(m_shape->geometry.boneWeights);
-    m_shape->buffers.boneIds = createBuffer<ArrayBuffer>(m_shape->geometry.boneIds);
+    m_shape->buffers.vertices = createBuffer<ArrayBuffer>(geometry.vertices);
+    m_shape->buffers.normals = createBuffer<ArrayBuffer>(geometry.normals);
+    m_shape->buffers.texCoords = createBuffer<ArrayBuffer>(geometry.texCoords);
+    m_shape->buffers.tangents = createBuffer<ArrayBuffer>(geometry.tangents);
+    m_shape->buffers.bitangents = createBuffer<ArrayBuffer>(geometry.bitangents);
+    m_shape->buffers.boneWeights = createBuffer<ArrayBuffer>(geometry.boneWeights);
+    m_shape->buffers.boneIds = createBuffer<ArrayBuffer>(geometry.boneIds);
 
-    m_shape->buffers.indices = createBuffer<IndexBuffer>(m_shape->geometry.indices);
+    m_shape->buffers.indices = createBuffer<IndexBuffer>(geometry.indices);
 }
 
 // using vector instead of map since the same texture may have different params

@@ -14,13 +14,14 @@ public:
     constexpr static usize AnimationNotFound = -1;
 
 public:
-    void setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation);
-    void recycle();
+    ~Shape();
 
     /// creates InputLayout and adds it into inputLayouts array
     /// <br>note: this function will limit max bones per vertex to 4
     /// <br>if you need more, you will have to create InputLayout manually
     void createInputLayout(const InputLayoutShapeLocations &locations);
+
+    void setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation);
 
     void prepareAnimation(uint index);
     void invalidateAnimation(uint index);
@@ -38,11 +39,6 @@ public:
     uint bonesPerVertex = 0;
 
 public:
-    struct Geometry {
-        std::vector<float> vertices, normals, texCoords, tangents, bitangents, boneWeights;
-        std::vector<uint> indices, boneIds;
-    } geometry;
-
     struct Buffers {
         ArrayBuffer *vertices, *normals, *texCoords, *tangents, *bitangents, *boneWeights, *boneIds;
         IndexBuffer *indices;
