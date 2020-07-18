@@ -3,7 +3,6 @@
 
 #include <algine/core/buffers/Buffer.h>
 #include <algine/templates.h>
-#include <tulz/macros.h>
 
 namespace algine {
 class ArrayBuffer: public Buffer {
