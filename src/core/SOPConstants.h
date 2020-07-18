@@ -11,6 +11,7 @@ enum {
     TextureCubeObject,
     ArrayBufferObject,
     IndexBufferObject,
+    UniformBufferObject,
     ShaderProgramObject,
     InputLayoutObject
 };
@@ -21,6 +22,7 @@ constant(Texture2DStr, "Texture2D")
 constant(TextureCubeStr, "TextureCube")
 constant(ArrayBufferStr, "ArrayBuffer")
 constant(IndexBufferStr, "IndexBuffer")
+constant(UniformBufferStr, "UniformBuffer")
 constant(ShaderProgramStr, "ShaderProgram")
 constant(InputLayoutStr, "InputLayout")
 }

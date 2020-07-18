@@ -5,6 +5,7 @@
 #include <algine/core/texture/TextureCube.h>
 #include <algine/core/buffers/ArrayBuffer.h>
 #include <algine/core/buffers/IndexBuffer.h>
+#include <algine/core/buffers/UniformBuffer.h>
 #include <algine/core/shader/ShaderProgram.h>
 #include <algine/core/InputLayout.h>
 
@@ -19,6 +20,7 @@ Texture2D* Engine::m_defaultTexture2D;
 TextureCube* Engine::m_defaultTextureCube;
 ArrayBuffer* Engine::m_defaultArrayBuffer;
 IndexBuffer* Engine::m_defaultIndexBuffer;
+UniformBuffer* Engine::m_defaultUniformBuffer;
 ShaderProgram* Engine::m_defaultShaderProgram;
 InputLayout* Engine::m_defaultInputLayout;
 
@@ -28,6 +30,7 @@ Texture2D* Engine::m_boundTexture2D;
 TextureCube* Engine::m_boundTextureCube;
 ArrayBuffer* Engine::m_boundArrayBuffer;
 IndexBuffer* Engine::m_boundIndexBuffer;
+UniformBuffer* Engine::m_boundUniformBuffer;
 ShaderProgram* Engine::m_boundShaderProgram;
 InputLayout* Engine::m_boundInputLayout;
 
@@ -58,6 +61,10 @@ void Engine::init() {
     m_defaultIndexBuffer->m_id = 0;
     m_defaultIndexBuffer->m_target = GL_ELEMENT_ARRAY_BUFFER;
 
+    m_defaultUniformBuffer = (UniformBuffer*) malloc(sizeof(UniformBuffer));
+    m_defaultUniformBuffer->m_id = 0;
+    m_defaultUniformBuffer->m_target = GL_UNIFORM_BUFFER;
+
     m_defaultShaderProgram = (ShaderProgram*) malloc(sizeof(ShaderProgram));
     m_defaultShaderProgram->id = 0;
 
@@ -72,6 +79,7 @@ void Engine::destroy() {
     TextureCube::destroy(m_defaultTextureCube);
     ArrayBuffer::destroy(m_defaultArrayBuffer);
     IndexBuffer::destroy(m_defaultIndexBuffer);
+    UniformBuffer::destroy(m_defaultUniformBuffer);
     ShaderProgram::destroy(m_defaultShaderProgram);
     InputLayout::destroy(m_defaultInputLayout);
 }
@@ -86,6 +94,7 @@ returnBound(Texture2D, getBoundTexture2D, m_boundTexture2D, m_defaultTexture2D)
 returnBound(TextureCube, getBoundTextureCube, m_boundTextureCube, m_defaultTextureCube)
 returnBound(ArrayBuffer, getBoundArrayBuffer, m_boundArrayBuffer, m_defaultArrayBuffer)
 returnBound(IndexBuffer, getBoundIndexBuffer, m_boundIndexBuffer, m_defaultIndexBuffer)
+returnBound(UniformBuffer, getBoundUniformBuffer, m_boundUniformBuffer, m_defaultUniformBuffer)
 returnBound(ShaderProgram, getBoundShaderProgram, m_boundShaderProgram, m_defaultShaderProgram)
 returnBound(InputLayout, getBoundInputLayout, m_boundInputLayout, m_defaultInputLayout)
 #else
@@ -97,6 +106,7 @@ returnNull(Texture2D, getBoundTexture2D)
 returnNull(TextureCube, getBoundTextureCube)
 returnNull(ArrayBuffer, getBoundArrayBuffer)
 returnNull(IndexBuffer, getBoundIndexBuffer)
+returnNull(UniformBuffer, getBoundUniformBuffer)
 returnNull(ShaderProgram, getBoundShaderProgram)
 returnNull(InputLayout, getBoundInputLayout)
 #endif
@@ -117,6 +127,7 @@ returnDefault(Texture2D, defaultTexture2D, m_defaultTexture2D)
 returnDefault(TextureCube, defaultTextureCube, m_defaultTextureCube)
 returnDefault(ArrayBuffer, defaultArrayBuffer, m_defaultArrayBuffer)
 returnDefault(IndexBuffer, defaultIndexBuffer, m_defaultIndexBuffer)
+returnDefault(UniformBuffer, defaultUniformBuffer, m_defaultUniformBuffer)
 returnDefault(ShaderProgram, defaultShaderProgram, m_defaultShaderProgram)
 returnDefault(InputLayout, defaultInputLayout, m_defaultInputLayout)
 
@@ -182,6 +193,9 @@ void Engine::setBoundObject(const uint type, const void *const obj) {
             break;
         case SOPConstants::IndexBufferObject:
             m_boundIndexBuffer = (IndexBuffer*) obj;
+            break;
+        case SOPConstants::UniformBufferObject:
+            m_boundUniformBuffer = (UniformBuffer*) obj;
             break;
         case SOPConstants::ShaderProgramObject:
             m_boundShaderProgram = (ShaderProgram*) obj;

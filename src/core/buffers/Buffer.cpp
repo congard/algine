@@ -2,6 +2,8 @@
 
 #include <algine/core/Engine.h>
 
+#include <GL/glew.h>
+
 #include <string>
 #include <cassert>
 
@@ -23,6 +25,8 @@ inline void* getBoundBuffer(const uint target) {
             return Engine::getBoundArrayBuffer();
         case GL_ELEMENT_ARRAY_BUFFER:
             return Engine::getBoundIndexBuffer();
+        case GL_UNIFORM_BUFFER:
+            return Engine::getBoundUniformBuffer();
         default:
             assert(0);
     }
@@ -34,6 +38,8 @@ inline uint getBufferObject(const uint target) {
             return SOPConstants::ArrayBufferObject;
         case GL_ELEMENT_ARRAY_BUFFER:
             return SOPConstants::IndexBufferObject;
+        case GL_UNIFORM_BUFFER:
+            return SOPConstants::UniformBufferObject;
         default:
             assert(0);
     }
@@ -45,6 +51,8 @@ inline string getBufferObjectName(const uint target) {
             return SOPConstants::ArrayBufferStr;
         case GL_ELEMENT_ARRAY_BUFFER:
             return SOPConstants::IndexBufferStr;
+        case GL_UNIFORM_BUFFER:
+            return SOPConstants::UniformBufferStr;
         default:
             assert(0);
     }

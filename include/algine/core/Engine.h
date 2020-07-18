@@ -11,6 +11,7 @@ class Texture2D;
 class TextureCube;
 class ArrayBuffer;
 class IndexBuffer;
+class UniformBuffer;
 class ShaderProgram;
 class InputLayout;
 
@@ -34,6 +35,7 @@ public:
     static TextureCube* getBoundTextureCube();
     static ArrayBuffer* getBoundArrayBuffer();
     static IndexBuffer* getBoundIndexBuffer();
+    static UniformBuffer* getBoundUniformBuffer();
     static ShaderProgram* getBoundShaderProgram();
     static InputLayout* getBoundInputLayout();
 
@@ -47,6 +49,7 @@ public:
     static TextureCube* defaultTextureCube();
     static ArrayBuffer* defaultArrayBuffer();
     static IndexBuffer* defaultIndexBuffer();
+    static UniformBuffer* defaultUniformBuffer();
     static ShaderProgram* defaultShaderProgram();
     static InputLayout* defaultInputLayout();
 
@@ -93,6 +96,7 @@ private:
     static TextureCube *m_defaultTextureCube;
     static ArrayBuffer *m_defaultArrayBuffer;
     static IndexBuffer *m_defaultIndexBuffer;
+    static UniformBuffer *m_defaultUniformBuffer;
     static ShaderProgram *m_defaultShaderProgram;
     static InputLayout *m_defaultInputLayout;
 
@@ -106,6 +110,7 @@ private:
     static TextureCube *m_boundTextureCube;
     static ArrayBuffer *m_boundArrayBuffer;
     static IndexBuffer *m_boundIndexBuffer;
+    static UniformBuffer *m_boundUniformBuffer;
     static ShaderProgram *m_boundShaderProgram;
     static InputLayout *m_boundInputLayout;
 };
