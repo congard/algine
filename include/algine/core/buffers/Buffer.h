@@ -18,6 +18,7 @@ public:
     void bind() const;
     void unbind() const;
     void setData(uint size, const void *data, uint usage);
+    void updateData(uint offset, uint size, const void *data);
 
     uint getId() const;
 

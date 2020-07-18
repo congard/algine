@@ -84,6 +84,11 @@ void Buffer::setData(const uint size, const void *data, const uint usage) {
     glBufferData(m_target, size, data, usage);
 }
 
+void Buffer::updateData(const uint offset, const uint size, const void *data) {
+    checkBinding()
+    glBufferSubData(m_target, offset, size, data);
+}
+
 uint Buffer::getId() const {
     return m_id;
 }
