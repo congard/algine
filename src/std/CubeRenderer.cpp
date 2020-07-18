@@ -1,5 +1,7 @@
 #include <algine/std/CubeRenderer.h>
 
+#include <GL/glew.h>
+
 namespace algine {
 CubeRenderer::CubeRenderer(const uint inPosLocation) {
     // source: https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip

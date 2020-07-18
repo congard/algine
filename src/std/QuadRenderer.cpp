@@ -1,5 +1,7 @@
 #include <algine/std/QuadRenderer.h>
 
+#include <GL/glew.h>
+
 namespace algine {
 QuadRenderer::QuadRenderer(const uint inPosLocation) {
     const float vertices[] = {
