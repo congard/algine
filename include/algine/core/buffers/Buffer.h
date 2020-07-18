@@ -2,13 +2,14 @@
 #define ALGINE_BUFFER_H
 
 #include <algine/types.h>
-#include <GL/glew.h>
 
 namespace algine {
 class Buffer {
 public:
     enum Usage {
-        StaticDraw = GL_STATIC_DRAW
+        StreamDraw = 0x88E0,
+        StaticDraw = 0x88E4,
+        DynamicDraw = 0x88E8
     };
 
     Buffer();
