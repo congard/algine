@@ -116,6 +116,7 @@ add_library(algine
         src/core/shader/Shader.cpp include/algine/core/shader/Shader.h
         src/core/shader/ShaderManager.cpp include/algine/core/shader/ShaderManager.h
         src/core/shader/ShaderProgram.cpp include/algine/core/shader/ShaderProgram.h
+        src/core/shader/UniformBlock.cpp include/algine/core/shader/UniformBlock.h
         src/core/Engine.cpp include/algine/core/Engine.h
         src/core/SOP.h src/core/SOPConstants.h
 
