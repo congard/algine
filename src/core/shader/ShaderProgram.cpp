@@ -70,7 +70,10 @@ void ShaderProgram::attachShader(const Shader &shader) {
 
 void ShaderProgram::link() {
     glLinkProgram(id);
-    ShaderTools::getProgramInfoLogById(id, GL_LINK_STATUS);
+
+    string infoLog = ShaderTools::getProgramInfoLogById(id, GL_LINK_STATUS);
+    if (!infoLog.empty())
+        cerr << "Info log of ShaderProgram with id " << id << ": " << infoLog;
 }
 
 void ShaderProgram::loadUniformLocation(const string &name) {

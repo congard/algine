@@ -40,7 +40,10 @@ void Shader::fromSource(const string &source) {
     const char *c_str = source.c_str();
     glShaderSource(id, 1, &c_str, nullptr);
     glCompileShader(id);
-    ShaderTools::getShaderInfoLogById(id, GL_COMPILE_STATUS);
+
+    string infoLog = ShaderTools::getShaderInfoLogById(id, GL_COMPILE_STATUS);
+    if (!infoLog.empty())
+        cerr << "Info log of Shader with id " << id << ": " << infoLog;
 }
 
 void Shader::fromFile(const string &path) {
