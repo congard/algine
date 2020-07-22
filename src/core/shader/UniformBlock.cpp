@@ -10,33 +10,8 @@ using namespace tulz;
 using namespace glm;
 
 namespace algine {
-void UniformBlock::init() {
-    load();
-    configureBuffer();
-    linkBuffer();
-}
-
-void UniformBlock::load() {
-    m_varIndices = Array<uint>(m_varNames.size());
-    m_varOffsets = Array<uint>(m_varNames.size());
-
-    m_blockIndex = glGetUniformBlockIndex(m_shaderProgram->id, m_name.c_str());
-    glGetActiveUniformBlockiv(m_shaderProgram->id, m_blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE,
-                              reinterpret_cast<int*>(&m_blockSize));
-
-    for (uint i = 0; i < m_varNames.size(); i++) {
-        auto varName = m_varNames[i].c_str();
-        glGetUniformIndices(m_shaderProgram->id, 1, &varName, &m_varIndices[i]);
-
-        // If skip this check and the GLSL compiler removes the variable (if it unused, e.g in packed format),
-        // then there will be GL_INVALID_VALUE: "A uniform index exceeds the total number of uniforms."
-        // Since m_varIndices[i] will contain VariableNotFound
-        if (m_varIndices[i] != VariableNotFound) {
-            int offset;
-            glGetActiveUniformsiv(m_shaderProgram->id, 1, &m_varIndices[i], GL_UNIFORM_OFFSET, &offset);
-            m_varOffsets[i] = offset;
-        }
-    }
+void UniformBlock::assignBindingPoint(const ShaderProgram *shaderProgram) const {
+    glUniformBlockBinding(shaderProgram->id, getIndex(shaderProgram), m_bindingPoint);
 }
 
 void UniformBlock::configureBuffer() {
@@ -50,17 +25,34 @@ void UniformBlock::configureBuffer() {
 // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glBindBufferBase.xhtml
 
 void UniformBlock::linkBuffer() {
-    glBindBufferBase(GL_UNIFORM_BUFFER, m_blockIndex, m_uniformBuffer->m_id);
+    glBindBufferBase(GL_UNIFORM_BUFFER, m_bindingPoint, m_uniformBuffer->m_id);
     Engine::defaultUniformBuffer()->bind();
 }
 
 void UniformBlock::linkBuffer(const uint offset, const uint size) {
-    glBindBufferRange(GL_UNIFORM_BUFFER, m_blockIndex, m_uniformBuffer->m_id, offset, size);
+    glBindBufferRange(GL_UNIFORM_BUFFER, m_bindingPoint, m_uniformBuffer->m_id, offset, size);
     Engine::defaultUniformBuffer()->bind();
 }
 
-void UniformBlock::setShaderProgram(ShaderProgram *shaderProgram) {
-    m_shaderProgram = shaderProgram;
+void UniformBlock::loadBlockInfo(const ShaderProgram *shaderProgram) {
+    m_varOffsets = Array<uint>(m_varNames.size());
+
+    const uint blockIndex = getIndex(shaderProgram);
+    glGetActiveUniformBlockiv(shaderProgram->id, blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE,
+                              reinterpret_cast<int*>(&m_blockSize));
+
+    for (uint i = 0; i < m_varNames.size(); i++) {
+        uint varIndex = getVarIndex(shaderProgram, m_varNames[i]);
+
+        // If skip this check and the GLSL compiler removes the variable (if it unused, e.g in packed format),
+        // then there will be GL_INVALID_VALUE: "A uniform index exceeds the total number of uniforms."
+        // Since varIndex will contain VariableNotFound
+        if (varIndex != VariableNotFound) {
+            int offset;
+            glGetActiveUniformsiv(shaderProgram->id, 1, &varIndex, GL_UNIFORM_OFFSET, &offset);
+            m_varOffsets[i] = offset;
+        }
+    }
 }
 
 void UniformBlock::setBuffer(UniformBuffer *buffer) {
@@ -69,6 +61,23 @@ void UniformBlock::setBuffer(UniformBuffer *buffer) {
 
 void UniformBlock::setName(const string &name) {
     m_name = name;
+}
+
+void UniformBlock::setBindingPoint(const uint bindingPoint) {
+    m_bindingPoint = bindingPoint;
+}
+
+void UniformBlock::setBlockInfo(const uint size, const Array<uint> &varOffsets) {
+    m_blockSize = size;
+    m_varOffsets = varOffsets;
+}
+
+void UniformBlock::setBlockInfo(const uint size, const vector<uint> &varOffsets) {
+    m_blockSize = size;
+    m_varOffsets = Array<uint>(varOffsets.size());
+
+    for (uint i = 0; i < varOffsets.size(); i++)
+        m_varOffsets[i] = varOffsets[i];
 }
 
 void UniformBlock::setVarNames(const vector<string> &names) {
@@ -82,10 +91,6 @@ void UniformBlock::setVarNames(const Array<string> &names) {
     m_varNames = names;
 }
 
-ShaderProgram* UniformBlock::getShaderProgram() const {
-    return m_shaderProgram;
-}
-
 UniformBuffer* UniformBlock::getBuffer() const {
     return m_uniformBuffer;
 }
@@ -94,8 +99,12 @@ string UniformBlock::getName() const {
     return m_name;
 }
 
-uint UniformBlock::getIndex() const {
-    return m_blockIndex;
+uint UniformBlock::getBindingPoint() const {
+    return m_bindingPoint;
+}
+
+uint UniformBlock::getIndex(const ShaderProgram *shaderProgram) const {
+    return glGetUniformBlockIndex(shaderProgram->id, m_name.c_str());;
 }
 
 uint UniformBlock::getSize() const {
@@ -114,32 +123,16 @@ Array<string> UniformBlock::getVarNames() const {
     return m_varNames;
 }
 
-Array<uint> UniformBlock::getVarIndices() const {
-    return m_varIndices;
-}
-
 Array<uint> UniformBlock::getVarOffsets() const {
     return m_varOffsets;
-}
-
-uint UniformBlock::getVarIndex(const string &name) const {
-    return m_varIndices.array()[getVarPosition(name)];
 }
 
 uint UniformBlock::getVarOffset(const string &name) const {
     return m_varOffsets.array()[getVarPosition(name)];
 }
 
-uint UniformBlock::getVarIndex(const uint position) const {
-    return m_varIndices.array()[position];
-}
-
 uint UniformBlock::getVarOffset(const uint position) const {
     return m_varOffsets.array()[position];
-}
-
-bool UniformBlock::isVarValid(const string &name) const {
-    return getVarIndex(name) != VariableNotFound;
 }
 
 // Definitions are not generated to keep things simple (first of all debugging)
@@ -214,5 +207,17 @@ void UniformBlock::writeMat3(const string &name, const mat3 &p) {
 
 void UniformBlock::writeMat4(const string &name, const mat4 &p) {
     writeMat4(getVarPosition(name), p);
+}
+
+uint UniformBlock::getVarIndex(const ShaderProgram *shaderProgram, const std::string &name) {
+    uint index;
+    auto varName = name.c_str();
+    glGetUniformIndices(shaderProgram->id, 1, &varName, &index);
+
+    return index;
+}
+
+bool UniformBlock::isVarValid(const ShaderProgram *shaderProgram, const std::string &name) {
+    return getVarIndex(shaderProgram, name) != VariableNotFound;
 }
 }

@@ -13,34 +13,31 @@ public:
     static constexpr uint VariableNotFound = -1;
 
 public:
-    void init();
-
-    void load();
+    void assignBindingPoint(const ShaderProgram *shaderProgram) const;
     void configureBuffer();
     void linkBuffer();
     void linkBuffer(uint offset, uint size);
 
-    void setShaderProgram(ShaderProgram *shaderProgram);
+    void loadBlockInfo(const ShaderProgram *shaderProgram);
+
     void setBuffer(UniformBuffer *buffer);
     void setName(const std::string &name);
+    void setBindingPoint(uint bindingPoint);
+    void setBlockInfo(uint size, const tulz::Array<uint>& varOffsets);
+    void setBlockInfo(uint size, const std::vector<uint>& varOffsets);
     void setVarNames(const std::vector<std::string> &names);
     void setVarNames(const tulz::Array<std::string> &names);
 
-    ShaderProgram* getShaderProgram() const;
     UniformBuffer* getBuffer() const;
     std::string getName() const;
-    uint getIndex() const;
+    uint getBindingPoint() const;
+    uint getIndex(const ShaderProgram *shaderProgram) const;
     uint getSize() const;
     uint getVarPosition(const std::string &name) const;
     tulz::Array<std::string> getVarNames() const;
-    tulz::Array<uint> getVarIndices() const;
     tulz::Array<uint> getVarOffsets() const;
-    uint getVarIndex(const std::string &name) const;
     uint getVarOffset(const std::string &name) const;
-    uint getVarIndex(uint position) const;
     uint getVarOffset(uint position) const;
-
-    bool isVarValid(const std::string &name) const;
 
     void write(uint position, uint size, const void *data);
     void writeBool(uint position, bool p);
@@ -62,16 +59,17 @@ public:
     void writeMat3(const std::string &name, const glm::mat3 &p);
     void writeMat4(const std::string &name, const glm::mat4 &p);
 
+    static uint getVarIndex(const ShaderProgram *shaderProgram, const std::string &name);
+    static bool isVarValid(const ShaderProgram *shaderProgram, const std::string &name);
+
 private:
     std::string m_name;
 
     tulz::Array<std::string> m_varNames;
-    tulz::Array<uint> m_varIndices;
     tulz::Array<uint> m_varOffsets;
 
-    ShaderProgram *m_shaderProgram;
     UniformBuffer *m_uniformBuffer;
-    uint m_blockIndex, m_blockSize;
+    uint m_bindingPoint = 0, m_blockSize;
 };
 }
 
