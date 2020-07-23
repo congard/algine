@@ -84,11 +84,16 @@ void ShapeLoader::load() {
                 for (auto & animation : m_shape->animations)
                     animation.bones.resize(m_shape->bonesStorage.count());
                 break;
+            case DisableBones:
+                m_bonesPerVertex = 0;
+                break;
             default:
                 std::cerr << "Unknown algine param " << p << "\n";
                 break;
         }
     }
+
+    m_shape->bonesPerVertex = m_bonesPerVertex;
 
     // load textures
     loadTextures();
@@ -113,6 +118,10 @@ void ShapeLoader::setDefaultTexturesParams(const std::map<uint, uint> &params) {
     m_defaultTexturesParams = params;
 }
 
+void ShapeLoader::setBonesPerVertex(uint bonesPerVertex) {
+    m_bonesPerVertex = bonesPerVertex;
+}
+
 Shape *ShapeLoader::getShape() const {
     return m_shape;
 }
@@ -126,13 +135,41 @@ ShapeLoader::LoadedTexture::LoadedTexture(
     this->params = params;
 }
 
+uint getMaxBonesPerVertex(const aiMesh *mesh) {
+    uint *bonesPerVertices = (uint*) calloc(mesh->mNumVertices, sizeof(uint));
+
+    for (uint i = 0; i < mesh->mNumBones; i++) {
+        const aiBone *bone = mesh->mBones[i];
+
+        for (uint j = 0; j < bone->mNumWeights; j++) {
+            const aiVertexWeight &weight = bone->mWeights[j];
+            bonesPerVertices[weight.mVertexId]++;
+        }
+    }
+
+    uint bonesPerVertex = 0; // max value from bonesPerVertices
+    for (uint i = 0; i < mesh->mNumVertices; i++) {
+        if (bonesPerVertex < bonesPerVertices[i]) {
+            bonesPerVertex = bonesPerVertices[i];
+        }
+    }
+
+    free(bonesPerVertices);
+
+    return bonesPerVertex;
+}
+
 void ShapeLoader::loadBones(const aiMesh *aimesh) {
     vector<BoneInfo> binfos; // bone infos
     binfos.reserve(aimesh->mNumVertices); // allocating space
 
+    uint maxBonesPerVertex = getMaxBonesPerVertex(aimesh);
+    if (maxBonesPerVertex < m_bonesPerVertex)
+        maxBonesPerVertex = m_bonesPerVertex;
+
     // filling array
     for (size_t i = 0; i < aimesh->mNumVertices; i++)
-        binfos.emplace_back(m_shape->bonesPerVertex);
+        binfos.emplace_back(maxBonesPerVertex);
 
     // loading bone data
     for (usize i = 0; i < aimesh->mNumBones; i++) {
@@ -146,16 +183,32 @@ void ShapeLoader::loadBones(const aiMesh *aimesh) {
         }
 
         for (usize j = 0; j < bone->mNumWeights; j++) {
-            aiVertexWeight *vertexWeight = &(bone->mWeights[j]);
-            binfos[vertexWeight->mVertexId].add(boneIndex, vertexWeight->mWeight);
+            const aiVertexWeight &vertexWeight = bone->mWeights[j];
+            binfos[vertexWeight.mVertexId].add(boneIndex, vertexWeight.mWeight);
+        }
+    }
+
+    if (maxBonesPerVertex > m_bonesPerVertex) {
+        for (auto & binfo : binfos) {
+            binfo.sort(); // sorting by weights. From more to less
+
+            // calculating weights sum for active bones
+            float weightsSum = 0;
+            for (uint j = 0; j < m_bonesPerVertex; j++)
+                weightsSum += binfo.getWeight(j);
+
+            // normalizing weights
+            // weight_0 + weight_1 + ... + weight_j-1 = 1
+            for (uint j = 0; j < m_bonesPerVertex; j++)
+                binfo.setWeight(j, binfo.getWeight(j) / weightsSum);
         }
     }
 
     // converting to a suitable view
     for (auto & binfo : binfos) {
-        for (size_t j = 0; j < binfo.size(); j++) {
-            geometry.boneIds.push_back(binfo.ids[j]);
-            geometry.boneWeights.push_back(binfo.weights[j]);
+        for (size_t j = 0; j < m_bonesPerVertex; j++) {
+            geometry.boneIds.push_back(binfo.getId(j));
+            geometry.boneWeights.push_back(binfo.getWeight(j));
         }
     }
 }
@@ -165,7 +218,8 @@ void ShapeLoader::processNode(const aiNode *node, const aiScene *scene) {
     for (size_t i = 0; i < node->mNumMeshes; i++) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
         processMesh(mesh, scene);
-        if (m_shape->bonesPerVertex != 0)
+
+        if (m_bonesPerVertex != 0)
             loadBones(mesh);
     }
 
