@@ -25,7 +25,9 @@ public:
 
     void prepareAnimation(uint index);
     void invalidateAnimation(uint index);
-    bool isAnimationValid(uint index);
+
+    bool isAnimationValid(uint index) const;
+    bool isBonesPresent() const;
 
     usize getAnimationIndexByName(const std::string &name);
 
@@ -36,7 +38,7 @@ public:
     std::vector<InputLayout*> inputLayouts;
     BonesStorage bonesStorage;
     Node rootNode;
-    uint bonesPerVertex = 0;
+    uint bonesPerVertex;
 
 public:
     struct Buffers {

@@ -44,7 +44,7 @@ void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
     attribDescription.setCount(2);
     addAttribute(inputLayout, attribDescription, buffers.texCoords);
 
-    if (bonesPerVertex != 0) {
+    if (isBonesPresent()) {
         attribDescription.setCount(4);
 
         attribDescription.setLocation(locations.inBoneWeights);
@@ -71,8 +71,12 @@ void Shape::invalidateAnimation(const uint index) {
     animations[index].bones.clear();
 }
 
-bool Shape::isAnimationValid(const uint index) {
+bool Shape::isAnimationValid(const uint index) const {
     return animations[index].bones.size() == bonesStorage.count();
+}
+
+bool Shape::isBonesPresent() const {
+    return bonesPerVertex > 0;
 }
 
 usize Shape::getAnimationIndexByName(const std::string &name) {
