@@ -4,18 +4,24 @@
 #include <algine/types.h>
 
 #include <tulz/Array.h>
+#include <utility>
 
 namespace algine {
 class BoneInfo {
 public:
     explicit BoneInfo(uint size);
 
+    void sort();
     void add(uint id, float weight);
+    void setId(uint index, uint id);
+    void setWeight(uint index, float weight);
+
     uint size() const;
+    uint getId(uint index) const;
+    float getWeight(uint index) const;
 
 public:
-    tulz::Array<uint> ids;
-    tulz::Array<float> weights;
+    tulz::Array<std::pair<uint, float>> info; // id, weight
 };
 }
 
