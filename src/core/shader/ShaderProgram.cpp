@@ -8,6 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
 
+#include <iostream>
+
 #define SOP_BOUND_PTR Engine::m_boundShaderProgram
 #define SOP_OBJECT_TYPE SOPConstants::ShaderProgramObject
 #define SOP_OBJECT_ID id
