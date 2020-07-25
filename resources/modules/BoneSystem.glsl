@@ -5,8 +5,10 @@
  * #alp include "modules/BoneSystem.glsl"
  */
 
-uniform mat4 bones[MAX_BONES];
-uniform int boneAttribsPerVertex = 0;
+uniform BoneSystem {
+    mat4 bones[MAX_BONES];
+    int boneAttribsPerVertex;
+};
 
 in vec4 inBoneWeights[MAX_BONE_ATTRIBS_PER_VERTEX];
 in ivec4 inBoneIds[MAX_BONE_ATTRIBS_PER_VERTEX];
