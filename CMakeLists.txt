@@ -143,6 +143,7 @@ add_library(algine
         src/std/animation/BoneInfo.cpp include/algine/std/animation/BoneInfo.h
         src/std/animation/BonesStorage.cpp include/algine/std/animation/BonesStorage.h
         src/std/animation/AnimationBlender.cpp include/algine/std/animation/AnimationBlender.h
+        src/std/animation/BoneSystemManager.cpp include/algine/std/animation/BoneSystemManager.h
         src/std/camera/Camera.cpp include/algine/std/camera/Camera.h
         src/std/camera/BaseCameraController.cpp include/algine/std/camera/BaseCameraController.h
         src/std/camera/FreeCameraController.cpp include/algine/std/camera/FreeCameraController.h
