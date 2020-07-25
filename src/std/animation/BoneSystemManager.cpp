@@ -66,6 +66,11 @@ inline void linkUniformBuffer(UniformBlock &uniformBlock, UniformBuffer *buffer)
     }
 }
 
+void BoneSystemManager::writeBonesForAll() {
+    for (auto p : m_buffers)
+        writeBones(p.first, p.second);
+}
+
 void BoneSystemManager::writeBones(Model *model) {
     if (model->getShape()->isBonesPresent())
         writeBones(model, m_buffers[model]);

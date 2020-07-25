@@ -14,6 +14,7 @@ public:
     void init();
     void initBuffer(Model *model);
     void initBuffers(const std::vector<Model*> &models);
+    void writeBonesForAll();
     void writeBones(Model *model);
     void linkBuffer(Model *model);
     void setupBones(Model *model);
