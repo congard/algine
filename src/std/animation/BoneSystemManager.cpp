@@ -4,19 +4,12 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include <iostream>
-
 using namespace std;
 using namespace glm;
 
+#define empty_block 0
+
 namespace algine {
-BoneSystemManager::~BoneSystemManager() {
-    for (auto & p : m_buffers)
-        UniformBuffer::destroy(p.second);
-
-    UniformBuffer::destroy(m_emptyBuffer);
-}
-
 void BoneSystemManager::init() {
     using namespace Module::BoneSystem::Vars::Block;
 
@@ -31,77 +24,49 @@ void BoneSystemManager::init() {
     m_bonesPos = m_uniformBlock.getVarPosition(Bones);
     m_boneAttribsCountPos = m_uniformBlock.getVarPosition(BoneAttribsPerVertex);
 
-    m_emptyBuffer = new UniformBuffer();
-    m_uniformBlock.setBuffer(m_emptyBuffer);
-    m_uniformBlock.configureBuffer();
+    m_bufferStorage.setBufferType(Buffer::Uniform);
+    m_bufferStorage.setBufferUsage(Buffer::DynamicDraw);
+    m_bufferStorage.setBlockSize(m_uniformBlock.getSize(), UniformBuffer::getOffsetAlignment());
+    m_bufferStorage.allocateStorage();
 
-    m_emptyBuffer->bind();
-    m_uniformBlock.writeInt(m_boneAttribsCountPos, 0);
-    m_emptyBuffer->unbind();
-}
+    int zero = 0;
+    m_bufferStorage.allocateBlock(empty_block); // for default (empty) block
+    m_bufferStorage.write(
+            empty_block, m_uniformBlock.getVarOffset(m_boneAttribsCountPos), sizeof(int), &zero);
 
-void BoneSystemManager::initBuffer(Model *model) {
-    if (model->getShape()->isBonesPresent()) {
-        auto buffer = new UniformBuffer();
-        m_uniformBlock.setBuffer(buffer);
-        m_uniformBlock.configureBuffer();
-
-        buffer->bind();
-        m_uniformBlock.writeInt(m_boneAttribsCountPos, getAttribsCount(model->getShape()->bonesPerVertex));
-        buffer->unbind();
-
-        m_buffers[model] = buffer;
-    }
-}
-
-void BoneSystemManager::initBuffers(const std::vector<Model*> &models) {
-    for (auto model : models)
-        initBuffer(model);
-}
-
-inline void linkUniformBuffer(UniformBlock &uniformBlock, UniformBuffer *buffer) {
-    if (uniformBlock.getBuffer() != buffer) {
-        uniformBlock.setBuffer(buffer);
-        uniformBlock.linkBuffer();
-    }
+    m_uniformBlock.setBuffer(reinterpret_cast<UniformBuffer*>(m_bufferStorage.getBuffer()));
 }
 
 void BoneSystemManager::writeBonesForAll() {
-    for (auto p : m_buffers)
+    for (auto p : m_ids)
         writeBones(p.first, p.second);
 }
 
 void BoneSystemManager::writeBones(Model *model) {
     if (model->getShape()->isBonesPresent())
-        writeBones(model, m_buffers[model]);
+        writeBones(model, m_ids[model]);
 }
 
 void BoneSystemManager::linkBuffer(Model *model) {
     if (model->getShape()->isBonesPresent()) {
-        linkUniformBuffer(m_uniformBlock, m_buffers[model]);
+        linkUniformBuffer(m_ids[model]);
     } else {
-        linkUniformBuffer(m_uniformBlock, m_emptyBuffer);
+        linkUniformBuffer(empty_block);
     }
 }
 
 void BoneSystemManager::setupBones(Model *const model) {
     if (model->getShape()->isBonesPresent()) {
-        UniformBuffer *buffer = m_buffers[model];
-        writeBones(model, buffer);
-        linkUniformBuffer(m_uniformBlock, buffer);
+        uint index = m_ids[model];
+        writeBones(model, index);
+        linkUniformBuffer(index);
     } else {
-        linkUniformBuffer(m_uniformBlock, m_emptyBuffer);
+        linkUniformBuffer(empty_block);
     }
 }
 
-void BoneSystemManager::destroyBuffer(Model *model) {
-    UniformBuffer::destroy(m_buffers[model]);
-    m_buffers.erase(model);
-}
-
-void BoneSystemManager::destroyBuffers(const std::vector<Model*> &models) {
-    for (auto model : models)
-        destroyBuffer(model);
+void BoneSystemManager::setMaxModelsCount(uint count) {
+    m_bufferStorage.setBlocksCount(count + 1);
 }
 
 void BoneSystemManager::setBindingPoint(uint bindingPoint) {
@@ -116,6 +81,29 @@ void BoneSystemManager::addShaderProgram(ShaderProgram *shaderProgram) {
     m_programs.emplace_back(shaderProgram);
 }
 
+void BoneSystemManager::addModel(Model *model) {
+    uint index = m_bufferStorage.allocateBlock();
+    m_ids[model] = index;
+
+    int attribsCount = getAttribsCount(model->getShape()->bonesPerVertex);
+    m_bufferStorage.write(index, m_uniformBlock.getVarOffset(m_boneAttribsCountPos), sizeof(int), &attribsCount);
+}
+
+void BoneSystemManager::addModels(const std::vector<Model*> &models) {
+    for (auto model : models)
+        addModel(model);
+}
+
+void BoneSystemManager::removeModel(Model *model) {
+    m_bufferStorage.freeBlock(m_ids[model]);
+    m_ids.erase(model);
+}
+
+void BoneSystemManager::removeModels(const std::vector<Model*> &models) {
+    for (auto model : models)
+        removeModel(model);
+}
+
 uint BoneSystemManager::getBindingPoint() const {
     return m_uniformBlock.getBindingPoint();
 }
@@ -128,16 +116,26 @@ const UniformBlock& BoneSystemManager::getUniformBlock() const {
     return m_uniformBlock;
 }
 
+const BlockBufferStorage& BoneSystemManager::getBlockBufferStorage() const {
+    return m_bufferStorage;
+}
+
 uint BoneSystemManager::getAttribsCount(const uint bonesPerVertex) {
     return bonesPerVertex / 4 + (bonesPerVertex % 4 == 0 ? 0 : 1);
 }
 
-void BoneSystemManager::writeBones(Model *model, UniformBuffer *buffer) {
+void BoneSystemManager::writeBones(Model *model, uint index) {
     const vector<mat4> &bones = *model->getBones();
 
-    buffer->bind();
-    buffer->updateData(
-            m_uniformBlock.getVarOffset(m_bonesPos),
+    m_bufferStorage.write(
+            index, m_uniformBlock.getVarOffset(m_bonesPos),
             sizeof(mat4) * bones.size(), value_ptr(bones[0]));
+}
+
+void BoneSystemManager::linkUniformBuffer(uint blockIndex) {
+    if (blockIndex != m_linkedBlock) {
+        m_linkedBlock = blockIndex;
+        m_uniformBlock.linkBuffer(m_bufferStorage.getBlockSize() * blockIndex, m_uniformBlock.getSize());
+    }
 }
 }
