@@ -2,4 +2,12 @@
 
 #include <GL/glew.h>
 
-algine::UniformBuffer::UniformBuffer(): Buffer(GL_UNIFORM_BUFFER) { /* empty */ }
+namespace algine {
+UniformBuffer::UniformBuffer() : Buffer(Buffer::Uniform) { /* empty */ }
+
+uint UniformBuffer::getOffsetAlignment() {
+    int alignment;
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignment);
+    return alignment;
+}
+}
