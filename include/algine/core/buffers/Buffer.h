@@ -12,6 +12,13 @@ public:
         DynamicDraw = 0x88E8
     };
 
+    enum Types {
+        Array = 0x8892,
+        Index = 0x8893,
+        Uniform = 0x8A11
+    };
+
+public:
     Buffer();
     ~Buffer();
 
@@ -20,7 +27,9 @@ public:
     void setData(uint size, const void *data, uint usage);
     void updateData(uint offset, uint size, const void *data);
 
+    uint size() const;
     uint getId() const;
+    uint getType() const;
 
 protected:
     explicit Buffer(uint target);
