@@ -5,7 +5,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace algine {
-namespace Lighting {
 Light::~Light() {
     Framebuffer::destroy(shadowMapFb);
 }
@@ -54,6 +53,5 @@ float Light::getKq() {
 
 glm::vec3 Light::getColor() {
     return m_color;
-}
 }
 }

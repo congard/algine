@@ -4,7 +4,6 @@
 #include <algine/std/lighting/Light.h>
 
 namespace algine {
-namespace Lighting {
 class PointLight: public Light {
 public:
     PointLight();
@@ -32,7 +31,6 @@ public:
 
     static const glm::mat4 m_lightViews[6];
 };
-}
 }
 
 #endif //ALGINE_POINTLIGHT_H

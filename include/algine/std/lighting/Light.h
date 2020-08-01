@@ -6,7 +6,6 @@
 #include <algine/std/Translatable.h>
 
 namespace algine {
-namespace Lighting {
 class Light: public Translatable {
 public:
     enum {
@@ -43,7 +42,6 @@ public:
     glm::mat4 m_lightProjection;
     glm::vec3 m_color;
 };
-}
 }
 
 #endif //ALGINE_LIGHT_H

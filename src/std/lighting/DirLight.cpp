@@ -8,7 +8,6 @@
 using namespace std;
 
 namespace algine {
-namespace Lighting {
 DirLight::DirLight(const uint rotatorType): Rotatable(rotatorType) {
     type = TypeDirLight;
 }
@@ -71,6 +70,5 @@ float DirLight::getMinBias() const {
 
 float DirLight::getMaxBias() const {
     return m_maxBias;
-}
 }
 }

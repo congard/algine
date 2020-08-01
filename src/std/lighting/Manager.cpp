@@ -153,14 +153,14 @@ ShaderProgram *Manager::getPointLightShadowShader() const {
     return pointShadowShader;
 }
 
-#define checkIsDirLight \
-    if (lightType != algine::Lighting::Light::TypeDirLight) { \
+#define checkIsDirLight() \
+    if (lightType != algine::Light::TypeDirLight) { \
         std::cerr << "Object " << obj << " can only be used with Light::TypeDirLight\n"; \
         return -1; \
     }
 
-#define checkIsPointLight \
-    if (lightType != algine::Lighting::Light::TypePointLight) { \
+#define checkIsPointLight() \
+    if (lightType != algine::Light::TypePointLight) { \
         std::cerr << "Object " << obj << " can only be used with Light::TypePointLight\n"; \
         return -1; \
     }
@@ -184,28 +184,28 @@ inline int Manager::Locations::getLocation(const uint obj, const uint lightType,
         case ShadowMap:
             return lights[lightType][lightIndex]->shadowMap;
         case MinBias:
-            checkIsDirLight
+            checkIsDirLight()
             return reinterpret_cast<Locations::DirLight*>(lights[lightType][lightIndex])->minBias;
         case MaxBias:
-            checkIsDirLight
+            checkIsDirLight()
             return reinterpret_cast<Locations::DirLight*>(lights[lightType][lightIndex])->maxBias;
         case LightMatrix:
-            checkIsDirLight
+            checkIsDirLight()
             return reinterpret_cast<Locations::DirLight*>(lights[lightType][lightIndex])->lightMatrix;
         case Bias:
-            checkIsPointLight
+            checkIsPointLight()
             return reinterpret_cast<Locations::PointLight*>(lights[lightType][lightIndex])->bias;
         case FarPlane:
-            checkIsPointLight
+            checkIsPointLight()
             return reinterpret_cast<Locations::PointLight*>(lights[lightType][lightIndex])->farPlane;
         case ShadowShaderPos:
-            checkIsPointLight
+            checkIsPointLight()
             return shadowShaderPos;
         case ShadowShaderFarPlane:
-            checkIsPointLight
+            checkIsPointLight()
             return shadowShaderFarPlane;
         case ShadowShaderMatrices:
-            checkIsPointLight
+            checkIsPointLight()
             return shadowShaderMatrices;
         default:
             std::cerr << "Object " << obj << " not found\n";

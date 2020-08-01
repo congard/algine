@@ -8,7 +8,6 @@
 using namespace std;
 
 namespace algine {
-namespace Lighting {
 #define lightView(l_x, l_y, l_z, up_x, up_y, up_z) \
 glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(l_x, l_y, l_z), glm::vec3(up_x, up_y, up_z))
 
@@ -89,6 +88,5 @@ float PointLight::getNear() const {
 
 float PointLight::getBias() const {
     return m_bias;
-}
 }
 }

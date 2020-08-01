@@ -5,7 +5,6 @@
 #include <algine/std/Rotatable.h>
 
 namespace algine {
-namespace Lighting {
 class DirLight: public Light, public Rotatable {
 public:
     explicit DirLight(uint rotatorType = Rotator::RotatorTypeSimple);
@@ -31,7 +30,6 @@ public:
     glm::mat4 m_lightSpace;
     float m_minBias = 0.005f, m_maxBias = 0.05f;
 };
-}
 }
 
 #endif //ALGINE_DIRLIGHT_H
