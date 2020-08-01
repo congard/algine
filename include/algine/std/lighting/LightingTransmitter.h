@@ -1,5 +1,5 @@
-#ifndef ALGINE_TRANSMITTER_H
-#define ALGINE_TRANSMITTER_H
+#ifndef ALGINE_LIGHTINGTRANSMITTER_H
+#define ALGINE_LIGHTINGTRANSMITTER_H
 
 #include <algine/types.h>
 #include <algine/std/lighting/Light.h>
@@ -7,17 +7,16 @@
 #include <algine/std/lighting/PointLight.h>
 
 namespace algine {
-namespace Lighting {
-class Manager;
+class LightingManager;
 
 /**
- * Designed only for using in Manager
- * Do not create your own instance of Transmitter
+ * Designed only for using in LightingManager
+ * Do not create your own instance of LightingTransmitter
  */
-class Transmitter {
+class LightingTransmitter {
 public:
-    Transmitter();
-    explicit Transmitter(Manager *manager);
+    LightingTransmitter();
+    explicit LightingTransmitter(LightingManager *manager);
 
     void setDirLightsCount(uint count);
     void setPointLightsCount(uint count);
@@ -41,9 +40,8 @@ public:
     void setShadowShaderMatrices(const PointLight &light);
 
 private:
-    Manager *manager = nullptr;
+    LightingManager *manager = nullptr;
 };
 }
-}
 
-#endif //ALGINE_TRANSMITTER_H
+#endif //ALGINE_LIGHTINGTRANSMITTER_H

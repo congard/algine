@@ -128,8 +128,8 @@ add_library(algine
         src/std/model/ShapeLoader.cpp include/algine/std/model/ShapeLoader.h
         src/std/Node.cpp include/algine/std/Node.h
         src/std/AMTLLoader.cpp include/algine/std/AMTLLoader.h
-        src/std/lighting/Manager.cpp include/algine/std/lighting/Manager.h
-        src/std/lighting/Transmitter.cpp include/algine/std/lighting/Transmitter.h
+        src/std/lighting/LightingManager.cpp include/algine/std/lighting/LightingManager.h
+        src/std/lighting/LightingTransmitter.cpp include/algine/std/lighting/LightingTransmitter.h
         src/std/lighting/Light.cpp include/algine/std/lighting/Light.h
         src/std/lighting/PointLight.cpp include/algine/std/lighting/PointLight.h
         src/std/lighting/DirLight.cpp include/algine/std/lighting/DirLight.h

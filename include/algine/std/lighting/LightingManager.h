@@ -2,13 +2,12 @@
 #define ALGINE_MODULE_H
 
 #include <algine/types.h>
-#include <algine/std/lighting/Transmitter.h>
+#include <algine/std/lighting/LightingTransmitter.h>
 #include <algine/core/shader/ShaderProgram.h>
 
 namespace algine {
-namespace Lighting {
-class Manager {
-    friend class Transmitter;
+class LightingManager {
+    friend class LightingTransmitter;
 
 public:
     enum {
@@ -18,8 +17,8 @@ public:
         FarPlane, Bias, ShadowShaderPos, ShadowShaderFarPlane, ShadowShaderMatrices // point
     };
 
-    Manager();
-    ~Manager();
+    LightingManager();
+    ~LightingManager();
 
     void indexDirLightLocations();
     void indexPointLightLocations();
@@ -42,7 +41,7 @@ public:
     ShaderProgram* getPointLightShadowShader() const;
 
 public:
-    Transmitter transmitter;
+    LightingTransmitter transmitter;
 
     uint dirLightsLimit = 8, pointLightsLimit = 8;
     uint dirLightsInitialSlot = 0, pointLightsInitialSlot = 0;
@@ -73,7 +72,6 @@ private:
     void clearDirLightsLocations();
     void clearPointLightsLocations();
 };
-}
 }
 
 #endif //ALGINE_MODULE_H

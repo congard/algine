@@ -1,4 +1,6 @@
-#include <algine/std/lighting/Manager.h>
+#include <algine/std/lighting/LightingManager.h>
+
+#include <algine/core/Engine.h>
 #include <algine/constants/Lighting.h>
 #include <algine/constants/ShadowShader.h>
 
@@ -7,23 +9,22 @@
 namespace LightingVars = algine::Module::Lighting::Vars;
 
 namespace algine {
-namespace Lighting {
-Manager::Manager() {
-    transmitter = Transmitter(this);
+LightingManager::LightingManager() {
+    transmitter = LightingTransmitter(this);
 };
 
-Manager::~Manager() {
+LightingManager::~LightingManager() {
     clearDirLightsLocations();
     clearPointLightsLocations();
 }
 
-void Manager::clearDirLightsLocations() {
+void LightingManager::clearDirLightsLocations() {
     for (auto &i : locations.lights[0])
         delete i;
     locations.lights[0].clear();
 }
 
-void Manager::clearPointLightsLocations() {
+void LightingManager::clearPointLightsLocations() {
     for (auto &i : locations.lights[1])
         delete i;
     locations.lights[1].clear();
@@ -35,7 +36,7 @@ void Manager::clearPointLightsLocations() {
 #define pointLightElem(elem) \
     LightingVars::PointLights + std::string("[") + std::to_string(i) + "]." + LightingVars::Light::elem
 
-void Manager::indexDirLightLocations() {
+void LightingManager::indexDirLightLocations() {
     clearDirLightsLocations();
 
     locations.dirLightsCount = lightShader->getLocation(LightingVars::DirLightsCount);
@@ -56,7 +57,7 @@ void Manager::indexDirLightLocations() {
     }
 }
 
-void Manager::indexPointLightLocations() {
+void LightingManager::indexPointLightLocations() {
     clearPointLightsLocations();
 
     locations.pointLightsCount = lightShader->getLocation(LightingVars::PointLightsCount);
@@ -82,74 +83,72 @@ void Manager::indexPointLightLocations() {
     }
 }
 
-void Manager::configureShadowMapping() {
+void LightingManager::configureShadowMapping() {
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
     // Note: Mesa drivers require sampler as int, not uint
 
     for (uint i = 0; i < dirLightsLimit; i++) {
-        ShaderProgram::setInt(getLocation(Manager::ShadowMap, Light::TypeDirLight, i),
+        ShaderProgram::setInt(getLocation(LightingManager::ShadowMap, Light::TypeDirLight, i),
                               static_cast<int>(dirLightsInitialSlot + i));
-        glActiveTexture(GL_TEXTURE0 + dirLightsInitialSlot + i);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        Engine::defaultTexture2D()->use(dirLightsInitialSlot + i);
     }
 
     for (uint i = 0; i < pointLightsLimit; i++) {
-        ShaderProgram::setInt(getLocation(Manager::ShadowMap, Light::TypePointLight, i),
+        ShaderProgram::setInt(getLocation(LightingManager::ShadowMap, Light::TypePointLight, i),
                               static_cast<int>(pointLightsInitialSlot + i));
-        glActiveTexture(GL_TEXTURE0 + pointLightsInitialSlot + i);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        Engine::defaultTextureCube()->use(pointLightsInitialSlot + i);
     }
 }
 
-void Manager::setDirLightsLimit(const uint limit) {
+void LightingManager::setDirLightsLimit(const uint limit) {
     dirLightsLimit = limit;
 }
 
-void Manager::setDirLightsMapInitialSlot(uint slot) {
+void LightingManager::setDirLightsMapInitialSlot(uint slot) {
     dirLightsInitialSlot = slot;
 }
 
-void Manager::setPointLightsLimit(const uint limit) {
+void LightingManager::setPointLightsLimit(const uint limit) {
     pointLightsLimit = limit;
 }
 
-void Manager::setPointLightsMapInitialSlot(uint slot) {
+void LightingManager::setPointLightsMapInitialSlot(uint slot) {
     pointLightsInitialSlot = slot;
 }
 
-void Manager::setLightShader(ShaderProgram *const in_lightShader) {
+void LightingManager::setLightShader(ShaderProgram *const in_lightShader) {
     lightShader = in_lightShader;
 }
 
-void Manager::setPointLightShadowShader(ShaderProgram *shadowShader) {
+void LightingManager::setPointLightShadowShader(ShaderProgram *shadowShader) {
     pointShadowShader = shadowShader;
 }
 
-int Manager::getLocation(const uint obj, const uint lightType, const uint lightIndex) const {
+int LightingManager::getLocation(const uint obj, const uint lightType, const uint lightIndex) const {
     return locations.getLocation(obj, lightType, lightIndex);
 }
 
-uint Manager::getDirLightsLimit() const {
+uint LightingManager::getDirLightsLimit() const {
     return dirLightsLimit;
 }
 
-uint Manager::getDirLightsMapInitialSlot() const {
+uint LightingManager::getDirLightsMapInitialSlot() const {
     return dirLightsInitialSlot;
 }
 
-uint Manager::getPointLightsLimit() const {
+uint LightingManager::getPointLightsLimit() const {
     return pointLightsLimit;
 }
 
-uint Manager::getPointLightsMapInitialSlot() const {
+uint LightingManager::getPointLightsMapInitialSlot() const {
     return pointLightsInitialSlot;
 }
 
-ShaderProgram *Manager::getLightShader() const {
+ShaderProgram* LightingManager::getLightShader() const {
     return lightShader;
 }
 
-ShaderProgram *Manager::getPointLightShadowShader() const {
+ShaderProgram* LightingManager::getPointLightShadowShader() const {
     return pointShadowShader;
 }
 
@@ -165,7 +164,7 @@ ShaderProgram *Manager::getPointLightShadowShader() const {
         return -1; \
     }
 
-inline int Manager::Locations::getLocation(const uint obj, const uint lightType, const uint lightIndex) const {
+inline int LightingManager::Locations::getLocation(const uint obj, const uint lightType, const uint lightIndex) const {
     switch (obj) {
         case DirLightsCount:
             return dirLightsCount;
@@ -211,6 +210,5 @@ inline int Manager::Locations::getLocation(const uint obj, const uint lightType,
             std::cerr << "Object " << obj << " not found\n";
             return -1;
     }
-}
 }
 }
