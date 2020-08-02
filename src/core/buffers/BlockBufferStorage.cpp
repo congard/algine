@@ -7,8 +7,8 @@ using namespace tulz;
 
 #define allocated_block true
 #define free_block false
-#define is_block_allocated(index) m_bufferMap.array()[index]
-#define is_block_free(index) !m_bufferMap.array()[index]
+#define is_block_allocated(index) m_bufferMap[index]
+#define is_block_free(index) !m_bufferMap[index]
 
 namespace algine {
 BlockBufferStorage::~BlockBufferStorage() {
