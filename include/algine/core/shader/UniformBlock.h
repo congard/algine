@@ -34,10 +34,13 @@ public:
     uint getIndex(const ShaderProgram *shaderProgram) const;
     uint getSize() const;
     uint getVarPosition(const std::string &name) const;
-    tulz::Array<std::string> getVarNames() const;
-    tulz::Array<uint> getVarOffsets() const;
+    const tulz::Array<std::string>& getVarNames() const;
+    std::string getVarName(uint position) const;
+    const tulz::Array<uint>& getVarOffsets() const;
     uint getVarOffset(const std::string &name) const;
     uint getVarOffset(uint position) const;
+    tulz::Array<uint> getVarIndices(const ShaderProgram *shaderProgram) const;
+    uint getVarIndex(uint position, const ShaderProgram *shaderProgram) const;
 
     void write(uint position, uint size, const void *data);
     void writeBool(uint position, bool p);
@@ -59,8 +62,8 @@ public:
     void writeMat3(const std::string &name, const glm::mat3 &p);
     void writeMat4(const std::string &name, const glm::mat4 &p);
 
-    static uint getVarIndex(const ShaderProgram *shaderProgram, const std::string &name);
-    static bool isVarValid(const ShaderProgram *shaderProgram, const std::string &name);
+    static uint getVarIndex(const std::string &name, const ShaderProgram *shaderProgram);
+    static bool isVarValid(const std::string &name, const ShaderProgram *shaderProgram);
 
 private:
     std::string m_name;

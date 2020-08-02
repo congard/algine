@@ -42,7 +42,7 @@ void UniformBlock::loadBlockInfo(const ShaderProgram *shaderProgram) {
                               reinterpret_cast<int*>(&m_blockSize));
 
     for (uint i = 0; i < m_varNames.size(); i++) {
-        uint varIndex = getVarIndex(shaderProgram, m_varNames[i]);
+        uint varIndex = getVarIndex(m_varNames[i], shaderProgram);
 
         // If skip this check and the GLSL compiler removes the variable (if it unused, e.g in packed format),
         // then there will be GL_INVALID_VALUE: "A uniform index exceeds the total number of uniforms."
@@ -113,26 +113,43 @@ uint UniformBlock::getSize() const {
 
 uint UniformBlock::getVarPosition(const string &name) const {
     for (uint i = 0; i < m_varNames.size(); i++)
-        if (m_varNames.array()[i] == name)
+        if (m_varNames[i] == name)
             return i;
 
     return PositionNotFound;
 }
 
-Array<string> UniformBlock::getVarNames() const {
+const Array<string>& UniformBlock::getVarNames() const {
     return m_varNames;
 }
 
-Array<uint> UniformBlock::getVarOffsets() const {
+string UniformBlock::getVarName(uint position) const {
+    return m_varNames[position];
+}
+
+const Array<uint>& UniformBlock::getVarOffsets() const {
     return m_varOffsets;
 }
 
 uint UniformBlock::getVarOffset(const string &name) const {
-    return m_varOffsets.array()[getVarPosition(name)];
+    return m_varOffsets[getVarPosition(name)];
 }
 
-uint UniformBlock::getVarOffset(const uint position) const {
-    return m_varOffsets.array()[position];
+uint UniformBlock::getVarOffset(uint position) const {
+    return m_varOffsets[position];
+}
+
+Array<uint> UniformBlock::getVarIndices(const ShaderProgram *shaderProgram) const {
+    auto indices = Array<uint>(m_varNames.size());
+
+    for (uint i = 0; i < indices.size(); i++)
+        indices[i] = getVarIndex(m_varNames[i], shaderProgram);
+
+    return indices;
+}
+
+uint UniformBlock::getVarIndex(uint position, const ShaderProgram *shaderProgram) const {
+    return getVarIndex(m_varNames[position], shaderProgram);
 }
 
 // Definitions are not generated to keep things simple (first of all debugging)
@@ -209,7 +226,7 @@ void UniformBlock::writeMat4(const string &name, const mat4 &p) {
     writeMat4(getVarPosition(name), p);
 }
 
-uint UniformBlock::getVarIndex(const ShaderProgram *shaderProgram, const std::string &name) {
+uint UniformBlock::getVarIndex(const std::string &name, const ShaderProgram *shaderProgram) {
     uint index;
     auto varName = name.c_str();
     glGetUniformIndices(shaderProgram->id, 1, &varName, &index);
@@ -217,7 +234,7 @@ uint UniformBlock::getVarIndex(const ShaderProgram *shaderProgram, const std::st
     return index;
 }
 
-bool UniformBlock::isVarValid(const ShaderProgram *shaderProgram, const std::string &name) {
-    return getVarIndex(shaderProgram, name) != VariableNotFound;
+bool UniformBlock::isVarValid(const std::string &name, const ShaderProgram *shaderProgram) {
+    return getVarIndex(name, shaderProgram) != VariableNotFound;
 }
 }
