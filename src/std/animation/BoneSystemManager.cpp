@@ -19,7 +19,7 @@ void BoneSystemManager::init() {
     for (auto program : m_programs)
         m_uniformBlock.assignBindingPoint(program);
 
-    m_uniformBlock.loadBlockInfo(m_programs[0]);
+    m_uniformBlock.init(m_programs[0]);
 
     m_bonesPos = m_uniformBlock.getVarPosition(Bones);
     m_boneAttribsCountPos = m_uniformBlock.getVarPosition(BoneAttribsPerVertex);

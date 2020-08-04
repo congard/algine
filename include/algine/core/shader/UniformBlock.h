@@ -1,38 +1,23 @@
 #ifndef ALGINE_UNIFORMBLOCK_H
 #define ALGINE_UNIFORMBLOCK_H
 
-#include <algine/core/shader/ShaderProgram.h>
-#include <algine/core/buffers/UniformBuffer.h>
+#include <algine/core/shader/BaseUniformBlock.h>
 
 #include <tulz/Array.h>
 
 namespace algine {
-class UniformBlock {
+class UniformBlock: public BaseUniformBlock {
 public:
     static constexpr uint PositionNotFound = -1;
-    static constexpr uint VariableNotFound = -1;
 
 public:
-    void assignBindingPoint(const ShaderProgram *shaderProgram) const;
-    void allocateSuitableBufferSize();
-    void linkBuffer();
-    void linkBuffer(uint offset, uint size);
+    void init(const ShaderProgram *shaderProgram) override;
 
-    void loadBlockInfo(const ShaderProgram *shaderProgram);
-
-    void setBuffer(UniformBuffer *buffer);
-    void setName(const std::string &name);
-    void setBindingPoint(uint bindingPoint);
     void setBlockInfo(uint size, const tulz::Array<uint>& varOffsets);
     void setBlockInfo(uint size, const std::vector<uint>& varOffsets);
     void setVarNames(const std::vector<std::string> &names);
     void setVarNames(const tulz::Array<std::string> &names);
 
-    UniformBuffer* getBuffer() const;
-    std::string getName() const;
-    uint getBindingPoint() const;
-    uint getIndex(const ShaderProgram *shaderProgram) const;
-    uint getSize() const;
     uint getVarPosition(const std::string &name) const;
     const tulz::Array<std::string>& getVarNames() const;
     std::string getVarName(uint position) const;
@@ -62,18 +47,9 @@ public:
     void writeMat3(const std::string &name, const glm::mat3 &p);
     void writeMat4(const std::string &name, const glm::mat4 &p);
 
-    static uint getVarIndex(const std::string &name, const ShaderProgram *shaderProgram);
-    static uint getVarOffset(const std::string &name, const ShaderProgram *shaderProgram);
-    static bool isVarValid(const std::string &name, const ShaderProgram *shaderProgram);
-
 private:
-    std::string m_name;
-
     tulz::Array<std::string> m_varNames;
     tulz::Array<uint> m_varOffsets;
-
-    UniformBuffer *m_uniformBuffer;
-    uint m_bindingPoint = 0, m_blockSize;
 };
 }
 
