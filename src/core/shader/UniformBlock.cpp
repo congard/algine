@@ -14,7 +14,7 @@ void UniformBlock::assignBindingPoint(const ShaderProgram *shaderProgram) const 
     glUniformBlockBinding(shaderProgram->id, getIndex(shaderProgram), m_bindingPoint);
 }
 
-void UniformBlock::configureBuffer() {
+void UniformBlock::allocateSuitableBufferSize() {
     m_uniformBuffer->bind();
     m_uniformBuffer->setData(m_blockSize, nullptr, Buffer::DynamicDraw);
     m_uniformBuffer->unbind();

@@ -14,7 +14,7 @@ public:
 
 public:
     void assignBindingPoint(const ShaderProgram *shaderProgram) const;
-    void configureBuffer();
+    void allocateSuitableBufferSize();
     void linkBuffer();
     void linkBuffer(uint offset, uint size);
 
