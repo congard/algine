@@ -63,6 +63,7 @@ public:
     void writeMat4(const std::string &name, const glm::mat4 &p);
 
     static uint getVarIndex(const std::string &name, const ShaderProgram *shaderProgram);
+    static uint getVarOffset(const std::string &name, const ShaderProgram *shaderProgram);
     static bool isVarValid(const std::string &name, const ShaderProgram *shaderProgram);
 
 private:

@@ -41,18 +41,8 @@ void UniformBlock::loadBlockInfo(const ShaderProgram *shaderProgram) {
     glGetActiveUniformBlockiv(shaderProgram->id, blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE,
                               reinterpret_cast<int*>(&m_blockSize));
 
-    for (uint i = 0; i < m_varNames.size(); i++) {
-        uint varIndex = getVarIndex(m_varNames[i], shaderProgram);
-
-        // If skip this check and the GLSL compiler removes the variable (if it unused, e.g in packed format),
-        // then there will be GL_INVALID_VALUE: "A uniform index exceeds the total number of uniforms."
-        // Since varIndex will contain VariableNotFound
-        if (varIndex != VariableNotFound) {
-            int offset;
-            glGetActiveUniformsiv(shaderProgram->id, 1, &varIndex, GL_UNIFORM_OFFSET, &offset);
-            m_varOffsets[i] = offset;
-        }
-    }
+    for (uint i = 0; i < m_varNames.size(); i++)
+        m_varOffsets[i] = getVarOffset(m_varNames[i], shaderProgram);
 }
 
 void UniformBlock::setBuffer(UniformBuffer *buffer) {
@@ -232,6 +222,21 @@ uint UniformBlock::getVarIndex(const std::string &name, const ShaderProgram *sha
     glGetUniformIndices(shaderProgram->id, 1, &varName, &index);
 
     return index;
+}
+
+uint UniformBlock::getVarOffset(const std::string &name, const ShaderProgram *shaderProgram) {
+    uint varIndex = getVarIndex(name, shaderProgram);
+
+    // If skip this check and the GLSL compiler removes the variable (if it unused, e.g in packed format),
+    // then there will be GL_INVALID_VALUE: "A uniform index exceeds the total number of uniforms."
+    // Since varIndex will contain VariableNotFound
+    if (varIndex != VariableNotFound) {
+        int offset;
+        glGetActiveUniformsiv(shaderProgram->id, 1, &varIndex, GL_UNIFORM_OFFSET, &offset);
+        return offset;
+    }
+
+    return VariableNotFound;
 }
 
 bool UniformBlock::isVarValid(const std::string &name, const ShaderProgram *shaderProgram) {
