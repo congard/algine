@@ -14,8 +14,10 @@ public:
 
     void assignBindingPoint(const ShaderProgram *shaderProgram) const;
     void allocateSuitableBufferSize();
-    void linkBuffer();
-    void linkBuffer(uint offset, uint size);
+    void linkBuffer() const;
+    void linkBuffer(uint offset, uint size) const;
+    void bindBuffer() const;
+    void unbindBuffer() const;
 
     void setBuffer(UniformBuffer *buffer);
     void setName(const std::string &name);
