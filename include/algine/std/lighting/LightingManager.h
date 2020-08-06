@@ -2,75 +2,87 @@
 #define ALGINE_MODULE_H
 
 #include <algine/types.h>
-#include <algine/std/lighting/LightingTransmitter.h>
 #include <algine/core/shader/ShaderProgram.h>
+#include <algine/core/shader/UniformBlock.h>
+
+#include <algine/std/lighting/Light.h>
+#include <algine/std/lighting/DirLight.h>
+#include <algine/std/lighting/PointLight.h>
+
+#include <tulz/Array.h>
 
 namespace algine {
 class LightingManager {
-    friend class LightingTransmitter;
-
 public:
-    enum {
-        DirLightsCount, PointLightsCount,
-        Kc, Kl, Kq, Pos, Color, ShadowMap, // common
-        MinBias, MaxBias, LightMatrix, // dir
-        FarPlane, Bias, ShadowShaderPos, ShadowShaderFarPlane, ShadowShaderMatrices // point
-    };
-
     LightingManager();
     ~LightingManager();
 
-    void indexDirLightLocations();
-    void indexPointLightLocations();
+    void init();
     void configureShadowMapping();
 
-    void setDirLightsLimit(uint limit);
-    void setDirLightsMapInitialSlot(uint slot);
-    void setPointLightsLimit(uint limit);
-    void setPointLightsMapInitialSlot(uint slot);
+    void setBindingPoint(uint bindingPoint);
+    void setLightsLimit(uint limit, Light::Type lightType);
+    void setLightsMapInitialSlot(uint slot, Light::Type lightType);
     void setLightShader(ShaderProgram *lightShader);
     void setPointLightShadowShader(ShaderProgram *shadowShader);
 
-    int getLocation(uint obj, uint lightType, uint lightIndex) const;
-
-    uint getDirLightsLimit() const;
-    uint getDirLightsMapInitialSlot() const;
-    uint getPointLightsLimit() const;
-    uint getPointLightsMapInitialSlot() const;
+    uint getLightsLimit(Light::Type lightType) const;
+    uint getLightsMapInitialSlot(Light::Type lightType) const;
     ShaderProgram* getLightShader() const;
     ShaderProgram* getPointLightShadowShader() const;
+    const BaseUniformBlock& getUniformBlock() const;
 
-public:
-    LightingTransmitter transmitter;
+    void bindBuffer() const;
+    void unbindBuffer() const;
 
-    uint dirLightsLimit = 8, pointLightsLimit = 8;
-    uint dirLightsInitialSlot = 0, pointLightsInitialSlot = 0;
-    ShaderProgram *lightShader = nullptr;
-    ShaderProgram *pointShadowShader = nullptr;
+    // push writes data to the shader
+
+    void pushShadowMap(const DirLight &light, uint index);
+    void pushShadowMap(const PointLight &light, uint index);
+    void pushShadowShaderPos(const PointLight &light);
+    void pushShadowShaderFarPlane(const PointLight &light);
+    void pushShadowShaderMatrices(const PointLight &light);
+
+    // write writes data to the buffer
+
+    void writeDirLightsCount(uint count);
+    void writePointLightsCount(uint count);
+
+    void writeShadowOpacity(float shadowOpacity);
+    void writeShadowDiskRadiusK(float diskRadiusK);
+    void writeShadowDiskRadiusMin(float diskRadiusMin);
+
+    void writeKc(const Light &light, uint index);
+    void writeKl(const Light &light, uint index);
+    void writeKq(const Light &light, uint index);
+    void writePos(const Light &light, uint index);
+    void writeColor(const Light &light, uint index);
+
+    void writeMinBias(const DirLight &light, uint index);
+    void writeMaxBias(const DirLight &light, uint index);
+    void writeLightMatrix(const DirLight &light, uint index);
+
+    void writeFarPlane(const PointLight &light, uint index);
+    void writeBias(const PointLight &light, uint index);
 
 private:
-    struct Locations {
-        int getLocation(uint obj, uint lightType, uint lightIndex) const;
+    typedef tulz::Array<uint> LightOffsets;
 
-        struct Light {
-            int kc, kl, kq, pos, color, shadowMap;
-        };
+private:
+    uint m_lightsLimit[Light::TypesCount];
+    uint m_lightsInitialSlot[Light::TypesCount] = {0};
+    ShaderProgram *m_lightShader = nullptr;
+    ShaderProgram *m_pointShadowShader = nullptr;
 
-        struct DirLight: public Light {
-            int minBias, maxBias, lightMatrix;
-        };
-
-        struct PointLight: public Light {
-            int farPlane, bias;
-        };
-
-        int dirLightsCount = -1, pointLightsCount = -1;
-        int shadowShaderPos = -1, shadowShaderFarPlane = -1, shadowShaderMatrices = -1; // point light shadow shader locations
-        std::vector<Light*> lights[2]; // dir light locations, point light locations
-    } locations;
-
-    void clearDirLightsLocations();
-    void clearPointLightsLocations();
+private:
+    BaseUniformBlock m_uniformBlock;
+    tulz::Array<LightOffsets> m_offsets[Light::TypesCount];
+    uint m_lightsCountOffset[Light::TypesCount];
+    uint m_shadowOpacityOffset, m_shadowDiskRadiusKOffset, m_shadowDiskRadiusMinOffset;
+    int m_shadowMapsLocations[Light::TypesCount];
+    int m_shadowShaderPosLoc = -1; // point light shadow shader locations; Loc means Location
+    int m_shadowShaderFarPlaneLoc = -1;
+    int m_shadowShaderMatricesLoc = -1;
 };
 }
 

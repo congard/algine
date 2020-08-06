@@ -15,15 +15,8 @@ namespace Lighting {
     }
 
     namespace Vars {
-        constant(PointLightsCount, "pointLightsCount")
-        constant(DirLightsCount, "dirLightsCount")
-        constant(PointLights, "pointLights")
-        constant(DirLights, "dirLights")
         constant(PointLightShadowMaps, "pointLightShadowMaps[0]")
         constant(DirLightShadowMaps, "dirLightShadowMaps[0]")
-        constant(ShadowDiskRadiusK, "diskRadius_k")
-        constant(ShadowDiskRadiusMin, "diskRadius_min")
-        constant(ShadowOpacity, "shadowOpacity")
 
         namespace Light {
             constant(Pos, "pos")
@@ -36,6 +29,17 @@ namespace Lighting {
             constant(MaxBias, "maxBias")
             constant(MinBias, "minBias")
             constant(LightMatrix, "lightMatrix")
+        }
+
+        namespace Block {
+            constant(Name, "Lighting")
+            constant(PointLightsCount, "pointLightsCount")
+            constant(DirLightsCount, "dirLightsCount")
+            constant(PointLights, "pointLights")
+            constant(DirLights, "dirLights")
+            constant(ShadowDiskRadiusK, "diskRadius_k")
+            constant(ShadowDiskRadiusMin, "diskRadius_min")
+            constant(ShadowOpacity, "shadowOpacity")
         }
     }
 }

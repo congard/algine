@@ -13,22 +13,7 @@
 #ifndef ALGINE_MODULE_LIGHTING_GLSL
 #define ALGINE_MODULE_LIGHTING_GLSL
 
-uniform uint pointLightsCount;
-uniform uint dirLightsCount;
-uniform float shadowOpacity = 1.0;
-
-uniform struct PointLight {
-	float kc; // constant term
-	float kl; // linear term
-	float kq; // quadratic term
-	float far; // shadow matrix far plane
-	float bias;
-	vec3 pos; // in world space
-	vec3 color;
-} pointLights[MAX_POINT_LIGHTS_COUNT];
-uniform samplerCube pointLightShadowMaps[MAX_POINT_LIGHTS_COUNT];
-
-uniform struct DirLight {
+struct DirLight {
 	float kc; // constant term
 	float kl; // linear term
 	float kq; // quadratic term
@@ -36,7 +21,31 @@ uniform struct DirLight {
 	vec3 pos; // in world space
 	vec3 color;
 	mat4 lightMatrix;
-} dirLights[MAX_DIR_LIGHTS_COUNT];
+};
+
+struct PointLight {
+	float kc; // constant term
+	float kl; // linear term
+	float kq; // quadratic term
+	float far; // shadow matrix far plane
+	float bias;
+	vec3 pos; // in world space
+	vec3 color;
+};
+
+layout(packed) uniform Lighting {
+	DirLight dirLights[MAX_DIR_LIGHTS_COUNT];
+	PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
+
+	uint pointLightsCount;
+	uint dirLightsCount;
+
+	float shadowOpacity;
+	float diskRadius_k;
+	float diskRadius_min;
+};
+
+uniform samplerCube pointLightShadowMaps[MAX_POINT_LIGHTS_COUNT];
 uniform sampler2D dirLightShadowMaps[MAX_DIR_LIGHTS_COUNT];
 
 struct LightingVars {
@@ -51,9 +60,6 @@ struct LightingVars {
 } lighting;
 
 #if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
-uniform float diskRadius_k;
-uniform float diskRadius_min;
-
 // for PCF
 const vec3 sampleOffsetDirections[20] = vec3[] (
 		vec3(1, 1, 1), vec3(1, -1, 1), vec3(-1, -1, 1), vec3(-1, 1, 1),

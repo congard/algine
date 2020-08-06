@@ -4,82 +4,109 @@
 #include <algine/constants/Lighting.h>
 #include <algine/constants/ShadowShader.h>
 
-#include <iostream>
+#include <tulz/macros.h>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace LightingVars = algine::Module::Lighting::Vars;
+using namespace tulz;
+using namespace std;
+using namespace glm;
 
 namespace algine {
 LightingManager::LightingManager() {
-    transmitter = LightingTransmitter(this);
-};
+    for (uint & i : m_lightsLimit)
+        i = 8; // default lights limit value
+}
 
 LightingManager::~LightingManager() {
-    clearDirLightsLocations();
-    clearPointLightsLocations();
+    delete m_uniformBlock.getBuffer();
 }
 
-void LightingManager::clearDirLightsLocations() {
-    for (auto &i : locations.lights[0])
-        delete i;
-    locations.lights[0].clear();
+// for converting enum class to uint
+template<typename T> inline uint to_uint(T t) {
+    return static_cast<uint>(t);
 }
 
-void LightingManager::clearPointLightsLocations() {
-    for (auto &i : locations.lights[1])
-        delete i;
-    locations.lights[1].clear();
-}
+// E means enum
+constexpr uint EDirLight = static_cast<uint>(Light::Type::Dir);
+constexpr uint EPointLight = static_cast<uint>(Light::Type::Point);
 
+// offsets; used throughout the cpp; to keep things human-readable
+enum_class(CommonLightOffsets, Kc, Kl, Kq, Pos, Color, common_elements_count)
+
+enum_class(DirLightOffsets: CommonLightOffsets,
+        MinBias = common_elements_count, MaxBias, LightMatrix, elements_count)
+
+enum_class(PointLightOffsets: CommonLightOffsets,
+        Far = common_elements_count, Bias, elements_count)
+
+// only for using in init()
 #define dirLightElem(elem) \
-    LightingVars::DirLights + std::string("[") + std::to_string(i) + "]." + LightingVars::Light::elem
+    LightingVars::Block::DirLights + string("[") + to_string(i) + "]." + LightingVars::Light::elem
 
 #define pointLightElem(elem) \
-    LightingVars::PointLights + std::string("[") + std::to_string(i) + "]." + LightingVars::Light::elem
+    LightingVars::Block::PointLights + string("[") + to_string(i) + "]." + LightingVars::Light::elem
 
-void LightingManager::indexDirLightLocations() {
-    clearDirLightsLocations();
+#define getDirLightOffset(elem) BaseUniformBlock::getVarOffset(dirLightElem(elem), m_lightShader)
+#define getPointLightOffset(elem) BaseUniformBlock::getVarOffset(pointLightElem(elem), m_lightShader)
+#define dirLightOffset(type) m_offsets[EDirLight][i][DirLightOffsets::type]
+#define pointLightOffset(type) m_offsets[EPointLight][i][PointLightOffsets::type]
 
-    locations.dirLightsCount = lightShader->getLocation(LightingVars::DirLightsCount);
+void LightingManager::init() {
+    m_uniformBlock.setName(LightingVars::Block::Name);
+    m_uniformBlock.init(m_lightShader);
 
-    locations.lights[0].reserve(dirLightsLimit);
-    for (uint i = 0; i < dirLightsLimit; ++i) {
-        auto lightLocations = new Locations::DirLight;
-        lightLocations->kc = lightShader->getLocation(dirLightElem(Kc));
-        lightLocations->kl = lightShader->getLocation(dirLightElem(Kl));
-        lightLocations->kq = lightShader->getLocation(dirLightElem(Kq));
-        lightLocations->pos = lightShader->getLocation(dirLightElem(Pos));
-        lightLocations->color = lightShader->getLocation(dirLightElem(Color));
-        lightLocations->shadowMap = lightShader->getLocation(LightingVars::DirLightShadowMaps) + i;
-        lightLocations->minBias = lightShader->getLocation(dirLightElem(MinBias));
-        lightLocations->maxBias = lightShader->getLocation(dirLightElem(MaxBias));
-        lightLocations->lightMatrix = lightShader->getLocation(dirLightElem(LightMatrix));
-        locations.lights[0].push_back(lightLocations);
+    m_uniformBlock.setBuffer(new UniformBuffer());
+    m_uniformBlock.allocateSuitableBufferSize();
+    m_uniformBlock.assignBindingPoint(m_lightShader);
+    m_uniformBlock.linkBuffer();
+
+    m_lightsCountOffset[EDirLight] = BaseUniformBlock::getVarOffset(
+            LightingVars::Block::DirLightsCount, m_lightShader);
+    m_lightsCountOffset[EPointLight] = BaseUniformBlock::getVarOffset(
+            LightingVars::Block::PointLightsCount, m_lightShader);
+    m_shadowMapsLocations[EDirLight] = m_lightShader->getLocation(LightingVars::DirLightShadowMaps);
+    m_shadowMapsLocations[EPointLight] = m_lightShader->getLocation(LightingVars::PointLightShadowMaps);
+
+    m_shadowOpacityOffset = BaseUniformBlock::getVarOffset(
+            LightingVars::Block::ShadowOpacity, m_lightShader);
+    m_shadowDiskRadiusKOffset = BaseUniformBlock::getVarOffset(
+            LightingVars::Block::ShadowDiskRadiusK, m_lightShader);
+    m_shadowDiskRadiusMinOffset = BaseUniformBlock::getVarOffset(
+            LightingVars::Block::ShadowDiskRadiusMin, m_lightShader);
+
+    if (m_pointShadowShader) {
+        m_shadowShaderPosLoc = m_pointShadowShader->getLocation(ShadowShader::Vars::PointLight::Pos);
+        m_shadowShaderFarPlaneLoc = m_pointShadowShader->getLocation(ShadowShader::Vars::PointLight::FarPlane);
+        m_shadowShaderMatricesLoc = m_pointShadowShader->getLocation(ShadowShader::Vars::PointLight::ShadowMatrices);
     }
-}
 
-void LightingManager::indexPointLightLocations() {
-    clearPointLightsLocations();
+    m_offsets[EDirLight] = Array<LightOffsets>(m_lightsLimit[EDirLight]);
+    m_offsets[EPointLight] = Array<LightOffsets>(m_lightsLimit[EPointLight]);
 
-    locations.pointLightsCount = lightShader->getLocation(LightingVars::PointLightsCount);
-
-    if (pointShadowShader) {
-        locations.shadowShaderPos = pointShadowShader->getLocation(ShadowShader::Vars::PointLight::Pos);
-        locations.shadowShaderFarPlane = pointShadowShader->getLocation(ShadowShader::Vars::PointLight::FarPlane);
-        locations.shadowShaderMatrices = pointShadowShader->getLocation(ShadowShader::Vars::PointLight::ShadowMatrices);
+    // dir light offsets
+    for (uint i = 0; i < m_lightsLimit[EDirLight]; ++i) {
+        m_offsets[EDirLight][i] = LightOffsets(DirLightOffsets::elements_count);
+        dirLightOffset(Kc) = getDirLightOffset(Kc);
+        dirLightOffset(Kl) = getDirLightOffset(Kl);
+        dirLightOffset(Kq) = getDirLightOffset(Kq);
+        dirLightOffset(Pos) = getDirLightOffset(Pos);
+        dirLightOffset(Color) = getDirLightOffset(Color);
+        dirLightOffset(MinBias) = getDirLightOffset(MinBias);
+        dirLightOffset(MaxBias) = getDirLightOffset(MaxBias);
+        dirLightOffset(LightMatrix) = getDirLightOffset(LightMatrix);
     }
 
-    locations.lights[1].reserve(pointLightsLimit);
-    for (uint i = 0; i < pointLightsLimit; ++i) {
-        auto lightLocations = new Locations::PointLight;
-        lightLocations->kc = lightShader->getLocation(pointLightElem(Kc));
-        lightLocations->kl = lightShader->getLocation(pointLightElem(Kl));
-        lightLocations->kq = lightShader->getLocation(pointLightElem(Kq));
-        lightLocations->pos = lightShader->getLocation(pointLightElem(Pos));
-        lightLocations->color = lightShader->getLocation(pointLightElem(Color));
-        lightLocations->shadowMap = lightShader->getLocation(LightingVars::PointLightShadowMaps) + i;
-        lightLocations->farPlane = lightShader->getLocation(pointLightElem(FarPlane));
-        lightLocations->bias = lightShader->getLocation(pointLightElem(Bias));
-        locations.lights[1].push_back(lightLocations);
+    // point light offsets
+    for (uint i = 0; i < m_lightsLimit[EPointLight]; ++i) {
+        m_offsets[EPointLight][i] = LightOffsets(PointLightOffsets::elements_count);
+        pointLightOffset(Kc) = getPointLightOffset(Kc);
+        pointLightOffset(Kl) = getPointLightOffset(Kl);
+        pointLightOffset(Kq) = getPointLightOffset(Kq);
+        pointLightOffset(Pos) = getPointLightOffset(Pos);
+        pointLightOffset(Color) = getPointLightOffset(Color);
+        pointLightOffset(Far) = getPointLightOffset(FarPlane);
+        pointLightOffset(Bias) = getPointLightOffset(Bias);
     }
 }
 
@@ -87,128 +114,171 @@ void LightingManager::configureShadowMapping() {
     // to avoid black screen on AMD GPUs and old Intel HD Graphics
     // Note: Mesa drivers require sampler as int, not uint
 
-    for (uint i = 0; i < dirLightsLimit; i++) {
-        ShaderProgram::setInt(getLocation(LightingManager::ShadowMap, Light::TypeDirLight, i),
-                              static_cast<int>(dirLightsInitialSlot + i));
-        Engine::defaultTexture2D()->use(dirLightsInitialSlot + i);
+    for (int i = 0; i < m_lightsLimit[EDirLight]; i++) {
+        ShaderProgram::setInt(m_shadowMapsLocations[EDirLight] + i,
+                              static_cast<int>(m_lightsInitialSlot[EDirLight] + i));
+        Engine::defaultTexture2D()->use(m_lightsInitialSlot[EDirLight] + i);
     }
 
-    for (uint i = 0; i < pointLightsLimit; i++) {
-        ShaderProgram::setInt(getLocation(LightingManager::ShadowMap, Light::TypePointLight, i),
-                              static_cast<int>(pointLightsInitialSlot + i));
-        Engine::defaultTextureCube()->use(pointLightsInitialSlot + i);
+    for (int i = 0; i < m_lightsLimit[EPointLight]; i++) {
+        ShaderProgram::setInt(m_shadowMapsLocations[EPointLight] + i,
+                              static_cast<int>(m_lightsInitialSlot[EPointLight] + i));
+        Engine::defaultTextureCube()->use(m_lightsInitialSlot[EPointLight] + i);
     }
 }
 
-void LightingManager::setDirLightsLimit(const uint limit) {
-    dirLightsLimit = limit;
+void LightingManager::setBindingPoint(uint bindingPoint) {
+    m_uniformBlock.setBindingPoint(bindingPoint);
 }
 
-void LightingManager::setDirLightsMapInitialSlot(uint slot) {
-    dirLightsInitialSlot = slot;
+void LightingManager::setLightsLimit(uint limit, Light::Type lightType) {
+    m_lightsLimit[to_uint(lightType)] = limit;
 }
 
-void LightingManager::setPointLightsLimit(const uint limit) {
-    pointLightsLimit = limit;
-}
-
-void LightingManager::setPointLightsMapInitialSlot(uint slot) {
-    pointLightsInitialSlot = slot;
+void LightingManager::setLightsMapInitialSlot(uint slot, Light::Type lightType) {
+    m_lightsInitialSlot[to_uint(lightType)] = slot;
 }
 
 void LightingManager::setLightShader(ShaderProgram *const in_lightShader) {
-    lightShader = in_lightShader;
+    m_lightShader = in_lightShader;
 }
 
 void LightingManager::setPointLightShadowShader(ShaderProgram *shadowShader) {
-    pointShadowShader = shadowShader;
+    m_pointShadowShader = shadowShader;
 }
 
-int LightingManager::getLocation(const uint obj, const uint lightType, const uint lightIndex) const {
-    return locations.getLocation(obj, lightType, lightIndex);
+uint LightingManager::getLightsLimit(Light::Type lightType) const {
+    return m_lightsLimit[to_uint(lightType)];
 }
 
-uint LightingManager::getDirLightsLimit() const {
-    return dirLightsLimit;
-}
-
-uint LightingManager::getDirLightsMapInitialSlot() const {
-    return dirLightsInitialSlot;
-}
-
-uint LightingManager::getPointLightsLimit() const {
-    return pointLightsLimit;
-}
-
-uint LightingManager::getPointLightsMapInitialSlot() const {
-    return pointLightsInitialSlot;
+uint LightingManager::getLightsMapInitialSlot(Light::Type lightType) const {
+    return m_lightsInitialSlot[to_uint(lightType)];
 }
 
 ShaderProgram* LightingManager::getLightShader() const {
-    return lightShader;
+    return m_lightShader;
 }
 
 ShaderProgram* LightingManager::getPointLightShadowShader() const {
-    return pointShadowShader;
+    return m_pointShadowShader;
 }
 
-#define checkIsDirLight() \
-    if (lightType != algine::Light::TypeDirLight) { \
-        std::cerr << "Object " << obj << " can only be used with Light::TypeDirLight\n"; \
-        return -1; \
-    }
+const BaseUniformBlock& LightingManager::getUniformBlock() const {
+    return m_uniformBlock;
+}
 
-#define checkIsPointLight() \
-    if (lightType != algine::Light::TypePointLight) { \
-        std::cerr << "Object " << obj << " can only be used with Light::TypePointLight\n"; \
-        return -1; \
-    }
+void LightingManager::bindBuffer() const {
+    m_uniformBlock.bindBuffer();
+}
 
-inline int LightingManager::Locations::getLocation(const uint obj, const uint lightType, const uint lightIndex) const {
-    switch (obj) {
-        case DirLightsCount:
-            return dirLightsCount;
-        case PointLightsCount:
-            return pointLightsCount;
-        case Kc:
-            return lights[lightType][lightIndex]->kc;
-        case Kl:
-            return lights[lightType][lightIndex]->kl;
-        case Kq:
-            return lights[lightType][lightIndex]->kq;
-        case Pos:
-            return lights[lightType][lightIndex]->pos;
-        case Color:
-            return lights[lightType][lightIndex]->color;
-        case ShadowMap:
-            return lights[lightType][lightIndex]->shadowMap;
-        case MinBias:
-            checkIsDirLight()
-            return reinterpret_cast<Locations::DirLight*>(lights[lightType][lightIndex])->minBias;
-        case MaxBias:
-            checkIsDirLight()
-            return reinterpret_cast<Locations::DirLight*>(lights[lightType][lightIndex])->maxBias;
-        case LightMatrix:
-            checkIsDirLight()
-            return reinterpret_cast<Locations::DirLight*>(lights[lightType][lightIndex])->lightMatrix;
-        case Bias:
-            checkIsPointLight()
-            return reinterpret_cast<Locations::PointLight*>(lights[lightType][lightIndex])->bias;
-        case FarPlane:
-            checkIsPointLight()
-            return reinterpret_cast<Locations::PointLight*>(lights[lightType][lightIndex])->farPlane;
-        case ShadowShaderPos:
-            checkIsPointLight()
-            return shadowShaderPos;
-        case ShadowShaderFarPlane:
-            checkIsPointLight()
-            return shadowShaderFarPlane;
-        case ShadowShaderMatrices:
-            checkIsPointLight()
-            return shadowShaderMatrices;
-        default:
-            std::cerr << "Object " << obj << " not found\n";
-            return -1;
-    }
+void LightingManager::unbindBuffer() const {
+    m_uniformBlock.unbindBuffer();
+}
+
+void LightingManager::pushShadowMap(const DirLight &light, uint index) {
+    uint slot = m_lightsInitialSlot[EDirLight] + index;
+    ShaderProgram::setInt(m_shadowMapsLocations[EDirLight] + static_cast<int>(index), static_cast<int>(slot));
+    light.shadowMap->use(slot);
+}
+
+void LightingManager::pushShadowMap(const PointLight &light, uint index) {
+    uint slot = m_lightsInitialSlot[EPointLight] + index;
+    ShaderProgram::setInt(m_shadowMapsLocations[EPointLight] + static_cast<int>(index), static_cast<int>(slot));
+    light.shadowMap->use(slot);
+}
+
+void LightingManager::pushShadowShaderPos(const PointLight &light) {
+    ShaderProgram::setVec3(m_shadowShaderPosLoc, light.m_pos);
+}
+
+void LightingManager::pushShadowShaderFarPlane(const PointLight &light) {
+    ShaderProgram::setFloat(m_shadowShaderFarPlaneLoc, light.m_far);
+}
+
+void LightingManager::pushShadowShaderMatrices(const PointLight &light) {
+    for (int i = 0; i < 6; i++)
+        ShaderProgram::setMat4(m_shadowShaderMatricesLoc + i, light.m_lightSpaceMatrices[i]);
+}
+
+// TODO: create & use BufferWriter
+
+void LightingManager::writeDirLightsCount(uint count) {
+    m_uniformBlock.getBuffer()->updateData(m_lightsCountOffset[EDirLight], sizeof(uint), &count);
+}
+
+void LightingManager::writePointLightsCount(uint count) {
+    m_uniformBlock.getBuffer()->updateData(m_lightsCountOffset[EPointLight], sizeof(uint), &count);
+}
+
+void LightingManager::writeShadowOpacity(float shadowOpacity) {
+    m_uniformBlock.getBuffer()->updateData(m_shadowOpacityOffset, sizeof(float), &shadowOpacity);
+}
+
+void LightingManager::writeShadowDiskRadiusK(float diskRadiusK) {
+    m_uniformBlock.getBuffer()->updateData(m_shadowDiskRadiusKOffset, sizeof(float), &diskRadiusK);
+}
+
+void LightingManager::writeShadowDiskRadiusMin(float diskRadiusMin) {
+    m_uniformBlock.getBuffer()->updateData(m_shadowDiskRadiusMinOffset, sizeof(float), &diskRadiusMin);
+}
+
+void LightingManager::writeKc(const Light &light, uint index) {
+    m_uniformBlock.getBuffer()->updateData(
+            m_offsets[to_uint(light.type)][index][CommonLightOffsets::Kc],
+            sizeof(float), &light.m_kc);
+}
+
+void LightingManager::writeKl(const Light &light, uint index) {
+    m_uniformBlock.getBuffer()->updateData(
+            m_offsets[to_uint(light.type)][index][CommonLightOffsets::Kl],
+            sizeof(float), &light.m_kl);
+}
+
+void LightingManager::writeKq(const Light &light, uint index) {
+    m_uniformBlock.getBuffer()->updateData(
+            m_offsets[to_uint(light.type)][index][CommonLightOffsets::Kq],
+            sizeof(float), &light.m_kq);
+}
+
+void LightingManager::writePos(const Light &light, uint index) {
+    m_uniformBlock.getBuffer()->updateData(
+            m_offsets[to_uint(light.type)][index][CommonLightOffsets::Pos],
+            sizeof(vec3), value_ptr(light.m_pos));
+}
+
+void LightingManager::writeColor(const Light &light, uint index) {
+    m_uniformBlock.getBuffer()->updateData(
+            m_offsets[to_uint(light.type)][index][CommonLightOffsets::Color],
+            sizeof(vec3), value_ptr(light.m_color));
+}
+
+void LightingManager::writeMinBias(const DirLight &light, uint index) {
+    m_uniformBlock.getBuffer()->updateData(
+            m_offsets[EDirLight][index][DirLightOffsets::MinBias],
+            sizeof(float), &light.m_minBias);
+}
+
+void LightingManager::writeMaxBias(const DirLight &light, uint index) {
+    m_uniformBlock.getBuffer()->updateData(
+            m_offsets[EDirLight][index][DirLightOffsets::MaxBias],
+            sizeof(float), &light.m_maxBias);
+}
+
+void LightingManager::writeLightMatrix(const DirLight &light, uint index) {
+    m_uniformBlock.getBuffer()->updateData(
+            m_offsets[EDirLight][index][DirLightOffsets::LightMatrix],
+            sizeof(mat4), value_ptr(light.m_lightSpace));
+}
+
+void LightingManager::writeFarPlane(const PointLight &light, uint index) {
+    m_uniformBlock.getBuffer()->updateData(
+            m_offsets[EPointLight][index][PointLightOffsets::Far],
+            sizeof(float), &light.m_far);
+}
+
+void LightingManager::writeBias(const PointLight &light, uint index) {
+    m_uniformBlock.getBuffer()->updateData(
+            m_offsets[EPointLight][index][PointLightOffsets::Bias],
+            sizeof(float), &light.m_bias);
 }
 }
