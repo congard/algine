@@ -8,11 +8,15 @@
 namespace algine {
 class Light: public Translatable {
 public:
-    enum {
-        TypeDirLight,
-        TypePointLight
+    enum class Type {
+        Dir,
+        Point,
+        elements_count
     };
 
+    static constexpr uint TypesCount = static_cast<uint>(Type::elements_count);
+
+public:
     ~Light();
 
     void translate() override;
@@ -34,7 +38,7 @@ public:
     glm::vec3 getColor();
 
 public:
-    int type = -1;
+    Type type;
     float m_kc; // constant term; usually kept at 1.0
     float m_kl; // linear term
     float m_kq; // quadratic term

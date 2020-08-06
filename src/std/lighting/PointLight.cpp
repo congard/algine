@@ -21,7 +21,7 @@ const glm::mat4 PointLight::m_lightViews[] = {
 };
 
 PointLight::PointLight() {
-    type = TypePointLight;
+    type = Type::Point;
 }
 
 PointLight::~PointLight() {
