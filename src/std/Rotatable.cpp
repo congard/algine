@@ -4,8 +4,10 @@
 #include <tulz/macros.h>
 #include <algorithm>
 
+using namespace glm;
+
 namespace algine {
-void Rotatable::swap(algine::Rotatable &other) {
+void Rotatable::swap(Rotatable &other) {
     std::swap(m_rotation, other.m_rotation);
     std::swap(rotator, other.rotator);
 }
@@ -72,27 +74,39 @@ float Rotatable::getRoll() const {
     return rotator->roll;
 }
 
-glm::mat4 Rotatable::getRotationMatrix() const {
+mat4 Rotatable::getRotationMatrix() const {
     return m_rotation;
 }
 
-glm::vec3 Rotatable::getRotate() const {
-    return glm::vec3(rotator->pitch, rotator->yaw, rotator->roll);
+vec3 Rotatable::getRotate() const {
+    return {
+        rotator->pitch,
+        rotator->yaw,
+        rotator->roll
+    };
 }
 
-glm::vec3 Rotatable::getForward() const {
-    return -glm::vec3(m_rotation[0][2], m_rotation[1][2], m_rotation[2][2]);
+vec3 Rotatable::getForward() const {
+    return -getBack();
 }
 
-glm::vec3 Rotatable::getBack() const {
-    return -getForward();
+vec3 Rotatable::getBack() const {
+    return {
+        m_rotation[0][2],
+        m_rotation[1][2],
+        m_rotation[2][2]
+    };
 }
 
-glm::vec3 Rotatable::getRight() const {
-    return glm::vec3(m_rotation[0][0], m_rotation[1][0], m_rotation[2][0]);
+vec3 Rotatable::getRight() const {
+    return {
+        m_rotation[0][0],
+        m_rotation[1][0],
+        m_rotation[2][0]
+    };
 }
 
-glm::vec3 Rotatable::getLeft() const {
+vec3 Rotatable::getLeft() const {
     return -getRight();
 }
 }
