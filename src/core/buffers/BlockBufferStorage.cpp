@@ -50,8 +50,16 @@ void BlockBufferStorage::reallocateStorage() {
         m_bufferMap = newBufferMap;
     }
 
-    // TODO: add copying of old buffer data
+    // reallocate buffer & copy old data
+    uint oldSize = m_buffer->size();
+    uint newSize = storageSize;
+    uint dataToCopySize = min(oldSize, newSize);
+
+    auto data = m_buffer->getData(0, dataToCopySize);
+
     m_buffer->setData(storageSize, nullptr, m_usage);
+    m_buffer->updateData(0, dataToCopySize, data.array());
+
 }
 
 void BlockBufferStorage::allocateBlock(uint blockIndex) {
