@@ -11,6 +11,7 @@
 
 using namespace algine;
 using namespace std;
+using namespace tulz;
 
 #ifdef ALGINE_SECURE_OPERATIONS
 #include "../SOPConstants.h"
@@ -87,6 +88,15 @@ void Buffer::setData(const uint size, const void *data, const uint usage) {
 void Buffer::updateData(const uint offset, const uint size, const void *data) {
     checkBinding()
     glBufferSubData(m_target, offset, size, data);
+}
+
+Array<byte> Buffer::getData(uint offset, uint size) {
+    checkBinding()
+
+    tulz::Array<byte> array(size);
+    glGetBufferSubData(m_target, offset, size, array.array());
+
+    return array;
 }
 
 uint Buffer::size() const {

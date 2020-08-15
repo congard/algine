@@ -2,6 +2,7 @@
 #define ALGINE_BUFFER_H
 
 #include <algine/types.h>
+#include <tulz/Array.h>
 
 namespace algine {
 class Buffer {
@@ -26,6 +27,7 @@ public:
     void unbind() const;
     void setData(uint size, const void *data, uint usage);
     void updateData(uint offset, uint size, const void *data);
+    tulz::Array<byte> getData(uint offset, uint size);
 
     uint size() const;
     uint getId() const;
