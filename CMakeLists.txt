@@ -108,6 +108,7 @@ add_library(algine
         src/core/buffers/UniformBuffer.cpp include/algine/core/buffers/UniformBuffer.h
         src/core/buffers/BlockBufferStorage.cpp include/algine/core/buffers/BlockBufferStorage.h
         src/core/buffers/BufferWriter.cpp include/algine/core/buffers/BufferWriter.h
+        src/core/buffers/BufferReader.cpp include/algine/core/buffers/BufferReader.h
         src/core/InputLayout.cpp include/algine/core/InputLayout.h
         src/core/InputAttributeDescription.cpp include/algine/core/InputAttributeDescription.h
         src/core/texture/Texture.cpp include/algine/core/texture/Texture.h
