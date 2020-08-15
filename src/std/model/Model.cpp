@@ -5,8 +5,13 @@ using namespace std;
 using namespace glm;
 
 namespace algine {
-Model::Model(const uint rotatorType): Rotatable(rotatorType) {
-    /* empty */
+Model::Model(Shape *shape, const uint rotatorType): Rotatable(rotatorType) {
+    if (shape)
+        setShape(shape);
+}
+
+Model::~Model() {
+    deletePtr(m_animator)
 }
 
 void Model::updateMatrix() {
@@ -16,13 +21,18 @@ void Model::updateMatrix() {
 void Model::setShape(Shape *shape) {
     m_shape = shape;
 
-    // nullptr check because m_bones could be already set
-    if (!m_shape->animations.empty() && m_bones == nullptr)
-        m_bones = &m_shape->animations[0].bones;
-}
+    if (!m_shape->animations.empty()) {
+        if (m_animator == nullptr) {
+            m_animator = new Animator(m_shape);
+        } else {
+            // suddenly setShape function is called one more time
+            m_animator->setShape(m_shape);
+        }
 
-void Model::setAnimator(Animator *animator) {
-    m_animator = animator;
+        // nullptr check because m_bones could be already set
+        if (m_bones == nullptr)
+            m_bones = &m_shape->animations[0].bones;
+    }
 }
 
 void Model::setBones(const vector<mat4> *bones) {
