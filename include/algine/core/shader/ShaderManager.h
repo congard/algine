@@ -24,6 +24,7 @@ public:
     void addIncludePath(const std::string &includePath);
 
     void define(const std::string &macro, const std::string &value = std::string(), int shaderType = -1); // -1: define in all shaders
+    void define(const std::string &macro, size value, int shaderType = -1); // -1: define in all shaders
     void removeDefinition(uint shaderType, const std::string &macro, uint type = RemoveLast);
     void removeDefinition(const std::string &macro, uint type = RemoveLast); // removes in all shaders
 

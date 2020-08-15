@@ -51,14 +51,13 @@ void ShaderManager::fromSource(const ShadersInfo &sources) {
     fromSource(sources.vertex, sources.fragment, sources.geometry);
 }
 
-#define _checkShaderType \
-if (shaderType > Shader::Geometry || shaderType < -1) { \
-    cerr << "Unknown shader type " << shaderType << "\n"; \
-    return; \
+inline void checkShaderType(int shaderType) {
+    if (shaderType > Shader::Geometry || shaderType < -1)
+        throw invalid_argument("Unknown shader type " + to_string(shaderType));
 }
 
-void ShaderManager::setBaseIncludePath(const string &path, const int shaderType) {
-    _checkShaderType
+void ShaderManager::setBaseIncludePath(const string &path, int shaderType) {
+    checkShaderType(shaderType);
 
     if (shaderType == -1) {
         baseIncludePath[Shader::Vertex] = path;
@@ -73,7 +72,7 @@ void ShaderManager::addIncludePath(const string &includePath) {
 }
 
 void ShaderManager::define(const string &macro, const string &value, const int shaderType) {
-    _checkShaderType
+    checkShaderType(shaderType);
 
     if (shaderType == -1) {
         definitions[Shader::Vertex].emplace_back(macro, value);
@@ -81,6 +80,10 @@ void ShaderManager::define(const string &macro, const string &value, const int s
         definitions[Shader::Geometry].emplace_back(macro, value);
     } else
         definitions[shaderType].emplace_back(macro, value);
+}
+
+void ShaderManager::define(const string &macro, size value, int shaderType) {
+    define(macro, to_string(value), shaderType);
 }
 
 void ShaderManager::removeDefinition(const uint shaderType, const string &macro, const uint type) {
