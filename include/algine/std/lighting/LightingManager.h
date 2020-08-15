@@ -4,6 +4,7 @@
 #include <algine/types.h>
 #include <algine/core/shader/ShaderProgram.h>
 #include <algine/core/shader/UniformBlock.h>
+#include <algine/core/buffers/BufferWriter.h>
 
 #include <algine/std/lighting/Light.h>
 #include <algine/std/lighting/DirLight.h>
@@ -75,6 +76,7 @@ private:
     ShaderProgram *m_pointShadowShader = nullptr;
 
 private:
+    BufferWriter m_bufferWriter;
     BaseUniformBlock m_uniformBlock;
     tulz::Array<LightOffsets> m_offsets[Light::TypesCount];
     uint m_lightsCountOffset[Light::TypesCount];

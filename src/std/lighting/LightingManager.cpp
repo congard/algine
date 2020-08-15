@@ -56,7 +56,11 @@ void LightingManager::init() {
     m_uniformBlock.setName(LightingVars::Block::Name);
     m_uniformBlock.init(m_lightShader);
 
-    m_uniformBlock.setBuffer(new UniformBuffer());
+    auto uniformBuffer = new UniformBuffer();
+
+    m_bufferWriter.setBuffer(uniformBuffer);
+
+    m_uniformBlock.setBuffer(uniformBuffer);
     m_uniformBlock.allocateSuitableBufferSize();
     m_uniformBlock.assignBindingPoint(m_lightShader);
     m_uniformBlock.linkBuffer();
@@ -200,85 +204,65 @@ void LightingManager::pushShadowShaderMatrices(const PointLight &light) {
         ShaderProgram::setMat4(m_shadowShaderMatricesLoc + i, light.m_lightSpaceMatrices[i]);
 }
 
-// TODO: create & use BufferWriter
-
 void LightingManager::writeDirLightsCount(uint count) {
-    m_uniformBlock.getBuffer()->updateData(m_lightsCountOffset[EDirLight], sizeof(uint), &count);
+    m_bufferWriter.write(m_lightsCountOffset[EDirLight], count);
 }
 
 void LightingManager::writePointLightsCount(uint count) {
-    m_uniformBlock.getBuffer()->updateData(m_lightsCountOffset[EPointLight], sizeof(uint), &count);
+    m_bufferWriter.write(m_lightsCountOffset[EPointLight], count);
 }
 
 void LightingManager::writeShadowOpacity(float shadowOpacity) {
-    m_uniformBlock.getBuffer()->updateData(m_shadowOpacityOffset, sizeof(float), &shadowOpacity);
+    m_bufferWriter.write(m_shadowOpacityOffset, shadowOpacity);
 }
 
 void LightingManager::writeShadowDiskRadiusK(float diskRadiusK) {
-    m_uniformBlock.getBuffer()->updateData(m_shadowDiskRadiusKOffset, sizeof(float), &diskRadiusK);
+    m_bufferWriter.write(m_shadowDiskRadiusKOffset, diskRadiusK);
 }
 
 void LightingManager::writeShadowDiskRadiusMin(float diskRadiusMin) {
-    m_uniformBlock.getBuffer()->updateData(m_shadowDiskRadiusMinOffset, sizeof(float), &diskRadiusMin);
+    m_bufferWriter.write(m_shadowDiskRadiusMinOffset, diskRadiusMin);
 }
 
+#define lightOffsets m_offsets[to_uint(light.type)][index]
+
 void LightingManager::writeKc(const Light &light, uint index) {
-    m_uniformBlock.getBuffer()->updateData(
-            m_offsets[to_uint(light.type)][index][CommonLightOffsets::Kc],
-            sizeof(float), &light.m_kc);
+    m_bufferWriter.write(lightOffsets[CommonLightOffsets::Kc], light.m_kc);
 }
 
 void LightingManager::writeKl(const Light &light, uint index) {
-    m_uniformBlock.getBuffer()->updateData(
-            m_offsets[to_uint(light.type)][index][CommonLightOffsets::Kl],
-            sizeof(float), &light.m_kl);
+    m_bufferWriter.write(lightOffsets[CommonLightOffsets::Kl], light.m_kl);
 }
 
 void LightingManager::writeKq(const Light &light, uint index) {
-    m_uniformBlock.getBuffer()->updateData(
-            m_offsets[to_uint(light.type)][index][CommonLightOffsets::Kq],
-            sizeof(float), &light.m_kq);
+    m_bufferWriter.write(lightOffsets[CommonLightOffsets::Kq], light.m_kq);
 }
 
 void LightingManager::writePos(const Light &light, uint index) {
-    m_uniformBlock.getBuffer()->updateData(
-            m_offsets[to_uint(light.type)][index][CommonLightOffsets::Pos],
-            sizeof(vec3), value_ptr(light.m_pos));
+    m_bufferWriter.write(lightOffsets[CommonLightOffsets::Pos], light.m_pos);
 }
 
 void LightingManager::writeColor(const Light &light, uint index) {
-    m_uniformBlock.getBuffer()->updateData(
-            m_offsets[to_uint(light.type)][index][CommonLightOffsets::Color],
-            sizeof(vec3), value_ptr(light.m_color));
+    m_bufferWriter.write(lightOffsets[CommonLightOffsets::Color], light.m_color);
 }
 
 void LightingManager::writeMinBias(const DirLight &light, uint index) {
-    m_uniformBlock.getBuffer()->updateData(
-            m_offsets[EDirLight][index][DirLightOffsets::MinBias],
-            sizeof(float), &light.m_minBias);
+    m_bufferWriter.write(lightOffsets[DirLightOffsets::MinBias], light.m_minBias);
 }
 
 void LightingManager::writeMaxBias(const DirLight &light, uint index) {
-    m_uniformBlock.getBuffer()->updateData(
-            m_offsets[EDirLight][index][DirLightOffsets::MaxBias],
-            sizeof(float), &light.m_maxBias);
+    m_bufferWriter.write(lightOffsets[DirLightOffsets::MaxBias], light.m_maxBias);
 }
 
 void LightingManager::writeLightMatrix(const DirLight &light, uint index) {
-    m_uniformBlock.getBuffer()->updateData(
-            m_offsets[EDirLight][index][DirLightOffsets::LightMatrix],
-            sizeof(mat4), value_ptr(light.m_lightSpace));
+    m_bufferWriter.write(lightOffsets[DirLightOffsets::LightMatrix], light.m_lightSpace);
 }
 
 void LightingManager::writeFarPlane(const PointLight &light, uint index) {
-    m_uniformBlock.getBuffer()->updateData(
-            m_offsets[EPointLight][index][PointLightOffsets::Far],
-            sizeof(float), &light.m_far);
+    m_bufferWriter.write(lightOffsets[PointLightOffsets::Far], light.m_far);
 }
 
 void LightingManager::writeBias(const PointLight &light, uint index) {
-    m_uniformBlock.getBuffer()->updateData(
-            m_offsets[EPointLight][index][PointLightOffsets::Bias],
-            sizeof(float), &light.m_bias);
+    m_bufferWriter.write(lightOffsets[PointLightOffsets::Bias], light.m_bias);
 }
 }
