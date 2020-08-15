@@ -4,6 +4,8 @@
 #include <GL/glew.h>
 #include <iostream>
 
+#include "NativeConstants.h"
+
 #define SOP_BOUND_PTR Engine::m_boundInputLayout
 #define SOP_OBJECT_TYPE SOPConstants::InputLayoutObject
 #define SOP_OBJECT_ID m_id
@@ -12,6 +14,7 @@
 #include "SOPConstants.h"
 
 using namespace std;
+using namespace algine::NativeConstants;
 
 namespace algine {
 InputLayout::InputLayout(): m_id() {
@@ -33,7 +36,6 @@ void InputLayout::unbind() const {
     glBindVertexArray(0);
 }
 
-// TODO: type constants
 void
 InputLayout::addAttribute(
         const InputAttributeDescription &inputAttributeDescription,
@@ -45,9 +47,9 @@ InputLayout::addAttribute(
     arrayBuffer->bind();
 
     switch (inputAttributeDescription.m_format) {
-        case GL_FLOAT:
-        case GL_HALF_FLOAT:
-        case GL_DOUBLE:
+        case Types::Float:
+        case Types::HalfFloat:
+        case Types::Double:
             glVertexAttribPointer(
                 inputAttributeDescription.m_location,
                 inputAttributeDescription.m_count,
@@ -57,10 +59,12 @@ InputLayout::addAttribute(
                 reinterpret_cast<const void *>(inputAttributeDescription.m_offset * sizeof(float))
             );
             break;
-        case GL_UNSIGNED_BYTE:
-        case GL_UNSIGNED_INT:
-        case GL_INT:
-        case GL_BYTE:
+        case Types::Byte:
+        case Types::UnsignedByte:
+        case Types::Short:
+        case Types::UnsignedShort:
+        case Types::Int:
+        case Types::UnsignedInt:
             glVertexAttribIPointer(
                 inputAttributeDescription.m_location,
                 inputAttributeDescription.m_count,
