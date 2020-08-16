@@ -7,6 +7,8 @@
 #include <vector>
 
 namespace algine {
+class JsonHelper;
+
 class ShaderManager {
 public:
     enum {
@@ -15,6 +17,7 @@ public:
         RemoveAll
     };
 
+public:
     void fromFile(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string());
     void fromFile(const ShadersInfo &paths);
     void fromSource(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string());
@@ -36,14 +39,25 @@ public:
     ShadersInfo getGenerated();
     ShadersInfo makeGenerated();
 
-protected:
-    std::vector<std::pair<std::string, std::string>> definitions[3]; // 3 because vertex, fragment and geometry
-    std::vector<std::string> includePaths;
-    std::string baseIncludePath[3]; // vertex, fragment, geometry
-    std::string vertexTemp, fragmentTemp, geometryTemp; // shaders; temp - template
-    std::string vertexGen, fragmentGen, geometryGen; // gen - generated
+    void loadConfig(const std::string &path);
+    void loadConfigSource(const std::string &source);
 
+    JsonHelper jsonConfig(bool useSources = false);
+    std::string config(bool useSources = false, int indent = 4);
+
+private:
+    typedef std::pair<std::string, std::string> Definition;
+
+private:
     std::string processDirectives(const std::string &src, const std::string &baseIncludePath);
+
+private:
+    std::vector<Definition> m_definitions[3]; // 3 because vertex, fragment and geometry
+    std::vector<std::string> m_includePaths;
+    std::string m_shaderPaths[3]; // vertex, fragment, geometry
+    std::string m_baseIncludePath[3]; // vertex, fragment, geometry
+    std::string m_vertexTemp, m_fragmentTemp, m_geometryTemp; // shaders; temp - template
+    std::string m_vertexGen, m_fragmentGen, m_geometryGen; // gen - generated
 };
 }
 
