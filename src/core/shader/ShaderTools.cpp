@@ -2,9 +2,11 @@
 
 #include <algine/core/shader/ShaderProgram.h>
 
+#include <tulz/Array.h>
 #include <GL/glew.h>
 
 using namespace std;
+using namespace tulz;
 
 namespace algine {
 namespace ShaderTools {
@@ -15,12 +17,12 @@ string getShaderInfoLogById(const uint shader, const uint type) {
     if (infoLogSize == 0)
         return string();
 
-    GLchar infoLog[infoLogSize];
+    Array<char> infoLog(infoLogSize);
     glGetShaderiv(shader, type, &success);
 
     if (!success) {
-        glGetShaderInfoLog(shader, infoLogSize, nullptr, infoLog);
-        return string(infoLog);
+        glGetShaderInfoLog(shader, infoLogSize, nullptr, infoLog.array());
+        return string(infoLog.array());
     }
 
     return string();
@@ -33,12 +35,12 @@ string getProgramInfoLogById(const uint program, const uint type) {
     if (infoLogSize == 0)
         return string();
 
-    GLchar infoLog[infoLogSize];
+    Array<char> infoLog(infoLogSize);
     glGetProgramiv(program, type, &success);
 
     if (!success) {
-        glGetProgramInfoLog(program, infoLogSize, nullptr, infoLog);
-        return string(infoLog);
+        glGetProgramInfoLog(program, infoLogSize, nullptr, infoLog.array());
+        return string(infoLog.array());
     }
 
     return string();
