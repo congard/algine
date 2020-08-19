@@ -333,7 +333,7 @@ JsonHelper ShaderManager::jsonConfig(bool useSources) {
             config[Params][type] = params;
     };
 
-    auto setNotEmpty = [&](const string &key, const string &value)
+    auto setString = [](json &config, const string &key, const string &value)
     {
         if (!value.empty())
             config[key] = value;
@@ -343,26 +343,27 @@ JsonHelper ShaderManager::jsonConfig(bool useSources) {
 
     // write sources or paths
     if (useSources) {
-        setNotEmpty(Vertex, m_vertexTemp);
-        setNotEmpty(Fragment, m_fragmentTemp);
-        setNotEmpty(Geometry, m_geometryTemp);
+        setString(config, Vertex, m_vertexTemp);
+        setString(config, Fragment, m_fragmentTemp);
+        setString(config, Geometry, m_geometryTemp);
     } else {
-        setNotEmpty(Vertex, m_shaderPaths[Shader::Vertex]);
-        setNotEmpty(Fragment, m_shaderPaths[Shader::Fragment]);
-        setNotEmpty(Geometry, m_shaderPaths[Shader::Geometry]);
+        setString(config, Vertex, m_shaderPaths[Shader::Vertex]);
+        setString(config, Fragment, m_shaderPaths[Shader::Fragment]);
+        setString(config, Geometry, m_shaderPaths[Shader::Geometry]);
     }
 
     // write base include paths
     {
         json baseIncludePaths;
-        baseIncludePaths[Vertex] = m_baseIncludePath[Shader::Vertex];
-        baseIncludePaths[Fragment] = m_baseIncludePath[Shader::Fragment];
-        baseIncludePaths[Geometry] = m_baseIncludePath[Shader::Geometry];
+        setString(baseIncludePaths, Vertex, m_baseIncludePath[Shader::Vertex]);
+        setString(baseIncludePaths, Fragment, m_baseIncludePath[Shader::Fragment]);
+        setString(baseIncludePaths, Geometry, m_baseIncludePath[Shader::Geometry]);
         config[BaseIncludePaths] = baseIncludePaths;
     }
 
     // write include paths
-    config[IncludePaths] = m_includePaths;
+    if (!m_includePaths.empty())
+        config[IncludePaths] = m_includePaths;
 
     // make common, vertex, fragment and geometry definitions arrays
     {
