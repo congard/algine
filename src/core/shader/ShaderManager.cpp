@@ -1,7 +1,7 @@
 #include <algine/core/shader/ShaderManager.h>
 
 #include <algine/core/shader/Shader.h>
-#include <algine/std/JsonHelper.h>
+#include <algine/core/JsonHelper.h>
 
 #include <tulz/Path.h>
 #include <tulz/File.h>
@@ -195,14 +195,10 @@ ShadersInfo ShaderManager::makeGenerated() {
     return getGenerated();
 }
 
-void ShaderManager::loadConfig(const string &path) {
-    loadConfigSource(File(path, File::ReadText).readStr());
-}
-
-void ShaderManager::loadConfigSource(const string &source) {
+void ShaderManager::deserialize(const JsonHelper &jsonHelper) {
     using namespace Config;
 
-    json config = json::parse(source);
+    const json &config = jsonHelper.json;
 
     // note: params are also definitions, but without value
     enum_class(DefinitionType,
@@ -300,7 +296,7 @@ void ShaderManager::loadConfigSource(const string &source) {
     loadDefinitions(DefinitionType::Geometry);
 }
 
-JsonHelper ShaderManager::jsonConfig(bool useSources) {
+JsonHelper ShaderManager::serialize() {
     using namespace Config;
 
     json config;
@@ -339,10 +335,10 @@ JsonHelper ShaderManager::jsonConfig(bool useSources) {
             config[key] = value;
     };
 
-    config[FromSources] = useSources;
+    config[FromSources] = m_configUseSources;
 
     // write sources or paths
-    if (useSources) {
+    if (m_configUseSources) {
         setString(config, Vertex, m_vertexTemp);
         setString(config, Fragment, m_fragmentTemp);
         setString(config, Geometry, m_geometryTemp);
@@ -402,10 +398,6 @@ JsonHelper ShaderManager::jsonConfig(bool useSources) {
     }
 
     return config;
-}
-
-string ShaderManager::config(bool useSources, int indent) {
-    return jsonConfig(useSources).toString(indent);
 }
 
 // src: where to insert

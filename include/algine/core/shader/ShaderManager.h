@@ -2,6 +2,7 @@
 #define ALGINE_SHADERMANAGER_H
 
 #include <algine/core/shader/ShadersInfo.h>
+#include <algine/core/Serializable.h>
 #include <algine/types.h>
 
 #include <vector>
@@ -9,7 +10,7 @@
 namespace algine {
 class JsonHelper;
 
-class ShaderManager {
+class ShaderManager: public Serializable {
 public:
     enum {
         RemoveFirst,
@@ -39,11 +40,9 @@ public:
     ShadersInfo getGenerated();
     ShadersInfo makeGenerated();
 
-    void loadConfig(const std::string &path);
-    void loadConfigSource(const std::string &source);
+    void deserialize(const JsonHelper &jsonHelper) override;
 
-    JsonHelper jsonConfig(bool useSources = false);
-    std::string config(bool useSources = false, int indent = 4);
+    JsonHelper serialize() override;
 
 private:
     typedef std::pair<std::string, std::string> Definition;
@@ -58,6 +57,9 @@ private:
     std::string m_baseIncludePath[3]; // vertex, fragment, geometry
     std::string m_vertexTemp, m_fragmentTemp, m_geometryTemp; // shaders; temp - template
     std::string m_vertexGen, m_fragmentGen, m_geometryGen; // gen - generated
+
+private:
+    bool m_configUseSources = false;
 };
 }
 
