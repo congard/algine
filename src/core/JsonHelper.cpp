@@ -1,4 +1,4 @@
-#include <algine/std/JsonHelper.h>
+#include <algine/core/JsonHelper.h>
 
 #include <utility>
 
@@ -8,6 +8,10 @@ using namespace nlohmann;
 namespace algine {
 JsonHelper::JsonHelper(::json inJson): json(move(inJson)) {
     // see initializer list above
+}
+
+JsonHelper::JsonHelper(const string &strJson) {
+    json = json::parse(strJson);
 }
 
 JsonHelper::JsonHelper() = default;

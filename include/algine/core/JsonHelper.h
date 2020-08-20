@@ -12,12 +12,13 @@ public:
     // do not mark explicit because we really need implicit conversion
     // just ignore Clang-Tidy warning
     JsonHelper(nlohmann::json inJson);
+    JsonHelper(const std::string &strJson);
     JsonHelper();
 
     void set(const nlohmann::json &inJson);
     nlohmann::json& get();
 
-    std::string toString(int indent = DoNotFormat) const;
+    std::string toString(int indent = 4) const;
 
 public:
     nlohmann::json json;

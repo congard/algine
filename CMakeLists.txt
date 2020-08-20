@@ -127,7 +127,7 @@ add_library(algine
 
         include/algine/std/Material.h
         src/std/assimp2glm.h
-        src/std/JsonHelper.cpp include/algine/std/JsonHelper.h
+        src/core/JsonHelper.cpp include/algine/core/JsonHelper.h
         src/std/model/Model.cpp include/algine/std/model/Model.h
         src/std/model/Shape.cpp include/algine/std/model/Shape.h
         src/std/model/ShapeLoader.cpp include/algine/std/model/ShapeLoader.h
