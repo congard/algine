@@ -1,4 +1,4 @@
-#include <algine/core/shader/ShaderManager.h>
+#include <algine/core/shader/ShaderProgramManager.h>
 
 #include <algine/core/shader/Shader.h>
 #include <algine/core/JsonHelper.h>
@@ -38,7 +38,7 @@ constant(Params, "params");
 }
 
 namespace algine {
-void ShaderManager::fromFile(const string &vertex, const string &fragment, const string &geometry) {
+void ShaderProgramManager::fromFile(const string &vertex, const string &fragment, const string &geometry) {
     m_shaderPaths[Shader::Vertex] = vertex;
     m_shaderPaths[Shader::Fragment] = fragment;
     m_shaderPaths[Shader::Geometry] = geometry;
@@ -59,18 +59,18 @@ void ShaderManager::fromFile(const string &vertex, const string &fragment, const
     }
 }
 
-void ShaderManager::fromFile(const ShadersInfo &paths) {
+void ShaderProgramManager::fromFile(const ShadersInfo &paths) {
     fromFile(paths.vertex, paths.fragment, paths.geometry);
 }
 
-void ShaderManager::fromSource(const string &vertex, const string &fragment, const string &geometry) {
+void ShaderProgramManager::fromSource(const string &vertex, const string &fragment, const string &geometry) {
     m_vertexTemp = vertex;
     m_fragmentTemp = fragment;
     m_geometryTemp = geometry;
     resetGenerated();
 }
 
-void ShaderManager::fromSource(const ShadersInfo &sources) {
+void ShaderProgramManager::fromSource(const ShadersInfo &sources) {
     fromSource(sources.vertex, sources.fragment, sources.geometry);
 }
 
@@ -79,7 +79,7 @@ inline void checkShaderType(int shaderType) {
         throw invalid_argument("Unknown shader type " + to_string(shaderType));
 }
 
-void ShaderManager::setBaseIncludePath(const string &path, int shaderType) {
+void ShaderProgramManager::setBaseIncludePath(const string &path, int shaderType) {
     checkShaderType(shaderType);
 
     if (shaderType == -1) {
@@ -90,11 +90,11 @@ void ShaderManager::setBaseIncludePath(const string &path, int shaderType) {
         m_baseIncludePath[shaderType] = path;
 }
 
-void ShaderManager::addIncludePath(const string &includePath) {
+void ShaderProgramManager::addIncludePath(const string &includePath) {
     m_includePaths.push_back(includePath);
 }
 
-void ShaderManager::define(const string &macro, const string &value, const int shaderType) {
+void ShaderProgramManager::define(const string &macro, const string &value, const int shaderType) {
     checkShaderType(shaderType);
 
     if (shaderType == -1) {
@@ -106,11 +106,11 @@ void ShaderManager::define(const string &macro, const string &value, const int s
     }
 }
 
-void ShaderManager::define(const string &macro, size value, int shaderType) {
+void ShaderProgramManager::define(const string &macro, size value, int shaderType) {
     define(macro, to_string(value), shaderType);
 }
 
-void ShaderManager::removeDefinition(const uint shaderType, const string &macro, const uint type) {
+void ShaderProgramManager::removeDefinition(const uint shaderType, const string &macro, const uint type) {
     auto &shaderDefs = m_definitions[shaderType];
 
     switch (type) {
@@ -137,25 +137,25 @@ void ShaderManager::removeDefinition(const uint shaderType, const string &macro,
     }
 }
 
-void ShaderManager::removeDefinition(const string &macro, const uint type) {
+void ShaderProgramManager::removeDefinition(const string &macro, const uint type) {
     removeDefinition(Shader::Vertex, macro, type);
     removeDefinition(Shader::Fragment, macro, type);
     removeDefinition(Shader::Geometry, macro, type);
 }
 
-void ShaderManager::resetGenerated() {
+void ShaderProgramManager::resetGenerated() {
     m_vertexGen = m_vertexTemp;
     m_fragmentGen = m_fragmentTemp;
     m_geometryGen = m_geometryTemp;
 }
 
-void ShaderManager::resetDefinitions() {
+void ShaderProgramManager::resetDefinitions() {
     m_definitions[0].clear();
     m_definitions[1].clear();
     m_definitions[2].clear();
 }
 
-void ShaderManager::generate() {
+void ShaderProgramManager::generate() {
     constexpr char versionRegex[] = R"~([ \t]*#[ \t]*version[ \t]+[0-9]+(?:[ \t]+[a-z]+|[ \t]*)(?:\r\n|\n|$))~";
     string *shaders[3] {&m_vertexGen, &m_fragmentGen, &m_geometryGen};
 
@@ -175,7 +175,7 @@ void ShaderManager::generate() {
     }
 }
 
-ShadersInfo ShaderManager::getTemplate() {
+ShadersInfo ShaderProgramManager::getTemplate() {
     return {
             m_vertexTemp,
             m_fragmentTemp,
@@ -183,7 +183,7 @@ ShadersInfo ShaderManager::getTemplate() {
     };
 }
 
-ShadersInfo ShaderManager::getGenerated() {
+ShadersInfo ShaderProgramManager::getGenerated() {
     return {
             m_vertexGen,
             m_fragmentGen,
@@ -191,12 +191,12 @@ ShadersInfo ShaderManager::getGenerated() {
     };
 }
 
-ShadersInfo ShaderManager::makeGenerated() {
+ShadersInfo ShaderProgramManager::makeGenerated() {
     generate();
     return getGenerated();
 }
 
-void ShaderManager::import(const JsonHelper &jsonHelper) {
+void ShaderProgramManager::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -297,7 +297,7 @@ void ShaderManager::import(const JsonHelper &jsonHelper) {
     loadDefinitions(DefinitionType::Geometry);
 }
 
-JsonHelper ShaderManager::dump() {
+JsonHelper ShaderProgramManager::dump() {
     using namespace Config;
 
     json config;
@@ -443,7 +443,7 @@ inline vector<pair<uint, uint>> findComments(const string &src) {
     return result;
 }
 
-string ShaderManager::processDirectives(const string &src, const string &baseIncludePath) {
+string ShaderProgramManager::processDirectives(const string &src, const string &baseIncludePath) {
     string result = src;
     constexpr char regex[] = R"~((\w+)[ \t]+(.+))~";
 

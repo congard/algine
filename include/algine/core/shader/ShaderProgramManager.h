@@ -1,5 +1,5 @@
-#ifndef ALGINE_SHADERMANAGER_H
-#define ALGINE_SHADERMANAGER_H
+#ifndef ALGINE_SHADERPROGRAMMANAGER_H
+#define ALGINE_SHADERPROGRAMMANAGER_H
 
 #include <algine/core/shader/ShadersInfo.h>
 #include <algine/core/transfer/Transferable.h>
@@ -12,7 +12,7 @@
 namespace algine {
 class JsonHelper;
 
-class ShaderManager: public Transferable {
+class ShaderProgramManager: public Transferable {
 public:
     enum {
         RemoveFirst,
@@ -64,4 +64,4 @@ private:
 };
 }
 
-#endif //ALGINE_SHADERMANAGER_H
+#endif //ALGINE_SHADERPROGRAMMANAGER_H
