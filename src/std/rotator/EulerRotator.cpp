@@ -3,17 +3,19 @@
 
 #include <glm/gtc/quaternion.hpp>
 
+using namespace glm;
+
 namespace algine {
 EulerRotator::EulerRotator() {
-    type = RotatorTypeEuler;
+    m_type = RotatorTypeEuler;
 }
 
-void EulerRotator::rotate(glm::mat4 &matrix) {
-    glm::quat qPitch = glm::angleAxis(pitch, glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::quat qYaw = glm::angleAxis(yaw, glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::quat qRoll = glm::angleAxis(roll, glm::vec3(0.0f, 0.0f, 1.0f));
+void EulerRotator::rotate(mat4 &matrix) {
+    quat qPitch = angleAxis(m_pitch, vec3(1.0f, 0.0f, 0.0f));
+    quat qYaw = angleAxis(m_yaw, vec3(0.0f, 1.0f, 0.0f));
+    quat qRoll = angleAxis(m_roll, vec3(0.0f, 0.0f, 1.0f));
 
-    glm::quat orientation = glm::normalize(qPitch * qYaw * qRoll);
-    matrix = glm::mat4_cast(orientation);
+    quat orientation = normalize(qPitch * qYaw * qRoll);
+    matrix = mat4_cast(orientation);
 }
 }

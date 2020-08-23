@@ -1,7 +1,20 @@
 #define GLM_FORCE_CTOR_INIT
 #include <algine/std/Scalable.h>
 
+#include <algine/core/JsonHelper.h>
+#include <algine/core/transfer/GLMTransferrer.h>
+
 #include <glm/gtc/matrix_transform.hpp>
+
+using namespace glm;
+using namespace nlohmann;
+
+#define constant(name, val) constexpr char name[] = val
+
+namespace Config {
+constant(Scaling, "scaling");
+constant(Scale, "scale");
+}
 
 namespace algine {
 void Scalable::setScale(const float x, const float y, const float z) {
@@ -10,7 +23,7 @@ void Scalable::setScale(const float x, const float y, const float z) {
     m_scale.z = z;
 }
 
-void Scalable::setScale(const glm::vec3 &scale) {
+void Scalable::setScale(const vec3 &scale) {
     m_scale = scale;
 }
 
@@ -42,11 +55,25 @@ float Scalable::getScaleZ() const {
     return m_scale.z;
 }
 
-glm::vec3 Scalable::getScale() const {
+vec3 Scalable::getScale() const {
     return m_scale;
 }
 
 glm::mat4 Scalable::getScalingMatrix() const {
     return m_scaling;
+}
+
+void Scalable::import(const JsonHelper &jsonHelper) {
+    m_scaling = GLMTransferrer::import<mat4>(jsonHelper.readValue(Config::Scaling));
+    m_scale = GLMTransferrer::import<vec3>(jsonHelper.readValue(Config::Scale));
+}
+
+JsonHelper Scalable::dump() {
+    json config;
+
+    config[Config::Scaling] = GLMTransferrer::dump(m_scaling).json;
+    config[Config::Scale] = GLMTransferrer::dump(m_scale).json;
+
+    return config;
 }
 }

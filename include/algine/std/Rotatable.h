@@ -3,8 +3,10 @@
 
 #include <algine/std/rotator/Rotator.h>
 
+#include <algine/core/transfer/Transferable.h>
+
 namespace algine {
-class Rotatable {
+class Rotatable: public Transferable {
 protected:
     void swap(Rotatable &other);
 
@@ -31,6 +33,9 @@ public:
     glm::vec3 getBack() const;
     glm::vec3 getRight() const;
     glm::vec3 getLeft() const;
+
+    JsonHelper dump() override;
+    void import(const JsonHelper &jsonHelper) override;
 
 public:
     Rotator *rotator = nullptr;

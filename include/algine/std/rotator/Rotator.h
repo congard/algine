@@ -4,8 +4,10 @@
 #include <glm/mat4x4.hpp>
 #include <algine/types.h>
 
+#include <algine/core/transfer/Transferable.h>
+
 namespace algine {
-class Rotator {
+class Rotator: public Transferable {
 public:
     enum {
         RotatorTypeSimple,
@@ -13,6 +15,7 @@ public:
         RotatorTypeFree
     };
 
+public:
     virtual ~Rotator() = default; // to hide -Wdelete-non-virtual-dtor
 
     virtual void rotate(glm::mat4 &matrix);
@@ -20,15 +23,18 @@ public:
     void setYaw(float yaw);
     void setRoll(float roll);
 
-    float getPitch();
-    float getYaw();
-    float getRoll();
+    float getPitch() const;
+    float getYaw() const;
+    float getRoll() const;
 
     static Rotator* create(uint type);
 
+    void import(const JsonHelper &jsonHelper) override;
+    JsonHelper dump() override;
+
 public:
-    float pitch = 0, yaw = 0, roll = 0;
-    uint type = RotatorTypeSimple;
+    float m_pitch = 0, m_yaw = 0, m_roll = 0;
+    uint m_type = RotatorTypeSimple;
 };
 }
 

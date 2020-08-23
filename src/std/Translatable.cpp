@@ -1,7 +1,20 @@
 #define GLM_FORCE_CTOR_INIT
 #include <algine/std/Translatable.h>
 
+#include <algine/core/transfer/GLMTransferrer.h>
+#include <algine/core/JsonHelper.h>
+
 #include <glm/gtc/matrix_transform.hpp>
+
+using namespace nlohmann;
+using namespace glm;
+
+#define constant(name, val) constexpr char name[] = val
+
+namespace Config {
+constant(Translation, "translation");
+constant(Pos, "pos");
+}
 
 namespace algine {
 void Translatable::setPos(const float x, const float y, const float z) {
@@ -10,7 +23,7 @@ void Translatable::setPos(const float x, const float y, const float z) {
     m_pos.z = z;
 }
 
-void Translatable::setPos(const glm::vec3 &pos) {
+void Translatable::setPos(const vec3 &pos) {
     m_pos = pos;
 }
 
@@ -27,7 +40,7 @@ void Translatable::setZ(const float z) {
 }
 
 void Translatable::translate() {
-    m_translation = glm::translate(glm::mat4(), m_pos);
+    m_translation = glm::translate(mat4(), m_pos);
 }
 
 float Translatable::getX() const {
@@ -42,11 +55,25 @@ float Translatable::getZ() const {
     return m_pos.z;
 }
 
-glm::vec3 Translatable::getPos() const {
+vec3 Translatable::getPos() const {
     return m_pos;
 }
 
-glm::mat4 Translatable::getTranslationMatrix() const {
+mat4 Translatable::getTranslationMatrix() const {
     return m_translation;
+}
+
+void Translatable::import(const JsonHelper &jsonHelper) {
+    m_translation = GLMTransferrer::import<mat4>(jsonHelper.readValue(Config::Translation));
+    m_pos = GLMTransferrer::import<vec3>(jsonHelper.readValue(Config::Pos));
+}
+
+JsonHelper Translatable::dump() {
+    json config;
+
+    config[Config::Translation] = GLMTransferrer::dump(m_translation).json;
+    config[Config::Pos] = GLMTransferrer::dump(m_pos).json;
+
+    return config;
 }
 }

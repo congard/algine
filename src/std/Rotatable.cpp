@@ -1,10 +1,21 @@
 #define GLM_FORCE_CTOR_INIT
 #include <algine/std/Rotatable.h>
 
+#include <algine/core/JsonHelper.h>
+#include <algine/core/transfer/GLMTransferrer.h>
+
 #include <tulz/macros.h>
 #include <algorithm>
 
 using namespace glm;
+using namespace nlohmann;
+
+#define constant(name, val) constexpr char name[] = val
+
+namespace Config {
+constant(Rotation, "rotation");
+constant(Rotator, "rotator");
+}
 
 namespace algine {
 void Rotatable::swap(Rotatable &other) {
@@ -18,7 +29,7 @@ Rotatable::Rotatable(const uint rotatorType) {
 
 Rotatable::Rotatable(const Rotatable &src) {
     m_rotation = src.m_rotation;
-    rotator = Rotator::create(src.rotator->type);
+    rotator = Rotator::create(src.rotator->m_type);
 }
 
 Rotatable::Rotatable(Rotatable &&src) noexcept {
@@ -41,21 +52,21 @@ Rotatable::~Rotatable() {
 }
 
 void Rotatable::setPitch(const float pitch) {
-    rotator->pitch = pitch;
+    rotator->m_pitch = pitch;
 }
 
 void Rotatable::setYaw(const float yaw) {
-    rotator->yaw = yaw;
+    rotator->m_yaw = yaw;
 }
 
 void Rotatable::setRoll(const float roll) {
-    rotator->roll = roll;
+    rotator->m_roll = roll;
 }
 
 void Rotatable::setRotate(const float pitch, const float yaw, const float roll) {
-    rotator->pitch = pitch;
-    rotator->yaw = yaw;
-    rotator->roll = roll;
+    rotator->m_pitch = pitch;
+    rotator->m_yaw = yaw;
+    rotator->m_roll = roll;
 }
 
 void Rotatable::rotate() {
@@ -63,15 +74,15 @@ void Rotatable::rotate() {
 }
 
 float Rotatable::getPitch() const {
-    return rotator->pitch;
+    return rotator->m_pitch;
 }
 
 float Rotatable::getYaw() const {
-    return rotator->yaw;
+    return rotator->m_yaw;
 }
 
 float Rotatable::getRoll() const {
-    return rotator->roll;
+    return rotator->m_roll;
 }
 
 mat4 Rotatable::getRotationMatrix() const {
@@ -80,9 +91,9 @@ mat4 Rotatable::getRotationMatrix() const {
 
 vec3 Rotatable::getRotate() const {
     return {
-        rotator->pitch,
-        rotator->yaw,
-        rotator->roll
+        rotator->m_pitch,
+        rotator->m_yaw,
+        rotator->m_roll
     };
 }
 
@@ -108,5 +119,19 @@ vec3 Rotatable::getRight() const {
 
 vec3 Rotatable::getLeft() const {
     return -getRight();
+}
+
+JsonHelper Rotatable::dump() {
+    json config;
+
+    config[Config::Rotation] = GLMTransferrer::dump(m_rotation).json;
+    config[Config::Rotator] = rotator->dump().json;
+
+    return config;
+}
+
+void Rotatable::import(const JsonHelper &jsonHelper) {
+    m_rotation = GLMTransferrer::import<mat4>(jsonHelper.readValue(Config::Rotation));
+    rotator->import(jsonHelper.readValue(Config::Rotator));
 }
 }
