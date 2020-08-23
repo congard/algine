@@ -94,6 +94,7 @@ add_library(algine
         include/algine/ext/constants/BloomSearchShader.h
         include/algine/ext/constants/COCShader.h
         include/algine/ext/constants/BlendDOF.h
+        include/algine/core/transfer/GLMTransferrer.h
         include/algine/core/texture/PixelData.h
         include/algine/core/texture/TextureCreateInfo.h
         include/algine/core/shader/ShadersInfo.h
