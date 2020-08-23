@@ -20,6 +20,10 @@ void JsonHelper::set(const ::json &inJson) {
     json = inJson;
 }
 
+void JsonHelper::append(const JsonHelper &jsonHelper) {
+    json.update(jsonHelper.json);
+}
+
 nlohmann::json &JsonHelper::get() {
     return json;
 }

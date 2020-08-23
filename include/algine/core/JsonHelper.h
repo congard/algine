@@ -16,7 +16,25 @@ public:
     JsonHelper();
 
     void set(const nlohmann::json &inJson);
+    void append(const JsonHelper &jsonHelper);
     nlohmann::json& get();
+
+    template<typename T = nlohmann::json>
+    inline void readValue(const std::string &key, T &writeTo, const T &defaultValue = T()) const {
+        if (json.contains(key)) {
+            writeTo = json[key];
+        } else {
+            writeTo = defaultValue;
+        }
+    }
+
+    template<typename T = nlohmann::json>
+    inline T readValue(const std::string &key, const T &defaultValue = T()) const {
+        T value;
+        readValue(key, value, defaultValue);
+
+        return value;
+    }
 
     std::string toString(int indent = 4) const;
 
