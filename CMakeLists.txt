@@ -77,7 +77,6 @@ if (ALGINE_SECURE_OPERATIONS)
 endif()
 
 add_library(algine
-        include/algine/constants.h
         include/algine/types.h
         include/algine/templates.h
         include/algine/constants/AMTL.h
