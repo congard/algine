@@ -2,15 +2,17 @@
 #define ALGINE_SHADERMANAGER_H
 
 #include <algine/core/shader/ShadersInfo.h>
-#include <algine/core/Serializable.h>
+#include <algine/core/transfer/Transferable.h>
 #include <algine/types.h>
 
 #include <vector>
 
+// TODO: generate only one shader, not vertex/fragment/geometry
+
 namespace algine {
 class JsonHelper;
 
-class ShaderManager: public Serializable {
+class ShaderManager: public Transferable {
 public:
     enum {
         RemoveFirst,
@@ -40,9 +42,8 @@ public:
     ShadersInfo getGenerated();
     ShadersInfo makeGenerated();
 
-    void deserialize(const JsonHelper &jsonHelper) override;
-
-    JsonHelper serialize() override;
+    void import(const JsonHelper &jsonHelper) override;
+    JsonHelper dump() override;
 
 private:
     typedef std::pair<std::string, std::string> Definition;

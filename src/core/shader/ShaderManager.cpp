@@ -16,6 +16,7 @@ using namespace tulz::StringUtils;
 using namespace nlohmann;
 
 #define constant(name, val) constexpr char name[] = val
+
 namespace ShaderManager {
 constant(Include, "include");
 constant(Link, "link");
@@ -195,7 +196,7 @@ ShadersInfo ShaderManager::makeGenerated() {
     return getGenerated();
 }
 
-void ShaderManager::deserialize(const JsonHelper &jsonHelper) {
+void ShaderManager::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -296,7 +297,7 @@ void ShaderManager::deserialize(const JsonHelper &jsonHelper) {
     loadDefinitions(DefinitionType::Geometry);
 }
 
-JsonHelper ShaderManager::serialize() {
+JsonHelper ShaderManager::dump() {
     using namespace Config;
 
     json config;
