@@ -100,6 +100,7 @@ add_library(algine
         include/algine/std/model/Mesh.h
         include/algine/std/model/InputLayoutShapeLocations.h
 
+        src/core/Object.cpp include/algine/core/Object.h
         src/core/transfer/Transferable.cpp include/algine/core/transfer/Transferable.h
         src/core/Framebuffer.cpp include/algine/core/Framebuffer.h
         src/core/Renderbuffer.cpp include/algine/core/Renderbuffer.h
