@@ -38,6 +38,8 @@ public:
 
     std::shared_ptr<Shader> createShader(uint access = Private);
 
+    void dumperUseSources(bool use);
+
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
 
@@ -52,7 +54,7 @@ private:
     std::string m_gen;
     std::string m_name;
     uint m_type;
-    bool m_configUseSources = false;
+    bool m_dumperUseSources = false;
 };
 }
 

@@ -149,6 +149,10 @@ shared_ptr<Shader> ShaderManager::createShader(uint access) {
     return shader;
 }
 
+void ShaderManager::dumperUseSources(bool use) {
+    m_dumperUseSources = use;
+}
+
 void ShaderManager::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
@@ -206,7 +210,7 @@ JsonHelper ShaderManager::dump() {
     setString(BaseIncludePath, m_baseIncludePath);
 
     // write source or path
-    if (m_configUseSources) {
+    if (m_dumperUseSources) {
         setString(Source, m_source);
     } else {
         setString(Config::Path, m_path);
