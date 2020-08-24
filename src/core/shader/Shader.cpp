@@ -10,6 +10,8 @@ using namespace std;
 using namespace tulz;
 
 namespace algine {
+std::vector<std::shared_ptr<Shader>> Shader::publicShaders;
+
 Shader::Shader(const uint type) {
     create(type);
 }
@@ -48,5 +50,35 @@ void Shader::fromSource(const string &source) {
 
 void Shader::fromFile(const string &path) {
     fromSource(File(path, File::Read).readStr());
+}
+
+constexpr uint notFound = static_cast<uint>(-1);
+
+inline uint indexByName(const string &name) {
+    for (uint i = 0; i < Shader::publicShaders.size(); i++) {
+        if (Shader::publicShaders[i]->name == name) {
+            return i;
+        }
+    }
+
+    return notFound;
+}
+
+shared_ptr<Shader> Shader::getByName(const string &name) {
+    uint index = indexByName(name);
+
+    if (index != notFound)
+        return publicShaders[index];
+
+    return nullptr;
+}
+
+Shader* Shader::byName(const string &name) {
+    uint index = indexByName(name);
+
+    if (index != notFound)
+        return publicShaders[index].get();
+
+    return nullptr;
 }
 }
