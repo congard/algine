@@ -26,8 +26,7 @@ public:
     void fromSource(const std::string &source);
     void fromFile(const std::string &path);
 
-public:
-    uint id = 0;
+    uint getId() const;
 
 public:
     static std::shared_ptr<Shader> getByName(const std::string &name);
@@ -35,6 +34,9 @@ public:
 
 public:
     static std::vector<std::shared_ptr<Shader>> publicShaders;
+
+private:
+    uint m_id = 0;
 };
 }
 

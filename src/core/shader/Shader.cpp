@@ -19,19 +19,19 @@ Shader::Shader(const uint type) {
 Shader::Shader() = default;
 
 Shader::~Shader() {
-    glDeleteShader(id);
+    glDeleteShader(m_id);
 }
 
 void Shader::create(const uint type) {
     switch (type) {
         case Vertex:
-            id = glCreateShader(GL_VERTEX_SHADER);
+            m_id = glCreateShader(GL_VERTEX_SHADER);
             break;
         case Fragment:
-            id = glCreateShader(GL_FRAGMENT_SHADER);
+            m_id = glCreateShader(GL_FRAGMENT_SHADER);
             break;
         case Geometry:
-            id = glCreateShader(GL_GEOMETRY_SHADER);
+            m_id = glCreateShader(GL_GEOMETRY_SHADER);
             break;
         default:
             cerr << "Unknown shader type " << type << "\n";
@@ -40,16 +40,20 @@ void Shader::create(const uint type) {
 
 void Shader::fromSource(const string &source) {
     const char *c_str = source.c_str();
-    glShaderSource(id, 1, &c_str, nullptr);
-    glCompileShader(id);
+    glShaderSource(m_id, 1, &c_str, nullptr);
+    glCompileShader(m_id);
 
-    string infoLog = ShaderTools::getShaderInfoLogById(id, GL_COMPILE_STATUS);
+    string infoLog = ShaderTools::getShaderInfoLogById(m_id, GL_COMPILE_STATUS);
     if (!infoLog.empty())
-        cerr << "Info log of Shader with id " << id << ": " << infoLog;
+        cerr << "Info log of Shader with id " << m_id << ": " << infoLog;
 }
 
 void Shader::fromFile(const string &path) {
     fromSource(File(path, File::Read).readStr());
+}
+
+uint Shader::getId() const {
+    return m_id;
 }
 
 constexpr uint notFound = static_cast<uint>(-1);

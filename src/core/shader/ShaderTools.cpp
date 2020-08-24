@@ -47,7 +47,7 @@ string getProgramInfoLogById(const uint program, const uint type) {
 }
 
 string getShaderInfoLog(const Shader *const shader, const uint type) {
-    return getShaderInfoLogById(shader->id, type);
+    return getShaderInfoLogById(shader->getId(), type);
 }
 
 string getProgramInfoLog(const ShaderProgram *const program, const uint type) {

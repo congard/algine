@@ -67,7 +67,7 @@ void ShaderProgram::fromFile(const ShadersInfo &paths) {
 }
 
 void ShaderProgram::attachShader(const Shader &shader) {
-    glAttachShader(id, shader.id);
+    glAttachShader(id, shader.getId());
 }
 
 void ShaderProgram::link() {
