@@ -119,19 +119,30 @@ shared_ptr<Shader> ShaderManager::createShader(uint access) {
     shader->setName(m_name);
 
     if (access == Public) {
+        auto printInfo = [&]()
+        {
+            if (!m_path.empty()) {
+                cerr << "Path: " << m_path << "\n";
+            } else if (!m_source.empty()) {
+                cerr << "Source: " << m_source << "\n";
+            }
+        };
+
         if (m_name.empty()) {
             cerr << "Warning: Shader without name can't be public\n";
 
-            if (!m_path.empty())
-                cerr << "Shader path: " << m_path << "\n";
-            else if (!m_source.empty())
-                cerr << "Shader source: " << m_source << "\n";
+            printInfo();
 
             return shader;
         }
 
         if (Shader::byName(m_name) == nullptr) {
             Shader::publicShaders.emplace_back(shader);
+        } else {
+            cerr << "Warning: Shader with the same name was already loaded. "
+                    "Access of the current shader will be set to private";
+
+            printInfo();
         }
     }
 
