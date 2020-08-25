@@ -11,12 +11,14 @@
 namespace algine {
 class ShaderManager: public ShaderDefinitionManager {
 public:
-    enum {
+    enum class Access {
         Private,
         Public
     };
 
 public:
+    ShaderManager();
+
     void fromFile(const std::string &path);
     void fromSource(const std::string &source);
 
@@ -27,16 +29,18 @@ public:
     void generate();
 
     void setName(const std::string &name);
+    void setAccess(Access access);
     void setType(uint type);
 
     std::string getName() const;
+    Access getAccess() const;
     uint getType() const;
 
     std::string getTemplate();
     std::string getGenerated();
     std::string makeGenerated();
 
-    std::shared_ptr<Shader> createShader(uint access = Private);
+    std::shared_ptr<Shader> createShader();
 
     void dumperUseSources(bool use);
 
@@ -53,8 +57,9 @@ private:
     std::string m_source;
     std::string m_gen;
     std::string m_name;
+    Access m_access;
     uint m_type;
-    bool m_dumperUseSources = false;
+    bool m_dumperUseSources;
 };
 }
 

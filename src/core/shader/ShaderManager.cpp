@@ -24,7 +24,11 @@ constant(Link, "link");
 
 namespace Config {
 constant(Name, "name");
+constant(Access, "access");
 constant(Type, "type");
+
+constant(Private, "private");
+constant(Public, "public");
 
 constant(Vertex, "vertex");
 constant(Fragment, "fragment");
@@ -38,6 +42,14 @@ constant(IncludePaths, "includePaths");
 }
 
 namespace algine {
+ShaderManager::ShaderManager()
+    : m_access(Access::Private),
+      m_type(),
+      m_dumperUseSources(false)
+{
+    // see initializer list above
+}
+
 void ShaderManager::fromFile(const string &path) {
     m_path = path;
 
@@ -85,12 +97,20 @@ void ShaderManager::setName(const string &name) {
     m_name = name;
 }
 
+void ShaderManager::setAccess(Access access) {
+    m_access = access;
+}
+
 void ShaderManager::setType(uint type) {
     m_type = type;
 }
 
 string ShaderManager::getName() const {
     return m_name;
+}
+
+ShaderManager::Access ShaderManager::getAccess() const {
+    return m_access;
 }
 
 uint ShaderManager::getType() const {
@@ -110,7 +130,7 @@ string ShaderManager::makeGenerated() {
     return getGenerated();
 }
 
-shared_ptr<Shader> ShaderManager::createShader(uint access) {
+shared_ptr<Shader> ShaderManager::createShader() {
     if (m_gen.empty())
         generate();
 
@@ -118,7 +138,7 @@ shared_ptr<Shader> ShaderManager::createShader(uint access) {
     shader->fromSource(m_gen);
     shader->setName(m_name);
 
-    if (access == Public) {
+    if (m_access == Access::Public) {
         auto printInfo = [&]()
         {
             if (!m_path.empty()) {
@@ -192,6 +212,14 @@ void ShaderManager::import(const JsonHelper &jsonHelper) {
         {Geometry, Shader::Geometry}
     } [config[Type]];
 
+    // load access
+    if (config.contains(Config::Access)) {
+        m_access = map<string, Access> {
+            {Private, Access::Private},
+            {Public, Access::Public}
+        } [config[Config::Access]];
+    }
+
     ShaderDefinitionManager::import(jsonHelper);
 }
 
@@ -222,7 +250,10 @@ JsonHelper ShaderManager::dump() {
 
     // write type
     // note: Shader must keep types order
-    config[Type] = (vector<string> {Vertex, Fragment, Geometry})[m_type];
+    config[Type] = vector<string> {Vertex, Fragment, Geometry} [m_type];
+
+    // write access
+    config[Config::Access] = vector<string> {Private, Public} [static_cast<uint>(m_access)];
 
     config.update(ShaderDefinitionManager::dump().json);
 
