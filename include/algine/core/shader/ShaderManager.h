@@ -47,6 +47,8 @@ public:
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
 
+    void importFromFile(const std::string &path) override;
+
 private:
     std::string processDirectives(const std::string &src, const std::string &baseIncludePath);
 
@@ -57,6 +59,7 @@ private:
     std::string m_source;
     std::string m_gen;
     std::string m_name;
+    std::string m_confPath;
     Access m_access;
     uint m_type;
     bool m_dumperUseSources;

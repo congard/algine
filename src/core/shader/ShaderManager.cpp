@@ -260,6 +260,11 @@ JsonHelper ShaderManager::dump() {
     return config;
 }
 
+void ShaderManager::importFromFile(const string &path) {
+    m_confPath = path;
+    Transferable::importFromFile(path);
+}
+
 // src: where to insert
 // srcPos: position to start erase
 // srcSize: count of symbols to erase
