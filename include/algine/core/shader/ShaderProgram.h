@@ -14,7 +14,7 @@
 #include <vector>
 
 namespace algine {
-class ShaderProgram {
+class ShaderProgram: public Object {
 public:
     ShaderProgram();
     ~ShaderProgram();
@@ -59,6 +59,13 @@ public:
 public:
     uint id;
     std::unordered_map<std::string, int> locations;
+
+public:
+    static std::shared_ptr<ShaderProgram> getByName(const std::string &name);
+    static ShaderProgram* byName(const std::string &name);
+
+public:
+    static std::vector<std::shared_ptr<ShaderProgram>> publicPrograms;
 };
 }
 
