@@ -6,7 +6,9 @@ using namespace std;
 using namespace nlohmann;
 
 namespace algine {
-JsonHelper::JsonHelper(::json inJson): json(move(inJson)) {
+JsonHelper::JsonHelper(::json inJson)
+    : json(move(inJson))
+{
     // see initializer list above
 }
 
@@ -21,7 +23,9 @@ void JsonHelper::set(const ::json &inJson) {
 }
 
 void JsonHelper::append(const JsonHelper &jsonHelper) {
-    json.update(jsonHelper.json);
+    if (!jsonHelper.json.empty()) {
+        json.update(jsonHelper.json);
+    }
 }
 
 nlohmann::json &JsonHelper::get() {
