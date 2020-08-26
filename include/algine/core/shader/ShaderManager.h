@@ -3,19 +3,14 @@
 
 #include <algine/core/shader/ShaderDefinitionManager.h>
 #include <algine/core/shader/Shader.h>
+#include <algine/core/ManagerBase.h>
 #include <algine/types.h>
 
 #include <memory>
 #include <vector>
 
 namespace algine {
-class ShaderManager: public ShaderDefinitionManager {
-public:
-    enum class Access {
-        Private,
-        Public
-    };
-
+class ShaderManager: public ShaderDefinitionManager, public ManagerBase {
 public:
     ShaderManager();
 
@@ -28,12 +23,9 @@ public:
     void resetGenerated();
     void generate();
 
-    void setName(const std::string &name);
-    void setAccess(Access access);
     void setType(uint type);
 
-    std::string getName() const;
-    Access getAccess() const;
+    std::string getConfigPath() const;
     uint getType() const;
 
     std::string getTemplate();
@@ -58,9 +50,7 @@ private:
     std::string m_baseIncludePath;
     std::string m_source;
     std::string m_gen;
-    std::string m_name;
     std::string m_confPath;
-    Access m_access;
     uint m_type;
     bool m_dumperUseSources;
 };

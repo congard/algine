@@ -23,12 +23,7 @@ constant(Link, "link");
 }
 
 namespace Config {
-constant(Name, "name");
-constant(Access, "access");
 constant(Type, "type");
-
-constant(Private, "private");
-constant(Public, "public");
 
 constant(Vertex, "vertex");
 constant(Fragment, "fragment");
@@ -43,8 +38,7 @@ constant(IncludePaths, "includePaths");
 
 namespace algine {
 ShaderManager::ShaderManager()
-    : m_access(Access::Private),
-      m_type(),
+    : m_type(),
       m_dumperUseSources(false)
 {
     // see initializer list above
@@ -93,24 +87,12 @@ void ShaderManager::generate() {
     m_gen = processDirectives(m_gen, m_baseIncludePath);
 }
 
-void ShaderManager::setName(const string &name) {
-    m_name = name;
-}
-
-void ShaderManager::setAccess(Access access) {
-    m_access = access;
-}
-
 void ShaderManager::setType(uint type) {
     m_type = type;
 }
 
-string ShaderManager::getName() const {
-    return m_name;
-}
-
-ShaderManager::Access ShaderManager::getAccess() const {
-    return m_access;
+string ShaderManager::getConfigPath() const {
+    return m_confPath;
 }
 
 uint ShaderManager::getType() const {
@@ -178,14 +160,9 @@ void ShaderManager::import(const JsonHelper &jsonHelper) {
 
     const json &config = jsonHelper.json;
 
-    auto loadString = [&](const string &key, string &writeTo)
-    {
-        if (config.contains(key))
-            writeTo = config[key];
-    };
-
-    loadString(Name, m_name);
-    loadString(BaseIncludePath, m_baseIncludePath);
+    // load base include path
+    if (config.contains(BaseIncludePath))
+        m_baseIncludePath = config[BaseIncludePath];
 
     // load shader path or source
     if (config.contains(Source)) {
@@ -212,14 +189,7 @@ void ShaderManager::import(const JsonHelper &jsonHelper) {
         {Geometry, Shader::Geometry}
     } [config[Type]];
 
-    // load access
-    if (config.contains(Config::Access)) {
-        m_access = map<string, Access> {
-            {Private, Access::Private},
-            {Public, Access::Public}
-        } [config[Config::Access]];
-    }
-
+    ManagerBase::import(jsonHelper);
     ShaderDefinitionManager::import(jsonHelper);
 }
 
@@ -234,7 +204,6 @@ JsonHelper ShaderManager::dump() {
             config[key] = value;
     };
 
-    setString(Name, m_name);
     setString(BaseIncludePath, m_baseIncludePath);
 
     // write source or path
@@ -252,17 +221,16 @@ JsonHelper ShaderManager::dump() {
     // note: Shader must keep types order
     config[Type] = vector<string> {Vertex, Fragment, Geometry} [m_type];
 
-    // write access
-    config[Config::Access] = vector<string> {Private, Public} [static_cast<uint>(m_access)];
+    JsonHelper result(config);
+    result.append(ManagerBase::dump());
+    result.append(ShaderDefinitionManager::dump());
 
-    config.update(ShaderDefinitionManager::dump().json);
-
-    return config;
+    return result;
 }
 
 void ShaderManager::importFromFile(const string &path) {
     m_confPath = path;
-    Transferable::importFromFile(path);
+    import(File(path, File::ReadText).readStr());
 }
 
 // src: where to insert
