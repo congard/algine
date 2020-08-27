@@ -1,66 +1,53 @@
 #ifndef ALGINE_SHADERPROGRAMMANAGER_H
 #define ALGINE_SHADERPROGRAMMANAGER_H
 
-#include <algine/core/shader/ShadersInfo.h>
-#include <algine/core/transfer/Transferable.h>
-#include <algine/types.h>
-
-#include <vector>
-
-// TODO: generate only one shader, not vertex/fragment/geometry
+#include <algine/core/shader/ShaderProgramPtr.h>
+#include <algine/core/shader/ShaderManager.h>
+#include <algine/core/shader/ShaderProgram.h>
+#include <algine/core/ManagerBase.h>
 
 namespace algine {
-class JsonHelper;
-
-class ShaderProgramManager: public Transferable {
+class ShaderProgramManager: public ShaderDefinitionManager, public ManagerBase {
 public:
-    enum {
-        RemoveFirst,
-        RemoveLast,
-        RemoveAll
+    class PrivateShader {
+    public:
+        enum DumpMode {
+            Path,
+            Dump
+        };
+
+    public:
+        // do not mark explicit because we really need implicit conversion
+        // manager.setPrivateShaders({vertex, fragment});
+        // instead of ugly
+        // manager.setPrivateShaders({ShaderProgramManager::PrivateShader(vertex), ... });
+        // just ignore Clang-Tidy warning
+        PrivateShader(ShaderManager shaderManager, uint dumpMode = Dump);
+
+    public:
+        ShaderManager manager;
+        uint dumpMode;
     };
 
 public:
-    void fromFile(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string());
-    void fromFile(const ShadersInfo &paths);
-    void fromSource(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string());
-    void fromSource(const ShadersInfo &sources);
+    void setPrivateShaders(const std::vector<PrivateShader> &shaders);
+    void addPrivateShader(const ShaderManager &manager, uint dumpMode = PrivateShader::Dump);
+    const std::vector<PrivateShader>& getPrivateShaders() const;
 
-    void setBaseIncludePath(const std::string &path, int shaderType = -1);
-    void addIncludePath(const std::string &includePath);
+    void setPublicShaders(const std::vector<std::string> &shaders);
+    void addPublicShader(const std::string &name);
+    const std::vector<std::string>& getPublicShaders() const;
 
-    void define(const std::string &macro, const std::string &value = std::string(), int shaderType = -1); // -1: define in all shaders
-    void define(const std::string &macro, size value, int shaderType = -1); // -1: define in all shaders
-    void removeDefinition(uint shaderType, const std::string &macro, uint type = RemoveLast);
-    void removeDefinition(const std::string &macro, uint type = RemoveLast); // removes in all shaders
-
-    void resetGenerated();
-    void resetDefinitions();
-    void generate();
-
-    ShadersInfo getTemplate();
-    ShadersInfo getGenerated();
-    ShadersInfo makeGenerated();
+    ShaderProgramPtr createProgram();
 
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
 
-private:
-    typedef std::pair<std::string, std::string> Definition;
+    void importFromFile(const std::string &path) override;
 
 private:
-    std::string processDirectives(const std::string &src, const std::string &baseIncludePath);
-
-private:
-    std::vector<Definition> m_definitions[3]; // 3 because vertex, fragment and geometry
-    std::vector<std::string> m_includePaths;
-    std::string m_shaderPaths[3]; // vertex, fragment, geometry
-    std::string m_baseIncludePath[3]; // vertex, fragment, geometry
-    std::string m_vertexTemp, m_fragmentTemp, m_geometryTemp; // shaders; temp - template
-    std::string m_vertexGen, m_fragmentGen, m_geometryGen; // gen - generated
-
-private:
-    bool m_configUseSources = false;
+    std::vector<PrivateShader> m_privateShaders;
+    std::vector<std::string> m_publicShaders;
 };
 }
 
