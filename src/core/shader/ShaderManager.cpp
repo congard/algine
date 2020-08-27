@@ -112,39 +112,22 @@ string ShaderManager::makeGenerated() {
     return getGenerated();
 }
 
-shared_ptr<Shader> ShaderManager::createShader() {
+ShaderPtr ShaderManager::createShader() {
     if (m_gen.empty())
         generate();
 
-    shared_ptr<Shader> shader = make_shared<Shader>(m_type);
+    ShaderPtr shader = make_shared<Shader>(m_type);
     shader->fromSource(m_gen);
     shader->setName(m_name);
 
     if (m_access == Access::Public) {
-        auto printInfo = [&]()
-        {
-            if (!m_path.empty()) {
-                cerr << "Path: " << m_path << "\n";
-            } else if (!m_source.empty()) {
-                cerr << "Source: " << m_source << "\n";
-            }
-        };
-
-        if (m_name.empty()) {
-            cerr << "Warning: Shader without name can't be public\n";
-
-            printInfo();
-
-            return shader;
-        }
+        if (m_name.empty())
+            throw runtime_error("Shader without name can't be public");
 
         if (Shader::byName(m_name) == nullptr) {
             Shader::publicShaders.emplace_back(shader);
         } else {
-            cerr << "Warning: Shader with the same name was already loaded. "
-                    "Access of the current shader will be set to private";
-
-            printInfo();
+            throw runtime_error("Shader with the same name was already loaded");
         }
     }
 

@@ -10,7 +10,7 @@ using namespace std;
 using namespace tulz;
 
 namespace algine {
-std::vector<std::shared_ptr<Shader>> Shader::publicShaders;
+vector<ShaderPtr> Shader::publicShaders;
 
 Shader::Shader(const uint type) {
     create(type);
@@ -68,7 +68,7 @@ inline uint indexByName(const string &name) {
     return notFound;
 }
 
-shared_ptr<Shader> Shader::getByName(const string &name) {
+ShaderPtr Shader::getByName(const string &name) {
     uint index = indexByName(name);
 
     if (index != notFound)

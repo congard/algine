@@ -1,10 +1,11 @@
 #ifndef ALGINE_SHADERPROGRAM_H
 #define ALGINE_SHADERPROGRAM_H
 
-#include <algine/types.h>
-#include <algine/templates.h>
+#include <algine/core/shader/ShaderProgramPtr.h>
 #include <algine/core/shader/ShadersInfo.h>
 #include <algine/core/shader/Shader.h>
+#include <algine/types.h>
+#include <algine/templates.h>
 
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
@@ -61,11 +62,11 @@ public:
     std::unordered_map<std::string, int> locations;
 
 public:
-    static std::shared_ptr<ShaderProgram> getByName(const std::string &name);
+    static ShaderProgramPtr getByName(const std::string &name);
     static ShaderProgram* byName(const std::string &name);
 
 public:
-    static std::vector<std::shared_ptr<ShaderProgram>> publicPrograms;
+    static std::vector<ShaderProgramPtr> publicPrograms;
 };
 }
 

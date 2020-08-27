@@ -1,6 +1,7 @@
 #ifndef ALGINE_SHADER_H
 #define ALGINE_SHADER_H
 
+#include <algine/core/shader/ShaderPtr.h>
 #include <algine/core/Object.h>
 #include <algine/types.h>
 
@@ -29,11 +30,11 @@ public:
     uint getId() const;
 
 public:
-    static std::shared_ptr<Shader> getByName(const std::string &name);
+    static ShaderPtr getByName(const std::string &name);
     static Shader* byName(const std::string &name);
 
 public:
-    static std::vector<std::shared_ptr<Shader>> publicShaders;
+    static std::vector<ShaderPtr> publicShaders;
 
 private:
     uint m_id = 0;

@@ -21,7 +21,7 @@ using namespace std;
 using namespace tulz;
 
 namespace algine {
-vector<shared_ptr<ShaderProgram>> ShaderProgram::publicPrograms;
+vector<ShaderProgramPtr> ShaderProgram::publicPrograms;
 
 ShaderProgram::ShaderProgram() {
     id = glCreateProgram();
@@ -228,7 +228,7 @@ inline uint indexByName(const string &name) {
     return notFound;
 }
 
-shared_ptr<ShaderProgram> ShaderProgram::getByName(const string &name) {
+ShaderProgramPtr ShaderProgram::getByName(const string &name) {
     uint index = indexByName(name);
 
     if (index != notFound)

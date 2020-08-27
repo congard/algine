@@ -2,6 +2,7 @@
 #define ALGINE_SHADERMANAGER_H
 
 #include <algine/core/shader/ShaderDefinitionManager.h>
+#include <algine/core/shader/ShaderPtr.h>
 #include <algine/core/shader/Shader.h>
 #include <algine/core/ManagerBase.h>
 #include <algine/types.h>
@@ -32,7 +33,7 @@ public:
     std::string getGenerated();
     std::string makeGenerated();
 
-    std::shared_ptr<Shader> createShader();
+    ShaderPtr createShader();
 
     void dumperUseSources(bool use);
 
