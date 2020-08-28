@@ -3,6 +3,7 @@
 
 #include <algine/core/shader/ShaderPtr.h>
 #include <algine/core/Object.h>
+#include <algine/templates.h>
 #include <algine/types.h>
 
 #include <string>
@@ -28,6 +29,9 @@ public:
     void fromFile(const std::string &path);
 
     uint getId() const;
+
+    implementVariadicCreate(Shader)
+    implementVariadicDestroy(Shader)
 
 public:
     static ShaderPtr getByName(const std::string &name);
