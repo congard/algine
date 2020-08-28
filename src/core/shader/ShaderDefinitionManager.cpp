@@ -13,35 +13,39 @@ constant(Params, "params");
 }
 
 namespace algine {
+inline int getMacroIndexImpl(const vector<ShaderDefinitionManager::Definition> &definitions,
+                             const std::string &macro)
+{
+    for (int i = 0; i < definitions.size(); i++) {
+        if (definitions[i].first == macro) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+#define getMacroIndex(macro) getMacroIndexImpl(m_definitions, macro)
+
 void ShaderDefinitionManager::define(const string &macro, const string &value) {
-    m_definitions.emplace_back(macro, value);
+    int index = getMacroIndex(macro);
+
+    if (index == -1) {
+        m_definitions.emplace_back(macro, value);
+    } else {
+        m_definitions[index].second = value; // overwrite existing
+    }
 }
 
 void ShaderDefinitionManager::define(const string &macro, size value) {
     define(macro, to_string(value));
 }
 
-void ShaderDefinitionManager::removeDefinition(const string &macro, uint type) {
-    switch (type) {
-        case RemoveFirst:
-        case RemoveAll:
-            for (uint i = 0; i < static_cast<uint>(m_definitions.size()); i++)
-                if (m_definitions[i].first == macro) {
-                    m_definitions.erase(m_definitions.begin() + i);
+void ShaderDefinitionManager::removeDefinition(const string &macro) {
+    int index = getMacroIndex(macro);
 
-                    if (type == RemoveFirst)
-                        return;
-                }
-            break;
-        case RemoveLast:
-            for (int i = static_cast<int>(m_definitions.size()) - 1; i >= 0; i--)
-                if (m_definitions[i].first == macro) {
-                    m_definitions.erase(m_definitions.begin() + i);
-                    return;
-                }
-            break;
-        default:
-            throw runtime_error("Unknown remove type " + to_string(type));
+    if (index != -1) {
+        m_definitions.erase(m_definitions.begin() + index);
     }
 }
 
@@ -51,6 +55,12 @@ void ShaderDefinitionManager::resetDefinitions() {
 
 void ShaderDefinitionManager::setDefinitions(const vector<Definition> &definitions) {
     m_definitions = definitions;
+}
+
+void ShaderDefinitionManager::appendDefinitions(const vector<Definition> &definitions) {
+    for (const auto & def : definitions) {
+        define(def.first, def.second);
+    }
 }
 
 const vector<ShaderDefinitionManager::Definition>& ShaderDefinitionManager::getDefinitions() const {

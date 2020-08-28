@@ -10,22 +10,16 @@
 namespace algine {
 class ShaderDefinitionManager: public Transferable {
 public:
-    enum {
-        RemoveFirst,
-        RemoveLast,
-        RemoveAll
-    };
-
-public:
     typedef std::pair<std::string, std::string> Definition;
 
 public:
     void define(const std::string &macro, const std::string &value = std::string());
     void define(const std::string &macro, size value);
-    void removeDefinition(const std::string &macro, uint type = RemoveLast);
+    void removeDefinition(const std::string &macro);
     void resetDefinitions();
 
     void setDefinitions(const std::vector<Definition> &definitions);
+    void appendDefinitions(const std::vector<Definition> &definitions);
 
     const std::vector<Definition>& getDefinitions() const;
 
