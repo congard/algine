@@ -5,7 +5,6 @@
 #include <tulz/Path.h>
 #include <tulz/File.h>
 #include <tulz/StringUtils.h>
-#include <tulz/macros.h>
 
 #include <stdexcept>
 #include <iostream>
@@ -17,7 +16,8 @@ using namespace std;
 
 #define constant(name, val) constexpr char name[] = val
 
-namespace ShaderManager {
+// ALP means Algine Preprocessor
+namespace ALPKeywords {
 constant(Include, "include");
 constant(Link, "link");
 }
@@ -32,11 +32,26 @@ constant(Geometry, "geometry");
 constant(Source, "source");
 constant(Path, "path");
 
-constant(BaseIncludePath, "baseIncludePath");
 constant(IncludePaths, "includePaths");
 }
 
 namespace algine {
+template<typename T>
+inline bool isElementExist(const vector<T> &v, const T &e) {
+    return find(v.begin(), v.end(), e) != v.end();
+}
+
+template<typename T>
+inline void removeElement(vector<T> &v, const T &e) {
+    auto it = find(v.begin(), v.end(), e);
+
+    if (it != v.end()) {
+        v.erase(it);
+    }
+}
+
+vector<string> ShaderManager::m_globalIncludePaths;
+
 ShaderManager::ShaderManager()
     : m_type(),
       m_dumperUseSources(false)
@@ -54,7 +69,9 @@ ShaderManager::ShaderManager(uint type)
 void ShaderManager::fromFile(const string &path) {
     m_path = path;
 
-    setBaseIncludePath(Path(path).getParentDirectory());
+    // base include path
+    m_includePaths.insert(m_includePaths.begin(), Path(path).getParentDirectory());
+
     fromSource(File(path, File::Read).readStr());
 }
 
@@ -63,12 +80,24 @@ void ShaderManager::fromSource(const string &source) {
     resetGenerated();
 }
 
-void ShaderManager::setBaseIncludePath(const string &path) {
-    m_baseIncludePath = path;
+void ShaderManager::setIncludePaths(const vector<string> &includePaths) {
+    m_includePaths = includePaths;
+}
+
+void ShaderManager::addIncludePaths(const vector<string> &includePaths) {
+    for (const auto & i : includePaths) {
+        addIncludePath(i);
+    }
 }
 
 void ShaderManager::addIncludePath(const string &includePath) {
-    m_includePaths.emplace_back(includePath);
+    if (!isElementExist(m_includePaths, includePath)) {
+        m_includePaths.emplace_back(includePath);
+    }
+}
+
+void ShaderManager::removeIncludePath(const std::string &includePath) {
+    removeElement(m_includePaths, includePath);
 }
 
 void ShaderManager::resetGenerated() {
@@ -91,7 +120,13 @@ void ShaderManager::generate() {
     m_gen.insert(version[0].pos + version[0].size, definitionsCode);
 
     // expand includes
-    m_gen = processDirectives(m_gen, m_baseIncludePath);
+    // base include path (path where file is located)
+    // it is zero element if shader loaded from file
+    if (!m_path.empty() && !m_includePaths.empty()) {
+        m_gen = processDirectives(m_gen, m_includePaths[0]);
+    } else {
+        m_gen = processDirectives(m_gen, "");
+    }
 }
 
 void ShaderManager::setType(uint type) {
@@ -104,6 +139,10 @@ string ShaderManager::getConfigPath() const {
 
 uint ShaderManager::getType() const {
     return m_type;
+}
+
+const vector<string>& ShaderManager::getIncludePaths() const {
+    return m_includePaths;
 }
 
 string ShaderManager::getTemplate() {
@@ -149,10 +188,6 @@ void ShaderManager::import(const JsonHelper &jsonHelper) {
 
     const json &config = jsonHelper.json;
 
-    // load base include path
-    if (config.contains(BaseIncludePath))
-        m_baseIncludePath = config[BaseIncludePath];
-
     // load shader path or source
     if (config.contains(Source)) {
         fromSource(config[Source]);
@@ -167,7 +202,7 @@ void ShaderManager::import(const JsonHelper &jsonHelper) {
         const json &includeArray = config[IncludePaths];
 
         for (const auto & i : includeArray) {
-            m_includePaths.emplace_back(i);
+            addIncludePath(i);
         }
     }
 
@@ -192,8 +227,6 @@ JsonHelper ShaderManager::dump() {
         if (!value.empty())
             config[key] = value;
     };
-
-    setString(BaseIncludePath, m_baseIncludePath);
 
     // write source or path
     if (m_dumperUseSources) {
@@ -220,6 +253,30 @@ JsonHelper ShaderManager::dump() {
 void ShaderManager::importFromFile(const string &path) {
     m_confPath = path;
     import(File(path, File::ReadText).readStr());
+}
+
+void ShaderManager::setGlobalIncludePaths(const vector<string> &includePaths) {
+    m_globalIncludePaths = includePaths;
+}
+
+void ShaderManager::addGlobalIncludePaths(const vector<string> &includePaths) {
+    for (const auto & i : includePaths) {
+        addGlobalIncludePath(i);
+    }
+}
+
+void ShaderManager::addGlobalIncludePath(const string &includePath) {
+    if (!isElementExist(m_globalIncludePaths, includePath)) {
+        m_globalIncludePaths.emplace_back(includePath);
+    }
+}
+
+void ShaderManager::removeGlobalIncludePath(const string &includePath) {
+    removeElement(m_globalIncludePaths, includePath);
+}
+
+vector<string>& ShaderManager::getGlobalIncludePaths() {
+    return m_globalIncludePaths;
 }
 
 // src: where to insert
@@ -259,15 +316,11 @@ inline vector<pair<uint, uint>> findComments(const string &src) {
     return result;
 }
 
-#define errFileNotFound() \
-{ \
-    cerr << "Err: file " << filePath << " not found\n" << matches.matches[0] << "\n\n"; \
-    continue; \
-}
-
 string ShaderManager::processDirectives(const string &src, const string &baseIncludePath) {
     string result = src;
     constexpr char regex[] = R"~((\w+)[ \t]+(.+))~";
+
+    using namespace ALPKeywords;
 
     // We process from the end because if we start from the beginning -
     // Matches::pos will be violated because of new data insertion
@@ -277,45 +330,65 @@ string ShaderManager::processDirectives(const string &src, const string &baseInc
         Matches &matches = pragmas[j];
         string &pragmaName = matches.matches[1];
 
-        switch_t(pragmaName)
-            case_t(::ShaderManager::Include) {
-                auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~("(.+)")~"); // "file"
-                string &filePath = fileMatches[0].matches[1];
+        auto pragmaIs = [&](const string &name)
+        {
+            return pragmaName == name;
+        };
 
-                if (!Path(filePath).isAbsolute()) {
-                    if (Path(Path::join(baseIncludePath, filePath)).exists()) { // try to find included file in base file folder
-                        filePath = Path::join(baseIncludePath, filePath);
-                    } else {
-                        bool found = false;
+        if (pragmaIs(Include)) {
+            auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~("(.+)")~"); // "file"
+            string &filePath = fileMatches[0].matches[1];
 
-                        for (string &i : m_includePaths) { // i - include path
+            auto fileNotFoundError = [&]()
+            {
+                cerr << "ShaderManager: Error: file " << filePath << " not found\n" << matches.matches[0] << "\n\n";
+            };
+
+            if (!Path(filePath).isAbsolute()) {
+                if (Path(Path::join(baseIncludePath, filePath)).exists()) { // try to find included file in base file folder
+                    filePath = Path::join(baseIncludePath, filePath);
+                } else {
+                    bool found = false;
+
+                    auto findIncludePath = [&](const vector<string> &includePaths)
+                    {
+                        for (const auto &i : includePaths) { // i - include path
                             if (Path(Path::join(i, filePath)).exists()) {
                                 filePath = Path::join(i, filePath);
                                 found = true;
                                 break;
                             }
                         }
+                    };
 
-                        if (!found) {
-                            errFileNotFound()
-                        }
+                    // try to find include path in the own array
+                    findIncludePath(m_includePaths);
+
+                    // otherwise try to find include path in the global array
+                    if (!found)
+                        findIncludePath(m_globalIncludePaths);
+
+                    if (!found) {
+                        fileNotFoundError();
+                        continue;
                     }
-                } else if (!Path(filePath).exists()) {
-                    errFileNotFound()
                 }
-
-                insert(result, matches.pos, matches.size,
-                       processDirectives(File(filePath, File::Read).readStr(), Path(filePath).getParentDirectory()));
-            } case_t(::ShaderManager::Link) {
-                auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~((.+)[ \t]+(.+))~");
-
-                // #alp link base link
-                insert(result, matches.pos, matches.size,
-                       "#define " + fileMatches[0].matches[2] + " " + fileMatches[0].matches[1]);
-            } default_t {
-                cerr << "Unknown pragma " << pragmaName << "\n" << matches.matches[0] << "\n\n";
+            } else if (!Path(filePath).exists()) {
+                fileNotFoundError();
+                continue;
             }
-        switch_t_end
+
+            insert(result, matches.pos, matches.size,
+                   processDirectives(File(filePath, File::Read).readStr(), Path(filePath).getParentDirectory()));
+        } else if (pragmaIs(Link)) {
+            auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~((.+)[ \t]+(.+))~");
+
+            // #alp link base link
+            insert(result, matches.pos, matches.size,
+                   "#define " + fileMatches[0].matches[2] + " " + fileMatches[0].matches[1]);
+        } else {
+            cerr << "Unknown pragma " << pragmaName << "\n" << matches.matches[0] << "\n\n";
+        }
     }
 
     return result;
