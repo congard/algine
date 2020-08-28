@@ -54,8 +54,22 @@ ShaderProgramPtr ShaderProgramManager::createProgram() {
     program->setName(m_name);
 
     for (auto & helper : m_privateShaders) {
-        auto shader = helper.manager.createShader();
+        auto &manager = helper.manager;
+
+        if (manager.getAccess() == ShaderManager::Access::Public)
+            throw runtime_error("Can't use public Shader as private");
+
+        // backup Shader level definitions
+        auto shaderDefs = manager.getDefinitions();
+
+        // append ShaderProgram level definitions
+        manager.appendDefinitions(m_definitions);
+
+        auto shader = manager.createShader();
         program->attachShader(*shader);
+
+        // restore Shader level definitions
+        manager.setDefinitions(shaderDefs);
     }
 
     for (auto & name : m_publicShaders) {
