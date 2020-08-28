@@ -44,6 +44,13 @@ ShaderManager::ShaderManager()
     // see initializer list above
 }
 
+ShaderManager::ShaderManager(uint type)
+    : m_type(type),
+      m_dumperUseSources(false)
+{
+    // see initializer list above
+}
+
 void ShaderManager::fromFile(const string &path) {
     m_path = path;
 

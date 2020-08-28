@@ -14,6 +14,7 @@ namespace algine {
 class ShaderManager: public ShaderDefinitionManager, public ManagerBase {
 public:
     ShaderManager();
+    explicit ShaderManager(uint type);
 
     void fromFile(const std::string &path);
     void fromSource(const std::string &source);
