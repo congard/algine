@@ -113,8 +113,7 @@ string ShaderManager::makeGenerated() {
 }
 
 ShaderPtr ShaderManager::createShader() {
-    if (m_gen.empty())
-        generate();
+    generate();
 
     ShaderPtr shader = make_shared<Shader>(m_type);
     shader->fromSource(m_gen);
