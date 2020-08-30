@@ -114,6 +114,8 @@ add_library(algine
         src/core/buffers/BufferReader.cpp include/algine/core/buffers/BufferReader.h
         src/core/InputLayout.cpp include/algine/core/InputLayout.h
         src/core/InputAttributeDescription.cpp include/algine/core/InputAttributeDescription.h
+        include/algine/core/texture/Texture2DPtr.h
+        include/algine/core/texture/TextureCubePtr.h
         src/core/texture/Texture.cpp include/algine/core/texture/Texture.h
         src/core/texture/Texture2D.cpp include/algine/core/texture/Texture2D.h
         src/core/texture/TextureCube.cpp include/algine/core/texture/TextureCube.h

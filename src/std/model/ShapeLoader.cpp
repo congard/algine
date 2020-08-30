@@ -4,6 +4,8 @@
 #include <algine/std/AMTLLoader.h>
 #include <algine/std/animation/BoneInfo.h>
 
+#include <algine/core/texture/Texture2D.h>
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -22,10 +24,18 @@ using namespace std;
 namespace algine {
 ShapeLoader::ShapeLoader() {
     m_shape = new Shape();
+
+    m_defaultTexturesParams = {
+            {Texture::WrapU, Texture::Repeat},
+            {Texture::WrapV, Texture::Repeat},
+            {Texture::MinFilter, Texture::Linear},
+            {Texture::MagFilter, Texture::Linear}
+    };
 }
 
 #define ASSIMP_PARAMS_MAX_INDEX JoinIdenticalVertices
 #define isAssimpParam(param) param <= ASSIMP_PARAMS_MAX_INDEX
+
 void ShapeLoader::load() {
     uint assimpParams[] = {
             aiProcess_Triangulate,
@@ -127,7 +137,7 @@ Shape *ShapeLoader::getShape() const {
 }
 
 ShapeLoader::LoadedTexture::LoadedTexture(
-        const string &path, const shared_ptr<Texture2D> &texture,
+        const string &path, const Texture2DPtr &texture,
         const map<uint, uint> &params)
 {
     this->path = path;
@@ -369,7 +379,7 @@ void ShapeLoader::loadTextures() {
                 &texPaths.normal, &texPaths.reflection, &texPaths.jitter
         };
 
-        shared_ptr<Texture2D> *const textures[textureTypesCount] = {
+        Texture2DPtr *const textures[textureTypesCount] = {
                 &material.ambientTexture, &material.diffuseTexture, &material.specularTexture,
                 &material.normalTexture, &material.reflectionTexture, &material.jitterTexture
         };
@@ -401,6 +411,7 @@ void ShapeLoader::loadTextures() {
 
                 // loading texture
                 vector<LoadedTexture> *loadedTextures = nullptr;
+
                 switch (sharedLevel) {
                     case AMTLLoader::Shared:
                         loadedTextures = &m_globalLoadedTextures;
@@ -413,18 +424,20 @@ void ShapeLoader::loadTextures() {
                 }
 
                 int index = getLoadedTextureIndex(loadedTextures, absolutePath, params);
+
                 if (index != -1) {
                     currentTexture = loadedTextures->operator[](index).texture; // texture already loaded
                 } else {
-                    shared_ptr<Texture2D> texture2D = make_shared<Texture2D>();
+                    Texture2DPtr texture2D = make_shared<Texture2D>();
                     texture2D->bind();
                     texture2D->fromFile(absolutePath);
                     texture2D->setParams(params);
                     texture2D->unbind();
                     currentTexture = texture2D;
 
-                    if (sharedLevel != AMTLLoader::Unique)
+                    if (sharedLevel != AMTLLoader::Unique) {
                         loadedTextures->emplace_back(absolutePath, texture2D, params);
+                    }
                 }
             }
         }

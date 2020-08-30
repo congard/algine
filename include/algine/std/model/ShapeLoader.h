@@ -1,8 +1,11 @@
 #ifndef ALGINE_SHAPELOADER_H
 #define ALGINE_SHAPELOADER_H
 
-#include <algine/types.h>
+#include <algine/core/texture/Texture2DPtr.h>
 #include <algine/std/model/Shape.h>
+#include <algine/types.h>
+
+#include <map>
 
 class aiMesh;
 class aiScene;
@@ -22,6 +25,7 @@ public:
         DisableBones
     };
 
+public:
     ShapeLoader();
 
     void load();
@@ -49,11 +53,11 @@ private:
     };
 
     struct LoadedTexture {
+        Texture2DPtr texture;
         std::string path;
-        std::shared_ptr<Texture2D> texture;
         std::map<uint, uint> params;
 
-        LoadedTexture(const std::string &path, const std::shared_ptr<Texture2D> &texture,
+        LoadedTexture(const std::string &path, const Texture2DPtr &texture,
                       const std::map<uint, uint> &params);
     };
 
@@ -74,14 +78,8 @@ private:
 private:
     std::vector<MaterialTexPaths> m_materialTexPaths;
     std::vector<uint> m_params;
+    std::map<uint, uint> m_defaultTexturesParams;
     std::string m_modelPath, m_texturesPath;
-
-    std::map<uint, uint> m_defaultTexturesParams = std::map<uint, uint> {
-            std::pair<uint, uint> {Texture::WrapU, Texture::Repeat},
-            std::pair<uint, uint> {Texture::WrapV, Texture::Repeat},
-            std::pair<uint, uint> {Texture::MinFilter, Texture::Linear},
-            std::pair<uint, uint> {Texture::MagFilter, Texture::Linear}
-    };
 
     AMTLLoader *m_amtlLoader = nullptr; // NOTE: exists only during load()!
     uint m_bonesPerVertex = 4;

@@ -3,13 +3,13 @@
 
 #include <string>
 #include <memory>
-#include <algine/core/texture/Texture2D.h>
+#include <algine/core/texture/Texture2DPtr.h>
 
 namespace algine {
 struct Material {
     std::string name;
 
-    std::shared_ptr<Texture2D>
+    Texture2DPtr
         ambientTexture = nullptr,
         diffuseTexture = nullptr,
         specularTexture = nullptr,
