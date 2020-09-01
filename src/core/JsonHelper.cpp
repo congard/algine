@@ -24,7 +24,7 @@ void JsonHelper::set(const ::json &inJson) {
 
 void JsonHelper::append(const JsonHelper &jsonHelper) {
     if (!jsonHelper.json.empty()) {
-        json.update(jsonHelper.json);
+        json.merge_patch(jsonHelper.json);
     }
 }
 
