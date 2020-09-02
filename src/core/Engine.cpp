@@ -73,15 +73,17 @@ void Engine::init() {
 }
 
 void Engine::destroy() {
-    Framebuffer::destroy(m_defaultFramebuffer);
-    Renderbuffer::destroy(m_defaultRenderbuffer);
-    Texture2D::destroy(m_defaultTexture2D);
-    TextureCube::destroy(m_defaultTextureCube);
-    ArrayBuffer::destroy(m_defaultArrayBuffer);
-    IndexBuffer::destroy(m_defaultIndexBuffer);
-    UniformBuffer::destroy(m_defaultUniformBuffer);
-    ShaderProgram::destroy(m_defaultShaderProgram);
-    InputLayout::destroy(m_defaultInputLayout);
+    // destructor is not called since we do not need to delete
+    // default OpenGL objects (with id 0)
+    free(m_defaultFramebuffer);
+    free(m_defaultRenderbuffer);
+    free(m_defaultTexture2D);
+    free(m_defaultTextureCube);
+    free(m_defaultArrayBuffer);
+    free(m_defaultIndexBuffer);
+    free(m_defaultUniformBuffer);
+    free(m_defaultShaderProgram);
+    free(m_defaultInputLayout);
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS
