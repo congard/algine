@@ -29,9 +29,15 @@ Framebuffer::~Framebuffer() {
     glDeleteFramebuffers(1, &m_id);
 }
 
-void Framebuffer::bind() {
+void Framebuffer::bind() const {
     commitBinding()
     glBindFramebuffer(GL_FRAMEBUFFER, m_id);
+}
+
+void Framebuffer::unbind() const {
+    checkBinding()
+    commitUnbinding()
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Framebuffer::attachTexture(const Texture2D *const texture, const uint attachment) {
@@ -54,9 +60,9 @@ void Framebuffer::addAttachmentsList(const std::vector<uint> &list) {
 }
 
 void Framebuffer::addOutput(const uint outIndex, const uint attachment) {
-    if (outIndex == attachmentsList.size())
+    if (outIndex == attachmentsList.size()) {
         attachmentsList.emplace_back(attachment);
-    else if (outIndex > attachmentsList.size()) {
+    } else if (outIndex > attachmentsList.size()) {
         vector<uint> tmp(outIndex + 1, EmptyAttachment);
         for (uint i = 0; i < attachmentsList.size(); ++i)
             tmp[i] = attachmentsList[i];
@@ -120,12 +126,6 @@ void Framebuffer::clearStencilBuffer() {
     clear(StencilBuffer);
 }
 
-void Framebuffer::unbind() {
-    checkBinding()
-    commitUnbinding()
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
 void Framebuffer::setActiveAttachmentsList(const uint index) {
     m_activeList = index;
 }
@@ -146,22 +146,22 @@ inline pair<uint, uint> getTexFormatInfo(const uint format) {
         case Texture::RG16:
         case Texture::RG16F:
         case Texture::RG32F:
-            return pair<uint, uint> {Texture::RG, 2};
+            return {Texture::RG, 2};
         case Texture::RGB:
         case Texture::RGB8:
         case Texture::RGB16F:
         case Texture::RGB32F:
-            return pair<uint, uint> {Texture::RGB, 3};;
+            return {Texture::RGB, 3};;
         case Texture::RGBA:
         case Texture::RGBA8:
         case Texture::RGBA16:
         case Texture::RGBA16F:
         case Texture::RGBA32F:
-            return pair<uint, uint> {Texture::RGBA, 4};
+            return {Texture::RGBA, 4};
         case Texture::DepthComponent:
-            return pair<uint, uint> {Texture::DepthComponent, 1};
+            return {Texture::DepthComponent, 1};
         default:
-            return pair<uint, uint> {Texture::Red, 1};
+            return {Texture::Red, 1};
     }
 }
 
@@ -200,7 +200,7 @@ inline PixelData getPixels2D(const uint mode, const uint x, const uint y,
 }
 
 PixelData Framebuffer::getPixels2D(const uint mode, const uint x, const uint y,
-        const uint width, const uint height, int format)
+        const uint width, const uint height, int format) const
 {
     checkBinding()
 
@@ -213,7 +213,7 @@ PixelData Framebuffer::getPixels2D(const uint mode, const uint x, const uint y,
     return algine::getPixels2D(mode, x, y, width, height, getTexFormatInfo(format));
 }
 
-PixelData Framebuffer::getAllPixels2D(const uint attachment, int format) {
+PixelData Framebuffer::getAllPixels2D(const uint attachment, int format) const {
     checkBinding()
 
     uint width, height;
@@ -230,7 +230,7 @@ PixelData Framebuffer::getAllPixels2D(const uint attachment, int format) {
     return algine::getPixels2D(attachment, 0, 0, width, height, getTexFormatInfo(format));
 }
 
-PixelData Framebuffer::getAllPixelsCube(const TextureCube::Face face, const uint attachment, int format) {
+PixelData Framebuffer::getAllPixelsCube(const TextureCube::Face face, const uint attachment, int format) const {
     checkBinding()
     glBindTexture(GL_TEXTURE_CUBE_MAP, getAttachedTexId(attachment));
 

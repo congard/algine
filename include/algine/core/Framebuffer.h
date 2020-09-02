@@ -32,7 +32,8 @@ public:
     Framebuffer();
     ~Framebuffer();
 
-    void bind();
+    void bind() const;
+    void unbind() const;
     void attachTexture(const Texture2D *texture, uint attachment);
     void attachTexture(const TextureCube *texture, uint attachment);
     void attachRenderbuffer(const Renderbuffer *renderbuffer, uint attachment);
@@ -45,15 +46,14 @@ public:
     void clearColorBuffer();
     void clearDepthBuffer();
     void clearStencilBuffer();
-    void unbind();
 
     void setActiveAttachmentsList(uint index);
     void setAttachmentsList(uint index, const std::vector<uint> &list);
     void setAttachmentsLists(const std::vector<std::vector<uint>> &lists);
 
-    PixelData getPixels2D(uint mode, uint x, uint y, uint width, uint height, int format = -1);
-    PixelData getAllPixels2D(uint attachment, int format = -1);
-    PixelData getAllPixelsCube(TextureCube::Face face, uint attachment, int format = -1);
+    PixelData getPixels2D(uint mode, uint x, uint y, uint width, uint height, int format = -1) const;
+    PixelData getAllPixels2D(uint attachment, int format = -1) const;
+    PixelData getAllPixelsCube(TextureCube::Face face, uint attachment, int format = -1) const;
 
     uint getActiveAttachmentsList() const;
     uint getId() const;
