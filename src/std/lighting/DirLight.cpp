@@ -29,7 +29,7 @@ void DirLight::initShadows(const uint shadowMapWidth, const uint shadowMapHeight
     shadowMapFb = new Framebuffer();
 
     shadowMap->bind();
-    shadowMap->setWidthHeight(shadowMapWidth, shadowMapHeight);
+    shadowMap->setDimensions(shadowMapWidth, shadowMapHeight);
     shadowMap->setFormat(Texture::DepthComponent);
     shadowMap->update();
     shadowMap->setParams(map<uint, uint> {

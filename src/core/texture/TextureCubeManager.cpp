@@ -57,7 +57,7 @@ TextureCubePtr TextureCubeManager::createTexture() {
             texture->fromFile(path.second, path.first, m_dataType);
         }
     } else {
-        texture->setWidthHeight(m_width, m_height);
+        texture->setDimensions(m_width, m_height);
         texture->update();
     }
 

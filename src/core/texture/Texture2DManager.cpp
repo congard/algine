@@ -41,7 +41,7 @@ Texture2DPtr Texture2DManager::createTexture() {
     if (!m_path.empty()) {
         texture->fromFile(m_path, m_dataType);
     } else {
-        texture->setWidthHeight(m_width, m_height);
+        texture->setDimensions(m_width, m_height);
         texture->update();
     }
 

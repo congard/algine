@@ -127,9 +127,9 @@ void Texture::setHeight(uint _height) {
     height = _height;
 }
 
-void Texture::setWidthHeight(uint _width, uint _height) {
-    width = _width;
-    height = _height;
+void Texture::setDimensions(uint width, uint height) {
+    width = width;
+    height = height;
 }
 
 uint Texture::getLOD() const {

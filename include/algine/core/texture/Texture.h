@@ -83,7 +83,7 @@ public:
 
     void setWidth(uint width);
     void setHeight(uint height);
-    void setWidthHeight(uint width, uint height);
+    void setDimensions(uint width, uint height);
 
     /// updates width / height, lod, format
     virtual void update() = 0;
