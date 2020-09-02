@@ -122,6 +122,9 @@ add_library(algine
         src/core/texture/Texture2D.cpp include/algine/core/texture/Texture2D.h
         src/core/texture/TextureCube.cpp include/algine/core/texture/TextureCube.h
         src/core/texture/TextureTools.cpp include/algine/core/texture/TextureTools.h
+        src/core/texture/TextureManager.cpp include/algine/core/texture/TextureManager.h
+        src/core/texture/Texture2DManager.cpp include/algine/core/texture/Texture2DManager.h
+        src/core/texture/TextureCubeManager.cpp include/algine/core/texture/TextureCubeManager.h
         src/core/shader/ShaderTools.cpp include/algine/core/shader/ShaderTools.h
         include/algine/core/shader/ShaderPtr.h
         include/algine/core/shader/ShaderProgramPtr.h
