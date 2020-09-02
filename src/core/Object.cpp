@@ -21,7 +21,7 @@ string Object::getName() const {
 }
 
 void Object::import(const JsonHelper &jsonHelper) {
-    name = jsonHelper.readValue(Config::Name);
+    name = jsonHelper.readValue<string>(Config::Name);
 }
 
 JsonHelper Object::dump() {
