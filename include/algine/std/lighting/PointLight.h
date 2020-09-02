@@ -5,6 +5,8 @@
 
 namespace algine {
 class PointLight: public Light {
+    friend class LightingManager;
+
 public:
     PointLight();
     ~PointLight();
@@ -23,12 +25,16 @@ public:
     float getNear() const;
     float getBias() const;
 
-public:
-    TextureCube *shadowMap = nullptr;
+    TextureCube* getShadowMap() const;
+    const glm::mat4& getLightSpaceMatrix(TextureCube::Face face) const;
+
+private:
+    TextureCube *m_shadowMap = nullptr;
     glm::mat4 m_lightSpaceMatrices[6];
     float m_far = 32.0f, m_near = 1.0f;
     float m_bias = 0.4f;
 
+private:
     static const glm::mat4 m_lightViews[6];
 };
 }

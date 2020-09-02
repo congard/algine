@@ -40,12 +40,12 @@ void Engine::init() {
     // In the case of increasing the number of operations performed by
     // the ctor, create something like init() in the following classes
     m_defaultTexture2D = (Texture2D*) malloc(sizeof(Texture2D));
-    m_defaultTexture2D->id = 0;
-    m_defaultTexture2D->target = GL_TEXTURE_2D;
+    m_defaultTexture2D->m_id = 0;
+    m_defaultTexture2D->m_target = GL_TEXTURE_2D;
 
     m_defaultTextureCube = (TextureCube*) malloc(sizeof(TextureCube));
-    m_defaultTextureCube->id = 0;
-    m_defaultTextureCube->target = GL_TEXTURE_CUBE_MAP;
+    m_defaultTextureCube->m_id = 0;
+    m_defaultTextureCube->m_target = GL_TEXTURE_CUBE_MAP;
 
     m_defaultFramebuffer = (Framebuffer*) malloc(sizeof(Framebuffer));
     m_defaultFramebuffer->m_id = 0;

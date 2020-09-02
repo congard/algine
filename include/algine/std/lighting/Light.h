@@ -7,6 +7,8 @@
 
 namespace algine {
 class Light: public Translatable {
+    friend class LightingManager;
+
 public:
     enum class Type {
         Dir,
@@ -32,17 +34,20 @@ public:
     void setColor(const glm::vec3 &color);
     void setColor(float red, float green, float blue);
 
-    float getKc();
-    float getKl();
-    float getKq();
-    glm::vec3 getColor();
+    float getKc() const;
+    float getKl() const;
+    float getKq() const;
+    glm::vec3 getColor() const;
 
-public:
-    Type type;
+    Framebuffer* getShadowFramebuffer() const;
+    const glm::mat4& getLightProjection() const;
+
+protected:
+    Type m_type;
     float m_kc; // constant term; usually kept at 1.0
     float m_kl; // linear term
     float m_kq; // quadratic term
-    Framebuffer *shadowMapFb = nullptr;
+    Framebuffer *m_shadowFb = nullptr;
     glm::mat4 m_lightProjection;
     glm::vec3 m_color;
 };

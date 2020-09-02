@@ -14,10 +14,10 @@ using namespace std;
 
 #ifdef ALGINE_SECURE_OPERATIONS
 #include "../SOPConstants.h"
-#define SOP_BOUND_PTR getBoundTexture(target)
-#define SOP_OBJECT_TYPE getTextureObject(target)
-#define SOP_OBJECT_ID id
-#define SOP_OBJECT_NAME getTextureObjectName(target)
+#define SOP_BOUND_PTR getBoundTexture(m_target)
+#define SOP_OBJECT_TYPE getTextureObject(m_target)
+#define SOP_OBJECT_ID m_id
+#define SOP_OBJECT_NAME getTextureObjectName(m_target)
 
 inline void* getBoundTexture(const uint target) {
     switch (target) {
@@ -55,39 +55,39 @@ inline string getTextureObjectName(const uint target) {
 
 namespace algine {
 Texture::Texture() {
-    glGenTextures(1, &id);
+    glGenTextures(1, &m_id);
 }
 
 Texture::Texture(uint target): Texture() {
-    this->target = target;
+    this->m_target = target;
 }
 
 Texture::~Texture() {
-    glDeleteTextures(1, &id);
+    glDeleteTextures(1, &m_id);
 }
 
 void Texture::bind() const {
     commitBinding()
-    glBindTexture(target, id);
+    glBindTexture(m_target, m_id);
 }
 
 void Texture::unbind() const {
     checkBinding()
     commitUnbinding()
-    glBindTexture(target, 0);
+    glBindTexture(m_target, 0);
 }
 
 void Texture::use(uint slot) const {
     commitBinding()
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(target, id);
+    glBindTexture(m_target, m_id);
 }
 
 void Texture::setParams(const map<uint, uint> &params) {
     checkBinding()
 
     for (const auto & key : params) {
-        glTexParameteri(target, key.first, key.second);
+        glTexParameteri(m_target, key.first, key.second);
     }
 }
 
@@ -95,15 +95,15 @@ void Texture::setParams(const map<uint, float> &params) {
     checkBinding()
 
     for (const auto & key : params) {
-        glTexParameterf(target, key.first, key.second);
+        glTexParameterf(m_target, key.first, key.second);
     }
 }
 
 void Texture::applyTextureCreateInfo(const TextureCreateInfo &createInfo) {
-    lod = createInfo.lod;
-    format = createInfo.format;
-    width = createInfo.width;
-    height = createInfo.height;
+    m_lod = createInfo.lod;
+    m_format = createInfo.format;
+    m_width = createInfo.width;
+    m_height = createInfo.height;
 
     bind();
     setParams(createInfo.params);
@@ -111,59 +111,59 @@ void Texture::applyTextureCreateInfo(const TextureCreateInfo &createInfo) {
     unbind();
 }
 
-void Texture::setLOD(uint _lod) {
-    lod = _lod;
+void Texture::setLOD(uint lod) {
+    m_lod = lod;
 }
 
-void Texture::setFormat(uint _format) {
-    format = _format;
+void Texture::setFormat(uint format) {
+    m_format = format;
 }
 
-void Texture::setWidth(uint _width) {
-    width = _width;
+void Texture::setWidth(uint width) {
+    m_width = width;
 }
 
-void Texture::setHeight(uint _height) {
-    height = _height;
+void Texture::setHeight(uint height) {
+    m_height = height;
 }
 
 void Texture::setDimensions(uint width, uint height) {
-    width = width;
-    height = height;
+    m_width = width;
+    m_height = height;
 }
 
 uint Texture::getLOD() const {
-    return lod;
+    return m_lod;
 }
 
 uint Texture::getFormat() const {
-    return format;
+    return m_format;
 }
 
 uint Texture::getWidth() const {
-    return width;
+    return m_width;
 }
 
 uint Texture::getHeight() const {
-    return height;
+    return m_height;
 }
 
 uint Texture::getId() const {
-    return id;
+    return m_id;
 }
 
-void Texture::texFromFile(const string &path, uint _target, DataType dataType, bool flipImage) {
+void Texture::texFromFile(const string &path, uint target, DataType dataType, bool flipImage) {
     int channels;
     stbi_set_flip_vertically_on_load(flipImage);
     unsigned char *data = stbi_load(path.c_str(),
-            reinterpret_cast<int*>(&width), reinterpret_cast<int*>(&height), &channels, 0);
+                                    reinterpret_cast<int*>(&m_width), reinterpret_cast<int*>(&m_height), &channels, 0);
 
     int formats[] = {Red, RG, RGB, RGBA};
     int dataFormat = formats[channels - 1];
 
     if (data) {
-        glTexImage2D(_target, lod, format, width, height, 0, dataFormat, static_cast<uint>(dataType), data);
-        glGenerateMipmap(target);
+        glTexImage2D(target, m_lod, m_format, m_width, m_height, 0, dataFormat, static_cast<uint>(dataType), data);
+        glGenerateMipmap(m_target);
     } else {
         cerr << "Failed to load texture " << path << "\n";
         return;

@@ -9,11 +9,11 @@ using namespace std;
 
 namespace algine {
 DirLight::DirLight(const uint rotatorType): Rotatable(rotatorType) {
-    type = Type::Dir;
+    m_type = Type::Dir;
 }
 
 DirLight::~DirLight() {
-    Texture2D::destroy(shadowMap);
+    Texture2D::destroy(m_shadowMap);
 }
 
 void DirLight::orthoShadows(const float left, const float right, const float bottom, const float top, const float near, const float far) {
@@ -25,26 +25,26 @@ void DirLight::perspectiveShadows(const float fovy, const float aspect, const fl
 }
 
 void DirLight::initShadows(const uint shadowMapWidth, const uint shadowMapHeight) {
-    shadowMap = new Texture2D();
-    shadowMapFb = new Framebuffer();
+    m_shadowMap = new Texture2D();
+    m_shadowFb = new Framebuffer();
 
-    shadowMap->bind();
-    shadowMap->setDimensions(shadowMapWidth, shadowMapHeight);
-    shadowMap->setFormat(Texture::DepthComponent);
-    shadowMap->update();
-    shadowMap->setParams(map<uint, uint> {
-            pair<uint, uint> {Texture::MinFilter, Texture::Nearest},
-            pair<uint, uint> {Texture::MagFilter, Texture::Nearest},
-            pair<uint, uint> {Texture::WrapU, Texture::Repeat},
-            pair<uint, uint> {Texture::WrapV, Texture::Repeat}
+    m_shadowMap->bind();
+    m_shadowMap->setDimensions(shadowMapWidth, shadowMapHeight);
+    m_shadowMap->setFormat(Texture::DepthComponent);
+    m_shadowMap->update();
+    m_shadowMap->setParams(map<uint, uint> {
+        {Texture::MinFilter, Texture::Nearest},
+        {Texture::MagFilter, Texture::Nearest},
+        {Texture::WrapU, Texture::Repeat},
+        {Texture::WrapV, Texture::Repeat}
     });
-    shadowMap->unbind();
+    m_shadowMap->unbind();
 
-    shadowMapFb->bind();
-    shadowMapFb->attachTexture(shadowMap, Framebuffer::DepthAttachment);
+    m_shadowFb->bind();
+    m_shadowFb->attachTexture(m_shadowMap, Framebuffer::DepthAttachment);
     // glDrawBuffer(GL_NONE);
     // glReadBuffer(GL_NONE);
-    shadowMapFb->unbind();
+    m_shadowFb->unbind();
 }
 
 void DirLight::updateMatrix() {
@@ -52,8 +52,8 @@ void DirLight::updateMatrix() {
 }
 
 void DirLight::begin() {
-    shadowMapFb->bind();
-    glViewport(0, 0, shadowMap->width, shadowMap->height);
+    m_shadowFb->bind();
+    glViewport(0, 0, m_shadowMap->getWidth(), m_shadowMap->getHeight());
 }
 
 void DirLight::setMinBias(const float minBias) {
@@ -70,5 +70,13 @@ float DirLight::getMinBias() const {
 
 float DirLight::getMaxBias() const {
     return m_maxBias;
+}
+
+Texture2D* DirLight::getShadowMap() const {
+    return m_shadowMap;
+}
+
+const glm::mat4& DirLight::getLightSpaceMatrix() const {
+    return m_lightSpace;
 }
 }

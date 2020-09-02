@@ -6,7 +6,7 @@
 
 namespace algine {
 Light::~Light() {
-    Framebuffer::destroy(shadowMapFb);
+    Framebuffer::destroy(m_shadowFb);
 }
 
 void Light::translate() { // TODO: check rotate
@@ -14,7 +14,7 @@ void Light::translate() { // TODO: check rotate
 }
 
 void Light::end() {
-    shadowMapFb->unbind();
+    m_shadowFb->unbind();
 }
 
 void Light::setKc(const float kc) {
@@ -39,19 +39,27 @@ void Light::setColor(const float red, const float green, const float blue) {
     m_color.b = blue;
 }
 
-float Light::getKc() {
+float Light::getKc() const {
     return m_kc;
 }
 
-float Light::getKl() {
+float Light::getKl() const {
     return m_kl;
 }
 
-float Light::getKq() {
+float Light::getKq() const {
     return m_kq;
 }
 
-glm::vec3 Light::getColor() {
+glm::vec3 Light::getColor() const {
     return m_color;
+}
+
+Framebuffer* Light::getShadowFramebuffer() const {
+    return m_shadowFb;
+}
+
+const glm::mat4& Light::getLightProjection() const {
+    return m_lightProjection;
 }
 }

@@ -12,6 +12,8 @@
 
 namespace algine {
 class Texture: public Object {
+    friend class Engine;
+
 public:
     enum Params {
         MinFilter = GL_TEXTURE_MIN_FILTER,
@@ -94,12 +96,12 @@ public:
     uint getHeight() const;
     uint getId() const;
 
-public:
-    uint target = 0; // texture 2d, texture cube etc
-    uint id = 0;
-    uint lod = 0;
-    uint format = RGB16F;
-    uint width = 512, height = 512;
+protected:
+    uint m_target = 0; // texture 2d, texture cube etc
+    uint m_id = 0;
+    uint m_lod = 0;
+    uint m_format = RGB16F;
+    uint m_width = 512, m_height = 512;
 
 protected:
     explicit Texture(uint target);

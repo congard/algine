@@ -182,13 +182,13 @@ void LightingManager::unbindBuffer() const {
 void LightingManager::pushShadowMap(const DirLight &light, uint index) {
     uint slot = m_lightsInitialSlot[EDirLight] + index;
     ShaderProgram::setInt(m_shadowMapsLocations[EDirLight] + static_cast<int>(index), static_cast<int>(slot));
-    light.shadowMap->use(slot);
+    light.m_shadowMap->use(slot);
 }
 
 void LightingManager::pushShadowMap(const PointLight &light, uint index) {
     uint slot = m_lightsInitialSlot[EPointLight] + index;
     ShaderProgram::setInt(m_shadowMapsLocations[EPointLight] + static_cast<int>(index), static_cast<int>(slot));
-    light.shadowMap->use(slot);
+    light.m_shadowMap->use(slot);
 }
 
 void LightingManager::pushShadowShaderPos(const PointLight &light) {
@@ -224,7 +224,7 @@ void LightingManager::writeShadowDiskRadiusMin(float diskRadiusMin) {
     m_bufferWriter.write(m_shadowDiskRadiusMinOffset, diskRadiusMin);
 }
 
-#define lightOffsets m_offsets[to_uint(light.type)][index]
+#define lightOffsets m_offsets[to_uint(light.m_type)][index]
 
 void LightingManager::writeKc(const Light &light, uint index) {
     m_bufferWriter.write(lightOffsets[CommonLightOffsets::Kc], light.m_kc);

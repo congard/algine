@@ -6,6 +6,8 @@
 
 namespace algine {
 class DirLight: public Light, public Rotatable {
+    friend class LightingManager;
+
 public:
     explicit DirLight(uint rotatorType = Rotator::RotatorTypeSimple);
     ~DirLight();
@@ -25,8 +27,11 @@ public:
     float getMinBias() const;
     float getMaxBias() const;
 
-public:
-    Texture2D *shadowMap = nullptr;
+    Texture2D* getShadowMap() const;
+    const glm::mat4& getLightSpaceMatrix() const;
+
+private:
+    Texture2D *m_shadowMap = nullptr;
     glm::mat4 m_lightSpace;
     float m_minBias = 0.005f, m_maxBias = 0.05f;
 };
