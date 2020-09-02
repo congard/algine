@@ -53,7 +53,7 @@ public:
 
     PixelData getPixels2D(uint mode, uint x, uint y, uint width, uint height, int format = -1);
     PixelData getAllPixels2D(uint attachment, int format = -1);
-    PixelData getAllPixelsCube(uint face, uint attachment, int format = -1);
+    PixelData getAllPixelsCube(TextureCube::Face face, uint attachment, int format = -1);
 
     uint getActiveAttachmentsList() const;
     uint getId() const;
@@ -68,9 +68,9 @@ public:
     implementVariadicDestroy(Framebuffer)
 
 protected:
-    uint m_id = 0;
-    uint m_activeList = 0;
-    std::vector<std::vector<uint>> m_attachmentsLists = {std::vector<uint> {ColorAttachmentZero}};
+    uint m_id;
+    uint m_activeList;
+    std::vector<std::vector<uint>> m_attachmentsLists;
 };
 
 }

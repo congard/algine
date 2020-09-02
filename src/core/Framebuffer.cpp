@@ -17,7 +17,11 @@ using namespace tulz;
 namespace algine {
 #define attachmentsList m_attachmentsLists[m_activeList]
 
-Framebuffer::Framebuffer() {
+Framebuffer::Framebuffer()
+    : m_id(0),
+      m_activeList(0),
+      m_attachmentsLists({{ColorAttachmentZero}})
+{
     glGenFramebuffers(1, &m_id);
 }
 
@@ -178,6 +182,8 @@ inline uint getAttachedTexId(const uint attachment) {
     return id;
 }
 
+// TODO: SOP: bindDefaultX
+
 inline PixelData getPixels2D(const uint mode, const uint x, const uint y,
         const uint width, const uint height, const pair<uint, uint> &formatInfo)
 {
@@ -213,8 +219,10 @@ PixelData Framebuffer::getAllPixels2D(const uint attachment, int format) {
     uint width, height;
 
     glBindTexture(GL_TEXTURE_2D, getAttachedTexId(attachment));
+
     if (format == -1)
         format = getTex2DParam(GL_TEXTURE_INTERNAL_FORMAT);
+
     width = getTex2DParam(GL_TEXTURE_WIDTH);
     height = getTex2DParam(GL_TEXTURE_HEIGHT);
     Engine::defaultTexture2D()->bind();
@@ -222,22 +230,24 @@ PixelData Framebuffer::getAllPixels2D(const uint attachment, int format) {
     return algine::getPixels2D(attachment, 0, 0, width, height, getTexFormatInfo(format));
 }
 
-PixelData Framebuffer::getAllPixelsCube(const uint face, const uint attachment, int format) {
+PixelData Framebuffer::getAllPixelsCube(const TextureCube::Face face, const uint attachment, int format) {
     checkBinding()
     glBindTexture(GL_TEXTURE_CUBE_MAP, getAttachedTexId(attachment));
 
+    uint faceVal = static_cast<uint>(face);
+
     if (format == -1)
-        format = getTexParam(face, GL_TEXTURE_INTERNAL_FORMAT);
+        format = getTexParam(faceVal, GL_TEXTURE_INTERNAL_FORMAT);
 
     auto formatInfo = getTexFormatInfo(format);
 
     PixelData pixelData;
-    pixelData.width = getTexParam(face, GL_TEXTURE_WIDTH);
-    pixelData.height = getTexParam(face, GL_TEXTURE_HEIGHT);
+    pixelData.width = getTexParam(faceVal, GL_TEXTURE_WIDTH);
+    pixelData.height = getTexParam(faceVal, GL_TEXTURE_HEIGHT);
     pixelData.componentsCount = formatInfo.second;
     pixelData.pixels = Array<float>(pixelData.width * pixelData.height * pixelData.componentsCount);
 
-    glGetTexImage(face, 0, formatInfo.first, GL_FLOAT, pixelData.pixels.m_array);
+    glGetTexImage(faceVal, 0, formatInfo.first, GL_FLOAT, pixelData.pixels.m_array);
     Engine::defaultTextureCube()->bind();
 
     return pixelData;
