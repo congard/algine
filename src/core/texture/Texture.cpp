@@ -58,7 +58,7 @@ Texture::Texture() {
     glGenTextures(1, &id);
 }
 
-Texture::Texture(const uint target): Texture() {
+Texture::Texture(uint target): Texture() {
     this->target = target;
 }
 
@@ -71,7 +71,13 @@ void Texture::bind() const {
     glBindTexture(target, id);
 }
 
-void Texture::use(const uint slot) const {
+void Texture::unbind() const {
+    checkBinding()
+    commitUnbinding()
+    glBindTexture(target, 0);
+}
+
+void Texture::use(uint slot) const {
     commitBinding()
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(target, id);
@@ -79,14 +85,18 @@ void Texture::use(const uint slot) const {
 
 void Texture::setParams(const map<uint, uint> &params) {
     checkBinding()
-    for(const auto & key : params)
+
+    for (const auto & key : params) {
         glTexParameteri(target, key.first, key.second);
+    }
 }
 
 void Texture::setParams(const map<uint, float> &params) {
     checkBinding()
-    for(const auto & key : params)
+
+    for (const auto & key : params) {
         glTexParameterf(target, key.first, key.second);
+    }
 }
 
 void Texture::applyTextureCreateInfo(const TextureCreateInfo &createInfo) {
@@ -101,31 +111,25 @@ void Texture::applyTextureCreateInfo(const TextureCreateInfo &createInfo) {
     unbind();
 }
 
-void Texture::setLOD(const uint _lod) {
+void Texture::setLOD(uint _lod) {
     lod = _lod;
 }
 
-void Texture::setFormat(const uint _format) {
+void Texture::setFormat(uint _format) {
     format = _format;
 }
 
-void Texture::setWidth(const uint _width) {
+void Texture::setWidth(uint _width) {
     width = _width;
 }
 
-void Texture::setHeight(const uint _height) {
+void Texture::setHeight(uint _height) {
     height = _height;
 }
 
-void Texture::setWidthHeight(const uint _width, const uint _height) {
+void Texture::setWidthHeight(uint _width, uint _height) {
     width = _width;
     height = _height;
-}
-
-void Texture::unbind() const {
-    checkBinding()
-    commitUnbinding()
-    glBindTexture(target, 0);
 }
 
 uint Texture::getLOD() const {
@@ -148,7 +152,7 @@ uint Texture::getId() const {
     return id;
 }
 
-void Texture::texFromFile(const string &path, uint _target, uint dataType, bool flipImage) {
+void Texture::texFromFile(const string &path, uint _target, DataType dataType, bool flipImage) {
     int channels;
     stbi_set_flip_vertically_on_load(flipImage);
     unsigned char *data = stbi_load(path.c_str(),
@@ -158,7 +162,7 @@ void Texture::texFromFile(const string &path, uint _target, uint dataType, bool 
     int dataFormat = formats[channels - 1];
 
     if (data) {
-        glTexImage2D(_target, lod, format, width, height, 0, dataFormat, dataType, data);
+        glTexImage2D(_target, lod, format, width, height, 0, dataFormat, static_cast<uint>(dataType), data);
         glGenerateMipmap(target);
     } else {
         cerr << "Failed to load texture " << path << "\n";

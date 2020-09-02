@@ -1,15 +1,17 @@
 #ifndef ALGINE_TEXTURE_H
 #define ALGINE_TEXTURE_H
 
-#include <algine/types.h>
 #include <algine/core/texture/TextureCreateInfo.h>
+#include <algine/core/DataType.h>
+#include <algine/core/Object.h>
+#include <algine/types.h>
 
 #include <GL/glew.h>
 #include <map>
 #include <string>
 
 namespace algine {
-class Texture {
+class Texture: public Object {
 public:
     enum Params {
         MinFilter = GL_TEXTURE_MIN_FILTER,
@@ -56,10 +58,12 @@ public:
         RGBA32F = GL_RGBA32F,
     };
 
+public:
     Texture();
     ~Texture();
 
     void bind() const;
+    void unbind() const;
     void use(uint slot) const; // activate + bind
     void setParams(const std::map<uint, uint> &params);
     void setParams(const std::map<uint, float> &params);
@@ -84,9 +88,6 @@ public:
     /// updates width / height, lod, format
     virtual void update() = 0;
 
-    // TODO: shader: rename > unbind
-    void unbind() const;
-
     uint getLOD() const;
     uint getFormat() const;
     uint getWidth() const;
@@ -96,15 +97,13 @@ public:
 public:
     uint target = 0; // texture 2d, texture cube etc
     uint id = 0;
-    uint
-        lod = 0,
-        format = RGB16F,
-        width = 512,
-        height = 512;
+    uint lod = 0;
+    uint format = RGB16F;
+    uint width = 512, height = 512;
 
 protected:
     explicit Texture(uint target);
-    void texFromFile(const std::string &path, uint target, uint dataType = GL_UNSIGNED_BYTE, bool flipImage = true);
+    void texFromFile(const std::string &path, uint target, DataType dataType = DataType::UnsignedByte, bool flipImage = true);
 };
 }
 
