@@ -97,6 +97,7 @@ add_library(algine
         include/algine/core/texture/PixelData.h
         include/algine/core/texture/TextureCreateInfo.h
         include/algine/core/shader/ShadersInfo.h
+        include/algine/core/DataType.h
         include/algine/std/model/Mesh.h
         include/algine/std/model/InputLayoutShapeLocations.h
 
