@@ -2,16 +2,13 @@
 
 #include <algine/core/JsonHelper.h>
 
+#include "../ConfigStrings.h"
+
 using namespace std;
 using namespace nlohmann;
 
-#define constant(name, val) constexpr char name[] = val
-
+namespace algine {
 namespace Config {
-constant(File, "file");
-constant(Paths, "paths");
-
-// cube faces
 constant(Right, "right");
 constant(Left, "left");
 constant(Top, "top");
@@ -20,7 +17,6 @@ constant(Back, "back");
 constant(Front, "front");
 }
 
-namespace algine {
 TextureCubeManager::TextureCubeManager() {
     m_type = TextureManager::Type::TextureCube;
     m_defaultParams = TextureCube::defaultParams();

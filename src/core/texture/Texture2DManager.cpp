@@ -1,18 +1,12 @@
 #include <algine/core/texture/Texture2DManager.h>
 
 #include <algine/core/texture/Texture2D.h>
-
 #include <algine/core/JsonHelper.h>
+
+#include "../ConfigStrings.h"
 
 using namespace std;
 using namespace nlohmann;
-
-#define constant(name, val) constexpr char name[] = val
-
-namespace Config {
-constant(File, "file");
-constant(Path, "path");
-}
 
 namespace algine {
 Texture2DManager::Texture2DManager() {
