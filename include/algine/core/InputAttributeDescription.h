@@ -1,6 +1,7 @@
 #ifndef ALGINE_INPUTATTRIBUTEDESCRIPTION_H
 #define ALGINE_INPUTATTRIBUTEDESCRIPTION_H
 
+#include <algine/core/DataType.h>
 #include <algine/types.h>
 
 namespace algine {
@@ -15,8 +16,8 @@ public:
     uint getCount() const;
     void setCount(uint count);
 
-    uint getFormat() const;
-    void setFormat(uint format);
+    DataType getDataType() const;
+    void setDataType(DataType dataType);
 
     uint getStride() const;
     void setStride(uint stride);
@@ -25,9 +26,9 @@ public:
     void setOffset(uint offset);
 
 public:
+    DataType m_dataType = DataType::Float;
     uint m_location = LocationAbsent;
     uint m_count = 4;
-    uint m_format = 0x1406; // GL_FLOAT TODO: make type constants (for GL_FLOAT, GL_UNSIGNED_BYTE etc)
     uint m_stride = 0;
     uint m_offset = 0;
 };

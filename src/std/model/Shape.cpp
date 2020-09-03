@@ -1,6 +1,6 @@
 #include <algine/std/model/Shape.h>
 
-#include "../../core/NativeConstants.h"
+#include <algine/core/DataType.h>
 
 namespace algine {
 Shape::~Shape() {
@@ -53,7 +53,7 @@ void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
         addAttribute(inputLayout, attribDescription, buffers.boneWeights);
 
         attribDescription.setLocation(locations.inBoneIds);
-        attribDescription.setFormat(NativeConstants::Types::UnsignedInt);
+        attribDescription.setDataType(DataType::UnsignedInt);
         addAttribute(inputLayout, attribDescription, buffers.boneIds);
     }
 

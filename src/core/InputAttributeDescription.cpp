@@ -17,12 +17,12 @@ void InputAttributeDescription::setCount(const uint count) {
     m_count = count;
 }
 
-uint InputAttributeDescription::getFormat() const {
-    return m_format;
+DataType InputAttributeDescription::getDataType() const {
+    return m_dataType;
 }
 
-void InputAttributeDescription::setFormat(const uint format) {
-    m_format = format;
+void InputAttributeDescription::setDataType(DataType dataType) {
+    m_dataType = dataType;
 }
 
 uint InputAttributeDescription::getStride() const {

@@ -9,19 +9,21 @@
 
 namespace algine {
 class InputLayout {
+    friend class Engine;
+
 public:
     InputLayout();
     ~InputLayout();
 
     void bind() const;
     void unbind() const;
-    void addAttribute(const InputAttributeDescription &inputAttributeDescription, const ArrayBuffer *arrayBuffer) const;
+    void addAttribute(const InputAttributeDescription &inputAttribDescription, const ArrayBuffer *arrayBuffer) const;
     void setIndexBuffer(const IndexBuffer *indexBuffer) const;
 
     implementVariadicCreate(InputLayout)
     implementVariadicDestroy(InputLayout)
 
-public:
+private:
     uint m_id;
 };
 }

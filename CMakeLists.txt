@@ -137,7 +137,6 @@ add_library(algine
         src/core/shader/UniformBlock.cpp include/algine/core/shader/UniformBlock.h
         src/core/Engine.cpp include/algine/core/Engine.h
         src/core/SOP.h src/core/SOPConstants.h
-        src/core/NativeConstants.h
         src/core/ConfigStrings.h
 
         include/algine/std/Material.h
