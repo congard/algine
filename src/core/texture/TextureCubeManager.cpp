@@ -2,7 +2,7 @@
 
 #include <algine/core/JsonHelper.h>
 
-#include "../ConfigStrings.h"
+#include "../TextureConfigManipulator.h"
 
 using namespace std;
 using namespace nlohmann;
