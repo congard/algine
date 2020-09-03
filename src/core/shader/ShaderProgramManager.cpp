@@ -18,13 +18,6 @@ constant(Name, "name");
 }
 
 namespace algine {
-ShaderProgramManager::PrivateShader::PrivateShader(ShaderManager shaderManager, uint dumpMode)
-    : manager(move(shaderManager)),
-      dumpMode(dumpMode)
-{
-    // see initializer list above
-}
-
 void ShaderProgramManager::setPrivateShaders(const vector<PrivateShader> &shaders) {
     m_privateShaders = shaders;
 }
@@ -54,7 +47,7 @@ ShaderProgramPtr ShaderProgramManager::createProgram() {
     program->setName(m_name);
 
     for (auto & helper : m_privateShaders) {
-        auto &manager = helper.manager;
+        auto &manager = helper.object;
 
         if (manager.getAccess() == ShaderManager::Access::Public)
             throw runtime_error("Can't use public Shader as private");
@@ -138,7 +131,7 @@ JsonHelper ShaderProgramManager::dump() {
     // write private shaders
     for (auto & mgrHelper : m_privateShaders) {
         const auto mode = mgrHelper.dumpMode;
-        auto &shaderManager = mgrHelper.manager;
+        auto &shaderManager = mgrHelper.object;
 
         if (mode == PrivateShader::Path) {
             if (shaderManager.getConfigPath().empty()) {

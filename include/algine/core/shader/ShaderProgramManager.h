@@ -4,30 +4,13 @@
 #include <algine/core/shader/ShaderProgramPtr.h>
 #include <algine/core/shader/ShaderManager.h>
 #include <algine/core/shader/ShaderProgram.h>
+#include <algine/core/transfer/DumpModeHelper.h>
 #include <algine/core/ManagerBase.h>
 
 namespace algine {
 class ShaderProgramManager: public ShaderDefinitionManager, public ManagerBase {
 public:
-    class PrivateShader {
-    public:
-        enum DumpMode {
-            Path,
-            Dump
-        };
-
-    public:
-        // do not mark explicit because we really need implicit conversion
-        // manager.setPrivateShaders({vertex, fragment});
-        // instead of ugly
-        // manager.setPrivateShaders({ShaderProgramManager::PrivateShader(vertex), ... });
-        // just ignore Clang-Tidy warning
-        PrivateShader(ShaderManager shaderManager, uint dumpMode = Dump);
-
-    public:
-        ShaderManager manager;
-        uint dumpMode;
-    };
+    using PrivateShader = DumpModeHelper<ShaderManager>;
 
 public:
     void setPrivateShaders(const std::vector<PrivateShader> &shaders);
