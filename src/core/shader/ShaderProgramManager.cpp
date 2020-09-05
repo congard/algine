@@ -18,54 +18,87 @@ constant(Name, "name");
 }
 
 namespace algine {
-void ShaderProgramManager::setPrivateShaders(const vector<PrivateShader> &shaders) {
-    m_privateShaders = shaders;
+void ShaderProgramManager::setShaders(const vector<ShaderManager> &shaders) {
+    m_shaders = shaders;
 }
 
-void ShaderProgramManager::addPrivateShader(const ShaderManager &manager, uint dumpMode) {
-    m_privateShaders.emplace_back(manager, dumpMode);
+void ShaderProgramManager::addShader(const ShaderManager &manager) {
+    m_shaders.emplace_back(manager);
 }
 
-const vector<ShaderProgramManager::PrivateShader>& ShaderProgramManager::getPrivateShaders() const {
-    return m_privateShaders;
+const vector<ShaderManager>& ShaderProgramManager::getShaders() const {
+    return m_shaders;
 }
 
-void ShaderProgramManager::setPublicShaders(const vector<string> &shaders) {
-    m_publicShaders = shaders;
+void ShaderProgramManager::setShaderNames(const vector<string> &names) {
+    m_shaderNames = names;
 }
 
-void ShaderProgramManager::addPublicShader(const string &name) {
-    m_publicShaders.emplace_back(name);
+void ShaderProgramManager::addShaderName(const string &name) {
+    m_shaderNames.emplace_back(name);
 }
 
-const vector<string>& ShaderProgramManager::getPublicShaders() const {
-    return m_publicShaders;
+const vector<string>& ShaderProgramManager::getShaderNames() const {
+    return m_shaderNames;
+}
+
+void ShaderProgramManager::setShaderPaths(const vector<string> &paths) {
+    m_shaderPaths = paths;
+}
+
+void ShaderProgramManager::addShaderPath(const string &path) {
+    m_shaderPaths.emplace_back(path);
+}
+
+const vector<string>& ShaderProgramManager::getShaderPaths() const {
+    return m_shaderPaths;
 }
 
 ShaderProgramPtr ShaderProgramManager::createProgram() {
     ShaderProgramPtr program = make_shared<ShaderProgram>();
     program->setName(m_name);
 
-    for (auto & helper : m_privateShaders) {
-        auto &manager = helper.object;
+    auto processMixedShader = [&](ShaderManager &manager)
+    {
+        if (manager.getAccess() == ShaderManager::Access::Public) {
+            // note that if Shader public, then ShaderProgram
+            // level definitions will not be applied
 
-        if (manager.getAccess() == ShaderManager::Access::Public)
-            throw runtime_error("Can't use public Shader as private");
+            auto publicShader = Shader::byName(manager.getName());
 
-        // backup Shader level definitions
-        auto shaderDefs = manager.getDefinitions();
+            if (publicShader != nullptr) {
+                // if Shader already loaded, just use it
+                program->attachShader(*publicShader);
+            } else {
+                // otherwise create it
+                auto shader = manager.createShader();
+                program->attachShader(*shader);
+            }
+        } else {
+            // backup Shader level definitions
+            auto shaderDefs = manager.getDefinitions();
 
-        // append ShaderProgram level definitions
-        manager.appendDefinitions(m_definitions);
+            // append ShaderProgram level definitions
+            manager.appendDefinitions(m_definitions);
 
-        auto shader = manager.createShader();
-        program->attachShader(*shader);
+            auto shader = manager.createShader();
+            program->attachShader(*shader);
 
-        // restore Shader level definitions
-        manager.setDefinitions(shaderDefs);
+            // restore Shader level definitions
+            manager.setDefinitions(shaderDefs);
+        }
+    };
+
+    for (auto & manager : m_shaders)
+        processMixedShader(manager);
+
+    for (auto & path : m_shaderPaths) {
+        ShaderManager manager;
+        manager.importFromFile(path);
+        processMixedShader(manager);
     }
 
-    for (auto & name : m_publicShaders) {
+    for (auto & name : m_shaderNames) {
         auto shader = Shader::byName(name);
 
         if (shader == nullptr)
@@ -95,18 +128,16 @@ void ShaderProgramManager::import(const JsonHelper &jsonHelper) {
 
     const json &shaders = jsonHelper.json[Shaders];
 
-    // load private & public shaders
+    // load shaders
     for (const auto & shader : shaders) {
-        if (shader.contains(Path)) {
-            ShaderManager shaderManager;
-            shaderManager.importFromFile(shader[Path]);
-            m_privateShaders.emplace_back(shaderManager);
-        } else if (shader.contains(Dump)) {
+         if (shader.contains(Dump)) {
             ShaderManager shaderManager;
             shaderManager.import(shader[Dump]);
-            m_privateShaders.emplace_back(shaderManager);
+            m_shaders.emplace_back(shaderManager);
+        } else if (shader.contains(Path)) {
+             m_shaderPaths.emplace_back(shader[Path]);
         } else if (shader.contains(Name)) {
-            m_publicShaders.emplace_back(shader[Name]);
+            m_shaderNames.emplace_back(shader[Name]);
         } else {
             throw invalid_argument("Unknown Shader source:\n" + shader.dump(4));
         }
@@ -128,27 +159,14 @@ JsonHelper ShaderProgramManager::dump() {
         config[Shaders].emplace_back(kv);
     };
 
-    // write private shaders
-    for (auto & mgrHelper : m_privateShaders) {
-        const auto mode = mgrHelper.dumpMode;
-        auto &shaderManager = mgrHelper.object;
+    // write shaders
+    for (auto & manager : m_shaders)
+        emplaceData(Dump, manager.dump().json);
 
-        if (mode == PrivateShader::Path) {
-            if (shaderManager.getConfigPath().empty()) {
-                cerr << "Warning: ShaderProgramManager::dump(): Shader path is empty, will be used dump instead\n";
-                emplaceData(Dump, shaderManager.dump().json);
-            } else {
-                emplaceData(Path, shaderManager.getConfigPath());
-            }
-        } else if (mode == PrivateShader::Dump) {
-            emplaceData(Dump, shaderManager.dump().json);
-        } else {
-            throw invalid_argument("Unknown PrivateShader::dumpMode '" + to_string(mode) + "'");
-        }
-    }
+    for (auto & path : m_shaderPaths)
+        emplaceData(Path, path);
 
-    // write public shaders
-    for (auto & name : m_publicShaders)
+    for (auto & name : m_shaderNames)
         emplaceData(Name, name);
 
     JsonHelper result(config);

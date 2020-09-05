@@ -1,25 +1,24 @@
 #ifndef ALGINE_SHADERPROGRAMMANAGER_H
 #define ALGINE_SHADERPROGRAMMANAGER_H
 
-#include <algine/core/shader/ShaderProgramPtr.h>
 #include <algine/core/shader/ShaderManager.h>
 #include <algine/core/shader/ShaderProgram.h>
-#include <algine/core/transfer/DumpModeHelper.h>
 #include <algine/core/ManagerBase.h>
 
 namespace algine {
 class ShaderProgramManager: public ShaderDefinitionManager, public ManagerBase {
 public:
-    using PrivateShader = DumpModeHelper<ShaderManager>;
+    void setShaders(const std::vector<ShaderManager> &shaders);
+    void addShader(const ShaderManager &manager);
+    const std::vector<ShaderManager>& getShaders() const;
 
-public:
-    void setPrivateShaders(const std::vector<PrivateShader> &shaders);
-    void addPrivateShader(const ShaderManager &manager, uint dumpMode = PrivateShader::Dump);
-    const std::vector<PrivateShader>& getPrivateShaders() const;
+    void setShaderNames(const std::vector<std::string> &names);
+    void addShaderName(const std::string &name);
+    const std::vector<std::string>& getShaderNames() const;
 
-    void setPublicShaders(const std::vector<std::string> &shaders);
-    void addPublicShader(const std::string &name);
-    const std::vector<std::string>& getPublicShaders() const;
+    void setShaderPaths(const std::vector<std::string> &paths);
+    void addShaderPath(const std::string &path);
+    const std::vector<std::string>& getShaderPaths() const;
 
     ShaderProgramPtr createProgram();
 
@@ -29,8 +28,8 @@ public:
     void importFromFile(const std::string &path) override;
 
 private:
-    std::vector<PrivateShader> m_privateShaders;
-    std::vector<std::string> m_publicShaders;
+    std::vector<ShaderManager> m_shaders;
+    std::vector<std::string> m_shaderNames, m_shaderPaths;
 };
 }
 
