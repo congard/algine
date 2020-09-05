@@ -30,7 +30,7 @@ void ManagerBase::setAccess(Access access) {
     m_access = access;
 }
 
-string ManagerBase::getName() const {
+const string& ManagerBase::getName() const {
     return m_name;
 }
 

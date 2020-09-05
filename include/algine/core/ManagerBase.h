@@ -19,7 +19,7 @@ public:
     void setName(const std::string &name);
     void setAccess(Access access);
 
-    std::string getName() const;
+    const std::string& getName() const;
     Access getAccess() const;
 
     void import(const JsonHelper &jsonHelper) override;
