@@ -5,6 +5,8 @@
 #include <tulz/File.h>
 #include <iostream>
 
+#include "../PublicObjectTools.h"
+
 using namespace std;
 using namespace nlohmann;
 
@@ -52,6 +54,12 @@ void ShaderProgramManager::addShaderPath(const string &path) {
 
 const vector<string>& ShaderProgramManager::getShaderPaths() const {
     return m_shaderPaths;
+}
+
+ShaderProgramPtr ShaderProgramManager::getProgram() {
+    using namespace PublicObjectTools;
+
+    return getPtr<ShaderProgramPtr>(this, &ShaderProgramManager::createProgram);
 }
 
 ShaderProgramPtr ShaderProgramManager::createProgram() {

@@ -39,5 +39,31 @@ inline typename TPtr::element_type* byName(const vector<TPtr> &array, const stri
 
     return nullptr;
 }
+
+// below are the templates used in the managers for the getXXX function
+
+template<typename TPtr, typename TMgr>
+using CreatePtrFunction = TPtr (TMgr::*)();
+
+template<typename TPtr, typename TMgr>
+inline TPtr getPtr(TMgr *manager, CreatePtrFunction<TPtr, TMgr> createPtr) {
+    using T = typename TPtr::element_type;
+
+    const string &name = manager->getName();
+
+    // if the object is public, it can be already created by something
+    // if the object already created, just return it
+    // otherwise just call create function
+
+    if (manager->getAccess() == TMgr::Access::Public && !name.empty()) {
+        auto obj = T::getByName(name);
+
+        if (obj != nullptr) {
+            return obj;
+        }
+    }
+
+    return (manager->*createPtr)();
+}
 }
 }

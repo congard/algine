@@ -3,6 +3,7 @@
 #include <algine/core/JsonHelper.h>
 
 #include "../TextureConfigManipulator.h"
+#include "../PublicObjectTools.h"
 
 using namespace std;
 using namespace nlohmann;
@@ -36,6 +37,12 @@ void TextureCubeManager::setPaths(const map<TextureCube::Face, string> &paths) {
 
 const map<TextureCube::Face, string>& TextureCubeManager::getPaths() const {
     return m_paths;
+}
+
+
+
+TextureCubePtr TextureCubeManager::getTexture() {
+    return PublicObjectTools::getPtr<TextureCubePtr>(this, &TextureCubeManager::createTexture);
 }
 
 TextureCubePtr TextureCubeManager::createTexture() {

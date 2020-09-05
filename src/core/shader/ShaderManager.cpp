@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <iostream>
 
+#include "../PublicObjectTools.h"
+
 using namespace nlohmann;
 using namespace tulz;
 using namespace tulz::StringUtils;
@@ -156,6 +158,10 @@ string ShaderManager::getGenerated() {
 string ShaderManager::makeGenerated() {
     generate();
     return getGenerated();
+}
+
+ShaderPtr ShaderManager::getShader() {
+    return PublicObjectTools::getPtr<ShaderPtr>(this, &ShaderManager::createShader);
 }
 
 ShaderPtr ShaderManager::createShader() {

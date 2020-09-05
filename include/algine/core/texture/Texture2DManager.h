@@ -12,6 +12,7 @@ public:
     void setPath(const std::string &path);
     std::string getPath() const;
 
+    Texture2DPtr getTexture();
     Texture2DPtr createTexture();
 
     void import(const JsonHelper &jsonHelper) override;

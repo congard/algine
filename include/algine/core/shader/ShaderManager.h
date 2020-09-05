@@ -38,6 +38,7 @@ public:
     std::string getGenerated();
     std::string makeGenerated();
 
+    ShaderPtr getShader();
     ShaderPtr createShader();
 
     void dumperUseSources(bool use);

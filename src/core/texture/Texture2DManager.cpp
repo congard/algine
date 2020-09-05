@@ -4,6 +4,7 @@
 #include <algine/core/JsonHelper.h>
 
 #include "../TextureConfigManipulator.h"
+#include "../PublicObjectTools.h"
 
 using namespace std;
 using namespace nlohmann;
@@ -20,6 +21,10 @@ void Texture2DManager::setPath(const string &path) {
 
 std::string Texture2DManager::getPath() const {
     return m_path;
+}
+
+Texture2DPtr Texture2DManager::getTexture() {
+    return PublicObjectTools::getPtr<Texture2DPtr>(this, &Texture2DManager::createTexture);
 }
 
 Texture2DPtr Texture2DManager::createTexture() {
