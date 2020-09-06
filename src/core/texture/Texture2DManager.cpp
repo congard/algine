@@ -44,7 +44,7 @@ Texture2DPtr Texture2DManager::createTexture() {
         texture->update();
     }
 
-    texture->setParams(m_params);
+    texture->setParams(m_params.empty() ? m_defaultParams : m_params);
 
     texture->unbind();
 

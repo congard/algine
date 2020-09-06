@@ -39,8 +39,6 @@ const map<TextureCube::Face, string>& TextureCubeManager::getPaths() const {
     return m_paths;
 }
 
-
-
 TextureCubePtr TextureCubeManager::getTexture() {
     return PublicObjectTools::getPtr<TextureCubePtr>(this, &TextureCubeManager::createTexture);
 }
@@ -64,7 +62,7 @@ TextureCubePtr TextureCubeManager::createTexture() {
         texture->update();
     }
 
-    texture->setParams(m_params);
+    texture->setParams(m_params.empty() ? m_defaultParams : m_params);
 
     texture->unbind();
 
