@@ -2,11 +2,15 @@
 
 #include <algine/core/JsonHelper.h>
 
+#include <tulz/DirectoryVisitor.h>
+#include <tulz/Path.h>
+
 #include "../TextureConfigManipulator.h"
 #include "../PublicObjectTools.h"
 
 using namespace std;
 using namespace nlohmann;
+using namespace tulz;
 
 namespace algine {
 namespace Config {
@@ -54,6 +58,8 @@ TextureCubePtr TextureCubeManager::createTexture() {
     texture->bind();
 
     if (!m_paths.empty()) {
+        DirectoryVisitor visitor(Path(m_confPath).getParentDirectory());
+
         for (const auto & path : m_paths) {
             texture->fromFile(path.second, path.first, m_dataType);
         }

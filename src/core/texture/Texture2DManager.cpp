@@ -3,11 +3,15 @@
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/JsonHelper.h>
 
+#include <tulz/DirectoryVisitor.h>
+#include <tulz/Path.h>
+
 #include "../TextureConfigManipulator.h"
 #include "../PublicObjectTools.h"
 
 using namespace std;
 using namespace nlohmann;
+using namespace tulz;
 
 namespace algine {
 Texture2DManager::Texture2DManager() {
@@ -38,6 +42,7 @@ Texture2DPtr Texture2DManager::createTexture() {
     texture->bind();
 
     if (!m_path.empty()) {
+        DirectoryVisitor visitor(Path(m_confPath).getParentDirectory());
         texture->fromFile(m_path, m_dataType);
     } else {
         texture->setDimensions(m_width, m_height);
