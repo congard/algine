@@ -185,6 +185,6 @@ JsonHelper ShaderProgramManager::dump() {
 }
 
 void ShaderProgramManager::importFromFile(const std::string &path) {
-    import(tulz::File(path, tulz::File::ReadText).readStr());
+    ManagerBase::importFromFile(path);
 }
 }

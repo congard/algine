@@ -257,8 +257,7 @@ JsonHelper ShaderManager::dump() {
 }
 
 void ShaderManager::importFromFile(const string &path) {
-    m_confPath = path;
-    import(File(path, File::ReadText).readStr());
+    ManagerBase::importFromFile(path);
 }
 
 void ShaderManager::setGlobalIncludePaths(const vector<string> &includePaths) {

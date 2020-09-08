@@ -70,4 +70,9 @@ JsonHelper ManagerBase::dump() {
 
     return config;
 }
+
+void ManagerBase::importFromFile(const string &path) {
+    m_confPath = path;
+    Transferable::importFromFile(path);
+}
 }

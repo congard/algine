@@ -64,7 +64,6 @@ private:
     std::string m_path;
     std::string m_source;
     std::string m_gen;
-    std::string m_confPath;
     uint m_type;
     bool m_dumperUseSources;
 

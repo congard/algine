@@ -25,7 +25,10 @@ public:
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
 
+    void importFromFile(const std::string &path) override;
+
 protected:
+    std::string m_confPath;
     std::string m_name;
     Access m_access;
 };
