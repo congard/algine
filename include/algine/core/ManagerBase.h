@@ -22,13 +22,16 @@ public:
     const std::string& getName() const;
     Access getAccess() const;
 
+    void setWorkingDirectory(const std::string &path);
+    const std::string& getWorkingDirectory() const;
+
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
 
     void importFromFile(const std::string &path) override;
 
 protected:
-    std::string m_confPath;
+    std::string m_confPath, m_workingDirectory;
     std::string m_name;
     Access m_access;
 };

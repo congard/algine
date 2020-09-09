@@ -2,8 +2,11 @@
 
 #include <algine/core/JsonHelper.h>
 
+#include <tulz/Path.h>
+
 using namespace std;
 using namespace nlohmann;
+using namespace tulz;
 
 #define constant(name, val) constexpr char name[] = val
 
@@ -36,6 +39,14 @@ const string& ManagerBase::getName() const {
 
 ManagerBase::Access ManagerBase::getAccess() const {
     return m_access;
+}
+
+void ManagerBase::setWorkingDirectory(const string &path) {
+    m_workingDirectory = path;
+}
+
+const string& ManagerBase::getWorkingDirectory() const {
+    return m_workingDirectory;
 }
 
 void ManagerBase::import(const JsonHelper &jsonHelper) {
@@ -72,7 +83,13 @@ JsonHelper ManagerBase::dump() {
 }
 
 void ManagerBase::importFromFile(const string &path) {
-    m_confPath = path;
-    Transferable::importFromFile(path);
+    if (!m_workingDirectory.empty()) {
+        m_confPath = Path::join(m_workingDirectory, path);
+    } else {
+        m_confPath = path;
+        m_workingDirectory = Path(path).getParentDirectory();
+    }
+
+    Transferable::importFromFile(m_confPath);
 }
 }
