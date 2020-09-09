@@ -11,9 +11,13 @@ using namespace std;
 
 namespace algine {
 namespace Config {
+constant(Name, "name");
+constant(Dump, "dump");
+
 constant(Type, "type");
 constant(Texture2D, "texture2d");
 constant(TextureCube, "textureCube");
+constant(Textures, "textures");
 
 constant(Width, "width");
 constant(Height, "height");
