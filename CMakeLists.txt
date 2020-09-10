@@ -147,7 +147,6 @@ add_library(algine
         src/std/model/Shape.cpp include/algine/std/model/Shape.h
         src/std/model/ShapeLoader.cpp include/algine/std/model/ShapeLoader.h
         src/std/Node.cpp include/algine/std/Node.h
-        src/std/AMTLLoader.cpp include/algine/std/AMTLLoader.h
         src/std/lighting/LightingManager.cpp include/algine/std/lighting/LightingManager.h
         src/std/lighting/Light.cpp include/algine/std/lighting/Light.h
         src/std/lighting/PointLight.cpp include/algine/std/lighting/PointLight.h
@@ -176,6 +175,8 @@ add_library(algine
         src/std/Rotatable.cpp include/algine/std/Rotatable.h
         src/std/Translatable.cpp include/algine/std/Translatable.h
         src/std/Scalable.cpp include/algine/std/Scalable.h
+        src/std/AMTLMaterialManager.cpp include/algine/std/AMTLMaterialManager.h
+        src/std/AMTLManager.cpp include/algine/std/AMTLManager.h
 
         src/ext/Blur.cpp include/algine/ext/Blur.h
         src/ext/event/MouseEventListener.cpp include/algine/ext/event/MouseEventListener.h

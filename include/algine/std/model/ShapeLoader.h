@@ -1,21 +1,17 @@
 #ifndef ALGINE_SHAPELOADER_H
 #define ALGINE_SHAPELOADER_H
 
-#include <algine/core/texture/Texture2DPtr.h>
 #include <algine/std/model/Shape.h>
+#include <algine/std/AMTLManager.h>
 #include <algine/types.h>
-
-#include <map>
 
 class aiMesh;
 class aiScene;
 
 namespace algine {
-class AMTLLoader;
-
 class ShapeLoader {
 public:
-    enum Params {
+    enum class Param {
         Triangulate,
         SortByPolygonType,
         CalcTangentSpace,
@@ -29,63 +25,39 @@ public:
     ShapeLoader();
 
     void load();
-    void addParam(uint param);
+    void addParam(Param param);
+    void addParams(const std::vector<Param> &params);
+    void setParams(const std::vector<Param> &params);
     void setModelPath(const std::string &path);
-    void setTexturesPath(const std::string &path);
-    void setDefaultTexturesParams(const std::map<uint, uint> &params);
+    void setAMTLPath(const std::string &path);
     void setBonesPerVertex(uint bonesPerVertex);
 
-    template<typename...Args>
-    void addParams(Args...args) {
-        int params[] = {args...};
-        for (uint i = 0; i < sizeof...(args); i++)
-            addParam(params[i]);
-    }
+    const std::vector<Param>& getParams() const;
+    const std::string& getModelPath() const;
+    const std::string& getAMTLPath() const;
+    uint getBonesPerVertex() const;
 
     Shape *getShape() const;
-
-public:
-    Shape *m_shape = nullptr;
-
-private:
-    struct MaterialTexPaths {
-        std::string ambient, diffuse, specular, normal, reflection, jitter;
-    };
-
-    struct LoadedTexture {
-        Texture2DPtr texture;
-        std::string path;
-        std::map<uint, uint> params;
-
-        LoadedTexture(const std::string &path, const Texture2DPtr &texture,
-                      const std::map<uint, uint> &params);
-    };
-
-    struct Geometry {
-        std::vector<float> vertices, normals, texCoords, tangents, bitangents, boneWeights;
-        std::vector<uint> indices, boneIds;
-    } geometry;
 
 private:
     void loadBones(const aiMesh *aimesh);
     void processNode(const aiNode *node, const aiScene *scene);
     void processMesh(const aiMesh *aimesh, const aiScene *scene);
-    void loadTextures();
     void genBuffers();
-    static int getLoadedTextureIndex(const std::vector<LoadedTexture> *loadedTextures, const std::string &path,
-                                     const std::map<uint, uint> &params);
 
 private:
-    std::vector<MaterialTexPaths> m_materialTexPaths;
-    std::vector<uint> m_params;
-    std::map<uint, uint> m_defaultTexturesParams;
-    std::string m_modelPath, m_texturesPath;
+    Shape *m_shape = nullptr;
 
-    AMTLLoader *m_amtlLoader = nullptr; // NOTE: exists only during load()!
+private:
+    std::vector<float> vertices, normals, texCoords, tangents, bitangents, boneWeights;
+    std::vector<uint> indices, boneIds;
+
+private:
+    std::vector<Param> m_params;
+    std::string m_modelPath, m_amtlPath;
+
+    AMTLManager m_amtlManager;
     uint m_bonesPerVertex = 4;
-
-    std::vector<LoadedTexture> m_modelLoadedTextures;
-    static std::vector<LoadedTexture> m_globalLoadedTextures;
 };
 }
 
