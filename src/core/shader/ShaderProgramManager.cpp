@@ -102,6 +102,7 @@ ShaderProgramPtr ShaderProgramManager::createProgram() {
 
     for (auto & path : m_shaderPaths) {
         ShaderManager manager;
+        manager.setWorkingDirectory(m_workingDirectory);
         manager.importFromFile(path);
         processMixedShader(manager);
     }
@@ -140,6 +141,7 @@ void ShaderProgramManager::import(const JsonHelper &jsonHelper) {
     for (const auto & shader : shaders) {
          if (shader.contains(Dump)) {
             ShaderManager shaderManager;
+            shaderManager.setWorkingDirectory(m_workingDirectory);
             shaderManager.import(shader[Dump]);
             m_shaders.emplace_back(shaderManager);
         } else if (shader.contains(Path)) {
