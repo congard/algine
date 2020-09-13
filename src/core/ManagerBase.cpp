@@ -85,6 +85,7 @@ JsonHelper ManagerBase::dump() {
 void ManagerBase::importFromFile(const string &path) {
     if (!m_workingDirectory.empty()) {
         m_confPath = Path::join(m_workingDirectory, path);
+        m_workingDirectory = Path(m_confPath).getParentDirectory();
     } else {
         m_confPath = path;
         m_workingDirectory = Path(path).getParentDirectory();
