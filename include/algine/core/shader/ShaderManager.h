@@ -16,27 +16,26 @@ public:
     ShaderManager();
     explicit ShaderManager(uint type);
 
-    void fromFile(const std::string &path);
-    void fromSource(const std::string &source);
+    void setType(uint type);
+    uint getType() const;
 
+    void setPath(const std::string &path);
     void setIncludePaths(const std::vector<std::string> &includePaths);
     void addIncludePaths(const std::vector<std::string> &includePaths);
     void addIncludePath(const std::string &includePath);
     void removeIncludePath(const std::string &includePath);
 
+    const std::string& getPath() const;
+    const std::vector<std::string>& getIncludePaths() const;
+
+    void setSource(const std::string &source);
+    const std::string& getSource() const;
+
     void resetGenerated();
     void generate();
 
-    void setType(uint type);
-
-    std::string getConfigPath() const;
-    uint getType() const;
-
-    const std::vector<std::string>& getIncludePaths() const;
-
-    std::string getTemplate();
-    std::string getGenerated();
-    std::string makeGenerated();
+    const std::string& getGenerated() const;
+    const std::string& makeGenerated();
 
     ShaderPtr getShader();
     ShaderPtr createShader();

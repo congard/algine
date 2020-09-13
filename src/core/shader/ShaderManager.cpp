@@ -68,18 +68,16 @@ ShaderManager::ShaderManager(uint type)
     // see initializer list above
 }
 
-void ShaderManager::fromFile(const string &path) {
-    m_path = path;
-
-    // base include path
-    m_includePaths.insert(m_includePaths.begin(), Path(path).getParentDirectory());
-
-    fromSource(File(path, File::Read).readStr());
+void ShaderManager::setType(uint type) {
+    m_type = type;
 }
 
-void ShaderManager::fromSource(const string &source) {
-    m_source = source;
-    resetGenerated();
+uint ShaderManager::getType() const {
+    return m_type;
+}
+
+void ShaderManager::setPath(const string &path) {
+    m_path = path;
 }
 
 void ShaderManager::setIncludePaths(const vector<string> &includePaths) {
@@ -102,60 +100,83 @@ void ShaderManager::removeIncludePath(const std::string &includePath) {
     removeElement(m_includePaths, includePath);
 }
 
-void ShaderManager::resetGenerated() {
-    m_gen = "";
-}
-
-void ShaderManager::generate() {
-    constexpr char versionRegex[] = R"~([ \t]*#[ \t]*version[ \t]+[0-9]+(?:[ \t]+[a-z]+|[ \t]*)(?:\r\n|\n|$))~";
-
-    m_gen = m_source;
-
-    // generate definitions code
-    vector<Matches> version = findRegex(m_gen, versionRegex);
-    if (version.empty())
-        return;
-
-    string definitionsCode = "\n";
-    for (auto & j : m_definitions)
-        definitionsCode += "#define " + j.first + " " + j.second + "\n";
-    m_gen.insert(version[0].pos + version[0].size, definitionsCode);
-
-    // expand includes
-    // base include path (path where file is located)
-    // it is zero element if shader loaded from file
-    if (!m_path.empty() && !m_includePaths.empty()) {
-        m_gen = processDirectives(m_gen, m_includePaths[0]);
-    } else {
-        m_gen = processDirectives(m_gen, "");
-    }
-}
-
-void ShaderManager::setType(uint type) {
-    m_type = type;
-}
-
-string ShaderManager::getConfigPath() const {
-    return m_confPath;
-}
-
-uint ShaderManager::getType() const {
-    return m_type;
+const string& ShaderManager::getPath() const {
+    return m_path;
 }
 
 const vector<string>& ShaderManager::getIncludePaths() const {
     return m_includePaths;
 }
 
-string ShaderManager::getTemplate() {
+void ShaderManager::setSource(const string &source) {
+    m_source = source;
+}
+
+const string& ShaderManager::getSource() const {
     return m_source;
 }
 
-string ShaderManager::getGenerated() {
+void ShaderManager::resetGenerated() {
+    m_gen = "";
+}
+
+inline void cfgWorkingDirectoryImpl(string &workingDirectory, const string &path) {
+    if (workingDirectory.empty() && !path.empty()) {
+        workingDirectory = Path(path).getParentDirectory();
+    }
+}
+
+#define cfgWorkingDirectory() cfgWorkingDirectoryImpl(m_workingDirectory, m_path)
+
+inline void cfgSourceImpl(ShaderManager *self) {
+    const string &source = self->getSource();
+    const string &path = self->getPath();
+    const string &workingDirectory = self->getWorkingDirectory();
+
+    if (source.empty()) {
+        if (path.empty())
+            throw runtime_error("Source and path are empty");
+
+        self->setSource(File(Path::join(workingDirectory, path), File::ReadText).readStr());
+    }
+}
+
+#define cfgSource() cfgSourceImpl(this)
+
+void ShaderManager::generate() {
+    constexpr char versionRegex[] = R"~([ \t]*#[ \t]*version[ \t]+[0-9]+(?:[ \t]+[a-z]+|[ \t]*)(?:\r\n|\n|$))~";
+
+    cfgWorkingDirectory();
+    cfgSource();
+
+    m_gen = m_source;
+
+    // generate definitions code
+    {
+        vector<Matches> version = findRegex(m_gen, versionRegex);
+
+        if (version.empty())
+            return;
+
+        string definitionsCode = "\n";
+
+        for (auto &j : m_definitions)
+            definitionsCode += "#define " + j.first + " " + j.second + "\n";
+
+        m_gen.insert(version[0].pos + version[0].size, definitionsCode);
+    }
+
+    // expand includes
+    // base include path (path where file is located)
+    // it is working directory (if specified)
+    m_gen = processDirectives(m_gen, m_workingDirectory);
+}
+
+const string& ShaderManager::getGenerated() const {
     return m_gen;
 }
 
-string ShaderManager::makeGenerated() {
+const string& ShaderManager::makeGenerated() {
     generate();
     return getGenerated();
 }
@@ -196,9 +217,9 @@ void ShaderManager::import(const JsonHelper &jsonHelper) {
 
     // load shader path or source
     if (config.contains(Source)) {
-        fromSource(config[Source]);
+        setSource(config[Source]);
     } else if (config.contains(Config::Path)) {
-        fromFile(config[Config::Path]);
+        setPath(config[Config::Path]);
     } else {
         throw runtime_error("ShaderManager: broken file:\n" + jsonHelper.toString());
     }
@@ -236,6 +257,8 @@ JsonHelper ShaderManager::dump() {
 
     // write source or path
     if (m_dumperUseSources) {
+        cfgWorkingDirectory();
+        cfgSource();
         setString(Source, m_source);
     } else {
         setString(Config::Path, m_path);
