@@ -51,7 +51,7 @@ void Engine::init() {
     m_defaultFramebuffer->m_id = 0;
 
     m_defaultRenderbuffer = (Renderbuffer*) malloc(sizeof(Renderbuffer));
-    m_defaultRenderbuffer->id = 0;
+    m_defaultRenderbuffer->m_id = 0;
 
     m_defaultArrayBuffer = (ArrayBuffer*) malloc(sizeof(ArrayBuffer));
     m_defaultArrayBuffer->m_id = 0;

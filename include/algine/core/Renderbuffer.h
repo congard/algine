@@ -1,9 +1,8 @@
 #ifndef ALGINE_RENDERBUFFER_H
 #define ALGINE_RENDERBUFFER_H
 
-#include <algine/types.h>
-#include <algine/core/texture/Texture.h>
 #include <algine/templates.h>
+#include <algine/types.h>
 
 namespace algine {
 class Renderbuffer {
@@ -23,7 +22,7 @@ public:
 
     void setWidth(uint width);
     void setHeight(uint height);
-    void setWidthHeight(uint width, uint height);
+    void setDimensions(uint width, uint height);
 
     void update();
     void unbind();
@@ -37,13 +36,10 @@ public:
     implementVariadicDestroy(Renderbuffer)
 
 protected:
-    uint id = 0;
-    uint
-        format = Texture::DepthComponent,
-        width = 512,
-        height = 512;
+    uint m_id;
+    uint m_format;
+    uint m_width, m_height;
 };
-
 }
 
 #endif /* ALGINE_RENDERBUFFER_H */
