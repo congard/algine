@@ -5,7 +5,7 @@
 
 #include <tulz/Path.h>
 
-#include "../TextureConfigManipulator.h"
+#include "../ConfigStrings.h"
 #include "../PublicObjectTools.h"
 
 using namespace std;

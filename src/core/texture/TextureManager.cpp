@@ -3,7 +3,7 @@
 #include <algine/core/texture/Texture.h>
 #include <algine/core/JsonHelper.h>
 
-#include "../TextureConfigManipulator.h"
+#include "../TextureConfigTools.h"
 
 using namespace std;
 using namespace nlohmann;
