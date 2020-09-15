@@ -98,6 +98,7 @@ add_library(algine
         include/algine/core/texture/TextureCreateInfo.h
         include/algine/core/texture/Texture2DPtr.h
         include/algine/core/texture/TextureCubePtr.h
+        include/algine/core/RenderbufferPtr.h
         include/algine/core/shader/ShadersInfo.h
         include/algine/core/DataType.h
         include/algine/std/model/Mesh.h
