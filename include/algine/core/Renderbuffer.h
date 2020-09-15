@@ -1,11 +1,15 @@
 #ifndef ALGINE_RENDERBUFFER_H
 #define ALGINE_RENDERBUFFER_H
 
+#include <algine/core/RenderbufferPtr.h>
+#include <algine/core/Object.h>
 #include <algine/templates.h>
 #include <algine/types.h>
 
+#include <vector>
+
 namespace algine {
-class Renderbuffer {
+class Renderbuffer: public Object {
     friend class Engine;
 
 public:
@@ -34,6 +38,13 @@ public:
 
     implementVariadicCreate(Renderbuffer)
     implementVariadicDestroy(Renderbuffer)
+
+public:
+    static RenderbufferPtr getByName(const std::string &name);
+    static Renderbuffer* byName(const std::string &name);
+
+public:
+    static std::vector<RenderbufferPtr> publicRenderbuffers;
 
 protected:
     uint m_id;

@@ -111,6 +111,7 @@ add_library(algine
         src/core/transfer/Transferable.cpp include/algine/core/transfer/Transferable.h
         src/core/Framebuffer.cpp include/algine/core/Framebuffer.h
         src/core/Renderbuffer.cpp include/algine/core/Renderbuffer.h
+        src/core/RenderbufferManager.cpp include/algine/core/RenderbufferManager.h
         src/core/buffers/Buffer.cpp include/algine/core/buffers/Buffer.h
         src/core/buffers/ArrayBuffer.cpp include/algine/core/buffers/ArrayBuffer.h
         src/core/buffers/IndexBuffer.cpp include/algine/core/buffers/IndexBuffer.h

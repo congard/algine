@@ -12,7 +12,11 @@
 #include "../core/SOP.h"
 #include "../core/SOPConstants.h"
 
+#include "PublicObjectTools.h"
+
 namespace algine {
+vector<RenderbufferPtr> Renderbuffer::publicRenderbuffers;
+
 Renderbuffer::Renderbuffer()
     : m_id(),
       m_format(),
@@ -74,4 +78,12 @@ uint Renderbuffer::getHeight() const {
 uint Renderbuffer::getId() const {
     return m_id;
 }
-};
+
+RenderbufferPtr Renderbuffer::getByName(const string &name) {
+    return PublicObjectTools::getByName(publicRenderbuffers, name);
+}
+
+Renderbuffer* Renderbuffer::byName(const string &name) {
+    return PublicObjectTools::byName(publicRenderbuffers, name);
+}
+}
