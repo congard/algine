@@ -12,12 +12,11 @@ namespace algine {
 TextureManager::TextureManager()
     : m_type(),
       m_dataType(DataType::UnsignedByte),
-      m_format(Texture::RGB),
-      m_width(), // width & height will be overwritten
-      m_height(), // if texture loaded from file
       m_writeFileSection()
 {
     // m_defaultParams initialized in derived class
+    // width & height will be overwritten if texture loaded from file
+    m_format = Texture::RGB;
 }
 
 void TextureManager::setType(Type type) {
@@ -26,18 +25,6 @@ void TextureManager::setType(Type type) {
 
 void TextureManager::setDataType(DataType dataType) {
     m_dataType = dataType;
-}
-
-void TextureManager::setFormat(uint format) {
-    m_format = format;
-}
-
-void TextureManager::setWidth(uint width) {
-    m_width = width;
-}
-
-void TextureManager::setHeight(uint height) {
-    m_height = height;
 }
 
 void TextureManager::setParams(const map<uint, uint> &params) {
@@ -54,18 +41,6 @@ TextureManager::Type TextureManager::getType() const {
 
 DataType TextureManager::getDataType() const {
     return m_dataType;
-}
-
-uint TextureManager::getFormat() const {
-    return m_format;
-}
-
-uint TextureManager::getWidth() const {
-    return m_width;
-}
-
-uint TextureManager::getHeight() const {
-    return m_height;
 }
 
 const map<uint, uint>& TextureManager::getParams() const {
@@ -91,14 +66,6 @@ void TextureManager::import(const JsonHelper &jsonHelper) {
     if (config.contains(File) && config[File].contains(Config::DataType))
         m_dataType = stringToDataType(config[File][Config::DataType]);
 
-    // load width & height
-    m_width = jsonHelper.readValue<int>(Width);
-    m_height = jsonHelper.readValue<int>(Height);
-
-    // load format
-    if (config.contains(Format))
-        m_format = stringToFormat(config[Format]);
-
     // load params
     if (config.contains(Params)) {
         for (const auto & p : config[Params].items()) {
@@ -108,7 +75,7 @@ void TextureManager::import(const JsonHelper &jsonHelper) {
         m_params = m_defaultParams;
     }
 
-    ManagerBase::import(jsonHelper);
+    ImageManagerBase::import(jsonHelper);
 }
 
 JsonHelper TextureManager::dump() {
@@ -123,22 +90,12 @@ JsonHelper TextureManager::dump() {
     if (m_writeFileSection)
         config[File][Config::DataType] = dataTypeToString(m_dataType);
 
-    // write width & height if not zero
-    if (m_width != 0)
-        config[Width] = m_width;
-
-    if (m_height != 0)
-        config[Height] = m_height;
-
-    // write format
-    config[Format] = formatToString(m_format);
-
     // write params
     for (const auto & param : m_params)
         config[Params][paramKeyToString(param.first)] = paramValueToString(param.second);
 
     JsonHelper result(config);
-    result.append(ManagerBase::dump());
+    result.append(ImageManagerBase::dump());
 
     return result;
 }
