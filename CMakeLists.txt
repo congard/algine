@@ -96,6 +96,8 @@ add_library(algine
         include/algine/core/transfer/GLMTransferrer.h
         include/algine/core/texture/PixelData.h
         include/algine/core/texture/TextureCreateInfo.h
+        include/algine/core/texture/Texture2DPtr.h
+        include/algine/core/texture/TextureCubePtr.h
         include/algine/core/shader/ShadersInfo.h
         include/algine/core/DataType.h
         include/algine/std/model/Mesh.h
@@ -104,6 +106,7 @@ add_library(algine
         src/core/PublicObjectTools.h
         src/core/Object.cpp include/algine/core/Object.h
         src/core/ManagerBase.cpp include/algine/core/ManagerBase.h
+        src/core/ImageManagerBase.cpp include/algine/core/ImageManagerBase.h
         src/core/transfer/Transferable.cpp include/algine/core/transfer/Transferable.h
         src/core/Framebuffer.cpp include/algine/core/Framebuffer.h
         src/core/Renderbuffer.cpp include/algine/core/Renderbuffer.h
@@ -116,8 +119,6 @@ add_library(algine
         src/core/buffers/BufferReader.cpp include/algine/core/buffers/BufferReader.h
         src/core/InputLayout.cpp include/algine/core/InputLayout.h
         src/core/InputAttributeDescription.cpp include/algine/core/InputAttributeDescription.h
-        include/algine/core/texture/Texture2DPtr.h
-        include/algine/core/texture/TextureCubePtr.h
         src/core/texture/Texture.cpp include/algine/core/texture/Texture.h
         src/core/texture/Texture2D.cpp include/algine/core/texture/Texture2D.h
         src/core/texture/TextureCube.cpp include/algine/core/texture/TextureCube.h
