@@ -116,18 +116,9 @@ ShaderProgramPtr ShaderProgramManager::createProgram() {
         program->attachShader(*shader);
     }
 
-    if (m_access == Access::Public) {
-        if (m_name.empty())
-            throw runtime_error("ShaderProgram without name can't be public");
-
-        if (ShaderProgram::byName(m_name) == nullptr) {
-            ShaderProgram::publicPrograms.emplace_back(program);
-        } else {
-            throw runtime_error("ShaderProgram with the same name was already loaded");
-        }
-    }
-
     program->link();
+
+    PublicObjectTools::postCreateAccessOp("ShaderProgram", this, program);
 
     return program;
 }

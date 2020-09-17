@@ -65,5 +65,28 @@ inline TPtr getPtr(TMgr *manager, CreatePtrFunction<TPtr, TMgr> createPtr) {
 
     return (manager->*createPtr)();
 }
+
+// below the function that needs to call in manager's
+// createXXX() after full Object creation
+
+template<typename TPtr, typename TMgr>
+inline void postCreateAccessOp(const string &typeName, const TMgr *manager, const TPtr &obj) {
+    using Access = typename TMgr::Access;
+    using T = typename TPtr::element_type;
+
+    Access access = manager->getAccess();
+    const string &name = manager->getName();
+
+    if (access == Access::Public) {
+        if (name.empty())
+            throw runtime_error(typeName + " without name can't be public");
+
+        if (T::byName(name) == nullptr) {
+            T::publicObjects.emplace_back(obj);
+        } else {
+            throw runtime_error(typeName + " with the same name was already loaded");
+        }
+    }
+}
 }
 }

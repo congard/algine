@@ -51,16 +51,7 @@ Texture2DPtr Texture2DManager::createTexture() {
 
     texture->unbind();
 
-    if (m_access == Access::Public) {
-        if (m_name.empty())
-            throw runtime_error("Texture2D without name can't be public");
-
-        if (Texture2D::byName(m_name) == nullptr) {
-            Texture2D::publicTextures.emplace_back(texture);
-        } else {
-            throw runtime_error("Texture2D with the same name was already loaded");
-        }
-    }
+    PublicObjectTools::postCreateAccessOp("Texture2D", this, texture);
 
     return texture;
 }

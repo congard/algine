@@ -192,16 +192,7 @@ ShaderPtr ShaderManager::createShader() {
     shader->fromSource(m_gen);
     shader->setName(m_name);
 
-    if (m_access == Access::Public) {
-        if (m_name.empty())
-            throw runtime_error("Shader without name can't be public");
-
-        if (Shader::byName(m_name) == nullptr) {
-            Shader::publicShaders.emplace_back(shader);
-        } else {
-            throw runtime_error("Shader with the same name was already loaded");
-        }
-    }
+    PublicObjectTools::postCreateAccessOp("Shader", this, shader);
 
     return shader;
 }

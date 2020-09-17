@@ -44,7 +44,7 @@ public:
     static Texture2D* byName(const std::string &name);
 
 public:
-    static std::vector<Texture2DPtr> publicTextures;
+    static std::vector<Texture2DPtr> publicObjects;
 };
 }
 

@@ -46,7 +46,7 @@ public:
     static TextureCube* byName(const std::string &name);
 
 public:
-    static std::vector<TextureCubePtr> publicTextures;
+    static std::vector<TextureCubePtr> publicObjects;
 };
 }
 

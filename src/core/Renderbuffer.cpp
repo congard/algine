@@ -15,7 +15,7 @@
 #include "PublicObjectTools.h"
 
 namespace algine {
-vector<RenderbufferPtr> Renderbuffer::publicRenderbuffers;
+vector<RenderbufferPtr> Renderbuffer::publicObjects;
 
 Renderbuffer::Renderbuffer()
     : m_id(),
@@ -80,10 +80,10 @@ uint Renderbuffer::getId() const {
 }
 
 RenderbufferPtr Renderbuffer::getByName(const string &name) {
-    return PublicObjectTools::getByName(publicRenderbuffers, name);
+    return PublicObjectTools::getByName(publicObjects, name);
 }
 
 Renderbuffer* Renderbuffer::byName(const string &name) {
-    return PublicObjectTools::byName(publicRenderbuffers, name);
+    return PublicObjectTools::byName(publicObjects, name);
 }
 }

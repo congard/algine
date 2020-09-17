@@ -16,7 +16,7 @@
 using namespace std;
 
 namespace algine {
-vector<Texture2DPtr> Texture2D::publicTextures;
+vector<Texture2DPtr> Texture2D::publicObjects;
 
 Texture2D::Texture2D()
     : Texture(GL_TEXTURE_2D)
@@ -57,10 +57,10 @@ map<uint, uint> Texture2D::defaultParams() {
 }
 
 Texture2DPtr Texture2D::getByName(const string &name) {
-    return PublicObjectTools::getByName(publicTextures, name);
+    return PublicObjectTools::getByName(publicObjects, name);
 }
 
 Texture2D* Texture2D::byName(const string &name) {
-    return PublicObjectTools::byName(publicTextures, name);
+    return PublicObjectTools::byName(publicObjects, name);
 }
 }

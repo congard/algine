@@ -66,7 +66,7 @@ public:
     static ShaderProgram* byName(const std::string &name);
 
 public:
-    static std::vector<ShaderProgramPtr> publicPrograms;
+    static std::vector<ShaderProgramPtr> publicObjects;
 };
 }
 

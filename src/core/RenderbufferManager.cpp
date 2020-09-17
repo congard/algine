@@ -21,16 +21,7 @@ RenderbufferPtr RenderbufferManager::createRenderbuffer() {
     renderbuffer->update();
     renderbuffer->unbind();
 
-    if (m_access == Access::Public) {
-        if (m_name.empty())
-            throw runtime_error("Renderbuffer without name can't be public");
-
-        if (Renderbuffer::byName(m_name) == nullptr) {
-            Renderbuffer::publicRenderbuffers.emplace_back(renderbuffer);
-        } else {
-            throw runtime_error("Renderbuffer with the same name was already loaded");
-        }
-    }
+    PublicObjectTools::postCreateAccessOp("Renderbuffer", this, renderbuffer);
 
     return renderbuffer;
 }

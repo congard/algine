@@ -38,7 +38,7 @@ public:
     static Shader* byName(const std::string &name);
 
 public:
-    static std::vector<ShaderPtr> publicShaders;
+    static std::vector<ShaderPtr> publicObjects;
 
 private:
     uint m_id = 0;

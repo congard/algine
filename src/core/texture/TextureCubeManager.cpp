@@ -69,16 +69,7 @@ TextureCubePtr TextureCubeManager::createTexture() {
 
     texture->unbind();
 
-    if (m_access == Access::Public) {
-        if (m_name.empty())
-            throw runtime_error("TextureCube without name can't be public");
-
-        if (TextureCube::byName(m_name) == nullptr) {
-            TextureCube::publicTextures.emplace_back(texture);
-        } else {
-            throw runtime_error("TextureCube with the same name was already loaded");
-        }
-    }
+    PublicObjectTools::postCreateAccessOp("TextureCube", this, texture);
 
     return texture;
 }

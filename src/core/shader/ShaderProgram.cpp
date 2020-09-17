@@ -21,7 +21,7 @@ using namespace std;
 using namespace tulz;
 
 namespace algine {
-vector<ShaderProgramPtr> ShaderProgram::publicPrograms;
+vector<ShaderProgramPtr> ShaderProgram::publicObjects;
 
 ShaderProgram::ShaderProgram() {
     id = glCreateProgram();
@@ -219,8 +219,8 @@ void ShaderProgram::setMat4(const string &location, const glm::mat4 &p) {
 constexpr uint notFound = static_cast<uint>(-1);
 
 inline uint indexByName(const string &name) {
-    for (uint i = 0; i < ShaderProgram::publicPrograms.size(); i++) {
-        if (ShaderProgram::publicPrograms[i]->name == name) {
+    for (uint i = 0; i < ShaderProgram::publicObjects.size(); i++) {
+        if (ShaderProgram::publicObjects[i]->name == name) {
             return i;
         }
     }
@@ -232,7 +232,7 @@ ShaderProgramPtr ShaderProgram::getByName(const string &name) {
     uint index = indexByName(name);
 
     if (index != notFound)
-        return publicPrograms[index];
+        return publicObjects[index];
 
     return nullptr;
 }
@@ -241,7 +241,7 @@ ShaderProgram* ShaderProgram::byName(const string &name) {
     uint index = indexByName(name);
 
     if (index != notFound)
-        return publicPrograms[index].get();
+        return publicObjects[index].get();
 
     return nullptr;
 }

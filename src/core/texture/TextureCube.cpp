@@ -16,7 +16,7 @@
 using namespace std;
 
 namespace algine {
-vector<TextureCubePtr> TextureCube::publicTextures;
+vector<TextureCubePtr> TextureCube::publicObjects;
 
 TextureCube::TextureCube()
     : Texture(GL_TEXTURE_CUBE_MAP)
@@ -54,10 +54,10 @@ map<uint, uint> TextureCube::defaultParams() {
 }
 
 TextureCubePtr TextureCube::getByName(const string &name) {
-    return PublicObjectTools::getByName(publicTextures, name);
+    return PublicObjectTools::getByName(publicObjects, name);
 }
 
 TextureCube* TextureCube::byName(const string &name) {
-    return PublicObjectTools::byName(publicTextures, name);
+    return PublicObjectTools::byName(publicObjects, name);
 }
 }

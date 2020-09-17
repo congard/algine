@@ -44,7 +44,7 @@ public:
     static Renderbuffer* byName(const std::string &name);
 
 public:
-    static std::vector<RenderbufferPtr> publicRenderbuffers;
+    static std::vector<RenderbufferPtr> publicObjects;
 
 protected:
     uint m_id;

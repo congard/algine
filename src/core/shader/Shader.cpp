@@ -10,7 +10,7 @@ using namespace std;
 using namespace tulz;
 
 namespace algine {
-vector<ShaderPtr> Shader::publicShaders;
+vector<ShaderPtr> Shader::publicObjects;
 
 Shader::Shader(const uint type) {
     create(type);
@@ -59,8 +59,8 @@ uint Shader::getId() const {
 constexpr uint notFound = static_cast<uint>(-1);
 
 inline uint indexByName(const string &name) {
-    for (uint i = 0; i < Shader::publicShaders.size(); i++) {
-        if (Shader::publicShaders[i]->name == name) {
+    for (uint i = 0; i < Shader::publicObjects.size(); i++) {
+        if (Shader::publicObjects[i]->name == name) {
             return i;
         }
     }
@@ -72,7 +72,7 @@ ShaderPtr Shader::getByName(const string &name) {
     uint index = indexByName(name);
 
     if (index != notFound)
-        return publicShaders[index];
+        return publicObjects[index];
 
     return nullptr;
 }
@@ -81,7 +81,7 @@ Shader* Shader::byName(const string &name) {
     uint index = indexByName(name);
 
     if (index != notFound)
-        return publicShaders[index].get();
+        return publicObjects[index].get();
 
     return nullptr;
 }
