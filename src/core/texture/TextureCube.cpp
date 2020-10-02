@@ -13,6 +13,8 @@
 
 #include "../PublicObjectTools.h"
 
+#include "TexturePrivateTools.h"
+
 using namespace std;
 
 namespace algine {
@@ -52,6 +54,24 @@ map<uint, uint> TextureCube::defaultParams() {
         {WrapW, ClampToEdge}
     };
 }
+
+// TextureCube faces have the same internal format, size, mipmap level
+// https://www.khronos.org/opengl/wiki/Cubemap_Texture
+#define target static_cast<uint>(Face::Right)
+
+uint TextureCube::getActualFormat() const {
+    return TexturePrivateTools::getTexParam(target, GL_TEXTURE_INTERNAL_FORMAT);
+}
+
+uint TextureCube::getActualWidth() const {
+    return TexturePrivateTools::getTexParam(target, GL_TEXTURE_WIDTH);
+}
+
+uint TextureCube::getActualHeight() const {
+    return TexturePrivateTools::getTexParam(target, GL_TEXTURE_HEIGHT);
+}
+
+#undef target
 
 TextureCubePtr TextureCube::getByName(const string &name) {
     return PublicObjectTools::getByName(publicObjects, name);

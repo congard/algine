@@ -96,6 +96,10 @@ public:
     uint getHeight() const;
     uint getId() const;
 
+    virtual uint getActualFormat() const = 0;
+    virtual uint getActualWidth() const = 0;
+    virtual uint getActualHeight() const = 0;
+
 protected:
     uint m_target = 0; // texture 2d, texture cube etc
     uint m_id = 0;

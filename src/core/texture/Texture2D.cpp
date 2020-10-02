@@ -13,6 +13,8 @@
 
 #include "../PublicObjectTools.h"
 
+#include "TexturePrivateTools.h"
+
 using namespace std;
 
 namespace algine {
@@ -54,6 +56,18 @@ map<uint, uint> Texture2D::defaultParams() {
         {WrapU, ClampToEdge},
         {WrapV, ClampToEdge}
     };
+}
+
+uint Texture2D::getActualFormat() const {
+    return TexturePrivateTools::getTexParam(m_target, GL_TEXTURE_INTERNAL_FORMAT);
+}
+
+uint Texture2D::getActualWidth() const {
+    return TexturePrivateTools::getTexParam(m_target, GL_TEXTURE_WIDTH);
+}
+
+uint Texture2D::getActualHeight() const {
+    return TexturePrivateTools::getTexParam(m_target, GL_TEXTURE_HEIGHT);
 }
 
 Texture2DPtr Texture2D::getByName(const string &name) {

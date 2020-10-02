@@ -30,13 +30,18 @@ public:
     static std::map<uint, uint> defaultParams();
 
     template<typename T, typename...Args>
-    static void setParamsMultiple(const std::map<uint, T> &params, Args&...args) {
-        TextureCube** arr[] = {&args...};
+    static void setParamsMultiple(const std::map<uint, T> &params, Args...args) {
+        TextureCube* arr[] = {args...};
+
         for (usize i = 0; i < sizeof...(args); i++) {
-            (*arr[i])->bind();
-            (*arr[i])->setParams(params);
+            arr[i]->bind();
+            arr[i]->setParams(params);
         }
     }
+
+    uint getActualFormat() const override;
+    uint getActualWidth() const override;
+    uint getActualHeight() const override;
 
     implementVariadicCreate(TextureCube)
     implementVariadicDestroy(TextureCube)
