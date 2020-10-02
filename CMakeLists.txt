@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(algine)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # Under Windows you can compile this project using GNU compiler (for example by using MinGW-w64)
 # You can use CLion or QtCreator as IDE
