@@ -4,14 +4,16 @@
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/Framebuffer.h>
 #include <algine/core/shader/ShaderProgram.h>
+
+#include <algine/std/QuadRendererPtr.h>
 #include <algine/std/QuadRenderer.h>
+
 #include <tulz/Array.h>
 
 namespace algine {
 class Blur {
 public:
     explicit Blur(const TextureCreateInfo &textureCreateInfo);
-    ~Blur();
 
     /**
      * Must be called <b>after</b> setPingPongShaders(h, v)
@@ -27,25 +29,25 @@ public:
     void makeBlur(const Texture2D *image);
 
     void setAmount(uint amount);
-    void setQuadRenderer(QuadRenderer *quadRenderer);
-    void setPingPongShaders(ShaderProgram *hor, ShaderProgram *vert);
+    void setQuadRenderer(const QuadRendererPtr &quadRenderer);
+    void setPingPongShaders(const ShaderProgramPtr &hor, const ShaderProgramPtr &vert);
 
     uint getAmount() const;
-    QuadRenderer* getQuadRenderer() const;
-    ShaderProgram* getPingPongShaders() const;
-    Texture2D* get() const;
-    Texture2D *const *getPingPongTextures() const;
-    Framebuffer *const *getPingPongFramebuffers() const;
+    QuadRendererPtr& getQuadRenderer();
+    ShaderProgramPtr* getPingPongShaders();
+    Texture2DPtr& get();
+    Texture2DPtr* getPingPongTextures();
+    FramebufferPtr* getPingPongFramebuffers();
 
     static tulz::Array<float> getKernel(int size, float sigma);
 
-protected:
-    Texture2D *pingpongTex[2] {nullptr, nullptr};
-    Framebuffer *pingpongFb[2] {nullptr, nullptr};
-    ShaderProgram *pingpongShaders[2] {nullptr, nullptr};
-    QuadRenderer *quadRenderer = nullptr;
-    uint amount = 2;
-    bool horizontal = true, firstIteration = true;
+private:
+    Texture2DPtr m_pingpongTex[2];
+    FramebufferPtr m_pingpongFb[2];
+    ShaderProgramPtr m_pingpongShaders[2];
+    QuadRendererPtr m_quadRenderer;
+    uint m_amount;
+    bool m_horizontal, m_firstIteration;
 };
 }
 
