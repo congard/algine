@@ -71,9 +71,9 @@ private:
 
 private:
     uint m_lightsLimit[Light::TypesCount];
-    uint m_lightsInitialSlot[Light::TypesCount] = {0};
-    ShaderProgram *m_lightShader = nullptr;
-    ShaderProgram *m_pointShadowShader = nullptr;
+    uint m_lightsInitialSlot[Light::TypesCount];
+    ShaderProgram *m_lightShader;
+    ShaderProgram *m_pointShadowShader;
 
 private:
     BufferWriter m_bufferWriter;
@@ -82,9 +82,9 @@ private:
     uint m_lightsCountOffset[Light::TypesCount];
     uint m_shadowOpacityOffset, m_shadowDiskRadiusKOffset, m_shadowDiskRadiusMinOffset;
     int m_shadowMapsLocations[Light::TypesCount];
-    int m_shadowShaderPosLoc = -1; // point light shadow shader locations; Loc means Location
-    int m_shadowShaderFarPlaneLoc = -1;
-    int m_shadowShaderMatricesLoc = -1;
+    int m_shadowShaderPosLoc; // point light shadow shader locations; Loc means Location
+    int m_shadowShaderFarPlaneLoc;
+    int m_shadowShaderMatricesLoc;
 };
 }
 

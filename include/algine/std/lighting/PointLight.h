@@ -9,7 +9,6 @@ class PointLight: public Light {
 
 public:
     PointLight();
-    ~PointLight();
 
     void initShadows(uint shadowMapWidth = 512, uint shadowMapHeight = 512) override;
     void updateMatrix() override;
@@ -25,11 +24,10 @@ public:
     float getNear() const;
     float getBias() const;
 
-    TextureCube* getShadowMap() const;
+    TextureCubePtr& getShadowMap() const;
     const glm::mat4& getLightSpaceMatrix(TextureCube::Face face) const;
 
 private:
-    TextureCube *m_shadowMap = nullptr;
     glm::mat4 m_lightSpaceMatrices[6];
     float m_far = 32.0f, m_near = 1.0f;
     float m_bias = 0.4f;

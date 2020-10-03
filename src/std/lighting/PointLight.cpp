@@ -2,6 +2,8 @@
 
 #include <algine/std/lighting/PointLight.h>
 
+#include <algine/core/PtrMaker.h>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <map>
 
@@ -24,29 +26,25 @@ PointLight::PointLight() {
     m_type = Type::Point;
 }
 
-PointLight::~PointLight() {
-    TextureCube::destroy(m_shadowMap);
-}
-
 void PointLight::initShadows(const uint shadowMapWidth, const uint shadowMapHeight) {
-    m_shadowMap = new TextureCube();
+    TextureCubePtr shadowMap = PtrMaker::make();
     m_shadowFb = new Framebuffer();
 
-    m_shadowMap->bind();
-    m_shadowMap->setDimensions(shadowMapWidth, shadowMapHeight);
-    m_shadowMap->setFormat(Texture::DepthComponent);
-    m_shadowMap->update();
-    m_shadowMap->setParams(map<uint, uint> {
+    shadowMap->bind();
+    shadowMap->setDimensions(shadowMapWidth, shadowMapHeight);
+    shadowMap->setFormat(Texture::DepthComponent);
+    shadowMap->update();
+    shadowMap->setParams(map<uint, uint> {
         {Texture::MinFilter, Texture::Nearest},
         {Texture::MagFilter, Texture::Nearest},
         {Texture::WrapU, Texture::ClampToEdge},
         {Texture::WrapV, Texture::ClampToEdge},
         {Texture::WrapW, Texture::ClampToEdge}
     });
-    m_shadowMap->unbind();
+    shadowMap->unbind();
 
     m_shadowFb->bind();
-    m_shadowFb->attachTexture(m_shadowMap, Framebuffer::DepthAttachment);
+    m_shadowFb->attachTexture(shadowMap, Framebuffer::DepthAttachment);
     // glDrawBuffer(GL_NONE);
     // glReadBuffer(GL_NONE);
     m_shadowFb->unbind();
@@ -60,7 +58,10 @@ void PointLight::updateMatrix() {
 
 void PointLight::begin() {
     m_shadowFb->bind();
-    glViewport(0, 0, m_shadowMap->getWidth(), m_shadowMap->getHeight());
+
+    const auto &shadowMap = getShadowMap();
+
+    glViewport(0, 0, shadowMap->getWidth(), shadowMap->getHeight());
 }
 
 void PointLight::perspectiveShadows() {
@@ -91,8 +92,8 @@ float PointLight::getBias() const {
     return m_bias;
 }
 
-TextureCube* PointLight::getShadowMap() const {
-    return m_shadowMap;
+TextureCubePtr& PointLight::getShadowMap() const {
+    return m_shadowFb->getAttachedTextureCube(Framebuffer::DepthAttachment);
 }
 
 const glm::mat4& PointLight::getLightSpaceMatrix(TextureCube::Face face) const {

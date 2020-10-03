@@ -10,7 +10,6 @@ class DirLight: public Light, public Rotatable {
 
 public:
     explicit DirLight(uint rotatorType = Rotator::RotatorTypeSimple);
-    ~DirLight();
 
     void orthoShadows(float left, float right, float bottom, float top, float near = 1.0f, float far = 32.0f);
     void perspectiveShadows(float fovy, float aspect, float near = 1.0f, float far = 32.0f);
@@ -27,11 +26,10 @@ public:
     float getMinBias() const;
     float getMaxBias() const;
 
-    Texture2D* getShadowMap() const;
+    Texture2DPtr& getShadowMap() const;
     const glm::mat4& getLightSpaceMatrix() const;
 
 private:
-    Texture2D *m_shadowMap = nullptr;
     glm::mat4 m_lightSpace;
     float m_minBias = 0.005f, m_maxBias = 0.05f;
 };

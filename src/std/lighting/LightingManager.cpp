@@ -5,17 +5,31 @@
 #include <algine/constants/ShadowShader.h>
 
 #include <tulz/macros.h>
-#include <glm/gtc/type_ptr.hpp>
 
-namespace LightingVars = algine::Module::Lighting::Vars;
 using namespace tulz;
 using namespace std;
 using namespace glm;
 
+namespace LightingVars = algine::Module::Lighting::Vars;
+
 namespace algine {
-LightingManager::LightingManager() {
-    for (uint & i : m_lightsLimit)
+LightingManager::LightingManager()
+    : m_lightsLimit(),
+      m_lightsInitialSlot(),
+      m_lightShader(),
+      m_pointShadowShader(),
+      m_lightsCountOffset(),
+      m_shadowOpacityOffset(),
+      m_shadowDiskRadiusKOffset(),
+      m_shadowDiskRadiusMinOffset(),
+      m_shadowMapsLocations(),
+      m_shadowShaderPosLoc(-1),
+      m_shadowShaderFarPlaneLoc(-1),
+      m_shadowShaderMatricesLoc(-1)
+{
+    for (uint & i : m_lightsLimit) {
         i = 8; // default lights limit value
+    }
 }
 
 LightingManager::~LightingManager() {
@@ -23,7 +37,8 @@ LightingManager::~LightingManager() {
 }
 
 // for converting enum class to uint
-template<typename T> inline uint to_uint(T t) {
+template<typename T>
+inline uint to_uint(T t) {
     return static_cast<uint>(t);
 }
 
@@ -182,13 +197,13 @@ void LightingManager::unbindBuffer() const {
 void LightingManager::pushShadowMap(const DirLight &light, uint index) {
     uint slot = m_lightsInitialSlot[EDirLight] + index;
     ShaderProgram::setInt(m_shadowMapsLocations[EDirLight] + static_cast<int>(index), static_cast<int>(slot));
-    light.m_shadowMap->use(slot);
+    light.getShadowMap()->use(slot);
 }
 
 void LightingManager::pushShadowMap(const PointLight &light, uint index) {
     uint slot = m_lightsInitialSlot[EPointLight] + index;
     ShaderProgram::setInt(m_shadowMapsLocations[EPointLight] + static_cast<int>(index), static_cast<int>(slot));
-    light.m_shadowMap->use(slot);
+    light.getShadowMap()->use(slot);
 }
 
 void LightingManager::pushShadowShaderPos(const PointLight &light) {
@@ -200,8 +215,9 @@ void LightingManager::pushShadowShaderFarPlane(const PointLight &light) {
 }
 
 void LightingManager::pushShadowShaderMatrices(const PointLight &light) {
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
         ShaderProgram::setMat4(m_shadowShaderMatricesLoc + i, light.m_lightSpaceMatrices[i]);
+    }
 }
 
 void LightingManager::writeDirLightsCount(uint count) {
