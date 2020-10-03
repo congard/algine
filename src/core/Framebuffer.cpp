@@ -11,16 +11,19 @@
 #include "SOP.h"
 #include "SOPConstants.h"
 
+#include "texture/TexturePrivateTools.h"
+#include "PublicObjectTools.h"
+
 using namespace std;
 using namespace tulz;
 
 namespace algine {
-#define attachmentsList m_attachmentsLists[m_activeList]
+vector<FramebufferPtr> Framebuffer::publicObjects;
 
 Framebuffer::Framebuffer()
     : m_id(0),
       m_activeList(0),
-      m_attachmentsLists({{ColorAttachmentZero}})
+      m_outputLists({{}})
 {
     glGenFramebuffers(1, &m_id);
 }
@@ -40,73 +43,36 @@ void Framebuffer::unbind() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::attachTexture(const Texture2D *const texture, const uint attachment) {
+void Framebuffer::attachTexture(const Texture2DPtr &texture, Attachment attachment) {
     checkBinding()
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->getId(), 0);
+
+    m_texture2DAttachments[attachment] = texture;
 }
 
-void Framebuffer::attachTexture(const TextureCube *const texture, const uint attachment) {
+void Framebuffer::attachTexture(const TextureCubePtr &texture, Attachment attachment) {
     checkBinding()
+
     glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->getId(), 0);
+
+    m_textureCubeAttachments[attachment] = texture;
 }
 
-void Framebuffer::attachRenderbuffer(const Renderbuffer *const renderbuffer, const uint attachment) {
+void Framebuffer::attachRenderbuffer(const RenderbufferPtr &renderbuffer, Attachment attachment) {
     checkBinding()
+
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderbuffer->getId());
-}
 
-void Framebuffer::addAttachmentsList(const std::vector<uint> &list) {
-    m_attachmentsLists.emplace_back(list);
-}
-
-void Framebuffer::addOutput(const uint outIndex, const uint attachment) {
-    if (outIndex == attachmentsList.size()) {
-        attachmentsList.emplace_back(attachment);
-    } else if (outIndex > attachmentsList.size()) {
-        vector<uint> tmp(outIndex + 1, EmptyAttachment);
-        for (uint i = 0; i < attachmentsList.size(); ++i)
-            tmp[i] = attachmentsList[i];
-        tmp[outIndex] = attachment;
-        attachmentsList = tmp;
-    } else {
-        attachmentsList[outIndex] = attachment;
-    }
-}
-
-inline void inlineOptimizeAttachmentsList(vector<uint> &attachments) {
-    for (int i = static_cast<int>(attachments.size()) - 1; i >= 0; --i) {
-        if (attachments[i] != Framebuffer::EmptyAttachment) {
-            attachments.erase(attachments.begin() + i + 1, attachments.end());
-            return;
-        }
-    }
-
-    attachments.clear();
-}
-
-void Framebuffer::removeOutput(const uint outIndex, const bool optimizeList) {
-    if (outIndex < attachmentsList.size()) {
-        attachmentsList[outIndex] = EmptyAttachment;
-
-        if (optimizeList && outIndex == attachmentsList.size() - 1)
-            inlineOptimizeAttachmentsList(attachmentsList);
-    } else {
-        throw runtime_error(
-                "Incorrect outIndex value. Active list: " +
-                to_string(m_activeList) +
-                "\nAttachments: " +
-                to_string(attachmentsList.size()) +
-                "\nGiven outIndex: " + to_string(outIndex));
-    }
-}
-
-void Framebuffer::optimizeAttachmentsList() {
-    inlineOptimizeAttachmentsList(attachmentsList);
+    m_renderbufferAttachments[attachment] = renderbuffer;
 }
 
 void Framebuffer::update() {
     checkBinding()
-    glDrawBuffers(attachmentsList.size(), &attachmentsList[0]);
+
+    const auto &list = m_outputLists[m_activeList];
+
+    glDrawBuffers(list.size(), list.data());
 }
 
 void Framebuffer::clear(const uint buffersMask) {
@@ -126,16 +92,36 @@ void Framebuffer::clearStencilBuffer() {
     clear(StencilBuffer);
 }
 
-void Framebuffer::setActiveAttachmentsList(const uint index) {
+void Framebuffer::setActiveOutputList(Index index) {
     m_activeList = index;
 }
 
-void Framebuffer::setAttachmentsList(const uint index, const vector<uint> &list) {
-    m_attachmentsLists[index] = list;
+void Framebuffer::setOutputLists(const vector<OutputList> &lists) {
+    m_outputLists = lists;
 }
 
-void Framebuffer::setAttachmentsLists(const vector<vector<uint>> &lists) {
-    m_attachmentsLists = lists;
+void Framebuffer::addOutputList(const OutputList &list) {
+    m_outputLists.emplace_back(list);
+}
+
+Index Framebuffer::getActiveOutputListIndex() const {
+    return m_activeList;
+}
+
+OutputList& Framebuffer::getActiveOutputList() {
+    return m_outputLists[m_activeList];
+}
+
+OutputList& Framebuffer::getLastOutputList() {
+    return m_outputLists.back();
+}
+
+OutputList& Framebuffer::getOutputList(Index index) {
+    return m_outputLists[index];
+}
+
+vector<OutputList>& Framebuffer::getOutputLists() {
+    return m_outputLists;
 }
 
 // returns base format + components count
@@ -151,7 +137,7 @@ inline pair<uint, uint> getTexFormatInfo(const uint format) {
         case Texture::RGB8:
         case Texture::RGB16F:
         case Texture::RGB32F:
-            return {Texture::RGB, 3};;
+            return {Texture::RGB, 3};
         case Texture::RGBA:
         case Texture::RGBA8:
         case Texture::RGBA16:
@@ -165,27 +151,7 @@ inline pair<uint, uint> getTexFormatInfo(const uint format) {
     }
 }
 
-inline uint getTexParam(const uint target, const uint param) {
-    constexpr uint mipLevel = 0;
-    int p;
-    glGetTexLevelParameteriv(target, mipLevel, param, &p);
-    return p;
-}
-
-inline uint getTex2DParam(const uint param) {
-    return getTexParam(GL_TEXTURE_2D, param);
-}
-
-inline uint getAttachedTexId(const uint attachment) {
-    int id;
-    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, attachment, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &id);
-    return id;
-}
-
-// TODO: SOP: bindDefaultX
-
-inline PixelData getPixels2D(const uint mode, const uint x, const uint y,
-        const uint width, const uint height, const pair<uint, uint> &formatInfo)
+inline PixelData getPixels2D(uint mode, uint x, uint y, uint width, uint height, const pair<uint, uint> &formatInfo)
 {
     PixelData pixelData;
     pixelData.width = width;
@@ -199,74 +165,101 @@ inline PixelData getPixels2D(const uint mode, const uint x, const uint y,
     return pixelData;
 }
 
-PixelData Framebuffer::getPixels2D(const uint mode, const uint x, const uint y,
-        const uint width, const uint height, int format) const
+PixelData Framebuffer::getPixels2D(uint mode, uint x, uint y, uint width, uint height, int format) const
 {
     checkBinding()
 
+    auto &texture = m_texture2DAttachments.at(mode);
+
     if (format == -1) {
-        glBindTexture(GL_TEXTURE_2D, getAttachedTexId(mode));
-        format = getTex2DParam(GL_TEXTURE_INTERNAL_FORMAT);
-        Engine::defaultTexture2D()->bind();
+        texture->bind();
+        format = texture->getActualFormat();
+        texture->unbind();
     }
 
     return algine::getPixels2D(mode, x, y, width, height, getTexFormatInfo(format));
 }
 
-PixelData Framebuffer::getAllPixels2D(const uint attachment, int format) const {
+PixelData Framebuffer::getAllPixels2D(uint attachment, int format) const {
     checkBinding()
 
     uint width, height;
 
-    glBindTexture(GL_TEXTURE_2D, getAttachedTexId(attachment));
+    auto &texture = m_texture2DAttachments.at(attachment);
+
+    texture->bind();
 
     if (format == -1)
-        format = getTex2DParam(GL_TEXTURE_INTERNAL_FORMAT);
+        format = texture->getActualFormat();
 
-    width = getTex2DParam(GL_TEXTURE_WIDTH);
-    height = getTex2DParam(GL_TEXTURE_HEIGHT);
-    Engine::defaultTexture2D()->bind();
+    width = texture->getActualWidth();
+    height = texture->getActualHeight();
+    texture->unbind();
 
     return algine::getPixels2D(attachment, 0, 0, width, height, getTexFormatInfo(format));
 }
 
-PixelData Framebuffer::getAllPixelsCube(const TextureCube::Face face, const uint attachment, int format) const {
+PixelData Framebuffer::getAllPixelsCube(TextureCube::Face face, uint attachment, int format) const {
     checkBinding()
-    glBindTexture(GL_TEXTURE_CUBE_MAP, getAttachedTexId(attachment));
 
-    uint faceVal = static_cast<uint>(face);
+    auto &texture = m_textureCubeAttachments.at(attachment);
+
+    texture->bind();
 
     if (format == -1)
-        format = getTexParam(faceVal, GL_TEXTURE_INTERNAL_FORMAT);
+        format = texture->getActualFormat();
 
     auto formatInfo = getTexFormatInfo(format);
 
     PixelData pixelData;
-    pixelData.width = getTexParam(faceVal, GL_TEXTURE_WIDTH);
-    pixelData.height = getTexParam(faceVal, GL_TEXTURE_HEIGHT);
+    pixelData.width = texture->getActualWidth();
+    pixelData.height = texture->getActualHeight();
     pixelData.componentsCount = formatInfo.second;
     pixelData.pixels = Array<float>(pixelData.width * pixelData.height * pixelData.componentsCount);
 
-    glGetTexImage(faceVal, 0, formatInfo.first, GL_FLOAT, pixelData.pixels.m_array);
-    Engine::defaultTextureCube()->bind();
+    glGetTexImage(static_cast<uint>(face), 0, formatInfo.first, GL_FLOAT, pixelData.pixels.m_array);
+
+    texture->unbind();
 
     return pixelData;
 }
 
-uint Framebuffer::getActiveAttachmentsList() const {
-    return m_activeList;
-}
-
-std::vector<uint> Framebuffer::getAttachmentsList(const uint index) const {
-    return m_attachmentsLists[index];
-}
-
-vector<vector<uint>> Framebuffer::getAttachmentsLists() const {
-    return m_attachmentsLists;
-}
-
 uint Framebuffer::getId() const {
     return m_id;
+}
+
+bool Framebuffer::hasAttachment(Attachment attachment) {
+    return getAttachedObjectType(attachment) != AttachedObjectType::None;
+}
+
+Framebuffer::AttachedObjectType Framebuffer::getAttachedObjectType(Attachment attachment) {
+    auto isContains = [&](const auto &m)
+    {
+        return m.find(attachment) != m.end();
+    };
+
+    if (isContains(m_renderbufferAttachments))
+        return AttachedObjectType::Renderbuffer;
+
+    if (isContains(m_texture2DAttachments))
+        return AttachedObjectType::Texture2D;
+
+    if (isContains(m_textureCubeAttachments))
+        return AttachedObjectType::TextureCube;
+
+    return AttachedObjectType::None;
+}
+
+RenderbufferPtr& Framebuffer::getAttachedRenderbuffer(Attachment attachment) {
+    return m_renderbufferAttachments[attachment];
+}
+
+Texture2DPtr& Framebuffer::getAttachedTexture2D(Attachment attachment) {
+    return m_texture2DAttachments[attachment];
+}
+
+TextureCubePtr& Framebuffer::getAttachedTextureCube(Attachment attachment) {
+    return m_textureCubeAttachments[attachment];
 }
 
 void Framebuffer::setClearColor(const float red, const float green, const float blue, const float alpha) {
@@ -279,5 +272,13 @@ void Framebuffer::setClearDepth(const float depth) {
 
 void Framebuffer::setClearStencil(const int s) {
     glClearStencil(s);
+}
+
+FramebufferPtr Framebuffer::getByName(const string &name) {
+    return PublicObjectTools::getByName(publicObjects, name);
+}
+
+Framebuffer* Framebuffer::byName(const string &name) {
+    return PublicObjectTools::byName(publicObjects, name);
 }
 }
