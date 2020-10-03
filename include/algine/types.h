@@ -23,6 +23,9 @@ typedef int size;
 #else
 #error "Error in types.h: are you sure that you have a 32 or 64 bit system? If compatibility with 16-bit and 8-bit systems is needed, write here: https://gitlab.com/congard/algine/issues or dbcongard@gmail.com"
 #endif
+
+typedef uint Index;
+typedef uint Attachment;
 } /* namespace algine */
 
 #endif /* ALGINE_TYPES_H */
