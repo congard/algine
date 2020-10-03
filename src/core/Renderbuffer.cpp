@@ -80,10 +80,10 @@ uint Renderbuffer::getId() const {
 }
 
 RenderbufferPtr Renderbuffer::getByName(const string &name) {
-    return PublicObjectTools::getByName(publicObjects, name);
+    return PublicObjectTools::getByName<RenderbufferPtr>(name);
 }
 
 Renderbuffer* Renderbuffer::byName(const string &name) {
-    return PublicObjectTools::byName(publicObjects, name);
+    return PublicObjectTools::byName<Renderbuffer>(name);
 }
 }

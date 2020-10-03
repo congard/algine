@@ -71,10 +71,10 @@ uint Texture2D::getActualHeight() const {
 }
 
 Texture2DPtr Texture2D::getByName(const string &name) {
-    return PublicObjectTools::getByName(publicObjects, name);
+    return PublicObjectTools::getByName<Texture2DPtr>(name);
 }
 
 Texture2D* Texture2D::byName(const string &name) {
-    return PublicObjectTools::byName(publicObjects, name);
+    return PublicObjectTools::byName<Texture2D>(name);
 }
 }

@@ -1,3 +1,5 @@
+#include <algine/core/PtrMaker.h>
+
 #include <algine/types.h>
 
 #include <string>
@@ -5,8 +7,7 @@
 
 using namespace std;
 
-namespace algine {
-namespace PublicObjectTools {
+namespace algine::PublicObjectTools {
 constexpr uint notFound = static_cast<uint>(-1);
 
 template<typename TPtr>
@@ -21,7 +22,9 @@ inline uint indexByName(const vector<TPtr> &array, const string &name) {
 }
 
 template<typename TPtr>
-inline TPtr getByName(const vector<TPtr> &array, const string &name) {
+inline TPtr getByName(const string &name) {
+    const auto &array = PtrMaker::PtrType<TPtr>::publicObjects;
+
     uint index = indexByName(array, name);
 
     if (index != notFound)
@@ -30,8 +33,10 @@ inline TPtr getByName(const vector<TPtr> &array, const string &name) {
     return nullptr;
 }
 
-template<typename TPtr>
-inline typename TPtr::element_type* byName(const vector<TPtr> &array, const string &name) {
+template<typename T>
+inline T* byName(const string &name) {
+    const auto &array = T::publicObjects;
+
     uint index = indexByName(array, name);
 
     if (index != notFound)
@@ -41,6 +46,8 @@ inline typename TPtr::element_type* byName(const vector<TPtr> &array, const stri
 }
 
 // below are the templates used in the managers for the getXXX function
+
+// TODO: simplify (createXXX now just create)
 
 template<typename TPtr, typename TMgr>
 using CreatePtrFunction = TPtr (TMgr::*)();
@@ -87,6 +94,5 @@ inline void postCreateAccessOp(const string &typeName, const TMgr *manager, cons
             throw runtime_error(typeName + " with the same name was already loaded");
         }
     }
-}
 }
 }

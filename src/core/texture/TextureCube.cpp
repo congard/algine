@@ -74,10 +74,10 @@ uint TextureCube::getActualHeight() const {
 #undef target
 
 TextureCubePtr TextureCube::getByName(const string &name) {
-    return PublicObjectTools::getByName(publicObjects, name);
+    return PublicObjectTools::getByName<TextureCubePtr>(name);
 }
 
 TextureCube* TextureCube::byName(const string &name) {
-    return PublicObjectTools::byName(publicObjects, name);
+    return PublicObjectTools::byName<TextureCube>(name);
 }
 }

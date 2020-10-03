@@ -275,10 +275,10 @@ void Framebuffer::setClearStencil(const int s) {
 }
 
 FramebufferPtr Framebuffer::getByName(const string &name) {
-    return PublicObjectTools::getByName(publicObjects, name);
+    return PublicObjectTools::getByName<FramebufferPtr>(name);
 }
 
 Framebuffer* Framebuffer::byName(const string &name) {
-    return PublicObjectTools::byName(publicObjects, name);
+    return PublicObjectTools::byName<Framebuffer>(name);
 }
 }
