@@ -56,13 +56,11 @@ const vector<string>& ShaderProgramManager::getShaderPaths() const {
     return m_shaderPaths;
 }
 
-ShaderProgramPtr ShaderProgramManager::getProgram() {
-    using namespace PublicObjectTools;
-
-    return getPtr<ShaderProgramPtr>(this, &ShaderProgramManager::createProgram);
+ShaderProgramPtr ShaderProgramManager::get() {
+    return PublicObjectTools::getPtr<ShaderProgramPtr>(this);
 }
 
-ShaderProgramPtr ShaderProgramManager::createProgram() {
+ShaderProgramPtr ShaderProgramManager::create() {
     ShaderProgramPtr program = make_shared<ShaderProgram>();
     program->setName(m_name);
 
@@ -79,7 +77,7 @@ ShaderProgramPtr ShaderProgramManager::createProgram() {
                 program->attachShader(*publicShader);
             } else {
                 // otherwise create it
-                auto shader = manager.createShader();
+                auto shader = manager.create();
                 program->attachShader(*shader);
             }
         } else {
@@ -89,7 +87,7 @@ ShaderProgramPtr ShaderProgramManager::createProgram() {
             // append ShaderProgram level definitions
             manager.appendDefinitions(m_definitions);
 
-            auto shader = manager.createShader();
+            auto shader = manager.create();
             program->attachShader(*shader);
 
             // restore Shader level definitions

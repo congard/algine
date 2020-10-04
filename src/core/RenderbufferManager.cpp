@@ -7,11 +7,11 @@
 using namespace std;
 
 namespace algine {
-RenderbufferPtr RenderbufferManager::getRenderbuffer() {
-    return PublicObjectTools::getPtr(this, &RenderbufferManager::createRenderbuffer);
+RenderbufferPtr RenderbufferManager::get() {
+    return PublicObjectTools::getPtr<RenderbufferPtr>(this);
 }
 
-RenderbufferPtr RenderbufferManager::createRenderbuffer() {
+RenderbufferPtr RenderbufferManager::create() {
     RenderbufferPtr renderbuffer = make_shared<Renderbuffer>();
     renderbuffer->setName(m_name);
     renderbuffer->setFormat(m_format);

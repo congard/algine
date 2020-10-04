@@ -20,8 +20,8 @@ public:
     void addShaderPath(const std::string &path);
     const std::vector<std::string>& getShaderPaths() const;
 
-    ShaderProgramPtr getProgram();
-    ShaderProgramPtr createProgram();
+    ShaderProgramPtr get();
+    ShaderProgramPtr create();
 
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;

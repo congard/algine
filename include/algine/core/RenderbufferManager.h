@@ -8,8 +8,8 @@
 namespace algine {
 class RenderbufferManager: public ImageManagerBase {
 public:
-    RenderbufferPtr getRenderbuffer();
-    RenderbufferPtr createRenderbuffer();
+    RenderbufferPtr get();
+    RenderbufferPtr create();
 };
 }
 

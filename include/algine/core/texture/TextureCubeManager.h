@@ -16,8 +16,8 @@ public:
     void setPaths(const std::map<TextureCube::Face, std::string> &paths);
     const std::map<TextureCube::Face, std::string>& getPaths() const;
 
-    TextureCubePtr getTexture();
-    TextureCubePtr createTexture();
+    TextureCubePtr get();
+    TextureCubePtr create();
 
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;

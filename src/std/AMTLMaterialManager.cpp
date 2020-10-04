@@ -154,7 +154,7 @@ Texture2DPtr AMTLMaterialManager::loadTexture(Texture type) {
         auto it = m_textures.find(type);
 
         if (it != m_textures.end()) {
-            return it->second.getTexture();
+            return it->second.get();
         }
     }
 
@@ -165,7 +165,7 @@ Texture2DPtr AMTLMaterialManager::loadTexture(Texture type) {
             Texture2DManager manager;
             manager.setWorkingDirectory(m_workingDirectory);
             manager.importFromFile(it->second);
-            return manager.getTexture();
+            return manager.get();
         }
     }
 

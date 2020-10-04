@@ -42,11 +42,11 @@ const map<TextureCube::Face, string>& TextureCubeManager::getPaths() const {
     return m_paths;
 }
 
-TextureCubePtr TextureCubeManager::getTexture() {
-    return PublicObjectTools::getPtr<TextureCubePtr>(this, &TextureCubeManager::createTexture);
+TextureCubePtr TextureCubeManager::get() {
+    return PublicObjectTools::getPtr<TextureCubePtr>(this);
 }
 
-TextureCubePtr TextureCubeManager::createTexture() {
+TextureCubePtr TextureCubeManager::create() {
     if (m_type != TextureManager::Type::TextureCube)
         throw runtime_error("Invalid texture type. Use a different manager");
 

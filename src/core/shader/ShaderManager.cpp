@@ -181,11 +181,11 @@ const string& ShaderManager::makeGenerated() {
     return getGenerated();
 }
 
-ShaderPtr ShaderManager::getShader() {
-    return PublicObjectTools::getPtr<ShaderPtr>(this, &ShaderManager::createShader);
+ShaderPtr ShaderManager::get() {
+    return PublicObjectTools::getPtr<ShaderPtr>(this);
 }
 
-ShaderPtr ShaderManager::createShader() {
+ShaderPtr ShaderManager::create() {
     generate();
 
     ShaderPtr shader = make_shared<Shader>(m_type);

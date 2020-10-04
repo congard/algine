@@ -45,15 +45,10 @@ inline T* byName(const string &name) {
     return nullptr;
 }
 
-// below are the templates used in the managers for the getXXX function
-
-// TODO: simplify (createXXX now just create)
+// below are the templates used in the managers for the get function
 
 template<typename TPtr, typename TMgr>
-using CreatePtrFunction = TPtr (TMgr::*)();
-
-template<typename TPtr, typename TMgr>
-inline TPtr getPtr(TMgr *manager, CreatePtrFunction<TPtr, TMgr> createPtr) {
+inline TPtr getPtr(TMgr *manager) {
     using T = typename TPtr::element_type;
 
     const string &name = manager->getName();
@@ -70,11 +65,11 @@ inline TPtr getPtr(TMgr *manager, CreatePtrFunction<TPtr, TMgr> createPtr) {
         }
     }
 
-    return (manager->*createPtr)();
+    return manager->create();
 }
 
 // below the function that needs to call in manager's
-// createXXX() after full Object creation
+// create() after full Object creation
 
 template<typename TPtr, typename TMgr>
 inline void postCreateAccessOp(const string &typeName, const TMgr *manager, const TPtr &obj) {

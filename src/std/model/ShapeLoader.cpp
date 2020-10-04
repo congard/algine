@@ -391,7 +391,7 @@ void ShapeLoader::processMesh(const aiMesh *aimesh, const aiScene *scene) {
                 {Texture::MagFilter, Texture::Linear}
             });
 
-            getTexturePtr() = manager.createTexture();
+            getTexturePtr() = manager.create();
         }
     };
 

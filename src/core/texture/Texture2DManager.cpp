@@ -26,11 +26,11 @@ std::string Texture2DManager::getPath() const {
     return m_path;
 }
 
-Texture2DPtr Texture2DManager::getTexture() {
-    return PublicObjectTools::getPtr<Texture2DPtr>(this, &Texture2DManager::createTexture);
+Texture2DPtr Texture2DManager::get() {
+    return PublicObjectTools::getPtr<Texture2DPtr>(this);
 }
 
-Texture2DPtr Texture2DManager::createTexture() {
+Texture2DPtr Texture2DManager::create() {
     if (m_type != TextureManager::Type::Texture2D)
         throw runtime_error("Invalid texture type. Use a different manager");
 
