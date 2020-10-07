@@ -94,6 +94,10 @@ void Framebuffer::addOutputList(const OutputList &list) {
     m_outputLists.emplace_back(list);
 }
 
+void Framebuffer::removeOutputLists() {
+    m_outputLists = {};
+}
+
 Index Framebuffer::getActiveOutputListIndex() const {
     return m_activeList;
 }

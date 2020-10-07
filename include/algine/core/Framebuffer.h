@@ -55,6 +55,7 @@ public:
     void setActiveOutputList(Index index);
     void setOutputLists(const std::vector<OutputList> &lists);
     void addOutputList(const OutputList &list = {});
+    void removeOutputLists();
 
     Index getActiveOutputListIndex() const;
     OutputList& getActiveOutputList();
