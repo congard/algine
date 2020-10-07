@@ -50,6 +50,8 @@ public:
     void attachTexture(const TextureCubePtr &texture, Attachment attachment);
     void attachRenderbuffer(const RenderbufferPtr &renderbuffer, Attachment attachment);
 
+    void resizeAttachments(uint width, uint height);
+
     void setActiveOutputList(Index index);
     void setOutputLists(const std::vector<OutputList> &lists);
     void addOutputList(const OutputList &list = {});

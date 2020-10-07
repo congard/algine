@@ -67,29 +67,19 @@ void Framebuffer::attachRenderbuffer(const RenderbufferPtr &renderbuffer, Attach
     m_renderbufferAttachments[attachment] = renderbuffer;
 }
 
-void Framebuffer::update() {
-    checkBinding()
+void Framebuffer::resizeAttachments(uint width, uint height) {
+    auto resize = [&](const auto &m)
+    {
+        for (const auto & [attachment, obj] : m) {
+            obj->bind();
+            obj->setDimensions(width, height);
+            obj->update();
+        }
+    };
 
-    const auto &list = m_outputLists[m_activeList];
-
-    glDrawBuffers(list.size(), list.data());
-}
-
-void Framebuffer::clear(const uint buffersMask) {
-    checkBinding()
-    glClear(buffersMask);
-}
-
-void Framebuffer::clearColorBuffer() {
-    clear(ColorBuffer);
-}
-
-void Framebuffer::clearDepthBuffer() {
-    clear(DepthBuffer);
-}
-
-void Framebuffer::clearStencilBuffer() {
-    clear(StencilBuffer);
+    resize(m_renderbufferAttachments);
+    resize(m_texture2DAttachments);
+    resize(m_textureCubeAttachments);
 }
 
 void Framebuffer::setActiveOutputList(Index index) {
@@ -122,6 +112,31 @@ OutputList& Framebuffer::getOutputList(Index index) {
 
 vector<OutputList>& Framebuffer::getOutputLists() {
     return m_outputLists;
+}
+
+void Framebuffer::update() {
+    checkBinding()
+
+    const auto &list = m_outputLists[m_activeList];
+
+    glDrawBuffers(list.size(), list.data());
+}
+
+void Framebuffer::clear(const uint buffersMask) {
+    checkBinding()
+    glClear(buffersMask);
+}
+
+void Framebuffer::clearColorBuffer() {
+    clear(ColorBuffer);
+}
+
+void Framebuffer::clearDepthBuffer() {
+    clear(DepthBuffer);
+}
+
+void Framebuffer::clearStencilBuffer() {
+    clear(StencilBuffer);
 }
 
 // returns base format + components count
