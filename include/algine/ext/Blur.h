@@ -28,6 +28,8 @@ public:
      */
     void makeBlur(const Texture2D *image);
 
+    void resizeOutput(uint width, uint height);
+
     void setAmount(uint amount);
     void setQuadRenderer(const QuadRendererPtr &quadRenderer);
     void setPingPongShaders(const ShaderProgramPtr &hor, const ShaderProgramPtr &vert);

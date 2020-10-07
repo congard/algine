@@ -68,6 +68,14 @@ void Blur::makeBlur(const Texture2D *image) {
     }
 }
 
+void Blur::resizeOutput(uint width, uint height) {
+    for (const auto & texture : m_pingpongTex) {
+        texture->bind();
+        texture->setDimensions(width, height);
+        texture->update();
+    }
+}
+
 void Blur::setAmount(uint amount) {
     m_amount = amount;
 }
