@@ -9,8 +9,7 @@ using namespace std;
 
 #define constant(name, val) constexpr char name[] = val
 
-namespace algine {
-namespace Config {
+namespace algine::Config {
 constant(Name, "name");
 constant(Dump, "dump");
 
@@ -18,9 +17,16 @@ constant(Type, "type");
 constant(Texture2D, "texture2d");
 constant(TextureCube, "textureCube");
 constant(Textures, "textures");
+constant(Renderbuffer, "renderbuffer");
 
 constant(Width, "width");
 constant(Height, "height");
+
+// may be used for example as attachments names
+constant(Color, "color");
+constant(Depth, "depth");
+constant(Stencil, "stencil");
+constant(Empty, "empty");
 
 constant(Format, "format");
 
@@ -114,7 +120,6 @@ inline string dataTypeToString(algine::DataType dataType) {
 
 #undef dataType_str
 
-}
 }
 
 #endif //ALGINE_CONFIGSTRINGS_H
