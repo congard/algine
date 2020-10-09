@@ -32,6 +32,10 @@ nlohmann::json &JsonHelper::get() {
     return json;
 }
 
+JsonHelper::operator nlohmann::json&() {
+    return json;
+}
+
 string JsonHelper::toString(int indent) const {
     return json.dump(indent);
 }
