@@ -3,22 +3,21 @@
 #include <utility>
 
 using namespace std;
-using namespace nlohmann;
 
 namespace algine {
-JsonHelper::JsonHelper(::json inJson)
+JsonHelper::JsonHelper(nlohmann::json inJson)
     : json(move(inJson))
 {
     // see initializer list above
 }
 
 JsonHelper::JsonHelper(const string &strJson) {
-    json = json::parse(strJson);
+    json = nlohmann::json::parse(strJson);
 }
 
 JsonHelper::JsonHelper() = default;
 
-void JsonHelper::set(const ::json &inJson) {
+void JsonHelper::set(const nlohmann::json &inJson) {
     json = inJson;
 }
 
@@ -28,11 +27,11 @@ void JsonHelper::append(const JsonHelper &jsonHelper) {
     }
 }
 
-nlohmann::json &JsonHelper::get() {
-    return json;
+bool JsonHelper::empty() const {
+    return json.empty();
 }
 
-JsonHelper::operator nlohmann::json&() {
+nlohmann::json& JsonHelper::get() {
     return json;
 }
 
