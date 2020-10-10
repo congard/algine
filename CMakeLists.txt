@@ -79,7 +79,6 @@ endif()
 add_library(algine
         include/algine/types.h
         include/algine/templates.h
-        include/algine/constants/AMTL.h
         include/algine/constants/BoneSystem.h
         include/algine/constants/ShadowShader.h
         include/algine/constants/QuadShader.h
@@ -96,20 +95,32 @@ add_library(algine
         include/algine/core/transfer/GLMTransferrer.h
         include/algine/core/texture/PixelData.h
         include/algine/core/texture/TextureCreateInfo.h
+        include/algine/core/shader/ShaderPtr.h
+        include/algine/core/shader/ShaderProgramPtr.h
         include/algine/core/texture/Texture2DPtr.h
         include/algine/core/texture/TextureCubePtr.h
         include/algine/core/RenderbufferPtr.h
+        include/algine/core/FramebufferPtr.h
+        include/algine/core/PtrMaker.h
         include/algine/core/shader/ShadersInfo.h
         include/algine/core/DataType.h
+        include/algine/std/QuadRendererPtr.h
+        include/algine/std/CubeRendererPtr.h
         include/algine/std/model/Mesh.h
+        include/algine/std/Material.h
         include/algine/std/model/InputLayoutShapeLocations.h
 
         src/core/PublicObjectTools.h
+        src/core/JsonHelper.cpp include/algine/core/JsonHelper.h
         src/core/Object.cpp include/algine/core/Object.h
         src/core/ManagerBase.cpp include/algine/core/ManagerBase.h
         src/core/ImageManagerBase.cpp include/algine/core/ImageManagerBase.h
         src/core/transfer/Transferable.cpp include/algine/core/transfer/Transferable.h
+        src/core/OutputList.cpp include/algine/core/OutputList.h
+        src/core/OutputListManager.cpp include/algine/core/OutputListManager.h
+        src/core/FramebufferConfigTools.h
         src/core/Framebuffer.cpp include/algine/core/Framebuffer.h
+        src/core/FramebufferManager.cpp include/algine/core/FramebufferManager.h
         src/core/Renderbuffer.cpp include/algine/core/Renderbuffer.h
         src/core/RenderbufferManager.cpp include/algine/core/RenderbufferManager.h
         src/core/buffers/Buffer.cpp include/algine/core/buffers/Buffer.h
@@ -121,6 +132,7 @@ add_library(algine
         src/core/buffers/BufferReader.cpp include/algine/core/buffers/BufferReader.h
         src/core/InputLayout.cpp include/algine/core/InputLayout.h
         src/core/InputAttributeDescription.cpp include/algine/core/InputAttributeDescription.h
+        src/core/texture/TexturePrivateTools.h
         src/core/texture/Texture.cpp include/algine/core/texture/Texture.h
         src/core/texture/Texture2D.cpp include/algine/core/texture/Texture2D.h
         src/core/texture/TextureCube.cpp include/algine/core/texture/TextureCube.h
@@ -129,8 +141,6 @@ add_library(algine
         src/core/texture/Texture2DManager.cpp include/algine/core/texture/Texture2DManager.h
         src/core/texture/TextureCubeManager.cpp include/algine/core/texture/TextureCubeManager.h
         src/core/shader/ShaderTools.cpp include/algine/core/shader/ShaderTools.h
-        include/algine/core/shader/ShaderPtr.h
-        include/algine/core/shader/ShaderProgramPtr.h
         src/core/shader/Shader.cpp include/algine/core/shader/Shader.h
         src/core/shader/ShaderManager.cpp include/algine/core/shader/ShaderManager.h
         src/core/shader/ShaderDefinitionManager.cpp include/algine/core/shader/ShaderDefinitionManager.h
@@ -144,9 +154,7 @@ add_library(algine
         src/core/ImageConfigTools.h
         src/core/TextureConfigTools.h
 
-        include/algine/std/Material.h
         src/std/assimp2glm.h
-        src/core/JsonHelper.cpp include/algine/core/JsonHelper.h
         src/std/model/Model.cpp include/algine/std/model/Model.h
         src/std/model/Shape.cpp include/algine/std/model/Shape.h
         src/std/model/ShapeLoader.cpp include/algine/std/model/ShapeLoader.h
