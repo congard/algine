@@ -1,12 +1,12 @@
 #ifndef ALGINE_TEXTURE2DPTR_H
 #define ALGINE_TEXTURE2DPTR_H
 
-#include <memory>
+#include <algine/core/Ptr.h>
 
 namespace algine {
 class Texture2D;
 
-typedef std::shared_ptr<Texture2D> Texture2DPtr;
+typedef Ptr<Texture2D> Texture2DPtr;
 }
 
 #endif //ALGINE_TEXTURE2DPTR_H

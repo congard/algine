@@ -1,12 +1,12 @@
 #ifndef ALGINE_SHADERPTR_H
 #define ALGINE_SHADERPTR_H
 
-#include <memory>
+#include <algine/core/Ptr.h>
 
 namespace algine {
 class Shader;
 
-typedef std::shared_ptr<Shader> ShaderPtr;
+typedef Ptr<Shader> ShaderPtr;
 }
 
 #endif //ALGINE_SHADERPTR_H

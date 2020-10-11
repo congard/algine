@@ -1,11 +1,11 @@
 #ifndef ALGINE_PTRMAKER_H
 #define ALGINE_PTRMAKER_H
 
-#include <memory>
+#include <algine/core/Ptr.h>
 
 /*
  * Can be used in 2 ways:
- *   shared_ptr<Foo> foo = PtrMaker::make();
+ *   Ptr<Foo> foo = PtrMaker::make();
  *   auto foo = PtrMaker::make<Foo>();
  */
 class PtrMaker {
@@ -15,12 +15,12 @@ public:
 
     /*
      * to allow syntax like
-     *   shared_ptr<Foo> foo = PtrMaker::make(Bar());
+     *   Ptr<Foo> foo = PtrMaker::make(Bar());
      * or (better, without extra move)
      *   Bar bar;
-     *   shared_ptr<Foo> foo = PtrMaker::make(bar);
+     *   Ptr<Foo> foo = PtrMaker::make(bar);
      * best for syntax like
-     *   shared_ptr<Foo> foo = PtrMaker::make();
+     *   Ptr<Foo> foo = PtrMaker::make();
      */
     template<typename... Args>
     class AutoPtr {
@@ -49,7 +49,7 @@ public:
         if constexpr (std::is_same_v<T, std::false_type>) {
             return AutoPtr<Args...>(std::forward<Args>(args)...);
         } else {
-            return std::make_shared<T>(args...);
+            return make_ptr<T>(args...);
         }
     }
 
@@ -62,6 +62,12 @@ public:
     constexpr static void create(TPtr &firstPtr, U&... pointers) {
         create(firstPtr);
         create(pointers...);
+    }
+
+private:
+    template<typename T, typename... Args>
+    constexpr static algine::Ptr<T> make_ptr(Args&&... args) {
+        return std::make_shared<T>(std::forward<Args>(args)...);
     }
 };
 

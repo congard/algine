@@ -1,12 +1,12 @@
 #ifndef ALGINE_FRAMEBUFFERPTR_H
 #define ALGINE_FRAMEBUFFERPTR_H
 
-#include <memory>
+#include <algine/core/Ptr.h>
 
 namespace algine {
 class Framebuffer;
 
-typedef std::shared_ptr<Framebuffer> FramebufferPtr;
+typedef Ptr<Framebuffer> FramebufferPtr;
 }
 
 #endif //ALGINE_FRAMEBUFFERPTR_H

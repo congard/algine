@@ -1,12 +1,12 @@
 #ifndef ALGINE_CUBERENDERERPTR_H
 #define ALGINE_CUBERENDERERPTR_H
 
-#include <memory>
+#include <algine/core/Ptr.h>
 
 namespace algine {
 class CubeRenderer;
 
-typedef std::shared_ptr<CubeRenderer> CubeRendererPtr;
+typedef Ptr<CubeRenderer> CubeRendererPtr;
 }
 
 #endif //ALGINE_CUBERENDERERPTR_H

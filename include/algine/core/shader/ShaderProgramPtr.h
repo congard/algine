@@ -1,12 +1,12 @@
 #ifndef ALGINE_SHADERPROGRAMPTR_H
 #define ALGINE_SHADERPROGRAMPTR_H
 
-#include <memory>
+#include <algine/core/Ptr.h>
 
 namespace algine {
 class ShaderProgram;
 
-typedef std::shared_ptr<ShaderProgram> ShaderProgramPtr;
+typedef Ptr<ShaderProgram> ShaderProgramPtr;
 }
 
 #endif //ALGINE_SHADERPROGRAMPTR_H

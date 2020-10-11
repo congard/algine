@@ -1,12 +1,12 @@
 #ifndef ALGINE_RENDERBUFFERPTR_H
 #define ALGINE_RENDERBUFFERPTR_H
 
-#include <memory>
+#include <algine/core/Ptr.h>
 
 namespace algine {
 class Renderbuffer;
 
-typedef std::shared_ptr<Renderbuffer> RenderbufferPtr;
+typedef Ptr<Renderbuffer> RenderbufferPtr;
 }
 
 #endif //ALGINE_RENDERBUFFERPTR_H

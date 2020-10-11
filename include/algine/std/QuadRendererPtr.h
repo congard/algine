@@ -1,12 +1,12 @@
 #ifndef ALGINE_QUADRENDERERPTR_H
 #define ALGINE_QUADRENDERERPTR_H
 
-#include <memory>
+#include <algine/core/Ptr.h>
 
 namespace algine {
 class QuadRenderer;
 
-typedef std::shared_ptr<QuadRenderer> QuadRendererPtr;
+typedef Ptr<QuadRenderer> QuadRendererPtr;
 }
 
 #endif //ALGINE_QUADRENDERERPTR_H
