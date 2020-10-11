@@ -1,5 +1,5 @@
 #define GLM_FORCE_CTOR_INIT
-#include <algine/std/model/ShapeLoader.h>
+#include <algine/std/model/ShapeManager.h>
 
 #include <algine/std/animation/BoneInfo.h>
 #include <algine/core/texture/Texture2D.h>
@@ -19,11 +19,11 @@ using namespace tulz;
 using namespace std;
 
 namespace algine {
-ShapeLoader::ShapeLoader() {
+ShapeManager::ShapeManager() {
     m_shape = new Shape();
 }
 
-void ShapeLoader::load() {
+void ShapeManager::load() {
     map<Param, uint> assimpParams = {
         {Param::Triangulate, aiProcess_Triangulate},
         {Param::SortByPolygonType, aiProcess_SortByPType},
@@ -103,49 +103,49 @@ void ShapeLoader::load() {
     genBuffers();
 }
 
-void ShapeLoader::addParam(Param param) {
+void ShapeManager::addParam(Param param) {
     m_params.emplace_back(param);
 }
 
-void ShapeLoader::addParams(const vector<Param> &params) {
+void ShapeManager::addParams(const vector<Param> &params) {
     for (auto param : params) {
         m_params.emplace_back(param);
     }
 }
 
-void ShapeLoader::setParams(const vector<Param> &params) {
+void ShapeManager::setParams(const vector<Param> &params) {
     m_params = params;
 }
 
-void ShapeLoader::setModelPath(const string &path) {
+void ShapeManager::setModelPath(const string &path) {
     m_modelPath = path;
 }
 
-void ShapeLoader::setAMTLPath(const string &path) {
+void ShapeManager::setAMTLPath(const string &path) {
     m_amtlPath = path;
 }
 
-void ShapeLoader::setBonesPerVertex(uint bonesPerVertex) {
+void ShapeManager::setBonesPerVertex(uint bonesPerVertex) {
     m_bonesPerVertex = bonesPerVertex;
 }
 
-const vector<ShapeLoader::Param>& ShapeLoader::getParams() const {
+const vector<ShapeManager::Param>& ShapeManager::getParams() const {
     return m_params;
 }
 
-const string& ShapeLoader::getModelPath() const {
+const string& ShapeManager::getModelPath() const {
     return m_modelPath;
 }
 
-const string& ShapeLoader::getAMTLPath() const {
+const string& ShapeManager::getAMTLPath() const {
     return m_amtlPath;
 }
 
-uint ShapeLoader::getBonesPerVertex() const {
+uint ShapeManager::getBonesPerVertex() const {
     return m_bonesPerVertex;
 }
 
-Shape *ShapeLoader::getShape() const {
+Shape *ShapeManager::getShape() const {
     return m_shape;
 }
 
@@ -174,7 +174,7 @@ uint getMaxBonesPerVertex(const aiMesh *mesh) {
     return bonesPerVertex;
 }
 
-void ShapeLoader::loadBones(const aiMesh *aimesh) {
+void ShapeManager::loadBones(const aiMesh *aimesh) {
     vector<BoneInfo> binfos; // bone infos
     binfos.reserve(aimesh->mNumVertices); // allocating space
 
@@ -230,7 +230,7 @@ void ShapeLoader::loadBones(const aiMesh *aimesh) {
     }
 }
 
-void ShapeLoader::processNode(const aiNode *node, const aiScene *scene) {
+void ShapeManager::processNode(const aiNode *node, const aiScene *scene) {
     // обработать все полигональные сетки в узле (если есть)
     for (size_t i = 0; i < node->mNumMeshes; i++) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -248,7 +248,7 @@ void ShapeLoader::processNode(const aiNode *node, const aiScene *scene) {
     }
 }
 
-void ShapeLoader::processMesh(const aiMesh *aimesh, const aiScene *scene) {
+void ShapeManager::processMesh(const aiMesh *aimesh, const aiScene *scene) {
     Mesh mesh;
     mesh.start = indices.size();
     uint verticesAtBeginning = vertices.size() / 3;
@@ -436,7 +436,7 @@ inline BufferType* createBuffer(const vector<DataType> &data) {
     return nullptr;
 }
 
-void ShapeLoader::genBuffers() {
+void ShapeManager::genBuffers() {
     m_shape->buffers.vertices = createBuffer<ArrayBuffer>(vertices);
     m_shape->buffers.normals = createBuffer<ArrayBuffer>(normals);
     m_shape->buffers.texCoords = createBuffer<ArrayBuffer>(texCoords);

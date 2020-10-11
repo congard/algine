@@ -1,5 +1,5 @@
-#ifndef ALGINE_SHAPELOADER_H
-#define ALGINE_SHAPELOADER_H
+#ifndef ALGINE_SHAPEMANAGER_H
+#define ALGINE_SHAPEMANAGER_H
 
 #include <algine/std/model/Shape.h>
 #include <algine/std/AMTLManager.h>
@@ -9,7 +9,7 @@ class aiMesh;
 class aiScene;
 
 namespace algine {
-class ShapeLoader {
+class ShapeManager {
 public:
     enum class Param {
         Triangulate,
@@ -22,7 +22,7 @@ public:
     };
 
 public:
-    ShapeLoader();
+    ShapeManager();
 
     void load();
     void addParam(Param param);
@@ -61,4 +61,4 @@ private:
 };
 }
 
-#endif //ALGINE_SHAPELOADER_H
+#endif //ALGINE_SHAPEMANAGER_H

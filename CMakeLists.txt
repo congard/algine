@@ -157,7 +157,7 @@ add_library(algine
         src/std/assimp2glm.h
         src/std/model/Model.cpp include/algine/std/model/Model.h
         src/std/model/Shape.cpp include/algine/std/model/Shape.h
-        src/std/model/ShapeLoader.cpp include/algine/std/model/ShapeLoader.h
+        src/std/model/ShapeManager.cpp include/algine/std/model/ShapeManager.h
         src/std/Node.cpp include/algine/std/Node.h
         src/std/lighting/LightingManager.cpp include/algine/std/lighting/LightingManager.h
         src/std/lighting/Light.cpp include/algine/std/lighting/Light.h
