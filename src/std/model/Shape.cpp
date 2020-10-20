@@ -2,62 +2,64 @@
 
 #include <algine/core/DataType.h>
 
+#include "../../core/PublicObjectTools.h"
+
+using namespace std;
+
 namespace algine {
+vector<ShapePtr> Shape::publicObjects;
+
 Shape::~Shape() {
     for (auto &inputLayout : inputLayouts)
         InputLayout::destroy(inputLayout);
 
-    ArrayBuffer::destroy(buffers.vertices, buffers.normals, buffers.texCoords,
-                         buffers.tangents, buffers.bitangents, buffers.boneWeights, buffers.boneIds);
-    IndexBuffer::destroy(buffers.indices);
-}
-
-inline void
-addAttribute(
-        const InputLayout *inputLayout,
-        const InputAttributeDescription &inputAttributeDescription,
-        const ArrayBuffer *arrayBuffer)
-{
-    if (inputAttributeDescription.m_location != InputAttributeDescription::LocationAbsent && arrayBuffer != nullptr)
-        inputLayout->addAttribute(inputAttributeDescription, arrayBuffer);
+    ArrayBuffer::destroy(vertices, normals, texCoords, tangents, bitangents, boneWeights, boneIds);
+    IndexBuffer::destroy(indices);
 }
 
 void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
-    auto *inputLayout = new InputLayout();
+    auto inputLayout = new InputLayout();
     inputLayout->bind();
     inputLayouts.push_back(inputLayout);
 
     InputAttributeDescription attribDescription;
     attribDescription.setCount(3);
 
+    auto addAttribute = [&](const ArrayBuffer *arrayBuffer)
+    {
+        if (attribDescription.m_location != InputAttributeDescription::LocationAbsent && arrayBuffer != nullptr) {
+            inputLayout->addAttribute(attribDescription, arrayBuffer);
+        }
+    };
+
     attribDescription.setLocation(locations.inPosition);
-    addAttribute(inputLayout, attribDescription, buffers.vertices);
+    addAttribute(vertices);
 
     attribDescription.setLocation(locations.inNormal);
-    addAttribute(inputLayout, attribDescription, buffers.normals);
+    addAttribute(normals);
 
     attribDescription.setLocation(locations.inTangent);
-    addAttribute(inputLayout, attribDescription, buffers.tangents);
+    addAttribute(tangents);
 
     attribDescription.setLocation(locations.inBitangent);
-    addAttribute(inputLayout, attribDescription, buffers.bitangents);
+    addAttribute(bitangents);
 
     attribDescription.setLocation(locations.inTexCoord);
     attribDescription.setCount(2);
-    addAttribute(inputLayout, attribDescription, buffers.texCoords);
+    addAttribute(texCoords);
 
     if (isBonesPresent()) {
         attribDescription.setCount(4);
 
         attribDescription.setLocation(locations.inBoneWeights);
-        addAttribute(inputLayout, attribDescription, buffers.boneWeights);
+        addAttribute(boneWeights);
 
         attribDescription.setLocation(locations.inBoneIds);
         attribDescription.setDataType(DataType::UnsignedInt);
-        addAttribute(inputLayout, attribDescription, buffers.boneIds);
+        addAttribute(boneIds);
     }
 
-    inputLayout->setIndexBuffer(buffers.indices);
+    inputLayout->setIndexBuffer(indices);
     inputLayout->unbind();
 }
 
@@ -87,5 +89,13 @@ usize Shape::getAnimationIndexByName(const std::string &name) {
             return i;
 
     return AnimationNotFound;
+}
+
+ShapePtr Shape::getByName(const string &name) {
+    return PublicObjectTools::getByName<ShapePtr>(name);
+}
+
+Shape* Shape::byName(const string &name) {
+    return PublicObjectTools::byName<Shape>(name);
 }
 }
