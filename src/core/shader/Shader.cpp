@@ -6,6 +6,8 @@
 #include <GL/glew.h>
 #include <iostream>
 
+#include "../PublicObjectTools.h"
+
 using namespace std;
 using namespace tulz;
 
@@ -40,12 +42,15 @@ void Shader::create(const uint type) {
 
 void Shader::fromSource(const string &source) {
     const char *c_str = source.c_str();
+
     glShaderSource(m_id, 1, &c_str, nullptr);
     glCompileShader(m_id);
 
     string infoLog = ShaderTools::getShaderInfoLogById(m_id, GL_COMPILE_STATUS);
-    if (!infoLog.empty())
+
+    if (!infoLog.empty()) {
         cerr << "Info log of Shader with id " << m_id << ": " << infoLog;
+    }
 }
 
 void Shader::fromFile(const string &path) {
@@ -56,33 +61,11 @@ uint Shader::getId() const {
     return m_id;
 }
 
-constexpr uint notFound = static_cast<uint>(-1);
-
-inline uint indexByName(const string &name) {
-    for (uint i = 0; i < Shader::publicObjects.size(); i++) {
-        if (Shader::publicObjects[i]->name == name) {
-            return i;
-        }
-    }
-
-    return notFound;
-}
-
 ShaderPtr Shader::getByName(const string &name) {
-    uint index = indexByName(name);
-
-    if (index != notFound)
-        return publicObjects[index];
-
-    return nullptr;
+    return PublicObjectTools::getByName<ShaderPtr>(name);
 }
 
 Shader* Shader::byName(const string &name) {
-    uint index = indexByName(name);
-
-    if (index != notFound)
-        return publicObjects[index].get();
-
-    return nullptr;
+    return PublicObjectTools::byName<Shader>(name);
 }
 }

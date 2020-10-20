@@ -17,6 +17,8 @@
 #include "../SOP.h"
 #include "../SOPConstants.h"
 
+#include "../PublicObjectTools.h"
+
 using namespace std;
 using namespace tulz;
 
@@ -76,8 +78,10 @@ void ShaderProgram::link() {
     glLinkProgram(id);
 
     string infoLog = ShaderTools::getProgramInfoLogById(id, GL_LINK_STATUS);
-    if (!infoLog.empty())
+
+    if (!infoLog.empty()) {
         cerr << "Info log of ShaderProgram with id " << id << ": " << infoLog;
+    }
 }
 
 void ShaderProgram::loadUniformLocation(const string &name) {
@@ -85,8 +89,9 @@ void ShaderProgram::loadUniformLocation(const string &name) {
 }
 
 void ShaderProgram::loadUniformLocations(const vector<string> &names) {
-    for (const string &name : names)
+    for (const string &name : names) {
         loadUniformLocation(name);
+    }
 }
 
 void ShaderProgram::loadAttribLocation(const string &name) {
@@ -94,13 +99,15 @@ void ShaderProgram::loadAttribLocation(const string &name) {
 }
 
 void ShaderProgram::loadAttribLocations(const vector<string> &names) {
-    for (const string &name : names)
+    for (const string &name : names) {
         loadAttribLocation(name);
+    }
 }
 
 void ShaderProgram::loadActiveLocations() {
     int numActiveAttribs = 0;
     int numActiveUniforms = 0;
+
     glGetProgramInterfaceiv(id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numActiveAttribs);
     glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
 
@@ -112,9 +119,11 @@ void ShaderProgram::loadActiveLocations() {
         glGetProgramResourceiv(id, GL_PROGRAM_INPUT, i, getArraySize(properties),
                                &properties[0], getArraySize(values), nullptr, &values[0]);
 
-        nameData.resize(values[0]); //The length of the name.
+        nameData.resize(values[0]); // the length of the name
         glGetProgramResourceName(id, GL_PROGRAM_INPUT, i, nameData.size(), nullptr, &nameData[0]);
+
         string name(&nameData[0], nameData.size() - 1);
+
         loadAttribLocation(name);
     }
 
@@ -122,9 +131,11 @@ void ShaderProgram::loadActiveLocations() {
         glGetProgramResourceiv(id, GL_UNIFORM, i, getArraySize(properties),
                                &properties[0], getArraySize(values), nullptr, &values[0]);
 
-        nameData.resize(values[0]); //The length of the name.
+        nameData.resize(values[0]); // the length of the name
         glGetProgramResourceName(id, GL_UNIFORM, i, nameData.size(), nullptr, &nameData[0]);
+
         string name(&nameData[0], nameData.size() - 1);
+
         loadUniformLocation(name);
     }
 }
@@ -216,33 +227,11 @@ void ShaderProgram::setMat4(const string &location, const glm::mat4 &p) {
     setMat4(getLocation(location), p);
 }
 
-constexpr uint notFound = static_cast<uint>(-1);
-
-inline uint indexByName(const string &name) {
-    for (uint i = 0; i < ShaderProgram::publicObjects.size(); i++) {
-        if (ShaderProgram::publicObjects[i]->name == name) {
-            return i;
-        }
-    }
-
-    return notFound;
-}
-
 ShaderProgramPtr ShaderProgram::getByName(const string &name) {
-    uint index = indexByName(name);
-
-    if (index != notFound)
-        return publicObjects[index];
-
-    return nullptr;
+    return PublicObjectTools::getByName<ShaderProgramPtr>(name);
 }
 
 ShaderProgram* ShaderProgram::byName(const string &name) {
-    uint index = indexByName(name);
-
-    if (index != notFound)
-        return publicObjects[index].get();
-
-    return nullptr;
+    return PublicObjectTools::byName<ShaderProgram>(name);
 }
 }
