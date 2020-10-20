@@ -107,6 +107,7 @@ add_library(algine
         include/algine/core/DataType.h
         include/algine/std/QuadRendererPtr.h
         include/algine/std/CubeRendererPtr.h
+        include/algine/std/model/ShapePtr.h
         include/algine/std/model/Mesh.h
         include/algine/std/Material.h
 
