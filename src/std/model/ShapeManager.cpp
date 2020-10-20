@@ -2,7 +2,10 @@
 #include <algine/std/model/ShapeManager.h>
 
 #include <algine/std/animation/BoneInfo.h>
+
 #include <algine/core/texture/Texture2D.h>
+#include <algine/core/PtrMaker.h>
+#include <algine/core/JsonHelper.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -13,17 +16,217 @@
 #include <iostream>
 #include <cfloat>
 
+#include "../../core/PublicObjectTools.h"
 #include "../assimp2glm.h"
+#include "ShapeConfigTools.h"
 
 using namespace tulz;
 using namespace std;
+using namespace nlohmann;
 
 namespace algine {
-ShapeManager::ShapeManager() {
-    m_shape = new Shape();
+namespace Default {
+constexpr uint BonesPerVertex = 4;
+}
+
+ShapeManager::ShapeManager()
+    : m_amtlDumpMode(AMTLDumpMode::None),
+      m_bonesPerVertex(Default::BonesPerVertex)
+{
+    // see initializer list above
+}
+
+void ShapeManager::addParam(Param param) {
+    m_params.emplace_back(param);
+}
+
+void ShapeManager::addParams(const vector<Param> &params) {
+    for (auto param : params) {
+        m_params.emplace_back(param);
+    }
+}
+
+void ShapeManager::setParams(const vector<Param> &params) {
+    m_params = params;
+}
+
+void ShapeManager::addInputLayoutLocations(const InputLayoutShapeLocations &locations) {
+    m_locations.emplace_back(locations);
+}
+
+void ShapeManager::setInputLayoutLocations(const vector<InputLayoutShapeLocations> &locations) {
+    m_locations = locations;
+}
+
+void ShapeManager::setModelPath(const string &path) {
+    m_modelPath = path;
+}
+
+void ShapeManager::setAMTLPath(const string &path) {
+    m_amtlPath = path;
+}
+
+void ShapeManager::setAMTL(const AMTLManager &amtlManager) {
+    m_amtlManager = amtlManager;
+}
+
+void ShapeManager::setBonesPerVertex(uint bonesPerVertex) {
+    m_bonesPerVertex = bonesPerVertex;
+}
+
+const vector<ShapeManager::Param>& ShapeManager::getParams() const {
+    return m_params;
+}
+
+const vector<InputLayoutShapeLocations>& ShapeManager::getInputLayoutLocations() const {
+    return m_locations;
+}
+
+const string& ShapeManager::getModelPath() const {
+    return m_modelPath;
+}
+
+const string& ShapeManager::getAMTLPath() const {
+    return m_amtlPath;
+}
+
+const AMTLManager& ShapeManager::getAMTL() const {
+    return m_amtlManager;
+}
+
+uint ShapeManager::getBonesPerVertex() const {
+    return m_bonesPerVertex;
+}
+
+ShapePtr ShapeManager::get() {
+    return PublicObjectTools::getPtr<ShapePtr>(this);
+}
+
+ShapePtr ShapeManager::create() {
+    load();
+
+    PublicObjectTools::postCreateAccessOp("Shape", this, m_shape);
+
+    return m_shape;
+}
+
+void ShapeManager::setAMTLDumpMode(AMTLDumpMode mode) {
+    m_amtlDumpMode = mode;
+}
+
+ShapeManager::AMTLDumpMode ShapeManager::getAMTLDumpMode() const {
+    return m_amtlDumpMode;
+}
+
+void ShapeManager::import(const JsonHelper &jsonHelper) {
+    using namespace Config;
+
+    const json &config = jsonHelper.json;
+
+    // load params
+    if (config.contains(Params)) {
+        for (const auto & p : config[Params]) {
+            m_params.emplace_back(stringToParam(p));
+        }
+    }
+
+    // load locations
+    if (config.contains(InputLayoutLocations)) {
+        for (const auto & l : config[InputLayoutLocations]) {
+            InputLayoutShapeLocations locations;
+            locations.import(l);
+            m_locations.emplace_back(locations);
+        }
+    }
+
+    // load shape path
+    m_modelPath = jsonHelper.readValue<string>(Path);
+
+    // load AMTL
+    if (config.contains(AMTL)) {
+        const auto &amtlData = config[AMTL];
+
+        if (amtlData.contains(Path)) {
+            m_amtlPath = amtlData[Path];
+            m_amtlDumpMode = AMTLDumpMode::Path;
+        } else if (amtlData.contains(Dump)) {
+            m_amtlManager.import(amtlData[Dump]);
+            m_amtlDumpMode = AMTLDumpMode::Dump;
+        }
+    }
+
+    // load bones per vertex
+    m_bonesPerVertex = jsonHelper.readValue<uint>(BonesPerVertex, Default::BonesPerVertex);
+
+    ManagerBase::import(jsonHelper);
+}
+
+JsonHelper ShapeManager::dump() {
+    using namespace Config;
+
+    json config;
+
+    // write params
+    for (const auto & p : m_params)
+        config[Params].emplace_back(paramToString(p));
+
+    // write locations
+    for (auto & l : m_locations)
+        config[InputLayoutLocations].emplace_back(l.dump().json);
+
+    // write shape path
+    if (!m_modelPath.empty())
+        config[Path] = m_modelPath;
+
+    // write AMTL
+    if (m_amtlDumpMode == AMTLDumpMode::Path) {
+        if (!m_amtlPath.empty()) {
+            config[AMTL][Path] = m_amtlPath;
+        }
+    } else if (m_amtlDumpMode == AMTLDumpMode::Dump) {
+        if (!m_amtlManager.getMaterials().empty()) {
+            config[AMTL][Dump] = m_amtlManager.dump().json;
+        }
+    }
+
+    // write bones per vertex
+    if (m_bonesPerVertex != Default::BonesPerVertex)
+        config[AMTL][BonesPerVertex] = m_bonesPerVertex;
+
+    JsonHelper result(config);
+    result.append(ManagerBase::dump());
+
+    return result;
+}
+
+uint getMaxBonesPerVertex(const aiMesh *mesh) {
+    auto bonesPerVertices = (uint*) calloc(mesh->mNumVertices, sizeof(uint));
+
+    for (uint i = 0; i < mesh->mNumBones; i++) {
+        const aiBone *bone = mesh->mBones[i];
+
+        for (uint j = 0; j < bone->mNumWeights; j++) {
+            const aiVertexWeight &weight = bone->mWeights[j];
+            bonesPerVertices[weight.mVertexId]++;
+        }
+    }
+
+    uint bonesPerVertex = 0; // max value from bonesPerVertices
+
+    for (uint i = 0; i < mesh->mNumVertices; i++) {
+        if (bonesPerVertex < bonesPerVertices[i]) {
+            bonesPerVertex = bonesPerVertices[i];
+        }
+    }
+
+    free(bonesPerVertices);
+
+    return bonesPerVertex;
 }
 
 void ShapeManager::load() {
+    m_shape = PtrMaker::make();
+
     map<Param, uint> assimpParams = {
         {Param::Triangulate, aiProcess_Triangulate},
         {Param::SortByPolygonType, aiProcess_SortByPType},
@@ -58,12 +261,16 @@ void ShapeManager::load() {
     m_shape->globalInverseTransform = glm::inverse(getMat4(scene->mRootNode->mTransformation));
 
     // try to find AMTL if does not specified
-    if (m_amtlPath.empty())
-        m_amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
+    if (m_amtlManager.getMaterials().empty()) {
+        if (m_amtlPath.empty()) {
+            m_amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
+        }
 
-    // try to load AMTL
-    if (Path(m_amtlPath).exists())
-        m_amtlManager.importFromFile(m_amtlPath);
+        // try to load AMTL
+        if (Path(m_amtlPath).exists()) {
+            m_amtlManager.importFromFile(m_amtlPath);
+        }
+    }
 
     // load shape
     processNode(scene->mRootNode, scene);
@@ -79,7 +286,7 @@ void ShapeManager::load() {
     for (const auto p : algineParams) {
         switch (p) {
             case Param::InverseNormals:
-                for (float &normal : normals) {
+                for (float &normal : m_normals) {
                     normal *= -1;
                 }
                 break;
@@ -101,77 +308,11 @@ void ShapeManager::load() {
 
     // generate buffers
     genBuffers();
-}
 
-void ShapeManager::addParam(Param param) {
-    m_params.emplace_back(param);
-}
-
-void ShapeManager::addParams(const vector<Param> &params) {
-    for (auto param : params) {
-        m_params.emplace_back(param);
+    // add input layouts
+    for (const auto & l : m_locations) {
+        m_shape->createInputLayout(l);
     }
-}
-
-void ShapeManager::setParams(const vector<Param> &params) {
-    m_params = params;
-}
-
-void ShapeManager::setModelPath(const string &path) {
-    m_modelPath = path;
-}
-
-void ShapeManager::setAMTLPath(const string &path) {
-    m_amtlPath = path;
-}
-
-void ShapeManager::setBonesPerVertex(uint bonesPerVertex) {
-    m_bonesPerVertex = bonesPerVertex;
-}
-
-const vector<ShapeManager::Param>& ShapeManager::getParams() const {
-    return m_params;
-}
-
-const string& ShapeManager::getModelPath() const {
-    return m_modelPath;
-}
-
-const string& ShapeManager::getAMTLPath() const {
-    return m_amtlPath;
-}
-
-uint ShapeManager::getBonesPerVertex() const {
-    return m_bonesPerVertex;
-}
-
-Shape *ShapeManager::getShape() const {
-    return m_shape;
-}
-
-uint getMaxBonesPerVertex(const aiMesh *mesh) {
-    uint *bonesPerVertices = (uint*) calloc(mesh->mNumVertices, sizeof(uint));
-
-    for (uint i = 0; i < mesh->mNumBones; i++) {
-        const aiBone *bone = mesh->mBones[i];
-
-        for (uint j = 0; j < bone->mNumWeights; j++) {
-            const aiVertexWeight &weight = bone->mWeights[j];
-            bonesPerVertices[weight.mVertexId]++;
-        }
-    }
-
-    uint bonesPerVertex = 0; // max value from bonesPerVertices
-
-    for (uint i = 0; i < mesh->mNumVertices; i++) {
-        if (bonesPerVertex < bonesPerVertices[i]) {
-            bonesPerVertex = bonesPerVertices[i];
-        }
-    }
-
-    free(bonesPerVertices);
-
-    return bonesPerVertex;
 }
 
 void ShapeManager::loadBones(const aiMesh *aimesh) {
@@ -224,8 +365,8 @@ void ShapeManager::loadBones(const aiMesh *aimesh) {
     // converting to a suitable view
     for (const auto & binfo : binfos) {
         for (size_t j = 0; j < m_bonesPerVertex; j++) {
-            boneIds.push_back(binfo.getId(j));
-            boneWeights.push_back(binfo.getWeight(j));
+            m_boneIds.push_back(binfo.getId(j));
+            m_boneWeights.push_back(binfo.getWeight(j));
         }
     }
 }
@@ -250,60 +391,60 @@ void ShapeManager::processNode(const aiNode *node, const aiScene *scene) {
 
 void ShapeManager::processMesh(const aiMesh *aimesh, const aiScene *scene) {
     Mesh mesh;
-    mesh.start = indices.size();
-    uint verticesAtBeginning = vertices.size() / 3;
+    mesh.start = m_indices.size();
+    uint verticesAtBeginning = m_vertices.size() / 3;
 
     // allocating space for vertices, normals, texCoords, tangents and bitangents
-    vertices.reserve(aimesh->mNumVertices * 3);
+    m_vertices.reserve(aimesh->mNumVertices * 3);
 
     if (aimesh->HasNormals()) {
-        normals.reserve(aimesh->mNumVertices * 3);
+        m_normals.reserve(aimesh->mNumVertices * 3);
     } if (aimesh->HasTextureCoords(0)) {
-        texCoords.reserve(aimesh->mNumVertices * 2);
+        m_texCoords.reserve(aimesh->mNumVertices * 2);
     } if (aimesh->HasTangentsAndBitangents()) {
-        tangents.reserve(aimesh->mNumVertices * 3);
-        bitangents.reserve(aimesh->mNumVertices * 3);
+        m_tangents.reserve(aimesh->mNumVertices * 3);
+        m_bitangents.reserve(aimesh->mNumVertices * 3);
     }
 
     for (size_t i = 0; i < aimesh->mNumVertices; i++) {
         // vertices
-        vertices.push_back(aimesh->mVertices[i].x);
-        vertices.push_back(aimesh->mVertices[i].y);
-        vertices.push_back(aimesh->mVertices[i].z);
+        m_vertices.push_back(aimesh->mVertices[i].x);
+        m_vertices.push_back(aimesh->mVertices[i].y);
+        m_vertices.push_back(aimesh->mVertices[i].z);
 
         // normals
         if (aimesh->HasNormals()) {
-            normals.push_back(aimesh->mNormals[i].x);
-            normals.push_back(aimesh->mNormals[i].y);
-            normals.push_back(aimesh->mNormals[i].z);
+            m_normals.push_back(aimesh->mNormals[i].x);
+            m_normals.push_back(aimesh->mNormals[i].y);
+            m_normals.push_back(aimesh->mNormals[i].z);
         }
 
         // texCoords
         if (aimesh->HasTextureCoords(0)) {
-            texCoords.push_back(aimesh->mTextureCoords[0][i].x);
-            texCoords.push_back(aimesh->mTextureCoords[0][i].y);
+            m_texCoords.push_back(aimesh->mTextureCoords[0][i].x);
+            m_texCoords.push_back(aimesh->mTextureCoords[0][i].y);
         }
 
         // tangents and bitangents
         if (aimesh->HasTangentsAndBitangents()) {
-            tangents.push_back(aimesh->mTangents[i].x);
-            tangents.push_back(aimesh->mTangents[i].y);
-            tangents.push_back(aimesh->mTangents[i].z);
+            m_tangents.push_back(aimesh->mTangents[i].x);
+            m_tangents.push_back(aimesh->mTangents[i].y);
+            m_tangents.push_back(aimesh->mTangents[i].z);
 
-            bitangents.push_back(aimesh->mBitangents[i].x);
-            bitangents.push_back(aimesh->mBitangents[i].y);
-            bitangents.push_back(aimesh->mBitangents[i].z);
+            m_bitangents.push_back(aimesh->mBitangents[i].x);
+            m_bitangents.push_back(aimesh->mBitangents[i].y);
+            m_bitangents.push_back(aimesh->mBitangents[i].z);
         }
     }
 
     // faces
     for (size_t i = 0; i < aimesh->mNumFaces; i++) {
         for (size_t j = 0; j < aimesh->mFaces[i].mNumIndices; j++) {
-            indices.push_back(aimesh->mFaces[i].mIndices[j] + verticesAtBeginning);
+            m_indices.push_back(aimesh->mFaces[i].mIndices[j] + verticesAtBeginning);
         }
     }
 
-    mesh.count = indices.size() - mesh.start;
+    mesh.count = m_indices.size() - mesh.start;
 
     // load classic & AMTL material
     aiMaterial *material = scene->mMaterials[aimesh->mMaterialIndex];
@@ -437,14 +578,14 @@ inline BufferType* createBuffer(const vector<DataType> &data) {
 }
 
 void ShapeManager::genBuffers() {
-    m_shape->buffers.vertices = createBuffer<ArrayBuffer>(vertices);
-    m_shape->buffers.normals = createBuffer<ArrayBuffer>(normals);
-    m_shape->buffers.texCoords = createBuffer<ArrayBuffer>(texCoords);
-    m_shape->buffers.tangents = createBuffer<ArrayBuffer>(tangents);
-    m_shape->buffers.bitangents = createBuffer<ArrayBuffer>(bitangents);
-    m_shape->buffers.boneWeights = createBuffer<ArrayBuffer>(boneWeights);
-    m_shape->buffers.boneIds = createBuffer<ArrayBuffer>(boneIds);
+    m_shape->vertices = createBuffer<ArrayBuffer>(m_vertices);
+    m_shape->normals = createBuffer<ArrayBuffer>(m_normals);
+    m_shape->texCoords = createBuffer<ArrayBuffer>(m_texCoords);
+    m_shape->tangents = createBuffer<ArrayBuffer>(m_tangents);
+    m_shape->bitangents = createBuffer<ArrayBuffer>(m_bitangents);
+    m_shape->boneWeights = createBuffer<ArrayBuffer>(m_boneWeights);
+    m_shape->boneIds = createBuffer<ArrayBuffer>(m_boneIds);
 
-    m_shape->buffers.indices = createBuffer<IndexBuffer>(indices);
+    m_shape->indices = createBuffer<IndexBuffer>(m_indices);
 }
 }
