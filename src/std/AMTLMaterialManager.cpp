@@ -147,34 +147,19 @@ const map<AMTLMaterialManager::Texture, string>& AMTLMaterialManager::getTexture
 }
 
 Texture2DPtr AMTLMaterialManager::loadTexture(Texture type) {
-    // if (auto it = m_textures.find(type); it != m_textures.end()) { ... }
-    // supported only in C++17
-
-    {
-        auto it = m_textures.find(type);
-
-        if (it != m_textures.end()) {
-            return it->second.get();
-        }
+    if (auto it = m_textures.find(type); it != m_textures.end()) {
+        return it->second.get();
     }
 
-    {
-        auto it = m_texPaths.find(type);
-
-        if (it != m_texPaths.end()) {
-            Texture2DManager manager;
-            manager.setWorkingDirectory(m_workingDirectory);
-            manager.importFromFile(it->second);
-            return manager.get();
-        }
+    if (auto it = m_texPaths.find(type); it != m_texPaths.end()) {
+        Texture2DManager manager;
+        manager.setWorkingDirectory(m_workingDirectory);
+        manager.importFromFile(it->second);
+        return manager.get();
     }
 
-    {
-        auto it = m_texNames.find(type);
-
-        if (it != m_texNames.end()) {
-            return Texture2D::getByName(it->second);
-        }
+    if (auto it = m_texNames.find(type); it != m_texNames.end()) {
+        return Texture2D::getByName(it->second);
     }
 
     return nullptr;
