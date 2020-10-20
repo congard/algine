@@ -109,7 +109,6 @@ add_library(algine
         include/algine/std/CubeRendererPtr.h
         include/algine/std/model/Mesh.h
         include/algine/std/Material.h
-        include/algine/std/model/InputLayoutShapeLocations.h
 
         src/core/PublicObjectTools.h
         src/core/JsonHelper.cpp include/algine/core/JsonHelper.h
@@ -159,6 +158,7 @@ add_library(algine
         src/std/model/Model.cpp include/algine/std/model/Model.h
         src/std/model/Shape.cpp include/algine/std/model/Shape.h
         src/std/model/ShapeManager.cpp include/algine/std/model/ShapeManager.h
+        src/std/model/InputLayoutShapeLocations.cpp include/algine/std/model/InputLayoutShapeLocations.h
         src/std/Node.cpp include/algine/std/Node.h
         src/std/lighting/LightingManager.cpp include/algine/std/lighting/LightingManager.h
         src/std/lighting/Light.cpp include/algine/std/lighting/Light.h
