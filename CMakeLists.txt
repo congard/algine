@@ -157,6 +157,7 @@ add_library(algine
 
         src/std/assimp2glm.h
         src/std/model/Model.cpp include/algine/std/model/Model.h
+        src/std/model/ShapeConfigTools.h
         src/std/model/Shape.cpp include/algine/std/model/Shape.h
         src/std/model/ShapeManager.cpp include/algine/std/model/ShapeManager.h
         src/std/model/InputLayoutShapeLocations.cpp include/algine/std/model/InputLayoutShapeLocations.h
