@@ -32,29 +32,29 @@ void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
         }
     };
 
-    attribDescription.setLocation(locations.inPosition);
+    attribDescription.setLocation(locations.position);
     addAttribute(vertices);
 
-    attribDescription.setLocation(locations.inNormal);
+    attribDescription.setLocation(locations.normal);
     addAttribute(normals);
 
-    attribDescription.setLocation(locations.inTangent);
+    attribDescription.setLocation(locations.tangent);
     addAttribute(tangents);
 
-    attribDescription.setLocation(locations.inBitangent);
+    attribDescription.setLocation(locations.bitangent);
     addAttribute(bitangents);
 
-    attribDescription.setLocation(locations.inTexCoord);
+    attribDescription.setLocation(locations.texCoord);
     attribDescription.setCount(2);
     addAttribute(texCoords);
 
     if (isBonesPresent()) {
         attribDescription.setCount(4);
 
-        attribDescription.setLocation(locations.inBoneWeights);
+        attribDescription.setLocation(locations.boneWeights);
         addAttribute(boneWeights);
 
-        attribDescription.setLocation(locations.inBoneIds);
+        attribDescription.setLocation(locations.boneIds);
         attribDescription.setDataType(DataType::UnsignedInt);
         addAttribute(boneIds);
     }

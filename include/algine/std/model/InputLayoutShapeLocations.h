@@ -10,13 +10,13 @@ public:
     JsonHelper dump() override;
 
 public:
-    int inPosition = 0;
-    int inTexCoord = -1;
-    int inNormal = -1;
-    int inTangent = -1;
-    int inBitangent = -1;
-    int inBoneWeights = -1;
-    int inBoneIds = -1;
+    int position = 0;
+    int texCoord = -1;
+    int normal = -1;
+    int tangent = -1;
+    int bitangent = -1;
+    int boneWeights = -1;
+    int boneIds = -1;
 };
 }
 

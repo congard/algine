@@ -31,13 +31,13 @@ void InputLayoutShapeLocations::import(const JsonHelper &jsonHelper) {
         return jsonHelper.readValue(key, defaultLocation);
     };
 
-    inPosition = read(Position, Default::PositionLocation);
-    inTexCoord = read(TexCoord);
-    inNormal = read(Normal);
-    inTangent = read(Tangent);
-    inBitangent = read(Bitangent);
-    inBoneWeights = read(BoneWeights);
-    inBoneIds = read(BoneIds);
+    position = read(Position, Default::PositionLocation);
+    texCoord = read(TexCoord);
+    normal = read(Normal);
+    tangent = read(Tangent);
+    bitangent = read(Bitangent);
+    boneWeights = read(BoneWeights);
+    boneIds = read(BoneIds);
 }
 
 JsonHelper InputLayoutShapeLocations::dump() {
@@ -52,13 +52,13 @@ JsonHelper InputLayoutShapeLocations::dump() {
         }
     };
 
-    write(Position, inPosition, Default::PositionLocation);
-    write(TexCoord, inTexCoord);
-    write(Normal, inNormal);
-    write(Tangent, inTangent);
-    write(Bitangent, inBitangent);
-    write(BoneWeights, inBoneWeights);
-    write(BoneIds, inBoneIds);
+    write(Position, position, Default::PositionLocation);
+    write(TexCoord, texCoord);
+    write(Normal, normal);
+    write(Tangent, tangent);
+    write(Bitangent, bitangent);
+    write(BoneWeights, boneWeights);
+    write(BoneIds, boneIds);
 
     return config;
 }
