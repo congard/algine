@@ -24,8 +24,7 @@ public:
     /// <br>if you need more, you will have to create InputLayout manually
     void createInputLayout(const InputLayoutShapeLocations &locations);
 
-    // TODO: setBoneTransform
-    void setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation);
+    void setBoneTransform(const std::string &boneName, const glm::mat4 &transformation);
 
     void prepareAnimation(uint index);
     void invalidateAnimation(uint index);

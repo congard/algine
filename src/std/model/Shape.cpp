@@ -63,19 +63,23 @@ void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
     inputLayout->unbind();
 }
 
-void Shape::setNodeTransform(const std::string &nodeName, const glm::mat4 &transformation) {
-    rootNode.getNode(nodeName)->transformation = transformation;
+void Shape::setBoneTransform(const string &boneName, const glm::mat4 &transformation) {
+    if (uint index = bonesStorage.getIndex(boneName); index != BonesStorage::BoneNotFound) {
+        bonesStorage.bones[index].transformation = transformation;
+    } else {
+        throw runtime_error("Bone " + boneName + " does not found");
+    }
 }
 
-void Shape::prepareAnimation(const uint index) {
+void Shape::prepareAnimation(uint index) {
     animations[index].bones.resize(bonesStorage.count());
 }
 
-void Shape::invalidateAnimation(const uint index) {
+void Shape::invalidateAnimation(uint index) {
     animations[index].bones.clear();
 }
 
-bool Shape::isAnimationValid(const uint index) const {
+bool Shape::isAnimationValid(uint index) const {
     return animations[index].bones.size() == bonesStorage.count();
 }
 
@@ -83,7 +87,7 @@ bool Shape::isBonesPresent() const {
     return bonesPerVertex > 0;
 }
 
-usize Shape::getAnimationIndexByName(const std::string &name) {
+usize Shape::getAnimationIndexByName(const string &name) {
     for (usize i = 0; i < animations.size(); i++)
         if (animations[i].name == name)
             return i;

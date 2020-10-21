@@ -18,7 +18,7 @@ public:
 public:
     std::string name;
     std::vector<Node> childs;
-    glm::mat4 defaultTransform = glm::mat4(1.0f), transformation = glm::mat4(1.0f);
+    glm::mat4 defaultTransform = glm::mat4(1.0f);
 };
 
 } /* namespace algine */
