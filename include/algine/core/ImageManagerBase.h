@@ -3,6 +3,8 @@
 
 #include <algine/core/ManagerBase.h>
 
+#include <algine/types.h>
+
 namespace algine {
 class ImageManagerBase: public ManagerBase {
 public:

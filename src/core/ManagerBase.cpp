@@ -2,6 +2,8 @@
 
 #include <algine/core/JsonHelper.h>
 
+#include <algine/types.h>
+
 #include <tulz/Path.h>
 
 using namespace std;
