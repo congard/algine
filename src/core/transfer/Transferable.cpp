@@ -9,6 +9,6 @@ using namespace tulz;
 
 namespace algine {
 void Transferable::importFromFile(const string &path) {
-    import(File(path, File::ReadText).readStr());
+    import(File(path, File::Mode::ReadText).readStr());
 }
 }

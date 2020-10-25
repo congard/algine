@@ -54,7 +54,7 @@ void Shader::fromSource(const string &source) {
 }
 
 void Shader::fromFile(const string &path) {
-    fromSource(File(path, File::Read).readStr());
+    fromSource(File(path, File::Mode::ReadText).readStr());
 }
 
 uint Shader::getId() const {

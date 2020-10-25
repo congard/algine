@@ -60,9 +60,9 @@ void ShaderProgram::fromSource(const ShadersInfo &shaders) {
 }
 
 void ShaderProgram::fromFile(const string &vertex, const string &fragment, const string &geometry) {
-    string vertexSource = vertex.empty() ? "" : File(vertex, File::Read).readStr();
-    string fragmentSource = fragment.empty() ? "" : File(fragment, File::Read).readStr();
-    string geometrySource = geometry.empty() ? "" : File(geometry, File::Read).readStr();
+    string vertexSource = vertex.empty() ? "" : File(vertex, File::Mode::ReadText).readStr();
+    string fragmentSource = fragment.empty() ? "" : File(fragment, File::Mode::ReadText).readStr();
+    string geometrySource = geometry.empty() ? "" : File(geometry, File::Mode::ReadText).readStr();
     fromSource(vertexSource, fragmentSource, geometrySource);
 }
 

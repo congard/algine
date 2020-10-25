@@ -137,7 +137,7 @@ inline void cfgSourceImpl(ShaderManager *self) {
         if (path.empty())
             throw runtime_error("Source and path are empty");
 
-        self->setSource(File(Path::join(workingDirectory, path), File::ReadText).readStr());
+        self->setSource(File(Path::join(workingDirectory, path), File::Mode::ReadText).readStr());
     }
 }
 
@@ -398,7 +398,7 @@ string ShaderManager::processDirectives(const string &src, const string &baseInc
             }
 
             insert(result, matches.pos, matches.size,
-                   processDirectives(File(filePath, File::Read).readStr(), Path(filePath).getParentDirectory()));
+                   processDirectives(File(filePath, File::Mode::ReadText).readStr(), Path(filePath).getParentDirectory()));
         } else if (pragmaIs(Link)) {
             auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~((.+)[ \t]+(.+))~");
 
