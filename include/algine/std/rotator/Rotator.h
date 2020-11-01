@@ -9,13 +9,14 @@
 namespace algine {
 class Rotator: public Transferable {
 public:
-    enum {
-        RotatorTypeSimple,
-        RotatorTypeEuler,
-        RotatorTypeFree
+    enum class Type {
+        Simple,
+        Euler,
+        Free
     };
 
 public:
+    Rotator();
     virtual ~Rotator() = default; // to hide -Wdelete-non-virtual-dtor
 
     virtual void rotate(glm::mat4 &matrix);
@@ -27,14 +28,14 @@ public:
     float getYaw() const;
     float getRoll() const;
 
-    static Rotator* create(uint type);
+    static Rotator* create(Type type);
 
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
 
 public:
-    float m_pitch = 0, m_yaw = 0, m_roll = 0;
-    uint m_type = RotatorTypeSimple;
+    float m_pitch, m_yaw, m_roll;
+    Type m_type;
 };
 }
 

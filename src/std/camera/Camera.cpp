@@ -4,8 +4,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace algine {
-Camera::Camera(const uint rotatorType): Rotatable(rotatorType) {
-    /* empty */
+Camera::Camera(Rotator::Type rotatorType)
+    : Rotatable(rotatorType),
+      m_fov(glm::radians(90.0f)),
+      m_aspectRatio(1.0f),
+      m_near(1.0f),
+      m_far(32.0f)
+{
+    // see initializer list above
 }
 
 void Camera::translate() {
@@ -16,19 +22,19 @@ void Camera::updateMatrix() {
     m_transform = m_rotation * m_translation * m_scaling;
 }
 
-void Camera::setFieldOfView(const float fov) {
+void Camera::setFieldOfView(float fov) {
     m_fov = fov;
 }
 
-void Camera::setAspectRatio(const float aspectRatio) {
+void Camera::setAspectRatio(float aspectRatio) {
     m_aspectRatio = aspectRatio;
 }
 
-void Camera::setNear(const float near) {
+void Camera::setNear(float near) {
     m_near = near;
 }
 
-void Camera::setFar(const float far) {
+void Camera::setFar(float far) {
     m_far = far;
 }
 

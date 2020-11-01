@@ -7,7 +7,7 @@ using namespace glm;
 
 namespace algine {
 EulerRotator::EulerRotator() {
-    m_type = RotatorTypeEuler;
+    m_type = Type::Euler;
 }
 
 void EulerRotator::rotate(mat4 &matrix) {

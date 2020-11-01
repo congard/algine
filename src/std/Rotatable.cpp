@@ -23,7 +23,7 @@ void Rotatable::swap(Rotatable &other) {
     std::swap(rotator, other.rotator);
 }
 
-Rotatable::Rotatable(const uint rotatorType) {
+Rotatable::Rotatable(Rotator::Type rotatorType) {
     rotator = Rotator::create(rotatorType);
 }
 

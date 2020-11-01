@@ -5,9 +5,12 @@ using namespace std;
 using namespace glm;
 
 namespace algine {
-Model::Model(Shape *shape, const uint rotatorType): Rotatable(rotatorType) {
-    if (shape)
+Model::Model(Shape *shape, Rotator::Type rotatorType)
+    : Rotatable(rotatorType)
+{
+    if (shape) {
         setShape(shape);
+    }
 }
 
 Model::~Model() {
@@ -30,8 +33,9 @@ void Model::setShape(Shape *shape) {
         }
 
         // nullptr check because m_bones could be already set
-        if (m_bones == nullptr)
+        if (m_bones == nullptr) {
             m_bones = &m_shape->animations[0].bones;
+        }
     }
 }
 
@@ -39,7 +43,7 @@ void Model::setBones(const vector<mat4> *bones) {
     m_bones = bones;
 }
 
-void Model::setBonesFromAnimation(const uint animationIndex) {
+void Model::setBonesFromAnimation(Index animationIndex) {
     m_bones = &m_shape->animations[animationIndex].bones;
 }
 
@@ -63,7 +67,7 @@ const vector<mat4>* Model::getBones() const {
     return m_bones;
 }
 
-const mat4& Model::getBone(const uint index) const {
+const mat4& Model::getBone(Index index) const {
     return m_bones->operator[](index);
 }
 }

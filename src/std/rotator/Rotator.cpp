@@ -29,21 +29,30 @@ constant(Free, "free");
 }
 
 namespace algine {
+Rotator::Rotator()
+    : m_pitch(0),
+      m_yaw(0),
+      m_roll(0),
+      m_type(Type::Simple)
+{
+    // see initializer list above
+}
+
 void Rotator::rotate(mat4 &matrix) {
     matrix = glm::rotate(matrix, m_pitch, vec3(1.0f, 0.0f, 0.0f));
     matrix = glm::rotate(matrix, m_yaw, vec3(0.0f, 1.0f, 0.0f));
     matrix = glm::rotate(matrix, m_roll, vec3(0.0f, 0.0f, 1.0f));
 }
 
-void Rotator::setPitch(const float pitch) {
+void Rotator::setPitch(float pitch) {
     m_pitch = pitch;
 }
 
-void Rotator::setYaw(const float yaw) {
+void Rotator::setYaw(float yaw) {
     m_yaw = yaw;
 }
 
-void Rotator::setRoll(const float roll) {
+void Rotator::setRoll(float roll) {
     m_roll = roll;
 }
 
@@ -59,57 +68,55 @@ float Rotator::getRoll() const {
     return m_roll;
 }
 
-Rotator* Rotator::create(uint type) {
+Rotator* Rotator::create(Type type) {
     switch (type) {
-        case RotatorTypeSimple:
+        case Type::Simple:
             return new Rotator();
-        case RotatorTypeEuler:
+        case Type::Euler:
             return new EulerRotator();
-        case RotatorTypeFree:
+        case Type::Free:
             return new FreeRotator();
         default:
-            throw runtime_error("Unknown rotator type " + to_string(type));
+            throw runtime_error("Unknown rotator type " + to_string(static_cast<int>(type)));
     }
 }
 
 void Rotator::import(const JsonHelper &jsonHelper) {
-    using namespace Config;
     using namespace Config::RotatorType;
 
     const json &config = jsonHelper.json;
 
-    jsonHelper.readValue(Yaw, m_yaw);
-    jsonHelper.readValue(Pitch, m_pitch);
-    jsonHelper.readValue(Roll, m_roll);
+    jsonHelper.readValue(Config::Yaw, m_yaw);
+    jsonHelper.readValue(Config::Pitch, m_pitch);
+    jsonHelper.readValue(Config::Roll, m_roll);
 
     string type_str;
-    jsonHelper.readValue(Type, type_str);
+    jsonHelper.readValue(Config::Type, type_str);
 
-    map<string, int> types {
-        {Simple, RotatorTypeSimple},
-        {Euler,  RotatorTypeEuler},
-        {Free,   RotatorTypeFree}
+    map<string, Type> types {
+        {Simple, Type::Simple},
+        {Euler, Type::Euler},
+        {Free, Type::Free}
     };
 
     if (types.find(type_str) != types.end()) {
         m_type = types[type_str];
     } else {
         string message = "Unknown Rotator type: " + type_str + "\n"
-                          "Available: " + Simple + ", " + Euler + ", " + Free;
+                         "Available: " + Simple + ", " + Euler + ", " + Free;
         throw runtime_error(message);
     }
 }
 
 JsonHelper Rotator::dump() {
-    using namespace Config;
     using namespace Config::RotatorType;
 
     json config;
 
-    config[Yaw] = m_yaw;
-    config[Pitch] = m_pitch;
-    config[Roll] = m_roll;
-    config[Type] = (vector<string> {Simple, Euler, Free})[m_type];
+    config[Config::Yaw] = m_yaw;
+    config[Config::Pitch] = m_pitch;
+    config[Config::Roll] = m_roll;
+    config[Config::Type] = (vector<string> {Simple, Euler, Free})[static_cast<uint>(m_type)];
 
     return config;
 }

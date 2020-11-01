@@ -11,7 +11,7 @@ protected:
     void swap(Rotatable &other);
 
 public:
-    explicit Rotatable(uint rotatorType = Rotator::RotatorTypeSimple);
+    explicit Rotatable(Rotator::Type rotatorType = Rotator::Type::Simple);
     Rotatable(const Rotatable &src); // copy constructor
     Rotatable(Rotatable &&src) noexcept; // move constructor
     Rotatable& operator=(const Rotatable &rhs); // copy operator

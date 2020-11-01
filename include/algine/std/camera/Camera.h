@@ -4,12 +4,13 @@
 #include <algine/std/Rotatable.h>
 #include <algine/std/Translatable.h>
 #include <algine/std/Scalable.h>
+
 #include <glm/mat4x4.hpp>
 
 namespace algine {
 class Camera: public Rotatable, public Translatable, public Scalable {
 public:
-    explicit Camera(uint rotatorType = Rotator::RotatorTypeEuler);
+    explicit Camera(Rotator::Type rotatorType = Rotator::Type::Euler);
 
     void translate() override;
     void updateMatrix();
@@ -28,10 +29,7 @@ public:
 
 public:
     glm::mat4 m_projection, m_transform; // m_transform is view matrix
-    float m_fov = 1.5708f, // 90 degrees
-          m_aspectRatio = 1.0f,
-          m_near = 1.0f,
-          m_far = 32.0f;
+    float m_fov, m_aspectRatio, m_near, m_far;
 };
 }
 

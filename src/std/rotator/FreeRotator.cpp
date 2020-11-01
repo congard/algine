@@ -5,7 +5,7 @@ using namespace glm;
 
 namespace algine {
 FreeRotator::FreeRotator() {
-    m_type = RotatorTypeFree;
+    m_type = Type::Free;
 }
 
 void FreeRotator::rotate(mat4 &matrix) {

@@ -10,21 +10,21 @@
 namespace algine {
 class Model: public Rotatable, public Translatable, public Scalable {
 public:
-    explicit Model(Shape *shape = nullptr, uint rotatorType = Rotator::RotatorTypeSimple);
+    explicit Model(Shape *shape = nullptr, Rotator::Type rotatorType = Rotator::Type::Simple);
     ~Model();
 
     void updateMatrix();
 
     void setShape(Shape *shape);
     void setBones(const std::vector<glm::mat4> *bones);
-    void setBonesFromAnimation(uint animationIndex);
+    void setBonesFromAnimation(Index animationIndex);
     void setBonesFromAnimation(const std::string &animationName);
 
     Shape* getShape() const;
     Animator* getAnimator() const;
     glm::mat4& transformation();
     const std::vector<glm::mat4>* getBones() const;
-    const glm::mat4& getBone(uint index) const;
+    const glm::mat4& getBone(Index index) const;
 
 public:
     glm::mat4 m_transform;

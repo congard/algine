@@ -9,7 +9,7 @@ class DirLight: public Light, public Rotatable {
     friend class LightingManager;
 
 public:
-    explicit DirLight(uint rotatorType = Rotator::RotatorTypeSimple);
+    explicit DirLight(Rotator::Type rotatorType = Rotator::Type::Simple);
 
     void orthoShadows(float left, float right, float bottom, float top, float near = 1.0f, float far = 32.0f);
     void perspectiveShadows(float fovy, float aspect, float near = 1.0f, float far = 32.0f);
