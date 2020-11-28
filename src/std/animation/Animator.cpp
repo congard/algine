@@ -11,12 +11,12 @@ using namespace glm;
 namespace algine {
 Animator::Animator() = default;
 
-Animator::Animator(Shape *shape, const string &animationName) {
+Animator::Animator(const ShapePtr &shape, const string &animationName) {
     m_shape = shape;
     setAnimation(animationName);
 }
 
-Animator::Animator(Shape *shape, usize animationIndex) {
+Animator::Animator(const ShapePtr &shape, usize animationIndex) {
     m_shape = shape;
     m_animationIndex = animationIndex;
 }
@@ -35,7 +35,7 @@ void Animator::animate(float timeInSeconds) {
     readNodeHierarchy(animationTime, m_shape->rootNode, identity);
 }
 
-void Animator::setShape(Shape *shape) {
+void Animator::setShape(const ShapePtr &shape) {
     m_shape = shape;
 }
 
@@ -56,7 +56,7 @@ void Animator::setAnimation(const string &name) {
     }
 }
 
-Shape* Animator::getShape() const {
+const ShapePtr& Animator::getShape() const {
     return m_shape;
 }
 

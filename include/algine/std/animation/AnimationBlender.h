@@ -18,7 +18,7 @@ public:
     };
 
 public:
-    explicit AnimationBlender(Shape *shape);
+    explicit AnimationBlender(const ShapePtr &shape);
     AnimationBlender();
 
     void blend();
@@ -29,7 +29,7 @@ public:
     void setBlendList(const std::vector<uint> &blendList);
     void setFactor(float factor);
     void changeFactor(float step);
-    void setShape(Shape *shape);
+    void setShape(const ShapePtr &shape);
     void setLhsAnim(uint index);
     void setRhsAnim(uint index);
 
@@ -38,7 +38,7 @@ public:
     uint getLhsAnim() const;
     uint getRhsAnim() const;
     float getFactor() const;
-    Shape* getShape() const;
+    const ShapePtr& getShape() const;
     const std::vector<glm::mat4>& bones();
 
 private:
@@ -51,7 +51,7 @@ private:
     glm::mat4 inverseGlobalInverseTransform;
     uint m_blendListMode = BlendListDisable;
     uint m_lhsAnim = 0, m_rhsAnim = 0;
-    Shape *m_shape = nullptr;
+    ShapePtr m_shape = nullptr;
     float m_factor = 0.0f;
 };
 }

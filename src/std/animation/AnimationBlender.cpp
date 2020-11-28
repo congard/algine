@@ -7,7 +7,7 @@ using namespace std;
 using namespace glm;
 
 namespace algine {
-AnimationBlender::AnimationBlender(Shape *const shape) {
+AnimationBlender::AnimationBlender(const ShapePtr &shape) {
     setShape(shape);
 }
 
@@ -42,10 +42,11 @@ mat4 AnimationBlender::blendBones(uint index) const {
 
 void AnimationBlender::blend() {
     switch (m_blendListMode) {
-        case BlendListDisable:
+        case BlendListDisable: {
             for (uint i = 0; i < m_bones.size(); i++)
                 m_bones[i] = blendBones(i);
             break;
+        }
         case BlendListInclude:
         case BlendListExclude: {
             bool isInclude = m_blendListMode == BlendListInclude;
@@ -68,21 +69,24 @@ void AnimationBlender::blend() {
             }
             break;
         }
-        default:
+        default: {
             throw invalid_argument(
-                    "Unknown m_blendListMode value: " + to_string(m_blendListMode) + "\n"
-                    "Valid values:\n"
-                    "  0. AnimationBlender::BlendListDisable\n"
-                    "  1. AnimationBlender::BlendListExclude\n"
-                    "  2. AnimationBlender::BlendListInclude\n");
+                "Unknown m_blendListMode value: " + to_string(m_blendListMode) + "\n"
+                "Valid values:\n"
+                "  0. AnimationBlender::BlendListDisable\n"
+                "  1. AnimationBlender::BlendListExclude\n"
+                "  2. AnimationBlender::BlendListInclude\n"
+            );
+        }
     }
 }
 
 void AnimationBlender::initInverseBoneMatrices() {
     m_inverseBoneMatrices.resize(m_shape->bonesStorage.count());
 
-    for (uint i = 0; i < m_inverseBoneMatrices.size(); ++i)
+    for (uint i = 0; i < m_inverseBoneMatrices.size(); ++i) {
         m_inverseBoneMatrices[i] = inverse(m_shape->bonesStorage[i].boneMatrix);
+    }
 }
 
 void AnimationBlender::addBlendListItem(const uint item) {
@@ -113,7 +117,7 @@ void AnimationBlender::changeFactor(const float step) {
     m_factor = checkFactorBounds(m_factor + step);
 }
 
-void AnimationBlender::setShape(Shape *const shape) {
+void AnimationBlender::setShape(const ShapePtr &shape) {
     m_shape = shape;
     m_bones.resize(m_shape->bonesStorage.count());
     inverseGlobalInverseTransform = inverse(m_shape->globalInverseTransform);
@@ -148,7 +152,7 @@ float AnimationBlender::getFactor() const {
     return m_factor;
 }
 
-Shape* AnimationBlender::getShape() const {
+const ShapePtr& AnimationBlender::getShape() const {
     return m_shape;
 }
 
