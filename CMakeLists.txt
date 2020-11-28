@@ -92,6 +92,7 @@ add_library(algine
         include/algine/ext/constants/BloomSearchShader.h
         include/algine/ext/constants/COCShader.h
         include/algine/ext/constants/BlendDOF.h
+        include/algine/core/transfer/Transferable.h
         include/algine/core/transfer/GLMTransferrer.h
         include/algine/core/texture/PixelData.h
         include/algine/core/texture/TextureCreateInfo.h
@@ -116,7 +117,7 @@ add_library(algine
         src/core/Object.cpp include/algine/core/Object.h
         src/core/ManagerBase.cpp include/algine/core/ManagerBase.h
         src/core/ImageManagerBase.cpp include/algine/core/ImageManagerBase.h
-        src/core/transfer/Transferable.cpp include/algine/core/transfer/Transferable.h
+        src/core/transfer/FileTransferable.cpp include/algine/core/transfer/FileTransferable.h
         src/core/OutputList.cpp include/algine/core/OutputList.h
         src/core/OutputListManager.cpp include/algine/core/OutputListManager.h
         src/core/FramebufferConfigTools.h
