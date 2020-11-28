@@ -2,11 +2,8 @@
 
 #include <algine/core/JsonHelper.h>
 
-#include <tulz/Path.h>
-
 using namespace std;
 using namespace nlohmann;
-using namespace tulz;
 
 namespace algine {
 void AMTLManager::setMaterials(const vector<AMTLMaterialManager> &materials) {
@@ -68,10 +65,5 @@ JsonHelper AMTLManager::dump() {
         config.push_back(material.dump().json);
 
     return config;
-}
-
-void AMTLManager::importFromFile(const string &path) {
-    m_workingDirectory = Path(path).getParentDirectory();
-    Transferable::importFromFile(path);
 }
 }

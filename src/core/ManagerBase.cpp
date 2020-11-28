@@ -4,11 +4,8 @@
 
 #include <algine/types.h>
 
-#include <tulz/Path.h>
-
 using namespace std;
 using namespace nlohmann;
-using namespace tulz;
 
 #define constant(name, val) constexpr char name[] = val
 
@@ -43,14 +40,6 @@ ManagerBase::Access ManagerBase::getAccess() const {
     return m_access;
 }
 
-void ManagerBase::setWorkingDirectory(const string &path) {
-    m_workingDirectory = path;
-}
-
-const string& ManagerBase::getWorkingDirectory() const {
-    return m_workingDirectory;
-}
-
 void ManagerBase::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
@@ -82,17 +71,5 @@ JsonHelper ManagerBase::dump() {
     config[Config::Access] = vector<string> {Private, Public} [static_cast<uint>(m_access)];
 
     return config;
-}
-
-void ManagerBase::importFromFile(const string &path) {
-    if (!m_workingDirectory.empty()) {
-        m_confPath = Path::join(m_workingDirectory, path);
-        m_workingDirectory = Path(m_confPath).getParentDirectory();
-    } else {
-        m_confPath = path;
-        m_workingDirectory = Path(path).getParentDirectory();
-    }
-
-    Transferable::importFromFile(m_confPath);
 }
 }
