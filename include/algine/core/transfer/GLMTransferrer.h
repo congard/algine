@@ -5,8 +5,7 @@
 
 #include <glm/matrix.hpp>
 
-namespace algine {
-namespace GLMTransferrer {
+namespace algine::GLMTransferrer {
 template<typename T>
 JsonHelper dump(const T &glmType) {
     using value_type = typename T::value_type;
@@ -36,7 +35,6 @@ T import(const JsonHelper &jsonHelper) {
         array[i] = config[i];
 
     return glmType;
-}
 }
 }
 
