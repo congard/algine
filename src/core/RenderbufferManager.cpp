@@ -1,10 +1,8 @@
 #include <algine/core/RenderbufferManager.h>
 
-#include <stdexcept>
+#include <algine/core/PtrMaker.h>
 
 #include "PublicObjectTools.h"
-
-using namespace std;
 
 namespace algine {
 RenderbufferPtr RenderbufferManager::get() {
@@ -12,7 +10,7 @@ RenderbufferPtr RenderbufferManager::get() {
 }
 
 RenderbufferPtr RenderbufferManager::create() {
-    RenderbufferPtr renderbuffer = make_shared<Renderbuffer>();
+    RenderbufferPtr renderbuffer = PtrMaker::make();
     renderbuffer->setName(m_name);
     renderbuffer->setFormat(m_format);
     renderbuffer->setDimensions(m_width, m_height);
