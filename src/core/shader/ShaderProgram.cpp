@@ -4,7 +4,6 @@
 #include <algine/core/Engine.h>
 
 #include <tulz/File.h>
-#include <tulz/macros.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
 
@@ -85,7 +84,9 @@ void ShaderProgram::link() {
 }
 
 void ShaderProgram::loadUniformLocation(const string &name) {
-    locations[name] = glGetUniformLocation(id, name.c_str());
+    if (locations.find(name) == locations.end()) {
+        locations[name] = glGetUniformLocation(id, name.c_str());
+    }
 }
 
 void ShaderProgram::loadUniformLocations(const vector<string> &names) {
@@ -95,7 +96,9 @@ void ShaderProgram::loadUniformLocations(const vector<string> &names) {
 }
 
 void ShaderProgram::loadAttribLocation(const string &name) {
-    locations[name] = glGetAttribLocation(id, name.c_str());
+    if (locations.find(name) == locations.end()) {
+        locations[name] = glGetAttribLocation(id, name.c_str());
+    }
 }
 
 void ShaderProgram::loadAttribLocations(const vector<string> &names) {
@@ -111,32 +114,28 @@ void ShaderProgram::loadActiveLocations() {
     glGetProgramInterfaceiv(id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numActiveAttribs);
     glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
 
-    vector<char> nameData(256);
+    vector<char> nameData;
     uint properties[] = {GL_NAME_LENGTH};
     int values[getArraySize(properties)];
 
-    for (int i = 0; i < numActiveAttribs; ++i) {
-        glGetProgramResourceiv(id, GL_PROGRAM_INPUT, i, getArraySize(properties),
+    auto getName = [&](uint type, uint index)
+    {
+        glGetProgramResourceiv(id, type, index, getArraySize(properties),
                                &properties[0], getArraySize(values), nullptr, &values[0]);
 
         nameData.resize(values[0]); // the length of the name
-        glGetProgramResourceName(id, GL_PROGRAM_INPUT, i, nameData.size(), nullptr, &nameData[0]);
 
-        string name(&nameData[0], nameData.size() - 1);
+        glGetProgramResourceName(id, type, index, nameData.size(), nullptr, &nameData[0]);
 
-        loadAttribLocation(name);
+        return string(&nameData[0], nameData.size() - 1);
+    };
+
+    for (uint i = 0; i < numActiveAttribs; ++i) {
+        loadAttribLocation(getName(GL_PROGRAM_INPUT, i));
     }
 
-    for (int i = 0; i < numActiveUniforms; ++i) {
-        glGetProgramResourceiv(id, GL_UNIFORM, i, getArraySize(properties),
-                               &properties[0], getArraySize(values), nullptr, &values[0]);
-
-        nameData.resize(values[0]); // the length of the name
-        glGetProgramResourceName(id, GL_UNIFORM, i, nameData.size(), nullptr, &nameData[0]);
-
-        string name(&nameData[0], nameData.size() - 1);
-
-        loadUniformLocation(name);
+    for (uint i = 0; i < numActiveUniforms; ++i) {
+        loadUniformLocation(getName(GL_UNIFORM, i));
     }
 }
 
