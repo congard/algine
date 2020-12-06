@@ -110,6 +110,8 @@ add_library(algine
         include/algine/std/CubeRendererPtr.h
         include/algine/std/model/ShapePtr.h
         include/algine/std/model/Mesh.h
+        include/algine/std/model/ModelPtr.h
+        include/algine/std/model/InputLayoutShapeLocations.h
         include/algine/std/Material.h
 
         src/core/PublicObjectTools.h
@@ -161,7 +163,8 @@ add_library(algine
         src/std/model/ShapeConfigTools.h
         src/std/model/Shape.cpp include/algine/std/model/Shape.h
         src/std/model/ShapeManager.cpp include/algine/std/model/ShapeManager.h
-        src/std/model/InputLayoutShapeLocations.cpp include/algine/std/model/InputLayoutShapeLocations.h
+        src/std/model/InputLayoutShapeLocationsManager.cpp include/algine/std/model/InputLayoutShapeLocationsManager.h
+        src/std/model/ModelManager.cpp include/algine/std/model/ModelManager.h
         src/std/Node.cpp include/algine/std/Node.h
         src/std/lighting/LightingManager.cpp include/algine/std/lighting/LightingManager.h
         src/std/lighting/Light.cpp include/algine/std/lighting/Light.h
@@ -199,13 +202,15 @@ add_library(algine
         src/ext/event/MouseEvent.cpp include/algine/ext/event/MouseEvent.h include/algine/ext/event/MouseButton.h
         src/ext/debug.cpp include/algine/ext/debug.h)
 
+target_include_directories(algine PUBLIC src/core) # TODO: move PublicObjectTools to include/algine/internal
+
 # linking
 if (WIN32)
     target_link_libraries(algine assimp ${GLEW_LIBRARY} opengl32 tulz)
-elseif(UNIX)
+elseif (UNIX)
     target_link_libraries(algine assimp ${GLEW_LIBRARY} GL tulz)
+
     if (ALGINE_USE_SYSTEM_ASSIMP)
-        target_link_directories(algine
-                PUBLIC /usr/local/lib)
+        target_link_directories(algine PUBLIC /usr/local/lib)
     endif()
 endif()
