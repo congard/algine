@@ -1,22 +1,19 @@
 #ifndef ALGINE_INPUTLAYOUTSHAPELOCATIONS_H
 #define ALGINE_INPUTLAYOUTSHAPELOCATIONS_H
 
-#include <algine/core/transfer/Transferable.h>
-
 namespace algine {
-class InputLayoutShapeLocations: public Transferable {
+class InputLayoutShapeLocations {
 public:
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
+    constexpr static int None = -1;
 
 public:
-    int position = 0;
-    int texCoord = -1;
-    int normal = -1;
-    int tangent = -1;
-    int bitangent = -1;
-    int boneWeights = -1;
-    int boneIds = -1;
+    int position = None;
+    int texCoord = None;
+    int normal = None;
+    int tangent = None;
+    int bitangent = None;
+    int boneWeights = None;
+    int boneIds = None;
 };
 }
 
