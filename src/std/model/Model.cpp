@@ -1,11 +1,15 @@
 #define GLM_FORCE_CTOR_INIT
 #include <algine/std/model/Model.h>
 
+#include "../../core/PublicObjectTools.h"
+
 using namespace std;
 using namespace glm;
 
 namespace algine {
-Model::Model(Shape *shape, Rotator::Type rotatorType)
+vector<ModelPtr> Model::publicObjects;
+
+Model::Model(const ShapePtr &shape, Rotator::Type rotatorType)
     : Rotatable(rotatorType)
 {
     if (shape) {
@@ -13,15 +17,21 @@ Model::Model(Shape *shape, Rotator::Type rotatorType)
     }
 }
 
+Model::Model(Rotator::Type rotatorType)
+    : Rotatable(rotatorType)
+{
+    // see initializer list above
+}
+
 Model::~Model() {
     deletePtr(m_animator)
 }
 
-void Model::updateMatrix() {
+void Model::transform() {
     m_transform = m_translation * m_rotation * m_scaling;
 }
 
-void Model::setShape(Shape *shape) {
+void Model::setShape(const ShapePtr &shape) {
     m_shape = shape;
 
     if (!m_shape->animations.empty()) {
@@ -51,7 +61,7 @@ void Model::setBonesFromAnimation(const string &animationName) {
     setBonesFromAnimation(m_shape->getAnimationIndexByName(animationName));
 }
 
-Shape* Model::getShape() const {
+const ShapePtr& Model::getShape() const {
     return m_shape;
 }
 
@@ -69,5 +79,13 @@ const vector<mat4>* Model::getBones() const {
 
 const mat4& Model::getBone(Index index) const {
     return m_bones->operator[](index);
+}
+
+ModelPtr Model::getByName(const string &name) {
+    return PublicObjectTools::getByName<ModelPtr>(name);
+}
+
+Model* Model::byName(const string &name) {
+    return PublicObjectTools::byName<Model>(name);
 }
 }
