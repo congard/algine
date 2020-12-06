@@ -1,3 +1,6 @@
+#ifndef ALGINE_PUBLICOBJECTTOOLS
+#define ALGINE_PUBLICOBJECTTOOLS
+
 #include <algine/core/PtrMaker.h>
 
 #include <algine/types.h>
@@ -48,7 +51,15 @@ inline T* byName(const string &name) {
 
 // below are the templates used in the managers for the get function
 
-template<typename TPtr, typename TMgr>
+/**
+ *
+ * @tparam TPtr TPtr<T>
+ * @tparam TMgr
+ * @tparam Types used for TMgr::create<Types...>();
+ * @param manager
+ * @return
+ */
+template<typename TPtr, typename TMgr, typename ...Types>
 inline TPtr getPtr(TMgr *manager) {
     using T = typename TPtr::element_type;
 
@@ -66,7 +77,11 @@ inline TPtr getPtr(TMgr *manager) {
         }
     }
 
-    return manager->create();
+    if constexpr (sizeof...(Types) == 0) {
+        return manager->create();
+    } else {
+        return manager->template create<Types...>();
+    }
 }
 
 // below the function that needs to call in manager's
@@ -92,3 +107,5 @@ inline void postCreateAccessOp(const string &typeName, const TMgr *manager, cons
     }
 }
 }
+
+#endif // ALGINE_PUBLICOBJECTTOOLS
