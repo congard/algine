@@ -16,7 +16,6 @@
 #include <iostream>
 #include <cfloat>
 
-#include "../../core/PublicObjectTools.h"
 #include "../assimp2glm.h"
 #include "ShapeConfigTools.h"
 
@@ -50,12 +49,20 @@ void ShapeManager::setParams(const vector<Param> &params) {
     m_params = params;
 }
 
-void ShapeManager::addInputLayoutLocations(const InputLayoutShapeLocations &locations) {
+void ShapeManager::addInputLayoutLocations(const InputLayoutShapeLocationsManager &locations) {
     m_locations.emplace_back(locations);
 }
 
-void ShapeManager::setInputLayoutLocations(const vector<InputLayoutShapeLocations> &locations) {
+void ShapeManager::setInputLayoutLocations(const vector<InputLayoutShapeLocationsManager> &locations) {
     m_locations = locations;
+}
+
+void ShapeManager::addInputLayoutLocationsPath(const string &path) {
+    m_locationsPaths.emplace_back(path);
+}
+
+void ShapeManager::setInputLayoutLocationsPaths(const vector<string> &paths) {
+    m_locationsPaths = paths;
 }
 
 void ShapeManager::setModelPath(const string &path) {
@@ -78,8 +85,12 @@ const vector<ShapeManager::Param>& ShapeManager::getParams() const {
     return m_params;
 }
 
-const vector<InputLayoutShapeLocations>& ShapeManager::getInputLayoutLocations() const {
+const vector<InputLayoutShapeLocationsManager>& ShapeManager::getInputLayoutLocations() const {
     return m_locations;
+}
+
+const vector<string>& ShapeManager::getInputLayoutLocationsPaths() const {
+    return m_locationsPaths;
 }
 
 const string& ShapeManager::getModelPath() const {
@@ -96,18 +107,6 @@ const AMTLManager& ShapeManager::getAMTL() const {
 
 uint ShapeManager::getBonesPerVertex() const {
     return m_bonesPerVertex;
-}
-
-ShapePtr ShapeManager::get() {
-    return PublicObjectTools::getPtr<ShapePtr>(this);
-}
-
-ShapePtr ShapeManager::create() {
-    load();
-
-    PublicObjectTools::postCreateAccessOp("Shape", this, m_shape);
-
-    return m_shape;
 }
 
 void ShapeManager::setAMTLDumpMode(AMTLDumpMode mode) {
@@ -132,10 +131,17 @@ void ShapeManager::import(const JsonHelper &jsonHelper) {
 
     // load locations
     if (config.contains(InputLayoutLocations)) {
-        for (const auto & l : config[InputLayoutLocations]) {
-            InputLayoutShapeLocations locations;
-            locations.import(l);
-            m_locations.emplace_back(locations);
+        for (const auto & item : config[InputLayoutLocations]) {
+            if (item.is_object()) {
+                InputLayoutShapeLocationsManager locations;
+                locations.setWorkingDirectory(m_workingDirectory);
+                locations.import(item);
+                m_locations.emplace_back(locations);
+            } else if (item.is_string()) {
+                m_locationsPaths.emplace_back(item);
+            } else {
+                throw runtime_error("InputLayoutLocations can be specified by path (string) or by dump (object)");
+            }
         }
     }
 
@@ -171,8 +177,11 @@ JsonHelper ShapeManager::dump() {
         config[Params].emplace_back(paramToString(p));
 
     // write locations
-    for (auto & l : m_locations)
-        config[InputLayoutLocations].emplace_back(l.dump().json);
+    for (auto & locations : m_locations)
+        config[InputLayoutLocations].emplace_back(locations.dump().json);
+
+    for (auto & path : m_locationsPaths)
+        config[InputLayoutLocations].emplace_back(path);
 
     // write shape path
     if (!m_modelPath.empty())
@@ -225,8 +234,6 @@ uint getMaxBonesPerVertex(const aiMesh *mesh) {
 }
 
 void ShapeManager::load() {
-    m_shape = PtrMaker::make();
-
     map<Param, uint> assimpParams = {
         {Param::Triangulate, aiProcess_Triangulate},
         {Param::SortByPolygonType, aiProcess_SortByPType},
@@ -250,7 +257,7 @@ void ShapeManager::load() {
 
     // Create an instance of the Importer class
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(m_modelPath, completeAssimpParams);
+    const aiScene *scene = importer.ReadFile(Path::join(m_workingDirectory, m_modelPath), completeAssimpParams);
 
     // If the import failed, report it
     if (!scene) {
@@ -267,8 +274,8 @@ void ShapeManager::load() {
         }
 
         // try to load AMTL
-        if (Path(m_amtlPath).exists()) {
-            m_amtlManager.importFromFile(m_amtlPath);
+        if (string fullAMTLPath = Path::join(m_workingDirectory, m_amtlPath); Path(fullAMTLPath).exists()) {
+            m_amtlManager.importFromFile(fullAMTLPath);
         }
     }
 
@@ -285,22 +292,28 @@ void ShapeManager::load() {
     // apply algine params
     for (const auto p : algineParams) {
         switch (p) {
-            case Param::InverseNormals:
+            case Param::InverseNormals: {
                 for (float &normal : m_normals) {
                     normal *= -1;
                 }
+
                 break;
-            case Param::PrepareAllAnimations:
-                for (auto & animation : m_shape->animations) {
+            }
+            case Param::PrepareAllAnimations: {
+                for (auto &animation : m_shape->animations) {
                     animation.bones.resize(m_shape->bonesStorage.count());
                 }
+
                 break;
-            case Param::DisableBones:
+            }
+            case Param::DisableBones: {
                 m_bonesPerVertex = 0;
                 break;
-            default:
+            }
+            default: {
                 cerr << "Unknown algine param " << static_cast<uint>(p) << "\n";
                 break;
+            }
         }
     }
 
@@ -310,8 +323,16 @@ void ShapeManager::load() {
     genBuffers();
 
     // add input layouts
-    for (const auto & l : m_locations) {
-        m_shape->createInputLayout(l);
+    for (auto &item : m_locations) {
+        m_shape->createInputLayout(item.create());
+    }
+
+    for (auto &item : m_locationsPaths) {
+        InputLayoutShapeLocationsManager locations;
+        locations.setWorkingDirectory(m_workingDirectory);
+        locations.importFromFile(item);
+
+        m_shape->createInputLayout(locations.create());
     }
 }
 
@@ -523,7 +544,7 @@ void ShapeManager::processMesh(const aiMesh *aimesh, const aiScene *scene) {
             };
 
             Texture2DManager manager;
-            manager.setWorkingDirectory(Path(m_modelPath).getParentDirectory());
+            manager.setWorkingDirectory(Path(Path::join(m_workingDirectory, m_modelPath)).getParentDirectory());
             manager.setPath(path.C_Str());
             manager.setParams({
                 {Texture::WrapU, getMapMode(mapModeU)},
@@ -567,7 +588,7 @@ void ShapeManager::processMesh(const aiMesh *aimesh, const aiScene *scene) {
 template<typename BufferType, typename DataType>
 inline BufferType* createBuffer(const vector<DataType> &data) {
     if (!data.empty()) {
-        auto *bufferType = new BufferType();
+        auto bufferType = new BufferType();
         bufferType->bind();
         bufferType->setData(sizeof(data[0]) * data.size(), &data[0], Buffer::StaticDraw);
         bufferType->unbind();
