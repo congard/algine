@@ -1,10 +1,11 @@
 #define GLM_FORCE_CTOR_INIT
 #include <algine/std/model/Model.h>
 
-#include "../../core/PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
 
 using namespace std;
 using namespace glm;
+using namespace algine::internal;
 
 namespace algine {
 vector<ModelPtr> Model::publicObjects;

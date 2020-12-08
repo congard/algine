@@ -5,11 +5,12 @@
 #include <tulz/Path.h>
 
 #include "../ConfigStrings.h"
-#include "../PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
 
 using namespace std;
-using namespace nlohmann;
 using namespace tulz;
+using namespace nlohmann;
+using namespace algine::internal;
 
 namespace algine {
 namespace Config {

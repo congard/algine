@@ -79,6 +79,7 @@ endif()
 add_library(algine
         include/algine/types.h
         include/algine/templates.h
+        include/algine/internal/PublicObjectTools.h
         include/algine/constants/BoneSystem.h
         include/algine/constants/ShadowShader.h
         include/algine/constants/QuadShader.h
@@ -114,7 +115,6 @@ add_library(algine
         include/algine/std/model/InputLayoutShapeLocations.h
         include/algine/std/Material.h
 
-        src/core/PublicObjectTools.h
         src/core/JsonHelper.cpp include/algine/core/JsonHelper.h
         src/core/Object.cpp include/algine/core/Object.h
         src/core/ManagerBase.cpp include/algine/core/ManagerBase.h
@@ -201,8 +201,6 @@ add_library(algine
         src/ext/event/MouseEventListener.cpp include/algine/ext/event/MouseEventListener.h
         src/ext/event/MouseEvent.cpp include/algine/ext/event/MouseEvent.h include/algine/ext/event/MouseButton.h
         src/ext/debug.cpp include/algine/ext/debug.h)
-
-target_include_directories(algine PUBLIC src/core) # TODO: move PublicObjectTools to include/algine/internal
 
 # linking
 if (WIN32)

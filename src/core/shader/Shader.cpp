@@ -6,10 +6,11 @@
 #include <GL/glew.h>
 #include <iostream>
 
-#include "../PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
 
 using namespace std;
 using namespace tulz;
+using namespace algine::internal;
 
 namespace algine {
 vector<ShaderPtr> Shader::publicObjects;

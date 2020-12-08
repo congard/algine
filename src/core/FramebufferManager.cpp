@@ -4,10 +4,11 @@
 #include <algine/core/PtrMaker.h>
 
 #include "FramebufferConfigTools.h"
-#include "PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
 
 using namespace std;
 using namespace nlohmann;
+using namespace algine::internal;
 
 namespace algine {
 namespace Config {

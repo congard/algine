@@ -6,7 +6,7 @@
 #include <algine/std/model/Model.h>
 #include <algine/std/rotator/Rotator.h>
 
-#include "PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
 
 namespace algine {
 class ModelManager: public ManagerBase {
@@ -83,7 +83,7 @@ private:
 
 template<typename TModel, typename TShape>
 ModelPtr ModelManager::get() {
-    return PublicObjectTools::getPtr<ModelPtr, ModelManager, TModel, TShape>(this);
+    return internal::PublicObjectTools::getPtr<ModelPtr, TModel, TShape>(this);
 }
 
 template<typename TModel, typename TShape>
@@ -141,7 +141,7 @@ ModelPtr ModelManager::create() {
     model->scale();
     model->transform();
 
-    PublicObjectTools::postCreateAccessOp("Model", this, model);
+    internal::PublicObjectTools::postCreateAccessOp("Model", this, model);
 
     return model;
 }

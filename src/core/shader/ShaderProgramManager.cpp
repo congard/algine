@@ -2,13 +2,13 @@
 
 #include <algine/core/JsonHelper.h>
 
-#include <tulz/File.h>
 #include <iostream>
 
-#include "../PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
 
 using namespace std;
 using namespace nlohmann;
+using namespace algine::internal;
 
 #define constant(name, val) constexpr char name[] = val
 

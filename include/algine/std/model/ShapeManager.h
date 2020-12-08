@@ -8,7 +8,7 @@
 
 #include <algine/core/ManagerBase.h>
 
-#include "PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
 
 class aiMesh;
 class aiScene;
@@ -94,7 +94,7 @@ private:
 
 template<typename T>
 ShapePtr ShapeManager::get() {
-    return PublicObjectTools::getPtr<ShapePtr, ShapeManager, T>(this);
+    return internal::PublicObjectTools::getPtr<ShapePtr, T>(this);
 }
 
 template<typename T>
@@ -103,7 +103,7 @@ ShapePtr ShapeManager::create() {
 
     load();
 
-    PublicObjectTools::postCreateAccessOp("Shape", this, m_shape);
+    internal::PublicObjectTools::postCreateAccessOp("Shape", this, m_shape);
 
     return m_shape;
 }

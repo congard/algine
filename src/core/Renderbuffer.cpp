@@ -12,7 +12,9 @@
 #include "../core/SOP.h"
 #include "../core/SOPConstants.h"
 
-#include "PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
+
+using namespace algine::internal;
 
 namespace algine {
 vector<RenderbufferPtr> Renderbuffer::publicObjects;

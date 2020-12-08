@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace algine::PublicObjectTools {
+namespace algine::internal::PublicObjectTools {
 constexpr uint notFound = static_cast<uint>(-1);
 
 template<typename TPtr>
@@ -54,12 +54,12 @@ inline T* byName(const string &name) {
 /**
  *
  * @tparam TPtr TPtr<T>
- * @tparam TMgr
  * @tparam Types used for TMgr::create<Types...>();
+ * @tparam TMgr
  * @param manager
  * @return
  */
-template<typename TPtr, typename TMgr, typename ...Types>
+template<typename TPtr, typename ...Types, typename TMgr>
 inline TPtr getPtr(TMgr *manager) {
     using T = typename TPtr::element_type;
 

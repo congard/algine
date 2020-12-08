@@ -2,7 +2,9 @@
 
 #include <algine/core/PtrMaker.h>
 
-#include "PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
+
+using namespace algine::internal;
 
 namespace algine {
 RenderbufferPtr RenderbufferManager::get() {

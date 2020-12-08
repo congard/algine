@@ -16,10 +16,11 @@
 #include "../SOP.h"
 #include "../SOPConstants.h"
 
-#include "../PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
 
 using namespace std;
 using namespace tulz;
+using namespace algine::internal;
 
 namespace algine {
 vector<ShaderProgramPtr> ShaderProgram::publicObjects;

@@ -9,12 +9,13 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "../PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
 
 using namespace nlohmann;
+using namespace std;
 using namespace tulz;
 using namespace tulz::StringUtils;
-using namespace std;
+using namespace algine::internal;
 
 #define constant(name, val) constexpr char name[] = val
 

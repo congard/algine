@@ -11,11 +11,12 @@
 #include "../SOP.h"
 #include "../SOPConstants.h"
 
-#include "../PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
 
 #include "TexturePrivateTools.h"
 
 using namespace std;
+using namespace algine::internal;
 
 namespace algine {
 vector<TextureCubePtr> TextureCube::publicObjects;

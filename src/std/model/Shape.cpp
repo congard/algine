@@ -2,9 +2,10 @@
 
 #include <algine/core/DataType.h>
 
-#include "../../core/PublicObjectTools.h"
+#include "algine/internal/PublicObjectTools.h"
 
 using namespace std;
+using namespace algine::internal;
 
 namespace algine {
 vector<ShapePtr> Shape::publicObjects;
