@@ -62,14 +62,14 @@ enum_class(PointLightOffsets: CommonLightOffsets,
 #define pointLightElem(elem) \
     LightingVars::Block::PointLights + string("[") + to_string(i) + "]." + LightingVars::Light::elem
 
-#define getDirLightOffset(elem) BaseUniformBlock::getVarOffset(dirLightElem(elem), m_lightShader)
-#define getPointLightOffset(elem) BaseUniformBlock::getVarOffset(pointLightElem(elem), m_lightShader)
 #define dirLightOffset(type) m_offsets[EDirLight][i][DirLightOffsets::type]
 #define pointLightOffset(type) m_offsets[EPointLight][i][PointLightOffsets::type]
 
 void LightingManager::init() {
+    const auto lightShaderRaw = m_lightShader.get();
+
     m_uniformBlock.setName(LightingVars::Block::Name);
-    m_uniformBlock.init(m_lightShader);
+    m_uniformBlock.init(lightShaderRaw);
 
     auto uniformBuffer = new UniformBuffer();
 
@@ -77,22 +77,22 @@ void LightingManager::init() {
 
     m_uniformBlock.setBuffer(uniformBuffer);
     m_uniformBlock.allocateSuitableBufferSize();
-    m_uniformBlock.assignBindingPoint(m_lightShader);
+    m_uniformBlock.assignBindingPoint(lightShaderRaw);
     m_uniformBlock.linkBuffer();
 
     m_lightsCountOffset[EDirLight] = BaseUniformBlock::getVarOffset(
-            LightingVars::Block::DirLightsCount, m_lightShader);
+            LightingVars::Block::DirLightsCount, lightShaderRaw);
     m_lightsCountOffset[EPointLight] = BaseUniformBlock::getVarOffset(
-            LightingVars::Block::PointLightsCount, m_lightShader);
+            LightingVars::Block::PointLightsCount, lightShaderRaw);
     m_shadowMapsLocations[EDirLight] = m_lightShader->getLocation(LightingVars::DirLightShadowMaps);
     m_shadowMapsLocations[EPointLight] = m_lightShader->getLocation(LightingVars::PointLightShadowMaps);
 
     m_shadowOpacityOffset = BaseUniformBlock::getVarOffset(
-            LightingVars::Block::ShadowOpacity, m_lightShader);
+            LightingVars::Block::ShadowOpacity, lightShaderRaw);
     m_shadowDiskRadiusKOffset = BaseUniformBlock::getVarOffset(
-            LightingVars::Block::ShadowDiskRadiusK, m_lightShader);
+            LightingVars::Block::ShadowDiskRadiusK, lightShaderRaw);
     m_shadowDiskRadiusMinOffset = BaseUniformBlock::getVarOffset(
-            LightingVars::Block::ShadowDiskRadiusMin, m_lightShader);
+            LightingVars::Block::ShadowDiskRadiusMin, lightShaderRaw);
 
     if (m_pointShadowShader) {
         m_shadowShaderPosLoc = m_pointShadowShader->getLocation(ShadowShader::Vars::PointLight::Pos);
@@ -102,6 +102,9 @@ void LightingManager::init() {
 
     m_offsets[EDirLight] = Array<LightOffsets>(m_lightsLimit[EDirLight]);
     m_offsets[EPointLight] = Array<LightOffsets>(m_lightsLimit[EPointLight]);
+
+#define getDirLightOffset(elem) BaseUniformBlock::getVarOffset(dirLightElem(elem), lightShaderRaw)
+#define getPointLightOffset(elem) BaseUniformBlock::getVarOffset(pointLightElem(elem), lightShaderRaw)
 
     // dir light offsets
     for (uint i = 0; i < m_lightsLimit[EDirLight]; ++i) {
@@ -127,6 +130,9 @@ void LightingManager::init() {
         pointLightOffset(Far) = getPointLightOffset(FarPlane);
         pointLightOffset(Bias) = getPointLightOffset(Bias);
     }
+
+#undef getPointLightOffset
+#undef getDirLightOffset
 }
 
 void LightingManager::configureShadowMapping() {
@@ -158,11 +164,11 @@ void LightingManager::setLightsMapInitialSlot(uint slot, Light::Type lightType) 
     m_lightsInitialSlot[to_uint(lightType)] = slot;
 }
 
-void LightingManager::setLightShader(ShaderProgram *const in_lightShader) {
+void LightingManager::setLightShader(const ShaderProgramPtr &in_lightShader) {
     m_lightShader = in_lightShader;
 }
 
-void LightingManager::setPointLightShadowShader(ShaderProgram *shadowShader) {
+void LightingManager::setPointLightShadowShader(const ShaderProgramPtr &shadowShader) {
     m_pointShadowShader = shadowShader;
 }
 
@@ -174,11 +180,11 @@ uint LightingManager::getLightsMapInitialSlot(Light::Type lightType) const {
     return m_lightsInitialSlot[to_uint(lightType)];
 }
 
-ShaderProgram* LightingManager::getLightShader() const {
+const ShaderProgramPtr& LightingManager::getLightShader() const {
     return m_lightShader;
 }
 
-ShaderProgram* LightingManager::getPointLightShadowShader() const {
+const ShaderProgramPtr& LightingManager::getPointLightShadowShader() const {
     return m_pointShadowShader;
 }
 

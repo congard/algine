@@ -2,12 +2,12 @@
 #define ALGINE_POINTLAMP_H
 
 #include <algine/std/lighting/PointLight.h>
-#include <algine/std/model/Model.h>
+#include <algine/std/model/ModelPtr.h>
 
 namespace algine {
 class PointLamp: public PointLight {
 public:
-    Model *mptr = nullptr;
+    ModelPtr mptr = nullptr;
 
     void setPos(const glm::vec3 &pos);
 };

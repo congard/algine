@@ -24,13 +24,13 @@ public:
     void setBindingPoint(uint bindingPoint);
     void setLightsLimit(uint limit, Light::Type lightType);
     void setLightsMapInitialSlot(uint slot, Light::Type lightType);
-    void setLightShader(ShaderProgram *lightShader);
-    void setPointLightShadowShader(ShaderProgram *shadowShader);
+    void setLightShader(const ShaderProgramPtr &lightShader);
+    void setPointLightShadowShader(const ShaderProgramPtr &shadowShader);
 
     uint getLightsLimit(Light::Type lightType) const;
     uint getLightsMapInitialSlot(Light::Type lightType) const;
-    ShaderProgram* getLightShader() const;
-    ShaderProgram* getPointLightShadowShader() const;
+    const ShaderProgramPtr& getLightShader() const;
+    const ShaderProgramPtr& getPointLightShadowShader() const;
     const BaseUniformBlock& getUniformBlock() const;
 
     void bindBuffer() const;
@@ -72,8 +72,8 @@ private:
 private:
     uint m_lightsLimit[Light::TypesCount];
     uint m_lightsInitialSlot[Light::TypesCount];
-    ShaderProgram *m_lightShader;
-    ShaderProgram *m_pointShadowShader;
+    ShaderProgramPtr m_lightShader;
+    ShaderProgramPtr m_pointShadowShader;
 
 private:
     BufferWriter m_bufferWriter;
