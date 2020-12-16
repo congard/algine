@@ -115,6 +115,8 @@ add_library(algine
         include/algine/std/model/ModelPtr.h
         include/algine/std/model/InputLayoutShapeLocations.h
         include/algine/std/Material.h
+        include/algine/std/animation/BoneMatrix.h
+        include/algine/std/animation/BoneMatrices.h
 
         src/core/JsonHelper.cpp include/algine/core/JsonHelper.h
         src/core/Object.cpp include/algine/core/Object.h
