@@ -105,6 +105,7 @@ add_library(algine
         include/algine/core/FramebufferPtr.h
         include/algine/core/Ptr.h
         include/algine/core/PtrMaker.h
+        include/algine/core/RawPtr.h
         include/algine/core/shader/ShadersInfo.h
         include/algine/core/DataType.h
         include/algine/std/QuadRendererPtr.h
