@@ -13,7 +13,6 @@ constant(SortByPolygonType, "sortByPolygonType");
 constant(CalcTangentSpace, "calcTangentSpace");
 constant(JoinIdenticalVertices, "joinIdenticalVertices");
 constant(InverseNormals, "inverseNormals");
-constant(PrepareAllAnimations, "prepareAllAnimations");
 constant(DisableBones, "disableBones");
 
 constant(InputLayoutLocations, "inputLayoutLocations");
@@ -28,7 +27,6 @@ inline string paramToString(ShapeManager::Param param) {
     param_str(CalcTangentSpace);
     param_str(JoinIdenticalVertices);
     param_str(InverseNormals);
-    param_str(PrepareAllAnimations);
     param_str(DisableBones);
 
     throw runtime_error("Unsupported param " + to_string(static_cast<int>(param)));
@@ -44,7 +42,6 @@ inline ShapeManager::Param stringToParam(const string &str) {
     param(CalcTangentSpace);
     param(JoinIdenticalVertices);
     param(InverseNormals);
-    param(PrepareAllAnimations);
     param(DisableBones);
 
     throw runtime_error("Unsupported param '" + str + "'");

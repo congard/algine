@@ -8,7 +8,7 @@
 
 #include <algine/core/ManagerBase.h>
 
-#include "algine/internal/PublicObjectTools.h"
+#include <algine/internal/PublicObjectTools.h>
 
 class aiMesh;
 class aiScene;
@@ -22,7 +22,6 @@ public:
         CalcTangentSpace,
         JoinIdenticalVertices,
         InverseNormals,
-        PrepareAllAnimations,
         DisableBones
     };
 

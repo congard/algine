@@ -30,10 +30,7 @@ constexpr uint BonesPerVertex = 4;
 
 ShapeManager::ShapeManager()
     : m_amtlDumpMode(AMTLDumpMode::None),
-      m_bonesPerVertex(Default::BonesPerVertex)
-{
-    // see initializer list above
-}
+      m_bonesPerVertex(Default::BonesPerVertex) {}
 
 void ShapeManager::addParam(Param param) {
     m_params.emplace_back(param);
@@ -265,7 +262,7 @@ void ShapeManager::load() {
         return;
     }
 
-    m_shape->globalInverseTransform = glm::inverse(getMat4(scene->mRootNode->mTransformation));
+    m_shape->m_globalInverseTransform = glm::inverse(getMat4(scene->mRootNode->mTransformation));
 
     // try to find AMTL if does not specified
     if (m_amtlManager.getMaterials().empty()) {
@@ -283,11 +280,11 @@ void ShapeManager::load() {
     processNode(scene->mRootNode, scene);
 
     // load animations
-    m_shape->rootNode = Node(scene->mRootNode);
-    m_shape->animations.reserve(scene->mNumAnimations); // allocate space for animations
+    m_shape->m_rootNode = Node(scene->mRootNode);
+    m_shape->m_animations.reserve(scene->mNumAnimations); // allocate space for animations
 
     for (size_t i = 0; i < scene->mNumAnimations; i++)
-        m_shape->animations.emplace_back(scene->mAnimations[i]);
+        m_shape->m_animations.emplace_back(scene->mAnimations[i]);
 
     // apply algine params
     for (const auto p : algineParams) {
@@ -295,13 +292,6 @@ void ShapeManager::load() {
             case Param::InverseNormals: {
                 for (float &normal : m_normals) {
                     normal *= -1;
-                }
-
-                break;
-            }
-            case Param::PrepareAllAnimations: {
-                for (auto &animation : m_shape->animations) {
-                    animation.bones.resize(m_shape->bonesStorage.count());
                 }
 
                 break;
@@ -317,7 +307,7 @@ void ShapeManager::load() {
         }
     }
 
-    m_shape->bonesPerVertex = m_bonesPerVertex;
+    m_shape->m_bonesPerVertex = m_bonesPerVertex;
 
     // generate buffers
     genBuffers();
@@ -353,11 +343,11 @@ void ShapeManager::loadBones(const aiMesh *aimesh) {
     for (usize i = 0; i < aimesh->mNumBones; i++) {
         aiBone *bone = aimesh->mBones[i];
         string boneName(bone->mName.data);
-        int boneIndex = m_shape->bonesStorage.getIndex(boneName);
+        Index boneIndex = m_shape->m_bones.getIndex(boneName);
 
         if (boneIndex == BonesStorage::BoneNotFound) {
-            boneIndex = m_shape->bonesStorage.count();
-            m_shape->bonesStorage.bones.emplace_back(boneName, getMat4(bone->mOffsetMatrix));
+            boneIndex = m_shape->m_bones.size();
+            m_shape->m_bones.data().emplace_back(boneName, getMat4(bone->mOffsetMatrix));
         }
 
         for (usize j = 0; j < bone->mNumWeights; j++) {
@@ -582,7 +572,7 @@ void ShapeManager::processMesh(const aiMesh *aimesh, const aiScene *scene) {
     if (mesh.material.shininess == 0)
         mesh.material.shininess = FLT_EPSILON;
 
-    m_shape->meshes.push_back(mesh);
+    m_shape->m_meshes.push_back(mesh);
 }
 
 template<typename BufferType, typename DataType>
@@ -599,14 +589,14 @@ inline BufferType* createBuffer(const vector<DataType> &data) {
 }
 
 void ShapeManager::genBuffers() {
-    m_shape->vertices = createBuffer<ArrayBuffer>(m_vertices);
-    m_shape->normals = createBuffer<ArrayBuffer>(m_normals);
-    m_shape->texCoords = createBuffer<ArrayBuffer>(m_texCoords);
-    m_shape->tangents = createBuffer<ArrayBuffer>(m_tangents);
-    m_shape->bitangents = createBuffer<ArrayBuffer>(m_bitangents);
-    m_shape->boneWeights = createBuffer<ArrayBuffer>(m_boneWeights);
-    m_shape->boneIds = createBuffer<ArrayBuffer>(m_boneIds);
+    m_shape->m_vertices = createBuffer<ArrayBuffer>(m_vertices);
+    m_shape->m_normals = createBuffer<ArrayBuffer>(m_normals);
+    m_shape->m_texCoords = createBuffer<ArrayBuffer>(m_texCoords);
+    m_shape->m_tangents = createBuffer<ArrayBuffer>(m_tangents);
+    m_shape->m_bitangents = createBuffer<ArrayBuffer>(m_bitangents);
+    m_shape->m_boneWeights = createBuffer<ArrayBuffer>(m_boneWeights);
+    m_shape->m_boneIds = createBuffer<ArrayBuffer>(m_boneIds);
 
-    m_shape->indices = createBuffer<IndexBuffer>(m_indices);
+    m_shape->m_indices = createBuffer<IndexBuffer>(m_indices);
 }
 }
