@@ -1,6 +1,7 @@
 #include <algine/std/animation/BoneSystemManager.h>
 
 #include <algine/std/model/Model.h>
+#include <algine/std/model/Shape.h>
 
 #include <algine/constants/BoneSystem.h>
 
@@ -90,7 +91,7 @@ void BoneSystemManager::addModel(const ModelPtr &model) {
     uint index = m_bufferStorage.allocateBlock();
     m_ids[model] = index;
 
-    int attribsCount = getAttribsCount(model->getShape()->bonesPerVertex);
+    int attribsCount = getAttribsCount(model->getShape()->getBonesPerVertex());
     m_bufferStorage.write(index, m_uniformBlock.getVarOffset(m_boneAttribsCountPos), sizeof(int), &attribsCount);
 }
 
