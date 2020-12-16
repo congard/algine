@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <vector>
+#include <tuple>
 
 using namespace std;
 using namespace glm;
@@ -20,6 +21,9 @@ namespace Config {
 constant(Shape, "shape");
 constant(Rotator, "rotator");
 constant(ActiveAnimation, "activeAnimation");
+constant(ActivatedAnimations, "activatedAnimations");
+
+constant(All, "all");
 
 constant(Yaw, "yaw");
 constant(Pitch, "pitch");
@@ -33,24 +37,58 @@ constant(Pos, "pos");
 constant(Scale, "scale");
 }
 
+ModelManager::AnimationInfo::AnimationInfo(std::string name)
+    : m_name(move(name)),
+      m_index(None) {}
+
+ModelManager::AnimationInfo::AnimationInfo(Index index)
+    : m_index(index) {}
+
+ModelManager::AnimationInfo::AnimationInfo()
+    : m_index(None) {}
+
+const std::string &ModelManager::AnimationInfo::getName() const {
+    return m_name;
+}
+
+Index ModelManager::AnimationInfo::getIndex() const {
+    return m_index;
+}
+
+bool ModelManager::AnimationInfo::hasName() const {
+    return !m_name.empty();
+}
+
+bool ModelManager::AnimationInfo::hasIndex() const {
+    return m_index != None;
+}
+
+bool ModelManager::AnimationInfo::operator<(const AnimationInfo &rhs) const {
+    return tie(m_name, m_index) < tie(rhs.m_name, rhs.m_index);
+}
+
 ModelManager::ModelManager()
     : m_shapeDumpMode(ShapeDumpMode::None),
-      m_activeAnimationDumpMode(ActiveAnimationDumpMode::None),
-      m_animationIndex(0),
+      m_activatedAnimationsDumpMode(ActivatedAnimationsDumpMode::List),
       m_rotatorType(Rotator::Type::Euler),
       m_pos(),
       m_rotate(),
-      m_scale(1.0f)
-{
-    // see initializer list above
+      m_scale(1.0f) {}
+
+void ModelManager::activateAnimation(const string &name) {
+    m_activatedAnimations.insert(AnimationInfo(name));
+}
+
+void ModelManager::activateAnimation(Index index) {
+    m_activatedAnimations.insert(AnimationInfo(index));
 }
 
 void ModelManager::setShapeDumpMode(ShapeDumpMode mode) {
     m_shapeDumpMode = mode;
 }
 
-void ModelManager::setActiveAnimationDumpMode(ActiveAnimationDumpMode mode) {
-    m_activeAnimationDumpMode = mode;
+void ModelManager::setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode mode) {
+    m_activatedAnimationsDumpMode = mode;
 }
 
 void ModelManager::setShapePath(const string &path) {
@@ -72,15 +110,15 @@ void ModelManager::setShape(const ShapeManager &manager) {
 }
 
 void ModelManager::setActiveAnimationName(const string &name) {
-    setActiveAnimationDumpMode(ActiveAnimationDumpMode::Name);
-
-    m_animationName = name;
+    m_activeAnimation = AnimationInfo(name);
 }
 
 void ModelManager::setActiveAnimationIndex(Index index) {
-    setActiveAnimationDumpMode(ActiveAnimationDumpMode::Index);
+    m_activeAnimation = AnimationInfo(index);
+}
 
-    m_animationIndex = index;
+void ModelManager::setActivatedAnimations(const set<AnimationInfo> &animations) {
+    m_activatedAnimations = animations;
 }
 
 void ModelManager::setRotatorType(Rotator::Type type) {
@@ -103,8 +141,8 @@ ModelManager::ShapeDumpMode ModelManager::getShapeDumpMode() const {
     return m_shapeDumpMode;
 }
 
-ModelManager::ActiveAnimationDumpMode ModelManager::getActiveAnimationDumpMode() const {
-    return m_activeAnimationDumpMode;
+ModelManager::ActivatedAnimationsDumpMode ModelManager::getActivatedAnimationsDumpMode() const {
+    return m_activatedAnimationsDumpMode;
 }
 
 const string &ModelManager::getShapePath() const {
@@ -119,12 +157,12 @@ const ShapeManager& ModelManager::getShape() const {
     return m_shape;
 }
 
-const string& ModelManager::getActiveAnimationName() const {
-    return m_animationName;
+const ModelManager::AnimationInfo& ModelManager::getActiveAnimation() const {
+    return m_activeAnimation;
 }
 
-Index ModelManager::getActiveAnimationIndex() const {
-    return m_animationIndex;
+const set<ModelManager::AnimationInfo>& ModelManager::getActivatedAnimations() const {
+    return m_activatedAnimations;
 }
 
 Rotator::Type ModelManager::getRotatorType() const {
@@ -178,6 +216,27 @@ void ModelManager::import(const JsonHelper &jsonHelper) {
         }
     }
 
+    // load activated animations
+    if (config.contains(ActivatedAnimations)) {
+        if (const json &animations = config[ActivatedAnimations]; animations.is_string() && animations == All) {
+            setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode::All);
+        } else if (animations.is_array()) {
+            setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode::List);
+
+            for (const auto &anim : animations) {
+                if (anim.is_number()) {
+                    m_activatedAnimations.insert(AnimationInfo(anim.get<Index>()));
+                } else if (anim.is_string()) {
+                    m_activatedAnimations.insert(AnimationInfo(anim.get<string>()));
+                } else {
+                    throw runtime_error("Invalid activatedAnimations element:\n" + anim.dump());
+                }
+            }
+        } else {
+            throw runtime_error("Invalid activatedAnimations value:\n" + animations.dump());
+        }
+    }
+
     // load rotator
     if (config.contains(Config::Rotator)) {
         const JsonHelper &rotator = config[Config::Rotator];
@@ -225,17 +284,28 @@ JsonHelper ModelManager::dump() {
     }
 
     // write active animation
-    switch (m_activeAnimationDumpMode) {
-        case ActiveAnimationDumpMode::Index: {
-            config[Config::ActiveAnimation] = m_animationIndex;
+    if (m_activeAnimation.hasIndex()) {
+        config[Config::ActiveAnimation] = m_activeAnimation.getIndex();
+    } else if (m_activeAnimation.hasName()) {
+        config[Config::ActiveAnimation] = m_activeAnimation.getName();
+    }
+
+    // write activated animations
+    switch (m_activatedAnimationsDumpMode) {
+        case ActivatedAnimationsDumpMode::All: {
+            config[Config::ActivatedAnimations] = Config::All;
             break;
         }
-        case ActiveAnimationDumpMode::Name: {
-            config[Config::ActiveAnimation] = m_animationName;
+        case ActivatedAnimationsDumpMode::List: {
+            for (const auto &info : m_activatedAnimations) {
+                if (info.hasIndex()) {
+                    config[Config::ActivatedAnimations].emplace_back(info.getIndex());
+                } else if (info.hasName()) {
+                    config[Config::ActivatedAnimations].emplace_back(info.getName());
+                }
+            }
+
             break;
-        }
-        default: {
-            // empty
         }
     }
 

@@ -6,7 +6,9 @@
 #include <algine/std/model/Model.h>
 #include <algine/std/rotator/Rotator.h>
 
-#include "algine/internal/PublicObjectTools.h"
+#include <algine/internal/PublicObjectTools.h>
+
+#include <set>
 
 namespace algine {
 class ModelManager: public ManagerBase {
@@ -18,17 +20,42 @@ public:
         Name
     };
 
-    enum class ActiveAnimationDumpMode {
-        None,
-        Index,
-        Name
+    enum class ActivatedAnimationsDumpMode {
+        All,
+        List
+    };
+
+public:
+    class AnimationInfo {
+    public:
+        constexpr static Index None = -1;
+
+    public:
+        explicit AnimationInfo(std::string name);
+        explicit AnimationInfo(Index index);
+        AnimationInfo();
+
+        const std::string& getName() const;
+        Index getIndex() const;
+
+        bool hasName() const;
+        bool hasIndex() const;
+
+        bool operator<(const AnimationInfo &rhs) const;
+
+    private:
+        std::string m_name;
+        Index m_index;
     };
 
 public:
     ModelManager();
 
+    void activateAnimation(const std::string &name);
+    void activateAnimation(Index index);
+
     void setShapeDumpMode(ShapeDumpMode mode);
-    void setActiveAnimationDumpMode(ActiveAnimationDumpMode mode);
+    void setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode mode);
 
     void setShapePath(const std::string &path);
     void setShapeName(const std::string &name);
@@ -37,20 +64,23 @@ public:
     void setActiveAnimationName(const std::string &name);
     void setActiveAnimationIndex(Index index);
 
+    void setActivatedAnimations(const std::set<AnimationInfo> &animations);
+
     void setRotatorType(Rotator::Type type);
     void setPos(const glm::vec3 &pos);
     void setRotate(const glm::vec3 &rotate);
     void setScale(const glm::vec3 &scale);
 
     ShapeDumpMode getShapeDumpMode() const;
-    ActiveAnimationDumpMode getActiveAnimationDumpMode() const;
+    ActivatedAnimationsDumpMode getActivatedAnimationsDumpMode() const;
 
     const std::string& getShapePath() const;
     const std::string& getShapeName() const;
     const ShapeManager& getShape() const;
 
-    const std::string& getActiveAnimationName() const;
-    Index getActiveAnimationIndex() const;
+    const AnimationInfo& getActiveAnimation() const;
+
+    const std::set<AnimationInfo>& getActivatedAnimations() const;
 
     Rotator::Type getRotatorType() const;
     const glm::vec3& getPos() const;
@@ -68,17 +98,18 @@ public:
 
 private:
     ShapeDumpMode m_shapeDumpMode;
-    ActiveAnimationDumpMode m_activeAnimationDumpMode;
+    ActivatedAnimationsDumpMode m_activatedAnimationsDumpMode;
 
 private:
     std::string m_shapePath, m_shapeName;
     ShapeManager m_shape;
 
-    std::string m_animationName;
-    Index m_animationIndex;
+    AnimationInfo m_activeAnimation;
 
     Rotator::Type m_rotatorType;
     glm::vec3 m_pos, m_rotate, m_scale;
+
+    std::set<AnimationInfo> m_activatedAnimations;
 };
 
 template<typename TModel, typename TShape>
@@ -115,18 +146,28 @@ ModelPtr ModelManager::create() {
         }
     }
 
-    // configure animation
-    switch (m_activeAnimationDumpMode) {
-        case ActiveAnimationDumpMode::Index: {
-            model->setBonesFromAnimation(m_animationIndex);
+    // configure animations
+    if (m_activeAnimation.hasIndex()) {
+        model->setBonesFromAnimation(m_activeAnimation.getIndex());
+    } else if (m_activeAnimation.hasName()) {
+        model->setBonesFromAnimation(m_activeAnimation.getName());
+    }
+
+    switch (m_activatedAnimationsDumpMode) {
+        case ActivatedAnimationsDumpMode::All: {
+            model->activateAnimations();
             break;
         }
-        case ActiveAnimationDumpMode::Name: {
-            model->setBonesFromAnimation(m_animationName);
+        case ActivatedAnimationsDumpMode::List: {
+            for (const auto &info : m_activatedAnimations) {
+                if (info.hasIndex()) {
+                    model->activateAnimation(info.getIndex());
+                } else if (info.hasName()) {
+                    model->activateAnimation(info.getName());
+                }
+            }
+
             break;
-        }
-        default: {
-            // Explicitly left empty
         }
     }
 
