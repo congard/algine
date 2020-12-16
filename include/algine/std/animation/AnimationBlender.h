@@ -1,8 +1,8 @@
 #ifndef ALGINE_ANIMATIONBLENDER_H
 #define ALGINE_ANIMATIONBLENDER_H
 
+#include <algine/std/model/ModelPtr.h>
 #include <algine/types.h>
-#include <algine/std/model/Shape.h>
 
 #include <glm/mat4x4.hpp>
 
@@ -18,7 +18,7 @@ public:
     };
 
 public:
-    explicit AnimationBlender(const ShapePtr &shape);
+    explicit AnimationBlender(const ModelPtr &model);
     AnimationBlender();
 
     void blend();
@@ -29,7 +29,7 @@ public:
     void setBlendList(const std::vector<uint> &blendList);
     void setFactor(float factor);
     void changeFactor(float step);
-    void setShape(const ShapePtr &shape);
+    void setModel(const ModelPtr &model);
     void setLhsAnim(uint index);
     void setRhsAnim(uint index);
 
@@ -38,7 +38,7 @@ public:
     uint getLhsAnim() const;
     uint getRhsAnim() const;
     float getFactor() const;
-    const ShapePtr& getShape() const;
+    const ModelPtr& getModel() const;
     const std::vector<glm::mat4>& bones();
 
 private:
@@ -51,7 +51,7 @@ private:
     glm::mat4 inverseGlobalInverseTransform;
     uint m_blendListMode = BlendListDisable;
     uint m_lhsAnim = 0, m_rhsAnim = 0;
-    ShapePtr m_shape = nullptr;
+    ModelPtr m_model = nullptr;
     float m_factor = 0.0f;
 };
 }

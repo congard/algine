@@ -1,6 +1,8 @@
 #define GLM_FORCE_CTOR_INIT
 #include <algine/std/model/Model.h>
 
+#include <algine/std/model/Shape.h>
+
 #include "algine/internal/PublicObjectTools.h"
 
 using namespace std;
@@ -19,10 +21,7 @@ Model::Model(const ShapePtr &shape, Rotator::Type rotatorType)
 }
 
 Model::Model(Rotator::Type rotatorType)
-    : Rotatable(rotatorType)
-{
-    // see initializer list above
-}
+    : Rotatable(rotatorType) {}
 
 Model::~Model() {
     deletePtr(m_animator)
@@ -32,34 +31,94 @@ void Model::transform() {
     m_transform = m_translation * m_rotation * m_scaling;
 }
 
+#define configureAnimationList() m_animBones.resize(m_shape->getAnimationsAmount())
+
+void Model::activateAnimations() {
+    configureAnimationList();
+
+    for (auto &m_animBone : m_animBones) {
+        m_animBone.resize(m_shape->getBonesAmount());
+    }
+}
+
+void Model::activateAnimation(Index index) {
+    configureAnimationList();
+
+    m_animBones[index].resize(m_shape->getBonesAmount());
+}
+
+void Model::activateAnimation(const std::string &name) {
+    activateAnimation(m_shape->getAnimationIndexByName(name));
+}
+
+void Model::deactivateAnimation(Index index) {
+    configureAnimationList();
+
+    m_animBones[index] = {};
+}
+
+void Model::deactivateAnimation(const std::string &name) {
+    deactivateAnimation(m_shape->getAnimationIndexByName(name));
+}
+
+bool Model::isAnimationActivated(uint index) const {
+    return m_animBones[index].size() == m_shape->getBonesAmount();
+}
+
+bool Model::isBonesPresent() const {
+    return m_shape->isBonesPresent();
+}
+
+void Model::setBoneTransform(const string &boneName, const BoneMatrix &transformation) {
+    if (uint index = m_shape->m_bones.getIndex(boneName); index != BonesStorage::BoneNotFound) {
+        m_boneTransformations[index] = transformation;
+    } else {
+        throw runtime_error("Bone " + boneName + " does not found");
+    }
+}
+
+void Model::setBoneTransform(Index index, const BoneMatrix &transformation) {
+    if (index < m_boneTransformations.size()) {
+        m_boneTransformations[index] = transformation;
+    } else {
+        throw runtime_error("index >= m_boneTransformations.size()");
+    }
+}
+
 void Model::setShape(const ShapePtr &shape) {
     m_shape = shape;
 
-    if (!m_shape->animations.empty()) {
+    configureAnimationList();
+
+    if (m_shape->isAnimationsPresent()) {
         if (m_animator == nullptr) {
-            m_animator = new Animator(m_shape);
-        } else {
-            // suddenly setShape function is called one more time
-            m_animator->setShape(m_shape);
+            m_animator = new Animator(this);
         }
 
         // nullptr check because m_bones could be already set
         if (m_bones == nullptr) {
-            m_bones = &m_shape->animations[0].bones;
+            m_bones = &m_animBones[0];
         }
     }
+
+    // configure transformations array
+    m_boneTransformations.resize(m_shape->getBonesAmount(), mat4(1.0));
 }
 
-void Model::setBones(const vector<mat4> *bones) {
+void Model::setBones(const BoneMatrices *bones) {
     m_bones = bones;
 }
 
 void Model::setBonesFromAnimation(Index animationIndex) {
-    m_bones = &m_shape->animations[animationIndex].bones;
+    m_bones = &m_animBones[animationIndex];
 }
 
 void Model::setBonesFromAnimation(const string &animationName) {
     setBonesFromAnimation(m_shape->getAnimationIndexByName(animationName));
+}
+
+void Model::setBoneTransformations(const BoneMatrices &transformations) {
+    m_boneTransformations = transformations;
 }
 
 const ShapePtr& Model::getShape() const {
@@ -74,12 +133,16 @@ mat4& Model::transformation() {
     return m_transform;
 }
 
-const vector<mat4>* Model::getBones() const {
+const BoneMatrices* Model::getBones() const {
     return m_bones;
 }
 
-const mat4& Model::getBone(Index index) const {
+const BoneMatrix& Model::getBone(Index index) const {
     return m_bones->operator[](index);
+}
+
+const BoneMatrices& Model::getBoneTransformations() const {
+    return m_boneTransformations;
 }
 
 ModelPtr Model::getByName(const string &name) {

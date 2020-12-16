@@ -11,17 +11,17 @@ namespace algine {
 vector<ShapePtr> Shape::publicObjects;
 
 Shape::~Shape() {
-    for (auto &inputLayout : inputLayouts)
+    for (auto &inputLayout : m_inputLayouts)
         InputLayout::destroy(inputLayout);
 
-    ArrayBuffer::destroy(vertices, normals, texCoords, tangents, bitangents, boneWeights, boneIds);
-    IndexBuffer::destroy(indices);
+    ArrayBuffer::destroy(m_vertices, m_normals, m_texCoords, m_tangents, m_bitangents, m_boneWeights, m_boneIds);
+    IndexBuffer::destroy(m_indices);
 }
 
 void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
     auto inputLayout = new InputLayout();
     inputLayout->bind();
-    inputLayouts.push_back(inputLayout);
+    m_inputLayouts.push_back(inputLayout);
 
     InputAttributeDescription attribDescription;
     attribDescription.setCount(3);
@@ -34,66 +34,96 @@ void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
     };
 
     attribDescription.setLocation(locations.position);
-    addAttribute(vertices);
+    addAttribute(m_vertices);
 
     attribDescription.setLocation(locations.normal);
-    addAttribute(normals);
+    addAttribute(m_normals);
 
     attribDescription.setLocation(locations.tangent);
-    addAttribute(tangents);
+    addAttribute(m_tangents);
 
     attribDescription.setLocation(locations.bitangent);
-    addAttribute(bitangents);
+    addAttribute(m_bitangents);
 
     attribDescription.setLocation(locations.texCoord);
     attribDescription.setCount(2);
-    addAttribute(texCoords);
+    addAttribute(m_texCoords);
 
     if (isBonesPresent()) {
         attribDescription.setCount(4);
 
         attribDescription.setLocation(locations.boneWeights);
-        addAttribute(boneWeights);
+        addAttribute(m_boneWeights);
 
         attribDescription.setLocation(locations.boneIds);
         attribDescription.setDataType(DataType::UnsignedInt);
-        addAttribute(boneIds);
+        addAttribute(m_boneIds);
     }
 
-    inputLayout->setIndexBuffer(indices);
+    inputLayout->setIndexBuffer(m_indices);
     inputLayout->unbind();
 }
 
-void Shape::setBoneTransform(const string &boneName, const glm::mat4 &transformation) {
-    if (uint index = bonesStorage.getIndex(boneName); index != BonesStorage::BoneNotFound) {
-        bonesStorage.bones[index].transformation = transformation;
-    } else {
-        throw runtime_error("Bone " + boneName + " does not found");
-    }
-}
-
-void Shape::prepareAnimation(uint index) {
-    animations[index].bones.resize(bonesStorage.count());
-}
-
-void Shape::invalidateAnimation(uint index) {
-    animations[index].bones.clear();
-}
-
-bool Shape::isAnimationValid(uint index) const {
-    return animations[index].bones.size() == bonesStorage.count();
-}
-
 bool Shape::isBonesPresent() const {
-    return bonesPerVertex > 0;
+    return m_bonesPerVertex > 0;
 }
 
-usize Shape::getAnimationIndexByName(const string &name) {
-    for (usize i = 0; i < animations.size(); i++)
-        if (animations[i].name == name)
+bool Shape::isAnimationsPresent() const {
+    return !m_animations.empty();
+}
+
+const std::vector<Mesh>& Shape::getMeshes() const {
+    return m_meshes;
+}
+
+const std::vector<Animation>& Shape::getAnimations() const {
+    return m_animations;
+}
+
+const std::vector<InputLayout*>& Shape::getInputLayouts() const {
+    return m_inputLayouts;
+}
+
+const glm::mat4& Shape::getGlobalInverseTransform() const {
+    return m_globalInverseTransform;
+}
+
+const BonesStorage& Shape::getBones() const {
+    return m_bones;
+}
+
+const Node& Shape::getRootNode() const {
+    return m_rootNode;
+}
+
+uint Shape::getBonesPerVertex() const {
+    return m_bonesPerVertex;
+}
+
+const Animation& Shape::getAnimation(Index index) const {
+    return m_animations[index];
+}
+
+Index Shape::getAnimationIndexByName(const string &name) const {
+    for (Index i = 0; i < m_animations.size(); i++) {
+        if (m_animations[i].name == name) {
             return i;
+        }
+    }
 
     return AnimationNotFound;
+}
+
+uint Shape::getAnimationsAmount() const {
+    return m_animations.size();
+}
+
+uint Shape::getBonesAmount() const {
+    return m_bones.size();
+}
+
+InputLayout* Shape::getInputLayout(uint index) {
+    return m_inputLayouts[index];
 }
 
 ShapePtr Shape::getByName(const string &name) {

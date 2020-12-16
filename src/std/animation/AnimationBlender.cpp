@@ -1,23 +1,28 @@
 #define GLM_FORCE_CTOR_INIT
 #include <algine/std/animation/AnimationBlender.h>
 
+#include <algine/std/model/Model.h>
+#include <algine/std/model/Shape.h>
+
 #include <stdexcept>
 
 using namespace std;
 using namespace glm;
 
 namespace algine {
-AnimationBlender::AnimationBlender(const ShapePtr &shape) {
-    setShape(shape);
+AnimationBlender::AnimationBlender(const ModelPtr &model) {
+    setModel(model);
 }
 
 AnimationBlender::AnimationBlender() = default;
 
 mat4 AnimationBlender::blendBones(uint index) const {
-    const mat4 &lhs = m_shape->animations[m_lhsAnim].bones[index];
-    const mat4 &rhs = m_shape->animations[m_rhsAnim].bones[index];
+    const auto &shape = m_model->getShape();
 
-    const mat4 &boneMatrix = m_shape->bonesStorage[index].boneMatrix;
+    const mat4 &lhs = m_model->m_animBones[m_lhsAnim][index];
+    const mat4 &rhs = m_model->m_animBones[m_rhsAnim][index];
+
+    const mat4 &boneMatrix = shape->m_bones[index].boneMatrix;
     const mat4 &inverseBoneMatrix = m_inverseBoneMatrices[index];
 
     // extracting bone transformation
@@ -37,14 +42,16 @@ mat4 AnimationBlender::blendBones(uint index) const {
     transform[3] = finalTranslate;
 
     // forming result
-    return m_shape->globalInverseTransform * transform * boneMatrix;
+    return shape->getGlobalInverseTransform() * transform * boneMatrix;
 }
 
 void AnimationBlender::blend() {
     switch (m_blendListMode) {
         case BlendListDisable: {
-            for (uint i = 0; i < m_bones.size(); i++)
+            for (uint i = 0; i < m_bones.size(); i++) {
                 m_bones[i] = blendBones(i);
+            }
+
             break;
         }
         case BlendListInclude:
@@ -64,7 +71,7 @@ void AnimationBlender::blend() {
                 if (include) {
                     m_bones[i] = blendBones(i);
                 } else {
-                    m_bones[i] = m_shape->animations[m_lhsAnim].bones[i];
+                    m_bones[i] = m_model->m_animBones[m_lhsAnim][i];
                 }
             }
             break;
@@ -82,10 +89,12 @@ void AnimationBlender::blend() {
 }
 
 void AnimationBlender::initInverseBoneMatrices() {
-    m_inverseBoneMatrices.resize(m_shape->bonesStorage.count());
+    const auto &shape = m_model->getShape();
+
+    m_inverseBoneMatrices.resize(shape->getBonesAmount());
 
     for (uint i = 0; i < m_inverseBoneMatrices.size(); ++i) {
-        m_inverseBoneMatrices[i] = inverse(m_shape->bonesStorage[i].boneMatrix);
+        m_inverseBoneMatrices[i] = inverse(shape->m_bones[i].boneMatrix);
     }
 }
 
@@ -117,10 +126,13 @@ void AnimationBlender::changeFactor(const float step) {
     m_factor = checkFactorBounds(m_factor + step);
 }
 
-void AnimationBlender::setShape(const ShapePtr &shape) {
-    m_shape = shape;
-    m_bones.resize(m_shape->bonesStorage.count());
-    inverseGlobalInverseTransform = inverse(m_shape->globalInverseTransform);
+void AnimationBlender::setModel(const ModelPtr &model) {
+    const auto &shape = model->getShape();
+
+    m_model = model;
+    m_bones.resize(shape->getBonesAmount());
+    inverseGlobalInverseTransform = inverse(shape->getGlobalInverseTransform());
+
     initInverseBoneMatrices();
 }
 
@@ -152,8 +164,8 @@ float AnimationBlender::getFactor() const {
     return m_factor;
 }
 
-const ShapePtr& AnimationBlender::getShape() const {
-    return m_shape;
+const ModelPtr& AnimationBlender::getModel() const {
+    return m_model;
 }
 
 const vector<mat4>& AnimationBlender::bones() {

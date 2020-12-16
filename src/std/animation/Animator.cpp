@@ -1,6 +1,9 @@
 #define GLM_FORCE_CTOR_INIT
 #include <algine/std/animation/Animator.h>
 
+#include <algine/std/model/Model.h>
+#include <algine/std/model/Shape.h>
+
 #include <glm/gtx/quaternion.hpp>
 
 #include <stdexcept>
@@ -11,20 +14,21 @@ using namespace glm;
 namespace algine {
 Animator::Animator() = default;
 
-Animator::Animator(const ShapePtr &shape, const string &animationName) {
-    m_shape = shape;
+Animator::Animator(Model *model, const string &animationName)
+    : m_model(model)
+{
     setAnimation(animationName);
 }
 
-Animator::Animator(const ShapePtr &shape, usize animationIndex) {
-    m_shape = shape;
-    m_animationIndex = animationIndex;
-}
+Animator::Animator(Model *model, Index animationIndex)
+    : m_model(model),
+      m_animationIndex(animationIndex) {}
 
 void Animator::animate(float timeInSeconds) {
     mat4 identity;
 
-    const auto &animation = m_shape->animations[m_animationIndex];
+    const auto &shape = m_model->getShape();
+    const auto &animation = shape->getAnimation(m_animationIndex);
 
     auto animTicksPerSecond = static_cast<float>(animation.ticksPerSecond);
     float ticksPerSecond = animTicksPerSecond != 0 ? animTicksPerSecond : 25.0f;
@@ -32,35 +36,37 @@ void Animator::animate(float timeInSeconds) {
     float timeInTicks = timeInSeconds * ticksPerSecond;
     float animationTime = fmodf(timeInTicks, static_cast<float>(animation.duration));
 
-    readNodeHierarchy(animationTime, m_shape->rootNode, identity);
+    readNodeHierarchy(animationTime, shape->getRootNode(), identity);
 }
 
-void Animator::setShape(const ShapePtr &shape) {
-    m_shape = shape;
+void Animator::setModel(Model *model) {
+    m_model = model;
 }
 
-void Animator::setAnimationIndex(usize animationIndex) {
+void Animator::setAnimationIndex(Index animationIndex) {
     m_animationIndex = animationIndex;
 }
 
 void Animator::setAnimation(const string &name) {
-    m_animationIndex = m_shape->getAnimationIndexByName(name);
+    const auto &shape = m_model->getShape();
+
+    m_animationIndex = shape->getAnimationIndexByName(name);
 
     if (m_animationIndex == Shape::AnimationNotFound) {
         string available;
 
-        for (uint i = 0; i < m_shape->animations.size(); i++)
-            available += "  " + to_string(i) + ". '" + m_shape->animations[i].name + "'\n";
+        for (uint i = 0; i < shape->getAnimationsAmount(); i++)
+            available += "  " + to_string(i) + ". '" + shape->getAnimation(i).name + "'\n";
 
         throw runtime_error("Animation '" + name + "' not found\nAvailable animations:\n" + available);
     }
 }
 
-const ShapePtr& Animator::getShape() const {
-    return m_shape;
+Model* Animator::getModel() const {
+    return m_model;
 }
 
-usize Animator::getAnimationIndex() const {
+Index Animator::getAnimationIndex() const {
     return m_animationIndex;
 }
 
@@ -189,8 +195,10 @@ inline const AnimNode* findNodeAnim(const Animation *animation, const string &no
 }
 
 void Animator::readNodeHierarchy(float animationTime, const Node &node, const mat4 &parentTransform) {
+    const auto &shape = m_model->getShape();
+
     const string &nodeName = node.name;
-    const Animation &animation = m_shape->animations[m_animationIndex];
+    const Animation &animation = shape->getAnimation(m_animationIndex);
     const AnimNode *animNode = findNodeAnim(&animation, nodeName);
     mat4 nodeTransformation = node.defaultTransform;
 
@@ -219,15 +227,16 @@ void Animator::readNodeHierarchy(float animationTime, const Node &node, const ma
 
     mat4 globalTransformation = parentTransform * nodeTransformation;
 
-    if (uint index = m_shape->bonesStorage.getIndex(nodeName); index != BonesStorage::BoneNotFound) {
-        auto &bone = m_shape->bonesStorage.bones[index];
-        auto &dstBone = m_shape->animations[m_animationIndex].bones[index];
+    if (uint index = shape->m_bones.getIndex(nodeName); index != BonesStorage::BoneNotFound) {
+        auto &bone = shape->m_bones[index];
+        auto &boneTransformation = m_model->m_boneTransformations[index];
+        auto &dstBone = m_model->m_animBones[m_animationIndex][index];
 
-        globalTransformation *= bone.transformation;
-        dstBone = m_shape->globalInverseTransform * globalTransformation * bone.boneMatrix;
+        globalTransformation *= boneTransformation;
+        dstBone = shape->getGlobalInverseTransform() * globalTransformation * bone.boneMatrix;
     }
 
-    for (const auto & child : node.childs) {
+    for (const auto &child : node.childs) {
         readNodeHierarchy(animationTime, child, globalTransformation);
     }
 }

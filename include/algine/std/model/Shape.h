@@ -1,38 +1,52 @@
 #ifndef ALGINE_SHAPE_H
 #define ALGINE_SHAPE_H
 
-#include <algine/std/Node.h>
+#include <algine/std/model/InputLayoutShapeLocations.h>
+#include <algine/std/model/Mesh.h>
+#include <algine/std/model/ShapePtr.h>
+
 #include <algine/std/animation/Animation.h>
 #include <algine/std/animation/BonesStorage.h>
-#include <algine/std/model/Mesh.h>
-#include <algine/std/model/InputLayoutShapeLocations.h>
-#include <algine/std/model/ShapePtr.h>
+#include <algine/std/Node.h>
 
 #include <algine/core/InputLayout.h>
 #include <algine/core/Object.h>
+#include <algine/core/RawPtr.h>
 
 namespace algine {
 class Shape: public Object {
+    friend class ShapeManager;
+    friend class Model;
+    friend class Animator;
+    friend class AnimationBlender;
+
 public:
-    constexpr static usize AnimationNotFound = -1;
+    constexpr static Index AnimationNotFound = -1;
 
 public:
     ~Shape();
 
-    /// creates InputLayout and adds it into inputLayouts array
+    /// creates InputLayout and adds it into inputLayouts data
     /// <br>note: this function will limit max bones per vertex to 4
     /// <br>if you need more, you will have to create InputLayout manually
     void createInputLayout(const InputLayoutShapeLocations &locations);
 
-    void setBoneTransform(const std::string &boneName, const glm::mat4 &transformation);
-
-    void prepareAnimation(uint index);
-    void invalidateAnimation(uint index);
-
-    bool isAnimationValid(uint index) const;
     bool isBonesPresent() const;
+    bool isAnimationsPresent() const;
 
-    usize getAnimationIndexByName(const std::string &name);
+    const std::vector<Mesh>& getMeshes() const;
+    const std::vector<Animation>& getAnimations() const;
+    const std::vector<InputLayout*>& getInputLayouts() const;
+    const glm::mat4& getGlobalInverseTransform() const;
+    const BonesStorage& getBones() const;
+    const Node& getRootNode() const;
+    uint getBonesPerVertex() const;
+
+    const Animation& getAnimation(Index index) const;
+    Index getAnimationIndexByName(const std::string &name) const;
+    uint getAnimationsAmount() const;
+    uint getBonesAmount() const;
+    InputLayout* getInputLayout(uint index);
 
 public:
     static ShapePtr getByName(const std::string &name);
@@ -41,18 +55,19 @@ public:
 public:
     static std::vector<ShapePtr> publicObjects;
 
-public:
-    std::vector<Mesh> meshes;
-    std::vector<Animation> animations;
-    glm::mat4 globalInverseTransform;
-    std::vector<InputLayout*> inputLayouts;
-    BonesStorage bonesStorage;
-    Node rootNode;
-    uint bonesPerVertex;
+protected:
+    std::vector<Mesh> m_meshes;
+    std::vector<Animation> m_animations;
+    std::vector<InputLayout*> m_inputLayouts;
+    glm::mat4 m_globalInverseTransform;
+    BonesStorage m_bones;
+    Node m_rootNode;
+    uint m_bonesPerVertex;
 
-public:
-    ArrayBuffer *vertices, *normals, *texCoords, *tangents, *bitangents, *boneWeights, *boneIds;
-    IndexBuffer *indices;
+protected:
+    RawPtr<ArrayBuffer> m_vertices, m_normals, m_texCoords;
+    RawPtr<ArrayBuffer> m_tangents, m_bitangents, m_boneWeights, m_boneIds;
+    RawPtr<IndexBuffer> m_indices;
 };
 }
 
