@@ -3,8 +3,6 @@
 
 #include <algine/std/animation/AnimNode.h>
 
-#include <glm/mat4x4.hpp>
-
 #include <string>
 #include <vector>
 
@@ -19,7 +17,6 @@ public:
     double ticksPerSecond, duration;
     std::string name;
     std::vector<AnimNode> channels;
-    std::vector<glm::mat4> bones;
 };
 }
 
