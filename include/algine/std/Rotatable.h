@@ -11,12 +11,15 @@ protected:
     void swap(Rotatable &other);
 
 public:
-    explicit Rotatable(Rotator::Type rotatorType = Rotator::Type::Simple);
+    explicit Rotatable(Rotator::Type rotatorType);
+    Rotatable();
     Rotatable(const Rotatable &src); // copy constructor
     Rotatable(Rotatable &&src) noexcept; // move constructor
     Rotatable& operator=(const Rotatable &rhs); // copy operator
     Rotatable& operator=(Rotatable &&rhs) noexcept; // move operator
     ~Rotatable();
+
+    void setRotatorType(Rotator::Type rotatorType);
 
     void setPitch(float pitch);
     void setYaw(float yaw);
@@ -33,12 +36,13 @@ public:
     glm::vec3 getBack() const;
     glm::vec3 getRight() const;
     glm::vec3 getLeft() const;
+    Rotator* getRotator() const;
 
     JsonHelper dump() override;
     void import(const JsonHelper &jsonHelper) override;
 
-public:
-    Rotator *rotator = nullptr;
+protected:
+    Rotator *m_rotator;
     glm::mat4 m_rotation;
 };
 }

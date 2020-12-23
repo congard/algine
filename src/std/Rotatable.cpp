@@ -1,10 +1,11 @@
 #define GLM_FORCE_CTOR_INIT
 #include <algine/std/Rotatable.h>
 
-#include <algine/core/JsonHelper.h>
 #include <algine/core/transfer/GLMTransferrer.h>
+#include <algine/core/JsonHelper.h>
 
 #include <tulz/macros.h>
+
 #include <algorithm>
 
 using namespace glm;
@@ -20,17 +21,18 @@ constant(Rotator, "rotator");
 namespace algine {
 void Rotatable::swap(Rotatable &other) {
     std::swap(m_rotation, other.m_rotation);
-    std::swap(rotator, other.rotator);
+    std::swap(m_rotator, other.m_rotator);
 }
 
-Rotatable::Rotatable(Rotator::Type rotatorType) {
-    rotator = Rotator::create(rotatorType);
-}
+Rotatable::Rotatable(Rotator::Type rotatorType)
+    : m_rotator(Rotator::create(rotatorType)) {}
 
-Rotatable::Rotatable(const Rotatable &src) {
-    m_rotation = src.m_rotation;
-    rotator = Rotator::create(src.rotator->m_type);
-}
+Rotatable::Rotatable()
+    : m_rotator(nullptr) {}
+
+Rotatable::Rotatable(const Rotatable &src)
+    : m_rotation(src.m_rotation),
+      m_rotator(Rotator::create(src.m_rotator->getType())) {}
 
 Rotatable::Rotatable(Rotatable &&src) noexcept {
     src.swap(*this);
@@ -39,50 +41,58 @@ Rotatable::Rotatable(Rotatable &&src) noexcept {
 Rotatable& Rotatable::operator=(const Rotatable &rhs) {
     if (&rhs != this)
         Rotatable(rhs).swap(*this);
+
     return *this;
 }
 
 Rotatable& Rotatable::operator=(Rotatable &&rhs) noexcept {
     rhs.swap(*this);
+
     return *this;
 }
 
 Rotatable::~Rotatable() {
-    deletePtr(rotator)
+    deletePtr(m_rotator)
 }
 
-void Rotatable::setPitch(const float pitch) {
-    rotator->m_pitch = pitch;
+void Rotatable::setRotatorType(Rotator::Type rotatorType) {
+    delete m_rotator;
+
+    m_rotator = Rotator::create(rotatorType);
 }
 
-void Rotatable::setYaw(const float yaw) {
-    rotator->m_yaw = yaw;
+void Rotatable::setPitch(float pitch) {
+    m_rotator->setPitch(pitch);
 }
 
-void Rotatable::setRoll(const float roll) {
-    rotator->m_roll = roll;
+void Rotatable::setYaw(float yaw) {
+    m_rotator->setYaw(yaw);
 }
 
-void Rotatable::setRotate(const float pitch, const float yaw, const float roll) {
-    rotator->m_pitch = pitch;
-    rotator->m_yaw = yaw;
-    rotator->m_roll = roll;
+void Rotatable::setRoll(float roll) {
+    m_rotator->setRoll(roll);
+}
+
+void Rotatable::setRotate(float pitch, float yaw, float roll) {
+    setPitch(pitch);
+    setYaw(yaw);
+    setRoll(roll);
 }
 
 void Rotatable::rotate() {
-    rotator->rotate(m_rotation);
+    m_rotator->rotate(m_rotation);
 }
 
 float Rotatable::getPitch() const {
-    return rotator->m_pitch;
+    return m_rotator->getPitch();
 }
 
 float Rotatable::getYaw() const {
-    return rotator->m_yaw;
+    return m_rotator->getYaw();
 }
 
 float Rotatable::getRoll() const {
-    return rotator->m_roll;
+    return m_rotator->getRoll();
 }
 
 mat4 Rotatable::getRotationMatrix() const {
@@ -91,9 +101,9 @@ mat4 Rotatable::getRotationMatrix() const {
 
 vec3 Rotatable::getRotate() const {
     return {
-        rotator->m_pitch,
-        rotator->m_yaw,
-        rotator->m_roll
+        getPitch(),
+        getYaw(),
+        getRoll()
     };
 }
 
@@ -121,17 +131,21 @@ vec3 Rotatable::getLeft() const {
     return -getRight();
 }
 
+Rotator* Rotatable::getRotator() const {
+    return m_rotator;
+}
+
 JsonHelper Rotatable::dump() {
     json config;
 
     config[Config::Rotation] = GLMTransferrer::dump(m_rotation).json;
-    config[Config::Rotator] = rotator->dump().json;
+    config[Config::Rotator] = m_rotator->dump().json;
 
     return config;
 }
 
 void Rotatable::import(const JsonHelper &jsonHelper) {
     m_rotation = GLMTransferrer::import<mat4>(jsonHelper.readValue(Config::Rotation));
-    rotator->import(jsonHelper.readValue(Config::Rotator));
+    m_rotator->import(jsonHelper.readValue(Config::Rotator));
 }
 }
