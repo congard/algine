@@ -6,8 +6,6 @@
 #include <algine/std/model/Model.h>
 #include <algine/std/rotator/Rotator.h>
 
-#include <algine/internal/PublicObjectTools.h>
-
 #include <set>
 
 namespace algine {
@@ -54,6 +52,8 @@ public:
     void activateAnimation(const std::string &name);
     void activateAnimation(Index index);
 
+    void setClassName(const std::string &name);
+
     void setShapeDumpMode(ShapeDumpMode mode);
     void setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode mode);
 
@@ -71,6 +71,8 @@ public:
     void setRotate(const glm::vec3 &rotate);
     void setScale(const glm::vec3 &scale);
 
+    const std::string& getClassName() const;
+
     ShapeDumpMode getShapeDumpMode() const;
     ActivatedAnimationsDumpMode getActivatedAnimationsDumpMode() const;
 
@@ -87,10 +89,7 @@ public:
     const glm::vec3& getRotate() const;
     const glm::vec3& getScale() const;
 
-    template<typename TModel = Model, typename TShape = Shape>
     ModelPtr get();
-
-    template<typename TModel = Model, typename TShape = Shape>
     ModelPtr create();
 
     void import(const JsonHelper &jsonHelper) override;
@@ -101,6 +100,8 @@ private:
     ActivatedAnimationsDumpMode m_activatedAnimationsDumpMode;
 
 private:
+    std::string m_className;
+
     std::string m_shapePath, m_shapeName;
     ShapeManager m_shape;
 
@@ -111,81 +112,6 @@ private:
 
     std::set<AnimationInfo> m_activatedAnimations;
 };
-
-template<typename TModel, typename TShape>
-ModelPtr ModelManager::get() {
-    return internal::PublicObjectTools::getPtr<ModelPtr, TModel, TShape>(this);
-}
-
-template<typename TModel, typename TShape>
-ModelPtr ModelManager::create() {
-    ModelPtr model = PtrMaker::make<TModel>(m_rotatorType);
-
-    // create model & add Shape
-    switch (m_shapeDumpMode) {
-        case ShapeDumpMode::Path: {
-            ShapeManager manager;
-            manager.setWorkingDirectory(m_workingDirectory);
-            manager.importFromFile(m_shapePath);
-
-            model->setShape(manager.get<TShape>());
-
-            break;
-        }
-        case ShapeDumpMode::Dump: {
-            model->setShape(m_shape.get<TShape>());
-            break;
-        }
-        case ShapeDumpMode::Name: {
-            model->setShape(Shape::getByName(m_shapeName));
-            break;
-        }
-        case ShapeDumpMode::None: {
-            // Shape is nullptr
-            break;
-        }
-    }
-
-    // configure animations
-    if (m_activeAnimation.hasIndex()) {
-        model->setBonesFromAnimation(m_activeAnimation.getIndex());
-    } else if (m_activeAnimation.hasName()) {
-        model->setBonesFromAnimation(m_activeAnimation.getName());
-    }
-
-    switch (m_activatedAnimationsDumpMode) {
-        case ActivatedAnimationsDumpMode::All: {
-            model->activateAnimations();
-            break;
-        }
-        case ActivatedAnimationsDumpMode::List: {
-            for (const auto &info : m_activatedAnimations) {
-                if (info.hasIndex()) {
-                    model->activateAnimation(info.getIndex());
-                } else if (info.hasName()) {
-                    model->activateAnimation(info.getName());
-                }
-            }
-
-            break;
-        }
-    }
-
-    // set params
-    model->setPos(m_pos);
-    model->setRotate(m_rotate.x, m_rotate.y, m_rotate.z);
-    model->setScale(m_scale);
-
-    // init matrices
-    model->translate();
-    model->rotate();
-    model->scale();
-    model->transform();
-
-    internal::PublicObjectTools::postCreateAccessOp("Model", this, model);
-
-    return model;
-}
 }
 
 #endif //ALGINE_MODELMANAGER_H

@@ -8,8 +8,6 @@
 
 #include <algine/core/ManagerBase.h>
 
-#include <algine/internal/PublicObjectTools.h>
-
 class aiMesh;
 class aiScene;
 
@@ -45,6 +43,7 @@ public:
     void setAMTLPath(const std::string &path);
     void setAMTL(const AMTLManager &amtlManager);
     void setBonesPerVertex(uint bonesPerVertex);
+    void setClassName(const std::string &name);
 
     const std::vector<Param>& getParams() const;
     const std::vector<InputLayoutShapeLocationsManager>& getInputLayoutLocations() const;
@@ -53,11 +52,9 @@ public:
     const std::string& getAMTLPath() const;
     const AMTLManager& getAMTL() const;
     uint getBonesPerVertex() const;
+    const std::string& getClassName() const;
 
-    template<typename T = Shape>
     ShapePtr get();
-
-    template<typename T = Shape>
     ShapePtr create();
 
     void setAMTLDumpMode(AMTLDumpMode mode);
@@ -89,23 +86,10 @@ private:
 
     AMTLManager m_amtlManager;
     uint m_bonesPerVertex;
+
+private:
+    std::string m_className;
 };
-
-template<typename T>
-ShapePtr ShapeManager::get() {
-    return internal::PublicObjectTools::getPtr<ShapePtr, T>(this);
-}
-
-template<typename T>
-ShapePtr ShapeManager::create() {
-    m_shape = PtrMaker::make<T>();
-
-    load();
-
-    internal::PublicObjectTools::postCreateAccessOp("Shape", this, m_shape);
-
-    return m_shape;
-}
 }
 
 #endif //ALGINE_SHAPEMANAGER_H

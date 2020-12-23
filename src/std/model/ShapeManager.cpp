@@ -6,6 +6,9 @@
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/PtrMaker.h>
 #include <algine/core/JsonHelper.h>
+#include <algine/core/TypeRegistry.h>
+
+#include <algine/internal/PublicObjectTools.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -26,10 +29,13 @@ using namespace nlohmann;
 namespace algine {
 namespace Default {
 constexpr uint BonesPerVertex = 4;
+
+constant(ClassName, "Shape");
 }
 
 ShapeManager::ShapeManager()
-    : m_amtlDumpMode(AMTLDumpMode::None),
+    : m_className(Default::ClassName),
+      m_amtlDumpMode(AMTLDumpMode::None),
       m_bonesPerVertex(Default::BonesPerVertex) {}
 
 void ShapeManager::addParam(Param param) {
@@ -78,6 +84,10 @@ void ShapeManager::setBonesPerVertex(uint bonesPerVertex) {
     m_bonesPerVertex = bonesPerVertex;
 }
 
+void ShapeManager::setClassName(const string &name) {
+    m_className = name;
+}
+
 const vector<ShapeManager::Param>& ShapeManager::getParams() const {
     return m_params;
 }
@@ -106,6 +116,24 @@ uint ShapeManager::getBonesPerVertex() const {
     return m_bonesPerVertex;
 }
 
+const string& ShapeManager::getClassName() const {
+    return m_className;
+}
+
+ShapePtr ShapeManager::get() {
+    return internal::PublicObjectTools::getPtr<ShapePtr>(this);
+}
+
+ShapePtr ShapeManager::create() {
+    m_shape.reset(TypeRegistry::create<Shape>(m_className));
+
+    load();
+
+    internal::PublicObjectTools::postCreateAccessOp("Shape", this, m_shape);
+
+    return m_shape;
+}
+
 void ShapeManager::setAMTLDumpMode(AMTLDumpMode mode) {
     m_amtlDumpMode = mode;
 }
@@ -118,6 +146,10 @@ void ShapeManager::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
+
+    // load class name
+    if (config.contains(ClassName))
+        m_className = config[ClassName];
 
     // load params
     if (config.contains(Params)) {
@@ -168,6 +200,10 @@ JsonHelper ShapeManager::dump() {
     using namespace Config;
 
     json config;
+
+    // write class name
+    if (m_className != Default::ClassName)
+        config[Config::ClassName] = m_className;
 
     // write params
     for (const auto & p : m_params)

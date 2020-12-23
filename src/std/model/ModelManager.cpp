@@ -5,6 +5,9 @@
 
 #include <algine/core/transfer/GLMTransferrer.h>
 #include <algine/core/PtrMaker.h>
+#include <algine/core/TypeRegistry.h>
+
+#include <algine/internal/PublicObjectTools.h>
 
 #include "../../core/ConfigStrings.h"
 
@@ -35,6 +38,10 @@ constant(Free, "free");
 
 constant(Pos, "pos");
 constant(Scale, "scale");
+}
+
+namespace Default {
+constant(ClassName, "Model");
 }
 
 ModelManager::AnimationInfo::AnimationInfo(std::string name)
@@ -68,7 +75,8 @@ bool ModelManager::AnimationInfo::operator<(const AnimationInfo &rhs) const {
 }
 
 ModelManager::ModelManager()
-    : m_shapeDumpMode(ShapeDumpMode::None),
+    : m_className(Default::ClassName),
+      m_shapeDumpMode(ShapeDumpMode::None),
       m_activatedAnimationsDumpMode(ActivatedAnimationsDumpMode::List),
       m_rotatorType(Rotator::Type::Euler),
       m_pos(),
@@ -81,6 +89,10 @@ void ModelManager::activateAnimation(const string &name) {
 
 void ModelManager::activateAnimation(Index index) {
     m_activatedAnimations.insert(AnimationInfo(index));
+}
+
+void ModelManager::setClassName(const string &name) {
+    m_className = name;
 }
 
 void ModelManager::setShapeDumpMode(ShapeDumpMode mode) {
@@ -137,6 +149,10 @@ void ModelManager::setScale(const vec3 &scale) {
     m_scale = scale;
 }
 
+const string& ModelManager::getClassName() const {
+    return m_className;
+}
+
 ModelManager::ShapeDumpMode ModelManager::getShapeDumpMode() const {
     return m_shapeDumpMode;
 }
@@ -181,10 +197,88 @@ const vec3& ModelManager::getScale() const {
     return m_scale;
 }
 
+ModelPtr ModelManager::get() {
+    return internal::PublicObjectTools::getPtr<ModelPtr>(this);
+}
+
+ModelPtr ModelManager::create() {
+    ModelPtr model(TypeRegistry::create<Model>(m_className));
+    model->setRotatorType(m_rotatorType);
+
+    // create model & add Shape
+    switch (m_shapeDumpMode) {
+        case ShapeDumpMode::Path: {
+            ShapeManager manager;
+            manager.setWorkingDirectory(m_workingDirectory);
+            manager.importFromFile(m_shapePath);
+
+            model->setShape(manager.get());
+
+            break;
+        }
+        case ShapeDumpMode::Dump: {
+            model->setShape(m_shape.get());
+            break;
+        }
+        case ShapeDumpMode::Name: {
+            model->setShape(Shape::getByName(m_shapeName));
+            break;
+        }
+        case ShapeDumpMode::None: {
+            // Shape is nullptr
+            break;
+        }
+    }
+
+    // configure animations
+    if (m_activeAnimation.hasIndex()) {
+        model->setBonesFromAnimation(m_activeAnimation.getIndex());
+    } else if (m_activeAnimation.hasName()) {
+        model->setBonesFromAnimation(m_activeAnimation.getName());
+    }
+
+    switch (m_activatedAnimationsDumpMode) {
+        case ActivatedAnimationsDumpMode::All: {
+            model->activateAnimations();
+            break;
+        }
+        case ActivatedAnimationsDumpMode::List: {
+            for (const auto &info : m_activatedAnimations) {
+                if (info.hasIndex()) {
+                    model->activateAnimation(info.getIndex());
+                } else if (info.hasName()) {
+                    model->activateAnimation(info.getName());
+                }
+            }
+
+            break;
+        }
+    }
+
+    // set params
+    model->setPos(m_pos);
+    model->setRotate(m_rotate.x, m_rotate.y, m_rotate.z);
+    model->setScale(m_scale);
+
+    // init matrices
+    model->translate();
+    model->rotate();
+    model->scale();
+    model->transform();
+
+    internal::PublicObjectTools::postCreateAccessOp("Model", this, model);
+
+    return model;
+}
+
 void ModelManager::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
+
+    // load class name
+    if (config.contains(ClassName))
+        m_className = config[ClassName];
 
     // load shape
     if (config.contains(Config::Shape)) {
@@ -263,6 +357,10 @@ void ModelManager::import(const JsonHelper &jsonHelper) {
 
 JsonHelper ModelManager::dump() {
     json config;
+
+    // write class name
+    if (m_className != Default::ClassName)
+        config[Config::ClassName] = m_className;
 
     // write shape
     switch (m_shapeDumpMode) {
