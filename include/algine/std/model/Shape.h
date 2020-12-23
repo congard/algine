@@ -24,7 +24,7 @@ public:
     constexpr static Index AnimationNotFound = -1;
 
 public:
-    ~Shape();
+    virtual ~Shape();
 
     /// creates InputLayout and adds it into inputLayouts data
     /// <br>note: this function will limit max bones per vertex to 4
