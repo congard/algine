@@ -194,7 +194,7 @@ void Engine::setViewport(const uint width, const uint height, const uint x, cons
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS
-#include "SOPConstants.h"
+#include "internal/SOPConstants.h"
 
 void Engine::setBoundObject(const uint type, const void *const obj) {
     switch (type) {

@@ -7,13 +7,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-#include "../SOP.h"
+#include "internal/SOP.h"
 
 using namespace algine;
 using namespace std;
 
 #ifdef ALGINE_SECURE_OPERATIONS
-#include "../SOPConstants.h"
+#include "internal/SOPConstants.h"
 #define SOP_BOUND_PTR getBoundTexture(m_target)
 #define SOP_OBJECT_TYPE getTextureObject(m_target)
 #define SOP_OBJECT_ID m_id

@@ -8,8 +8,8 @@
 #define SOP_OBJECT_TYPE SOPConstants::FramebufferObject
 #define SOP_OBJECT_ID m_id
 #define SOP_OBJECT_NAME SOPConstants::FramebufferStr
-#include "SOP.h"
-#include "SOPConstants.h"
+#include "internal/SOP.h"
+#include "internal/SOPConstants.h"
 
 #include "texture/TexturePrivateTools.h"
 #include "internal/PublicObjectTools.h"

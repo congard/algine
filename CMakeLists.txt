@@ -80,6 +80,8 @@ add_library(algine
         include/algine/types.h
         include/algine/templates.h
         src/internal/PublicObjectTools.h
+        src/internal/SOP.h
+        src/internal/SOPConstants.h
         include/algine/constants/BoneSystem.h
         include/algine/constants/ShadowShader.h
         include/algine/constants/QuadShader.h
@@ -157,7 +159,6 @@ add_library(algine
         src/core/shader/UniformBlock.cpp include/algine/core/shader/UniformBlock.h
         src/core/Engine.cpp include/algine/core/Engine.h
         src/core/TypeRegistry.cpp include/algine/core/TypeRegistry.h
-        src/core/SOP.h src/core/SOPConstants.h
         src/core/ConfigStrings.h
         src/core/ImageConfigTools.h
         src/core/TextureConfigTools.h

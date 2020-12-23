@@ -7,14 +7,14 @@
 #include <string>
 #include <cassert>
 
-#include "../SOP.h"
+#include "internal/SOP.h"
 
 using namespace algine;
 using namespace std;
 using namespace tulz;
 
 #ifdef ALGINE_SECURE_OPERATIONS
-#include "../SOPConstants.h"
+#include "internal/SOPConstants.h"
 #define SOP_BOUND_PTR getBoundBuffer(m_target)
 #define SOP_OBJECT_TYPE getBufferObject(m_target)
 #define SOP_OBJECT_ID m_id

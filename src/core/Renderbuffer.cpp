@@ -9,8 +9,8 @@
 #define SOP_OBJECT_TYPE SOPConstants::RenderbufferObject
 #define SOP_OBJECT_ID m_id
 #define SOP_OBJECT_NAME SOPConstants::RenderbufferStr
-#include "../core/SOP.h"
-#include "../core/SOPConstants.h"
+#include "internal/SOP.h"
+#include "internal/SOPConstants.h"
 
 #include "internal/PublicObjectTools.h"
 

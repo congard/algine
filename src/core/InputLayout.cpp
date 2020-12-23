@@ -9,8 +9,8 @@
 #define SOP_OBJECT_TYPE SOPConstants::InputLayoutObject
 #define SOP_OBJECT_ID m_id
 #define SOP_OBJECT_NAME SOPConstants::InputLayoutStr
-#include "SOP.h"
-#include "SOPConstants.h"
+#include "internal/SOP.h"
+#include "internal/SOPConstants.h"
 
 using namespace std;
 

@@ -13,8 +13,8 @@
 #define SOP_OBJECT_TYPE SOPConstants::ShaderProgramObject
 #define SOP_OBJECT_ID id
 #define SOP_OBJECT_NAME SOPConstants::ShaderProgramStr
-#include "../SOP.h"
-#include "../SOPConstants.h"
+#include "internal/SOP.h"
+#include "internal/SOPConstants.h"
 
 #include "internal/PublicObjectTools.h"
 
