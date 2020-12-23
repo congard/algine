@@ -156,6 +156,7 @@ add_library(algine
         src/core/shader/BaseUniformBlock.cpp include/algine/core/shader/BaseUniformBlock.h
         src/core/shader/UniformBlock.cpp include/algine/core/shader/UniformBlock.h
         src/core/Engine.cpp include/algine/core/Engine.h
+        src/core/TypeRegistry.cpp include/algine/core/TypeRegistry.h
         src/core/SOP.h src/core/SOPConstants.h
         src/core/ConfigStrings.h
         src/core/ImageConfigTools.h
