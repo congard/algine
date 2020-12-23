@@ -17,9 +17,10 @@ class Model: public Object, public Rotatable, public Translatable, public Scalab
     friend class AnimationBlender;
 
 public:
-    explicit Model(const ShapePtr &shape = nullptr, Rotator::Type rotatorType = Rotator::Type::Simple);
+    explicit Model(const ShapePtr &shape, Rotator::Type rotatorType);
     explicit Model(Rotator::Type rotatorType);
-    ~Model();
+    Model();
+    virtual ~Model();
 
     void transform();
 

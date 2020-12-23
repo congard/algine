@@ -23,6 +23,8 @@ Model::Model(const ShapePtr &shape, Rotator::Type rotatorType)
 Model::Model(Rotator::Type rotatorType)
     : Rotatable(rotatorType) {}
 
+Model::Model() = default;
+
 Model::~Model() {
     deletePtr(m_animator)
 }
