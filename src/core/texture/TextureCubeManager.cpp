@@ -4,7 +4,7 @@
 
 #include <tulz/Path.h>
 
-#include "../ConfigStrings.h"
+#include "internal/ConfigStrings.h"
 #include "internal/PublicObjectTools.h"
 
 using namespace std;

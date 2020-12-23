@@ -12,7 +12,7 @@
 #include <tuple>
 
 #include "internal/PublicObjectTools.h"
-#include "../../core/ConfigStrings.h"
+#include "internal/ConfigStrings.h"
 
 using namespace std;
 using namespace glm;

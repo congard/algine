@@ -4,7 +4,7 @@
 
 #include <utility>
 
-#include "../../core/ConfigStrings.h"
+#include "internal/ConfigStrings.h"
 
 using namespace nlohmann;
 using namespace std;

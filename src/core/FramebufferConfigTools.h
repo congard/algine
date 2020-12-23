@@ -5,7 +5,7 @@
 
 #include <stdexcept>
 
-#include "ConfigStrings.h"
+#include "internal/ConfigStrings.h"
 
 namespace algine::Config {
 inline uint stringToAttachment(const string &str) {

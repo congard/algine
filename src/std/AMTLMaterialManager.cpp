@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-#include "../core/ConfigStrings.h"
+#include "internal/ConfigStrings.h"
 
 using namespace std;
 using namespace nlohmann;

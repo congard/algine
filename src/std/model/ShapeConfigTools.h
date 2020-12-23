@@ -5,7 +5,7 @@
 
 #include <stdexcept>
 
-#include "../../core/ConfigStrings.h"
+#include "internal/ConfigStrings.h"
 
 namespace algine::Config {
 constant(Triangulate, "triangulate");
