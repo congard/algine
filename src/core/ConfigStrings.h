@@ -22,6 +22,8 @@ constant(Renderbuffer, "renderbuffer");
 constant(Width, "width");
 constant(Height, "height");
 
+constant(ClassName, "className");
+
 // may be used for example as attachments names
 constant(Color, "color");
 constant(Depth, "depth");
