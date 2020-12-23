@@ -12,7 +12,7 @@
 #include "../core/SOP.h"
 #include "../core/SOPConstants.h"
 
-#include "algine/internal/PublicObjectTools.h"
+#include "internal/PublicObjectTools.h"
 
 using namespace algine::internal;
 

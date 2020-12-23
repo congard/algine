@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "algine/internal/PublicObjectTools.h"
+#include "internal/PublicObjectTools.h"
 
 using namespace nlohmann;
 using namespace std;

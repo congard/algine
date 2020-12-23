@@ -6,7 +6,7 @@
 #include <GL/glew.h>
 #include <iostream>
 
-#include "algine/internal/PublicObjectTools.h"
+#include "internal/PublicObjectTools.h"
 
 using namespace std;
 using namespace tulz;

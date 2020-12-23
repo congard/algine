@@ -7,13 +7,12 @@
 #include <algine/core/PtrMaker.h>
 #include <algine/core/TypeRegistry.h>
 
-#include <algine/internal/PublicObjectTools.h>
-
-#include "../../core/ConfigStrings.h"
-
 #include <iostream>
 #include <vector>
 #include <tuple>
+
+#include "internal/PublicObjectTools.h"
+#include "../../core/ConfigStrings.h"
 
 using namespace std;
 using namespace glm;

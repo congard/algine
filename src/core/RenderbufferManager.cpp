@@ -2,7 +2,7 @@
 
 #include <algine/core/PtrMaker.h>
 
-#include "algine/internal/PublicObjectTools.h"
+#include "internal/PublicObjectTools.h"
 
 using namespace algine::internal;
 

@@ -5,7 +5,7 @@
 #include <tulz/Path.h>
 
 #include "../ConfigStrings.h"
-#include "algine/internal/PublicObjectTools.h"
+#include "internal/PublicObjectTools.h"
 
 using namespace std;
 using namespace tulz;

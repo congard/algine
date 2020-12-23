@@ -3,7 +3,7 @@
 
 #include <algine/std/model/Shape.h>
 
-#include "algine/internal/PublicObjectTools.h"
+#include "internal/PublicObjectTools.h"
 
 using namespace std;
 using namespace glm;

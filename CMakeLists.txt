@@ -79,7 +79,7 @@ endif()
 add_library(algine
         include/algine/types.h
         include/algine/templates.h
-        include/algine/internal/PublicObjectTools.h
+        src/internal/PublicObjectTools.h
         include/algine/constants/BoneSystem.h
         include/algine/constants/ShadowShader.h
         include/algine/constants/QuadShader.h
@@ -205,6 +205,8 @@ add_library(algine
         src/ext/event/MouseEventListener.cpp include/algine/ext/event/MouseEventListener.h
         src/ext/event/MouseEvent.cpp include/algine/ext/event/MouseEvent.h include/algine/ext/event/MouseButton.h
         src/ext/debug.cpp include/algine/ext/debug.h)
+
+target_include_directories(algine PRIVATE src)
 
 # linking
 if (WIN32)

@@ -11,7 +11,7 @@
 #include "../SOP.h"
 #include "../SOPConstants.h"
 
-#include "algine/internal/PublicObjectTools.h"
+#include "internal/PublicObjectTools.h"
 
 #include "TexturePrivateTools.h"
 

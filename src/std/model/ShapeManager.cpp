@@ -8,8 +8,6 @@
 #include <algine/core/JsonHelper.h>
 #include <algine/core/TypeRegistry.h>
 
-#include <algine/internal/PublicObjectTools.h>
-
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -19,6 +17,7 @@
 #include <iostream>
 #include <cfloat>
 
+#include "internal/PublicObjectTools.h"
 #include "../assimp2glm.h"
 #include "ShapeConfigTools.h"
 

@@ -2,7 +2,7 @@
 
 #include <algine/core/DataType.h>
 
-#include "algine/internal/PublicObjectTools.h"
+#include "internal/PublicObjectTools.h"
 
 using namespace std;
 using namespace algine::internal;
