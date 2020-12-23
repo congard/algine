@@ -7,6 +7,7 @@
 #include <algine/core/JsonHelper.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <stdexcept>
 
 using namespace std;
@@ -33,15 +34,24 @@ Rotator::Rotator()
     : m_pitch(0),
       m_yaw(0),
       m_roll(0),
-      m_type(Type::Simple)
-{
-    // see initializer list above
-}
+      m_type(Type::Simple) {}
 
 void Rotator::rotate(mat4 &matrix) {
     matrix = glm::rotate(matrix, m_pitch, vec3(1.0f, 0.0f, 0.0f));
     matrix = glm::rotate(matrix, m_yaw, vec3(0.0f, 1.0f, 0.0f));
     matrix = glm::rotate(matrix, m_roll, vec3(0.0f, 0.0f, 1.0f));
+}
+
+void Rotator::changePitch(float dPitch) {
+    m_pitch += dPitch;
+}
+
+void Rotator::changeYaw(float dYaw) {
+    m_yaw += dYaw;
+}
+
+void Rotator::changeRoll(float dRoll) {
+    m_roll += dRoll;
 }
 
 void Rotator::setPitch(float pitch) {
@@ -68,16 +78,24 @@ float Rotator::getRoll() const {
     return m_roll;
 }
 
+Rotator::Type Rotator::getType() const {
+    return m_type;
+}
+
 Rotator* Rotator::create(Type type) {
     switch (type) {
-        case Type::Simple:
+        case Type::Simple: {
             return new Rotator();
-        case Type::Euler:
+        }
+        case Type::Euler: {
             return new EulerRotator();
-        case Type::Free:
+        }
+        case Type::Free: {
             return new FreeRotator();
-        default:
+        }
+        default: {
             throw runtime_error("Unknown rotator type " + to_string(static_cast<int>(type)));
+        }
     }
 }
 
@@ -102,9 +120,10 @@ void Rotator::import(const JsonHelper &jsonHelper) {
     if (types.find(type_str) != types.end()) {
         m_type = types[type_str];
     } else {
-        string message = "Unknown Rotator type: " + type_str + "\n"
-                         "Available: " + Simple + ", " + Euler + ", " + Free;
-        throw runtime_error(message);
+        throw runtime_error(
+            "Unknown Rotator type: " + type_str + "\n"
+            "Available: " + Simple + ", " + Euler + ", " + Free
+        );
     }
 }
 

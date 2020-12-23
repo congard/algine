@@ -1,10 +1,11 @@
 #ifndef ALGINE_ROTATOR_H
 #define ALGINE_ROTATOR_H
 
-#include <glm/mat4x4.hpp>
+#include <algine/core/transfer/Transferable.h>
+
 #include <algine/types.h>
 
-#include <algine/core/transfer/Transferable.h>
+#include <glm/mat4x4.hpp>
 
 namespace algine {
 class Rotator: public Transferable {
@@ -20,6 +21,11 @@ public:
     virtual ~Rotator() = default; // to hide -Wdelete-non-virtual-dtor
 
     virtual void rotate(glm::mat4 &matrix);
+
+    void changePitch(float dPitch);
+    void changeYaw(float dYaw);
+    void changeRoll(float dRoll);
+
     void setPitch(float pitch);
     void setYaw(float yaw);
     void setRoll(float roll);
@@ -28,12 +34,14 @@ public:
     float getYaw() const;
     float getRoll() const;
 
+    Type getType() const;
+
     static Rotator* create(Type type);
 
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
 
-public:
+protected:
     float m_pitch, m_yaw, m_roll;
     Type m_type;
 };
