@@ -2,13 +2,13 @@
 #include <algine/std/camera/FreeCameraController.h>
 
 namespace algine {
-void FreeCameraController::mouseMove(const float x, const float y, const float z) {
-    glm::vec3 dCoord = glm::vec3(x, y, z) - lastMousePos;
+void FreeCameraController::mouseMove(float x, float y, float z) {
+    glm::vec3 dCoord = glm::vec3(x, y, z) - m_lastMousePos;
 
-    camera->setYaw(dCoord.x * sensitivityYaw);
-    camera->setYaw(dCoord.y * sensitivityPitch);
-    camera->setYaw(dCoord.z * sensitivityRoll);
+    m_camera->setYaw(dCoord.x * m_sensitivityYaw);
+    m_camera->setPitch(dCoord.y * m_sensitivityPitch);
+    m_camera->setRoll(dCoord.z * m_sensitivityRoll);
 
-    lastMousePos = glm::vec3(x, y, z);
+    m_lastMousePos = {x, y, z};
 }
 }

@@ -4,9 +4,12 @@
 #include <algine/std/camera/BaseCameraController.h>
 
 namespace algine {
-class FreeCameraController : public BaseCameraController {
+class FreeCameraController: public BaseCameraController {
 public:
-    void mouseMove(float x, float y, float z = 0) override;
+    void mouseMove(float x, float y, float z) override;
+
+public:
+    using BaseCameraController::mouseMove;
 };
 }
 
