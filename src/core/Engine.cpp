@@ -8,8 +8,24 @@
 #include <algine/core/buffers/UniformBuffer.h>
 #include <algine/core/shader/ShaderProgram.h>
 #include <algine/core/InputLayout.h>
+#include <algine/core/TypeRegistry.h>
 
 #include <GL/glew.h>
+
+#ifndef ALGINE_CORE_ONLY
+#include <algine/std/model/Shape.h>
+#include <algine/std/model/Model.h>
+
+inline void initExtra() {
+    using namespace algine;
+
+    alRegisterType(Shape);
+    alRegisterType(Model);
+}
+
+#else
+#define initExtra()
+#endif
 
 using namespace std;
 
@@ -70,6 +86,8 @@ void Engine::init() {
 
     m_defaultInputLayout = (InputLayout*) malloc(sizeof(InputLayout));
     m_defaultInputLayout->m_id = 0;
+
+    initExtra();
 }
 
 void Engine::destroy() {
@@ -84,6 +102,8 @@ void Engine::destroy() {
     free(m_defaultUniformBuffer);
     free(m_defaultShaderProgram);
     free(m_defaultInputLayout);
+
+    TypeRegistry::clear();
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS
