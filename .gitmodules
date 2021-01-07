@@ -1,3 +1,7 @@
 [submodule "contrib/tulz"]
 	path = contrib/tulz
 	url = https://github.com/congard/tulz
+[submodule "contrib/glfw"]
+	path = contrib/glfw
+	url = https://github.com/glfw/glfw.git
+	branch = 3.3-stable

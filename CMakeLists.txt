@@ -46,6 +46,7 @@ else()
     add_subdirectory(contrib/assimp)
     include_directories(contrib/assimp/include)
 endif()
+
 if (ALGINE_USE_SYSTEM_GLEW)
     find_package(GLEW REQUIRED)
     set(GLEW_LIBRARY GLEW)
@@ -58,6 +59,18 @@ else()
     else()
         set(GLEW_LIBRARY glew)
     endif()
+endif()
+
+if (ALGINE_USE_SYSTEM_GLFW)
+    find_package(glfw3 REQUIRED)
+    message(STATUS "Algine: use system GLFW")
+else()
+    set(GLFW_BUILD_DOCS OFF)
+    set(GLFW_BUILD_EXAMPLES OFF)
+    set(GLFW_BUILD_TESTS OFF)
+
+    add_subdirectory(contrib/glfw)
+    include_directories(contrib/glfw/include)
 endif()
 
 add_subdirectory(contrib/tulz)
@@ -210,9 +223,9 @@ target_include_directories(algine PRIVATE src)
 
 # linking
 if (WIN32)
-    target_link_libraries(algine assimp ${GLEW_LIBRARY} opengl32 tulz)
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 tulz)
 elseif (UNIX)
-    target_link_libraries(algine assimp ${GLEW_LIBRARY} GL tulz)
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw GL tulz)
 
     if (ALGINE_USE_SYSTEM_ASSIMP)
         target_link_directories(algine PUBLIC /usr/local/lib)

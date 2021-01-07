@@ -5,6 +5,7 @@ out
 contrib/*
 !contrib/contrib.py
 !contrib/tulz
+!contrib/glfw
 
 # PyCharm
 scripts/.idea
