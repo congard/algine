@@ -17,7 +17,7 @@ constant(Pos, "pos");
 }
 
 namespace algine {
-void Translatable::setPos(const float x, const float y, const float z) {
+void Translatable::setPos(float x, float y, float z) {
     m_pos.x = x;
     m_pos.y = y;
     m_pos.z = z;
@@ -27,20 +27,24 @@ void Translatable::setPos(const vec3 &pos) {
     m_pos = pos;
 }
 
-void Translatable::setX(const float x) {
+void Translatable::setX(float x) {
     m_pos.x = x;
 }
 
-void Translatable::setY(const float y) {
+void Translatable::setY(float y) {
     m_pos.y = y;
 }
 
-void Translatable::setZ(const float z) {
+void Translatable::setZ(float z) {
     m_pos.z = z;
 }
 
+void Translatable::changePos(const vec3 &dPos) {
+    m_pos += dPos;
+}
+
 void Translatable::translate() {
-    m_translation = glm::translate(mat4(), m_pos);
+    m_translation = glm::translate(mat4(1.0f), m_pos);
 }
 
 float Translatable::getX() const {
@@ -55,11 +59,11 @@ float Translatable::getZ() const {
     return m_pos.z;
 }
 
-vec3 Translatable::getPos() const {
+const vec3& Translatable::getPos() const {
     return m_pos;
 }
 
-mat4 Translatable::getTranslationMatrix() const {
+const mat4& Translatable::getTranslationMatrix() const {
     return m_translation;
 }
 

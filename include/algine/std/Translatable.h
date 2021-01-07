@@ -14,13 +14,16 @@ public:
     void setX(float x);
     void setY(float y);
     void setZ(float z);
+
+    void changePos(const glm::vec3 &dPos);
+
     virtual void translate();
 
     float getX() const;
     float getY() const;
     float getZ() const;
-    glm::vec3 getPos() const;
-    glm::mat4 getTranslationMatrix() const;
+    const glm::vec3& getPos() const;
+    const glm::mat4& getTranslationMatrix() const;
 
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
