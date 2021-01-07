@@ -18,4 +18,10 @@ void FreeRotator::rotate(mat4 &matrix) {
     qRotation = normalize(qPYR * qRotation);
     matrix = mat4_cast(qRotation);
 }
+
+void FreeRotator::changeRotation(const vec3 &dRotate) {
+    setPitch(dRotate.x);
+    setYaw(dRotate.y);
+    setRoll(dRotate.z);
+}
 }

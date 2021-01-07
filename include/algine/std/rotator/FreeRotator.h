@@ -12,6 +12,8 @@ public:
 
     void rotate(glm::mat4 &matrix) override;
 
+    void changeRotation(const glm::vec3 &dRotate) override;
+
 public:
     glm::quat qRotation;
 };

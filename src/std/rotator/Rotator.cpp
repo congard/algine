@@ -37,9 +37,15 @@ Rotator::Rotator()
       m_type(Type::Simple) {}
 
 void Rotator::rotate(mat4 &matrix) {
-    matrix = glm::rotate(matrix, m_pitch, vec3(1.0f, 0.0f, 0.0f));
-    matrix = glm::rotate(matrix, m_yaw, vec3(0.0f, 1.0f, 0.0f));
-    matrix = glm::rotate(matrix, m_roll, vec3(0.0f, 0.0f, 1.0f));
+    matrix = glm::rotate(matrix, m_pitch, {1.0f, 0.0f, 0.0f});
+    matrix = glm::rotate(matrix, m_yaw, {0.0f, 1.0f, 0.0f});
+    matrix = glm::rotate(matrix, m_roll, {0.0f, 0.0f, 1.0f});
+}
+
+void Rotator::changeRotation(const vec3 &dRotate) {
+    changePitch(dRotate.x);
+    changeYaw(dRotate.y);
+    changeRoll(dRotate.z);
 }
 
 void Rotator::changePitch(float dPitch) {

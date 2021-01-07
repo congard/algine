@@ -22,6 +22,8 @@ public:
 
     virtual void rotate(glm::mat4 &matrix);
 
+    virtual void changeRotation(const glm::vec3 &dRotate);
+
     void changePitch(float dPitch);
     void changeYaw(float dYaw);
     void changeRoll(float dRoll);

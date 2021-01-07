@@ -25,6 +25,9 @@ public:
     void setYaw(float yaw);
     void setRoll(float roll);
     void setRotate(float pitch, float yaw, float roll);
+
+    void changeRotation(const glm::vec3 &dRotate);
+
     void rotate();
 
     float getPitch() const;

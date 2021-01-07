@@ -79,6 +79,10 @@ void Rotatable::setRotate(float pitch, float yaw, float roll) {
     setRoll(roll);
 }
 
+void Rotatable::changeRotation(const vec3 &dRotate) {
+    m_rotator->changeRotation(dRotate);
+}
+
 void Rotatable::rotate() {
     m_rotator->rotate(m_rotation);
 }
