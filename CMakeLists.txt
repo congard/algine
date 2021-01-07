@@ -124,6 +124,9 @@ add_library(algine
         include/algine/core/RawPtr.h
         include/algine/core/shader/ShadersInfo.h
         include/algine/core/DataType.h
+        include/algine/core/input/MouseKey.h
+        include/algine/core/input/KeyboardKey.h
+        include/algine/core/window/DebugWriter.h
         include/algine/std/QuadRendererPtr.h
         include/algine/std/CubeRendererPtr.h
         include/algine/std/model/ShapePtr.h
@@ -171,6 +174,15 @@ add_library(algine
         src/core/shader/ShaderProgram.cpp include/algine/core/shader/ShaderProgram.h
         src/core/shader/BaseUniformBlock.cpp include/algine/core/shader/BaseUniformBlock.h
         src/core/shader/UniformBlock.cpp include/algine/core/shader/UniformBlock.h
+        src/core/input/MouseKeyConverter.h
+        src/core/input/KeyboardKeyConverter.h
+        src/core/window/Window.cpp include/algine/core/window/Window.h
+        src/core/window/Content.cpp include/algine/core/window/Content.h
+        src/core/window/ConsoleDebugWriter.cpp include/algine/core/window/ConsoleDebugWriter.h
+        src/core/window/FileDebugWriter.cpp include/algine/core/window/FileDebugWriter.h
+        src/core/window/Icon.cpp include/algine/core/window/Icon.h
+        src/core/window/Icon2GLFWimage.h
+        src/core/window/Cursor.cpp include/algine/core/window/Cursor.h
         src/core/Engine.cpp include/algine/core/Engine.h
         src/core/TypeRegistry.cpp include/algine/core/TypeRegistry.h
         src/core/ImageConfigTools.h
@@ -213,9 +225,7 @@ add_library(algine
         src/std/AMTLManager.cpp include/algine/std/AMTLManager.h
 
         src/ext/Blur.cpp include/algine/ext/Blur.h
-        src/ext/event/MouseEventListener.cpp include/algine/ext/event/MouseEventListener.h
-        src/ext/event/MouseEvent.cpp include/algine/ext/event/MouseEvent.h include/algine/ext/event/MouseButton.h
-        src/ext/debug.cpp include/algine/ext/debug.h)
+        include/algine/ext/debug.h)
 
 target_include_directories(algine PRIVATE src)
 
