@@ -201,8 +201,6 @@ add_library(algine
         src/std/animation/AnimationBlender.cpp include/algine/std/animation/AnimationBlender.h
         src/std/animation/BoneSystemManager.cpp include/algine/std/animation/BoneSystemManager.h
         src/std/camera/Camera.cpp include/algine/std/camera/Camera.h
-        src/std/camera/FPSCamera.cpp include/algine/std/camera/FPSCamera.h
-        src/std/camera/FreeCamera.cpp include/algine/std/camera/FreeCamera.h
         src/std/rotator/Rotator.cpp include/algine/std/rotator/Rotator.h
         src/std/rotator/EulerRotator.cpp include/algine/std/rotator/EulerRotator.h
         src/std/rotator/FreeRotator.cpp include/algine/std/rotator/FreeRotator.h
