@@ -1,8 +1,9 @@
 #ifndef ALGINE_ENGINE_H
 #define ALGINE_ENGINE_H
 
-#include <string>
 #include <algine/types.h>
+
+#include <string>
 
 namespace algine {
 class Framebuffer;
@@ -41,6 +42,8 @@ public:
 
     static std::string getGPUVendor();
     static std::string getGPURenderer();
+
+    static uint getError();
 
 public:
     static Framebuffer* defaultFramebuffer();
@@ -88,6 +91,13 @@ public:
     static void setDepthTestMode(uint mode);
     static void setFaceCullingMode(uint mode);
     static void setViewport(uint width, uint height, uint x = 0, uint y = 0);
+
+public:
+    static long time();
+    static long timeFromStart();
+
+private:
+    static long m_startTime;
 
 private:
     static Framebuffer *m_defaultFramebuffer;

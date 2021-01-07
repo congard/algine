@@ -10,7 +10,9 @@
 #include <algine/core/InputLayout.h>
 #include <algine/core/TypeRegistry.h>
 
-#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+#include <chrono>
 
 #ifndef ALGINE_CORE_ONLY
 #include <algine/std/model/Shape.h>
@@ -30,6 +32,8 @@ inline void initExtra() {
 using namespace std;
 
 namespace algine {
+long Engine::m_startTime;
+
 Framebuffer* Engine::m_defaultFramebuffer;
 Renderbuffer* Engine::m_defaultRenderbuffer;
 Texture2D* Engine::m_defaultTexture2D;
@@ -51,6 +55,8 @@ ShaderProgram* Engine::m_boundShaderProgram;
 InputLayout* Engine::m_boundInputLayout;
 
 void Engine::init() {
+    m_startTime = Engine::time();
+
     // We use malloc instead of new since we don't want the ctor to be
     // called because ctor generates new texture id. We don't need it.
     // In the case of increasing the number of operations performed by
@@ -104,6 +110,8 @@ void Engine::destroy() {
     free(m_defaultInputLayout);
 
     TypeRegistry::clear();
+
+    glfwTerminate(); // Terminate GLFW, clearing any resources allocated by GLFW
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS
@@ -139,6 +147,10 @@ string Engine::getGPUVendor() {
 
 string Engine::getGPURenderer() {
     return reinterpret_cast<char const*>(glGetString(GL_RENDERER));
+}
+
+uint Engine::getError() {
+    return glGetError();
 }
 
 #define returnDefault(type, name, obj) type* Engine::name() { return obj; }
@@ -177,26 +189,36 @@ void Engine::disableDepthMask() {
     glDepthMask(false);
 }
 
-void Engine::drawElements(const uint start, const uint count, const uint polyType) {
+void Engine::drawElements(uint start, uint count, uint polyType) {
     glDrawElements(polyType, count, GL_UNSIGNED_INT, reinterpret_cast<void*>(start * sizeof(uint)));
 }
 
-void Engine::setDepthTestMode(const uint mode) {
+void Engine::setDepthTestMode(uint mode) {
     glDepthFunc(mode);
 }
 
-void Engine::setFaceCullingMode(const uint mode) {
+void Engine::setFaceCullingMode(uint mode) {
     glCullFace(mode);
 }
 
-void Engine::setViewport(const uint width, const uint height, const uint x, const uint y) {
+void Engine::setViewport(uint width, uint height, uint x, uint y) {
     glViewport(x, y, width, height);
+}
+
+long Engine::time() {
+    using namespace chrono;
+
+    return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+long Engine::timeFromStart() {
+    return Engine::time() - m_startTime;
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS
 #include "internal/SOPConstants.h"
 
-void Engine::setBoundObject(const uint type, const void *const obj) {
+void Engine::setBoundObject(uint type, const void *obj) {
     switch (type) {
         case SOPConstants::FramebufferObject:
             m_boundFramebuffer = (Framebuffer*) obj;
