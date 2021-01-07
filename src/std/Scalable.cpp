@@ -17,7 +17,11 @@ constant(Scale, "scale");
 }
 
 namespace algine {
-void Scalable::setScale(const float x, const float y, const float z) {
+void Scalable::changeScale(const vec3 &dScale) {
+    m_scale += dScale;
+}
+
+void Scalable::setScale(float x, float y, float z) {
     m_scale.x = x;
     m_scale.y = y;
     m_scale.z = z;
@@ -27,20 +31,20 @@ void Scalable::setScale(const vec3 &scale) {
     m_scale = scale;
 }
 
-void Scalable::setScaleX(const float x) {
+void Scalable::setScaleX(float x) {
     m_scale.x = x;
 }
 
-void Scalable::setScaleY(const float y) {
+void Scalable::setScaleY(float y) {
     m_scale.y = y;
 }
 
-void Scalable::setScaleZ(const float z) {
+void Scalable::setScaleZ(float z) {
     m_scale.z = z;
 }
 
 void Scalable::scale() {
-    m_scaling = glm::scale(glm::mat4(), m_scale);
+    m_scaling = glm::scale(glm::mat4(1.0f), m_scale);
 }
 
 float Scalable::getScaleX() const {

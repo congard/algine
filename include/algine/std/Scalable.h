@@ -9,6 +9,8 @@
 namespace algine {
 class Scalable: public Transferable {
 public:
+    void changeScale(const glm::vec3 &dScale);
+
     void setScale(float x, float y, float z);
     void setScale(const glm::vec3 &scale);
     void setScaleX(float x);
