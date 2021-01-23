@@ -1,14 +1,11 @@
-# Build scripts output, debug pictures
-out
-
-# contrib libs (must be installed via contrib/contrib.py)
+# contrib libs
 contrib/*
 !contrib/contrib.py
 !contrib/tulz
+!contrib/assimp
 !contrib/glfw
-
-# PyCharm
-scripts/.idea
+!contrib/glew
+!contrib/glm
 
 # Visual Studio Code dir
 .vscode
@@ -22,6 +19,6 @@ cmake-build-release
 CMakeLists.txt.user
 
 # KDevelop
-build
+/build
 algine.kdev4
 .kdev4
