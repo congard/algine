@@ -45,7 +45,7 @@ Here the repository with examples of usage: [algine-examples](https://github.com
 
 ## Building
 
-About building on Linux and Windows you can read [here](build.md)
+See [doc/build](doc/build/README.md)
 
 ## Contact
 
