@@ -93,6 +93,9 @@ void Buffer::updateData(const uint offset, const uint size, const void *data) {
 Array<byte> Buffer::getData(uint offset, uint size) {
     checkBinding()
 
+    if (size == 0)
+        return {};
+
     tulz::Array<byte> array(size);
     glGetBufferSubData(m_target, offset, size, array.array());
 
