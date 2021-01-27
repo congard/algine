@@ -569,7 +569,7 @@ void ShapeManager::processMesh(const aiMesh *aimesh, const aiScene *scene) {
             };
 
             Texture2DManager manager;
-            manager.setWorkingDirectory(Path(Path::join(m_workingDirectory, m_modelPath)).getParentDirectory());
+            manager.setWorkingDirectory(Path(Path::join(m_workingDirectory, m_modelPath)).getParentDirectory().toString());
             manager.setPath(path.C_Str());
             manager.setParams({
                 {Texture::WrapU, getMapMode(mapModeU)},

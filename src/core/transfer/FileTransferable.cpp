@@ -21,10 +21,10 @@ void FileTransferable::importFromFile(const string &path) {
 
     if (!m_workingDirectory.empty()) {
         m_confPath = Path::join(m_workingDirectory, path);
-        m_workingDirectory = Path(m_confPath).getParentDirectory();
+        m_workingDirectory = Path(m_confPath).getParentDirectory().toString();
     } else {
         m_confPath = path;
-        m_workingDirectory = Path(path).getParentDirectory();
+        m_workingDirectory = Path(path).getParentDirectory().toString();
     }
 
     import(File(m_confPath, File::Mode::ReadText).readStr());
