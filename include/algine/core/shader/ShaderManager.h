@@ -10,6 +10,10 @@
 #include <memory>
 #include <vector>
 
+namespace tulz {
+class Path;
+}
+
 namespace algine {
 class ShaderManager: public ShaderDefinitionManager, public ManagerBase {
 public:
@@ -56,7 +60,7 @@ public:
     static std::vector<std::string>& getGlobalIncludePaths();
 
 private:
-    std::string processDirectives(const std::string &src, const std::string &baseIncludePath);
+    std::string processDirectives(const std::string &src, const tulz::Path &baseIncludePath);
 
 private:
     std::vector<std::string> m_includePaths;

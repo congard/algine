@@ -2,9 +2,8 @@
 
 #include <algine/core/JsonHelper.h>
 
-#include <tulz/Path.h>
-#include <tulz/File.h>
 #include <tulz/StringUtils.h>
+#include <tulz/File.h>
 
 #include <stdexcept>
 #include <iostream>
@@ -57,17 +56,11 @@ vector<string> ShaderManager::m_globalIncludePaths;
 
 ShaderManager::ShaderManager()
     : m_type(),
-      m_dumperUseSources(false)
-{
-    // see initializer list above
-}
+      m_dumperUseSources(false) {}
 
 ShaderManager::ShaderManager(uint type)
     : m_type(type),
-      m_dumperUseSources(false)
-{
-    // see initializer list above
-}
+      m_dumperUseSources(false) {}
 
 void ShaderManager::setType(uint type) {
     m_type = type;
@@ -123,7 +116,7 @@ void ShaderManager::resetGenerated() {
 
 inline void cfgWorkingDirectoryImpl(string &workingDirectory, const string &path) {
     if (workingDirectory.empty() && !path.empty()) {
-        workingDirectory = Path(path).getParentDirectory();
+        workingDirectory = Path(path).getParentDirectory().toString();
     }
 }
 
@@ -170,7 +163,7 @@ void ShaderManager::generate() {
     // expand includes
     // base include path (path where file is located)
     // it is working directory (if specified)
-    m_gen = processDirectives(m_gen, m_workingDirectory);
+    m_gen = processDirectives(m_gen, Path(m_workingDirectory));
 }
 
 const string& ShaderManager::getGenerated() const {
@@ -336,7 +329,7 @@ inline vector<pair<uint, uint>> findComments(const string &src) {
     return result;
 }
 
-string ShaderManager::processDirectives(const string &src, const string &baseIncludePath) {
+string ShaderManager::processDirectives(const string &src, const Path &baseIncludePath) {
     string result = src;
     constexpr char regex[] = R"~((\w+)[ \t]+(.+))~";
 
@@ -357,15 +350,15 @@ string ShaderManager::processDirectives(const string &src, const string &baseInc
 
         if (pragmaIs(Include)) {
             auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~("(.+)")~"); // "file"
-            string &filePath = fileMatches[0].matches[1];
+            Path filePath(fileMatches[0].matches[1]);
 
             auto fileNotFoundError = [&]()
             {
-                cerr << "ShaderManager: Error: file " << filePath << " not found\n" << matches.matches[0] << "\n\n";
+                cerr << "ShaderManager: Error: file " << filePath.toString() << " not found\n" << matches.matches[0] << "\n\n";
             };
 
-            if (!Path(filePath).isAbsolute()) {
-                if (Path(Path::join(baseIncludePath, filePath)).exists()) { // try to find included file in base file folder
+            if (!filePath.isAbsolute()) {
+                if (Path::join(baseIncludePath, filePath).exists()) { // try to find included file in base file folder
                     filePath = Path::join(baseIncludePath, filePath);
                 } else {
                     bool found = false;
@@ -373,8 +366,10 @@ string ShaderManager::processDirectives(const string &src, const string &baseInc
                     auto findIncludePath = [&](const vector<string> &includePaths)
                     {
                         for (const auto &i : includePaths) { // i - include path
-                            if (Path(Path::join(i, filePath)).exists()) {
-                                filePath = Path::join(i, filePath);
+                            Path includePath(i);
+
+                            if (Path::join(includePath, filePath).exists()) {
+                                filePath = Path::join(includePath, filePath);
                                 found = true;
                                 break;
                             }
@@ -399,7 +394,7 @@ string ShaderManager::processDirectives(const string &src, const string &baseInc
             }
 
             insert(result, matches.pos, matches.size,
-                   processDirectives(File(filePath, File::Mode::ReadText).readStr(), Path(filePath).getParentDirectory()));
+                   processDirectives(File(filePath, File::Mode::ReadText).readStr(), filePath.getParentDirectory()));
         } else if (pragmaIs(Link)) {
             auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~((.+)[ \t]+(.+))~");
 
