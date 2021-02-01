@@ -27,9 +27,8 @@ using namespace algine::internal;
 namespace algine {
 vector<ShaderProgramPtr> ShaderProgram::publicObjects;
 
-ShaderProgram::ShaderProgram() {
-    id = glCreateProgram();
-}
+ShaderProgram::ShaderProgram()
+    : id(glCreateProgram()) {}
 
 ShaderProgram::~ShaderProgram() {
     glDeleteProgram(id);
@@ -227,6 +226,10 @@ void ShaderProgram::setMat3(const string &location, const glm::mat3 &p) {
 void ShaderProgram::setMat4(const string &location, const glm::mat4 &p) {
     checkBinding()
     setMat4(getLocation(location), p);
+}
+
+uint ShaderProgram::getId() const {
+    return id;
 }
 
 ShaderProgramPtr ShaderProgram::getByName(const string &name) {

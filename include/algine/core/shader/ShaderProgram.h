@@ -4,6 +4,7 @@
 #include <algine/core/shader/ShaderProgramPtr.h>
 #include <algine/core/shader/ShadersInfo.h>
 #include <algine/core/shader/Shader.h>
+
 #include <algine/types.h>
 #include <algine/templates.h>
 
@@ -54,10 +55,12 @@ public:
     void setMat3(const std::string &location, const glm::mat3 &p);
     void setMat4(const std::string &location, const glm::mat4 &p);
 
+    uint getId() const;
+
     implementVariadicCreate(ShaderProgram)
     implementVariadicDestroy(ShaderProgram)
 
-public:
+public: // TODO: make private
     uint id;
     std::unordered_map<std::string, int> locations;
 
