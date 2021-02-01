@@ -149,7 +149,7 @@ inline pair<uint, uint> getTexFormatInfo(const uint format) {
     switch (format) {
         case Texture::RG:
         case Texture::RG8:
-        case Texture::RG16:
+        enable_if_desktop(case Texture::desktop_RG16:)
         case Texture::RG16F:
         case Texture::RG32F:
             return {Texture::RG, 2};
@@ -160,7 +160,7 @@ inline pair<uint, uint> getTexFormatInfo(const uint format) {
             return {Texture::RGB, 3};
         case Texture::RGBA:
         case Texture::RGBA8:
-        case Texture::RGBA16:
+        enable_if_desktop(case Texture::desktop_RGBA16:)
         case Texture::RGBA16F:
         case Texture::RGBA32F:
             return {Texture::RGBA, 4};
@@ -237,7 +237,10 @@ PixelData Framebuffer::getAllPixelsCube(TextureCube::Face face, uint attachment,
     pixelData.componentsCount = formatInfo.second;
     pixelData.pixels = Array<float>(pixelData.width * pixelData.height * pixelData.componentsCount);
 
-    glGetTexImage(static_cast<uint>(face), 0, formatInfo.first, GL_FLOAT, pixelData.pixels.m_array);
+    // TODO: android
+    enable_if_desktop(
+        glGetTexImage(static_cast<uint>(face), 0, formatInfo.first, GL_FLOAT, pixelData.pixels.m_array)
+    );
 
     texture->unbind();
 

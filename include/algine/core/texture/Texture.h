@@ -4,9 +4,11 @@
 #include <algine/core/texture/TextureCreateInfo.h>
 #include <algine/core/DataType.h>
 #include <algine/core/Object.h>
-#include <algine/types.h>
 
-#include <GL/glew.h>
+#include <algine/templates.h>
+#include <algine/types.h>
+#include <algine/gl.h>
+
 #include <map>
 #include <string>
 
@@ -30,7 +32,10 @@ public:
         ClampToBorder = GL_CLAMP_TO_BORDER,
         Repeat = GL_REPEAT,
         MirroredRepeat = GL_MIRRORED_REPEAT,
-        MirrorClampToEdge = GL_MIRROR_CLAMP_TO_EDGE
+
+        enable_if_desktop(
+            desktop_MirrorClampToEdge = GL_MIRROR_CLAMP_TO_EDGE
+        )
     };
 
     enum BaseFormats {
@@ -44,12 +49,9 @@ public:
 
     enum SizedFormats {
         Red8 = GL_R8,
-        Red16 = GL_R16,
         RG8 = GL_RG8,
-        RG16 = GL_RG16,
         RGB8 = GL_RGB8,
         RGBA8 = GL_RGBA8,
-        RGBA16 = GL_RGBA16,
         Red16F = GL_R16F,
         RG16F = GL_RG16F,
         RGB16F = GL_RGB16F,
@@ -58,6 +60,12 @@ public:
         RG32F = GL_RG32F,
         RGB32F = GL_RGB32F,
         RGBA32F = GL_RGBA32F,
+
+        enable_if_desktop(
+            desktop_Red16 = GL_R16,
+            desktop_RG16 = GL_RG16,
+            desktop_RGBA16 = GL_RGBA16
+        )
     };
 
 public:

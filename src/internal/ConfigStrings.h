@@ -68,7 +68,7 @@ constant(ClampToEdge, "clampToEdge");
 constant(ClampToBorder, "clampToBorder");
 constant(Repeat, "repeat");
 constant(MirroredRepeat, "mirroredRepeat");
-constant(MirrorClampToEdge, "mirrorClampToEdge");
+constant(desktop_MirrorClampToEdge, "mirrorClampToEdge");
 
 constant(File, "file");
 constant(Path, "path");

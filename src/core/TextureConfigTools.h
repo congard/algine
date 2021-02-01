@@ -31,7 +31,10 @@ inline uint stringToParamValue(const string &str) {
     param_uint(ClampToBorder)
     param_uint(Repeat)
     param_uint(MirroredRepeat)
-    param_uint(MirrorClampToEdge)
+
+    enable_if_desktop(
+        param_uint(desktop_MirrorClampToEdge)
+    )
 
     throw runtime_error("Unsupported param value '" + str + "'");
 }
@@ -57,7 +60,10 @@ inline string paramValueToString(uint param) {
     param_str(ClampToBorder)
     param_str(Repeat)
     param_str(MirroredRepeat)
-    param_str(MirrorClampToEdge)
+
+    enable_if_desktop(
+        param_str(desktop_MirrorClampToEdge)
+    )
 
     throw runtime_error("Unsupported param value " + to_string(param));
 }
