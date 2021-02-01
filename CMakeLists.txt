@@ -1,10 +1,7 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.10)
 project(algine)
 
 set(CMAKE_CXX_STANDARD 17)
-
-# Under Windows you can compile this project using GNU compiler (for example by using MinGW-w64)
-# You can use CLion or QtCreator as IDE
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "Algine debug mode - adding -g option")
@@ -28,87 +25,40 @@ else()
     message(FATAL_ERROR "CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}\nBut you can choose only Debug or Release build type")
 endif()
 
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-set(ASSIMP_BUILD_TESTS OFF)
-set(BUILD_UTILS OFF) # glew flag
-
-if (ALGINE_LINK_LIBS_STATICALLY)
-    add_definitions(-DGLEW_STATIC)
-    set(BUILD_SHARED_LIBS OFF)
-else()
-    set(BUILD_SHARED_LIBS ON)
-endif()
-
-if (ALGINE_USE_SYSTEM_ASSIMP)
-    find_package(assimp REQUIRED)
-    message(STATUS "Algine: use system Assimp")
-else()
-    add_subdirectory(contrib/assimp)
-    include_directories(contrib/assimp/include)
-endif()
-
-if (ALGINE_USE_SYSTEM_GLEW)
-    find_package(GLEW REQUIRED)
-    set(GLEW_LIBRARY GLEW)
-    message(STATUS "Algine: use system GLEW")
-else()
-    add_subdirectory(contrib/glew/build/cmake)
-    include_directories(contrib/glew/include)
-    if (ALGINE_LINK_LIBS_STATICALLY)
-        set(GLEW_LIBRARY glew_s)
-    else()
-        set(GLEW_LIBRARY glew)
-    endif()
-endif()
-
-if (ALGINE_USE_SYSTEM_GLFW)
-    find_package(glfw3 REQUIRED)
-    message(STATUS "Algine: use system GLFW")
-else()
-    set(GLFW_BUILD_DOCS OFF)
-    set(GLFW_BUILD_EXAMPLES OFF)
-    set(GLFW_BUILD_TESTS OFF)
-
-    add_subdirectory(contrib/glfw)
-    include_directories(contrib/glfw/include)
-endif()
-
-add_subdirectory(contrib/tulz)
-include_directories(contrib/tulz/include)
-include_directories(contrib/glm)
-include_directories(contrib)
-include_directories(include)
-
 if (ALGINE_SECURE_OPERATIONS)
     if (NOT DEFINED ALGINE_SOP_LEVEL)
         set(ALGINE_SOP_LEVEL 0)
     endif()
 
-    add_compile_definitions(ALGINE_SECURE_OPERATIONS)
-    add_compile_definitions(ALGINE_SOP_LEVEL=${ALGINE_SOP_LEVEL})
+    add_definitions(-DALGINE_SECURE_OPERATIONS)
+    add_definitions(-DALGINE_SOP_LEVEL=${ALGINE_SOP_LEVEL})
+
     message(STATUS "Algine SOP level is ${ALGINE_SOP_LEVEL}")
 endif()
 
-add_library(algine
-        include/algine/types.h
-        include/algine/templates.h
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+set(ASSIMP_BUILD_TESTS OFF)
+
+add_subdirectory(contrib/assimp)
+include_directories(contrib/assimp/include)
+
+add_subdirectory(contrib/tulz)
+include_directories(contrib/tulz/include)
+
+include_directories(contrib/glm)
+include_directories(contrib)
+include_directories(include)
+
+set(ALGINE_CORE_SOURCES
         src/internal/PublicObjectTools.h
         src/internal/SOP.h
         src/internal/SOPConstants.h
         src/internal/ConfigStrings.h
-        include/algine/constants/BoneSystem.h
-        include/algine/constants/ShadowShader.h
-        include/algine/constants/QuadShader.h
-        include/algine/constants/CubemapShader.h
-        include/algine/constants/Lighting.h
-        include/algine/constants/Material.h
-        include/algine/constants/NormalMapping.h
-        include/algine/ext/constants/BlurShader.h
-        include/algine/ext/constants/SSRShader.h
-        include/algine/ext/constants/BlendBloom.h
-        include/algine/ext/constants/BloomSearchShader.h
-        include/algine/ext/constants/COCShader.h
-        include/algine/ext/constants/BlendDOF.h
+
+        include/algine/templates.h
+        include/algine/types.h
+        include/algine/gl.h
+
         include/algine/core/transfer/Transferable.h
         include/algine/core/transfer/GLMTransferrer.h
         include/algine/core/texture/PixelData.h
@@ -124,18 +74,6 @@ add_library(algine
         include/algine/core/RawPtr.h
         include/algine/core/shader/ShadersInfo.h
         include/algine/core/DataType.h
-        include/algine/core/input/MouseKey.h
-        include/algine/core/input/KeyboardKey.h
-        include/algine/core/window/DebugWriter.h
-        include/algine/std/QuadRendererPtr.h
-        include/algine/std/CubeRendererPtr.h
-        include/algine/std/model/ShapePtr.h
-        include/algine/std/model/Mesh.h
-        include/algine/std/model/ModelPtr.h
-        include/algine/std/model/InputLayoutShapeLocations.h
-        include/algine/std/Material.h
-        include/algine/std/animation/BoneMatrix.h
-        include/algine/std/animation/BoneMatrices.h
 
         src/core/JsonHelper.cpp include/algine/core/JsonHelper.h
         src/core/Object.cpp include/algine/core/Object.h
@@ -174,19 +112,31 @@ add_library(algine
         src/core/shader/ShaderProgram.cpp include/algine/core/shader/ShaderProgram.h
         src/core/shader/BaseUniformBlock.cpp include/algine/core/shader/BaseUniformBlock.h
         src/core/shader/UniformBlock.cpp include/algine/core/shader/UniformBlock.h
-        src/core/input/MouseKeyConverter.h
-        src/core/input/KeyboardKeyConverter.h
-        src/core/window/Window.cpp include/algine/core/window/Window.h
-        src/core/window/Content.cpp include/algine/core/window/Content.h
-        src/core/window/ConsoleDebugWriter.cpp include/algine/core/window/ConsoleDebugWriter.h
-        src/core/window/FileDebugWriter.cpp include/algine/core/window/FileDebugWriter.h
-        src/core/window/Icon.cpp include/algine/core/window/Icon.h
-        src/core/window/Icon2GLFWimage.h
-        src/core/window/Cursor.cpp include/algine/core/window/Cursor.h
         src/core/Engine.cpp include/algine/core/Engine.h
         src/core/TypeRegistry.cpp include/algine/core/TypeRegistry.h
         src/core/ImageConfigTools.h
         src/core/TextureConfigTools.h
+        src/core/log/Logger.cpp include/algine/core/log/Logger.h
+        src/core/log/Log.cpp include/algine/core/log/Log.h)
+
+set(ALGINE_STD_SOURCES
+        include/algine/constants/BoneSystem.h
+        include/algine/constants/ShadowShader.h
+        include/algine/constants/QuadShader.h
+        include/algine/constants/CubemapShader.h
+        include/algine/constants/Lighting.h
+        include/algine/constants/Material.h
+        include/algine/constants/NormalMapping.h
+
+        include/algine/std/QuadRendererPtr.h
+        include/algine/std/CubeRendererPtr.h
+        include/algine/std/model/ShapePtr.h
+        include/algine/std/model/Mesh.h
+        include/algine/std/model/ModelPtr.h
+        include/algine/std/model/InputLayoutShapeLocations.h
+        include/algine/std/Material.h
+        include/algine/std/animation/BoneMatrix.h
+        include/algine/std/animation/BoneMatrices.h
 
         src/std/assimp2glm.h
         src/std/model/Model.cpp include/algine/std/model/Model.h
@@ -222,20 +172,90 @@ add_library(algine
         src/std/Translatable.cpp include/algine/std/Translatable.h
         src/std/Scalable.cpp include/algine/std/Scalable.h
         src/std/AMTLMaterialManager.cpp include/algine/std/AMTLMaterialManager.h
-        src/std/AMTLManager.cpp include/algine/std/AMTLManager.h
+        src/std/AMTLManager.cpp include/algine/std/AMTLManager.h)
 
-        src/ext/Blur.cpp include/algine/ext/Blur.h
-        include/algine/ext/debug.h)
+set(ALGINE_EXT_SOURCES
+        include/algine/ext/constants/BlurShader.h
+        include/algine/ext/constants/SSRShader.h
+        include/algine/ext/constants/BlendBloom.h
+        include/algine/ext/constants/BloomSearchShader.h
+        include/algine/ext/constants/COCShader.h
+        include/algine/ext/constants/BlendDOF.h
+
+        include/algine/ext/debug.h
+
+        src/ext/Blur.cpp include/algine/ext/Blur.h)
+
+if (NOT ANDROID)
+    set(ALGINE_PLATFORM_SOURCES
+            include/algine/core/input/MouseKey.h
+            include/algine/core/input/KeyboardKey.h
+            include/algine/core/window/DebugWriter.h
+
+            src/core/input/MouseKeyConverter.h
+            src/core/input/KeyboardKeyConverter.h
+            src/core/window/Window.cpp include/algine/core/window/Window.h
+            src/core/window/Content.cpp include/algine/core/window/Content.h
+            src/core/window/ConsoleDebugWriter.cpp include/algine/core/window/ConsoleDebugWriter.h
+            src/core/window/FileDebugWriter.cpp include/algine/core/window/FileDebugWriter.h
+            src/core/window/Icon.cpp include/algine/core/window/Icon.h
+            src/core/window/Icon2GLFWimage.h
+            src/core/window/Cursor.cpp include/algine/core/window/Cursor.h)
+
+    # Under Windows you can compile this project using GNU compiler (for example by using MinGW-w64)
+    # You can use CLion or QtCreator as IDE
+
+    set(BUILD_UTILS OFF) # glew flag
+
+    if (ALGINE_LINK_LIBS_STATICALLY)
+        add_definitions(-DGLEW_STATIC)
+        set(BUILD_SHARED_LIBS OFF)
+    else()
+        set(BUILD_SHARED_LIBS ON)
+    endif()
+
+    if (ALGINE_USE_SYSTEM_GLEW)
+        find_package(GLEW REQUIRED)
+        set(GLEW_LIBRARY GLEW)
+        message(STATUS "Algine: use system GLEW")
+    else()
+        add_subdirectory(contrib/glew/build/cmake)
+        include_directories(contrib/glew/include)
+        if (ALGINE_LINK_LIBS_STATICALLY)
+            set(GLEW_LIBRARY glew_s)
+        else()
+            set(GLEW_LIBRARY glew)
+        endif()
+    endif()
+
+    if (ALGINE_USE_SYSTEM_GLFW)
+        find_package(glfw3 REQUIRED)
+        message(STATUS "Algine: use system GLFW")
+    else()
+        set(GLFW_BUILD_DOCS OFF)
+        set(GLFW_BUILD_EXAMPLES OFF)
+        set(GLFW_BUILD_TESTS OFF)
+
+        add_subdirectory(contrib/glfw)
+        include_directories(contrib/glfw/include)
+    endif()
+endif()
+
+add_library(algine
+        ${ALGINE_CORE_SOURCES}
+        ${ALGINE_STD_SOURCES}
+        ${ALGINE_EXT_SOURCES}
+        ${ALGINE_PLATFORM_SOURCES})
+
+set_target_properties(algine PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(algine PRIVATE src)
 
 # linking
-if (WIN32)
+if (ANDROID)
+    target_link_libraries(algine assimp android log GLESv3 EGL tulz)
+elseif (WIN32)
     target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 tulz)
 elseif (UNIX)
     target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw GL tulz)
-
-    if (ALGINE_USE_SYSTEM_ASSIMP)
-        target_link_directories(algine PUBLIC /usr/local/lib)
-    endif()
 endif()
