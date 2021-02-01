@@ -2,7 +2,7 @@
 
 #include <algine/core/Engine.h>
 
-#include <GL/glew.h>
+#include <algine/gl.h>
 
 using namespace std;
 

@@ -2,7 +2,8 @@
 
 #include <algine/core/Engine.h>
 
-#include <GL/glew.h>
+#include <algine/templates.h>
+#include <algine/gl.h>
 
 #include <string>
 #include <cassert>

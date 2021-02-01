@@ -3,9 +3,11 @@
 #include <algine/core/shader/ShaderTools.h>
 #include <algine/core/Engine.h>
 
+#include <algine/gl.h>
+
 #include <tulz/File.h>
+
 #include <glm/gtc/type_ptr.hpp>
-#include <GL/glew.h>
 
 #include <iostream>
 

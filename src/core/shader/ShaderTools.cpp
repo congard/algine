@@ -1,9 +1,9 @@
 #include <algine/core/shader/ShaderTools.h>
 
 #include <algine/core/shader/ShaderProgram.h>
+#include <algine/gl.h>
 
 #include <tulz/Array.h>
-#include <GL/glew.h>
 
 using namespace std;
 using namespace tulz;

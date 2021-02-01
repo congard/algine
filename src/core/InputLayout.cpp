@@ -2,7 +2,8 @@
 
 #include <algine/core/Engine.h>
 
-#include <GL/glew.h>
+#include <algine/gl.h>
+
 #include <iostream>
 
 #define SOP_BOUND_PTR Engine::m_boundInputLayout
@@ -34,8 +35,7 @@ void InputLayout::unbind() const {
     glBindVertexArray(0);
 }
 
-void
-InputLayout::addAttribute(
+void InputLayout::addAttribute(
         const InputAttributeDescription &inputAttribDescription,
         const ArrayBuffer *arrayBuffer) const
 {
@@ -49,12 +49,12 @@ InputLayout::addAttribute(
         case DataType::HalfFloat:
         case DataType::Double:
             glVertexAttribPointer(
-                    inputAttribDescription.m_location,
-                    inputAttribDescription.m_count,
-                    static_cast<GLenum>(inputAttribDescription.m_dataType),
-                    GL_FALSE,
-                    inputAttribDescription.m_stride,
-                    reinterpret_cast<const void *>(inputAttribDescription.m_offset * sizeof(float))
+                inputAttribDescription.m_location,
+                inputAttribDescription.m_count,
+                static_cast<GLenum>(inputAttribDescription.m_dataType),
+                GL_FALSE,
+                inputAttribDescription.m_stride,
+                reinterpret_cast<const void *>(inputAttribDescription.m_offset * sizeof(float))
             );
             break;
         case DataType::Byte:
@@ -64,11 +64,11 @@ InputLayout::addAttribute(
         case DataType::Int:
         case DataType::UnsignedInt:
             glVertexAttribIPointer(
-                    inputAttribDescription.m_location,
-                    inputAttribDescription.m_count,
-                    static_cast<GLenum>(inputAttribDescription.m_dataType),
-                    inputAttribDescription.m_stride,
-                    reinterpret_cast<const void *>(inputAttribDescription.m_offset * sizeof(float))
+                inputAttribDescription.m_location,
+                inputAttribDescription.m_count,
+                static_cast<GLenum>(inputAttribDescription.m_dataType),
+                inputAttribDescription.m_stride,
+                reinterpret_cast<const void *>(inputAttribDescription.m_offset * sizeof(float))
             );
             break;
         default:

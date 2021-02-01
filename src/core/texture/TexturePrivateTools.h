@@ -2,8 +2,7 @@
 #define ALGINE_TEXTUREPRIVATETOOLS_H
 
 #include <algine/types.h>
-
-#include <GL/glew.h>
+#include <algine/gl.h>
 
 namespace algine::TexturePrivateTools {
 inline uint getTexParam(const uint target, const uint name) {

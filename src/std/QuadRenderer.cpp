@@ -1,6 +1,6 @@
 #include <algine/std/QuadRenderer.h>
 
-#include <GL/glew.h>
+#include <algine/gl.h>
 
 namespace algine {
 QuadRenderer::QuadRenderer(const uint inPosLocation) {

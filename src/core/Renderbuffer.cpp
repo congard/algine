@@ -3,7 +3,7 @@
 #include <algine/core/texture/Texture.h>
 #include <algine/core/Engine.h>
 
-#include <GL/glew.h>
+#include <algine/gl.h>
 
 #define SOP_BOUND_PTR Engine::getBoundRenderbuffer()
 #define SOP_OBJECT_TYPE SOPConstants::RenderbufferObject

@@ -1,9 +1,9 @@
 #include <algine/core/shader/Shader.h>
 
 #include <algine/core/shader/ShaderTools.h>
+#include <algine/gl.h>
 
 #include <tulz/File.h>
-#include <GL/glew.h>
 #include <iostream>
 
 #include "internal/PublicObjectTools.h"

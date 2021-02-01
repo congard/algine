@@ -2,7 +2,7 @@
 
 #include <algine/core/Engine.h>
 
-#include <GL/glew.h>
+#include <algine/gl.h>
 
 #define SOP_BOUND_PTR Engine::m_boundFramebuffer
 #define SOP_OBJECT_TYPE SOPConstants::FramebufferObject
