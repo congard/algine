@@ -9,35 +9,39 @@
  */
 
 #ifdef ALGINE_SECURE_OPERATIONS
-#   define v_cast(ptr) (void*)(ptr)
+    #define v_cast(ptr) (void*)(ptr)
 
-#   if ALGINE_SOP_LEVEL == 0
-#       include <iostream>
+    #define sop_string_error_message() \
+        std::string message = "Non-bonded "; \
+        message += SOP_OBJECT_NAME; \
+        message += " (id " + std::to_string(SOP_OBJECT_ID) + ") state change\n"; \
 
-#       define checkBinding() \
+    #if ALGINE_SOP_LEVEL == 0
+        #include <algine/core/log/Log.h>
+
+        #define checkBinding() \
             if (v_cast(SOP_BOUND_PTR) != v_cast(this)) { \
-                std::cerr << "Warning: non-bonded " << SOP_OBJECT_NAME << " (id " + std::to_string(SOP_OBJECT_ID) + ") state change\n"; \
+                sop_string_error_message() \
+                Log::error("AlgineSOP") << message; \
             }
-#   elif ALGINE_SOP_LEVEL == 1
-#       include <stdexcept>
+    #elif ALGINE_SOP_LEVEL == 1
+        #include <stdexcept>
 
-#       define checkBinding() \
+        #define checkBinding() \
             if (v_cast(SOP_BOUND_PTR) != v_cast(this)) { \
-                std::string message = "Non-bonded "; \
-                message += SOP_OBJECT_NAME; \
-                message += " (id " + std::to_string(SOP_OBJECT_ID) + ") state change"; \
+                sop_string_error_message() \
                 throw std::runtime_error(message); \
             }
-#   else
-#       error "Unknown SOP level"
-#   endif
+    #else
+        #error "Unknown SOP level"
+    #endif
 
-#   define commitBinding() Engine::setBoundObject(SOP_OBJECT_TYPE, this);
-#   define commitUnbinding() Engine::setBoundObject(SOP_OBJECT_TYPE, nullptr);
+    #define commitBinding() Engine::setBoundObject(SOP_OBJECT_TYPE, this);
+    #define commitUnbinding() Engine::setBoundObject(SOP_OBJECT_TYPE, nullptr);
 #else
-#   define checkBinding()
-#   define commitBinding()
-#   define commitUnbinding()
+    #define checkBinding()
+    #define commitBinding()
+    #define commitUnbinding()
 #endif
 
 #endif //ALGINE_SOP_H
