@@ -5,9 +5,8 @@ using namespace tulz;
 namespace algine {
 BufferReader::BufferReader() = default;
 
-BufferReader::BufferReader(Buffer *buffer) {
-    m_buffer = buffer;
-}
+BufferReader::BufferReader(Buffer *buffer)
+    : m_buffer(buffer) {}
 
 void BufferReader::begin() {
     m_buffer->bind();

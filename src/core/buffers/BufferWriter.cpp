@@ -5,9 +5,8 @@ using namespace std;
 namespace algine {
 BufferWriter::BufferWriter() = default;
 
-BufferWriter::BufferWriter(Buffer *buffer) {
-    m_buffer = buffer;
-}
+BufferWriter::BufferWriter(Buffer *buffer)
+    : m_buffer(buffer) {}
 
 void BufferWriter::begin() {
     m_buffer->bind();
