@@ -2,7 +2,9 @@
 #define ALGINE_BUFFER_H
 
 #include <algine/types.h>
+
 #include <tulz/Array.h>
+#include <tulz/macros.h>
 
 namespace algine {
 class Buffer {
@@ -13,11 +15,20 @@ public:
         DynamicDraw = 0x88E8
     };
 
-    enum Types {
+    enum Type {
         Array = 0x8892,
         Index = 0x8893,
         Uniform = 0x8A11
     };
+
+    enum_class(MapMode,
+        Read = 0x0001,
+        Write = 0x0002,
+        InvalidateRange = 0x0004,
+        InvalidateBuffer = 0x0008,
+        FlushExplicit = 0x0010,
+        Unsinchronized = 0x0020
+    );
 
 public:
     Buffer();
@@ -28,6 +39,9 @@ public:
     void setData(uint size, const void *data, uint usage);
     void updateData(uint offset, uint size, const void *data);
     tulz::Array<byte> getData(uint offset, uint size);
+
+    void* mapData(uint offset, uint size, uint access);
+    bool unmapData();
 
     uint size() const;
     uint getId() const;

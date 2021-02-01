@@ -21,7 +21,7 @@ using namespace tulz;
 #define SOP_OBJECT_ID m_id
 #define SOP_OBJECT_NAME getBufferObjectName(m_target)
 
-inline void* getBoundBuffer(const uint target) {
+inline void* getBoundBuffer(uint target) {
     switch (target) {
         case GL_ARRAY_BUFFER:
             return Engine::getBoundArrayBuffer();
@@ -34,7 +34,7 @@ inline void* getBoundBuffer(const uint target) {
     }
 }
 
-inline uint getBufferObject(const uint target) {
+inline uint getBufferObject(uint target) {
     switch (target) {
         case GL_ARRAY_BUFFER:
             return SOPConstants::ArrayBufferObject;
@@ -47,7 +47,7 @@ inline uint getBufferObject(const uint target) {
     }
 }
 
-inline string getBufferObjectName(const uint target) {
+inline string getBufferObjectName(uint target) {
     switch (target) {
         case GL_ARRAY_BUFFER:
             return SOPConstants::ArrayBufferStr;
@@ -81,12 +81,12 @@ void Buffer::unbind() const {
     glBindBuffer(m_target, 0);
 }
 
-void Buffer::setData(const uint size, const void *data, const uint usage) {
+void Buffer::setData(uint size, const void *data, uint usage) {
     checkBinding()
     glBufferData(m_target, size, data, usage);
 }
 
-void Buffer::updateData(const uint offset, const uint size, const void *data) {
+void Buffer::updateData(uint offset, uint size, const void *data) {
     checkBinding()
     glBufferSubData(m_target, offset, size, data);
 }
@@ -98,9 +98,34 @@ Array<byte> Buffer::getData(uint offset, uint size) {
         return {};
 
     tulz::Array<byte> array(size);
-    glGetBufferSubData(m_target, offset, size, array.array());
+
+    enable_if_desktop(
+        glGetBufferSubData(m_target, offset, size, array.array());
+    )
+
+    enable_if_android(
+        auto ptr = mapData(offset, size, MapMode::Read);
+
+        if (ptr != nullptr) {
+            memcpy(array.array(), ptr, size);
+        }
+
+        unmapData();
+    )
 
     return array;
+}
+
+void* Buffer::mapData(uint offset, uint size, uint access) {
+    checkBinding()
+
+    return glMapBufferRange(m_target, offset, size, access);
+}
+
+bool Buffer::unmapData() {
+    checkBinding()
+
+    return glUnmapBuffer(m_target);
 }
 
 uint Buffer::size() const {
@@ -120,7 +145,7 @@ uint Buffer::getType() const {
     return m_target;
 }
 
-Buffer::Buffer(const uint target): Buffer() {
-    this->m_target = target;
+Buffer::Buffer(uint target): Buffer() {
+    m_target = target;
 }
 }
