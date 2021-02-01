@@ -10,9 +10,13 @@
 #include <algine/core/InputLayout.h>
 #include <algine/core/TypeRegistry.h>
 
-#include <GLFW/glfw3.h>
+#include <algine/gl.h>
 
 #include <chrono>
+
+#ifndef __ANDROID__
+    #include <GLFW/glfw3.h>
+#endif
 
 #ifndef ALGINE_CORE_ONLY
 #include <algine/std/model/Shape.h>
@@ -26,7 +30,7 @@ inline void initExtra() {
 }
 
 #else
-#define initExtra()
+    #define initExtra()
 #endif
 
 using namespace std;
@@ -111,7 +115,9 @@ void Engine::destroy() {
 
     TypeRegistry::clear();
 
-    glfwTerminate(); // Terminate GLFW, clearing any resources allocated by GLFW
+    enable_if_desktop(
+        glfwTerminate(); // Terminate GLFW, clearing any resources allocated by GLFW
+    )
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS
