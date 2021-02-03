@@ -3,9 +3,15 @@ project(algine)
 
 set(CMAKE_CXX_STANDARD 17)
 
+if (MSVC)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS true)
+endif()
+
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    message(STATUS "Algine debug mode - adding -g option")
-    add_compile_options("-g")
+    if (NOT MSVC)
+        message(STATUS "Algine debug mode - adding -g option")
+        add_compile_options("-g")
+    endif()
 
     if (NOT DEFINED ALGINE_SECURE_OPERATIONS)
         message(STATUS "Algine SOP set to ON")
@@ -15,7 +21,9 @@ elseif (CMAKE_BUILD_TYPE MATCHES Release)
     message(STATUS "Algine release mode")
 
     # should inline functions like bind(), unbind() etc
-    add_compile_options("-flto")
+    if (NOT MSVC)
+        add_compile_options("-flto")
+    endif()
 
     if (NOT DEFINED ALGINE_SECURE_OPERATIONS)
         message(STATUS "Algine SOP set to OFF")
@@ -35,19 +43,6 @@ if (ALGINE_SECURE_OPERATIONS)
 
     message(STATUS "Algine SOP level is ${ALGINE_SOP_LEVEL}")
 endif()
-
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-set(ASSIMP_BUILD_TESTS OFF)
-
-add_subdirectory(contrib/assimp)
-include_directories(contrib/assimp/include)
-
-add_subdirectory(contrib/tulz)
-include_directories(contrib/tulz/include)
-
-include_directories(contrib/glm)
-include_directories(contrib)
-include_directories(include)
 
 set(ALGINE_CORE_SOURCES
         src/internal/PublicObjectTools.h
@@ -207,39 +202,37 @@ if (NOT ANDROID)
 
     set(BUILD_UTILS OFF) # glew flag
 
-    if (ALGINE_LINK_LIBS_STATICALLY)
+    if (BUILD_SHARED_LIBS)
+        set(GLEW_LIBRARY glew)
+    else()
+        set(GLEW_LIBRARY glew_s)
+
         add_definitions(-DGLEW_STATIC)
-        set(BUILD_SHARED_LIBS OFF)
-    else()
-        set(BUILD_SHARED_LIBS ON)
     endif()
 
-    if (ALGINE_USE_SYSTEM_GLEW)
-        find_package(GLEW REQUIRED)
-        set(GLEW_LIBRARY GLEW)
-        message(STATUS "Algine: use system GLEW")
-    else()
-        add_subdirectory(contrib/glew/build/cmake)
-        include_directories(contrib/glew/include)
-        if (ALGINE_LINK_LIBS_STATICALLY)
-            set(GLEW_LIBRARY glew_s)
-        else()
-            set(GLEW_LIBRARY glew)
-        endif()
-    endif()
+    add_subdirectory(contrib/glew/build/cmake)
+    include_directories(contrib/glew/include)
 
-    if (ALGINE_USE_SYSTEM_GLFW)
-        find_package(glfw3 REQUIRED)
-        message(STATUS "Algine: use system GLFW")
-    else()
-        set(GLFW_BUILD_DOCS OFF)
-        set(GLFW_BUILD_EXAMPLES OFF)
-        set(GLFW_BUILD_TESTS OFF)
+    set(GLFW_BUILD_DOCS OFF)
+    set(GLFW_BUILD_EXAMPLES OFF)
+    set(GLFW_BUILD_TESTS OFF)
 
-        add_subdirectory(contrib/glfw)
-        include_directories(contrib/glfw/include)
-    endif()
+    add_subdirectory(contrib/glfw)
+    include_directories(contrib/glfw/include)
 endif()
+
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+set(ASSIMP_BUILD_TESTS OFF)
+
+add_subdirectory(contrib/tulz)
+include_directories(contrib/tulz/include)
+
+add_subdirectory(contrib/assimp)
+include_directories(contrib/assimp/include)
+
+include_directories(contrib/glm)
+include_directories(contrib)
+include_directories(include)
 
 add_library(algine
         ${ALGINE_CORE_SOURCES}
@@ -251,6 +244,10 @@ set_target_properties(algine PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(algine PRIVATE src)
 
+if (MSVC)
+    target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/contrib/assimp/include)
+endif()
+
 # linking
 if (ANDROID)
     target_link_libraries(algine assimp android log GLESv3 EGL tulz)
@@ -258,4 +255,9 @@ elseif (WIN32)
     target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 tulz)
 elseif (UNIX)
     target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw GL tulz)
+endif()
+
+# include some helpful scripts for Windows
+if (WIN32)
+    include(cmake/PostBuildWindows.cmake)
 endif()
