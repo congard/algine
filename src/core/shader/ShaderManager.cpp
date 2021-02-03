@@ -308,6 +308,10 @@ inline vector<Matches> findPragmas(const string &src, const string &regex, const
 
     for (int i = static_cast<int>(matches.size()) - 1; i >= 0; i--) {
         for (auto &exclude : excludes) {
+
+            if (matches.empty())
+                return matches;
+
             if (matches[i].pos > exclude.first && matches[i].pos + matches[i].size <= exclude.first + exclude.second) {
                 matches.erase(matches.begin() + i);
             }
