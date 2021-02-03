@@ -286,7 +286,7 @@ JsonHelper InputLayoutShapeLocationsManager::dump() {
 
     auto write = [&](const string &key, const auto &location)
     {
-        using T = remove_const_t<remove_reference_t<typeof(location)>>;
+        using T = remove_const_t<remove_reference_t<decltype(location)>>;
 
         if constexpr (is_same_v<T, string>) {
             if (!location.empty()) {
