@@ -8,8 +8,8 @@
 
 #include <algine/core/ManagerBase.h>
 
-class aiMesh;
-class aiScene;
+struct aiMesh;
+struct aiScene;
 
 namespace algine {
 class ShapeManager: public ManagerBase {
