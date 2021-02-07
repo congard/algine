@@ -45,157 +45,157 @@ if (ALGINE_SECURE_OPERATIONS)
 endif()
 
 set(ALGINE_CORE_SOURCES
-        src/internal/PublicObjectTools.h
-        src/internal/SOP.h
-        src/internal/SOPConstants.h
-        src/internal/ConfigStrings.h
+        src/common/internal/PublicObjectTools.h
+        src/common/internal/SOP.h
+        src/common/internal/SOPConstants.h
+        src/common/internal/ConfigStrings.h
 
-        include/algine/templates.h
-        include/algine/types.h
-        include/algine/gl.h
+        include/common/algine/templates.h
+        include/common/algine/types.h
+        include/common/algine/gl.h
 
-        include/algine/core/transfer/Transferable.h
-        include/algine/core/transfer/GLMTransferrer.h
-        include/algine/core/texture/PixelData.h
-        include/algine/core/texture/TextureCreateInfo.h
-        include/algine/core/shader/ShaderPtr.h
-        include/algine/core/shader/ShaderProgramPtr.h
-        include/algine/core/texture/Texture2DPtr.h
-        include/algine/core/texture/TextureCubePtr.h
-        include/algine/core/RenderbufferPtr.h
-        include/algine/core/FramebufferPtr.h
-        include/algine/core/Ptr.h
-        include/algine/core/PtrMaker.h
-        include/algine/core/RawPtr.h
-        include/algine/core/shader/ShadersInfo.h
-        include/algine/core/DataType.h
+        include/common/algine/core/transfer/Transferable.h
+        include/common/algine/core/transfer/GLMTransferrer.h
+        include/common/algine/core/texture/PixelData.h
+        include/common/algine/core/texture/TextureCreateInfo.h
+        include/common/algine/core/shader/ShaderPtr.h
+        include/common/algine/core/shader/ShaderProgramPtr.h
+        include/common/algine/core/texture/Texture2DPtr.h
+        include/common/algine/core/texture/TextureCubePtr.h
+        include/common/algine/core/RenderbufferPtr.h
+        include/common/algine/core/FramebufferPtr.h
+        include/common/algine/core/Ptr.h
+        include/common/algine/core/PtrMaker.h
+        include/common/algine/core/RawPtr.h
+        include/common/algine/core/shader/ShadersInfo.h
+        include/common/algine/core/DataType.h
 
-        src/core/JsonHelper.cpp include/algine/core/JsonHelper.h
-        src/core/Object.cpp include/algine/core/Object.h
-        src/core/ManagerBase.cpp include/algine/core/ManagerBase.h
-        src/core/ImageManagerBase.cpp include/algine/core/ImageManagerBase.h
-        src/core/transfer/FileTransferable.cpp include/algine/core/transfer/FileTransferable.h
-        src/core/OutputList.cpp include/algine/core/OutputList.h
-        src/core/OutputListManager.cpp include/algine/core/OutputListManager.h
-        src/core/FramebufferConfigTools.h
-        src/core/Framebuffer.cpp include/algine/core/Framebuffer.h
-        src/core/FramebufferManager.cpp include/algine/core/FramebufferManager.h
-        src/core/Renderbuffer.cpp include/algine/core/Renderbuffer.h
-        src/core/RenderbufferManager.cpp include/algine/core/RenderbufferManager.h
-        src/core/buffers/Buffer.cpp include/algine/core/buffers/Buffer.h
-        src/core/buffers/ArrayBuffer.cpp include/algine/core/buffers/ArrayBuffer.h
-        src/core/buffers/IndexBuffer.cpp include/algine/core/buffers/IndexBuffer.h
-        src/core/buffers/UniformBuffer.cpp include/algine/core/buffers/UniformBuffer.h
-        src/core/buffers/BlockBufferStorage.cpp include/algine/core/buffers/BlockBufferStorage.h
-        src/core/buffers/BufferWriter.cpp include/algine/core/buffers/BufferWriter.h
-        src/core/buffers/BufferReader.cpp include/algine/core/buffers/BufferReader.h
-        src/core/InputLayout.cpp include/algine/core/InputLayout.h
-        src/core/InputAttributeDescription.cpp include/algine/core/InputAttributeDescription.h
-        src/core/texture/TexturePrivateTools.h
-        src/core/texture/Texture.cpp include/algine/core/texture/Texture.h
-        src/core/texture/Texture2D.cpp include/algine/core/texture/Texture2D.h
-        src/core/texture/TextureCube.cpp include/algine/core/texture/TextureCube.h
-        src/core/texture/TextureTools.cpp include/algine/core/texture/TextureTools.h
-        src/core/texture/TextureManager.cpp include/algine/core/texture/TextureManager.h
-        src/core/texture/Texture2DManager.cpp include/algine/core/texture/Texture2DManager.h
-        src/core/texture/TextureCubeManager.cpp include/algine/core/texture/TextureCubeManager.h
-        src/core/shader/ShaderTools.cpp include/algine/core/shader/ShaderTools.h
-        src/core/shader/Shader.cpp include/algine/core/shader/Shader.h
-        src/core/shader/ShaderManager.cpp include/algine/core/shader/ShaderManager.h
-        src/core/shader/ShaderDefinitionManager.cpp include/algine/core/shader/ShaderDefinitionManager.h
-        src/core/shader/ShaderProgramManager.cpp include/algine/core/shader/ShaderProgramManager.h
-        src/core/shader/ShaderProgram.cpp include/algine/core/shader/ShaderProgram.h
-        src/core/shader/BaseUniformBlock.cpp include/algine/core/shader/BaseUniformBlock.h
-        src/core/shader/UniformBlock.cpp include/algine/core/shader/UniformBlock.h
-        src/core/Engine.cpp include/algine/core/Engine.h
-        src/core/TypeRegistry.cpp include/algine/core/TypeRegistry.h
-        src/core/ImageConfigTools.h
-        src/core/TextureConfigTools.h
-        src/core/log/Logger.cpp include/algine/core/log/Logger.h
-        src/core/log/Log.cpp include/algine/core/log/Log.h)
+        src/common/core/JsonHelper.cpp include/common/algine/core/JsonHelper.h
+        src/common/core/Object.cpp include/common/algine/core/Object.h
+        src/common/core/ManagerBase.cpp include/common/algine/core/ManagerBase.h
+        src/common/core/ImageManagerBase.cpp include/common/algine/core/ImageManagerBase.h
+        src/common/core/transfer/FileTransferable.cpp include/common/algine/core/transfer/FileTransferable.h
+        src/common/core/OutputList.cpp include/common/algine/core/OutputList.h
+        src/common/core/OutputListManager.cpp include/common/algine/core/OutputListManager.h
+        src/common/core/FramebufferConfigTools.h
+        src/common/core/Framebuffer.cpp include/common/algine/core/Framebuffer.h
+        src/common/core/FramebufferManager.cpp include/common/algine/core/FramebufferManager.h
+        src/common/core/Renderbuffer.cpp include/common/algine/core/Renderbuffer.h
+        src/common/core/RenderbufferManager.cpp include/common/algine/core/RenderbufferManager.h
+        src/common/core/buffers/Buffer.cpp include/common/algine/core/buffers/Buffer.h
+        src/common/core/buffers/ArrayBuffer.cpp include/common/algine/core/buffers/ArrayBuffer.h
+        src/common/core/buffers/IndexBuffer.cpp include/common/algine/core/buffers/IndexBuffer.h
+        src/common/core/buffers/UniformBuffer.cpp include/common/algine/core/buffers/UniformBuffer.h
+        src/common/core/buffers/BlockBufferStorage.cpp include/common/algine/core/buffers/BlockBufferStorage.h
+        src/common/core/buffers/BufferWriter.cpp include/common/algine/core/buffers/BufferWriter.h
+        src/common/core/buffers/BufferReader.cpp include/common/algine/core/buffers/BufferReader.h
+        src/common/core/InputLayout.cpp include/common/algine/core/InputLayout.h
+        src/common/core/InputAttributeDescription.cpp include/common/algine/core/InputAttributeDescription.h
+        src/common/core/texture/TexturePrivateTools.h
+        src/common/core/texture/Texture.cpp include/common/algine/core/texture/Texture.h
+        src/common/core/texture/Texture2D.cpp include/common/algine/core/texture/Texture2D.h
+        src/common/core/texture/TextureCube.cpp include/common/algine/core/texture/TextureCube.h
+        src/common/core/texture/TextureTools.cpp include/common/algine/core/texture/TextureTools.h
+        src/common/core/texture/TextureManager.cpp include/common/algine/core/texture/TextureManager.h
+        src/common/core/texture/Texture2DManager.cpp include/common/algine/core/texture/Texture2DManager.h
+        src/common/core/texture/TextureCubeManager.cpp include/common/algine/core/texture/TextureCubeManager.h
+        src/common/core/shader/ShaderTools.cpp include/common/algine/core/shader/ShaderTools.h
+        src/common/core/shader/Shader.cpp include/common/algine/core/shader/Shader.h
+        src/common/core/shader/ShaderManager.cpp include/common/algine/core/shader/ShaderManager.h
+        src/common/core/shader/ShaderDefinitionManager.cpp include/common/algine/core/shader/ShaderDefinitionManager.h
+        src/common/core/shader/ShaderProgramManager.cpp include/common/algine/core/shader/ShaderProgramManager.h
+        src/common/core/shader/ShaderProgram.cpp include/common/algine/core/shader/ShaderProgram.h
+        src/common/core/shader/BaseUniformBlock.cpp include/common/algine/core/shader/BaseUniformBlock.h
+        src/common/core/shader/UniformBlock.cpp include/common/algine/core/shader/UniformBlock.h
+        src/common/core/Engine.cpp include/common/algine/core/Engine.h
+        src/common/core/TypeRegistry.cpp include/common/algine/core/TypeRegistry.h
+        src/common/core/ImageConfigTools.h
+        src/common/core/TextureConfigTools.h
+        src/common/core/log/Logger.cpp include/common/algine/core/log/Logger.h
+        src/common/core/log/Log.cpp include/common/algine/core/log/Log.h)
 
 set(ALGINE_STD_SOURCES
-        include/algine/constants/BoneSystem.h
-        include/algine/constants/ShadowShader.h
-        include/algine/constants/QuadShader.h
-        include/algine/constants/CubemapShader.h
-        include/algine/constants/Lighting.h
-        include/algine/constants/Material.h
-        include/algine/constants/NormalMapping.h
+        include/common/algine/constants/BoneSystem.h
+        include/common/algine/constants/ShadowShader.h
+        include/common/algine/constants/QuadShader.h
+        include/common/algine/constants/CubemapShader.h
+        include/common/algine/constants/Lighting.h
+        include/common/algine/constants/Material.h
+        include/common/algine/constants/NormalMapping.h
 
-        include/algine/std/QuadRendererPtr.h
-        include/algine/std/CubeRendererPtr.h
-        include/algine/std/model/ShapePtr.h
-        include/algine/std/model/Mesh.h
-        include/algine/std/model/ModelPtr.h
-        include/algine/std/model/InputLayoutShapeLocations.h
-        include/algine/std/Material.h
-        include/algine/std/animation/BoneMatrix.h
-        include/algine/std/animation/BoneMatrices.h
+        include/common/algine/std/QuadRendererPtr.h
+        include/common/algine/std/CubeRendererPtr.h
+        include/common/algine/std/model/ShapePtr.h
+        include/common/algine/std/model/Mesh.h
+        include/common/algine/std/model/ModelPtr.h
+        include/common/algine/std/model/InputLayoutShapeLocations.h
+        include/common/algine/std/Material.h
+        include/common/algine/std/animation/BoneMatrix.h
+        include/common/algine/std/animation/BoneMatrices.h
 
-        src/std/assimp2glm.h
-        src/std/model/Model.cpp include/algine/std/model/Model.h
-        src/std/model/ShapeConfigTools.h
-        src/std/model/Shape.cpp include/algine/std/model/Shape.h
-        src/std/model/ShapeManager.cpp include/algine/std/model/ShapeManager.h
-        src/std/model/InputLayoutShapeLocationsManager.cpp include/algine/std/model/InputLayoutShapeLocationsManager.h
-        src/std/model/ModelManager.cpp include/algine/std/model/ModelManager.h
-        src/std/Node.cpp include/algine/std/Node.h
-        src/std/lighting/LightingManager.cpp include/algine/std/lighting/LightingManager.h
-        src/std/lighting/Light.cpp include/algine/std/lighting/Light.h
-        src/std/lighting/PointLight.cpp include/algine/std/lighting/PointLight.h
-        src/std/lighting/DirLight.cpp include/algine/std/lighting/DirLight.h
-        src/std/lighting/PointLamp.cpp include/algine/std/lighting/PointLamp.h
-        src/std/lighting/DirLamp.cpp include/algine/std/lighting/DirLamp.h
-        src/std/animation/VecAnimKey.cpp include/algine/std/animation/VecAnimKey.h
-        src/std/animation/QuatAnimKey.cpp include/algine/std/animation/QuatAnimKey.h
-        src/std/animation/AnimNode.cpp include/algine/std/animation/AnimNode.h
-        src/std/animation/Animation.cpp include/algine/std/animation/Animation.h
-        src/std/animation/Animator.cpp include/algine/std/animation/Animator.h
-        src/std/animation/Bone.cpp include/algine/std/animation/Bone.h
-        src/std/animation/BoneInfo.cpp include/algine/std/animation/BoneInfo.h
-        src/std/animation/BonesStorage.cpp include/algine/std/animation/BonesStorage.h
-        src/std/animation/AnimationBlender.cpp include/algine/std/animation/AnimationBlender.h
-        src/std/animation/BoneSystemManager.cpp include/algine/std/animation/BoneSystemManager.h
-        src/std/camera/Camera.cpp include/algine/std/camera/Camera.h
-        src/std/rotator/Rotator.cpp include/algine/std/rotator/Rotator.h
-        src/std/rotator/EulerRotator.cpp include/algine/std/rotator/EulerRotator.h
-        src/std/rotator/FreeRotator.cpp include/algine/std/rotator/FreeRotator.h
-        src/std/CubeRenderer.cpp include/algine/std/CubeRenderer.h
-        src/std/QuadRenderer.cpp include/algine/std/QuadRenderer.h
-        src/std/Rotatable.cpp include/algine/std/Rotatable.h
-        src/std/Translatable.cpp include/algine/std/Translatable.h
-        src/std/Scalable.cpp include/algine/std/Scalable.h
-        src/std/AMTLMaterialManager.cpp include/algine/std/AMTLMaterialManager.h
-        src/std/AMTLManager.cpp include/algine/std/AMTLManager.h)
+        src/common/std/assimp2glm.h
+        src/common/std/model/Model.cpp include/common/algine/std/model/Model.h
+        src/common/std/model/ShapeConfigTools.h
+        src/common/std/model/Shape.cpp include/common/algine/std/model/Shape.h
+        src/common/std/model/ShapeManager.cpp include/common/algine/std/model/ShapeManager.h
+        src/common/std/model/InputLayoutShapeLocationsManager.cpp include/common/algine/std/model/InputLayoutShapeLocationsManager.h
+        src/common/std/model/ModelManager.cpp include/common/algine/std/model/ModelManager.h
+        src/common/std/Node.cpp include/common/algine/std/Node.h
+        src/common/std/lighting/LightingManager.cpp include/common/algine/std/lighting/LightingManager.h
+        src/common/std/lighting/Light.cpp include/common/algine/std/lighting/Light.h
+        src/common/std/lighting/PointLight.cpp include/common/algine/std/lighting/PointLight.h
+        src/common/std/lighting/DirLight.cpp include/common/algine/std/lighting/DirLight.h
+        src/common/std/lighting/PointLamp.cpp include/common/algine/std/lighting/PointLamp.h
+        src/common/std/lighting/DirLamp.cpp include/common/algine/std/lighting/DirLamp.h
+        src/common/std/animation/VecAnimKey.cpp include/common/algine/std/animation/VecAnimKey.h
+        src/common/std/animation/QuatAnimKey.cpp include/common/algine/std/animation/QuatAnimKey.h
+        src/common/std/animation/AnimNode.cpp include/common/algine/std/animation/AnimNode.h
+        src/common/std/animation/Animation.cpp include/common/algine/std/animation/Animation.h
+        src/common/std/animation/Animator.cpp include/common/algine/std/animation/Animator.h
+        src/common/std/animation/Bone.cpp include/common/algine/std/animation/Bone.h
+        src/common/std/animation/BoneInfo.cpp include/common/algine/std/animation/BoneInfo.h
+        src/common/std/animation/BonesStorage.cpp include/common/algine/std/animation/BonesStorage.h
+        src/common/std/animation/AnimationBlender.cpp include/common/algine/std/animation/AnimationBlender.h
+        src/common/std/animation/BoneSystemManager.cpp include/common/algine/std/animation/BoneSystemManager.h
+        src/common/std/camera/Camera.cpp include/common/algine/std/camera/Camera.h
+        src/common/std/rotator/Rotator.cpp include/common/algine/std/rotator/Rotator.h
+        src/common/std/rotator/EulerRotator.cpp include/common/algine/std/rotator/EulerRotator.h
+        src/common/std/rotator/FreeRotator.cpp include/common/algine/std/rotator/FreeRotator.h
+        src/common/std/CubeRenderer.cpp include/common/algine/std/CubeRenderer.h
+        src/common/std/QuadRenderer.cpp include/common/algine/std/QuadRenderer.h
+        src/common/std/Rotatable.cpp include/common/algine/std/Rotatable.h
+        src/common/std/Translatable.cpp include/common/algine/std/Translatable.h
+        src/common/std/Scalable.cpp include/common/algine/std/Scalable.h
+        src/common/std/AMTLMaterialManager.cpp include/common/algine/std/AMTLMaterialManager.h
+        src/common/std/AMTLManager.cpp include/common/algine/std/AMTLManager.h)
 
 set(ALGINE_EXT_SOURCES
-        include/algine/ext/constants/BlurShader.h
-        include/algine/ext/constants/SSRShader.h
-        include/algine/ext/constants/BlendBloom.h
-        include/algine/ext/constants/BloomSearchShader.h
-        include/algine/ext/constants/COCShader.h
-        include/algine/ext/constants/BlendDOF.h
+        include/common/algine/ext/constants/BlurShader.h
+        include/common/algine/ext/constants/SSRShader.h
+        include/common/algine/ext/constants/BlendBloom.h
+        include/common/algine/ext/constants/BloomSearchShader.h
+        include/common/algine/ext/constants/COCShader.h
+        include/common/algine/ext/constants/BlendDOF.h
 
-        include/algine/ext/debug.h
+        include/common/algine/ext/debug.h
 
-        src/ext/Blur.cpp include/algine/ext/Blur.h)
+        src/common/ext/Blur.cpp include/common/algine/ext/Blur.h)
 
 if (NOT ANDROID)
     set(ALGINE_PLATFORM_SOURCES
-            include/algine/core/input/MouseKey.h
-            include/algine/core/input/KeyboardKey.h
-            include/algine/core/window/DebugWriter.h
+            include/desktop/algine/core/input/MouseKey.h
+            include/desktop/algine/core/input/KeyboardKey.h
+            include/desktop/algine/core/window/DebugWriter.h
 
-            src/core/input/MouseKeyConverter.h
-            src/core/input/KeyboardKeyConverter.h
-            src/core/window/Window.cpp include/algine/core/window/Window.h
-            src/core/window/Content.cpp include/algine/core/window/Content.h
-            src/core/window/ConsoleDebugWriter.cpp include/algine/core/window/ConsoleDebugWriter.h
-            src/core/window/FileDebugWriter.cpp include/algine/core/window/FileDebugWriter.h
-            src/core/window/Icon.cpp include/algine/core/window/Icon.h
-            src/core/window/Icon2GLFWimage.h
-            src/core/window/Cursor.cpp include/algine/core/window/Cursor.h)
+            src/desktop/core/input/MouseKeyConverter.h
+            src/desktop/core/input/KeyboardKeyConverter.h
+            src/desktop/core/window/Window.cpp include/desktop/algine/core/window/Window.h
+            src/desktop/core/window/Content.cpp include/desktop/algine/core/window/Content.h
+            src/desktop/core/window/ConsoleDebugWriter.cpp include/desktop/algine/core/window/ConsoleDebugWriter.h
+            src/desktop/core/window/FileDebugWriter.cpp include/desktop/algine/core/window/FileDebugWriter.h
+            src/desktop/core/window/Icon.cpp include/desktop/algine/core/window/Icon.h
+            src/desktop/core/window/Icon2GLFWimage.h
+            src/desktop/core/window/Cursor.cpp include/desktop/algine/core/window/Cursor.h)
 
     # Under Windows you can compile this project using GNU compiler (for example by using MinGW-w64)
     # You can use CLion or QtCreator as IDE
@@ -211,28 +211,21 @@ if (NOT ANDROID)
     endif()
 
     add_subdirectory(contrib/glew/build/cmake)
-    include_directories(contrib/glew/include)
 
     set(GLFW_BUILD_DOCS OFF)
     set(GLFW_BUILD_EXAMPLES OFF)
     set(GLFW_BUILD_TESTS OFF)
 
     add_subdirectory(contrib/glfw)
-    include_directories(contrib/glfw/include)
 endif()
 
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
 set(ASSIMP_BUILD_TESTS OFF)
 
 add_subdirectory(contrib/tulz)
-include_directories(contrib/tulz/include)
-
 add_subdirectory(contrib/assimp)
-include_directories(contrib/assimp/include)
 
-include_directories(contrib/glm)
 include_directories(contrib)
-include_directories(include)
 
 add_library(algine
         ${ALGINE_CORE_SOURCES}
@@ -242,7 +235,22 @@ add_library(algine
 
 set_target_properties(algine PROPERTIES LINKER_LANGUAGE CXX)
 
-target_include_directories(algine PRIVATE src)
+target_include_directories(algine PRIVATE src/common)
+
+target_include_directories(algine PRIVATE contrib/assimp/include)
+
+target_include_directories(algine PUBLIC contrib/tulz/include)
+target_include_directories(algine PUBLIC contrib/glm)
+target_include_directories(algine PUBLIC include/common)
+
+if (NOT ANDROID)
+    target_include_directories(algine PRIVATE src/desktop)
+
+    target_include_directories(algine PRIVATE contrib/glfw/include)
+
+    target_include_directories(algine PUBLIC contrib/glew/include) # TODO: mark PRIVATE in the future (see Texture.h)
+    target_include_directories(algine PUBLIC include/desktop)
+endif()
 
 if (MSVC)
     target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/contrib/assimp/include)
