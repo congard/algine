@@ -36,6 +36,9 @@ inline void initExtra() {
 using namespace std;
 
 namespace algine {
+int Engine::m_apiVersion;
+Engine::GraphicsAPI Engine::m_graphicsAPI;
+
 long Engine::m_startTime;
 
 Framebuffer* Engine::m_defaultFramebuffer;
@@ -59,6 +62,16 @@ ShaderProgram* Engine::m_boundShaderProgram;
 InputLayout* Engine::m_boundInputLayout;
 
 void Engine::init() {
+    enable_if_desktop(
+        m_apiVersion = 400;
+        m_graphicsAPI = GraphicsAPI::Core;
+    )
+
+    enable_if_android(
+        m_apiVersion = 300;
+        m_graphicsAPI = GraphicsAPI::ES;
+    )
+
     m_startTime = Engine::time();
 
     // We use malloc instead of new since we don't want the ctor to be
@@ -118,6 +131,19 @@ void Engine::destroy() {
     enable_if_desktop(
         glfwTerminate(); // Terminate GLFW, clearing any resources allocated by GLFW
     )
+}
+
+void Engine::setAPIVersion(int version, GraphicsAPI api) {
+    m_apiVersion = version;
+    m_graphicsAPI = api;
+}
+
+int Engine::getAPIVersion() {
+    return m_apiVersion;
+}
+
+Engine::GraphicsAPI Engine::getGraphicsAPI() {
+    return m_graphicsAPI;
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS

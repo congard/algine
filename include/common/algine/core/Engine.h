@@ -27,8 +27,19 @@ class Engine {
     friend class InputLayout;
 
 public:
+    enum class GraphicsAPI {
+        Core,
+        ES
+    };
+
+public:
     static void init();
     static void destroy();
+
+    static void setAPIVersion(int version, GraphicsAPI api);
+
+    static int getAPIVersion();
+    static GraphicsAPI getGraphicsAPI();
 
     static Framebuffer* getBoundFramebuffer();
     static Renderbuffer* getBoundRenderbuffer();
@@ -95,6 +106,10 @@ public:
 public:
     static long time();
     static long timeFromStart();
+
+private:
+    static int m_apiVersion;
+    static GraphicsAPI m_graphicsAPI;
 
 private:
     static long m_startTime;
