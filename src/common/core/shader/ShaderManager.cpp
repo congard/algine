@@ -1,6 +1,7 @@
 #include <algine/core/shader/ShaderManager.h>
 
 #include <algine/core/JsonHelper.h>
+#include <algine/core/Engine.h>
 
 #include <tulz/StringUtils.h>
 #include <tulz/File.h>
@@ -149,15 +150,33 @@ void ShaderManager::generate() {
     {
         vector<Matches> version = findRegex(m_gen, versionRegex);
 
-        if (version.empty())
-            return;
+        uint versionHeaderOffset;
+
+        if (version.empty()) {
+            string versionHeader = "#version " + to_string(Engine::getAPIVersion()) + " ";
+
+            if (Engine::getGraphicsAPI() == Engine::GraphicsAPI::Core) {
+                versionHeader.append("core");
+            } else {
+                versionHeader.append("es");
+            }
+
+            versionHeader.append("\n");
+
+            versionHeaderOffset = versionHeader.size();
+
+            m_gen.insert(0, versionHeader);
+        } else {
+            versionHeaderOffset = version[0].pos + version[0].size;
+        }
 
         string definitionsCode = "\n";
 
-        for (auto &j : m_definitions)
+        for (auto &j : m_definitions) {
             definitionsCode += "#define " + j.first + " " + j.second + "\n";
+        }
 
-        m_gen.insert(version[0].pos + version[0].size, definitionsCode);
+        m_gen.insert(versionHeaderOffset, definitionsCode);
     }
 
     // expand includes
