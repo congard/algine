@@ -26,7 +26,6 @@ constexpr static auto maxClickDeltaTime = 250L; // in ms
 #define initList \
     m_window(nullptr), \
     m_debugWriter(nullptr), \
-    m_apiVersion(400), \
     m_viewport(), \
     m_pos(0), \
     m_fullscreenDimensions(-1), \
@@ -150,13 +149,18 @@ void Window::create() {
     // additional calls to an already initialized library will return GLFW_TRUE immediately
     // https://www.glfw.org/docs/3.3/intro_guide.html#intro_init_init
     if (!glfwInit())
-        throw std::runtime_error("GLFW init failed");
+        throw runtime_error("GLFW init failed");
 
-    if (m_apiVersion < 100 || m_apiVersion > 460)
-        throw runtime_error("Invalid API version. Min is 100, max is 460. Your value: " + to_string(m_apiVersion));
+    if (Engine::getGraphicsAPI() != Engine::GraphicsAPI::Core)
+        throw runtime_error("Invalid graphics API: only Core accepted");
 
-    int majorVersion = m_apiVersion / 100;
-    int minorVersion = (m_apiVersion - majorVersion * 100) / 10;
+    const auto apiVersion = Engine::getAPIVersion();
+
+    if (apiVersion < 100 || apiVersion > 460)
+        throw runtime_error("Invalid API version. Min is 100, max is 460. Your value: " + to_string(apiVersion));
+
+    int majorVersion = apiVersion / 100;
+    int minorVersion = (apiVersion - majorVersion * 100) / 10;
 
     // Set all the required options for GLFW
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVersion);
@@ -250,10 +254,6 @@ bool Window::isKeyPressed(KeyboardKey key) const {
 
 bool Window::isMouseKeyPressed(MouseKey key) const {
     return glfwGetMouseButton(m_window, getGLFWMouseKeyValue(key)) == GLFW_PRESS;
-}
-
-void Window::setAPIVersion(int version) {
-    m_apiVersion = version;
 }
 
 void Window::setDebug(DebugWriter *debugWriter) {
@@ -542,10 +542,6 @@ void Window::setAutoIconify(bool autoIconify) {
 
 void Window::setFocusOnShow(bool focusOnShow) {
     glfwSetWindowAttrib(m_window, GLFW_FOCUS_ON_SHOW, focusOnShow);
-}
-
-int Window::getAPIVersion() const {
-    return m_apiVersion;
 }
 
 bool Window::isDebug() const {

@@ -47,7 +47,6 @@ public:
     bool isKeyPressed(KeyboardKey key) const;
     bool isMouseKeyPressed(MouseKey key) const;
 
-    void setAPIVersion(int version);
     void setDebug(DebugWriter *debugWriter);
 
     void setTitle(const std::string &title);
@@ -74,8 +73,6 @@ public:
     void setFloating(bool floating);
     void setAutoIconify(bool autoIconify);
     void setFocusOnShow(bool focusOnShow);
-
-    int getAPIVersion() const;
 
     bool isDebug() const;
 
@@ -113,7 +110,6 @@ private:
 
 private:
     GLFWwindow *m_window;
-    int m_apiVersion;
     std::unique_ptr<DebugWriter> m_debugWriter;
     std::string m_title;
     Cursor m_cursor;
