@@ -1,12 +1,3 @@
-/*
- * @author Congard
- * dbcongard@gmail.com
- * t.me/congard
- * github.com/congard
- */
-
-#version 330 core
-
 #ifdef ALGINE_SHADOW_MAPPING_TYPE_POINT_LIGHTING
 in vec4 fragPos; // world space
 

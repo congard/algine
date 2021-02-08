@@ -1,7 +1,3 @@
-// Algine SSR fragment shader
-
-#version 330 core
-
 uniform sampler2D baseImage;
 uniform sampler2D normalMap; // in view space
 uniform sampler2D ssrValuesMap;
@@ -29,7 +25,7 @@ vec2 binarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth) {
 
     vec4 projectedCoord;
  
-    for(int i = 0; i < binarySearchCount; i++) {
+    for (int i = 0; i < binarySearchCount; i++) {
         projectedCoord = projection * vec4(hitCoord, 1.0);
         projectedCoord.xy /= projectedCoord.w;
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
@@ -39,10 +35,12 @@ vec2 binarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth) {
         dDepth = hitCoord.z - depth;
 
         dir *= 0.5;
-        if(dDepth > 0.0)
+
+        if (dDepth > 0.0) {
             hitCoord += dir;
-        else
-            hitCoord -= dir;    
+        } else {
+            hitCoord -= dir;
+        }
     }
 
     projectedCoord = projection * vec4(hitCoord, 1.0);
@@ -63,10 +61,12 @@ vec2 rayCast(vec3 dir, inout vec3 hitCoord, out float dDepth) {
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5; 
 
         float depth = getPosition(projectedCoord.xy).z;
+
         dDepth = hitCoord.z - depth;
 
-        if ((dir.z - dDepth) < 1.2 && dDepth <= 0.0)
+        if ((dir.z - dDepth) < 1.2 && dDepth <= 0.0) {
             return binarySearch(dir, hitCoord, dDepth);
+        }
     }
 
     return vec2(-1.0);
@@ -129,6 +129,7 @@ void main() {
 
     if (coords.xy != vec2(-1.0)) {
         fragColor = mix(texture(baseImage, texCoord), vec4(color, 1.0), reflectionStrength).rgb;
+        
         return;
     }
     

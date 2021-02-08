@@ -1,12 +1,3 @@
-/*
- * @author Congard
- * dbcongard@gmail.com
- * t.me/congard
- * github.com/congard
- */
-
-#version 330 core
-
 #pragma algine include "modules/BoneSystem.glsl"
 
 in vec4 a_Position;
@@ -19,8 +10,9 @@ void main() {
 	vec4 position = a_Position;
 
 	#ifdef ALGINE_BONE_SYSTEM
-    if (isBonesPresent())
+    if (isBonesPresent()) {
         position = getBoneTransformMatrix() * position;
+    }
     #endif
 
 	gl_Position = transformationMatrix * position;

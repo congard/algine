@@ -1,5 +1,3 @@
-#version 330
-
 in vec2 texCoord;
 
 layout (location = 0) out float fragCoC;
