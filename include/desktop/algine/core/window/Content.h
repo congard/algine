@@ -29,18 +29,6 @@ public:
 
     bool isInitialized() const;
 
-    virtual void mouseMove(double x, double y);
-    virtual void mouseClick(MouseKey key);
-    virtual void mouseKeyPress(MouseKey key);
-    virtual void mouseKeyRelease(MouseKey key);
-
-    virtual void keyboardKeyPress(KeyboardKey key);
-    virtual void keyboardKeyRelease(KeyboardKey key);
-    virtual void keyboardKeyRepeat(KeyboardKey key);
-
-    virtual void windowSizeChange(int width, int height);
-    virtual void windowPosChange(int x, int y);
-
 protected:
     bool isKeyPressed(KeyboardKey key) const;
     bool isMouseKeyPressed(MouseKey key) const;

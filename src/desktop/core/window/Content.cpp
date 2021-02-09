@@ -39,18 +39,6 @@ bool Content::isInitialized() const {
     return m_isInitialized;
 }
 
-void Content::mouseMove(double x, double y) {}
-void Content::mouseClick(MouseKey key) {}
-void Content::mouseKeyPress(MouseKey key) {}
-void Content::mouseKeyRelease(MouseKey key) {}
-
-void Content::keyboardKeyPress(KeyboardKey key) {}
-void Content::keyboardKeyRelease(KeyboardKey key) {}
-void Content::keyboardKeyRepeat(KeyboardKey key) {}
-
-void Content::windowSizeChange(int width, int height) {}
-void Content::windowPosChange(int x, int y) {}
-
 bool Content::isKeyPressed(KeyboardKey key) const {
     return m_window->isKeyPressed(key);
 }
