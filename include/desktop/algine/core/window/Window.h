@@ -1,6 +1,7 @@
 #ifndef ALGINE_WINDOW_H
 #define ALGINE_WINDOW_H
 
+#include <algine/core/window/WindowEventHandler.h>
 #include <algine/core/window/DebugWriter.h>
 #include <algine/core/window/Cursor.h>
 #include <algine/core/input/KeyboardKey.h>
@@ -63,6 +64,8 @@ public:
     void setContent(const Ptr<Content> &content);
     void setContent(Content *content);
 
+    void setEventHandler(WindowEventHandler *eventHandler);
+
     void setMouseTracking(bool tracking);
     void setKeyboardTracking(bool tracking);
     void setWindowStateTracking(bool tracking);
@@ -86,6 +89,8 @@ public:
     float getOpacity() const;
 
     const Ptr<Content>& getContent() const;
+
+    WindowEventHandler* getEventHandler() const;
 
     bool isRenderLoopRunning() const;
 
@@ -116,6 +121,7 @@ private:
     glm::ivec2 m_pos, m_dimensions, m_fullscreenDimensions, m_viewport;
     CursorMode m_cursorMode;
     Ptr<Content> m_content;
+    WindowEventHandler *m_eventHandler;
     bool m_mouseTracking, m_keyboardTracking, m_windowStateTracking;
 
 private:

@@ -358,11 +358,16 @@ void Window::setContent(Content *content) {
     setContent(Ptr<Content>(content));
 }
 
-inline Content* getContentIfPresent(GLFWwindow *glfwWindow) {
+void Window::setEventHandler(WindowEventHandler *eventHandler) {
+    m_eventHandler = eventHandler;
+}
+
+inline WindowEventHandler* getEventHandlerIfPresent(GLFWwindow *glfwWindow) {
     auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
 
-    if (window)
-        return window->getContent().get();
+    if (window) {
+        return window->getEventHandler();
+    }
 
     return nullptr;
 }
@@ -378,7 +383,7 @@ void Window::setMouseTracking(bool tracking) {
             if (window == nullptr)
                 return;
 
-            auto &content = window->getContent();
+            auto eventHandler = window->getEventHandler();
             auto &mouseKeysInfo = window->m_mouseKeys;
             auto mouseKey = getMouseKey(button);
 
@@ -386,20 +391,20 @@ void Window::setMouseTracking(bool tracking) {
                 mouseKeysInfo[button] = Window::MouseKeyInfo {Engine::time(), 0, window->getCursorPos()};
 
                 // send press event
-                if (content != nullptr) {
-                    content->mouseKeyPress(mouseKey);
+                if (eventHandler != nullptr) {
+                    eventHandler->mouseKeyPress(mouseKey);
                 }
             } else if (action == GLFW_RELEASE) {
-                if (content != nullptr) {
+                if (eventHandler != nullptr) {
                     // send release event
-                    content->mouseKeyRelease(mouseKey);
+                    eventHandler->mouseKeyRelease(mouseKey);
 
                     // check click event conditions
                     long releaseTime = Engine::time();
                     long deltaTime = releaseTime - mouseKeysInfo[button].pressTime;
 
                     if (mouseKeysInfo[button].maxDelta <= maxClickDistance && deltaTime <= maxClickDeltaTime) {
-                        content->mouseClick(mouseKey);
+                        eventHandler->mouseClick(mouseKey);
                     }
 
                     mouseKeysInfo.erase(button);
@@ -429,8 +434,8 @@ void Window::setMouseTracking(bool tracking) {
             }
 
             // send move event
-            if (auto &content = window->getContent(); content != nullptr) {
-                content->mouseMove(x, y);
+            if (auto eventHandler = window->getEventHandler(); eventHandler != nullptr) {
+                eventHandler->mouseMove(x, y);
             }
         });
     } else {
@@ -444,18 +449,18 @@ void Window::setKeyboardTracking(bool tracking) {
 
     if (tracking) {
         glfwSetKeyCallback(m_window, [](GLFWwindow *window, int key, int scancode, int action, int mode) {
-            if (auto content = getContentIfPresent(window); content != nullptr) {
+            if (auto eventHandler = getEventHandlerIfPresent(window); eventHandler != nullptr) {
                 switch (action) {
                     case GLFW_PRESS: {
-                        content->keyboardKeyPress(getKeyboardKey(key));
+                        eventHandler->keyboardKeyPress(getKeyboardKey(key));
                         break;
                     }
                     case GLFW_REPEAT: {
-                        content->keyboardKeyRepeat(getKeyboardKey(key));
+                        eventHandler->keyboardKeyRepeat(getKeyboardKey(key));
                         break;
                     }
                     case GLFW_RELEASE: {
-                        content->keyboardKeyRelease(getKeyboardKey(key));
+                        eventHandler->keyboardKeyRelease(getKeyboardKey(key));
                         break;
                     }
                     default: {
@@ -474,21 +479,23 @@ void Window::setWindowStateTracking(bool tracking) {
 
     if (tracking) {
         glfwSetWindowSizeCallback(m_window, [](GLFWwindow *glfwWindow, int width, int height) {
-            if (auto content = getContentIfPresent(glfwWindow); content != nullptr) {
-                auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+            if (auto eventHandler = getEventHandlerIfPresent(glfwWindow); eventHandler != nullptr) {
+                eventHandler->windowSizeChange(width, height);
+            }
 
-                window->requestViewport();
+            if (auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow)); window != nullptr) {
+                if (auto &content = window->getContent(); content != nullptr) {
+                    window->requestViewport();
 
-                content->m_width = window->m_viewport.x;
-                content->m_height = window->m_viewport.y;
-
-                content->windowSizeChange(width, height);
+                    content->m_width = window->m_viewport.x;
+                    content->m_height = window->m_viewport.y;
+                }
             }
         });
 
         glfwSetWindowPosCallback(m_window, [](GLFWwindow *window, int x, int y) {
-            if (auto content = getContentIfPresent(window); content != nullptr) {
-                content->windowPosChange(x, y);
+            if (auto eventHandler = getEventHandlerIfPresent(window); eventHandler != nullptr) {
+                eventHandler->windowPosChange(x, y);
             }
         });
     } else {
@@ -592,6 +599,10 @@ float Window::getOpacity() const {
 
 const Ptr<Content>& Window::getContent() const {
     return m_content;
+}
+
+WindowEventHandler* Window::getEventHandler() const {
+    return m_eventHandler;
 }
 
 bool Window::isRenderLoopRunning() const {
