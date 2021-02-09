@@ -182,7 +182,7 @@ set(ALGINE_EXT_SOURCES
         src/common/ext/Blur.cpp include/common/algine/ext/Blur.h)
 
 if (NOT ANDROID)
-    set(ALGINE_PLATFORM_SOURCES
+    set(ALGINE_DESKTOP_SOURCES
             include/desktop/algine/core/input/MouseKey.h
             include/desktop/algine/core/input/KeyboardKey.h
             include/desktop/algine/core/window/DebugWriter.h
@@ -231,7 +231,8 @@ add_library(algine
         ${ALGINE_CORE_SOURCES}
         ${ALGINE_STD_SOURCES}
         ${ALGINE_EXT_SOURCES}
-        ${ALGINE_PLATFORM_SOURCES})
+        ${ALGINE_DESKTOP_SOURCES}
+        ${ALGINE_ANDROID_SOURCES})
 
 set_target_properties(algine PROPERTIES LINKER_LANGUAGE CXX)
 
