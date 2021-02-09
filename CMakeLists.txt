@@ -69,6 +69,7 @@ set(ALGINE_CORE_SOURCES
         include/common/algine/core/RawPtr.h
         include/common/algine/core/shader/ShadersInfo.h
         include/common/algine/core/DataType.h
+        include/common/algine/core/EventHandler.h
 
         src/common/core/JsonHelper.cpp include/common/algine/core/JsonHelper.h
         src/common/core/Object.cpp include/common/algine/core/Object.h
