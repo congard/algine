@@ -196,7 +196,8 @@ if (NOT ANDROID)
             src/desktop/core/window/FileDebugWriter.cpp include/desktop/algine/core/window/FileDebugWriter.h
             src/desktop/core/window/Icon.cpp include/desktop/algine/core/window/Icon.h
             src/desktop/core/window/Icon2GLFWimage.h
-            src/desktop/core/window/Cursor.cpp include/desktop/algine/core/window/Cursor.h)
+            src/desktop/core/window/Cursor.cpp include/desktop/algine/core/window/Cursor.h
+            src/desktop/core/window/WindowEventHandler.cpp include/desktop/algine/core/window/WindowEventHandler.h)
 
     # Under Windows you can compile this project using GNU compiler (for example by using MinGW-w64)
     # You can use CLion or QtCreator as IDE
