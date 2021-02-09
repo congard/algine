@@ -38,12 +38,4 @@ uint Content::height() const {
 bool Content::isInitialized() const {
     return m_isInitialized;
 }
-
-bool Content::isKeyPressed(KeyboardKey key) const {
-    return m_window->isKeyPressed(key);
-}
-
-bool Content::isMouseKeyPressed(MouseKey key) const {
-    return m_window->isMouseKeyPressed(key);
-}
 }

@@ -1,9 +1,6 @@
 #ifndef ALGINE_CONTENT_H
 #define ALGINE_CONTENT_H
 
-#include <algine/core/input/KeyboardKey.h>
-#include <algine/core/input/MouseKey.h>
-
 #include <algine/types.h>
 
 namespace algine {
@@ -28,10 +25,6 @@ public:
     uint height() const;
 
     bool isInitialized() const;
-
-protected:
-    bool isKeyPressed(KeyboardKey key) const;
-    bool isMouseKeyPressed(MouseKey key) const;
 
 private:
     Window *m_window;
