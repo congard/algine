@@ -31,6 +31,7 @@ constexpr static auto maxClickDeltaTime = 250L; // in ms
     m_fullscreenDimensions(-1), \
     m_cursorMode(CursorMode::Normal), \
     m_content(nullptr), \
+    m_eventHandler(nullptr), \
     m_mouseTracking(false), \
     m_keyboardTracking(false), \
     m_windowStateTracking(false), \
@@ -479,10 +480,6 @@ void Window::setWindowStateTracking(bool tracking) {
 
     if (tracking) {
         glfwSetWindowSizeCallback(m_window, [](GLFWwindow *glfwWindow, int width, int height) {
-            if (auto eventHandler = getEventHandlerIfPresent(glfwWindow); eventHandler != nullptr) {
-                eventHandler->windowSizeChange(width, height);
-            }
-
             if (auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow)); window != nullptr) {
                 if (auto &content = window->getContent(); content != nullptr) {
                     window->requestViewport();
@@ -490,6 +487,10 @@ void Window::setWindowStateTracking(bool tracking) {
                     content->m_width = window->m_viewport.x;
                     content->m_height = window->m_viewport.y;
                 }
+            }
+
+            if (auto eventHandler = getEventHandlerIfPresent(glfwWindow); eventHandler != nullptr) {
+                eventHandler->windowSizeChange(width, height);
             }
         });
 
