@@ -152,6 +152,10 @@ uint Texture::getId() const {
     return m_id;
 }
 
+void Texture::activateSlot(uint slot) {
+    glActiveTexture(GL_TEXTURE0 + slot);
+}
+
 void Texture::texFromFile(const string &path, uint target, DataType dataType, bool flipImage) {
     int channels;
     stbi_set_flip_vertically_on_load(flipImage);

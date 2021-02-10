@@ -74,7 +74,7 @@ public:
 
     void bind() const;
     void unbind() const;
-    void use(uint slot) const; // activate + bind
+    void use(uint slot) const; // activateSlot + bind
     void setParams(const std::map<uint, uint> &params);
     void setParams(const std::map<uint, float> &params);
     void applyTextureCreateInfo(const TextureCreateInfo &createInfo);
@@ -107,6 +107,8 @@ public:
     virtual uint getActualFormat() const = 0;
     virtual uint getActualWidth() const = 0;
     virtual uint getActualHeight() const = 0;
+
+    static void activateSlot(uint slot);
 
 protected:
     uint m_target = 0; // texture 2d, texture cube etc
