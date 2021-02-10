@@ -122,8 +122,44 @@ uint Shape::getBonesAmount() const {
     return m_bones.size();
 }
 
-InputLayout* Shape::getInputLayout(uint index) {
+uint Shape::getInputLayoutsAmount() const {
+    return m_inputLayouts.size();
+}
+
+InputLayout* Shape::getInputLayout(Index index) {
     return m_inputLayouts[index];
+}
+
+RawPtr<ArrayBuffer> Shape::getVerticesBuffer() const {
+    return m_vertices;
+}
+
+RawPtr<ArrayBuffer> Shape::getNormalsBuffer() const {
+    return m_normals;
+}
+
+RawPtr<ArrayBuffer> Shape::getTexCoordsBuffer() const {
+    return m_texCoords;
+}
+
+RawPtr<ArrayBuffer> Shape::getTangentsBuffer() const {
+    return m_tangents;
+}
+
+RawPtr<ArrayBuffer> Shape::getBitangentsBuffer() const {
+    return m_bitangents;
+}
+
+RawPtr<ArrayBuffer> Shape::getBoneWeightsBuffer() const {
+    return m_boneWeights;
+}
+
+RawPtr<ArrayBuffer> Shape::getBoneIdsBuffer() const {
+    return m_boneIds;
+}
+
+RawPtr<IndexBuffer> Shape::getIndicesBuffer() const {
+    return m_indices;
 }
 
 ShapePtr Shape::getByName(const string &name) {

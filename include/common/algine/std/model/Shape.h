@@ -46,7 +46,18 @@ public:
     Index getAnimationIndexByName(const std::string &name) const;
     uint getAnimationsAmount() const;
     uint getBonesAmount() const;
-    InputLayout* getInputLayout(uint index);
+    uint getInputLayoutsAmount() const;
+    InputLayout* getInputLayout(Index index);
+
+    RawPtr<ArrayBuffer> getVerticesBuffer() const;
+    RawPtr<ArrayBuffer> getNormalsBuffer() const;
+    RawPtr<ArrayBuffer> getTexCoordsBuffer() const;
+    RawPtr<ArrayBuffer> getTangentsBuffer() const;
+    RawPtr<ArrayBuffer> getBitangentsBuffer() const;
+    RawPtr<ArrayBuffer> getBoneWeightsBuffer() const;
+    RawPtr<ArrayBuffer> getBoneIdsBuffer() const;
+
+    RawPtr<IndexBuffer> getIndicesBuffer() const;
 
 public:
     static ShapePtr getByName(const std::string &name);
