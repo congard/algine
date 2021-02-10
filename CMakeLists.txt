@@ -227,8 +227,6 @@ set(ASSIMP_BUILD_TESTS OFF)
 add_subdirectory(contrib/tulz)
 add_subdirectory(contrib/assimp)
 
-include_directories(contrib)
-
 add_library(algine
         ${ALGINE_CORE_SOURCES}
         ${ALGINE_STD_SOURCES}
@@ -245,6 +243,9 @@ target_include_directories(algine PRIVATE contrib/assimp/include)
 target_include_directories(algine PUBLIC contrib/tulz/include)
 target_include_directories(algine PUBLIC contrib/glm)
 target_include_directories(algine PUBLIC include/common)
+target_include_directories(algine PUBLIC contrib)
+
+# TODO: ^^^ maybe move one header libs to, for example, libname/include/libname/file.hpp instead of libname/file.hpp
 
 if (NOT ANDROID)
     target_include_directories(algine PRIVATE src/desktop)
