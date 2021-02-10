@@ -110,6 +110,16 @@ void Engine::init() {
     m_defaultInputLayout = (InputLayout*) malloc(sizeof(InputLayout));
     m_defaultInputLayout->m_id = 0;
 
+    m_boundFramebuffer = m_defaultFramebuffer;
+    m_boundRenderbuffer = m_defaultRenderbuffer;
+    m_boundTexture2D = m_defaultTexture2D;
+    m_boundTextureCube = m_defaultTextureCube;
+    m_boundArrayBuffer = m_defaultArrayBuffer;
+    m_boundIndexBuffer = m_defaultIndexBuffer;
+    m_boundUniformBuffer = m_defaultUniformBuffer;
+    m_boundShaderProgram = m_defaultShaderProgram;
+    m_boundInputLayout = m_defaultInputLayout;
+
     initExtra();
 }
 
