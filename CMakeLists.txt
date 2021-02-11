@@ -73,6 +73,7 @@ set(ALGINE_CORE_SOURCES
         include/common/algine/core/EventHandler.h
 
         src/common/core/JsonHelper.cpp include/common/algine/core/JsonHelper.h
+        src/common/core/Surface.cpp include/common/algine/core/Surface.h
         src/common/core/Object.cpp include/common/algine/core/Object.h
         src/common/core/ManagerBase.cpp include/common/algine/core/ManagerBase.h
         src/common/core/ImageManagerBase.cpp include/common/algine/core/ImageManagerBase.h
