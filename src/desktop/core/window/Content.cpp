@@ -1,30 +1,30 @@
 #include <algine/core/window/Content.h>
 
-#include <algine/core/window/Window.h>
+#include <algine/core/Surface.h>
 
 namespace algine {
 Content::Content()
-    : m_window(nullptr),
+    : m_surface(nullptr),
       m_isInitialized(false),
       m_width(),
       m_height() {}
 
-Content::Content(Window *window)
+Content::Content(Surface *surface)
     : m_isInitialized(false),
       m_width(),
       m_height()
 {
-    setWindow(window);
+    setSurface(surface);
 }
 
 Content::~Content() = default;
 
-void Content::setWindow(Window *window) {
-    window->setContent(this);
+void Content::setSurface(Surface *surface) {
+    surface->setContent(this);
 }
 
-Window* Content::getWindow() const {
-    return m_window;
+Surface* Content::getSurface() const {
+    return m_surface;
 }
 
 uint Content::width() const {
