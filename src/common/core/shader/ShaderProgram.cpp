@@ -142,7 +142,22 @@ void ShaderProgram::loadActiveLocations() {
 }
 
 int ShaderProgram::getLocation(const string &name) {
+#ifdef ALGINE_SECURE_OPERATIONS
+    auto it = locations.find(name);
+
+    if (it == locations.end()) {
+        ALGINE_SOP_ERROR(
+            "Variable " + name + " does not exist in program with id " + to_string(id) + "\n"
+            "Maybe you have forgotten to call loadActiveLocations() first?"
+        );
+    } else {
+        return it->second;
+    }
+
+    return -1;
+#else
     return locations[name];
+#endif
 }
 
 void ShaderProgram::bind() {
