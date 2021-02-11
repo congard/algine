@@ -6,6 +6,7 @@
 #include <algine/core/window/Cursor.h>
 #include <algine/core/input/KeyboardKey.h>
 #include <algine/core/input/MouseKey.h>
+#include <algine/core/Surface.h>
 #include <algine/core/Ptr.h>
 #include <algine/types.h>
 
@@ -20,7 +21,7 @@ class GLFWwindow;
 namespace algine {
 class Content;
 
-class Window {
+class Window: public Surface {
 public:
     enum class CursorMode {
         Disabled,
@@ -39,9 +40,9 @@ public:
     void maximize();
 
     void renderFrame();
-    void renderLoop();
+    void renderLoop() override;
 
-    void stopRenderLoop();
+    void stopRenderLoop() override;
 
     glm::dvec2 getCursorPos() const;
 
@@ -61,8 +62,7 @@ public:
     void setCursorMode(CursorMode mode);
     void setOpacity(float opacity);
 
-    void setContent(const Ptr<Content> &content);
-    void setContent(Content *content);
+    void setContent(const Ptr<Content> &content) override;
 
     void setEventHandler(WindowEventHandler *eventHandler);
 
@@ -84,13 +84,9 @@ public:
     const glm::ivec2& getPos();
     const glm::ivec2& getDimensions();
     const glm::ivec2& getFullscreenDimensions() const;
-    const glm::ivec2& getViewport();
+    const glm::ivec2& getViewport() override;
     CursorMode getCursorMode() const;
     float getOpacity() const;
-
-    const Ptr<Content>& getContent() const;
-
-    WindowEventHandler* getEventHandler() const;
 
     bool isRenderLoopRunning() const;
 
@@ -108,6 +104,8 @@ public:
     bool isIconified() const;
     bool isMaximized() const;
 
+    using Surface::setContent;
+
 private:
     void requestPos();
     void requestDimensions();
@@ -118,10 +116,8 @@ private:
     std::unique_ptr<DebugWriter> m_debugWriter;
     std::string m_title;
     Cursor m_cursor;
-    glm::ivec2 m_pos, m_dimensions, m_fullscreenDimensions, m_viewport;
+    glm::ivec2 m_pos, m_dimensions, m_fullscreenDimensions;
     CursorMode m_cursorMode;
-    Ptr<Content> m_content;
-    WindowEventHandler *m_eventHandler;
     bool m_mouseTracking, m_keyboardTracking, m_windowStateTracking;
 
 private:

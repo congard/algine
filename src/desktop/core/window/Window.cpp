@@ -26,12 +26,9 @@ constexpr static auto maxClickDeltaTime = 250L; // in ms
 #define initList \
     m_window(nullptr), \
     m_debugWriter(nullptr), \
-    m_viewport(), \
     m_pos(0), \
     m_fullscreenDimensions(-1), \
     m_cursorMode(CursorMode::Normal), \
-    m_content(nullptr), \
-    m_eventHandler(nullptr), \
     m_mouseTracking(false), \
     m_keyboardTracking(false), \
     m_windowStateTracking(false), \
@@ -40,12 +37,18 @@ constexpr static auto maxClickDeltaTime = 250L; // in ms
 Window::Window()
     : initList,
       m_title("Algine Window"),
-      m_dimensions(512) {}
+      m_dimensions(512)
+{
+    initSurfaceFields();
+}
 
 Window::Window(string title, uint width, uint height)
     : initList,
       m_title(std::move(title)),
-      m_dimensions(width, height) {}
+      m_dimensions(width, height)
+{
+    initSurfaceFields();
+}
 
 // taken from https://vallentin.dev/2015/02/23/debugging-opengl
 void debugMessagesHandler(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
@@ -333,41 +336,26 @@ void Window::setOpacity(float opacity) {
 }
 
 void Window::setContent(const Ptr<Content> &content) {
-    if (m_content)
-        m_content->m_window = nullptr;
-
-    m_content = content;
-
-    if (!m_content) {
-        stopRenderLoop();
-    } else {
-        m_content->m_window = this;
-
+    if (content) {
         requestViewport();
-
-        m_content->m_width = m_viewport.x;
-        m_content->m_height = m_viewport.y;
-
-        if (!m_content->isInitialized()) {
-            m_content->init();
-            m_content->m_isInitialized = true;
-        }
     }
-}
 
-void Window::setContent(Content *content) {
-    setContent(Ptr<Content>(content));
+    Surface::setContent(content);
 }
 
 void Window::setEventHandler(WindowEventHandler *eventHandler) {
     m_eventHandler = eventHandler;
 }
 
+inline auto WEH(EventHandler *eventHandler) {
+    return reinterpret_cast<WindowEventHandler *>(eventHandler);
+}
+
 inline WindowEventHandler* getEventHandlerIfPresent(GLFWwindow *glfwWindow) {
-    auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+    auto window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
 
     if (window) {
-        return window->getEventHandler();
+        return WEH(window->getEventHandler());
     }
 
     return nullptr;
@@ -384,7 +372,7 @@ void Window::setMouseTracking(bool tracking) {
             if (window == nullptr)
                 return;
 
-            auto eventHandler = window->getEventHandler();
+            auto eventHandler = WEH(window->getEventHandler());
             auto &mouseKeysInfo = window->m_mouseKeys;
             auto mouseKey = getMouseKey(button);
 
@@ -435,7 +423,7 @@ void Window::setMouseTracking(bool tracking) {
             }
 
             // send move event
-            if (auto eventHandler = window->getEventHandler(); eventHandler != nullptr) {
+            if (auto eventHandler = WEH(window->getEventHandler()); eventHandler != nullptr) {
                 eventHandler->mouseMove(x, y);
             }
         });
@@ -587,7 +575,7 @@ const ivec2& Window::getFullscreenDimensions() const {
 const ivec2& Window::getViewport() {
     requestViewport();
 
-    return m_viewport;
+    return Surface::getViewport();
 }
 
 Window::CursorMode Window::getCursorMode() const {
@@ -596,14 +584,6 @@ Window::CursorMode Window::getCursorMode() const {
 
 float Window::getOpacity() const {
     return glfwGetWindowOpacity(m_window);
-}
-
-const Ptr<Content>& Window::getContent() const {
-    return m_content;
-}
-
-WindowEventHandler* Window::getEventHandler() const {
-    return m_eventHandler;
 }
 
 bool Window::isRenderLoopRunning() const {
