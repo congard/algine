@@ -47,6 +47,7 @@ endif()
 set(ALGINE_CORE_SOURCES
         src/common/internal/PublicObjectTools.h
         src/common/internal/SOP.h
+        src/common/internal/SOPError.h
         src/common/internal/SOPConstants.h
         src/common/internal/ConfigStrings.h
 
