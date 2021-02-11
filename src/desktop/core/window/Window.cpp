@@ -1,7 +1,6 @@
 #include <algine/core/window/Window.h>
 
-#include <algine/core/window/Content.h>
-
+#include <algine/core/Content.h>
 #include <algine/core/Engine.h>
 
 #include <GL/glew.h>

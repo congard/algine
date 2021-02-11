@@ -1,4 +1,4 @@
-#include <algine/core/window/Content.h>
+#include <algine/core/Content.h>
 
 #include <algine/core/Surface.h>
 

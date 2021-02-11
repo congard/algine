@@ -1,6 +1,6 @@
 #include <algine/core/Surface.h>
 
-#include <algine/core/window/Content.h>
+#include <algine/core/Content.h>
 
 namespace algine {
 const glm::ivec2& Surface::getViewport() {

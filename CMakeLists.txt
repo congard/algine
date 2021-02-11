@@ -74,6 +74,7 @@ set(ALGINE_CORE_SOURCES
 
         src/common/core/JsonHelper.cpp include/common/algine/core/JsonHelper.h
         src/common/core/Surface.cpp include/common/algine/core/Surface.h
+        src/common/core/Content.cpp include/common/algine/core/Content.h
         src/common/core/Object.cpp include/common/algine/core/Object.h
         src/common/core/ManagerBase.cpp include/common/algine/core/ManagerBase.h
         src/common/core/ImageManagerBase.cpp include/common/algine/core/ImageManagerBase.h
@@ -193,7 +194,6 @@ if (NOT ANDROID)
             src/desktop/core/input/MouseKeyConverter.h
             src/desktop/core/input/KeyboardKeyConverter.h
             src/desktop/core/window/Window.cpp include/desktop/algine/core/window/Window.h
-            src/desktop/core/window/Content.cpp include/desktop/algine/core/window/Content.h
             src/desktop/core/window/ConsoleDebugWriter.cpp include/desktop/algine/core/window/ConsoleDebugWriter.h
             src/desktop/core/window/FileDebugWriter.cpp include/desktop/algine/core/window/FileDebugWriter.h
             src/desktop/core/window/Icon.cpp include/desktop/algine/core/window/Icon.h
