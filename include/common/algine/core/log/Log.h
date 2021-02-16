@@ -6,6 +6,9 @@
 namespace algine {
 class Log {
 public:
+    constexpr static auto end = "\0";
+
+public:
     static Logger& info(const std::string &tag = "Algine");
     static Logger& error(const std::string &tag = "Algine");
 

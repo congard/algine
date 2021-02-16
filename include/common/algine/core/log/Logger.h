@@ -4,6 +4,7 @@
 #include <algine/templates.h>
 
 #include <string>
+#include <sstream>
 
 namespace algine {
 class Logger {
@@ -32,11 +33,14 @@ public:
 
     void setTag(const std::string &tag);
 
-private:
-    std::string m_tag;
+    std::ostream& stream();
 
 private:
-    enable_if_desktop(void *m_stream);
+    std::string m_tag;
+    std::ostringstream m_stream;
+
+private:
+    enable_if_desktop(void *m_output);
     enable_if_android(int m_priority);
 };
 }
