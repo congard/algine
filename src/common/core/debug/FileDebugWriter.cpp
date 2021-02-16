@@ -1,4 +1,4 @@
-#include <algine/core/window/FileDebugWriter.h>
+#include <algine/core/debug/FileDebugWriter.h>
 
 namespace algine {
 FileDebugWriter::FileDebugWriter(const std::string &file) {

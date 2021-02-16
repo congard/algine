@@ -1,4 +1,4 @@
-#include <algine/core/window/DebugWriter.h>
+#include <algine/core/debug/DebugWriter.h>
 
 namespace algine {
 DebugWriter::~DebugWriter() = default;

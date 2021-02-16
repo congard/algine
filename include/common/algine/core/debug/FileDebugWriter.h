@@ -1,7 +1,7 @@
 #ifndef ALGINE_FILEDEBUGWRITER_H
 #define ALGINE_FILEDEBUGWRITER_H
 
-#include <algine/core/window/DebugWriter.h>
+#include <algine/core/debug/DebugWriter.h>
 
 #include <fstream>
 

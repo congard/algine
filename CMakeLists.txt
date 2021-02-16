@@ -111,6 +111,9 @@ set(ALGINE_CORE_SOURCES
         src/common/core/shader/ShaderProgram.cpp include/common/algine/core/shader/ShaderProgram.h
         src/common/core/shader/BaseUniformBlock.cpp include/common/algine/core/shader/BaseUniformBlock.h
         src/common/core/shader/UniformBlock.cpp include/common/algine/core/shader/UniformBlock.h
+        src/common/core/debug/DebugWriter.cpp include/common/algine/core/debug/DebugWriter.h
+        src/common/core/debug/ConsoleDebugWriter.cpp include/common/algine/core/debug/ConsoleDebugWriter.h
+        src/common/core/debug/FileDebugWriter.cpp include/common/algine/core/debug/FileDebugWriter.h
         src/common/core/Engine.cpp include/common/algine/core/Engine.h
         src/common/core/TypeRegistry.cpp include/common/algine/core/TypeRegistry.h
         src/common/core/ImageConfigTools.h
@@ -193,9 +196,6 @@ if (NOT ANDROID)
             src/desktop/core/input/MouseKeyConverter.h
             src/desktop/core/input/KeyboardKeyConverter.h
             src/desktop/core/window/Window.cpp include/desktop/algine/core/window/Window.h
-            src/desktop/core/window/DebugWriter.cpp include/desktop/algine/core/window/DebugWriter.h
-            src/desktop/core/window/ConsoleDebugWriter.cpp include/desktop/algine/core/window/ConsoleDebugWriter.h
-            src/desktop/core/window/FileDebugWriter.cpp include/desktop/algine/core/window/FileDebugWriter.h
             src/desktop/core/window/Icon.cpp include/desktop/algine/core/window/Icon.h
             src/desktop/core/window/Icon2GLFWimage.h
             src/desktop/core/window/Cursor.cpp include/desktop/algine/core/window/Cursor.h

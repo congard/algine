@@ -1,4 +1,4 @@
-#include <algine/core/window/ConsoleDebugWriter.h>
+#include <algine/core/debug/ConsoleDebugWriter.h>
 
 #include <algine/core/log/Log.h>
 

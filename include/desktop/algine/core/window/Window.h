@@ -2,10 +2,10 @@
 #define ALGINE_WINDOW_H
 
 #include <algine/core/window/WindowEventHandler.h>
-#include <algine/core/window/DebugWriter.h>
 #include <algine/core/window/Cursor.h>
 #include <algine/core/input/KeyboardKey.h>
 #include <algine/core/input/MouseKey.h>
+#include <algine/core/debug/DebugWriter.h>
 #include <algine/core/Surface.h>
 #include <algine/core/Ptr.h>
 #include <algine/types.h>
