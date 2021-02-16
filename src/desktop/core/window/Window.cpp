@@ -54,6 +54,8 @@ void debugMessagesHandler(GLenum source, GLenum type, GLuint id, GLenum severity
                           const void *userParam)
 {
     auto writer = static_cast<DebugWriter*>(const_cast<void*>(userParam));
+    writer->begin();
+
     auto &stream = writer->stream();
 
     // Some debug messages are just annoying informational messages
@@ -145,7 +147,9 @@ void debugMessagesHandler(GLenum source, GLenum type, GLuint id, GLenum severity
             break;
     }
 
-    stream << "\n\n";
+    stream << "\n";
+
+    writer->end();
 }
 
 void Window::create() {
@@ -191,10 +195,14 @@ void Window::create() {
     }
 
     if (m_debugWriter != nullptr) {
+        m_debugWriter->begin();
+
         auto &stream = m_debugWriter->stream();
         stream << "Time: " << Engine::time() << "\n";
         stream << "GPU Vendor: " << Engine::getGPUVendor() << "\n";
-        stream << "GPU Renderer: " << Engine::getGPURenderer() << "\n\n";
+        stream << "GPU Renderer: " << Engine::getGPURenderer() << "\n";
+
+        m_debugWriter->end();
 
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
