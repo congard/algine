@@ -189,11 +189,11 @@ if (NOT ANDROID)
     set(ALGINE_DESKTOP_SOURCES
             include/desktop/algine/core/input/MouseKey.h
             include/desktop/algine/core/input/KeyboardKey.h
-            include/desktop/algine/core/window/DebugWriter.h
 
             src/desktop/core/input/MouseKeyConverter.h
             src/desktop/core/input/KeyboardKeyConverter.h
             src/desktop/core/window/Window.cpp include/desktop/algine/core/window/Window.h
+            src/desktop/core/window/DebugWriter.cpp include/desktop/algine/core/window/DebugWriter.h
             src/desktop/core/window/ConsoleDebugWriter.cpp include/desktop/algine/core/window/ConsoleDebugWriter.h
             src/desktop/core/window/FileDebugWriter.cpp include/desktop/algine/core/window/FileDebugWriter.h
             src/desktop/core/window/Icon.cpp include/desktop/algine/core/window/Icon.h

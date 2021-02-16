@@ -6,7 +6,10 @@
 namespace algine {
 class DebugWriter {
 public:
-    virtual ~DebugWriter() = default;
+    virtual ~DebugWriter();
+
+    virtual void begin();
+    virtual void end();
 
     virtual std::ostream& stream() = 0;
 };
