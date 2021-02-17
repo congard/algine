@@ -22,10 +22,7 @@ namespace algine {
 vector<Texture2DPtr> Texture2D::publicObjects;
 
 Texture2D::Texture2D()
-    : Texture(GL_TEXTURE_2D)
-{
-    // see initializer list above
-}
+    : Texture(GL_TEXTURE_2D) {}
 
 void Texture2D::fromFile(const std::string &path, DataType dataType, bool flipImage) {
     checkBinding()
@@ -33,16 +30,11 @@ void Texture2D::fromFile(const std::string &path, DataType dataType, bool flipIm
 }
 
 void Texture2D::update() {
-    // last 3 params never used, but must be correct:
-    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
     checkBinding()
 
-    // GL_INVALID_OPERATION is generated if internalformat is GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16,
-    // GL_DEPTH_COMPONENT24, or GL_DEPTH_COMPONENT32F, and format is not GL_DEPTH_COMPONENT
-    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
-    uint dataFormat = m_format == DepthComponent ? DepthComponent : Red;
+    auto [dataFormat, dataType] = TexturePrivateTools::getDataInfo(m_format);
 
-    glTexImage2D(m_target, m_lod, m_format, m_width, m_height, 0, dataFormat, GL_BYTE, nullptr);
+    glTexImage2D(m_target, m_lod, m_format, m_width, m_height, 0, dataFormat, static_cast<GLenum>(dataType), nullptr);
 }
 
 void Texture2D::update(const uint dataFormat, const uint dataType, const void *const data) {

@@ -59,7 +59,7 @@ Texture::Texture() {
 }
 
 Texture::Texture(uint target): Texture() {
-    this->m_target = target;
+    m_target = target;
 }
 
 Texture::~Texture() {
@@ -164,6 +164,14 @@ void Texture::texFromFile(const string &path, uint target, DataType dataType, bo
 
     int formats[] = {Red, RG, RGB, RGBA};
     int dataFormat = formats[channels - 1];
+
+    enable_if_android(
+        if (channels < 3) {
+            m_format = RGB;
+        } else {
+            m_format = dataFormat;
+        }
+    )
 
     if (data) {
         glTexImage2D(target, m_lod, m_format, m_width, m_height, 0, dataFormat, static_cast<uint>(dataType), data);

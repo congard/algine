@@ -22,10 +22,7 @@ namespace algine {
 vector<TextureCubePtr> TextureCube::publicObjects;
 
 TextureCube::TextureCube()
-    : Texture(GL_TEXTURE_CUBE_MAP)
-{
-    // see initializer list above
-}
+    : Texture(GL_TEXTURE_CUBE_MAP) {}
 
 void TextureCube::fromFile(const std::string &path, Face face, DataType dataType, bool flipImage) {
     checkBinding()
@@ -33,17 +30,14 @@ void TextureCube::fromFile(const std::string &path, Face face, DataType dataType
 }
 
 void TextureCube::update() {
-    // last 3 params never used, but must be correct:
-    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
     checkBinding()
 
-    // GL_INVALID_OPERATION is generated if internalformat is GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16,
-    // GL_DEPTH_COMPONENT24, or GL_DEPTH_COMPONENT32F, and format is not GL_DEPTH_COMPONENT
-    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
-    uint dataFormat = m_format == DepthComponent ? DepthComponent : Red;
+    auto [dataFormat, dataType] = TexturePrivateTools::getDataInfo(m_format);
 
-    for (uint i = 0; i < 6; ++i)
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_lod, m_format, m_width, m_height, 0, dataFormat, GL_BYTE, nullptr);
+    for (uint i = 0; i < 6; ++i) {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_lod, m_format, m_width, m_height, 0, dataFormat,
+                     static_cast<GLenum>(dataType), nullptr);
+    }
 }
 
 map<uint, uint> TextureCube::defaultParams() {
