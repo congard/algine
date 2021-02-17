@@ -11,19 +11,18 @@ class Content;
 
 class Surface {
 public:
-    virtual void renderLoop() = 0;
+    virtual ~Surface();
 
+    virtual void renderLoop() = 0;
     virtual void stopRenderLoop() = 0;
 
     virtual const glm::ivec2& getViewport();
 
     virtual void setContent(const Ptr<Content> &content);
     void setContent(Content *content);
-
-    void setEventHandler(EventHandler *eventHandler);
-
     const Ptr<Content>& getContent() const;
 
+    void setEventHandler(EventHandler *eventHandler);
     EventHandler* getEventHandler() const;
 
 protected:

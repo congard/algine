@@ -3,6 +3,8 @@
 #include <algine/core/Content.h>
 
 namespace algine {
+Surface::~Surface() = default;
+
 const glm::ivec2& Surface::getViewport() {
     return m_viewport;
 }
@@ -31,12 +33,12 @@ void Surface::setContent(Content *content) {
     setContent(Ptr<Content>(content));
 }
 
-void Surface::setEventHandler(EventHandler *eventHandler) {
-    m_eventHandler = eventHandler;
-}
-
 const Ptr<Content>& Surface::getContent() const {
     return m_content;
+}
+
+void Surface::setEventHandler(EventHandler *eventHandler) {
+    m_eventHandler = eventHandler;
 }
 
 EventHandler* Surface::getEventHandler() const {
