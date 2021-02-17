@@ -11,8 +11,8 @@ public class Algine {
     static AlgineActivity algineActivity;
     static AlgineView algineView;
     static AlgineViewActionHandler algineViewActionHandler;
-    static String applicationLibraryName;
-    static boolean initialized;
+    private static String applicationLibraryName;
+    private static boolean initialized;
 
     static {
         toDefaults();

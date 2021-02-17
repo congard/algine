@@ -51,21 +51,21 @@ public class Bridge {
     }
 
     public static boolean isPointerAvailable(int pointerId) {
-        return isActionHandlerAvailable() && algineViewActionHandler.pointers[pointerId] != null;
+        return isActionHandlerAvailable() && algineViewActionHandler.getPointer(pointerId) != null;
     }
 
     public static float getPointerX(int pointerId) {
         if (!isPointerAvailable(pointerId))
             return -1;
 
-        return algineViewActionHandler.pointers[pointerId].x;
+        return algineViewActionHandler.getPointer(pointerId).getX();
     }
 
     public static float getPointerY(int pointerId) {
         if (!isPointerAvailable(pointerId))
             return -1;
 
-        return algineViewActionHandler.pointers[pointerId].y;
+        return algineViewActionHandler.getPointer(pointerId).getY();
     }
 
     public static float[] getPointerPos(int pointerId) {

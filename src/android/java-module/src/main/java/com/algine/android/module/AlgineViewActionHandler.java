@@ -7,8 +7,12 @@ public class AlgineViewActionHandler implements View.OnTouchListener {
     private final static double maxClickDistance = 16.0;
     private final static long maxClickDeltaTime = 250;
 
-    final PointerInfo[] pointers = new PointerInfo[10]; // max 10 fingers
+    private final PointerInfo[] pointers = new PointerInfo[10]; // max 10 fingers
 
+    public PointerInfo getPointer(int pointerId) {
+        return pointers[pointerId];
+    }
+    
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         int maskedAction = event.getActionMasked();
@@ -72,6 +76,9 @@ public class AlgineViewActionHandler implements View.OnTouchListener {
 
                 break;
             }
+            default: {
+                // just ignore
+            }
         }
 
         return true;
@@ -86,24 +93,28 @@ public class AlgineViewActionHandler implements View.OnTouchListener {
     // we don't need to store these values on every event.
     // Just use these values when we really need them.
     private static class PointerBaseActionInfo {
-        int pointerIndex, pointerId;
-        float x, y;
+        private final int pointerId;
+        private final float x;
+        private final float y;
 
-        PointerBaseActionInfo(MotionEvent event) {
-            pointerIndex = event.getActionIndex();
+        private PointerBaseActionInfo(MotionEvent event) {
+            int pointerIndex = event.getActionIndex();
             pointerId = event.getPointerId(pointerIndex);
+
             x = event.getX(pointerIndex);
             y = event.getY(pointerIndex);
         }
     }
 
-    static class PointerInfo {
-        long pressTime;
-        double maxDelta;
-        float pressX, pressY;
-        float x, y;
+    public static class PointerInfo {
+        private final long pressTime;
+        private final float pressX;
+        private final float pressY;
+        private double maxDelta;
+        private float x;
+        private float y;
 
-        PointerInfo(long pressTime, float pressX, float pressY) {
+        private PointerInfo(long pressTime, float pressX, float pressY) {
             this.pressTime = pressTime;
             this.pressX = pressX;
             this.pressY = pressY;
@@ -111,9 +122,17 @@ public class AlgineViewActionHandler implements View.OnTouchListener {
             update(pressX, pressY);
         }
 
-        void update(float x, float y) {
+        private void update(float x, float y) {
             this.x = x;
             this.y = y;
+        }
+
+        public float getX() {
+            return x;
+        }
+
+        public float getY() {
+            return y;
         }
     }
 }
