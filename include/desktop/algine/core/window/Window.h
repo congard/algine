@@ -5,7 +5,6 @@
 #include <algine/core/window/Cursor.h>
 #include <algine/core/input/KeyboardKey.h>
 #include <algine/core/input/MouseKey.h>
-#include <algine/core/debug/DebugWriter.h>
 #include <algine/core/Surface.h>
 #include <algine/core/Ptr.h>
 #include <algine/types.h>
@@ -49,8 +48,6 @@ public:
     bool isKeyPressed(KeyboardKey key) const;
     bool isMouseKeyPressed(MouseKey key) const;
 
-    void setDebug(DebugWriter *debugWriter);
-
     void setTitle(const std::string &title);
     void setIcon(const Icon &icon);
     void setIcon(const std::vector<Icon> &icons);
@@ -76,8 +73,6 @@ public:
     void setFloating(bool floating);
     void setAutoIconify(bool autoIconify);
     void setFocusOnShow(bool focusOnShow);
-
-    bool isDebug() const;
 
     const std::string& getTitle() const;
     const Cursor& getCursor() const;
@@ -113,7 +108,6 @@ private:
 
 private:
     GLFWwindow *m_window;
-    std::unique_ptr<DebugWriter> m_debugWriter;
     std::string m_title;
     Cursor m_cursor;
     glm::ivec2 m_pos, m_dimensions, m_fullscreenDimensions;
