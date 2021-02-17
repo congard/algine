@@ -551,6 +551,9 @@ void ShapeManager::processMesh(const aiMesh *aimesh, const aiScene *scene) {
             aiString path;
             material->GetTexture(assimpType, 0, &path);
 
+            if (path.length == 0)
+                return;
+
             aiTextureMapMode mapModeU = aiTextureMapMode_Clamp;
             material->Get(AI_MATKEY_MAPPINGMODE_U(assimpType, 0), mapModeU);
 
