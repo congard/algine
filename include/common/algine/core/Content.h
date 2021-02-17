@@ -7,16 +7,14 @@
 namespace algine {
 class Surface;
 
-enable_if_desktop(
-    class Window;
-)
+enable_if_desktop(class Window);
+enable_if_android(class Screen);
 
 class Content {
     friend class Surface;
 
-    enable_if_desktop(
-        friend class Window;
-    )
+    enable_if_desktop(friend class Window);
+    enable_if_android(friend class Screen);
 
 public:
     Content();
@@ -37,7 +35,13 @@ public:
 
     enable_if_desktop(
         inline auto getWindow() const {
-            return reinterpret_cast<Window *>(getSurface());
+            return reinterpret_cast<Window *>(m_surface);
+        }
+    )
+
+    enable_if_android(
+        inline auto getScreen() const {
+            return reinterpret_cast<Screen *>(m_surface);
         }
     )
 
