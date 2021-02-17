@@ -1,9 +1,11 @@
 #ifndef ALGINE_ENGINE_H
 #define ALGINE_ENGINE_H
 
+#include <algine/core/debug/DebugWriter.h>
 #include <algine/types.h>
 
 #include <string>
+#include <memory>
 
 namespace algine {
 class Framebuffer;
@@ -35,6 +37,9 @@ public:
 public:
     static void init();
     static void destroy();
+
+    static void setDebugWriter(DebugWriter *debugWriter);
+    static std::unique_ptr<DebugWriter>& getDebugWriter();
 
     static void setAPIVersion(int version, GraphicsAPI api);
 
@@ -108,6 +113,8 @@ public:
     static long timeFromStart();
 
 private:
+    static std::unique_ptr<DebugWriter> m_debugWriter;
+
     static int m_apiVersion;
     static GraphicsAPI m_graphicsAPI;
 

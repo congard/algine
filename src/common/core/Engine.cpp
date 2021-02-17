@@ -14,6 +14,8 @@
 
 #include <chrono>
 
+#include "core/debug/Debug.h"
+
 #ifndef __ANDROID__
     #include <GLFW/glfw3.h>
 #endif
@@ -36,6 +38,8 @@ inline void initExtra() {
 using namespace std;
 
 namespace algine {
+unique_ptr<DebugWriter> Engine::m_debugWriter;
+
 int Engine::m_apiVersion;
 Engine::GraphicsAPI Engine::m_graphicsAPI;
 
@@ -138,9 +142,17 @@ void Engine::destroy() {
 
     TypeRegistry::clear();
 
-    enable_if_desktop(
-        glfwTerminate(); // Terminate GLFW, clearing any resources allocated by GLFW
-    )
+    enable_if_desktop(glfwTerminate()); // Terminate GLFW, clearing any resources allocated by GLFW
+}
+
+void Engine::setDebugWriter(DebugWriter *debugWriter) {
+    m_debugWriter.reset(debugWriter);
+
+    enable_if_android(enableDebugOutput());
+}
+
+unique_ptr<DebugWriter>& Engine::getDebugWriter() {
+    return m_debugWriter;
 }
 
 void Engine::setAPIVersion(int version, GraphicsAPI api) {
