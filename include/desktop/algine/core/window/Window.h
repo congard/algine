@@ -32,7 +32,6 @@ public:
     Window();
     Window(std::string title, uint width, uint height);
 
-    void create();
     void close();
     void iconify();
     void restore();
@@ -100,6 +99,9 @@ public:
     bool isMaximized() const;
 
     using Surface::setContent;
+
+private:
+    void create();
 
 private:
     void requestPos();

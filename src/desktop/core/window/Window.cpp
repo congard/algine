@@ -39,6 +39,7 @@ Window::Window()
       m_dimensions(512)
 {
     initSurfaceFields();
+    create();
 }
 
 Window::Window(string title, uint width, uint height)
@@ -47,6 +48,7 @@ Window::Window(string title, uint width, uint height)
       m_dimensions(width, height)
 {
     initSurfaceFields();
+    create();
 }
 
 void Window::create() {
