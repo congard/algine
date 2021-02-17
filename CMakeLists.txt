@@ -119,7 +119,8 @@ set(ALGINE_CORE_SOURCES
         src/common/core/ImageConfigTools.h
         src/common/core/TextureConfigTools.h
         src/common/core/log/Logger.cpp include/common/algine/core/log/Logger.h
-        src/common/core/log/Log.cpp include/common/algine/core/log/Log.h)
+        src/common/core/log/Log.cpp include/common/algine/core/log/Log.h
+        src/common/core/debug/Debug.h src/common/core/debug/Debug.cpp)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/constants/BoneSystem.h
