@@ -222,6 +222,13 @@ if (NOT ANDROID)
     set(GLFW_BUILD_TESTS OFF)
 
     add_subdirectory(contrib/glfw)
+else()
+    set(ALGINE_ANDROID_SOURCES
+            include/android/algine/Android.h
+
+            src/android/core/Bridge.cpp src/android/core/Bridge.h
+            src/android/core/Screen.cpp include/android/algine/core/Screen.h
+            src/android/core/ScreenEventHandler.cpp include/android/algine/core/ScreenEventHandler.h)
 endif()
 
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
@@ -257,9 +264,11 @@ if (NOT ANDROID)
 
     target_include_directories(algine PUBLIC contrib/glew/include) # TODO: mark PRIVATE in the future (see Texture.h)
     target_include_directories(algine PUBLIC include/desktop)
+else()
+    target_include_directories(algine PUBLIC include/android)
 endif()
 
-if (MSVC)
+if (MSVC OR ANDROID)
     target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/contrib/assimp/include)
 endif()
 
