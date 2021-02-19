@@ -2,12 +2,12 @@
 
 #include <algine/core/JsonHelper.h>
 #include <algine/core/Engine.h>
+#include <algine/core/log/Log.h>
 
 #include <tulz/StringUtils.h>
 #include <tulz/File.h>
 
 #include <stdexcept>
-#include <iostream>
 
 #include "internal/PublicObjectTools.h"
 
@@ -37,6 +37,8 @@ constant(Path, "path");
 
 constant(IncludePaths, "includePaths");
 }
+
+constant(TAG, "Algine ShaderManager");
 
 namespace algine {
 template<typename T>
@@ -366,8 +368,7 @@ string ShaderManager::processDirectives(const string &src, const Path &baseInclu
         Matches &matches = pragmas[j];
         string &pragmaName = matches.matches[1];
 
-        auto pragmaIs = [&](const string &name)
-        {
+        auto pragmaIs = [&](const string &name) {
             return pragmaName == name;
         };
 
@@ -375,9 +376,8 @@ string ShaderManager::processDirectives(const string &src, const Path &baseInclu
             auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~("(.+)")~"); // "file"
             Path filePath(fileMatches[0].matches[1]);
 
-            auto fileNotFoundError = [&]()
-            {
-                cerr << "ShaderManager: Error: file " << filePath.toString() << " not found\n" << matches.matches[0] << "\n\n";
+            auto fileNotFoundError = [&]() {
+                Log::error(TAG) << "ShaderManager: Error: file " << filePath.toString() << " not found\n" << matches.matches[0] << Log::end;
             };
 
             if (!filePath.isAbsolute()) {
@@ -425,7 +425,7 @@ string ShaderManager::processDirectives(const string &src, const Path &baseInclu
             insert(result, matches.pos, matches.size,
                    "#define " + fileMatches[0].matches[2] + " " + fileMatches[0].matches[1]);
         } else {
-            cerr << "Unknown pragma " << pragmaName << "\n" << matches.matches[0] << "\n\n";
+            Log::error(TAG) << "Unknown pragma " << pragmaName << "\n" << matches.matches[0] << Log::end;
         }
     }
 

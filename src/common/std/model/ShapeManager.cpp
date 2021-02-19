@@ -7,6 +7,7 @@
 #include <algine/core/PtrMaker.h>
 #include <algine/core/JsonHelper.h>
 #include <algine/core/TypeRegistry.h>
+#include <algine/core/log/Log.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -14,7 +15,6 @@
 
 #include <tulz/Path.h>
 
-#include <iostream>
 #include <cfloat>
 
 #include "internal/PublicObjectTools.h"
@@ -31,6 +31,8 @@ constexpr uint BonesPerVertex = 4;
 
 constant(ClassName, "Shape");
 }
+
+constant(TAG, "Algine ShapeManager");
 
 ShapeManager::ShapeManager()
     : m_className(Default::ClassName),
@@ -293,7 +295,7 @@ void ShapeManager::load() {
 
     // If the import failed, report it
     if (!scene) {
-        cerr << "Assimp error: " << importer.GetErrorString() << "\n";
+        Log::error(TAG) << "Assimp error: " << importer.GetErrorString() << Log::end;
         return;
     }
 
@@ -336,7 +338,7 @@ void ShapeManager::load() {
                 break;
             }
             default: {
-                cerr << "Unknown algine param " << static_cast<uint>(p) << "\n";
+                Log::error(TAG) << "Unknown algine param " << static_cast<uint>(p) << Log::end;
                 break;
             }
         }
