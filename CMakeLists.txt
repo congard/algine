@@ -233,6 +233,7 @@ endif()
 
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
 set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_NO_EXPORT ON)
 
 add_subdirectory(contrib/tulz)
 add_subdirectory(contrib/assimp)
