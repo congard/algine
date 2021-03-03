@@ -121,6 +121,70 @@ const string& ShapeManager::getClassName() const {
     return m_className;
 }
 
+const vector<float>& ShapeManager::getVertices() const {
+    return m_vertices;
+}
+
+void ShapeManager::setVertices(const vector<float> &vertices) {
+    m_vertices = vertices;
+}
+
+const vector<float>& ShapeManager::getNormals() const {
+    return m_normals;
+}
+
+void ShapeManager::setNormals(const vector<float> &normals) {
+    m_normals = normals;
+}
+
+const vector<float>& ShapeManager::getTexCoords() const {
+    return m_texCoords;
+}
+
+void ShapeManager::setTexCoords(const vector<float> &texCoords) {
+    m_texCoords = texCoords;
+}
+
+const vector<float>& ShapeManager::getTangents() const {
+    return m_tangents;
+}
+
+void ShapeManager::setTangents(const vector<float> &tangents) {
+    m_tangents = tangents;
+}
+
+const vector<float>& ShapeManager::getBitangents() const {
+    return m_bitangents;
+}
+
+void ShapeManager::setBitangents(const vector<float> &bitangents) {
+    m_bitangents = bitangents;
+}
+
+const vector<float>& ShapeManager::getBoneWeights() const {
+    return m_boneWeights;
+}
+
+void ShapeManager::setBoneWeights(const vector<float> &boneWeights) {
+    m_boneWeights = boneWeights;
+}
+
+const vector<uint>& ShapeManager::getBoneIds() const {
+    return m_boneIds;
+}
+
+void ShapeManager::setBoneIds(const vector<uint> &boneIds) {
+    m_boneIds = boneIds;
+}
+
+const vector<uint>& ShapeManager::getIndices() const {
+    return m_indices;
+}
+
+void ShapeManager::setIndices(const vector<uint> &indices) {
+    m_indices = indices;
+}
+
 ShapePtr ShapeManager::get() {
     return internal::PublicObjectTools::getPtr<ShapePtr>(this);
 }
@@ -128,7 +192,11 @@ ShapePtr ShapeManager::get() {
 ShapePtr ShapeManager::create() {
     m_shape.reset(TypeRegistry::create<Shape>(m_className));
 
-    load();
+    if (!m_modelPath.empty()) {
+        loadFile();
+    }
+
+    loadShape();
 
     internal::PublicObjectTools::postCreateAccessOp("Shape", this, m_shape);
 
@@ -267,7 +335,13 @@ uint getMaxBonesPerVertex(const aiMesh *mesh) {
     return bonesPerVertex;
 }
 
-void ShapeManager::load() {
+constexpr int PARAMS_TYPE_ASSIMP = 0;
+constexpr int PARAMS_TYPE_ALGINE = 1;
+
+template<int type>
+inline auto getParams(const vector<ShapeManager::Param> &params) {
+    using Param = ShapeManager::Param;
+
     map<Param, uint> assimpParams = {
         {Param::Triangulate, aiProcess_Triangulate},
         {Param::SortByPolygonType, aiProcess_SortByPType},
@@ -279,7 +353,7 @@ void ShapeManager::load() {
     uint completeAssimpParams = 0;
 
     // sort params
-    for (const auto p : m_params) {
+    for (const auto p : params) {
         auto assimpParam = assimpParams.find(p);
 
         if (assimpParam != assimpParams.end()) {
@@ -289,9 +363,22 @@ void ShapeManager::load() {
         }
     }
 
+    if constexpr (type == PARAMS_TYPE_ASSIMP) {
+        return completeAssimpParams;
+    } else {
+        return algineParams;
+    }
+}
+
+void ShapeManager::loadFile() {
+    if (m_shape == nullptr) {
+        m_shape.reset(TypeRegistry::create<Shape>(m_className));
+    }
+
     // Create an instance of the Importer class
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(Path::join(m_workingDirectory, m_modelPath), completeAssimpParams);
+    const aiScene *scene = importer.ReadFile(Path::join(m_workingDirectory, m_modelPath),
+                                             algine::getParams<PARAMS_TYPE_ASSIMP>(m_params));
 
     // If the import failed, report it
     if (!scene) {
@@ -320,11 +407,18 @@ void ShapeManager::load() {
     m_shape->m_rootNode = Node(scene->mRootNode);
     m_shape->m_animations.reserve(scene->mNumAnimations); // allocate space for animations
 
-    for (size_t i = 0; i < scene->mNumAnimations; i++)
+    for (size_t i = 0; i < scene->mNumAnimations; i++) {
         m_shape->m_animations.emplace_back(scene->mAnimations[i]);
+    }
+}
+
+void ShapeManager::loadShape() {
+    if (m_shape == nullptr) {
+        m_shape.reset(TypeRegistry::create<Shape>(m_className));
+    }
 
     // apply algine params
-    for (const auto p : algineParams) {
+    for (const auto p : algine::getParams<PARAMS_TYPE_ALGINE>(m_params)) {
         switch (p) {
             case Param::InverseNormals: {
                 for (float &normal : m_normals) {
@@ -361,6 +455,10 @@ void ShapeManager::load() {
 
         m_shape->createInputLayout(locations.create());
     }
+}
+
+ShapePtr& ShapeManager::getCurrentShape() {
+    return m_shape;
 }
 
 void ShapeManager::loadBones(const aiMesh *aimesh) {

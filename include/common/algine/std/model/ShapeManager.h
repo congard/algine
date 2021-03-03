@@ -54,6 +54,35 @@ public:
     uint getBonesPerVertex() const;
     const std::string& getClassName() const;
 
+    const std::vector<float>& getVertices() const;
+    void setVertices(const std::vector<float> &vertices);
+
+    const std::vector<float>& getNormals() const;
+    void setNormals(const std::vector<float> &normals);
+
+    const std::vector<float>& getTexCoords() const;
+    void setTexCoords(const std::vector<float> &texCoords);
+
+    const std::vector<float>& getTangents() const;
+    void setTangents(const std::vector<float> &tangents);
+
+    const std::vector<float>& getBitangents() const;
+    void setBitangents(const std::vector<float> &bitangents);
+
+    const std::vector<float>& getBoneWeights() const;
+    void setBoneWeights(const std::vector<float> &boneWeights);
+
+    const std::vector<uint>& getBoneIds() const;
+    void setBoneIds(const std::vector<uint> &boneIds);
+
+    const std::vector<uint>& getIndices() const;
+    void setIndices(const std::vector<uint> &indices);
+
+    void loadFile();
+    void loadShape();
+
+    ShapePtr& getCurrentShape();
+
     ShapePtr get();
     ShapePtr create();
 
@@ -64,7 +93,6 @@ public:
     JsonHelper dump() override;
 
 private:
-    void load();
     void loadBones(const aiMesh *aimesh);
     void processNode(const aiNode *node, const aiScene *scene);
     void processMesh(const aiMesh *aimesh, const aiScene *scene);
