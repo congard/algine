@@ -31,6 +31,11 @@ public:
     /// <br>if you need more, you will have to create InputLayout manually
     void createInputLayout(const InputLayoutShapeLocations &locations);
 
+    void setMeshes(const std::vector<Mesh> &meshes);
+    void setAnimations(const std::vector<Animation> &animations);
+    void addMesh(const Mesh &mesh);
+    void addAnimation(const Animation &animation);
+
     bool isBonesPresent() const;
     bool isAnimationsPresent() const;
 

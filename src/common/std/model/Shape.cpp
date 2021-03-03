@@ -64,6 +64,22 @@ void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
     inputLayout->unbind();
 }
 
+void Shape::setMeshes(const vector<Mesh> &meshes) {
+    m_meshes = meshes;
+}
+
+void Shape::setAnimations(const vector<Animation> &animations) {
+    m_animations = animations;
+}
+
+void Shape::addMesh(const Mesh &mesh) {
+    m_meshes.emplace_back(mesh);
+}
+
+void Shape::addAnimation(const Animation &animation) {
+    m_animations.emplace_back(animation);
+}
+
 bool Shape::isBonesPresent() const {
     return m_bonesPerVertex > 0;
 }
