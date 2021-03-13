@@ -9,9 +9,11 @@
 	path = contrib/assimp
 	url = https://github.com/assimp/assimp.git
 	branch = assimp_5.0_release
+	ignore = dirty
 [submodule "contrib/glew"]
 	path = contrib/glew
 	url = https://github.com/nigels-com/glew.git
+	ignore = dirty
 [submodule "contrib/glm"]
 	path = contrib/glm
 	url = https://github.com/g-truc/glm.git
