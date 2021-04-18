@@ -64,6 +64,7 @@ public:
         enable_if_desktop(
             desktop_Red16 = GL_R16,
             desktop_RG16 = GL_RG16,
+            desktop_RGB16 = GL_RGB16,
             desktop_RGBA16 = GL_RGBA16
         )
     };

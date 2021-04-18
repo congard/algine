@@ -145,7 +145,7 @@ void Framebuffer::clearStencilBuffer() {
 }
 
 // returns base format + components count
-inline pair<uint, uint> getTexFormatInfo(const uint format) {
+inline pair<uint, uint> getTexFormatInfo(uint format) {
     switch (format) {
         case Texture::RG:
         case Texture::RG8:
@@ -155,6 +155,7 @@ inline pair<uint, uint> getTexFormatInfo(const uint format) {
             return {Texture::RG, 2};
         case Texture::RGB:
         case Texture::RGB8:
+        enable_if_desktop(case Texture::desktop_RGB16:)
         case Texture::RGB16F:
         case Texture::RGB32F:
             return {Texture::RGB, 3};
