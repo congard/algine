@@ -41,7 +41,12 @@ constant(RG, "rg");
 constant(RGB, "rgb");
 constant(RGBA, "rgba");
 
-// some sized formats
+// sized formats
+constant(Red8, "red8");
+constant(RG8, "rg8");
+constant(RGB8, "rgb8");
+constant(RGBA8, "rgba8");
+
 constant(Red16F, "red16f");
 constant(RG16F, "rg16f");
 constant(RGB16F, "rgb16f");
@@ -51,6 +56,11 @@ constant(Red32F, "red32f");
 constant(RG32F, "rg32f");
 constant(RGB32F, "rgb32f");
 constant(RGBA32F, "rgba32f");
+
+constant(desktop_Red16, "desktop_red16");
+constant(desktop_RG16, "desktop_rg16");
+constant(desktop_RGB16, "desktop_rgb16");
+constant(desktop_RGBA16, "desktop_rgba16");
 
 constant(Params, "params");
 

@@ -10,8 +10,7 @@
 
 using namespace std;
 
-namespace algine {
-namespace Config {
+namespace algine::Config {
 #define format_uint(format) if (str == Config::format) return Texture::format;
 
 inline uint stringToFormat(const string &str) {
@@ -23,6 +22,11 @@ inline uint stringToFormat(const string &str) {
     format_uint(RGB)
     format_uint(RGBA)
 
+    format_uint(Red8)
+    format_uint(RG8)
+    format_uint(RGB8)
+    format_uint(RGBA8)
+
     format_uint(Red16F)
     format_uint(RG16F)
     format_uint(RGB16F)
@@ -32,6 +36,13 @@ inline uint stringToFormat(const string &str) {
     format_uint(RG32F)
     format_uint(RGB32F)
     format_uint(RGBA32F)
+
+    enable_if_desktop(
+        format_uint(desktop_Red16)
+        format_uint(desktop_RG16)
+        format_uint(desktop_RGB16)
+        format_uint(desktop_RGBA16)
+    )
 
     throw runtime_error("Unsupported format '" + str + "'");
 }
@@ -49,6 +60,11 @@ inline string formatToString(uint formatValue) {
     format_str(RGB)
     format_str(RGBA)
 
+    format_str(Red8)
+    format_str(RG8)
+    format_str(RGB8)
+    format_str(RGBA8)
+
     format_str(Red16F)
     format_str(RG16F)
     format_str(RGB16F)
@@ -59,11 +75,17 @@ inline string formatToString(uint formatValue) {
     format_str(RGB32F)
     format_str(RGBA32F)
 
+    enable_if_desktop(
+        format_str(desktop_Red16)
+        format_str(desktop_RG16)
+        format_str(desktop_RGB16)
+        format_str(desktop_RGBA16)
+    )
+
     throw runtime_error("Unsupported format " + to_string(formatValue));
 }
 
 #undef format_str
-}
 }
 
 #endif //ALGINE_IMAGECONFIGTOOLS_H
