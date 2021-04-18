@@ -166,7 +166,14 @@ inline pair<uint, uint> getTexFormatInfo(uint format) {
         case Texture::RGBA32F:
             return {Texture::RGBA, 4};
         case Texture::DepthComponent:
+        case Texture::DepthComponent16:
+        case Texture::DepthComponent24:
+        case Texture::DepthComponent32F:
             return {Texture::DepthComponent, 1};
+        case Texture::DepthStencil:
+        case Texture::Depth24Stencil8:
+        case Texture::Depth32FStencil8:
+            return {Texture::DepthStencil, 2};
         default:
             return {Texture::Red, 1};
     }

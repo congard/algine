@@ -15,7 +15,13 @@ namespace algine::Config {
 
 inline uint stringToFormat(const string &str) {
     format_uint(DepthComponent)
+    format_uint(DepthComponent16)
+    format_uint(DepthComponent24)
+    format_uint(DepthComponent32F)
+
     format_uint(DepthStencil)
+    format_uint(Depth24Stencil8)
+    format_uint(Depth32FStencil8)
 
     format_uint(Red)
     format_uint(RG)
@@ -53,7 +59,13 @@ inline uint stringToFormat(const string &str) {
 
 inline string formatToString(uint formatValue) {
     format_str(DepthComponent)
+    format_str(DepthComponent16)
+    format_str(DepthComponent24)
+    format_str(DepthComponent32F)
+
     format_str(DepthStencil)
+    format_str(Depth24Stencil8)
+    format_str(Depth32FStencil8)
 
     format_str(Red)
     format_str(RG)

@@ -48,6 +48,11 @@ public:
     };
 
     enum SizedFormats {
+        DepthComponent16 = GL_DEPTH_COMPONENT16,
+        DepthComponent24 = GL_DEPTH_COMPONENT24,
+        DepthComponent32F = GL_DEPTH_COMPONENT32F,
+        Depth24Stencil8 = GL_DEPTH24_STENCIL8,
+        Depth32FStencil8 = GL_DEPTH32F_STENCIL8,
         Red8 = GL_R8,
         RG8 = GL_RG8,
         RGB8 = GL_RGB8,

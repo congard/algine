@@ -30,7 +30,8 @@ inline constexpr TextureDataInfo getDataInfo(uint dataFormat) {
     // GL_DEPTH_COMPONENT24, or GL_DEPTH_COMPONENT32F, and format is not GL_DEPTH_COMPONENT
     // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
     enable_if_desktop(return {
-        dataFormat == Texture::DepthComponent ? Texture::DepthComponent : Texture::Red, DataType::Byte
+        (dataFormat == (Texture::DepthComponent || Texture::DepthComponent16 || Texture::DepthComponent24 || Texture::DepthComponent32F) ?
+            Texture::DepthComponent : Texture::Red), DataType::Byte
     });
 
     // android (OpenGL ES)
@@ -39,6 +40,16 @@ inline constexpr TextureDataInfo getDataInfo(uint dataFormat) {
     // is not one of those in the tables above.
     // https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glTexImage2D.xhtml
     switch (dataFormat) {
+        case Texture::DepthComponent16:
+            return {Texture::DepthComponent, DataType::UnsignedShort};
+        case Texture::DepthComponent24:
+            return {Texture::DepthComponent, DataType::UnsignedInt};
+        case Texture::DepthComponent32F:
+            return {Texture::DepthComponent, DataType::Float};
+        case Texture::Depth24Stencil8:
+            return {Texture::DepthStencil, static_cast<DataType>(GL_UNSIGNED_INT_24_8)};
+        case Texture::Depth32FStencil8:
+            return {Texture::DepthStencil, static_cast<DataType>(GL_FLOAT_32_UNSIGNED_INT_24_8_REV)};
         case Texture::RGB:
             return {Texture::RGB, DataType::UnsignedByte};
         case Texture::RGBA:

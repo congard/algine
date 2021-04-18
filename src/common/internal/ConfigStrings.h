@@ -42,6 +42,13 @@ constant(RGB, "rgb");
 constant(RGBA, "rgba");
 
 // sized formats
+constant(DepthComponent16, "depthComponent16");
+constant(DepthComponent24, "depthComponent24");
+constant(DepthComponent32F, "depthComponent32F");
+
+constant(Depth24Stencil8, "depth24Stencil8");
+constant(Depth32FStencil8, "depth32FStencil8");
+
 constant(Red8, "red8");
 constant(RG8, "rg8");
 constant(RGB8, "rgb8");
