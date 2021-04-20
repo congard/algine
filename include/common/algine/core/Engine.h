@@ -73,24 +73,24 @@ public:
     static InputLayout* defaultInputLayout();
 
 public:
-    enum DepthTestModes {
-        DepthTestNever = 0x0200,
-        DepthTestLess,
-        DepthTestEqual,
-        DepthTestLessOrEqual,
-        DepthTestGreater,
-        DepthTestNotEqual,
-        DepthTestGreaterOrEqual,
-        DepthTestAlways
+    enum class DepthTest {
+        Never = 0x0200,
+        Less,
+        Equal,
+        LessOrEqual,
+        Greater,
+        NotEqual,
+        GreaterOrEqual,
+        Always
     };
 
-    enum FaceCullingOptions {
-        CullFaceFront = 0x0404,
-        CullFaceBack = 0x0405,
-        CullFaceFrontAndBack = 0x0408
+    enum class FaceCulling {
+        Front = 0x0404,
+        Back = 0x0405,
+        FrontAndBack = 0x0408
     };
 
-    enum PolyTypes {
+    enum class PolyType {
         Triangle = 0x0004
     };
 
@@ -103,9 +103,9 @@ public:
     static void disableFaceCulling();
     static void disableDepthMask();
 
-    static void drawElements(uint start, uint count, uint polyType = Triangle);
-    static void setDepthTestMode(uint mode);
-    static void setFaceCullingMode(uint mode);
+    static void drawElements(uint start, uint count, PolyType polyType = PolyType::Triangle);
+    static void setDepthTestMode(DepthTest mode);
+    static void setFaceCullingMode(FaceCulling mode);
     static void setViewport(uint width, uint height, uint x = 0, uint y = 0);
 
 public:

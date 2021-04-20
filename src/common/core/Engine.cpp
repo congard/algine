@@ -243,16 +243,16 @@ void Engine::disableDepthMask() {
     glDepthMask(false);
 }
 
-void Engine::drawElements(uint start, uint count, uint polyType) {
-    glDrawElements(polyType, count, GL_UNSIGNED_INT, reinterpret_cast<void*>(start * sizeof(uint)));
+void Engine::drawElements(uint start, uint count, PolyType polyType) {
+    glDrawElements(static_cast<GLenum>(polyType), count, GL_UNSIGNED_INT, reinterpret_cast<void*>(start * sizeof(uint)));
 }
 
-void Engine::setDepthTestMode(uint mode) {
-    glDepthFunc(mode);
+void Engine::setDepthTestMode(DepthTest mode) {
+    glDepthFunc(static_cast<GLenum>(mode));
 }
 
-void Engine::setFaceCullingMode(uint mode) {
-    glCullFace(mode);
+void Engine::setFaceCullingMode(FaceCulling mode) {
+    glCullFace(static_cast<GLenum>(mode));
 }
 
 void Engine::setViewport(uint width, uint height, uint x, uint y) {
