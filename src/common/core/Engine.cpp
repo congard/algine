@@ -247,6 +247,10 @@ void Engine::drawElements(uint start, uint count, PolyType polyType) {
     glDrawElements(static_cast<GLenum>(polyType), count, GL_UNSIGNED_INT, reinterpret_cast<void*>(start * sizeof(uint)));
 }
 
+void Engine::drawArrays(uint start, uint count, PolyType polyType) {
+    glDrawArrays(static_cast<GLenum>(polyType), start, count);
+}
+
 void Engine::setDepthTestMode(DepthTest mode) {
     glDepthFunc(static_cast<GLenum>(mode));
 }

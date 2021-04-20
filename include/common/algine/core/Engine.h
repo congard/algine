@@ -104,6 +104,8 @@ public:
     static void disableDepthMask();
 
     static void drawElements(uint start, uint count, PolyType polyType = PolyType::Triangle);
+    static void drawArrays(uint start, uint count, PolyType polyType = PolyType::Triangle);
+
     static void setDepthTestMode(DepthTest mode);
     static void setFaceCullingMode(FaceCulling mode);
     static void setViewport(uint width, uint height, uint x = 0, uint y = 0);
