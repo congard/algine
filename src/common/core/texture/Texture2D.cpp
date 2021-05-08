@@ -37,9 +37,9 @@ void Texture2D::update() {
     glTexImage2D(m_target, m_lod, m_format, m_width, m_height, 0, dataFormat, static_cast<GLenum>(dataType), nullptr);
 }
 
-void Texture2D::update(const uint dataFormat, const uint dataType, const void *const data) {
+void Texture2D::update(uint dataFormat, DataType dataType, const void *data) {
     checkBinding()
-    glTexImage2D(m_target, m_lod, m_format, m_width, m_height, 0, dataFormat, dataType, data);
+    glTexImage2D(m_target, m_lod, m_format, m_width, m_height, 0, dataFormat, static_cast<GLenum>(dataType), data);
 }
 
 map<uint, uint> Texture2D::defaultParams() {

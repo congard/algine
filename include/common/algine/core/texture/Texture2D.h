@@ -23,7 +23,7 @@ public:
      * @param dataType
      * @param data
      */
-    void update(uint dataFormat, uint dataType, const void *data);
+    void update(uint dataFormat, DataType dataType, const void *data);
 
     static std::map<uint, uint> defaultParams();
 
