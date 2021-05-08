@@ -243,6 +243,20 @@ void Engine::disableDepthMask() {
     glDepthMask(false);
 }
 
+bool Engine::isDepthTestEnabled() {
+    return glIsEnabled(GL_DEPTH_TEST);
+}
+
+bool Engine::isFaceCullingEnabled() {
+    return glIsEnabled(GL_CULL_FACE);
+}
+
+bool Engine::isDepthMaskEnabled() {
+    GLboolean enabled;
+    glGetBooleanv(GL_DEPTH_WRITEMASK, &enabled);
+    return enabled;
+}
+
 void Engine::drawElements(uint start, uint count, PolyType polyType) {
     glDrawElements(static_cast<GLenum>(polyType), count, GL_UNSIGNED_INT, reinterpret_cast<void*>(start * sizeof(uint)));
 }

@@ -103,6 +103,10 @@ public:
     static void disableFaceCulling();
     static void disableDepthMask();
 
+    static bool isDepthTestEnabled();
+    static bool isFaceCullingEnabled();
+    static bool isDepthMaskEnabled();
+
     static void drawElements(uint start, uint count, PolyType polyType = PolyType::Triangle);
     static void drawArrays(uint start, uint count, PolyType polyType = PolyType::Triangle);
 
