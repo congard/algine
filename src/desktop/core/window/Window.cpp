@@ -249,7 +249,7 @@ void Window::setEventHandler(WindowEventHandler *eventHandler) {
 }
 
 inline auto WEH(EventHandler *eventHandler) {
-    return reinterpret_cast<WindowEventHandler *>(eventHandler);
+    return static_cast<WindowEventHandler *>(eventHandler);
 }
 
 inline WindowEventHandler* getEventHandlerIfPresent(GLFWwindow *glfwWindow) {
