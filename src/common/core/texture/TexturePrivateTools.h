@@ -29,10 +29,23 @@ inline constexpr TextureDataInfo getDataInfo(uint dataFormat) {
     // GL_INVALID_OPERATION is generated if internalformat is GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16,
     // GL_DEPTH_COMPONENT24, or GL_DEPTH_COMPONENT32F, and format is not GL_DEPTH_COMPONENT
     // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
-    enable_if_desktop(return {
-        (dataFormat == (Texture::DepthComponent || Texture::DepthComponent16 || Texture::DepthComponent24 || Texture::DepthComponent32F) ?
-            Texture::DepthComponent : Texture::Red), DataType::Byte
-    });
+    enable_if_desktop(
+    uint format {};
+
+    switch (dataFormat) {
+        case Texture::DepthComponent:
+        case Texture::DepthComponent16:
+        case Texture::DepthComponent24:
+        case Texture::DepthComponent32F:
+            format = Texture::DepthComponent;
+            break;
+        default:
+            format = Texture::Red;
+            break;
+    }
+
+    return {format, DataType::Byte}
+    );
 
     // android (OpenGL ES)
 
