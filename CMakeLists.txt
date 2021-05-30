@@ -266,6 +266,7 @@ if (NOT ANDROID)
     target_include_directories(algine PUBLIC contrib/glew/include) # TODO: mark PRIVATE in the future (see Texture.h)
     target_include_directories(algine PUBLIC include/desktop)
 else()
+    target_include_directories(algine PUBLIC contrib/tulz/android/include)
     target_include_directories(algine PUBLIC include/android)
 endif()
 
