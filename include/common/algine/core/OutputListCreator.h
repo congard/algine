@@ -1,5 +1,5 @@
-#ifndef ALGINE_OUTPUTLISTMANAGER_H
-#define ALGINE_OUTPUTLISTMANAGER_H
+#ifndef ALGINE_OUTPUTLISTCREATOR_H
+#define ALGINE_OUTPUTLISTCREATOR_H
 
 #include <algine/core/transfer/Transferable.h>
 #include <algine/core/OutputList.h>
@@ -7,15 +7,15 @@
 #include <map>
 
 namespace algine {
-class OutputListManager: public Transferable {
+class OutputListCreator: public Transferable {
 public:
     using Data = std::map<Index, Attachment>;
 
 public:
     // do not mark explicit because we really need implicit conversion
     // just ignore Clang-Tidy warning
-    OutputListManager(const Data &data);
-    OutputListManager();
+    OutputListCreator(const Data &data);
+    OutputListCreator();
 
     void set(const Data &data);
 
@@ -23,7 +23,7 @@ public:
     void addColor(Index index, Index attachmentIndex);
     void addColor(Index index);
 
-    OutputList get() const;
+    OutputList create() const;
     const Data& data() const;
 
     void import(const JsonHelper &jsonHelper) override;
@@ -34,4 +34,4 @@ private:
 };
 }
 
-#endif //ALGINE_OUTPUTLISTMANAGER_H
+#endif //ALGINE_OUTPUTLISTCREATOR_H

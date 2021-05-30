@@ -1,4 +1,4 @@
-#include <algine/std/model/InputLayoutShapeLocationsManager.h>
+#include <algine/std/model/InputLayoutShapeLocationsCreator.h>
 
 #include <algine/core/JsonHelper.h>
 
@@ -27,50 +27,38 @@ namespace Default {
 constexpr int Location = -1;
 }
 
-InputLayoutShapeLocationsManager::Location::Location(string locationName)
+InputLayoutShapeLocationsCreator::Location::Location(string locationName)
     : m_name(move(locationName)),
-      m_location(InputLayoutShapeLocations::None)
-{
-    // see initializer list above
-}
+      m_location(InputLayoutShapeLocations::None) {}
 
-InputLayoutShapeLocationsManager::Location::Location(const char *locationName)
+InputLayoutShapeLocationsCreator::Location::Location(const char *locationName)
     : m_name(locationName),
-      m_location(InputLayoutShapeLocations::None)
-{
-    // see initializer list above
-}
+      m_location(InputLayoutShapeLocations::None) {}
 
-InputLayoutShapeLocationsManager::Location::Location(int location)
-    : m_location(location)
-{
-    // see initializer list above
-}
+InputLayoutShapeLocationsCreator::Location::Location(int location)
+    : m_location(location) {}
 
-InputLayoutShapeLocationsManager::Location::Location()
-    : m_location(InputLayoutShapeLocations::None)
-{
-    // see initializer list above
-}
+InputLayoutShapeLocationsCreator::Location::Location()
+    : m_location(InputLayoutShapeLocations::None) {}
 
-const string& InputLayoutShapeLocationsManager::Location::getLocationName() const {
+const string& InputLayoutShapeLocationsCreator::Location::getLocationName() const {
     return m_name;
 }
 
-int InputLayoutShapeLocationsManager::Location::getLocation() const {
+int InputLayoutShapeLocationsCreator::Location::getLocation() const {
     return m_location;
 }
 
-bool InputLayoutShapeLocationsManager::Location::hasLocationName() const {
+bool InputLayoutShapeLocationsCreator::Location::hasLocationName() const {
     return !m_name.empty();
 }
 
-bool InputLayoutShapeLocationsManager::Location::hasLocation() const {
+bool InputLayoutShapeLocationsCreator::Location::hasLocation() const {
     return m_location != InputLayoutShapeLocations::None;
 }
 
-InputLayoutShapeLocationsManager::InputLayoutShapeLocationsManager(const InputLayoutShapeLocations &locations)
-    : InputLayoutShapeLocationsManager()
+InputLayoutShapeLocationsCreator::InputLayoutShapeLocationsCreator(const InputLayoutShapeLocations &locations)
+    : InputLayoutShapeLocationsCreator()
 {
 #define add(type, name) addLocation(Location::Type::type, locations.name)
 
@@ -85,85 +73,82 @@ InputLayoutShapeLocationsManager::InputLayoutShapeLocationsManager(const InputLa
 #undef add
 }
 
-InputLayoutShapeLocationsManager::InputLayoutShapeLocationsManager()
-    : m_shaderDumpMode(ShaderProgramDumpMode::None)
-{
-    // see initializer list above
-}
+InputLayoutShapeLocationsCreator::InputLayoutShapeLocationsCreator()
+    : m_shaderDumpMode(ShaderProgramDumpMode::None) {}
 
-void InputLayoutShapeLocationsManager::addLocation(Location::Type type, const Location &location) {
+void InputLayoutShapeLocationsCreator::addLocation(Location::Type type, const Location &location) {
     if (location.hasLocation() || location.hasLocationName()) {
         m_locations[type] = location;
     }
 }
 
-void InputLayoutShapeLocationsManager::setLocations(const Locations &locations) {
+void InputLayoutShapeLocationsCreator::setLocations(const Locations &locations) {
     m_locations = locations;
 }
 
-void InputLayoutShapeLocationsManager::setShaderProgram(const ShaderProgramManager &manager) {
+void InputLayoutShapeLocationsCreator::setShaderProgram(const ShaderProgramCreator &creator) {
     setShaderProgramDumpMode(ShaderProgramDumpMode::Dump);
 
-    m_shader = manager;
+    m_shader = creator;
 }
 
-void InputLayoutShapeLocationsManager::setShaderProgramName(const string &name) {
+void InputLayoutShapeLocationsCreator::setShaderProgramName(const string &name) {
     setShaderProgramDumpMode(ShaderProgramDumpMode::Name);
 
     m_shaderName = name;
 }
 
-void InputLayoutShapeLocationsManager::setShaderProgramPath(const string &path) {
+void InputLayoutShapeLocationsCreator::setShaderProgramPath(const string &path) {
     setShaderProgramDumpMode(ShaderProgramDumpMode::Path);
 
     m_shaderPath = path;
 }
 
-void InputLayoutShapeLocationsManager::setShaderProgramDumpMode(ShaderProgramDumpMode mode) {
+void InputLayoutShapeLocationsCreator::setShaderProgramDumpMode(ShaderProgramDumpMode mode) {
     m_shaderDumpMode = mode;
 }
 
-void InputLayoutShapeLocationsManager::setShaderProgramPtr(const ShaderProgramPtr &program) {
+void InputLayoutShapeLocationsCreator::setShaderProgramPtr(const ShaderProgramPtr &program) {
     m_programPtr = program;
 }
 
-const InputLayoutShapeLocationsManager::Locations& InputLayoutShapeLocationsManager::getLocations() const {
+const InputLayoutShapeLocationsCreator::Locations& InputLayoutShapeLocationsCreator::getLocations() const {
     return m_locations;
 }
 
-const ShaderProgramManager& InputLayoutShapeLocationsManager::getShaderProgram() const {
+const ShaderProgramCreator& InputLayoutShapeLocationsCreator::getShaderProgram() const {
     return m_shader;
 }
 
-const string& InputLayoutShapeLocationsManager::getShaderProgramName() const {
+const string& InputLayoutShapeLocationsCreator::getShaderProgramName() const {
     return m_shaderName;
 }
 
-const string& InputLayoutShapeLocationsManager::getShaderProgramPath() const {
+const string& InputLayoutShapeLocationsCreator::getShaderProgramPath() const {
     return m_shaderPath;
 }
 
-InputLayoutShapeLocationsManager::ShaderProgramDumpMode
-InputLayoutShapeLocationsManager::getShaderProgramDumpMode() const {
+InputLayoutShapeLocationsCreator::ShaderProgramDumpMode
+InputLayoutShapeLocationsCreator::getShaderProgramDumpMode() const {
     return m_shaderDumpMode;
 }
 
-const ShaderProgramPtr& InputLayoutShapeLocationsManager::getShaderProgramPtr() const {
+const ShaderProgramPtr& InputLayoutShapeLocationsCreator::getShaderProgramPtr() const {
     return m_programPtr;
 }
 
-InputLayoutShapeLocations InputLayoutShapeLocationsManager::create() {
+InputLayoutShapeLocations InputLayoutShapeLocationsCreator::create() {
     switch (m_shaderDumpMode) {
         case ShaderProgramDumpMode::Name: {
             m_programPtr = ShaderProgram::getByName(m_shaderName);
             break;
         }
         case ShaderProgramDumpMode::Path: {
-            ShaderProgramManager manager;
-            manager.setWorkingDirectory(m_workingDirectory);
-            manager.importFromFile(m_shaderPath);
+            ShaderProgramCreator creator;
+            creator.setWorkingDirectory(m_workingDirectory);
+            creator.importFromFile(m_shaderPath);
 
-            m_programPtr = manager.get();
+            m_programPtr = creator.get();
 
             break;
         }
@@ -178,14 +163,14 @@ InputLayoutShapeLocations InputLayoutShapeLocationsManager::create() {
 
     InputLayoutShapeLocations locations;
 
-    auto loadLocationImpl = [&](int &location, Location::Type type)
+    auto loadLocation = [&](int &location, Location::Type type)
     {
         if (auto it = m_locations.find(type); it != m_locations.end()) {
             auto &data = it->second;
 
             if (const auto &name = data.getLocationName(); !name.empty()) {
                 if (m_programPtr != nullptr) {
-                    m_programPtr->loadUniformLocation(name);
+                    m_programPtr->loadUniformLocation(name); // TODO: uniform?
                     location = m_programPtr->getLocation(name);
                 } else {
                     throw runtime_error("Can't load location from null ShaderProgram");
@@ -196,24 +181,20 @@ InputLayoutShapeLocations InputLayoutShapeLocationsManager::create() {
         }
     };
 
-#define loadLocation(name, type) loadLocationImpl(locations.name, Location::Type::type)
-
-    loadLocation(position, Position);
-    loadLocation(texCoord, TexCoord);
-    loadLocation(normal, Normal);
-    loadLocation(tangent, Tangent);
-    loadLocation(bitangent, Bitangent);
-    loadLocation(boneWeights, BoneWeights);
-    loadLocation(boneIds, BoneIds);
-
-#undef loadLocation
+    loadLocation(locations.position, Location::Type::Position);
+    loadLocation(locations.texCoord, Location::Type::TexCoord);
+    loadLocation(locations.normal, Location::Type::Normal);
+    loadLocation(locations.tangent, Location::Type::Tangent);
+    loadLocation(locations.bitangent, Location::Type::Bitangent);
+    loadLocation(locations.boneWeights, Location::Type::BoneWeights);
+    loadLocation(locations.boneIds, Location::Type::BoneIds);
 
     return locations;
 }
 
-#define type_str(name) if (type == InputLayoutShapeLocationsManager::Location::Type::name) return Config::name
+#define type_str(name) if (type == InputLayoutShapeLocationsCreator::Location::Type::name) return Config::name
 
-inline auto getLocationKey(InputLayoutShapeLocationsManager::Location::Type type) {
+inline auto getLocationKey(InputLayoutShapeLocationsCreator::Location::Type type) {
     type_str(Position);
     type_str(TexCoord);
     type_str(Normal);
@@ -227,7 +208,7 @@ inline auto getLocationKey(InputLayoutShapeLocationsManager::Location::Type type
 
 #undef type_str
 
-void InputLayoutShapeLocationsManager::import(const JsonHelper &jsonHelper) {
+void InputLayoutShapeLocationsCreator::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -269,17 +250,17 @@ void InputLayoutShapeLocationsManager::import(const JsonHelper &jsonHelper) {
             m_shaderPath = program[Path];
             m_shaderDumpMode = ShaderProgramDumpMode::Path;
         } else if (program.contains(Dump)) {
-            ShaderProgramManager manager;
-            manager.setWorkingDirectory(m_workingDirectory);
-            manager.import(program[Dump]);
+            ShaderProgramCreator creator;
+            creator.setWorkingDirectory(m_workingDirectory);
+            creator.import(program[Dump]);
 
-            m_shader = manager;
+            m_shader = creator;
             m_shaderDumpMode = ShaderProgramDumpMode::Dump;
         }
     }
 }
 
-JsonHelper InputLayoutShapeLocationsManager::dump() {
+JsonHelper InputLayoutShapeLocationsCreator::dump() {
     using namespace Config;
 
     json config;

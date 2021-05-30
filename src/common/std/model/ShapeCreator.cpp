@@ -1,5 +1,5 @@
 #define GLM_FORCE_CTOR_INIT
-#include <algine/std/model/ShapeManager.h>
+#include <algine/std/model/ShapeCreator.h>
 
 #include <algine/std/animation/BoneInfo.h>
 
@@ -32,164 +32,164 @@ constexpr uint BonesPerVertex = 4;
 constant(ClassName, "Shape");
 }
 
-constant(TAG, "Algine ShapeManager");
+constant(TAG, "Algine ShapeCreator");
 
-ShapeManager::ShapeManager()
+ShapeCreator::ShapeCreator()
     : m_className(Default::ClassName),
       m_amtlDumpMode(AMTLDumpMode::None),
       m_bonesPerVertex(Default::BonesPerVertex) {}
 
-void ShapeManager::addParam(Param param) {
+void ShapeCreator::addParam(Param param) {
     m_params.emplace_back(param);
 }
 
-void ShapeManager::addParams(const vector<Param> &params) {
+void ShapeCreator::addParams(const vector<Param> &params) {
     for (auto param : params) {
         m_params.emplace_back(param);
     }
 }
 
-void ShapeManager::setParams(const vector<Param> &params) {
+void ShapeCreator::setParams(const vector<Param> &params) {
     m_params = params;
 }
 
-void ShapeManager::addInputLayoutLocations(const InputLayoutShapeLocationsManager &locations) {
+void ShapeCreator::addInputLayoutLocations(const InputLayoutShapeLocationsCreator &locations) {
     m_locations.emplace_back(locations);
 }
 
-void ShapeManager::setInputLayoutLocations(const vector<InputLayoutShapeLocationsManager> &locations) {
+void ShapeCreator::setInputLayoutLocations(const vector<InputLayoutShapeLocationsCreator> &locations) {
     m_locations = locations;
 }
 
-void ShapeManager::addInputLayoutLocationsPath(const string &path) {
+void ShapeCreator::addInputLayoutLocationsPath(const string &path) {
     m_locationsPaths.emplace_back(path);
 }
 
-void ShapeManager::setInputLayoutLocationsPaths(const vector<string> &paths) {
+void ShapeCreator::setInputLayoutLocationsPaths(const vector<string> &paths) {
     m_locationsPaths = paths;
 }
 
-void ShapeManager::setModelPath(const string &path) {
+void ShapeCreator::setModelPath(const string &path) {
     m_modelPath = path;
 }
 
-void ShapeManager::setAMTLPath(const string &path) {
+void ShapeCreator::setAMTLPath(const string &path) {
     m_amtlPath = path;
 }
 
-void ShapeManager::setAMTL(const AMTLManager &amtlManager) {
+void ShapeCreator::setAMTL(const AMTLManager &amtlManager) {
     m_amtlManager = amtlManager;
 }
 
-void ShapeManager::setBonesPerVertex(uint bonesPerVertex) {
+void ShapeCreator::setBonesPerVertex(uint bonesPerVertex) {
     m_bonesPerVertex = bonesPerVertex;
 }
 
-void ShapeManager::setClassName(const string &name) {
+void ShapeCreator::setClassName(const string &name) {
     m_className = name;
 }
 
-const vector<ShapeManager::Param>& ShapeManager::getParams() const {
+const vector<ShapeCreator::Param>& ShapeCreator::getParams() const {
     return m_params;
 }
 
-const vector<InputLayoutShapeLocationsManager>& ShapeManager::getInputLayoutLocations() const {
+const vector<InputLayoutShapeLocationsCreator>& ShapeCreator::getInputLayoutLocations() const {
     return m_locations;
 }
 
-const vector<string>& ShapeManager::getInputLayoutLocationsPaths() const {
+const vector<string>& ShapeCreator::getInputLayoutLocationsPaths() const {
     return m_locationsPaths;
 }
 
-const string& ShapeManager::getModelPath() const {
+const string& ShapeCreator::getModelPath() const {
     return m_modelPath;
 }
 
-const string& ShapeManager::getAMTLPath() const {
+const string& ShapeCreator::getAMTLPath() const {
     return m_amtlPath;
 }
 
-const AMTLManager& ShapeManager::getAMTL() const {
+const AMTLManager& ShapeCreator::getAMTL() const {
     return m_amtlManager;
 }
 
-uint ShapeManager::getBonesPerVertex() const {
+uint ShapeCreator::getBonesPerVertex() const {
     return m_bonesPerVertex;
 }
 
-const string& ShapeManager::getClassName() const {
+const string& ShapeCreator::getClassName() const {
     return m_className;
 }
 
-const vector<float>& ShapeManager::getVertices() const {
+const vector<float>& ShapeCreator::getVertices() const {
     return m_vertices;
 }
 
-void ShapeManager::setVertices(const vector<float> &vertices) {
+void ShapeCreator::setVertices(const vector<float> &vertices) {
     m_vertices = vertices;
 }
 
-const vector<float>& ShapeManager::getNormals() const {
+const vector<float>& ShapeCreator::getNormals() const {
     return m_normals;
 }
 
-void ShapeManager::setNormals(const vector<float> &normals) {
+void ShapeCreator::setNormals(const vector<float> &normals) {
     m_normals = normals;
 }
 
-const vector<float>& ShapeManager::getTexCoords() const {
+const vector<float>& ShapeCreator::getTexCoords() const {
     return m_texCoords;
 }
 
-void ShapeManager::setTexCoords(const vector<float> &texCoords) {
+void ShapeCreator::setTexCoords(const vector<float> &texCoords) {
     m_texCoords = texCoords;
 }
 
-const vector<float>& ShapeManager::getTangents() const {
+const vector<float>& ShapeCreator::getTangents() const {
     return m_tangents;
 }
 
-void ShapeManager::setTangents(const vector<float> &tangents) {
+void ShapeCreator::setTangents(const vector<float> &tangents) {
     m_tangents = tangents;
 }
 
-const vector<float>& ShapeManager::getBitangents() const {
+const vector<float>& ShapeCreator::getBitangents() const {
     return m_bitangents;
 }
 
-void ShapeManager::setBitangents(const vector<float> &bitangents) {
+void ShapeCreator::setBitangents(const vector<float> &bitangents) {
     m_bitangents = bitangents;
 }
 
-const vector<float>& ShapeManager::getBoneWeights() const {
+const vector<float>& ShapeCreator::getBoneWeights() const {
     return m_boneWeights;
 }
 
-void ShapeManager::setBoneWeights(const vector<float> &boneWeights) {
+void ShapeCreator::setBoneWeights(const vector<float> &boneWeights) {
     m_boneWeights = boneWeights;
 }
 
-const vector<uint>& ShapeManager::getBoneIds() const {
+const vector<uint>& ShapeCreator::getBoneIds() const {
     return m_boneIds;
 }
 
-void ShapeManager::setBoneIds(const vector<uint> &boneIds) {
+void ShapeCreator::setBoneIds(const vector<uint> &boneIds) {
     m_boneIds = boneIds;
 }
 
-const vector<uint>& ShapeManager::getIndices() const {
+const vector<uint>& ShapeCreator::getIndices() const {
     return m_indices;
 }
 
-void ShapeManager::setIndices(const vector<uint> &indices) {
+void ShapeCreator::setIndices(const vector<uint> &indices) {
     m_indices = indices;
 }
 
-ShapePtr ShapeManager::get() {
+ShapePtr ShapeCreator::get() {
     return internal::PublicObjectTools::getPtr<ShapePtr>(this);
 }
 
-ShapePtr ShapeManager::create() {
+ShapePtr ShapeCreator::create() {
     m_shape.reset(TypeRegistry::create<Shape>(m_className));
 
     if (!m_modelPath.empty()) {
@@ -203,15 +203,15 @@ ShapePtr ShapeManager::create() {
     return m_shape;
 }
 
-void ShapeManager::setAMTLDumpMode(AMTLDumpMode mode) {
+void ShapeCreator::setAMTLDumpMode(AMTLDumpMode mode) {
     m_amtlDumpMode = mode;
 }
 
-ShapeManager::AMTLDumpMode ShapeManager::getAMTLDumpMode() const {
+ShapeCreator::AMTLDumpMode ShapeCreator::getAMTLDumpMode() const {
     return m_amtlDumpMode;
 }
 
-void ShapeManager::import(const JsonHelper &jsonHelper) {
+void ShapeCreator::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -231,7 +231,7 @@ void ShapeManager::import(const JsonHelper &jsonHelper) {
     if (config.contains(InputLayoutLocations)) {
         for (const auto & item : config[InputLayoutLocations]) {
             if (item.is_object()) {
-                InputLayoutShapeLocationsManager locations;
+                InputLayoutShapeLocationsCreator locations;
                 locations.setWorkingDirectory(m_workingDirectory);
                 locations.import(item);
                 m_locations.emplace_back(locations);
@@ -262,10 +262,10 @@ void ShapeManager::import(const JsonHelper &jsonHelper) {
     // load bones per vertex
     m_bonesPerVertex = jsonHelper.readValue<uint>(BonesPerVertex, Default::BonesPerVertex);
 
-    ManagerBase::import(jsonHelper);
+    Creator::import(jsonHelper);
 }
 
-JsonHelper ShapeManager::dump() {
+JsonHelper ShapeCreator::dump() {
     using namespace Config;
 
     json config;
@@ -305,7 +305,7 @@ JsonHelper ShapeManager::dump() {
         config[AMTL][BonesPerVertex] = m_bonesPerVertex;
 
     JsonHelper result(config);
-    result.append(ManagerBase::dump());
+    result.append(Creator::dump());
 
     return result;
 }
@@ -339,8 +339,8 @@ constexpr int PARAMS_TYPE_ASSIMP = 0;
 constexpr int PARAMS_TYPE_ALGINE = 1;
 
 template<int type>
-inline auto getParams(const vector<ShapeManager::Param> &params) {
-    using Param = ShapeManager::Param;
+inline auto getParams(const vector<ShapeCreator::Param> &params) {
+    using Param = ShapeCreator::Param;
 
     map<Param, uint> assimpParams = {
         {Param::Triangulate, aiProcess_Triangulate},
@@ -370,7 +370,7 @@ inline auto getParams(const vector<ShapeManager::Param> &params) {
     }
 }
 
-void ShapeManager::loadFile() {
+void ShapeCreator::loadFile() {
     if (m_shape == nullptr) {
         m_shape.reset(TypeRegistry::create<Shape>(m_className));
     }
@@ -412,7 +412,7 @@ void ShapeManager::loadFile() {
     }
 }
 
-void ShapeManager::loadShape() {
+void ShapeCreator::loadShape() {
     if (m_shape == nullptr) {
         m_shape.reset(TypeRegistry::create<Shape>(m_className));
     }
@@ -449,7 +449,7 @@ void ShapeManager::loadShape() {
     }
 
     for (auto &item : m_locationsPaths) {
-        InputLayoutShapeLocationsManager locations;
+        InputLayoutShapeLocationsCreator locations;
         locations.setWorkingDirectory(m_workingDirectory);
         locations.importFromFile(item);
 
@@ -457,11 +457,11 @@ void ShapeManager::loadShape() {
     }
 }
 
-ShapePtr& ShapeManager::getCurrentShape() {
+ShapePtr& ShapeCreator::getCurrentShape() {
     return m_shape;
 }
 
-void ShapeManager::loadBones(const aiMesh *aimesh) {
+void ShapeCreator::loadBones(const aiMesh *aimesh) {
     vector<BoneInfo> binfos; // bone infos
     binfos.reserve(aimesh->mNumVertices); // allocating space
 
@@ -517,7 +517,7 @@ void ShapeManager::loadBones(const aiMesh *aimesh) {
     }
 }
 
-void ShapeManager::processNode(const aiNode *node, const aiScene *scene) {
+void ShapeCreator::processNode(const aiNode *node, const aiScene *scene) {
     // обработать все полигональные сетки в узле (если есть)
     for (size_t i = 0; i < node->mNumMeshes; i++) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -535,7 +535,7 @@ void ShapeManager::processNode(const aiNode *node, const aiScene *scene) {
     }
 }
 
-void ShapeManager::processMesh(const aiMesh *aimesh, const aiScene *scene) {
+void ShapeCreator::processMesh(const aiMesh *aimesh, const aiScene *scene) {
     Mesh mesh;
     mesh.start = m_indices.size();
     uint verticesAtBeginning = m_vertices.size() / 3;
@@ -671,17 +671,17 @@ void ShapeManager::processMesh(const aiMesh *aimesh, const aiScene *scene) {
                 }
             };
 
-            Texture2DManager manager;
-            manager.setWorkingDirectory(Path(Path::join(m_workingDirectory, m_modelPath)).getParentDirectory().toString());
-            manager.setPath(path.C_Str());
-            manager.setParams({
+            Texture2DCreator creator;
+            creator.setWorkingDirectory(Path(Path::join(m_workingDirectory, m_modelPath)).getParentDirectory().toString());
+            creator.setPath(path.C_Str());
+            creator.setParams({
                 {Texture::WrapU, getMapMode(mapModeU)},
                 {Texture::WrapV, getMapMode(mapModeV)},
                 {Texture::MinFilter, Texture::Linear},
                 {Texture::MagFilter, Texture::Linear}
             });
 
-            getTexturePtr() = manager.create();
+            getTexturePtr() = creator.create();
         }
     };
 
@@ -726,7 +726,7 @@ inline BufferType* createBuffer(const vector<DataType> &data) {
     return nullptr;
 }
 
-void ShapeManager::genBuffers() {
+void ShapeCreator::genBuffers() {
     m_shape->m_vertices = createBuffer<ArrayBuffer>(m_vertices);
     m_shape->m_normals = createBuffer<ArrayBuffer>(m_normals);
     m_shape->m_texCoords = createBuffer<ArrayBuffer>(m_texCoords);

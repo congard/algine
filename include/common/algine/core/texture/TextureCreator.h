@@ -1,13 +1,13 @@
-#ifndef ALGINE_TEXTUREMANAGER_H
-#define ALGINE_TEXTUREMANAGER_H
+#ifndef ALGINE_TEXTURECREATOR_H
+#define ALGINE_TEXTURECREATOR_H
 
-#include <algine/core/ImageManagerBase.h>
+#include <algine/core/ImageCreator.h>
 #include <algine/core/DataType.h>
 
 #include <map>
 
 namespace algine {
-class TextureManager: public ImageManagerBase {
+class TextureCreator: public ImageCreator {
 public:
     enum class Type {
         Texture2D,
@@ -15,7 +15,7 @@ public:
     };
 
 public:
-    TextureManager();
+    TextureCreator();
 
     void setType(Type type);
     void setDataType(DataType dataType);
@@ -45,4 +45,4 @@ protected:
 };
 }
 
-#endif //ALGINE_TEXTUREMANAGER_H
+#endif //ALGINE_TEXTURECREATOR_H

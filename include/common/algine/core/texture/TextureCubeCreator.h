@@ -1,14 +1,14 @@
-#ifndef ALGINE_TEXTURECUBEMANAGER_H
-#define ALGINE_TEXTURECUBEMANAGER_H
+#ifndef ALGINE_TEXTURECUBECREATOR_H
+#define ALGINE_TEXTURECUBECREATOR_H
 
-#include <algine/core/texture/TextureManager.h>
+#include <algine/core/texture/TextureCreator.h>
 #include <algine/core/texture/TextureCubePtr.h>
 #include <algine/core/texture/TextureCube.h>
 
 namespace algine {
-class TextureCubeManager: public TextureManager {
+class TextureCubeCreator: public TextureCreator {
 public:
-    TextureCubeManager();
+    TextureCubeCreator();
 
     void setPath(const std::string &path, TextureCube::Face face);
     std::string getPath(TextureCube::Face face) const;
@@ -27,4 +27,4 @@ private:
 };
 }
 
-#endif //ALGINE_TEXTURECUBEMANAGER_H
+#endif //ALGINE_TEXTURECUBECREATOR_H

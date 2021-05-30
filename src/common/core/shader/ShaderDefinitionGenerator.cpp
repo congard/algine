@@ -1,4 +1,4 @@
-#include <algine/core/shader/ShaderDefinitionManager.h>
+#include <algine/core/shader/ShaderDefinitionGenerator.h>
 
 #include <algine/core/JsonHelper.h>
 
@@ -13,7 +13,7 @@ constant(Params, "params");
 }
 
 namespace algine {
-inline int getMacroIndexImpl(const vector<ShaderDefinitionManager::Definition> &definitions,
+inline int getMacroIndexImpl(const vector<ShaderDefinitionGenerator::Definition> &definitions,
                              const std::string &macro)
 {
     for (int i = 0; i < definitions.size(); i++) {
@@ -27,7 +27,7 @@ inline int getMacroIndexImpl(const vector<ShaderDefinitionManager::Definition> &
 
 #define getMacroIndex(macro) getMacroIndexImpl(m_definitions, macro)
 
-void ShaderDefinitionManager::define(const string &macro, const string &value) {
+void ShaderDefinitionGenerator::define(const string &macro, const string &value) {
     int index = getMacroIndex(macro);
 
     if (index == -1) {
@@ -37,11 +37,11 @@ void ShaderDefinitionManager::define(const string &macro, const string &value) {
     }
 }
 
-void ShaderDefinitionManager::define(const string &macro, size value) {
+void ShaderDefinitionGenerator::define(const string &macro, size value) {
     define(macro, to_string(value));
 }
 
-void ShaderDefinitionManager::removeDefinition(const string &macro) {
+void ShaderDefinitionGenerator::removeDefinition(const string &macro) {
     int index = getMacroIndex(macro);
 
     if (index != -1) {
@@ -49,25 +49,25 @@ void ShaderDefinitionManager::removeDefinition(const string &macro) {
     }
 }
 
-void ShaderDefinitionManager::resetDefinitions() {
+void ShaderDefinitionGenerator::resetDefinitions() {
     m_definitions.clear();
 }
 
-void ShaderDefinitionManager::setDefinitions(const vector<Definition> &definitions) {
+void ShaderDefinitionGenerator::setDefinitions(const vector<Definition> &definitions) {
     m_definitions = definitions;
 }
 
-void ShaderDefinitionManager::appendDefinitions(const vector<Definition> &definitions) {
+void ShaderDefinitionGenerator::appendDefinitions(const vector<Definition> &definitions) {
     for (const auto & def : definitions) {
         define(def.first, def.second);
     }
 }
 
-const vector<ShaderDefinitionManager::Definition>& ShaderDefinitionManager::getDefinitions() const {
+const vector<ShaderDefinitionGenerator::Definition>& ShaderDefinitionGenerator::getDefinitions() const {
     return m_definitions;
 }
 
-void ShaderDefinitionManager::import(const JsonHelper &jsonHelper) {
+void ShaderDefinitionGenerator::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -91,7 +91,7 @@ void ShaderDefinitionManager::import(const JsonHelper &jsonHelper) {
     }
 }
 
-JsonHelper ShaderDefinitionManager::dump() {
+JsonHelper ShaderDefinitionGenerator::dump() {
     using namespace Config;
 
     json config;

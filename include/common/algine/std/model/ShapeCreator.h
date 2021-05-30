@@ -1,18 +1,18 @@
-#ifndef ALGINE_SHAPEMANAGER_H
-#define ALGINE_SHAPEMANAGER_H
+#ifndef ALGINE_SHAPECREATOR_H
+#define ALGINE_SHAPECREATOR_H
 
-#include <algine/std/model/InputLayoutShapeLocationsManager.h>
+#include <algine/std/model/InputLayoutShapeLocationsCreator.h>
 #include <algine/std/model/ShapePtr.h>
 #include <algine/std/model/Shape.h>
 #include <algine/std/AMTLManager.h>
 
-#include <algine/core/ManagerBase.h>
+#include <algine/core/Creator.h>
 
 struct aiMesh;
 struct aiScene;
 
 namespace algine {
-class ShapeManager: public ManagerBase {
+class ShapeCreator: public Creator {
 public:
     enum class Param {
         Triangulate,
@@ -30,13 +30,13 @@ public:
     };
 
 public:
-    ShapeManager();
+    ShapeCreator();
 
     void addParam(Param param);
     void addParams(const std::vector<Param> &params);
     void setParams(const std::vector<Param> &params);
-    void addInputLayoutLocations(const InputLayoutShapeLocationsManager &locations);
-    void setInputLayoutLocations(const std::vector<InputLayoutShapeLocationsManager> &locations);
+    void addInputLayoutLocations(const InputLayoutShapeLocationsCreator &locations);
+    void setInputLayoutLocations(const std::vector<InputLayoutShapeLocationsCreator> &locations);
     void addInputLayoutLocationsPath(const std::string &path);
     void setInputLayoutLocationsPaths(const std::vector<std::string> &paths);
     void setModelPath(const std::string &path);
@@ -46,7 +46,7 @@ public:
     void setClassName(const std::string &name);
 
     const std::vector<Param>& getParams() const;
-    const std::vector<InputLayoutShapeLocationsManager>& getInputLayoutLocations() const;
+    const std::vector<InputLayoutShapeLocationsCreator>& getInputLayoutLocations() const;
     const std::vector<std::string>& getInputLayoutLocationsPaths() const;
     const std::string& getModelPath() const;
     const std::string& getAMTLPath() const;
@@ -108,7 +108,7 @@ private:
 
 private:
     std::vector<Param> m_params;
-    std::vector<InputLayoutShapeLocationsManager> m_locations;
+    std::vector<InputLayoutShapeLocationsCreator> m_locations;
     std::vector<std::string> m_locationsPaths;
     std::string m_modelPath, m_amtlPath;
 
@@ -120,4 +120,4 @@ private:
 };
 }
 
-#endif //ALGINE_SHAPEMANAGER_H
+#endif //ALGINE_SHAPECREATOR_H

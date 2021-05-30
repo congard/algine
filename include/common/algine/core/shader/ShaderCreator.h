@@ -1,10 +1,10 @@
-#ifndef ALGINE_SHADERMANAGER_H
-#define ALGINE_SHADERMANAGER_H
+#ifndef ALGINE_SHADERCREATOR_H
+#define ALGINE_SHADERCREATOR_H
 
-#include <algine/core/shader/ShaderDefinitionManager.h>
+#include <algine/core/shader/ShaderDefinitionGenerator.h>
 #include <algine/core/shader/ShaderPtr.h>
 #include <algine/core/shader/Shader.h>
-#include <algine/core/ManagerBase.h>
+#include <algine/core/Creator.h>
 #include <algine/types.h>
 
 #include <memory>
@@ -15,10 +15,10 @@ class Path;
 }
 
 namespace algine {
-class ShaderManager: public ShaderDefinitionManager, public ManagerBase {
+class ShaderCreator: public ShaderDefinitionGenerator, public Creator {
 public:
-    ShaderManager();
-    explicit ShaderManager(uint type);
+    ShaderCreator();
+    explicit ShaderCreator(uint type);
 
     void setType(uint type);
     uint getType() const;
@@ -75,4 +75,4 @@ private:
 };
 }
 
-#endif //ALGINE_SHADERMANAGER_H
+#endif //ALGINE_SHADERCREATOR_H

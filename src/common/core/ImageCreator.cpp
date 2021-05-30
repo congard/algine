@@ -1,4 +1,4 @@
-#include <algine/core/ImageManagerBase.h>
+#include <algine/core/ImageCreator.h>
 
 #include <algine/core/JsonHelper.h>
 
@@ -8,39 +8,36 @@ using namespace std;
 using namespace nlohmann;
 
 namespace algine {
-ImageManagerBase::ImageManagerBase()
+ImageCreator::ImageCreator()
     : m_format(),
       m_width(),
-      m_height()
-{
-    // see initializer list above
-}
+      m_height() {}
 
-void ImageManagerBase::setFormat(uint format) {
+void ImageCreator::setFormat(uint format) {
     m_format = format;
 }
 
-void ImageManagerBase::setWidth(uint width) {
+void ImageCreator::setWidth(uint width) {
     m_width = width;
 }
 
-void ImageManagerBase::setHeight(uint height) {
+void ImageCreator::setHeight(uint height) {
     m_height = height;
 }
 
-uint ImageManagerBase::getFormat() const {
+uint ImageCreator::getFormat() const {
     return m_format;
 }
 
-uint ImageManagerBase::getWidth() const {
+uint ImageCreator::getWidth() const {
     return m_width;
 }
 
-uint ImageManagerBase::getHeight() const {
+uint ImageCreator::getHeight() const {
     return m_height;
 }
 
-void ImageManagerBase::import(const JsonHelper &jsonHelper) {
+void ImageCreator::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -53,10 +50,10 @@ void ImageManagerBase::import(const JsonHelper &jsonHelper) {
     if (config.contains(Format))
         m_format = stringToFormat(config[Format]);
 
-    ManagerBase::import(jsonHelper);
+    Creator::import(jsonHelper);
 }
 
-JsonHelper ImageManagerBase::dump() {
+JsonHelper ImageCreator::dump() {
     using namespace Config;
 
     json config;
@@ -72,7 +69,7 @@ JsonHelper ImageManagerBase::dump() {
     config[Format] = formatToString(m_format);
 
     JsonHelper result(config);
-    result.append(ManagerBase::dump());
+    result.append(Creator::dump());
 
     return result;
 }

@@ -1,16 +1,16 @@
-#ifndef ALGINE_SHADERPROGRAMMANAGER_H
-#define ALGINE_SHADERPROGRAMMANAGER_H
+#ifndef ALGINE_SHADERPROGRAMCREATOR_H
+#define ALGINE_SHADERPROGRAMCREATOR_H
 
-#include <algine/core/shader/ShaderManager.h>
+#include <algine/core/shader/ShaderCreator.h>
 #include <algine/core/shader/ShaderProgram.h>
-#include <algine/core/ManagerBase.h>
+#include <algine/core/Creator.h>
 
 namespace algine {
-class ShaderProgramManager: public ShaderDefinitionManager, public ManagerBase {
+class ShaderProgramCreator: public ShaderDefinitionGenerator, public Creator {
 public:
-    void setShaders(const std::vector<ShaderManager> &shaders);
-    void addShader(const ShaderManager &manager);
-    const std::vector<ShaderManager>& getShaders() const;
+    void setShaders(const std::vector<ShaderCreator> &shaders);
+    void addShader(const ShaderCreator &creator);
+    const std::vector<ShaderCreator>& getShaders() const;
 
     void setShaderNames(const std::vector<std::string> &names);
     void addShaderName(const std::string &name);
@@ -29,9 +29,9 @@ public:
     void importFromFile(const std::string &path) override;
 
 private:
-    std::vector<ShaderManager> m_shaders;
+    std::vector<ShaderCreator> m_shaders;
     std::vector<std::string> m_shaderNames, m_shaderPaths;
 };
 }
 
-#endif //ALGINE_SHADERPROGRAMMANAGER_H
+#endif //ALGINE_SHADERPROGRAMCREATOR_H

@@ -1,14 +1,14 @@
-#ifndef ALGINE_IMAGEMANAGERBASE_H
-#define ALGINE_IMAGEMANAGERBASE_H
+#ifndef ALGINE_IMAGECREATOR_H
+#define ALGINE_IMAGECREATOR_H
 
-#include <algine/core/ManagerBase.h>
+#include <algine/core/Creator.h>
 
 #include <algine/types.h>
 
 namespace algine {
-class ImageManagerBase: public ManagerBase {
+class ImageCreator: public Creator {
 public:
-    ImageManagerBase();
+    ImageCreator();
 
     void setFormat(uint format);
     void setWidth(uint width);
@@ -27,4 +27,4 @@ protected:
 };
 }
 
-#endif //ALGINE_IMAGEMANAGERBASE_H
+#endif //ALGINE_IMAGECREATOR_H

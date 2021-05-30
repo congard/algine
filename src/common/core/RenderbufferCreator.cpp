@@ -1,4 +1,4 @@
-#include <algine/core/RenderbufferManager.h>
+#include <algine/core/RenderbufferCreator.h>
 
 #include <algine/core/PtrMaker.h>
 
@@ -7,11 +7,11 @@
 using namespace algine::internal;
 
 namespace algine {
-RenderbufferPtr RenderbufferManager::get() {
+RenderbufferPtr RenderbufferCreator::get() {
     return PublicObjectTools::getPtr<RenderbufferPtr>(this);
 }
 
-RenderbufferPtr RenderbufferManager::create() {
+RenderbufferPtr RenderbufferCreator::create() {
     RenderbufferPtr renderbuffer = PtrMaker::make();
     renderbuffer->setName(m_name);
     renderbuffer->setFormat(m_format);

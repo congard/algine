@@ -76,16 +76,16 @@ set(ALGINE_CORE_SOURCES
         src/common/core/Surface.cpp include/common/algine/core/Surface.h
         src/common/core/Content.cpp include/common/algine/core/Content.h
         src/common/core/Object.cpp include/common/algine/core/Object.h
-        src/common/core/ManagerBase.cpp include/common/algine/core/ManagerBase.h
-        src/common/core/ImageManagerBase.cpp include/common/algine/core/ImageManagerBase.h
+        src/common/core/Creator.cpp include/common/algine/core/Creator.h
+        src/common/core/ImageCreator.cpp include/common/algine/core/ImageCreator.h
         src/common/core/transfer/FileTransferable.cpp include/common/algine/core/transfer/FileTransferable.h
         src/common/core/OutputList.cpp include/common/algine/core/OutputList.h
-        src/common/core/OutputListManager.cpp include/common/algine/core/OutputListManager.h
+        src/common/core/OutputListCreator.cpp include/common/algine/core/OutputListCreator.h
         src/common/core/FramebufferConfigTools.h
         src/common/core/Framebuffer.cpp include/common/algine/core/Framebuffer.h
-        src/common/core/FramebufferManager.cpp include/common/algine/core/FramebufferManager.h
+        src/common/core/FramebufferCreator.cpp include/common/algine/core/FramebufferCreator.h
         src/common/core/Renderbuffer.cpp include/common/algine/core/Renderbuffer.h
-        src/common/core/RenderbufferManager.cpp include/common/algine/core/RenderbufferManager.h
+        src/common/core/RenderbufferCreator.cpp include/common/algine/core/RenderbufferCreator.h
         src/common/core/buffers/Buffer.cpp include/common/algine/core/buffers/Buffer.h
         src/common/core/buffers/ArrayBuffer.cpp include/common/algine/core/buffers/ArrayBuffer.h
         src/common/core/buffers/IndexBuffer.cpp include/common/algine/core/buffers/IndexBuffer.h
@@ -100,14 +100,14 @@ set(ALGINE_CORE_SOURCES
         src/common/core/texture/Texture2D.cpp include/common/algine/core/texture/Texture2D.h
         src/common/core/texture/TextureCube.cpp include/common/algine/core/texture/TextureCube.h
         src/common/core/texture/TextureTools.cpp include/common/algine/core/texture/TextureTools.h
-        src/common/core/texture/TextureManager.cpp include/common/algine/core/texture/TextureManager.h
-        src/common/core/texture/Texture2DManager.cpp include/common/algine/core/texture/Texture2DManager.h
-        src/common/core/texture/TextureCubeManager.cpp include/common/algine/core/texture/TextureCubeManager.h
+        src/common/core/texture/TextureCreator.cpp include/common/algine/core/texture/TextureCreator.h
+        src/common/core/texture/Texture2DCreator.cpp include/common/algine/core/texture/Texture2DCreator.h
+        src/common/core/texture/TextureCubeCreator.cpp include/common/algine/core/texture/TextureCubeCreator.h
         src/common/core/shader/ShaderTools.cpp include/common/algine/core/shader/ShaderTools.h
         src/common/core/shader/Shader.cpp include/common/algine/core/shader/Shader.h
-        src/common/core/shader/ShaderManager.cpp include/common/algine/core/shader/ShaderManager.h
-        src/common/core/shader/ShaderDefinitionManager.cpp include/common/algine/core/shader/ShaderDefinitionManager.h
-        src/common/core/shader/ShaderProgramManager.cpp include/common/algine/core/shader/ShaderProgramManager.h
+        src/common/core/shader/ShaderCreator.cpp include/common/algine/core/shader/ShaderCreator.h
+        src/common/core/shader/ShaderDefinitionGenerator.cpp include/common/algine/core/shader/ShaderDefinitionGenerator.h
+        src/common/core/shader/ShaderProgramCreator.cpp include/common/algine/core/shader/ShaderProgramCreator.h
         src/common/core/shader/ShaderProgram.cpp include/common/algine/core/shader/ShaderProgram.h
         src/common/core/shader/BaseUniformBlock.cpp include/common/algine/core/shader/BaseUniformBlock.h
         src/common/core/shader/UniformBlock.cpp include/common/algine/core/shader/UniformBlock.h
@@ -145,9 +145,9 @@ set(ALGINE_STD_SOURCES
         src/common/std/model/Model.cpp include/common/algine/std/model/Model.h
         src/common/std/model/ShapeConfigTools.h
         src/common/std/model/Shape.cpp include/common/algine/std/model/Shape.h
-        src/common/std/model/ShapeManager.cpp include/common/algine/std/model/ShapeManager.h
-        src/common/std/model/InputLayoutShapeLocationsManager.cpp include/common/algine/std/model/InputLayoutShapeLocationsManager.h
-        src/common/std/model/ModelManager.cpp include/common/algine/std/model/ModelManager.h
+        src/common/std/model/ShapeCreator.cpp include/common/algine/std/model/ShapeCreator.h
+        src/common/std/model/InputLayoutShapeLocationsCreator.cpp include/common/algine/std/model/InputLayoutShapeLocationsCreator.h
+        src/common/std/model/ModelCreator.cpp include/common/algine/std/model/ModelCreator.h
         src/common/std/Node.cpp include/common/algine/std/Node.h
         src/common/std/lighting/LightingManager.cpp include/common/algine/std/lighting/LightingManager.h
         src/common/std/lighting/Light.cpp include/common/algine/std/lighting/Light.h

@@ -1,4 +1,4 @@
-#include <algine/core/ManagerBase.h>
+#include <algine/core/Creator.h>
 
 #include <algine/core/JsonHelper.h>
 
@@ -18,29 +18,26 @@ constant(Public, "public");
 }
 
 namespace algine {
-ManagerBase::ManagerBase()
-    : m_access(Access::Private)
-{
-    // see initializer list above
-}
+Creator::Creator()
+    : m_access(Access::Private) {}
 
-void ManagerBase::setName(const string &name) {
+void Creator::setName(const string &name) {
     m_name = name;
 }
 
-void ManagerBase::setAccess(Access access) {
+void Creator::setAccess(Access access) {
     m_access = access;
 }
 
-const string& ManagerBase::getName() const {
+const string& Creator::getName() const {
     return m_name;
 }
 
-ManagerBase::Access ManagerBase::getAccess() const {
+Creator::Access Creator::getAccess() const {
     return m_access;
 }
 
-void ManagerBase::import(const JsonHelper &jsonHelper) {
+void Creator::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -58,7 +55,7 @@ void ManagerBase::import(const JsonHelper &jsonHelper) {
     }
 }
 
-JsonHelper ManagerBase::dump() {
+JsonHelper Creator::dump() {
     using namespace Config;
 
     json config;

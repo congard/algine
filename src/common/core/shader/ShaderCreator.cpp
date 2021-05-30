@@ -1,4 +1,4 @@
-#include <algine/core/shader/ShaderManager.h>
+#include <algine/core/shader/ShaderCreator.h>
 
 #include <algine/core/JsonHelper.h>
 #include <algine/core/Engine.h>
@@ -38,7 +38,7 @@ constant(Path, "path");
 constant(IncludePaths, "includePaths");
 }
 
-constant(TAG, "Algine ShaderManager");
+constant(TAG, "Algine ShaderCreator");
 
 namespace algine {
 template<typename T>
@@ -55,65 +55,65 @@ inline void removeElement(vector<T> &v, const T &e) {
     }
 }
 
-vector<string> ShaderManager::m_globalIncludePaths;
+vector<string> ShaderCreator::m_globalIncludePaths;
 
-ShaderManager::ShaderManager()
+ShaderCreator::ShaderCreator()
     : m_type(),
       m_dumperUseSources(false) {}
 
-ShaderManager::ShaderManager(uint type)
+ShaderCreator::ShaderCreator(uint type)
     : m_type(type),
       m_dumperUseSources(false) {}
 
-void ShaderManager::setType(uint type) {
+void ShaderCreator::setType(uint type) {
     m_type = type;
 }
 
-uint ShaderManager::getType() const {
+uint ShaderCreator::getType() const {
     return m_type;
 }
 
-void ShaderManager::setPath(const string &path) {
+void ShaderCreator::setPath(const string &path) {
     m_path = path;
 }
 
-void ShaderManager::setIncludePaths(const vector<string> &includePaths) {
+void ShaderCreator::setIncludePaths(const vector<string> &includePaths) {
     m_includePaths = includePaths;
 }
 
-void ShaderManager::addIncludePaths(const vector<string> &includePaths) {
+void ShaderCreator::addIncludePaths(const vector<string> &includePaths) {
     for (const auto & i : includePaths) {
         addIncludePath(i);
     }
 }
 
-void ShaderManager::addIncludePath(const string &includePath) {
+void ShaderCreator::addIncludePath(const string &includePath) {
     if (!isElementExist(m_includePaths, includePath)) {
         m_includePaths.emplace_back(includePath);
     }
 }
 
-void ShaderManager::removeIncludePath(const std::string &includePath) {
+void ShaderCreator::removeIncludePath(const std::string &includePath) {
     removeElement(m_includePaths, includePath);
 }
 
-const string& ShaderManager::getPath() const {
+const string& ShaderCreator::getPath() const {
     return m_path;
 }
 
-const vector<string>& ShaderManager::getIncludePaths() const {
+const vector<string>& ShaderCreator::getIncludePaths() const {
     return m_includePaths;
 }
 
-void ShaderManager::setSource(const string &source) {
+void ShaderCreator::setSource(const string &source) {
     m_source = source;
 }
 
-const string& ShaderManager::getSource() const {
+const string& ShaderCreator::getSource() const {
     return m_source;
 }
 
-void ShaderManager::resetGenerated() {
+void ShaderCreator::resetGenerated() {
     m_gen = "";
 }
 
@@ -125,7 +125,7 @@ inline void cfgWorkingDirectoryImpl(string &workingDirectory, const string &path
 
 #define cfgWorkingDirectory() cfgWorkingDirectoryImpl(m_workingDirectory, m_path)
 
-inline void cfgSourceImpl(ShaderManager *self) {
+inline void cfgSourceImpl(ShaderCreator *self) {
     const string &source = self->getSource();
     const string &path = self->getPath();
     const string &workingDirectory = self->getWorkingDirectory();
@@ -140,7 +140,7 @@ inline void cfgSourceImpl(ShaderManager *self) {
 
 #define cfgSource() cfgSourceImpl(this)
 
-void ShaderManager::generate() {
+void ShaderCreator::generate() {
     constexpr char versionRegex[] = R"~([ \t]*#[ \t]*version[ \t]+[0-9]+(?:[ \t]+[a-z]+|[ \t]*)(?:\r\n|\n|$))~";
 
     cfgWorkingDirectory();
@@ -187,20 +187,20 @@ void ShaderManager::generate() {
     m_gen = processDirectives(m_gen, Path(m_workingDirectory));
 }
 
-const string& ShaderManager::getGenerated() const {
+const string& ShaderCreator::getGenerated() const {
     return m_gen;
 }
 
-const string& ShaderManager::makeGenerated() {
+const string& ShaderCreator::makeGenerated() {
     generate();
     return getGenerated();
 }
 
-ShaderPtr ShaderManager::get() {
+ShaderPtr ShaderCreator::get() {
     return PublicObjectTools::getPtr<ShaderPtr>(this);
 }
 
-ShaderPtr ShaderManager::create() {
+ShaderPtr ShaderCreator::create() {
     generate();
 
     ShaderPtr shader = make_shared<Shader>(m_type);
@@ -212,11 +212,11 @@ ShaderPtr ShaderManager::create() {
     return shader;
 }
 
-void ShaderManager::dumperUseSources(bool use) {
+void ShaderCreator::dumperUseSources(bool use) {
     m_dumperUseSources = use;
 }
 
-void ShaderManager::import(const JsonHelper &jsonHelper) {
+void ShaderCreator::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -227,7 +227,7 @@ void ShaderManager::import(const JsonHelper &jsonHelper) {
     } else if (config.contains(Config::Path)) {
         setPath(config[Config::Path]);
     } else {
-        throw runtime_error("ShaderManager: broken file:\n" + jsonHelper.toString());
+        throw runtime_error("ShaderCreator: broken file:\n" + jsonHelper.toString());
     }
 
     // load include paths
@@ -246,11 +246,11 @@ void ShaderManager::import(const JsonHelper &jsonHelper) {
         {Geometry, Shader::Geometry}
     } [config[Type]];
 
-    ManagerBase::import(jsonHelper);
-    ShaderDefinitionManager::import(jsonHelper);
+    Creator::import(jsonHelper);
+    ShaderDefinitionGenerator::import(jsonHelper);
 }
 
-JsonHelper ShaderManager::dump() {
+JsonHelper ShaderCreator::dump() {
     using namespace Config;
 
     json config;
@@ -279,37 +279,37 @@ JsonHelper ShaderManager::dump() {
     config[Type] = vector<string> {Vertex, Fragment, Geometry} [m_type];
 
     JsonHelper result(config);
-    result.append(ManagerBase::dump());
-    result.append(ShaderDefinitionManager::dump());
+    result.append(Creator::dump());
+    result.append(ShaderDefinitionGenerator::dump());
 
     return result;
 }
 
-void ShaderManager::importFromFile(const string &path) {
-    ManagerBase::importFromFile(path);
+void ShaderCreator::importFromFile(const string &path) {
+    Creator::importFromFile(path);
 }
 
-void ShaderManager::setGlobalIncludePaths(const vector<string> &includePaths) {
+void ShaderCreator::setGlobalIncludePaths(const vector<string> &includePaths) {
     m_globalIncludePaths = includePaths;
 }
 
-void ShaderManager::addGlobalIncludePaths(const vector<string> &includePaths) {
+void ShaderCreator::addGlobalIncludePaths(const vector<string> &includePaths) {
     for (const auto & i : includePaths) {
         addGlobalIncludePath(i);
     }
 }
 
-void ShaderManager::addGlobalIncludePath(const string &includePath) {
+void ShaderCreator::addGlobalIncludePath(const string &includePath) {
     if (!isElementExist(m_globalIncludePaths, includePath)) {
         m_globalIncludePaths.emplace_back(includePath);
     }
 }
 
-void ShaderManager::removeGlobalIncludePath(const string &includePath) {
+void ShaderCreator::removeGlobalIncludePath(const string &includePath) {
     removeElement(m_globalIncludePaths, includePath);
 }
 
-vector<string>& ShaderManager::getGlobalIncludePaths() {
+vector<string>& ShaderCreator::getGlobalIncludePaths() {
     return m_globalIncludePaths;
 }
 
@@ -354,7 +354,7 @@ inline vector<pair<uint, uint>> findComments(const string &src) {
     return result;
 }
 
-string ShaderManager::processDirectives(const string &src, const Path &baseIncludePath) {
+string ShaderCreator::processDirectives(const string &src, const Path &baseIncludePath) {
     string result = src;
     constexpr char regex[] = R"~((\w+)[ \t]+(.+))~";
 
@@ -377,7 +377,7 @@ string ShaderManager::processDirectives(const string &src, const Path &baseInclu
             Path filePath(fileMatches[0].matches[1]);
 
             auto fileNotFoundError = [&]() {
-                Log::error(TAG) << "ShaderManager: Error: file " << filePath.toString() << " not found\n" << matches.matches[0] << Log::end;
+                Log::error(TAG) << "ShaderCreator: Error: file " << filePath.toString() << " not found\n" << matches.matches[0] << Log::end;
             };
 
             if (!filePath.isAbsolute()) {

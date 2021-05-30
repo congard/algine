@@ -1,7 +1,7 @@
 #ifndef ALGINE_SHAPECONFIGTOOLS_H
 #define ALGINE_SHAPECONFIGTOOLS_H
 
-#include <algine/std/model/ShapeManager.h>
+#include <algine/std/model/ShapeCreator.h>
 
 #include <stdexcept>
 
@@ -19,9 +19,9 @@ constant(InputLayoutLocations, "inputLayoutLocations");
 constant(BonesPerVertex, "bonesPerVertex");
 constant(AMTL, "amtl");
 
-#define param_str(name) if (param == ShapeManager::Param::name) return name
+#define param_str(name) if (param == ShapeCreator::Param::name) return name
 
-inline string paramToString(ShapeManager::Param param) {
+inline string paramToString(ShapeCreator::Param param) {
     param_str(Triangulate);
     param_str(SortByPolygonType);
     param_str(CalcTangentSpace);
@@ -34,9 +34,9 @@ inline string paramToString(ShapeManager::Param param) {
 
 #undef param_str
 
-#define param(name) if (str == name) return ShapeManager::Param::name
+#define param(name) if (str == name) return ShapeCreator::Param::name
 
-inline ShapeManager::Param stringToParam(const string &str) {
+inline ShapeCreator::Param stringToParam(const string &str) {
     param(Triangulate);
     param(SortByPolygonType);
     param(CalcTangentSpace);

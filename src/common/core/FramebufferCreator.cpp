@@ -1,4 +1,4 @@
-#include <algine/core/FramebufferManager.h>
+#include <algine/core/FramebufferCreator.h>
 
 #include <algine/core/JsonHelper.h>
 #include <algine/core/PtrMaker.h>
@@ -18,58 +18,58 @@ constant(OutputLists, "outputLists");
 }
 
 template<typename TMgr>
-void FramebufferManager::Attachments<TMgr>::set(const map<Attachment, TMgr> &managers) {
-    m_managers = managers;
+void FramebufferCreator::Attachments<TMgr>::set(const map<Attachment, TMgr> &creators) {
+    m_creators = creators;
 }
 
 template<typename TMgr>
-void FramebufferManager::Attachments<TMgr>::setPaths(const map<Attachment, string> &paths) {
+void FramebufferCreator::Attachments<TMgr>::setPaths(const map<Attachment, string> &paths) {
     m_paths = paths;
 }
 
 template<typename TMgr>
-void FramebufferManager::Attachments<TMgr>::setNames(const map<Attachment, string> &names) {
+void FramebufferCreator::Attachments<TMgr>::setNames(const map<Attachment, string> &names) {
     m_names = names;
 }
 
 template<typename TMgr>
-void FramebufferManager::Attachments<TMgr>::add(const TMgr &manager, Attachment attachment) {
-    m_managers[attachment] = manager;
+void FramebufferCreator::Attachments<TMgr>::add(const TMgr &creator, Attachment attachment) {
+    m_creators[attachment] = creator;
 }
 
 template<typename TMgr>
-void FramebufferManager::Attachments<TMgr>::addPath(const string &path, Attachment attachment) {
+void FramebufferCreator::Attachments<TMgr>::addPath(const string &path, Attachment attachment) {
     m_paths[attachment] = path;
 }
 
 template<typename TMgr>
-void FramebufferManager::Attachments<TMgr>::addName(const string &name, Attachment attachment) {
+void FramebufferCreator::Attachments<TMgr>::addName(const string &name, Attachment attachment) {
     m_names[attachment] = name;
 }
 
 template<typename TMgr>
-const map<Attachment, TMgr>& FramebufferManager::Attachments<TMgr>::get() const {
-    return m_managers;
+const map<Attachment, TMgr>& FramebufferCreator::Attachments<TMgr>::get() const {
+    return m_creators;
 }
 
 template<typename TMgr>
-const map<Attachment, string>& FramebufferManager::Attachments<TMgr>::getPaths() const {
+const map<Attachment, string>& FramebufferCreator::Attachments<TMgr>::getPaths() const {
     return m_paths;
 }
 
 template<typename TMgr>
-const map<Attachment, string>& FramebufferManager::Attachments<TMgr>::getNames() const {
+const map<Attachment, string>& FramebufferCreator::Attachments<TMgr>::getNames() const {
     return m_names;
 }
 
 template<typename TMgr>
-FramebufferManager::Attachments<TMgr>::Attachments() = default;
+FramebufferCreator::Attachments<TMgr>::Attachments() = default;
 
-template class FramebufferManager::Attachments<RenderbufferManager>;
-template class FramebufferManager::Attachments<Texture2DManager>;
-template class FramebufferManager::Attachments<TextureCubeManager>;
+template class FramebufferCreator::Attachments<RenderbufferCreator>;
+template class FramebufferCreator::Attachments<Texture2DCreator>;
+template class FramebufferCreator::Attachments<TextureCubeCreator>;
 
-void FramebufferManager::setOutputLists(const vector<OutputList> &lists) {
+void FramebufferCreator::setOutputLists(const vector<OutputList> &lists) {
     m_outputLists = {};
 
     for (const auto & list : lists) {
@@ -77,31 +77,31 @@ void FramebufferManager::setOutputLists(const vector<OutputList> &lists) {
     }
 }
 
-void FramebufferManager::setOutputLists(const vector<OutputListManager> &lists) {
+void FramebufferCreator::setOutputLists(const vector<OutputListCreator> &lists) {
     m_outputLists = lists;
 }
 
-void FramebufferManager::addOutputList(const OutputListManager &list) {
+void FramebufferCreator::addOutputList(const OutputListCreator &list) {
     m_outputLists.emplace_back(list);
 }
 
-const vector<OutputListManager>& FramebufferManager::getOutputLists() const {
+const vector<OutputListCreator>& FramebufferCreator::getOutputLists() const {
     return m_outputLists;
 }
 
-FramebufferManager::RenderbufferAttachments& FramebufferManager::renderbufferAttachments() {
+FramebufferCreator::RenderbufferAttachments& FramebufferCreator::renderbufferAttachments() {
     return m_renderbufferAttachments;
 }
 
-FramebufferManager::Texture2DAttachments& FramebufferManager::texture2DAttachments() {
+FramebufferCreator::Texture2DAttachments& FramebufferCreator::texture2DAttachments() {
     return m_texture2DAttachments;
 }
 
-FramebufferManager::TextureCubeAttachments& FramebufferManager::textureCubeAttachments() {
+FramebufferCreator::TextureCubeAttachments& FramebufferCreator::textureCubeAttachments() {
     return m_textureCubeAttachments;
 }
 
-FramebufferPtr FramebufferManager::get() {
+FramebufferPtr FramebufferCreator::get() {
     return PublicObjectTools::getPtr<FramebufferPtr>(this);
 }
 
@@ -112,7 +112,7 @@ struct type_holder {
 
 #define type_holder_get(holder) typename decltype(holder)::type
 
-FramebufferPtr FramebufferManager::create() {
+FramebufferPtr FramebufferCreator::create() {
     FramebufferPtr framebuffer = PtrMaker::make();
     framebuffer->setName(m_name);
 
@@ -120,7 +120,7 @@ FramebufferPtr FramebufferManager::create() {
     framebuffer->removeOutputLists();
 
     for (const auto & list : m_outputLists) {
-        framebuffer->addOutputList(list.get());
+        framebuffer->addOutputList(list.create());
     }
 
     // attach objects
@@ -139,15 +139,15 @@ FramebufferPtr FramebufferManager::create() {
             }
         };
 
-        auto attachByPath = [&](const string &path, Attachment attachment, auto managerType)
+        auto attachByPath = [&](const string &path, Attachment attachment, auto creatorType)
         {
-            using Manager = type_holder_get(managerType);
+            using TCreator = type_holder_get(creatorType);
 
-            Manager manager;
-            manager.setWorkingDirectory(m_workingDirectory);
-            manager.importFromFile(path);
+            TCreator creator;
+            creator.setWorkingDirectory(m_workingDirectory);
+            creator.importFromFile(path);
 
-            attach(manager.get(), attachment);
+            attach(creator.get(), attachment);
         };
 
         auto attachByName = [&](const string &name, Attachment attachment, auto objType)
@@ -164,16 +164,16 @@ FramebufferPtr FramebufferManager::create() {
             attach(ptr, attachment);
         };
 
-        // attach using managers, paths and names
+        // attach using creators, paths and names
 
-        using TMgr = typename decltype(attachments.m_managers)::mapped_type;
+        using T = typename decltype(attachments.m_creators)::mapped_type;
 
-        for (auto & p : attachments.m_managers) {
+        for (auto & p : attachments.m_creators) {
             attach(p.second.get(), p.first);
         }
 
         for (const auto & p : attachments.m_paths) {
-            attachByPath(p.second, p.first, type_holder<TMgr>());
+            attachByPath(p.second, p.first, type_holder<T>());
         }
 
         for (const auto & p : attachments.m_names) {
@@ -199,19 +199,19 @@ template<typename T>
 inline string typeName() {
     using TPlain = remove_reference_t<T>;
 
-    if constexpr (is_same_v<TPlain, FramebufferManager::RenderbufferAttachments>)
+    if constexpr (is_same_v<TPlain, FramebufferCreator::RenderbufferAttachments>)
         return Config::Renderbuffer;
 
-    if constexpr (is_same_v<TPlain, FramebufferManager::Texture2DAttachments>)
+    if constexpr (is_same_v<TPlain, FramebufferCreator::Texture2DAttachments>)
         return Config::Texture2D;
 
-    if constexpr (is_same_v<TPlain, FramebufferManager::TextureCubeAttachments>)
+    if constexpr (is_same_v<TPlain, FramebufferCreator::TextureCubeAttachments>)
         return Config::TextureCube;
 
     throw invalid_argument("Invalid template type");
 }
 
-void FramebufferManager::import(const JsonHelper &jsonHelper) {
+void FramebufferCreator::import(const JsonHelper &jsonHelper) {
     const json &config = jsonHelper.json;
 
     auto importAttachments = [&](auto &obj)
@@ -225,13 +225,13 @@ void FramebufferManager::import(const JsonHelper &jsonHelper) {
                 auto attachment = stringToAttachment(item[Config::Attachment]);
 
                 if (item.contains(Dump)) {
-                    using Manager = typename decltype(obj.m_managers)::mapped_type;
+                    using TCreator = typename decltype(obj.m_creators)::mapped_type;
 
-                    Manager manager;
-                    manager.setWorkingDirectory(m_workingDirectory);
-                    manager.import(item[Dump]);
+                    TCreator creator;
+                    creator.setWorkingDirectory(m_workingDirectory);
+                    creator.import(item[Dump]);
 
-                    obj.add(manager, attachment);
+                    obj.add(creator, attachment);
                 } else if (item.contains(Path)) {
                     obj.addPath(item[Path], attachment);
                 } else if (item.contains(Name)) {
@@ -251,16 +251,16 @@ void FramebufferManager::import(const JsonHelper &jsonHelper) {
     // load output lists
     if (config.contains(Config::OutputLists)) {
         for (const auto & list : config[Config::OutputLists]) {
-            OutputListManager outputListManager;
-            outputListManager.import(list);
-            m_outputLists.emplace_back(outputListManager);
+            OutputListCreator outputListCreator;
+            outputListCreator.import(list);
+            m_outputLists.emplace_back(outputListCreator);
         }
     }
 
-    ManagerBase::import(jsonHelper);
+    Creator::import(jsonHelper);
 }
 
-JsonHelper FramebufferManager::dump() {
+JsonHelper FramebufferCreator::dump() {
     json config;
 
     // write attachments
@@ -283,7 +283,7 @@ JsonHelper FramebufferManager::dump() {
                 attachmentsType.emplace_back(block);
             };
 
-            for (auto &p : obj.m_managers)
+            for (auto &p : obj.m_creators)
                 writeBlock(Config::Dump, p.second.dump().json, p.first);
 
             for (auto &p : obj.m_paths)
@@ -319,7 +319,7 @@ JsonHelper FramebufferManager::dump() {
     }
 
     JsonHelper result(config);
-    result.append(ManagerBase::dump());
+    result.append(Creator::dump());
 
     return result;
 }

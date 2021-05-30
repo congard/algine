@@ -1,5 +1,5 @@
 #define GLM_FORCE_CTOR_INIT
-#include <algine/std/model/ModelManager.h>
+#include <algine/std/model/ModelCreator.h>
 
 #include <algine/std/model/Model.h>
 
@@ -43,37 +43,37 @@ namespace Default {
 constant(ClassName, "Model");
 }
 
-ModelManager::AnimationInfo::AnimationInfo(std::string name)
+ModelCreator::AnimationInfo::AnimationInfo(std::string name)
     : m_name(move(name)),
       m_index(None) {}
 
-ModelManager::AnimationInfo::AnimationInfo(Index index)
+ModelCreator::AnimationInfo::AnimationInfo(Index index)
     : m_index(index) {}
 
-ModelManager::AnimationInfo::AnimationInfo()
+ModelCreator::AnimationInfo::AnimationInfo()
     : m_index(None) {}
 
-const std::string &ModelManager::AnimationInfo::getName() const {
+const std::string &ModelCreator::AnimationInfo::getName() const {
     return m_name;
 }
 
-Index ModelManager::AnimationInfo::getIndex() const {
+Index ModelCreator::AnimationInfo::getIndex() const {
     return m_index;
 }
 
-bool ModelManager::AnimationInfo::hasName() const {
+bool ModelCreator::AnimationInfo::hasName() const {
     return !m_name.empty();
 }
 
-bool ModelManager::AnimationInfo::hasIndex() const {
+bool ModelCreator::AnimationInfo::hasIndex() const {
     return m_index != None;
 }
 
-bool ModelManager::AnimationInfo::operator<(const AnimationInfo &rhs) const {
+bool ModelCreator::AnimationInfo::operator<(const AnimationInfo &rhs) const {
     return tie(m_name, m_index) < tie(rhs.m_name, rhs.m_index);
 }
 
-ModelManager::ModelManager()
+ModelCreator::ModelCreator()
     : m_className(Default::ClassName),
       m_shapeDumpMode(ShapeDumpMode::None),
       m_activatedAnimationsDumpMode(ActivatedAnimationsDumpMode::List),
@@ -82,136 +82,136 @@ ModelManager::ModelManager()
       m_rotate(),
       m_scale(1.0f) {}
 
-void ModelManager::activateAnimation(const string &name) {
+void ModelCreator::activateAnimation(const string &name) {
     m_activatedAnimations.insert(AnimationInfo(name));
 }
 
-void ModelManager::activateAnimation(Index index) {
+void ModelCreator::activateAnimation(Index index) {
     m_activatedAnimations.insert(AnimationInfo(index));
 }
 
-void ModelManager::setClassName(const string &name) {
+void ModelCreator::setClassName(const string &name) {
     m_className = name;
 }
 
-void ModelManager::setShapeDumpMode(ShapeDumpMode mode) {
+void ModelCreator::setShapeDumpMode(ShapeDumpMode mode) {
     m_shapeDumpMode = mode;
 }
 
-void ModelManager::setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode mode) {
+void ModelCreator::setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode mode) {
     m_activatedAnimationsDumpMode = mode;
 }
 
-void ModelManager::setShapePath(const string &path) {
+void ModelCreator::setShapePath(const string &path) {
     setShapeDumpMode(ShapeDumpMode::Path);
 
     m_shapePath = path;
 }
 
-void ModelManager::setShapeName(const string &name) {
+void ModelCreator::setShapeName(const string &name) {
     setShapeDumpMode(ShapeDumpMode::Name);
 
     m_shapeName = name;
 }
 
-void ModelManager::setShape(const ShapeManager &manager) {
+void ModelCreator::setShape(const ShapeCreator &creator) {
     setShapeDumpMode(ShapeDumpMode::Dump);
 
-    m_shape = manager;
+    m_shape = creator;
 }
 
-void ModelManager::setActiveAnimationName(const string &name) {
+void ModelCreator::setActiveAnimationName(const string &name) {
     m_activeAnimation = AnimationInfo(name);
 }
 
-void ModelManager::setActiveAnimationIndex(Index index) {
+void ModelCreator::setActiveAnimationIndex(Index index) {
     m_activeAnimation = AnimationInfo(index);
 }
 
-void ModelManager::setActivatedAnimations(const set<AnimationInfo> &animations) {
+void ModelCreator::setActivatedAnimations(const set<AnimationInfo> &animations) {
     m_activatedAnimations = animations;
 }
 
-void ModelManager::setRotatorType(Rotator::Type type) {
+void ModelCreator::setRotatorType(Rotator::Type type) {
     m_rotatorType = type;
 }
 
-void ModelManager::setPos(const vec3 &pos) {
+void ModelCreator::setPos(const vec3 &pos) {
     m_pos = pos;
 }
 
-void ModelManager::setRotate(const vec3 &rotate) {
+void ModelCreator::setRotate(const vec3 &rotate) {
     m_rotate = rotate;
 }
 
-void ModelManager::setScale(const vec3 &scale) {
+void ModelCreator::setScale(const vec3 &scale) {
     m_scale = scale;
 }
 
-const string& ModelManager::getClassName() const {
+const string& ModelCreator::getClassName() const {
     return m_className;
 }
 
-ModelManager::ShapeDumpMode ModelManager::getShapeDumpMode() const {
+ModelCreator::ShapeDumpMode ModelCreator::getShapeDumpMode() const {
     return m_shapeDumpMode;
 }
 
-ModelManager::ActivatedAnimationsDumpMode ModelManager::getActivatedAnimationsDumpMode() const {
+ModelCreator::ActivatedAnimationsDumpMode ModelCreator::getActivatedAnimationsDumpMode() const {
     return m_activatedAnimationsDumpMode;
 }
 
-const string &ModelManager::getShapePath() const {
+const string &ModelCreator::getShapePath() const {
     return m_shapePath;
 }
 
-const string &ModelManager::getShapeName() const {
+const string &ModelCreator::getShapeName() const {
     return m_shapeName;
 }
 
-const ShapeManager& ModelManager::getShape() const {
+const ShapeCreator& ModelCreator::getShape() const {
     return m_shape;
 }
 
-const ModelManager::AnimationInfo& ModelManager::getActiveAnimation() const {
+const ModelCreator::AnimationInfo& ModelCreator::getActiveAnimation() const {
     return m_activeAnimation;
 }
 
-const set<ModelManager::AnimationInfo>& ModelManager::getActivatedAnimations() const {
+const set<ModelCreator::AnimationInfo>& ModelCreator::getActivatedAnimations() const {
     return m_activatedAnimations;
 }
 
-Rotator::Type ModelManager::getRotatorType() const {
+Rotator::Type ModelCreator::getRotatorType() const {
     return m_rotatorType;
 }
 
-const vec3& ModelManager::getPos() const {
+const vec3& ModelCreator::getPos() const {
     return m_pos;
 }
 
-const vec3& ModelManager::getRotate() const {
+const vec3& ModelCreator::getRotate() const {
     return m_rotate;
 }
 
-const vec3& ModelManager::getScale() const {
+const vec3& ModelCreator::getScale() const {
     return m_scale;
 }
 
-ModelPtr ModelManager::get() {
+ModelPtr ModelCreator::get() {
     return internal::PublicObjectTools::getPtr<ModelPtr>(this);
 }
 
-ModelPtr ModelManager::create() {
+ModelPtr ModelCreator::create() {
     ModelPtr model(TypeRegistry::create<Model>(m_className));
     model->setRotatorType(m_rotatorType);
 
     // create model & add Shape
     switch (m_shapeDumpMode) {
         case ShapeDumpMode::Path: {
-            ShapeManager manager;
-            manager.setWorkingDirectory(m_workingDirectory);
-            manager.importFromFile(m_shapePath);
+            ShapeCreator creator;
+            creator.setWorkingDirectory(m_workingDirectory);
+            creator.importFromFile(m_shapePath);
 
-            model->setShape(manager.get());
+            model->setShape(creator.get());
 
             break;
         }
@@ -270,7 +270,7 @@ ModelPtr ModelManager::create() {
     return model;
 }
 
-void ModelManager::import(const JsonHelper &jsonHelper) {
+void ModelCreator::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -286,11 +286,11 @@ void ModelManager::import(const JsonHelper &jsonHelper) {
         if (shape.contains(Path)) {
             setShapePath(shape[Path]);
         } else if (shape.contains(Dump)) {
-            ShapeManager manager;
-            manager.setWorkingDirectory(m_workingDirectory);
-            manager.import(shape[Dump]);
+            ShapeCreator creator;
+            creator.setWorkingDirectory(m_workingDirectory);
+            creator.import(shape[Dump]);
 
-            setShape(manager);
+            setShape(creator);
         } else if (shape.contains(Name)) {
             setShapeName(shape[Name]);
         } else {
@@ -351,10 +351,10 @@ void ModelManager::import(const JsonHelper &jsonHelper) {
     m_pos = GLMTransferrer::import<vec3>(jsonHelper.readValue(Pos));
     m_scale = GLMTransferrer::import<vec3>(jsonHelper.readValue(Scale));
 
-    ManagerBase::import(jsonHelper);
+    Creator::import(jsonHelper);
 }
 
-JsonHelper ModelManager::dump() {
+JsonHelper ModelCreator::dump() {
     json config;
 
     // write class name
@@ -422,7 +422,7 @@ JsonHelper ModelManager::dump() {
     config[Config::Scale] = GLMTransferrer::dump(m_scale).get();
 
     JsonHelper result(config);
-    result.append(ManagerBase::dump());
+    result.append(Creator::dump());
 
     return result;
 }

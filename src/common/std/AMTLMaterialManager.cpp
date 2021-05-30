@@ -82,7 +82,7 @@ void AMTLMaterialManager::setJitter(float jitter) {
     m_jitter = jitter;
 }
 
-void AMTLMaterialManager::setTextures(const map<Texture, Texture2DManager> &textures) {
+void AMTLMaterialManager::setTextures(const map<Texture, Texture2DCreator> &textures) {
     m_textures = textures;
 }
 
@@ -94,7 +94,7 @@ void AMTLMaterialManager::setTexturePaths(const map<Texture, string> &paths) {
     m_texPaths = paths;
 }
 
-void AMTLMaterialManager::setTexture(Texture type, const Texture2DManager &texture) {
+void AMTLMaterialManager::setTexture(Texture type, const Texture2DCreator &texture) {
     m_textures[type] = texture;
 }
 
@@ -134,7 +134,7 @@ float AMTLMaterialManager::getJitter() const {
     return m_jitter;
 }
 
-const map<AMTLMaterialManager::Texture, Texture2DManager>& AMTLMaterialManager::getTextures() const {
+const map<AMTLMaterialManager::Texture, Texture2DCreator>& AMTLMaterialManager::getTextures() const {
     return m_textures;
 }
 
@@ -152,7 +152,7 @@ Texture2DPtr AMTLMaterialManager::loadTexture(Texture type) {
     }
 
     if (auto it = m_texPaths.find(type); it != m_texPaths.end()) {
-        Texture2DManager manager;
+        Texture2DCreator manager;
         manager.setWorkingDirectory(m_workingDirectory);
         manager.importFromFile(it->second);
         return manager.get();
@@ -226,7 +226,7 @@ void AMTLMaterialManager::import(const JsonHelper &jsonHelper) {
         const json &block = texture.value();
 
         if (block.contains(Dump)) {
-            Texture2DManager manager;
+            Texture2DCreator manager;
             manager.setWorkingDirectory(m_workingDirectory);
             manager.import(block[Dump]);
             m_textures[type] = manager;

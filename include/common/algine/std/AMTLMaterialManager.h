@@ -1,7 +1,7 @@
 #ifndef ALGINE_AMTLMATERIALMANAGER_H
 #define ALGINE_AMTLMATERIALMANAGER_H
 
-#include <algine/core/texture/Texture2DManager.h>
+#include <algine/core/texture/Texture2DCreator.h>
 
 #include <map>
 
@@ -32,11 +32,11 @@ public:
     void setReflection(float reflection);
     void setJitter(float jitter);
 
-    void setTextures(const std::map<Texture, Texture2DManager> &textures);
+    void setTextures(const std::map<Texture, Texture2DCreator> &textures);
     void setTextureNames(const std::map<Texture, std::string> &names);
     void setTexturePaths(const std::map<Texture, std::string> &paths);
 
-    void setTexture(Texture type, const Texture2DManager &texture);
+    void setTexture(Texture type, const Texture2DCreator &texture);
     void setTextureName(Texture type, const std::string &name);
     void setTexturePath(Texture type, const std::string &path);
 
@@ -49,7 +49,7 @@ public:
     float getReflection() const;
     float getJitter() const;
 
-    const std::map<Texture, Texture2DManager>& getTextures() const;
+    const std::map<Texture, Texture2DCreator>& getTextures() const;
     const std::map<Texture, std::string>& getTextureNames() const;
     const std::map<Texture, std::string>& getTexturePaths() const;
 
@@ -66,7 +66,7 @@ private:
     float m_reflection, m_jitter;
     float m_shininess;
 
-    std::map<Texture, Texture2DManager> m_textures;
+    std::map<Texture, Texture2DCreator> m_textures;
     std::map<Texture, std::string> m_texPaths, m_texNames;
 };
 }

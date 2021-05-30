@@ -1,12 +1,12 @@
-#ifndef ALGINE_MANAGERBASE_H
-#define ALGINE_MANAGERBASE_H
+#ifndef ALGINE_CREATOR_H
+#define ALGINE_CREATOR_H
 
 #include <algine/core/transfer/FileTransferable.h>
 
 #include <string>
 
 namespace algine {
-class ManagerBase: public FileTransferable {
+class Creator: public FileTransferable {
 public:
     enum class Access {
         Private,
@@ -14,7 +14,7 @@ public:
     };
 
 public:
-    ManagerBase();
+    Creator();
 
     void setName(const std::string &name);
     void setAccess(Access access);
@@ -31,4 +31,4 @@ protected:
 };
 }
 
-#endif //ALGINE_MANAGERBASE_H
+#endif //ALGINE_CREATOR_H

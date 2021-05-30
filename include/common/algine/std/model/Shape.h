@@ -15,7 +15,7 @@
 
 namespace algine {
 class Shape: public Object {
-    friend class ShapeManager;
+    friend class ShapeCreator;
     friend class Model;
     friend class Animator;
     friend class AnimationBlender;

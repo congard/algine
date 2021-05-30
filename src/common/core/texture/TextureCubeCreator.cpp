@@ -1,4 +1,4 @@
-#include <algine/core/texture/TextureCubeManager.h>
+#include <algine/core/texture/TextureCubeCreator.h>
 
 #include <algine/core/JsonHelper.h>
 
@@ -22,34 +22,34 @@ constant(Back, "back");
 constant(Front, "front");
 }
 
-TextureCubeManager::TextureCubeManager() {
-    m_type = TextureManager::Type::TextureCube;
+TextureCubeCreator::TextureCubeCreator() {
+    m_type = TextureCreator::Type::TextureCube;
     m_defaultParams = TextureCube::defaultParams();
 }
 
-void TextureCubeManager::setPath(const string &path, TextureCube::Face face) {
+void TextureCubeCreator::setPath(const string &path, TextureCube::Face face) {
     m_paths[face] = path;
 }
 
-string TextureCubeManager::getPath(TextureCube::Face face) const {
+string TextureCubeCreator::getPath(TextureCube::Face face) const {
     return m_paths.at(face);
 }
 
-void TextureCubeManager::setPaths(const map<TextureCube::Face, string> &paths) {
+void TextureCubeCreator::setPaths(const map<TextureCube::Face, string> &paths) {
     m_paths = paths;
 }
 
-const map<TextureCube::Face, string>& TextureCubeManager::getPaths() const {
+const map<TextureCube::Face, string>& TextureCubeCreator::getPaths() const {
     return m_paths;
 }
 
-TextureCubePtr TextureCubeManager::get() {
+TextureCubePtr TextureCubeCreator::get() {
     return PublicObjectTools::getPtr<TextureCubePtr>(this);
 }
 
-TextureCubePtr TextureCubeManager::create() {
-    if (m_type != TextureManager::Type::TextureCube)
-        throw runtime_error("Invalid texture type. Use a different manager");
+TextureCubePtr TextureCubeCreator::create() {
+    if (m_type != TextureCreator::Type::TextureCube)
+        throw runtime_error("Invalid texture type. Use a different creator");
 
     TextureCubePtr texture = make_shared<TextureCube>();
     texture->setName(m_name);
@@ -101,7 +101,7 @@ inline TextureCube::Face stringToFace(const string &str) {
     throw runtime_error("Unsupported face value '" + str + "'");
 }
 
-void TextureCubeManager::import(const JsonHelper &jsonHelper) {
+void TextureCubeCreator::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -112,10 +112,10 @@ void TextureCubeManager::import(const JsonHelper &jsonHelper) {
         }
     }
 
-    TextureManager::import(jsonHelper);
+    TextureCreator::import(jsonHelper);
 }
 
-JsonHelper TextureCubeManager::dump() {
+JsonHelper TextureCubeCreator::dump() {
     JsonHelper config;
 
     for (const auto & path : m_paths)
@@ -123,7 +123,7 @@ JsonHelper TextureCubeManager::dump() {
 
     m_writeFileSection = !m_paths.empty();
 
-    config.append(TextureManager::dump());
+    config.append(TextureCreator::dump());
 
     return config;
 }

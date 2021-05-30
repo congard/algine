@@ -1,4 +1,4 @@
-#include <algine/core/texture/TextureManager.h>
+#include <algine/core/texture/TextureCreator.h>
 
 #include <algine/core/texture/Texture.h>
 #include <algine/core/JsonHelper.h>
@@ -9,7 +9,7 @@ using namespace std;
 using namespace nlohmann;
 
 namespace algine {
-TextureManager::TextureManager()
+TextureCreator::TextureCreator()
     : m_type(),
       m_dataType(DataType::UnsignedByte),
       m_writeFileSection()
@@ -19,39 +19,39 @@ TextureManager::TextureManager()
     m_format = Texture::RGB;
 }
 
-void TextureManager::setType(Type type) {
+void TextureCreator::setType(Type type) {
     m_type = type;
 }
 
-void TextureManager::setDataType(DataType dataType) {
+void TextureCreator::setDataType(DataType dataType) {
     m_dataType = dataType;
 }
 
-void TextureManager::setParams(const map<uint, uint> &params) {
+void TextureCreator::setParams(const map<uint, uint> &params) {
     m_params = params;
 }
 
-void TextureManager::setDefaultParams(const map<uint, uint> &defaultParams) {
+void TextureCreator::setDefaultParams(const map<uint, uint> &defaultParams) {
     m_defaultParams = defaultParams;
 }
 
-TextureManager::Type TextureManager::getType() const {
+TextureCreator::Type TextureCreator::getType() const {
     return m_type;
 }
 
-DataType TextureManager::getDataType() const {
+DataType TextureCreator::getDataType() const {
     return m_dataType;
 }
 
-const map<uint, uint>& TextureManager::getParams() const {
+const map<uint, uint>& TextureCreator::getParams() const {
     return m_params;
 }
 
-const map<uint, uint>& TextureManager::getDefaultParams() const {
+const map<uint, uint>& TextureCreator::getDefaultParams() const {
     return m_defaultParams;
 }
 
-void TextureManager::import(const JsonHelper &jsonHelper) {
+void TextureCreator::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -75,10 +75,10 @@ void TextureManager::import(const JsonHelper &jsonHelper) {
         m_params = m_defaultParams;
     }
 
-    ImageManagerBase::import(jsonHelper);
+    ImageCreator::import(jsonHelper);
 }
 
-JsonHelper TextureManager::dump() {
+JsonHelper TextureCreator::dump() {
     using namespace Config;
 
     json config;
@@ -95,7 +95,7 @@ JsonHelper TextureManager::dump() {
         config[Params][paramKeyToString(param.first)] = paramValueToString(param.second);
 
     JsonHelper result(config);
-    result.append(ImageManagerBase::dump());
+    result.append(ImageCreator::dump());
 
     return result;
 }

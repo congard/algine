@@ -1,4 +1,4 @@
-#include <algine/core/texture/Texture2DManager.h>
+#include <algine/core/texture/Texture2DCreator.h>
 
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/JsonHelper.h>
@@ -14,26 +14,26 @@ using namespace nlohmann;
 using namespace algine::internal;
 
 namespace algine {
-Texture2DManager::Texture2DManager() {
-    m_type = TextureManager::Type::Texture2D;
+Texture2DCreator::Texture2DCreator() {
+    m_type = TextureCreator::Type::Texture2D;
     m_defaultParams = Texture2D::defaultParams();
 }
 
-void Texture2DManager::setPath(const string &path) {
+void Texture2DCreator::setPath(const string &path) {
     m_path = path;
 }
 
-std::string Texture2DManager::getPath() const {
+std::string Texture2DCreator::getPath() const {
     return m_path;
 }
 
-Texture2DPtr Texture2DManager::get() {
+Texture2DPtr Texture2DCreator::get() {
     return PublicObjectTools::getPtr<Texture2DPtr>(this);
 }
 
-Texture2DPtr Texture2DManager::create() {
-    if (m_type != TextureManager::Type::Texture2D)
-        throw runtime_error("Invalid texture type. Use a different manager");
+Texture2DPtr Texture2DCreator::create() {
+    if (m_type != TextureCreator::Type::Texture2D)
+        throw runtime_error("Invalid texture type. Use a different creator");
 
     Texture2DPtr texture = make_shared<Texture2D>();
     texture->setName(m_name);
@@ -57,7 +57,7 @@ Texture2DPtr Texture2DManager::create() {
     return texture;
 }
 
-void Texture2DManager::import(const JsonHelper &jsonHelper) {
+void Texture2DCreator::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &config = jsonHelper.json;
@@ -65,10 +65,10 @@ void Texture2DManager::import(const JsonHelper &jsonHelper) {
     if (config.contains(File) && config[File].contains(Path))
         m_path = config[File][Path];
 
-    TextureManager::import(jsonHelper);
+    TextureCreator::import(jsonHelper);
 }
 
-JsonHelper Texture2DManager::dump() {
+JsonHelper Texture2DCreator::dump() {
     JsonHelper config;
 
     if (!m_path.empty())
@@ -76,7 +76,7 @@ JsonHelper Texture2DManager::dump() {
 
     m_writeFileSection = !m_path.empty();
 
-    config.append(TextureManager::dump());
+    config.append(TextureCreator::dump());
 
     return config;
 }

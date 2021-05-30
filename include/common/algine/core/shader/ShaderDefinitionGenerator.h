@@ -1,5 +1,5 @@
-#ifndef ALGINE_SHADERDEFINITIONMANAGER_H
-#define ALGINE_SHADERDEFINITIONMANAGER_H
+#ifndef ALGINE_SHADERDEFINITIONGENERATOR_H
+#define ALGINE_SHADERDEFINITIONGENERATOR_H
 
 #include <algine/core/transfer/Transferable.h>
 #include <algine/types.h>
@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace algine {
-class ShaderDefinitionManager: public Transferable {
+class ShaderDefinitionGenerator: public Transferable {
 public:
     typedef std::pair<std::string, std::string> Definition;
 
@@ -31,4 +31,4 @@ protected:
 };
 }
 
-#endif //ALGINE_SHADERDEFINITIONMANAGER_H
+#endif //ALGINE_SHADERDEFINITIONGENERATOR_H

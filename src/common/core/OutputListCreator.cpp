@@ -1,4 +1,4 @@
-#include <algine/core/OutputListManager.h>
+#include <algine/core/OutputListCreator.h>
 
 #include <algine/core/Framebuffer.h>
 #include <algine/core/JsonHelper.h>
@@ -8,29 +8,29 @@
 using namespace nlohmann;
 
 namespace algine {
-OutputListManager::OutputListManager(const Data &data) {
+OutputListCreator::OutputListCreator(const Data &data) {
     set(data);
 }
 
-OutputListManager::OutputListManager() = default;
+OutputListCreator::OutputListCreator() = default;
 
-void OutputListManager::set(const Data &data) {
+void OutputListCreator::set(const Data &data) {
     m_data = data;
 }
 
-void OutputListManager::add(Index index, Attachment attachment) {
+void OutputListCreator::add(Index index, Attachment attachment) {
     m_data[index] = attachment;
 }
 
-void OutputListManager::addColor(Index index, Index attachmentIndex) {
+void OutputListCreator::addColor(Index index, Index attachmentIndex) {
     add(index, Framebuffer::ColorAttachmentZero + attachmentIndex);
 }
 
-void OutputListManager::addColor(Index index) {
+void OutputListCreator::addColor(Index index) {
     add(index, Framebuffer::ColorAttachmentZero + index);
 }
 
-OutputList OutputListManager::get() const {
+OutputList OutputListCreator::create() const {
     OutputList outputList;
 
     for (const auto & item : m_data)
@@ -39,11 +39,11 @@ OutputList OutputListManager::get() const {
     return outputList;
 }
 
-const OutputListManager::Data& OutputListManager::data() const {
+const OutputListCreator::Data& OutputListCreator::data() const {
     return m_data;
 }
 
-void OutputListManager::import(const JsonHelper &jsonHelper) {
+void OutputListCreator::import(const JsonHelper &jsonHelper) {
     const json &config = jsonHelper.json;
 
     for (const auto & p : config.items()) {
@@ -57,7 +57,7 @@ void OutputListManager::import(const JsonHelper &jsonHelper) {
     }
 }
 
-JsonHelper OutputListManager::dump() {
+JsonHelper OutputListCreator::dump() {
     json result;
 
     for (const auto & p : m_data)

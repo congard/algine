@@ -1,7 +1,7 @@
-#ifndef ALGINE_INPUTLAYOUTSHAPELOCATIONSMANAGER_H
-#define ALGINE_INPUTLAYOUTSHAPELOCATIONSMANAGER_H
+#ifndef ALGINE_INPUTLAYOUTSHAPELOCATIONSCREATOR_H
+#define ALGINE_INPUTLAYOUTSHAPELOCATIONSCREATOR_H
 
-#include <algine/core/shader/ShaderProgramManager.h>
+#include <algine/core/shader/ShaderProgramCreator.h>
 #include <algine/core/transfer/FileTransferable.h>
 
 #include <algine/std/model/InputLayoutShapeLocations.h>
@@ -9,7 +9,7 @@
 #include <map>
 
 namespace algine {
-class InputLayoutShapeLocationsManager: public FileTransferable {
+class InputLayoutShapeLocationsCreator: public FileTransferable {
 public:
     class Location {
     public:
@@ -53,20 +53,20 @@ public:
     };
 
 public:
-    InputLayoutShapeLocationsManager(const InputLayoutShapeLocations &locations);
-    InputLayoutShapeLocationsManager();
+    InputLayoutShapeLocationsCreator(const InputLayoutShapeLocations &locations);
+    InputLayoutShapeLocationsCreator();
 
     void addLocation(Location::Type type, const Location &location);
 
     void setLocations(const Locations &locations);
-    void setShaderProgram(const ShaderProgramManager &manager);
+    void setShaderProgram(const ShaderProgramCreator &creator);
     void setShaderProgramName(const std::string &name);
     void setShaderProgramPath(const std::string &path);
     void setShaderProgramDumpMode(ShaderProgramDumpMode mode);
     void setShaderProgramPtr(const ShaderProgramPtr &program);
 
     const Locations& getLocations() const;
-    const ShaderProgramManager& getShaderProgram() const;
+    const ShaderProgramCreator& getShaderProgram() const;
     const std::string& getShaderProgramName() const;
     const std::string& getShaderProgramPath() const;
     ShaderProgramDumpMode getShaderProgramDumpMode() const;
@@ -81,9 +81,9 @@ private:
     Locations m_locations;
     ShaderProgramPtr m_programPtr;
     ShaderProgramDumpMode m_shaderDumpMode;
-    ShaderProgramManager m_shader;
+    ShaderProgramCreator m_shader;
     std::string m_shaderName, m_shaderPath;
 };
 }
 
-#endif //ALGINE_INPUTLAYOUTSHAPELOCATIONSMANAGER_H
+#endif //ALGINE_INPUTLAYOUTSHAPELOCATIONSCREATOR_H

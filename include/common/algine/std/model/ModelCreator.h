@@ -1,7 +1,7 @@
-#ifndef ALGINE_MODELMANAGER_H
-#define ALGINE_MODELMANAGER_H
+#ifndef ALGINE_MODELCREATOR_H
+#define ALGINE_MODELCREATOR_H
 
-#include <algine/std/model/ShapeManager.h>
+#include <algine/std/model/ShapeCreator.h>
 #include <algine/std/model/ModelPtr.h>
 #include <algine/std/model/Model.h>
 #include <algine/std/rotator/Rotator.h>
@@ -9,7 +9,7 @@
 #include <set>
 
 namespace algine {
-class ModelManager: public ManagerBase {
+class ModelCreator: public Creator {
 public:
     enum class ShapeDumpMode {
         None,
@@ -47,7 +47,7 @@ public:
     };
 
 public:
-    ModelManager();
+    ModelCreator();
 
     void activateAnimation(const std::string &name);
     void activateAnimation(Index index);
@@ -59,7 +59,7 @@ public:
 
     void setShapePath(const std::string &path);
     void setShapeName(const std::string &name);
-    void setShape(const ShapeManager &manager);
+    void setShape(const ShapeCreator &creator);
 
     void setActiveAnimationName(const std::string &name);
     void setActiveAnimationIndex(Index index);
@@ -78,7 +78,7 @@ public:
 
     const std::string& getShapePath() const;
     const std::string& getShapeName() const;
-    const ShapeManager& getShape() const;
+    const ShapeCreator& getShape() const;
 
     const AnimationInfo& getActiveAnimation() const;
 
@@ -103,7 +103,7 @@ private:
     std::string m_className;
 
     std::string m_shapePath, m_shapeName;
-    ShapeManager m_shape;
+    ShapeCreator m_shape;
 
     AnimationInfo m_activeAnimation;
 
@@ -114,4 +114,4 @@ private:
 };
 }
 
-#endif //ALGINE_MODELMANAGER_H
+#endif //ALGINE_MODELCREATOR_H

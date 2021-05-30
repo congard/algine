@@ -1,4 +1,4 @@
-#include <algine/core/shader/ShaderProgramManager.h>
+#include <algine/core/shader/ShaderProgramCreator.h>
 
 #include <algine/core/JsonHelper.h>
 
@@ -20,89 +20,89 @@ constant(Name, "name");
 }
 
 namespace algine {
-void ShaderProgramManager::setShaders(const vector<ShaderManager> &shaders) {
+void ShaderProgramCreator::setShaders(const vector<ShaderCreator> &shaders) {
     m_shaders = shaders;
 }
 
-void ShaderProgramManager::addShader(const ShaderManager &manager) {
-    m_shaders.emplace_back(manager);
+void ShaderProgramCreator::addShader(const ShaderCreator &creator) {
+    m_shaders.emplace_back(creator);
 }
 
-const vector<ShaderManager>& ShaderProgramManager::getShaders() const {
+const vector<ShaderCreator>& ShaderProgramCreator::getShaders() const {
     return m_shaders;
 }
 
-void ShaderProgramManager::setShaderNames(const vector<string> &names) {
+void ShaderProgramCreator::setShaderNames(const vector<string> &names) {
     m_shaderNames = names;
 }
 
-void ShaderProgramManager::addShaderName(const string &name) {
+void ShaderProgramCreator::addShaderName(const string &name) {
     m_shaderNames.emplace_back(name);
 }
 
-const vector<string>& ShaderProgramManager::getShaderNames() const {
+const vector<string>& ShaderProgramCreator::getShaderNames() const {
     return m_shaderNames;
 }
 
-void ShaderProgramManager::setShaderPaths(const vector<string> &paths) {
+void ShaderProgramCreator::setShaderPaths(const vector<string> &paths) {
     m_shaderPaths = paths;
 }
 
-void ShaderProgramManager::addShaderPath(const string &path) {
+void ShaderProgramCreator::addShaderPath(const string &path) {
     m_shaderPaths.emplace_back(path);
 }
 
-const vector<string>& ShaderProgramManager::getShaderPaths() const {
+const vector<string>& ShaderProgramCreator::getShaderPaths() const {
     return m_shaderPaths;
 }
 
-ShaderProgramPtr ShaderProgramManager::get() {
+ShaderProgramPtr ShaderProgramCreator::get() {
     return PublicObjectTools::getPtr<ShaderProgramPtr>(this);
 }
 
-ShaderProgramPtr ShaderProgramManager::create() {
+ShaderProgramPtr ShaderProgramCreator::create() {
     ShaderProgramPtr program = make_shared<ShaderProgram>();
     program->setName(m_name);
 
-    auto processMixedShader = [&](ShaderManager &manager)
+    auto processMixedShader = [&](ShaderCreator &creator)
     {
-        if (manager.getAccess() == ShaderManager::Access::Public) {
+        if (creator.getAccess() == ShaderCreator::Access::Public) {
             // note that if Shader public, then ShaderProgram
             // level definitions will not be applied
 
-            auto publicShader = Shader::byName(manager.getName());
+            auto publicShader = Shader::byName(creator.getName());
 
             if (publicShader != nullptr) {
                 // if Shader already loaded, just use it
                 program->attachShader(*publicShader);
             } else {
                 // otherwise create it
-                auto shader = manager.create();
+                auto shader = creator.create();
                 program->attachShader(*shader);
             }
         } else {
             // backup Shader level definitions
-            auto shaderDefs = manager.getDefinitions();
+            auto shaderDefs = creator.getDefinitions();
 
             // append ShaderProgram level definitions
-            manager.appendDefinitions(m_definitions);
+            creator.appendDefinitions(m_definitions);
 
-            auto shader = manager.create();
+            auto shader = creator.create();
             program->attachShader(*shader);
 
             // restore Shader level definitions
-            manager.setDefinitions(shaderDefs);
+            creator.setDefinitions(shaderDefs);
         }
     };
 
-    for (auto & manager : m_shaders)
-        processMixedShader(manager);
+    for (auto & creator : m_shaders)
+        processMixedShader(creator);
 
     for (auto & path : m_shaderPaths) {
-        ShaderManager manager;
-        manager.setWorkingDirectory(m_workingDirectory);
-        manager.importFromFile(path);
-        processMixedShader(manager);
+        ShaderCreator creator;
+        creator.setWorkingDirectory(m_workingDirectory);
+        creator.importFromFile(path);
+        processMixedShader(creator);
     }
 
     for (auto & name : m_shaderNames) {
@@ -121,7 +121,7 @@ ShaderProgramPtr ShaderProgramManager::create() {
     return program;
 }
 
-void ShaderProgramManager::import(const JsonHelper &jsonHelper) {
+void ShaderProgramCreator::import(const JsonHelper &jsonHelper) {
     using namespace Config;
 
     const json &shaders = jsonHelper.json[Shaders];
@@ -129,10 +129,10 @@ void ShaderProgramManager::import(const JsonHelper &jsonHelper) {
     // load shaders
     for (const auto & shader : shaders) {
          if (shader.contains(Dump)) {
-            ShaderManager shaderManager;
-            shaderManager.setWorkingDirectory(m_workingDirectory);
-            shaderManager.import(shader[Dump]);
-            m_shaders.emplace_back(shaderManager);
+            ShaderCreator shaderCreator;
+            shaderCreator.setWorkingDirectory(m_workingDirectory);
+            shaderCreator.import(shader[Dump]);
+            m_shaders.emplace_back(shaderCreator);
         } else if (shader.contains(Path)) {
              m_shaderPaths.emplace_back(shader[Path]);
         } else if (shader.contains(Name)) {
@@ -142,11 +142,11 @@ void ShaderProgramManager::import(const JsonHelper &jsonHelper) {
         }
     }
 
-    ManagerBase::import(jsonHelper);
-    ShaderDefinitionManager::import(jsonHelper);
+    Creator::import(jsonHelper);
+    ShaderDefinitionGenerator::import(jsonHelper);
 }
 
-JsonHelper ShaderProgramManager::dump() {
+JsonHelper ShaderProgramCreator::dump() {
     using namespace Config;
 
     json config;
@@ -159,8 +159,8 @@ JsonHelper ShaderProgramManager::dump() {
     };
 
     // write shaders
-    for (auto & manager : m_shaders)
-        emplaceData(Dump, manager.dump().json);
+    for (auto & creator : m_shaders)
+        emplaceData(Dump, creator.dump().json);
 
     for (auto & path : m_shaderPaths)
         emplaceData(Path, path);
@@ -169,13 +169,13 @@ JsonHelper ShaderProgramManager::dump() {
         emplaceData(Name, name);
 
     JsonHelper result(config);
-    result.append(ManagerBase::dump());
-    result.append(ShaderDefinitionManager::dump());
+    result.append(Creator::dump());
+    result.append(ShaderDefinitionGenerator::dump());
 
     return result;
 }
 
-void ShaderProgramManager::importFromFile(const std::string &path) {
-    ManagerBase::importFromFile(path);
+void ShaderProgramCreator::importFromFile(const std::string &path) {
+    Creator::importFromFile(path);
 }
 }
