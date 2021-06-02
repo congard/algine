@@ -120,7 +120,12 @@ set(ALGINE_CORE_SOURCES
         src/common/core/TextureConfigTools.h
         src/common/core/log/Logger.cpp include/common/algine/core/log/Logger.h
         src/common/core/log/Log.cpp include/common/algine/core/log/Log.h
-        src/common/core/debug/Debug.h src/common/core/debug/Debug.cpp)
+        src/common/core/debug/Debug.h src/common/core/debug/Debug.cpp
+        src/common/core/io/IOSystem.cpp include/common/algine/core/io/IOSystem.h
+        src/common/core/io/IOStream.cpp include/common/algine/core/io/IOStream.h
+        src/common/core/io/StandardIOSystem.cpp include/common/algine/core/io/StandardIOSystem.h
+        src/common/core/io/StandardIOStream.cpp include/common/algine/core/io/StandardIOStream.h
+        src/common/core/io/IOWrapper.cpp include/common/algine/core/io/IOWrapper.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/constants/BoneSystem.h
