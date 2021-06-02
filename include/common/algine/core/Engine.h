@@ -2,6 +2,7 @@
 #define ALGINE_ENGINE_H
 
 #include <algine/core/debug/DebugWriter.h>
+#include <algine/core/io/IOSystem.h>
 #include <algine/types.h>
 
 #include <string>
@@ -40,6 +41,10 @@ public:
 
     static void setDebugWriter(DebugWriter *debugWriter);
     static std::unique_ptr<DebugWriter>& getDebugWriter();
+
+    static void setDefaultIOSystem(IOSystem *ioSystem);
+    static void setDefaultIOSystem(const std::shared_ptr<IOSystem> &ioSystem);
+    static const std::shared_ptr<IOSystem>& getDefaultIOSystem();
 
     static void setAPIVersion(int version, GraphicsAPI api);
 
@@ -120,6 +125,7 @@ public:
 
 private:
     static std::unique_ptr<DebugWriter> m_debugWriter;
+    static std::shared_ptr<IOSystem> m_defaultIOSystem;
 
     static int m_apiVersion;
     static GraphicsAPI m_graphicsAPI;

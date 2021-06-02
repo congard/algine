@@ -10,6 +10,8 @@
 #include <algine/core/InputLayout.h>
 #include <algine/core/TypeRegistry.h>
 
+#include <algine/core/io/StandardIOSystem.h>
+
 #include <algine/gl.h>
 
 #include <chrono>
@@ -39,6 +41,7 @@ using namespace std;
 
 namespace algine {
 unique_ptr<DebugWriter> Engine::m_debugWriter;
+shared_ptr<IOSystem> Engine::m_defaultIOSystem;
 
 int Engine::m_apiVersion;
 Engine::GraphicsAPI Engine::m_graphicsAPI;
@@ -124,6 +127,8 @@ void Engine::init() {
     m_boundShaderProgram = m_defaultShaderProgram;
     m_boundInputLayout = m_defaultInputLayout;
 
+    m_defaultIOSystem = make_shared<StandardIOSystem>();
+
     initExtra();
 }
 
@@ -153,6 +158,18 @@ void Engine::setDebugWriter(DebugWriter *debugWriter) {
 
 unique_ptr<DebugWriter>& Engine::getDebugWriter() {
     return m_debugWriter;
+}
+
+void Engine::setDefaultIOSystem(IOSystem *ioSystem) {
+    m_defaultIOSystem.reset(ioSystem);
+}
+
+void Engine::setDefaultIOSystem(const shared_ptr<IOSystem> &ioSystem) {
+    m_defaultIOSystem = ioSystem;
+}
+
+const shared_ptr<IOSystem>& Engine::getDefaultIOSystem() {
+    return m_defaultIOSystem;
 }
 
 void Engine::setAPIVersion(int version, GraphicsAPI api) {
