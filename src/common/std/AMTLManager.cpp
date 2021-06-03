@@ -37,8 +37,10 @@ inline int getMaterialIndex(const string &name, const vector<AMTLMaterialManager
 AMTLMaterialManager& AMTLManager::getMaterial(const string &name) {
     int index = getMaterialIndex(name, m_materials);
 
-    if (index != -1)
+    if (index != -1) {
+        m_materials[index].setIOSystem(io());
         return m_materials[index];
+    }
 
     throw runtime_error("AMTLMaterial '" + name + "' does not found");
 }

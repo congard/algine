@@ -3,12 +3,16 @@
 // STB_IMAGE_IMPLEMENTATION defined in Texture.cpp
 #include <stb/stb_image.h>
 
+#include "core/IOStreamUtils.h"
+
 namespace algine {
 Icon::Icon(): m_width(), m_height() {}
 
-Icon::Icon(const std::string &path) {
+Icon::Icon(const std::string &path, const std::shared_ptr<IOSystem> &ioSystem) {
+    auto bytes = IOStreamUtils::readAll<stbi_uc>(path, ioSystem);
+
     m_pixelData.reset(
-        stbi_load(path.c_str(), &m_width, &m_height, nullptr, 4), //rgba channels
+        stbi_load_from_memory(bytes.array(), (int) bytes.size(), &m_width, &m_height, nullptr, 4), //rgba channels
         [](void *ptr) {
             stbi_image_free(ptr);
         }

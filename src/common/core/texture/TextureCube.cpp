@@ -24,9 +24,13 @@ vector<TextureCubePtr> TextureCube::publicObjects;
 TextureCube::TextureCube()
     : Texture(GL_TEXTURE_CUBE_MAP) {}
 
-void TextureCube::fromFile(const std::string &path, Face face, DataType dataType, bool flipImage) {
+void TextureCube::fromFile(Face face, const TextureFileInfo &fileInfo) {
     checkBinding()
-    texFromFile(path, static_cast<uint>(face), dataType, flipImage);
+    texFromFile(static_cast<uint>(face), fileInfo);
+}
+
+void TextureCube::fromFile(Face face, const std::string &path) {
+    fromFile(face, TextureFileInfo {path});
 }
 
 void TextureCube::update() {

@@ -104,19 +104,16 @@ void ModelCreator::setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode mo
 
 void ModelCreator::setShapePath(const string &path) {
     setShapeDumpMode(ShapeDumpMode::Path);
-
     m_shapePath = path;
 }
 
 void ModelCreator::setShapeName(const string &name) {
     setShapeDumpMode(ShapeDumpMode::Name);
-
     m_shapeName = name;
 }
 
 void ModelCreator::setShape(const ShapeCreator &creator) {
     setShapeDumpMode(ShapeDumpMode::Dump);
-
     m_shape = creator;
 }
 
@@ -208,6 +205,7 @@ ModelPtr ModelCreator::create() {
     switch (m_shapeDumpMode) {
         case ShapeDumpMode::Path: {
             ShapeCreator creator;
+            creator.setIOSystem(io());
             creator.setWorkingDirectory(m_workingDirectory);
             creator.importFromFile(m_shapePath);
 
@@ -216,6 +214,7 @@ ModelPtr ModelCreator::create() {
             break;
         }
         case ShapeDumpMode::Dump: {
+            m_shape.setIOSystem(io());
             model->setShape(m_shape.get());
             break;
         }
@@ -289,7 +288,6 @@ void ModelCreator::import(const JsonHelper &jsonHelper) {
             ShapeCreator creator;
             creator.setWorkingDirectory(m_workingDirectory);
             creator.import(shape[Dump]);
-
             setShape(creator);
         } else if (shape.contains(Name)) {
             setShapeName(shape[Name]);

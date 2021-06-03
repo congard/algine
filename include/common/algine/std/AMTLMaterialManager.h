@@ -6,7 +6,7 @@
 #include <map>
 
 namespace algine {
-class AMTLMaterialManager: public Transferable {
+class AMTLMaterialManager: public Transferable, public IOWrapper {
     friend class AMTLManager;
 
 public:

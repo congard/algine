@@ -131,10 +131,11 @@ inline void cfgSourceImpl(ShaderCreator *self) {
     const string &workingDirectory = self->getWorkingDirectory();
 
     if (source.empty()) {
-        if (path.empty())
+        if (path.empty()) {
             throw runtime_error("Source and path are empty");
+        }
 
-        self->setSource(File(Path::join(workingDirectory, path), File::Mode::ReadText).readStr());
+        self->setSource(self->readStr(Path::join(workingDirectory, path)));
     }
 }
 
@@ -255,10 +256,10 @@ JsonHelper ShaderCreator::dump() {
 
     json config;
 
-    auto setString = [&](const string &key, const string &value)
-    {
-        if (!value.empty())
+    auto setString = [&](const string &key, const string &value) {
+        if (!value.empty()) {
             config[key] = value;
+        }
     };
 
     // write source or path
@@ -380,18 +381,21 @@ string ShaderCreator::processDirectives(const string &src, const Path &baseInclu
                 Log::error(TAG) << "ShaderCreator: Error: file " << filePath.toString() << " not found\n" << matches.matches[0] << Log::end;
             };
 
+            auto exists = [&](const Path &p) {
+                return io()->exists(p.toString());
+            };
+
             if (!filePath.isAbsolute()) {
-                if (Path::join(baseIncludePath, filePath).exists()) { // try to find included file in base file folder
+                if (exists(Path::join(baseIncludePath, filePath))) { // try to find included file in base file folder
                     filePath = Path::join(baseIncludePath, filePath);
                 } else {
                     bool found = false;
 
-                    auto findIncludePath = [&](const vector<string> &includePaths)
-                    {
+                    auto findIncludePath = [&](const vector<string> &includePaths) {
                         for (const auto &i : includePaths) { // i - include path
                             Path includePath(i);
 
-                            if (Path::join(includePath, filePath).exists()) {
+                            if (exists(Path::join(includePath, filePath))) {
                                 filePath = Path::join(includePath, filePath);
                                 found = true;
                                 break;
@@ -411,13 +415,13 @@ string ShaderCreator::processDirectives(const string &src, const Path &baseInclu
                         continue;
                     }
                 }
-            } else if (!Path(filePath).exists()) {
+            } else if (!exists(Path(filePath))) {
                 fileNotFoundError();
                 continue;
             }
 
             insert(result, matches.pos, matches.size,
-                   processDirectives(File(filePath, File::Mode::ReadText).readStr(), filePath.getParentDirectory()));
+                   processDirectives(readStr(filePath.toString()), filePath.getParentDirectory()));
         } else if (pragmaIs(Link)) {
             auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~((.+)[ \t]+(.+))~");
 

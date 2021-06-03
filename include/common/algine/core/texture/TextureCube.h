@@ -24,7 +24,8 @@ public:
 public:
     TextureCube();
 
-    void fromFile(const std::string &path, Face face, DataType dataType = DataType::UnsignedByte, bool flipImage = false);
+    void fromFile(Face face, const TextureFileInfo &fileInfo);
+    void fromFile(Face face, const std::string &path);
     void update() override;
 
     static std::map<uint, uint> defaultParams();

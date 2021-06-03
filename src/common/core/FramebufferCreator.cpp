@@ -144,6 +144,7 @@ FramebufferPtr FramebufferCreator::create() {
             using TCreator = type_holder_get(creatorType);
 
             TCreator creator;
+            creator.setIOSystem(io());
             creator.setWorkingDirectory(m_workingDirectory);
             creator.importFromFile(path);
 
@@ -168,15 +169,17 @@ FramebufferPtr FramebufferCreator::create() {
 
         using T = typename decltype(attachments.m_creators)::mapped_type;
 
-        for (auto & p : attachments.m_creators) {
-            attach(p.second.get(), p.first);
+        for (auto &p : attachments.m_creators) {
+            auto &creator = p.second;
+            creator.setIOSystem(io());
+            attach(creator.get(), p.first);
         }
 
-        for (const auto & p : attachments.m_paths) {
+        for (const auto &p : attachments.m_paths) {
             attachByPath(p.second, p.first, type_holder<T>());
         }
 
-        for (const auto & p : attachments.m_names) {
+        for (const auto &p : attachments.m_names) {
             attachByName(p.second, p.first, type);
         }
     };

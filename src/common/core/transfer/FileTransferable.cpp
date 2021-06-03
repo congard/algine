@@ -27,10 +27,10 @@ void FileTransferable::importFromFile(const string &path) {
         m_workingDirectory = Path(path).getParentDirectory().toString();
     }
 
-    import(File(m_confPath, File::Mode::ReadText).readStr());
+    import(readStr(m_confPath));
 }
 
 void FileTransferable::dumpToFile(const string &path) {
-    File(path, File::Mode::WriteText).write(dump().toString());
+    writeStr(path, dump().toString());
 }
 }

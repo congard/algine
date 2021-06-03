@@ -95,17 +95,20 @@ ShaderProgramPtr ShaderProgramCreator::create() {
         }
     };
 
-    for (auto & creator : m_shaders)
+    for (auto &creator : m_shaders) {
+        creator.setIOSystem(io());
         processMixedShader(creator);
+    }
 
-    for (auto & path : m_shaderPaths) {
+    for (auto &path : m_shaderPaths) {
         ShaderCreator creator;
+        creator.setIOSystem(io());
         creator.setWorkingDirectory(m_workingDirectory);
         creator.importFromFile(path);
         processMixedShader(creator);
     }
 
-    for (auto & name : m_shaderNames) {
+    for (auto &name : m_shaderNames) {
         auto shader = Shader::byName(name);
 
         if (shader == nullptr)

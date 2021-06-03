@@ -2,6 +2,7 @@
 #define ALGINE_TEXTURE_H
 
 #include <algine/core/texture/TextureCreateInfo.h>
+#include <algine/core/texture/TextureFileInfo.h>
 #include <algine/core/DataType.h>
 #include <algine/core/Object.h>
 
@@ -125,7 +126,7 @@ protected:
 
 protected:
     explicit Texture(uint target);
-    void texFromFile(const std::string &path, uint target, DataType dataType = DataType::UnsignedByte, bool flipImage = true);
+    void texFromFile(uint target, const TextureFileInfo &info);
 };
 }
 

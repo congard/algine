@@ -148,11 +148,13 @@ const map<AMTLMaterialManager::Texture, string>& AMTLMaterialManager::getTexture
 
 Texture2DPtr AMTLMaterialManager::loadTexture(Texture type) {
     if (auto it = m_textures.find(type); it != m_textures.end()) {
+        it->second.setIOSystem(io());
         return it->second.get();
     }
 
     if (auto it = m_texPaths.find(type); it != m_texPaths.end()) {
         Texture2DCreator manager;
+        manager.setIOSystem(io());
         manager.setWorkingDirectory(m_workingDirectory);
         manager.importFromFile(it->second);
         return manager.get();
@@ -164,6 +166,8 @@ Texture2DPtr AMTLMaterialManager::loadTexture(Texture type) {
 
     return nullptr;
 }
+
+// TODO: use magic_enum
 
 #define textureType_str(element) if (type == AMTLMaterialManager::Texture::element) return Config::element;
 

@@ -1,6 +1,7 @@
 #ifndef ALGINE_ICON_H
 #define ALGINE_ICON_H
 
+#include <algine/core/Engine.h>
 #include <algine/core/Ptr.h>
 
 #include <string>
@@ -12,7 +13,7 @@ public:
 
 public:
     Icon();
-    explicit Icon(const std::string &path);
+    explicit Icon(const std::string &path, const std::shared_ptr<IOSystem> &ioSystem = nullptr);
 
     void setWidth(int width);
     void setHeight(int height);

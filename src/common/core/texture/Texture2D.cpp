@@ -24,9 +24,13 @@ vector<Texture2DPtr> Texture2D::publicObjects;
 Texture2D::Texture2D()
     : Texture(GL_TEXTURE_2D) {}
 
-void Texture2D::fromFile(const std::string &path, DataType dataType, bool flipImage) {
+void Texture2D::fromFile(const TextureFileInfo &fileInfo) {
     checkBinding()
-    texFromFile(path, GL_TEXTURE_2D, dataType, flipImage);
+    texFromFile(GL_TEXTURE_2D, fileInfo);
+}
+
+void Texture2D::fromFile(const std::string &path) {
+    fromFile(TextureFileInfo {path});
 }
 
 void Texture2D::update() {

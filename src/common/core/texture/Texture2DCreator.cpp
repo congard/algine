@@ -42,7 +42,12 @@ Texture2DPtr Texture2DCreator::create() {
     texture->bind();
 
     if (!m_path.empty()) {
-        texture->fromFile(Path::join(m_workingDirectory, m_path), m_dataType);
+        TextureFileInfo info;
+        info.path = Path::join(m_workingDirectory, m_path);
+        info.dataType = m_dataType;
+        info.flip = true;
+        info.ioSystem = io();
+        texture->fromFile(info);
     } else {
         texture->setDimensions(m_width, m_height);
         texture->update();

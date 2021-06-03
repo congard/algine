@@ -58,8 +58,12 @@ TextureCubePtr TextureCubeCreator::create() {
     texture->bind();
 
     if (!m_paths.empty()) {
-        for (const auto & path : m_paths) {
-            texture->fromFile(Path::join(m_workingDirectory, path.second), path.first, m_dataType);
+        for (const auto &path : m_paths) {
+            TextureFileInfo info;
+            info.path = Path::join(m_workingDirectory, path.second);
+            info.dataType = m_dataType;
+            info.ioSystem = io();
+            texture->fromFile(path.first, info);
         }
     } else {
         texture->setDimensions(m_width, m_height);

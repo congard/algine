@@ -145,6 +145,7 @@ InputLayoutShapeLocations InputLayoutShapeLocationsCreator::create() {
         }
         case ShaderProgramDumpMode::Path: {
             ShaderProgramCreator creator;
+            creator.setIOSystem(io());
             creator.setWorkingDirectory(m_workingDirectory);
             creator.importFromFile(m_shaderPath);
 
@@ -153,6 +154,7 @@ InputLayoutShapeLocations InputLayoutShapeLocationsCreator::create() {
             break;
         }
         case ShaderProgramDumpMode::Dump: {
+            m_shader.setIOSystem(io());
             m_programPtr = m_shader.get();
             break;
         }

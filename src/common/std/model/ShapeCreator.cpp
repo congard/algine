@@ -9,6 +9,11 @@
 #include <algine/core/TypeRegistry.h>
 #include <algine/core/log/Log.h>
 
+#include <algine/core/io/IOSystem.h>
+#include <algine/core/io/IOStream.h>
+
+#include <assimp/IOSystem.hpp>
+#include <assimp/IOStream.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -370,6 +375,82 @@ inline auto getParams(const vector<ShapeCreator::Param> &params) {
     }
 }
 
+class AssimpCustomIOStream: public Assimp::IOStream {
+public:
+    explicit AssimpCustomIOStream(unique_ptr<algine::IOStream> &ioStream) {
+        swap(m_ioStream, ioStream);
+    }
+
+    size_t Read(void *pvBuffer, size_t pSize, size_t pCount) override {
+        return m_ioStream->read(pvBuffer, pSize, pCount);
+    }
+
+    size_t Write(const void *pvBuffer, size_t pSize, size_t pCount) override {
+        return m_ioStream->write(pvBuffer, pSize, pCount);
+    }
+
+    aiReturn Seek(size_t pOffset, aiOrigin pOrigin) override {
+        return static_cast<aiReturn>(m_ioStream->seek(pOffset, pOrigin));
+    }
+
+    size_t Tell() const override {
+        return m_ioStream->tell();
+    }
+
+    size_t FileSize() const override {
+        return m_ioStream->size();
+    }
+
+    void Flush() override {
+        m_ioStream->flush();
+    }
+
+    void close() {
+        m_ioStream->close();
+    }
+
+private:
+    unique_ptr<algine::IOStream> m_ioStream;
+};
+
+class AssimpCustomIOSystem: public Assimp::IOSystem {
+public:
+    explicit AssimpCustomIOSystem(const shared_ptr<algine::IOSystem> &ioSystem)
+        : m_ioSystem(ioSystem) {}
+
+    bool Exists(const char *pFile) const override {
+        return m_ioSystem->exists(pFile);
+    }
+
+    char getOsSeparator() const override {
+        return m_ioSystem->getSeparator();
+    }
+
+    Assimp::IOStream *Open(const char *pFile, const char *pMode) override {
+        auto isSame = [](const char *p1, const char *p2) { return !strcmp(p1, p2); };
+
+        auto stream = m_ioSystem->open(pFile, [&]() {
+            if (isSame(pMode, "r")) return IOStream::Mode::ReadText;
+            if (isSame(pMode, "rb")) return IOStream::Mode::Read;
+            if (isSame(pMode, "w")) return IOStream::Mode::WriteText;
+            if (isSame(pMode, "wb")) return IOStream::Mode::Write;
+            if (isSame(pMode, "a")) return IOStream::Mode::AppendText;
+            if (isSame(pMode, "ab")) return IOStream::Mode::Append;
+
+            return IOStream::Mode::None;
+        }());
+
+        return new AssimpCustomIOStream(stream);
+    }
+
+    void Close(Assimp::IOStream *pFile) override {
+        static_cast<AssimpCustomIOStream *>(pFile)->close();
+    }
+
+private:
+    shared_ptr<algine::IOSystem> m_ioSystem;
+};
+
 void ShapeCreator::loadFile() {
     if (m_shape == nullptr) {
         m_shape.reset(TypeRegistry::create<Shape>(m_className));
@@ -377,8 +458,10 @@ void ShapeCreator::loadFile() {
 
     // Create an instance of the Importer class
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(Path::join(m_workingDirectory, m_modelPath),
-                                             algine::getParams<PARAMS_TYPE_ASSIMP>(m_params));
+    importer.SetIOHandler(new AssimpCustomIOSystem(io()));
+
+    const aiScene *scene = importer.ReadFile(
+            Path::join(m_workingDirectory, m_modelPath), algine::getParams<PARAMS_TYPE_ASSIMP>(m_params));
 
     // If the import failed, report it
     if (!scene) {
@@ -395,7 +478,8 @@ void ShapeCreator::loadFile() {
         }
 
         // try to load AMTL
-        if (string fullAMTLPath = Path::join(m_workingDirectory, m_amtlPath); Path(fullAMTLPath).exists()) {
+        if (string fullAMTLPath = Path::join(m_workingDirectory, m_amtlPath); io()->exists(Path(fullAMTLPath).toString())) {
+            m_amtlManager.setIOSystem(io());
             m_amtlManager.importFromFile(fullAMTLPath);
         }
     }
@@ -445,14 +529,15 @@ void ShapeCreator::loadShape() {
 
     // add input layouts
     for (auto &item : m_locations) {
+        item.setIOSystem(io());
         m_shape->createInputLayout(item.create());
     }
 
     for (auto &item : m_locationsPaths) {
         InputLayoutShapeLocationsCreator locations;
+        locations.setIOSystem(io());
         locations.setWorkingDirectory(m_workingDirectory);
         locations.importFromFile(item);
-
         m_shape->createInputLayout(locations.create());
     }
 }
@@ -672,6 +757,7 @@ void ShapeCreator::processMesh(const aiMesh *aimesh, const aiScene *scene) {
             };
 
             Texture2DCreator creator;
+            creator.setIOSystem(io());
             creator.setWorkingDirectory(Path(Path::join(m_workingDirectory, m_modelPath)).getParentDirectory().toString());
             creator.setPath(path.C_Str());
             creator.setParams({

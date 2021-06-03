@@ -1,5 +1,4 @@
 #include <algine/core/texture/Texture.h>
-
 #include <algine/core/Engine.h>
 
 #include <iostream>
@@ -18,6 +17,8 @@ using namespace std;
 #define SOP_OBJECT_TYPE getTextureObject(m_target)
 #define SOP_OBJECT_ID m_id
 #define SOP_OBJECT_NAME getTextureObjectName(m_target)
+
+#include "core/IOStreamUtils.h"
 
 inline void* getBoundTexture(const uint target) {
     switch (target) {
@@ -156,11 +157,14 @@ void Texture::activateSlot(uint slot) {
     glActiveTexture(GL_TEXTURE0 + slot);
 }
 
-void Texture::texFromFile(const string &path, uint target, DataType dataType, bool flipImage) {
+void Texture::texFromFile(uint target, const TextureFileInfo &info) {
+    stbi_set_flip_vertically_on_load(info.flip);
+
+    auto bytes = IOStreamUtils::readAll<stbi_uc>(info.path, info.ioSystem);
     int channels;
-    stbi_set_flip_vertically_on_load(flipImage);
-    unsigned char *data = stbi_load(path.c_str(),
-                                    reinterpret_cast<int*>(&m_width), reinterpret_cast<int*>(&m_height), &channels, 0);
+
+    unsigned char *data = stbi_load_from_memory(
+            bytes.array(), (int) bytes.size(), reinterpret_cast<int*>(&m_width), reinterpret_cast<int*>(&m_height), &channels, 0);
 
     int formats[] = {Red, RG, RGB, RGBA};
     int dataFormat = formats[channels - 1];
@@ -174,10 +178,10 @@ void Texture::texFromFile(const string &path, uint target, DataType dataType, bo
     )
 
     if (data) {
-        glTexImage2D(target, m_lod, m_format, m_width, m_height, 0, dataFormat, static_cast<uint>(dataType), data);
+        glTexImage2D(target, m_lod, m_format, m_width, m_height, 0, dataFormat, static_cast<uint>(info.dataType), data);
         glGenerateMipmap(m_target);
     } else {
-        cerr << "Failed to load texture " << path << "\n";
+        cerr << "Failed to load texture " << info.path << "\n";
         return;
     }
 

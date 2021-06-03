@@ -14,7 +14,8 @@ class Texture2D: public Texture {
 public:
     Texture2D();
 
-    void fromFile(const std::string &path, DataType dataType = DataType::UnsignedByte, bool flipImage = true);
+    void fromFile(const TextureFileInfo &fileInfo);
+    void fromFile(const std::string &path);
     void update() override;
 
     /**
