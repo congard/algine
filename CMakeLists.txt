@@ -63,6 +63,7 @@ set(ALGINE_CORE_SOURCES
         include/common/algine/core/shader/ShaderProgramPtr.h
         include/common/algine/core/texture/Texture2DPtr.h
         include/common/algine/core/texture/TextureCubePtr.h
+        include/common/algine/core/texture/TextureFileInfo.h
         include/common/algine/core/RenderbufferPtr.h
         include/common/algine/core/FramebufferPtr.h
         include/common/algine/core/Ptr.h
@@ -125,7 +126,8 @@ set(ALGINE_CORE_SOURCES
         src/common/core/io/IOStream.cpp include/common/algine/core/io/IOStream.h
         src/common/core/io/StandardIOSystem.cpp include/common/algine/core/io/StandardIOSystem.h
         src/common/core/io/StandardIOStream.cpp include/common/algine/core/io/StandardIOStream.h
-        src/common/core/io/IOWrapper.cpp include/common/algine/core/io/IOWrapper.h)
+        src/common/core/io/IOWrapper.cpp include/common/algine/core/io/IOWrapper.h
+        src/common/core/IOStreamUtils.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/constants/BoneSystem.h
