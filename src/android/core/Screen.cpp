@@ -3,6 +3,8 @@
 #include <algine/core/Content.h>
 #include <algine/core/ScreenEventHandler.h>
 
+#include <tulz/macros.h>
+
 #include <stdexcept>
 
 #include "Bridge.h"
