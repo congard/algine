@@ -1,5 +1,5 @@
 #define GLM_FORCE_CTOR_INIT
-#include <algine/std/camera/Camera.h>
+#include <algine/std/Camera.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 

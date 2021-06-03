@@ -172,7 +172,7 @@ set(ALGINE_STD_SOURCES
         src/common/std/animation/BonesStorage.cpp include/common/algine/std/animation/BonesStorage.h
         src/common/std/animation/AnimationBlender.cpp include/common/algine/std/animation/AnimationBlender.h
         src/common/std/animation/BoneSystemManager.cpp include/common/algine/std/animation/BoneSystemManager.h
-        src/common/std/camera/Camera.cpp include/common/algine/std/camera/Camera.h
+        src/common/std/Camera.cpp include/common/algine/std/Camera.h
         src/common/std/rotator/Rotator.cpp include/common/algine/std/rotator/Rotator.h
         src/common/std/rotator/EulerRotator.cpp include/common/algine/std/rotator/EulerRotator.h
         src/common/std/rotator/FreeRotator.cpp include/common/algine/std/rotator/FreeRotator.h
