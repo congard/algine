@@ -38,8 +38,8 @@ CubeRenderer::CubeRenderer(const uint inPosLocation) {
 }
 
 CubeRenderer::~CubeRenderer() {
-    InputLayout::destroy(m_inputLayout);
-    ArrayBuffer::destroy(m_arrayBuffer);
+    delete m_inputLayout;
+    delete m_arrayBuffer;
 }
 
 void CubeRenderer::draw() {

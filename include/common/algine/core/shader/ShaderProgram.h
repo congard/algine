@@ -57,9 +57,6 @@ public:
 
     uint getId() const;
 
-    implementVariadicCreate(ShaderProgram)
-    implementVariadicDestroy(ShaderProgram)
-
 public: // TODO: make private
     uint id;
     std::unordered_map<std::string, int> locations;

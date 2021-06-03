@@ -8,9 +8,6 @@ namespace algine {
 class IndexBuffer: public Buffer {
 public:
     IndexBuffer();
-
-    implementVariadicCreate(IndexBuffer)
-    implementVariadicDestroy(IndexBuffer)
 };
 }
 

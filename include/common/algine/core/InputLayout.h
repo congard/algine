@@ -20,9 +20,6 @@ public:
     void addAttribute(const InputAttributeDescription &inputAttribDescription, const ArrayBuffer *arrayBuffer) const;
     void setIndexBuffer(const IndexBuffer *indexBuffer) const;
 
-    implementVariadicCreate(InputLayout)
-    implementVariadicDestroy(InputLayout)
-
 private:
     uint m_id;
 };

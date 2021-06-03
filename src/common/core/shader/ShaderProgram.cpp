@@ -6,6 +6,7 @@
 #include <algine/gl.h>
 
 #include <tulz/File.h>
+#include <tulz/macros.h>
 
 #include <glm/gtc/type_ptr.hpp>
 

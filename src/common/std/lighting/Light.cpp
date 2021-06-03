@@ -6,7 +6,7 @@
 
 namespace algine {
 Light::~Light() {
-    Framebuffer::destroy(m_shadowFb);
+    delete m_shadowFb;
 }
 
 void Light::translate() { // TODO: check rotate

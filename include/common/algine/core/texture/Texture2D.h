@@ -42,9 +42,6 @@ public:
     uint getActualWidth() const override;
     uint getActualHeight() const override;
 
-    implementVariadicCreate(Texture2D)
-    implementVariadicDestroy(Texture2D)
-
 public:
     static Texture2DPtr getByName(const std::string &name);
     static Texture2D* byName(const std::string &name);

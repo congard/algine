@@ -8,9 +8,6 @@ namespace algine {
 class ArrayBuffer: public Buffer {
 public:
     ArrayBuffer();
-
-    implementVariadicCreate(ArrayBuffer)
-    implementVariadicDestroy(ArrayBuffer)
 };
 }
 

@@ -10,9 +10,6 @@ public:
     UniformBuffer();
 
     static uint getOffsetAlignment();
-
-    implementVariadicCreate(UniformBuffer)
-    implementVariadicDestroy(UniformBuffer)
 };
 }
 

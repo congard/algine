@@ -30,9 +30,6 @@ public:
 
     uint getId() const;
 
-    implementVariadicCreate(Shader)
-    implementVariadicDestroy(Shader)
-
 public:
     static ShaderPtr getByName(const std::string &name);
     static Shader* byName(const std::string &name);

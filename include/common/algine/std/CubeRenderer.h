@@ -16,9 +16,6 @@ public:
     InputLayout *getInputLayout() const;
     ArrayBuffer *getArrayBuffer() const;
 
-    implementVariadicCreate(CubeRenderer)
-    implementVariadicDestroy(CubeRenderer)
-
 public:
     InputLayout *m_inputLayout;
     ArrayBuffer *m_arrayBuffer;

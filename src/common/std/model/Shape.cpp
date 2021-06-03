@@ -12,10 +12,13 @@ vector<ShapePtr> Shape::publicObjects;
 
 Shape::~Shape() {
     for (auto &inputLayout : m_inputLayouts)
-        InputLayout::destroy(inputLayout);
+        delete inputLayout;
 
-    ArrayBuffer::destroy(m_vertices, m_normals, m_texCoords, m_tangents, m_bitangents, m_boneWeights, m_boneIds);
-    IndexBuffer::destroy(m_indices);
+    for (auto &p : {m_vertices, m_normals, m_texCoords, m_tangents, m_bitangents, m_boneWeights, m_boneIds}) {
+        delete p;
+    }
+
+    delete m_indices;
 }
 
 void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {

@@ -85,9 +85,6 @@ public:
     static void setClearDepth(float depth);
     static void setClearStencil(int s);
 
-    implementVariadicCreate(Framebuffer)
-    implementVariadicDestroy(Framebuffer)
-
 public:
     static FramebufferPtr getByName(const std::string &name);
     static Framebuffer* byName(const std::string &name);

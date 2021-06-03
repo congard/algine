@@ -27,8 +27,8 @@ QuadRenderer::QuadRenderer(const uint inPosLocation) {
 }
 
 QuadRenderer::~QuadRenderer() {
-    InputLayout::destroy(m_inputLayout);
-    ArrayBuffer::destroy(m_arrayBuffer);
+    delete m_inputLayout;
+    delete m_arrayBuffer;
 }
 
 void QuadRenderer::draw() {
