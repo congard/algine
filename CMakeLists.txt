@@ -235,7 +235,9 @@ else()
 
             src/android/core/Bridge.cpp src/android/core/Bridge.h
             src/android/core/Screen.cpp include/android/algine/core/Screen.h
-            src/android/core/ScreenEventHandler.cpp include/android/algine/core/ScreenEventHandler.h)
+            src/android/core/ScreenEventHandler.cpp include/android/algine/core/ScreenEventHandler.h
+            src/android/core/io/AssetsIOSystem.cpp include/android/algine/core/io/AssetsIOSystem.h
+            src/android/core/io/AssetsIOStream.cpp include/android/algine/core/io/AssetsIOStream.h)
 endif()
 
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
