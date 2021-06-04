@@ -2,6 +2,8 @@
 
 #include <jni.h>
 
+#include <android/asset_manager.h>
+#include <android/asset_manager_jni.h>
 #include <android/log.h>
 
 #include <algine/core/Engine.h>
@@ -11,6 +13,7 @@
 #include <algine/Android.h>
 
 #include <tulz/DynamicLibrary.h>
+#include <tulz/assets/AssetManager.h>
 
 using namespace algine;
 using namespace tulz;
@@ -25,6 +28,7 @@ using namespace tulz;
 
 static JavaVM *jvm = nullptr;
 static jclass bridge;
+static jobject asset_manager;
 static DynamicLibrary application;
 
 template<typename T>
@@ -88,8 +92,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_algine_android_module_Bridge_init(JNIEnv *env, jclass clazz,
-        jstring application_library)
+Java_com_algine_android_module_Bridge_init(JNIEnv *env,
+        jclass clazz, jstring application_library, jobject activity)
 {
     ALOGI("Bridge init");
 
@@ -106,7 +110,19 @@ Java_com_algine_android_module_Bridge_init(JNIEnv *env, jclass clazz,
 
         Engine::init();
 
-        {
+        { // init assets
+            jclass activity_class = env->GetObjectClass(activity);
+
+            jmethodID activity_class_getAssets = env->GetMethodID(activity_class, "getAssets", "()Landroid/content/res/AssetManager;");
+            jobject local_asset_manager = env->CallObjectMethod(activity, activity_class_getAssets); // activity.getAssets();
+            asset_manager = env->NewGlobalRef(local_asset_manager);
+
+            auto assetManager = AAssetManager_fromJava(env, asset_manager);
+
+            AssetManager::setJavaAssetManager(assetManager);
+        }
+
+        { // init screen size
             auto dimensions = AndroidBridge::getViewDimensions();
 
             new Screen(); // create an instance of the Screen
@@ -193,6 +209,9 @@ Java_com_algine_android_module_Bridge_onDestroy(JNIEnv *env, jclass clazz) {
 
     Screen::destroyInstance();
     Engine::destroy();
+
+    env->DeleteGlobalRef(asset_manager);
+    env->DeleteGlobalRef(bridge);
 
     application.close(); // call after destroyInstance
 }

@@ -38,7 +38,7 @@ public class Algine {
         view.setRenderer(new GLSurfaceView.Renderer() {
             @Override
             public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-                Bridge.init(Algine.getApplicationLibraryName());
+                Bridge.init(Algine.getApplicationLibraryName(), algineActivity);
 
                 view.surfaceCreated();
             }

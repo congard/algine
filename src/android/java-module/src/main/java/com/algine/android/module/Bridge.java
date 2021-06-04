@@ -1,5 +1,6 @@
 package com.algine.android.module;
 
+import android.app.Activity;
 import android.opengl.GLSurfaceView;
 
 import static com.algine.android.module.Algine.algineViewActionHandler;
@@ -12,7 +13,7 @@ public class Bridge {
 
     // output calls
 
-    public static native void init(String applicationLibrary);
+    public static native void init(String applicationLibrary, Activity activity);
 
     public static native void pointerDown(float x, float y, int pointerId);
     public static native void pointerMove(float x, float y, int pointerId);
