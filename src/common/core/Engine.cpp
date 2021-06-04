@@ -10,8 +10,6 @@
 #include <algine/core/InputLayout.h>
 #include <algine/core/TypeRegistry.h>
 
-#include <algine/core/io/StandardIOSystem.h>
-
 #include <algine/gl.h>
 
 #include <chrono>
@@ -19,7 +17,10 @@
 #include "core/debug/Debug.h"
 
 #ifndef __ANDROID__
+    #include <algine/core/io/StandardIOSystem.h>
     #include <GLFW/glfw3.h>
+#else
+    #include <algine/core/io/AssetsIOSystem.h>
 #endif
 
 #ifndef ALGINE_CORE_ONLY
@@ -127,7 +128,11 @@ void Engine::init() {
     m_boundShaderProgram = m_defaultShaderProgram;
     m_boundInputLayout = m_defaultInputLayout;
 
+#ifndef __ANDROID__
     m_defaultIOSystem = make_shared<StandardIOSystem>();
+#else
+    m_defaultIOSystem = make_shared<AssetsIOSystem>();
+#endif
 
     initExtra();
 }
