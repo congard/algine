@@ -2,12 +2,12 @@
 #define ALGINE_FILETRANSFERABLE_H
 
 #include <algine/core/transfer/Transferable.h>
-#include <algine/core/io/IOWrapper.h>
+#include <algine/core/io/IOProvider.h>
 
 #include <string>
 
 namespace algine {
-class FileTransferable: public Transferable, public IOWrapper {
+class FileTransferable: public Transferable, public IOProvider {
 public:
     void setWorkingDirectory(const std::string &path);
     const std::string& getWorkingDirectory() const;

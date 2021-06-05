@@ -126,7 +126,7 @@ set(ALGINE_CORE_SOURCES
         src/common/core/io/IOStream.cpp include/common/algine/core/io/IOStream.h
         src/common/core/io/StandardIOSystem.cpp include/common/algine/core/io/StandardIOSystem.h
         src/common/core/io/StandardIOStream.cpp include/common/algine/core/io/StandardIOStream.h
-        src/common/core/io/IOWrapper.cpp include/common/algine/core/io/IOWrapper.h
+        src/common/core/io/IOProvider.cpp include/common/algine/core/io/IOProvider.h
         src/common/core/IOStreamUtils.h)
 
 set(ALGINE_STD_SOURCES

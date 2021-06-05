@@ -1,14 +1,14 @@
-#ifndef ALGINE_IOWRAPPER_H
-#define ALGINE_IOWRAPPER_H
+#ifndef ALGINE_IOPROVIDER_H
+#define ALGINE_IOPROVIDER_H
 
 #include <algine/core/io/IOSystem.h>
 
 #include <memory>
 
 namespace algine {
-class IOWrapper {
+class IOProvider {
 public:
-    IOWrapper();
+    IOProvider();
 
     void setIOSystem(IOSystem *ioSystem);
     void setIOSystem(const std::shared_ptr<IOSystem> &ioSystem);
@@ -25,4 +25,4 @@ private:
 };
 }
 
-#endif //ALGINE_IOWRAPPER_H
+#endif //ALGINE_IOPROVIDER_H
