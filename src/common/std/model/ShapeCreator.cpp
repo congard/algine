@@ -678,123 +678,92 @@ void ShapeCreator::processMesh(const aiMesh *aimesh, const aiScene *scene) {
     mesh.count = m_indices.size() - mesh.start;
 
     // load classic & AMTL material
-    aiMaterial *material = scene->mMaterials[aimesh->mMaterialIndex];
+    aiMaterial *pAiMaterial = scene->mMaterials[aimesh->mMaterialIndex];
 
-    mesh.material.name = material->GetName().C_Str();
+    auto &material = mesh.material;
+    material.setName(pAiMaterial->GetName().C_Str());
 
     AMTLMaterialManager dummyAMTLMaterialManager;
     auto &amtlMaterialManager =
-            m_amtlManager.isMaterialExists(mesh.material.name) ?
-            m_amtlManager.getMaterial(mesh.material.name) : dummyAMTLMaterialManager;
+            m_amtlManager.isMaterialExists(material.getName()) ?
+            m_amtlManager.getMaterial(material.getName()) : dummyAMTLMaterialManager;
 
-    using TextureType = AMTLMaterialManager::Texture;
+    // I. Load textures from Algine Material
+    for (const string &type : amtlMaterialManager.collectTextureNames()) {
+        auto texture = amtlMaterialManager.loadTexture(type);
+        material.setTexture2D(type, texture);
+    }
 
-    auto loadTexture = [&](TextureType type)
-    {
-        auto getAssimpType = [&]()
-        {
-            switch (type) {
-                case TextureType::Ambient: return aiTextureType_AMBIENT;
-                case TextureType::Diffuse: return aiTextureType_DIFFUSE;
-                case TextureType::Specular: return aiTextureType_SPECULAR;
-                case TextureType::Normal: return aiTextureType_NORMALS;
-                default: return aiTextureType_UNKNOWN;
-            }
-        };
-
-        auto getTexturePtr = [&]() -> auto&
-        {
-            switch (type) {
-                case TextureType::Ambient: return mesh.material.ambientTexture;
-                case TextureType::Diffuse: return mesh.material.diffuseTexture;
-                case TextureType::Specular: return mesh.material.specularTexture;
-                case TextureType::Normal: return mesh.material.normalTexture;
-                case TextureType::Reflection: return mesh.material.reflectionTexture;
-                case TextureType::Jitter: return mesh.material.jitterTexture;
-                default: assert(0);
-            }
-        };
-
-        // try to load texture from AMTLMaterial
-        {
-            auto &texture = getTexturePtr();
-
-            texture = amtlMaterialManager.loadTexture(type);
-
-            if (texture != nullptr) {
-                return;
-            }
-        }
-
-        // otherwise try to load texture from aiMaterial
-        {
-            auto assimpType = getAssimpType();
-
-            if (assimpType == aiTextureType_UNKNOWN)
-                return;
-
-            aiString path;
-            material->GetTexture(assimpType, 0, &path);
-
-            if (path.length == 0)
-                return;
-
-            aiTextureMapMode mapModeU = aiTextureMapMode_Clamp;
-            material->Get(AI_MATKEY_MAPPINGMODE_U(assimpType, 0), mapModeU);
-
-            aiTextureMapMode mapModeV = aiTextureMapMode_Clamp;
-            material->Get(AI_MATKEY_MAPPINGMODE_V(assimpType, 0), mapModeV);
-
-            auto getMapMode = [](aiTextureMapMode assimpMode)
-            {
-                switch (assimpMode) {
-                    case aiTextureMapMode_Wrap: return Texture::Repeat;
-                    case aiTextureMapMode_Clamp: return Texture::ClampToEdge;
-                    case aiTextureMapMode_Decal: return Texture::ClampToBorder;
-                    case aiTextureMapMode_Mirror: return Texture::MirroredRepeat;
-                    default: return Texture::ClampToEdge;
-                }
-            };
-
-            Texture2DCreator creator;
-            creator.setIOSystem(io());
-            creator.setWorkingDirectory(Path(Path::join(m_workingDirectory, m_modelPath)).getParentDirectory().toString());
-            creator.setPath(path.C_Str());
-            creator.setParams({
-                {Texture::WrapU, getMapMode(mapModeU)},
-                {Texture::WrapV, getMapMode(mapModeV)},
-                {Texture::MinFilter, Texture::Linear},
-                {Texture::MagFilter, Texture::Linear}
-            });
-
-            getTexturePtr() = creator.create();
-        }
+    // II. Load textures from Assimp Material
+    auto assimpTextures = map<aiTextureType, const char*> {
+            {aiTextureType_AMBIENT, Material::AmbientTexture},
+            {aiTextureType_DIFFUSE, Material::DiffuseTexture},
+            {aiTextureType_SPECULAR, Material::SpecularTexture},
+            {aiTextureType_NORMALS, Material::NormalTexture}
     };
 
-    loadTexture(TextureType::Ambient);
-    loadTexture(TextureType::Diffuse);
-    loadTexture(TextureType::Specular);
-    loadTexture(TextureType::Normal);
-    loadTexture(TextureType::Reflection);
-    loadTexture(TextureType::Jitter);
+    for (auto &p : assimpTextures) {
+        auto &texName = p.second;
 
-    mesh.material.ambientStrength = amtlMaterialManager.getAmbientStrength();
-    mesh.material.diffuseStrength = amtlMaterialManager.getDiffuseStrength();
-    mesh.material.specularStrength = amtlMaterialManager.getSpecularStrength();
-    mesh.material.reflection = amtlMaterialManager.getReflection();
-    mesh.material.jitter = amtlMaterialManager.getJitter();
+        if (material.hasTexture2D(texName)) {
+            continue; // texture has been already loaded from Algine Material
+        }
 
-    if (amtlMaterialManager.getShininess() != -1) {
-        mesh.material.shininess = amtlMaterialManager.getShininess();
-    } else {
-        material->Get(AI_MATKEY_SHININESS, mesh.material.shininess);
+        auto assimpType = p.first;
+
+        if (assimpType == aiTextureType_UNKNOWN)
+            continue;
+
+        aiString path;
+        pAiMaterial->GetTexture(assimpType, 0, &path);
+
+        if (path.length == 0)
+            continue;
+
+        aiTextureMapMode mapModeU = aiTextureMapMode_Clamp;
+        pAiMaterial->Get(AI_MATKEY_MAPPINGMODE_U(assimpType, 0), mapModeU);
+
+        aiTextureMapMode mapModeV = aiTextureMapMode_Clamp;
+        pAiMaterial->Get(AI_MATKEY_MAPPINGMODE_V(assimpType, 0), mapModeV);
+
+        auto getMapMode = [](aiTextureMapMode assimpMode) {
+            switch (assimpMode) {
+                case aiTextureMapMode_Wrap: return Texture::Repeat;
+                case aiTextureMapMode_Clamp: return Texture::ClampToEdge;
+                case aiTextureMapMode_Decal: return Texture::ClampToBorder;
+                case aiTextureMapMode_Mirror: return Texture::MirroredRepeat;
+                default: return Texture::ClampToEdge;
+            }
+        };
+
+        Texture2DCreator creator;
+        creator.setIOSystem(io());
+        creator.setWorkingDirectory(Path(Path::join(m_workingDirectory, m_modelPath)).getParentDirectory().toString());
+        creator.setPath(path.C_Str());
+        creator.setParams({
+            {Texture::WrapU, getMapMode(mapModeU)},
+            {Texture::WrapV, getMapMode(mapModeV)},
+            {Texture::MinFilter, Texture::Linear},
+            {Texture::MagFilter, Texture::Linear}
+        });
+
+        material.setTexture2D(texName, creator.create());
+    }
+
+    // III. Set values
+    material.setFloats(amtlMaterialManager.getFloats());
+
+    if (!material.hasFloat(Material::Shininess)) {
+        float shininess;
+        pAiMaterial->Get(AI_MATKEY_SHININESS, shininess);
+        material.setFloat(Material::Shininess, shininess);
     }
 
     // the result is undefined if shininess ≤ 0
     // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/pow.xhtml
     // FLT_EPSILON - min positive value for float
-    if (mesh.material.shininess == 0)
-        mesh.material.shininess = FLT_EPSILON;
+    if (material.getFloat(Material::Shininess) == 0)
+        material.setFloat(Material::Shininess, FLT_EPSILON);
 
     m_shape->m_meshes.push_back(mesh);
 }
@@ -820,7 +789,6 @@ void ShapeCreator::genBuffers() {
     m_shape->m_bitangents = createBuffer<ArrayBuffer>(m_bitangents);
     m_shape->m_boneWeights = createBuffer<ArrayBuffer>(m_boneWeights);
     m_shape->m_boneIds = createBuffer<ArrayBuffer>(m_boneIds);
-
     m_shape->m_indices = createBuffer<IndexBuffer>(m_indices);
 }
 }

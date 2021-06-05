@@ -3,57 +3,36 @@
 
 #include <algine/core/texture/Texture2DCreator.h>
 
-#include <map>
+#include <unordered_map>
+#include <set>
 
 namespace algine {
 class AMTLMaterialManager: public Transferable, public IOWrapper {
     friend class AMTLManager;
 
 public:
-    enum class Texture {
-        Ambient,
-        Diffuse,
-        Specular,
-        Normal,
-        Reflection,
-        Jitter
-    };
-
-public:
     AMTLMaterialManager();
-    explicit AMTLMaterialManager(const std::string &name);
+    explicit AMTLMaterialManager(std::string name);
 
     void setName(const std::string &name);
-
-    void setAmbientStrength(float ambientStrength);
-    void setDiffuseStrength(float diffuseStrength);
-    void setSpecularStrength(float specularStrength);
-    void setShininess(float shininess);
-    void setReflection(float reflection);
-    void setJitter(float jitter);
-
-    void setTextures(const std::map<Texture, Texture2DCreator> &textures);
-    void setTextureNames(const std::map<Texture, std::string> &names);
-    void setTexturePaths(const std::map<Texture, std::string> &paths);
-
-    void setTexture(Texture type, const Texture2DCreator &texture);
-    void setTextureName(Texture type, const std::string &name);
-    void setTexturePath(Texture type, const std::string &path);
+    void setFloat(const std::string &name, float value);
+    void setTexture(const std::string &name, const Texture2DCreator &texture);
+    void setTextureName(const std::string &name, const std::string &texName);
+    void setTexturePath(const std::string &name, const std::string &path);
 
     const std::string& getName() const;
+    float getFloat(const std::string &name) const;
+    bool hasFloat(const std::string &name) const;
+    bool hasTexture(const std::string &name) const;
 
-    float getAmbientStrength() const;
-    float getDiffuseStrength() const;
-    float getSpecularStrength() const;
-    float getShininess() const;
-    float getReflection() const;
-    float getJitter() const;
+    const std::unordered_map<std::string, float>& getFloats() const;
+    const std::unordered_map<std::string, Texture2DCreator>& getTextures() const;
+    const std::unordered_map<std::string, std::string>& getTextureNames() const;
+    const std::unordered_map<std::string, std::string>& getTexturePaths() const;
 
-    const std::map<Texture, Texture2DCreator>& getTextures() const;
-    const std::map<Texture, std::string>& getTextureNames() const;
-    const std::map<Texture, std::string>& getTexturePaths() const;
+    std::set<std::string> collectTextureNames() const;
 
-    Texture2DPtr loadTexture(Texture m);
+    Texture2DPtr loadTexture(const std::string &texName);
 
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
@@ -62,12 +41,9 @@ private:
     std::string m_workingDirectory;
     std::string m_name;
 
-    float m_ambientStrength, m_diffuseStrength, m_specularStrength;
-    float m_reflection, m_jitter;
-    float m_shininess;
-
-    std::map<Texture, Texture2DCreator> m_textures;
-    std::map<Texture, std::string> m_texPaths, m_texNames;
+    std::unordered_map<std::string, float> m_floats;
+    std::unordered_map<std::string, Texture2DCreator> m_textures;
+    std::unordered_map<std::string, std::string> m_texPaths, m_texNames;
 };
 }
 

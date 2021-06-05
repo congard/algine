@@ -144,7 +144,6 @@ set(ALGINE_STD_SOURCES
         include/common/algine/std/model/Mesh.h
         include/common/algine/std/model/ModelPtr.h
         include/common/algine/std/model/InputLayoutShapeLocations.h
-        include/common/algine/std/Material.h
         include/common/algine/std/animation/BoneMatrix.h
         include/common/algine/std/animation/BoneMatrices.h
 
@@ -182,7 +181,8 @@ set(ALGINE_STD_SOURCES
         src/common/std/Translatable.cpp include/common/algine/std/Translatable.h
         src/common/std/Scalable.cpp include/common/algine/std/Scalable.h
         src/common/std/AMTLMaterialManager.cpp include/common/algine/std/AMTLMaterialManager.h
-        src/common/std/AMTLManager.cpp include/common/algine/std/AMTLManager.h)
+        src/common/std/AMTLManager.cpp include/common/algine/std/AMTLManager.h
+        src/common/std/Material.cpp include/common/algine/std/Material.h)
 
 set(ALGINE_EXT_SOURCES
         include/common/algine/ext/constants/BlurShader.h
