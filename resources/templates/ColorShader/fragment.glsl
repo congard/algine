@@ -12,8 +12,8 @@ uniform mat4 viewMatrix;
 uniform vec3 cameraPos;
 uniform bool textureMappingEnabled;	// ALGINE_TEXTURE_MAPPING_MODE_DUAL
 
+in mat3 matTBN;
 in vec3 worldPosition; // Position for this fragment in world space
-in vec3 viewNormal; // Interpolated normal for this fragment, needs if normal mapping disabled
 in vec3 viewPosition;
 in vec2 texCoord; // Texture coordinates.
 
@@ -23,10 +23,11 @@ layout(location = 1) out vec3 normalBuffer;
 layout(location = 2) out vec3 positionBuffer;
 layout(location = 3) out vec2 ssrValuesBuffer;
 
-#alp include "modules/Material.glsl"
+vec3 viewNormal;
 
-#alp link material.normal normalMappingNormalMap
-#alp include "modules/NormalMapping.glsl"
+#alp include <NormalMapping.fs>
+
+#alp include "modules/Material.glsl"
 
 #alp link viewMatrix lightingViewMatrix
 #alp link cameraPos lightingCameraPos
@@ -35,7 +36,7 @@ layout(location = 3) out vec2 ssrValuesBuffer;
 
 // The entry point for our fragment shader.
 void main() {
-	initNormalMapping();
+	viewNormal = getNormal(material.normal, texCoord, matTBN);
 
 	#ifdef ALGINE_LIGHTING_MODE_ENABLED
 	initLighting();
@@ -78,7 +79,7 @@ void main() {
 	#endif /* ALGINE_LIGHTING_MODE_XXX */
 
 	#ifdef ALGINE_SSR_MODE_ENABLED
-	normalBuffer = normalMapping.viewNormal;
+	normalBuffer = viewNormal;
 	positionBuffer = viewPosition;
 	ssrValuesBuffer.r = texture(material.reflectionStrength, texCoord).r;
 	ssrValuesBuffer.g = texture(material.jitter, texCoord).r;

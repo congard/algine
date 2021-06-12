@@ -114,7 +114,7 @@ float calculateDirLightShadow(uint index) {
 	 * light direction. This way surfaces like the floor that are almost perpendicular to the light source get a small
 	 * bias, while surfaces like the cube’s side-faces get a much larger bias.
 	*/
-	float bias = max(dirLights[index].maxBias * (1.0 - dot(normalMapping.viewNormal, lighting.lightDir)), dirLights[index].minBias);
+	float bias = max(dirLights[index].maxBias * (1.0 - dot(viewNormal, lighting.lightDir)), dirLights[index].minBias);
 
 	// soft shadow pcf 3*3
 	#ifdef ALGINE_SHADOW_MAPPING_MODE_ENABLED // PCF
@@ -155,11 +155,11 @@ void calculateBaseLighting(vec3 pos, vec3 color, float kc, float kl, float kq) {
 
 	// diffuse
 	lighting.lightDir = normalize(lighting.lampEyePos - viewPosition);
-	float diff = max(dot(normalMapping.viewNormal, lighting.lightDir), 0.0);
+	float diff = max(dot(viewNormal, lighting.lightDir), 0.0);
 	lighting.diffuse = material.diffuseStrength * diff * color * attenuation;
 
 	// specular
-	vec3 reflectDir = reflect(-lighting.lightDir, normalMapping.viewNormal);
+	vec3 reflectDir = reflect(-lighting.lightDir, viewNormal);
 	float spec = pow(max(dot(lighting.viewDir, reflectDir), 0.0), material.shininess);
 	lighting.specular = material.specularStrength * spec * color * attenuation;
 }
