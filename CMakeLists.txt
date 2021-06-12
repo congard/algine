@@ -44,6 +44,11 @@ if (ALGINE_SECURE_OPERATIONS)
     message(STATUS "Algine SOP level is ${ALGINE_SOP_LEVEL}")
 endif()
 
+file(READ src/common/core/glsl-modules/BoneSystem.glsl GLSLModules_BoneSystem)
+file(READ src/common/core/glsl-modules/NormalMapping.vs.glsl GLSLModules_NormalMapping_vs)
+file(READ src/common/core/glsl-modules/NormalMapping.fs.glsl GLSLModules_NormalMapping_fs)
+configure_file(src/common/core/glsl-modules/GLSLModules.h.in src/common/core/glsl-modules/GLSLModules.h)
+
 set(ALGINE_CORE_SOURCES
         src/common/internal/PublicObjectTools.h
         src/common/internal/SOP.h
@@ -127,7 +132,8 @@ set(ALGINE_CORE_SOURCES
         src/common/core/io/StandardIOSystem.cpp include/common/algine/core/io/StandardIOSystem.h
         src/common/core/io/StandardIOStream.cpp include/common/algine/core/io/StandardIOStream.h
         src/common/core/io/IOProvider.cpp include/common/algine/core/io/IOProvider.h
-        src/common/core/IOStreamUtils.h)
+        src/common/core/IOStreamUtils.h
+        src/common/core/glsl-modules/GLSLModules.h.in)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/constants/BoneSystem.h
@@ -257,6 +263,7 @@ add_library(algine
 set_target_properties(algine PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(algine PRIVATE src/common)
+target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules)
 
 target_include_directories(algine PRIVATE contrib/assimp/include)
 

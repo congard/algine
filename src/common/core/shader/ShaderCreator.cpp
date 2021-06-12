@@ -10,6 +10,7 @@
 #include <stdexcept>
 
 #include "internal/PublicObjectTools.h"
+#include "GLSLModules.h"
 
 using namespace nlohmann;
 using namespace std;
@@ -374,7 +375,27 @@ string ShaderCreator::processDirectives(const string &src, const Path &baseInclu
         };
 
         if (pragmaIs(Include)) {
-            auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~("(.+)")~"); // "file"
+            // check for inclusion of built-in files
+            vector<Matches> fileMatches = StringUtils::findRegex(matches.matches[2], R"~(<(.+)>)~"); // <file>;
+
+            if (!fileMatches.empty()) {
+                string &path = fileMatches[0].matches[1];
+
+                for (const auto &p : GLSLModules::modules) {
+                    if (path == p.first) {
+                        insert(result, matches.pos, matches.size, p.second);
+                        goto success;
+                    }
+                }
+
+                throw runtime_error("Unknown built-in header: " + path);
+
+                success:
+                continue;
+            }
+
+            // otherwise process as inclusion of user file
+            fileMatches = StringUtils::findRegex(matches.matches[2], R"~("(.+)")~"); // "file"
             Path filePath(fileMatches[0].matches[1]);
 
             auto fileNotFoundError = [&]() {
