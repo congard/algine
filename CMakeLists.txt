@@ -142,7 +142,6 @@ set(ALGINE_STD_SOURCES
         include/common/algine/constants/CubemapShader.h
         include/common/algine/constants/Lighting.h
         include/common/algine/constants/Material.h
-        include/common/algine/constants/NormalMapping.h
 
         include/common/algine/std/QuadRendererPtr.h
         include/common/algine/std/CubeRendererPtr.h
