@@ -47,6 +47,7 @@ endif()
 file(READ src/common/core/glsl-modules/BoneSystem.glsl GLSLModules_BoneSystem)
 file(READ src/common/core/glsl-modules/NormalMapping.vs.glsl GLSLModules_NormalMapping_vs)
 file(READ src/common/core/glsl-modules/NormalMapping.fs.glsl GLSLModules_NormalMapping_fs)
+file(READ src/common/core/glsl-modules/SSR.glsl GLSLModules_SSR)
 configure_file(src/common/core/glsl-modules/GLSLModules.h.in src/common/core/glsl-modules/GLSLModules.h)
 
 set(ALGINE_CORE_SOURCES
@@ -191,7 +192,6 @@ set(ALGINE_STD_SOURCES
 
 set(ALGINE_EXT_SOURCES
         include/common/algine/ext/constants/BlurShader.h
-        include/common/algine/ext/constants/SSRShader.h
         include/common/algine/ext/constants/BlendBloom.h
         include/common/algine/ext/constants/BloomSearchShader.h
         include/common/algine/ext/constants/COCShader.h

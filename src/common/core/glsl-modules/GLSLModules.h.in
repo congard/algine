@@ -7,7 +7,8 @@ namespace algine::GLSLModules {
 constexpr std::pair<const char*, const char*> modules[] = {
     {"BoneSystem", R"(${GLSLModules_BoneSystem})"},
     {"NormalMapping.vs", R"(${GLSLModules_NormalMapping_vs})"},
-    {"NormalMapping.fs", R"(${GLSLModules_NormalMapping_fs})"}
+    {"NormalMapping.fs", R"(${GLSLModules_NormalMapping_fs})"},
+    {"SSR", R"(${GLSLModules_SSR})"}
 };
 }
 
