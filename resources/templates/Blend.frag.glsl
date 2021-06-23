@@ -1,6 +1,6 @@
 #version 330
 
-#alp include "modules/BlendBloom.glsl"
+#alp include <blend>
 #alp include "modules/BlendDOF.glsl"
 
 out vec3 fragColor;
@@ -19,8 +19,7 @@ void main() {
         texCoord
     );
     
-    if (isBloomEnabled())
-        color = blendBloom(texture(bloom, texCoord).rgb, color);
+    color = blendScreen(texture(bloom, texCoord).rgb, color);
     
     fragColor = vec3(1.0) - exp(-color * exposure); // tone mapping
     fragColor = pow(fragColor, vec3(1.0 / gamma)); // gamma correction

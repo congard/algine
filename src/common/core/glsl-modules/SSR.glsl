@@ -1,6 +1,8 @@
 #ifndef ALGINE_MODULE_SSR
 #define ALGINE_MODULE_SSR
 
+#alp include <fresnel>
+
 struct SSRValues {
     vec3 fallbackColor;
 
@@ -106,17 +108,6 @@ vec3 _ssr_hash(vec3 a) {
     return fract((a.xxy + a.yxx) * a.zyx);
 }
 
-// source: https://www.standardabweichung.de/code/javascript/webgl-glsl-fresnel-schlick-approximation
-float _ssr_fresnel(vec3 direction, vec3 normal) {
-    vec3 halfDirection = normalize(normal + direction);
-
-    float cosine = dot(halfDirection, direction);
-    float product = max(cosine, 0.0f);
-    float factor = 1.0f - pow(product, 5.0f);
-
-    return factor;
-}
-
 SSRResult ssrGetResult(
     in sampler2D normalMap, // in view space
     in sampler2D positionMap, // in view space
@@ -160,7 +151,7 @@ vec3 ssrGetColor(
     L = clamp(L * values.LLimiter, 0, 1);
     float error = 1 - L;
 
-    float fresnel = _ssr_fresnel(ssr.reflected, ssr.normal);
+    float fresnel = invertFresnel(ssr.reflected, ssr.normal);
 
     vec3 baseColor = texture(baseImage, values.uv).xyz;
     vec3 color = (ssr.uv != vec2(-1.0)) ? texture(baseImage, ssr.uv).xyz * error * fresnel : values.fallbackColor;
