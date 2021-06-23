@@ -48,6 +48,8 @@ file(READ src/common/core/glsl-modules/BoneSystem.glsl GLSLModules_BoneSystem)
 file(READ src/common/core/glsl-modules/NormalMapping.vs.glsl GLSLModules_NormalMapping_vs)
 file(READ src/common/core/glsl-modules/NormalMapping.fs.glsl GLSLModules_NormalMapping_fs)
 file(READ src/common/core/glsl-modules/SSR.glsl GLSLModules_SSR)
+file(READ src/common/core/glsl-modules/blend.glsl GLSLModules_blend)
+file(READ src/common/core/glsl-modules/fresnel.glsl GLSLModules_fresnel)
 configure_file(src/common/core/glsl-modules/GLSLModules.h.in src/common/core/glsl-modules/GLSLModules.h)
 
 set(ALGINE_CORE_SOURCES
