@@ -383,7 +383,7 @@ string ShaderCreator::processDirectives(const string &src, const Path &baseInclu
 
                 for (const auto &p : GLSLModules::modules) {
                     if (path == p.first) {
-                        insert(result, matches.pos, matches.size, p.second);
+                        insert(result, matches.pos, matches.size, processDirectives(p.second, {}));
                         goto success;
                     }
                 }
