@@ -151,17 +151,17 @@ void calculateBaseLighting(vec3 pos, vec3 color, float kc, float kl, float kq) {
 	#endif
 
 	// ambient
-	lighting.ambient = material.ambientStrength * color * attenuation;
+	lighting.ambient = ambientStrength * color * attenuation;
 
 	// diffuse
 	lighting.lightDir = normalize(lighting.lampEyePos - viewPosition);
 	float diff = max(dot(viewNormal, lighting.lightDir), 0.0);
-	lighting.diffuse = material.diffuseStrength * diff * color * attenuation;
+	lighting.diffuse = diffuseStrength * diff * color * attenuation;
 
 	// specular
 	vec3 reflectDir = reflect(-lighting.lightDir, viewNormal);
-	float spec = pow(max(dot(lighting.viewDir, reflectDir), 0.0), material.shininess);
-	lighting.specular = material.specularStrength * spec * color * attenuation;
+	float spec = pow(max(dot(lighting.viewDir, reflectDir), 0.0), shininess);
+	lighting.specular = specularStrength * spec * color * attenuation;
 }
 
 void initLighting() {
