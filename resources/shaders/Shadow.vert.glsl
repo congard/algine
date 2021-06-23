@@ -1,4 +1,4 @@
-#pragma algine include "modules/BoneSystem.glsl"
+#alp include <BoneSystem>
 
 in vec4 a_Position;
 

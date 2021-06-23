@@ -8,7 +8,7 @@
 #version 330
 
 #alp include <NormalMapping.vs>
-#alp include "modules/BoneSystem.glsl"
+#alp include <BoneSystem>
 
 uniform mat4 MVPMatrix, modelMatrix, viewMatrix, MVMatrix;
 
