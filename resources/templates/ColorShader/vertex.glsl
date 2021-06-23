@@ -1,10 +1,3 @@
-/*
- * @author Congard
- * dbcongard@gmail.com
- * t.me/congard
- * github.com/congard
- */
-
 #version 330
 
 #alp include <NormalMapping.vs>
