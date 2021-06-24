@@ -9,8 +9,20 @@ constexpr std::pair<const char*, const char*> modules[] = {
     {"NormalMapping.vs", R"(${GLSLModules_NormalMapping_vs})"},
     {"NormalMapping.fs", R"(${GLSLModules_NormalMapping_fs})"},
     {"SSR", R"(${GLSLModules_SSR})"},
+
     {"blend", R"(${GLSLModules_blend})"},
-    {"fresnel", R"(${GLSLModules_fresnel})"}
+    {"fresnel", R"(${GLSLModules_fresnel})"},
+
+    {"ToneMapping", R"(${GLSLModules_ToneMapping_all})"},
+    {"ToneMapping/aces", R"(${GLSLModules_ToneMapping_aces})"},
+    {"ToneMapping/exposure", R"(${GLSLModules_ToneMapping_exposure})"},
+    {"ToneMapping/filmic", R"(${GLSLModules_ToneMapping_filmic})"},
+    {"ToneMapping/lottes", R"(${GLSLModules_ToneMapping_lottes})"},
+    {"ToneMapping/reinhard", R"(${GLSLModules_ToneMapping_reinhard})"},
+    {"ToneMapping/reinhard2", R"(${GLSLModules_ToneMapping_reinhard2})"},
+    {"ToneMapping/uchimura", R"(${GLSLModules_ToneMapping_uchimura})"},
+    {"ToneMapping/uncharted2", R"(${GLSLModules_ToneMapping_uncharted2})"},
+    {"ToneMapping/unreal", R"(${GLSLModules_ToneMapping_unreal})"}
 };
 }
 

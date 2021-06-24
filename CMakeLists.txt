@@ -44,12 +44,26 @@ if (ALGINE_SECURE_OPERATIONS)
     message(STATUS "Algine SOP level is ${ALGINE_SOP_LEVEL}")
 endif()
 
+# built-in glsl modules
 file(READ src/common/core/glsl-modules/BoneSystem.glsl GLSLModules_BoneSystem)
 file(READ src/common/core/glsl-modules/NormalMapping.vs.glsl GLSLModules_NormalMapping_vs)
 file(READ src/common/core/glsl-modules/NormalMapping.fs.glsl GLSLModules_NormalMapping_fs)
 file(READ src/common/core/glsl-modules/SSR.glsl GLSLModules_SSR)
+
 file(READ src/common/core/glsl-modules/blend.glsl GLSLModules_blend)
 file(READ src/common/core/glsl-modules/fresnel.glsl GLSLModules_fresnel)
+
+file(READ src/common/core/glsl-modules/ToneMapping/all.glsl GLSLModules_ToneMapping_all)
+file(READ src/common/core/glsl-modules/ToneMapping/aces.glsl GLSLModules_ToneMapping_aces)
+file(READ src/common/core/glsl-modules/ToneMapping/exposure.glsl GLSLModules_ToneMapping_exposure)
+file(READ src/common/core/glsl-modules/ToneMapping/filmic.glsl GLSLModules_ToneMapping_filmic)
+file(READ src/common/core/glsl-modules/ToneMapping/lottes.glsl GLSLModules_ToneMapping_lottes)
+file(READ src/common/core/glsl-modules/ToneMapping/reinhard.glsl GLSLModules_ToneMapping_reinhard)
+file(READ src/common/core/glsl-modules/ToneMapping/reinhard2.glsl GLSLModules_ToneMapping_reinhard2)
+file(READ src/common/core/glsl-modules/ToneMapping/uchimura.glsl GLSLModules_ToneMapping_uchimura)
+file(READ src/common/core/glsl-modules/ToneMapping/uncharted2.glsl GLSLModules_ToneMapping_uncharted2)
+file(READ src/common/core/glsl-modules/ToneMapping/unreal.glsl GLSLModules_ToneMapping_unreal)
+
 configure_file(src/common/core/glsl-modules/GLSLModules.h.in src/common/core/glsl-modules/GLSLModules.h)
 
 set(ALGINE_CORE_SOURCES
