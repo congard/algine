@@ -10,8 +10,14 @@
  * You must link these variables with yours
  */
 
+// TODO: split this file to the modules
+
 #ifndef ALGINE_MODULE_LIGHTING_GLSL
 #define ALGINE_MODULE_LIGHTING_GLSL
+
+#alp include <Shading/diffuseLambert>
+#alp include <Shading/specularBlinnPhong>
+#alp include <Shading/attenuation>
 
 struct DirLight {
 	float kc; // constant term
@@ -59,7 +65,6 @@ struct LightingVars {
 	vec3 ambient, diffuse, specular, lightDir;
 } lighting;
 
-#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
 // for PCF
 const vec3 sampleOffsetDirections[20] = vec3[] (
 		vec3(1, 1, 1), vec3(1, -1, 1), vec3(-1, -1, 1), vec3(-1, 1, 1),
@@ -133,34 +138,22 @@ float calculateDirLightShadow(uint index) {
 	return currentDepth - bias > closestDepth ? 1.0 : 0.0; // simple shadow
 	#endif
 }
-#endif
-
-float calculateAttenuation(float kc, float kl, float kq) {
-	float distance = length(lighting.lampEyePos - viewPosition);
-
-	return 1.0 / (kc + kl * distance + kq * (distance * distance));
-}
 
 void calculateBaseLighting(vec3 pos, vec3 color, float kc, float kl, float kq) {
 	lighting.lampEyePos = vec3(lightingViewMatrix * vec4(pos, 1.0));
+	lighting.lightDir = normalize(lighting.lampEyePos - viewPosition);
 
-	float attenuation = 1.0;
-
-	#ifdef ALGINE_ATTENUATION_MODE_ENABLED
-	attenuation = calculateAttenuation(kc, kl, kq);
-	#endif
+	float attenuation = attenuation(length(lighting.lampEyePos - viewPosition), kc, kl, kq);
 
 	// ambient
 	lighting.ambient = ambientStrength * color * attenuation;
 
 	// diffuse
-	lighting.lightDir = normalize(lighting.lampEyePos - viewPosition);
-	float diff = max(dot(viewNormal, lighting.lightDir), 0.0);
+	float diff = diffuseLambert(viewNormal, lighting.lightDir);
 	lighting.diffuse = diffuseStrength * diff * color * attenuation;
 
 	// specular
-	vec3 reflectDir = reflect(-lighting.lightDir, viewNormal);
-	float spec = pow(max(dot(lighting.viewDir, reflectDir), 0.0), shininess);
+	float spec = specularBlinnPhong(shininess, viewPosition, viewNormal, lighting.lightDir);
 	lighting.specular = specularStrength * spec * color * attenuation;
 }
 
@@ -168,19 +161,15 @@ void initLighting() {
 	lighting.ambientResult = vec3(0.0);
 	lighting.diffuseResult = vec3(0.0);
 	lighting.specularResult = vec3(0.0);
-	lighting.viewDir = normalize(mat3(lightingViewMatrix) * lightingCameraPos - viewPosition);
+	lighting.viewDir = normalize(-viewPosition);
 }
 
 void calculateDirLighting() {
 	for (uint i = 0; i < pointLightsCount; i++) {
 		calculateBaseLighting(pointLights[i].pos, pointLights[i].color, pointLights[i].kc, pointLights[i].kl, pointLights[i].kq);
 		
-		float shadow = 0;
+		float shadow = calculatePointLightShadow(i) * shadowOpacity;
 
-		#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
-		shadow = calculatePointLightShadow(i) * shadowOpacity;
-		#endif
-		
 		lighting.ambientResult += lighting.ambient;
 		lighting.diffuseResult += lighting.diffuse * (1 - shadow);
 		lighting.specularResult += lighting.specular * (1 - shadow);
@@ -191,11 +180,7 @@ void calculatePointLighting() {
 	for (uint i = 0; i < dirLightsCount; i++) {
 		calculateBaseLighting(dirLights[i].pos, dirLights[i].color, dirLights[i].kc, dirLights[i].kl, dirLights[i].kq);
 
-		float shadow = 0;
-
-		#if !defined ALGINE_SHADOW_MAPPING_MODE_DISABLED
-		shadow = calculateDirLightShadow(i) * shadowOpacity;
-		#endif
+		float shadow = calculateDirLightShadow(i) * shadowOpacity;
 
 		lighting.ambientResult += lighting.ambient;
 		lighting.diffuseResult += lighting.diffuse * (1 - shadow);

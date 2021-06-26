@@ -90,6 +90,14 @@ file(READ src/common/core/glsl-modules/Blending/soft-light.glsl GLSLModules_Blen
 file(READ src/common/core/glsl-modules/Blending/subtract.glsl GLSLModules_Blending_subtract)
 file(READ src/common/core/glsl-modules/Blending/vivid-light.glsl GLSLModules_Blending_vivid_light)
 
+file(READ src/common/core/glsl-modules/Shading/all.glsl GLSLModules_Shading_all)
+file(READ src/common/core/glsl-modules/Shading/attenuation.glsl GLSLModules_Shading_attenuation)
+file(READ src/common/core/glsl-modules/Shading/diffuseLambert.glsl GLSLModules_Shading_diffuseLambert)
+file(READ src/common/core/glsl-modules/Shading/specularAnisotropic.glsl GLSLModules_Shading_specularAnisotropic)
+file(READ src/common/core/glsl-modules/Shading/specularBlinnPhong.glsl GLSLModules_Shading_specularBlinnPhong)
+file(READ src/common/core/glsl-modules/Shading/specularCookTorrance.glsl GLSLModules_Shading_specularCookTorrance)
+file(READ src/common/core/glsl-modules/Shading/specularPhong.glsl GLSLModules_Shading_specularPhong)
+
 configure_file(src/common/core/glsl-modules/GLSLModules.h.in src/common/core/glsl-modules/GLSLModules.h)
 
 set(ALGINE_CORE_SOURCES
