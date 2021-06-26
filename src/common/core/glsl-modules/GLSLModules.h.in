@@ -10,7 +10,6 @@ constexpr std::pair<const char*, const char*> modules[] = {
     {"NormalMapping.fs", R"(${GLSLModules_NormalMapping_fs})"},
     {"SSR", R"(${GLSLModules_SSR})"},
 
-    {"blend", R"(${GLSLModules_blend})"},
     {"fresnel", R"(${GLSLModules_fresnel})"},
 
     {"ToneMapping", R"(${GLSLModules_ToneMapping_all})"},
@@ -22,7 +21,34 @@ constexpr std::pair<const char*, const char*> modules[] = {
     {"ToneMapping/reinhard2", R"(${GLSLModules_ToneMapping_reinhard2})"},
     {"ToneMapping/uchimura", R"(${GLSLModules_ToneMapping_uchimura})"},
     {"ToneMapping/uncharted2", R"(${GLSLModules_ToneMapping_uncharted2})"},
-    {"ToneMapping/unreal", R"(${GLSLModules_ToneMapping_unreal})"}
+    {"ToneMapping/unreal", R"(${GLSLModules_ToneMapping_unreal})"},
+
+    {"Blending", R"(${GLSLModules_Blending_all})"},
+    {"Blending/add", R"(${GLSLModules_Blending_add})"},
+    {"Blending/average", R"(${GLSLModules_Blending_average})"},
+    {"Blending/color-burn", R"(${GLSLModules_Blending_color_burn})"},
+    {"Blending/color-dodge", R"(${GLSLModules_Blending_color_dodge})"},
+    {"Blending/darken", R"(${GLSLModules_Blending_darken})"},
+    {"Blending/difference", R"(${GLSLModules_Blending_difference})"},
+    {"Blending/exclusion", R"(${GLSLModules_Blending_exclusion})"},
+    {"Blending/glow", R"(${GLSLModules_Blending_glow})"},
+    {"Blending/hard-light", R"(${GLSLModules_Blending_hard_light})"},
+    {"Blending/hard-mix", R"(${GLSLModules_Blending_hard_mix})"},
+    {"Blending/lighten", R"(${GLSLModules_Blending_lighten})"},
+    {"Blending/linear-burn", R"(${GLSLModules_Blending_linear_burn})"},
+    {"Blending/linear-dodge", R"(${GLSLModules_Blending_linear_dodge})"},
+    {"Blending/linear-light", R"(${GLSLModules_Blending_linear_light})"},
+    {"Blending/multiply", R"(${GLSLModules_Blending_multiply})"},
+    {"Blending/negation", R"(${GLSLModules_Blending_negation})"},
+    {"Blending/normal", R"(${GLSLModules_Blending_normal})"},
+    {"Blending/overlay", R"(${GLSLModules_Blending_overlay})"},
+    {"Blending/phoenix", R"(${GLSLModules_Blending_phoenix})"},
+    {"Blending/pin-light", R"(${GLSLModules_Blending_pin_light})"},
+    {"Blending/reflect", R"(${GLSLModules_Blending_reflect})"},
+    {"Blending/screen", R"(${GLSLModules_Blending_screen})"},
+    {"Blending/soft-light", R"(${GLSLModules_Blending_soft_light})"},
+    {"Blending/subtract", R"(${GLSLModules_Blending_subtract})"},
+    {"Blending/vivid-light", R"(${GLSLModules_Blending_vivid_light})"}
 };
 }
 

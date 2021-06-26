@@ -1,7 +1,7 @@
 #version 330
 
 #alp include <ToneMapping/exposure>
-#alp include <blend>
+#alp include <Blending/screen>
 #alp include "modules/BlendDOF.glsl"
 
 out vec3 fragColor;
