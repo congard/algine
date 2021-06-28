@@ -1,7 +1,7 @@
 #ifndef ALGINE_DIRLIGHT_H
 #define ALGINE_DIRLIGHT_H
 
-#include <algine/std/lighting/Light.h>
+#include <algine/ext/lighting/Light.h>
 #include <algine/std/Rotatable.h>
 
 namespace algine {

@@ -1,16 +1,12 @@
-#include <algine/std/lighting/LightingManager.h>
+#include <algine/ext/lighting/LightingManager.h>
 
 #include <algine/core/Engine.h>
-#include <algine/constants/Lighting.h>
+#include <algine/ext/lighting/LightingConstants.h>
 #include <algine/constants/ShadowShader.h>
-
-#include <tulz/macros.h>
 
 using namespace tulz;
 using namespace std;
 using namespace glm;
-
-namespace LightingVars = algine::Module::Lighting::Vars;
 
 namespace algine {
 LightingManager::LightingManager()
@@ -30,13 +26,9 @@ LightingManager::~LightingManager() {
     delete m_uniformBlock.getBuffer();
 }
 
-// for converting enum class to uint
-template<typename T>
-inline uint to_uint(T t) {
-    return static_cast<uint>(t);
-}
-
 void LightingManager::init() {
+    namespace LightingVars = algine::Module::Lighting::Vars;
+
     const auto lightShaderRaw = m_lightShader.get();
 
     m_uniformBlock.setName(LightingVars::Block::Name);

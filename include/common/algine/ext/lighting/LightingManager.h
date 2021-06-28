@@ -6,9 +6,9 @@
 #include <algine/core/shader/UniformBlock.h>
 #include <algine/core/buffers/BufferWriter.h>
 
-#include <algine/std/lighting/Light.h>
-#include <algine/std/lighting/DirLight.h>
-#include <algine/std/lighting/PointLight.h>
+#include <algine/ext/lighting/Light.h>
+#include <algine/ext/lighting/DirLight.h>
+#include <algine/ext/lighting/PointLight.h>
 
 #include <tulz/Array.h>
 

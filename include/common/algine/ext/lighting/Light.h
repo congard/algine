@@ -12,11 +12,8 @@ class Light: public Translatable {
 public:
     enum class Type {
         Dir,
-        Point,
-        elements_count
+        Point
     };
-
-    static constexpr uint TypesCount = static_cast<uint>(Type::elements_count);
 
 public:
     ~Light();

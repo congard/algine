@@ -1,7 +1,7 @@
 #ifndef ALGINE_DIRLAMP_H
 #define ALGINE_DIRLAMP_H
 
-#include <algine/std/lighting/DirLight.h>
+#include <algine/ext/lighting/DirLight.h>
 #include <algine/std/model/ModelPtr.h>
 
 namespace algine {

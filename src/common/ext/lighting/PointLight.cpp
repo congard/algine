@@ -1,6 +1,6 @@
 #define GLM_FORCE_CTOR_INIT
 
-#include <algine/std/lighting/PointLight.h>
+#include <algine/ext/lighting/PointLight.h>
 
 #include <algine/core/PtrMaker.h>
 

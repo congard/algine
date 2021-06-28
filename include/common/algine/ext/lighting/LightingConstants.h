@@ -1,5 +1,5 @@
-#ifndef ALGINE_LIGHTING_H
-#define ALGINE_LIGHTING_H
+#ifndef ALGINE_LIGHTINGCONSTANTS_H
+#define ALGINE_LIGHTINGCONSTANTS_H
 
 #define constant(name, val) constexpr char name[] = val;
 
@@ -41,4 +41,4 @@ namespace algine::Module::Lighting {
 
 #undef constant
 
-#endif //ALGINE_LIGHTING_H
+#endif //ALGINE_LIGHTINGCONSTANTS_H

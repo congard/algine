@@ -1,7 +1,7 @@
 #ifndef ALGINE_POINTLIGHT_H
 #define ALGINE_POINTLIGHT_H
 
-#include <algine/std/lighting/Light.h>
+#include <algine/ext/lighting/Light.h>
 
 namespace algine {
 class PointLight: public Light {
@@ -10,7 +10,7 @@ class PointLight: public Light {
 public:
     PointLight();
 
-    void initShadows(uint shadowMapWidth = 512, uint shadowMapHeight = 512) override;
+    void initShadows(uint shadowMapWidth, uint shadowMapHeight) override;
     void updateMatrix() override;
     void begin() override;
 

@@ -193,7 +193,6 @@ set(ALGINE_STD_SOURCES
         include/common/algine/constants/ShadowShader.h
         include/common/algine/constants/QuadShader.h
         include/common/algine/constants/CubemapShader.h
-        include/common/algine/constants/Lighting.h
 
         include/common/algine/std/QuadRendererPtr.h
         include/common/algine/std/CubeRendererPtr.h
@@ -212,12 +211,6 @@ set(ALGINE_STD_SOURCES
         src/common/std/model/InputLayoutShapeLocationsCreator.cpp include/common/algine/std/model/InputLayoutShapeLocationsCreator.h
         src/common/std/model/ModelCreator.cpp include/common/algine/std/model/ModelCreator.h
         src/common/std/Node.cpp include/common/algine/std/Node.h
-        src/common/std/lighting/LightingManager.cpp include/common/algine/std/lighting/LightingManager.h
-        src/common/std/lighting/Light.cpp include/common/algine/std/lighting/Light.h
-        src/common/std/lighting/PointLight.cpp include/common/algine/std/lighting/PointLight.h
-        src/common/std/lighting/DirLight.cpp include/common/algine/std/lighting/DirLight.h
-        src/common/std/lighting/PointLamp.cpp include/common/algine/std/lighting/PointLamp.h
-        src/common/std/lighting/DirLamp.cpp include/common/algine/std/lighting/DirLamp.h
         src/common/std/animation/VecAnimKey.cpp include/common/algine/std/animation/VecAnimKey.h
         src/common/std/animation/QuatAnimKey.cpp include/common/algine/std/animation/QuatAnimKey.h
         src/common/std/animation/AnimNode.cpp include/common/algine/std/animation/AnimNode.h
@@ -250,6 +243,13 @@ set(ALGINE_EXT_SOURCES
 
         include/common/algine/ext/debug.h
 
+        include/common/algine/ext/lighting/LightingConstants.h
+        src/common/ext/lighting/LightingManager.cpp include/common/algine/ext/lighting/LightingManager.h
+        src/common/ext/lighting/Light.cpp include/common/algine/ext/lighting/Light.h
+        src/common/ext/lighting/PointLight.cpp include/common/algine/ext/lighting/PointLight.h
+        src/common/ext/lighting/DirLight.cpp include/common/algine/ext/lighting/DirLight.h
+        src/common/ext/lighting/PointLamp.cpp include/common/algine/ext/lighting/PointLamp.h
+        src/common/ext/lighting/DirLamp.cpp include/common/algine/ext/lighting/DirLamp.h
         src/common/ext/Blur.cpp include/common/algine/ext/Blur.h)
 
 if (NOT ANDROID)

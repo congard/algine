@@ -1,7 +1,7 @@
 #ifndef ALGINE_POINTLAMP_H
 #define ALGINE_POINTLAMP_H
 
-#include <algine/std/lighting/PointLight.h>
+#include <algine/ext/lighting/PointLight.h>
 #include <algine/std/model/ModelPtr.h>
 
 namespace algine {
