@@ -240,9 +240,7 @@ set(ALGINE_STD_SOURCES
 
 set(ALGINE_EXT_SOURCES
         include/common/algine/ext/constants/BlurShader.h
-        include/common/algine/ext/constants/BlendBloom.h
         include/common/algine/ext/constants/BloomSearchShader.h
-        include/common/algine/ext/constants/COCShader.h
         include/common/algine/ext/constants/BlendDOF.h
 
         include/common/algine/ext/debug.h
