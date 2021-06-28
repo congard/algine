@@ -8,4 +8,7 @@
 #alp include <Shading/specularCookTorrance>
 #alp include <Shading/specularPhong>
 
+#alp include <Shading/dirLightShadow>
+#alp include <Shading/pointLightShadow>
+
 #endif //ALGINE_MODULE_SHADING_ALL

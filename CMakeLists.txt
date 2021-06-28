@@ -100,6 +100,7 @@ file(READ src/common/core/glsl-modules/Shading/specularPhong.glsl GLSLModules_Sh
 file(READ src/common/core/glsl-modules/Shading/dirLightShadow.glsl GLSLModules_Shading_dirLightShadow)
 file(READ src/common/core/glsl-modules/Shading/pointLightShadow.glsl GLSLModules_Shading_pointLightShadow)
 
+file(READ src/common/core/glsl-modules/DOF/all.glsl GLSLModules_DOF_all)
 file(READ src/common/core/glsl-modules/DOF/cinematicCoC.glsl GLSLModules_DOF_cinematicCoC)
 file(READ src/common/core/glsl-modules/DOF/linearCoC.glsl GLSLModules_DOF_linearCoC)
 
