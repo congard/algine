@@ -22,13 +22,17 @@ public:
     void configureShadowMapping();
 
     void setBindingPoint(uint bindingPoint);
-    void setLightsLimit(uint limit, Light::Type lightType);
-    void setLightsMapInitialSlot(uint slot, Light::Type lightType);
+    void setDirLightsLimit(uint limit);
+    void setPointLightsLimit(uint limit);
+    void setDirMapInitialSlot(uint slot);
+    void setPointMapInitialSlot(uint slot);
     void setLightShader(const ShaderProgramPtr &lightShader);
     void setPointLightShadowShader(const ShaderProgramPtr &shadowShader);
 
-    uint getLightsLimit(Light::Type lightType) const;
-    uint getLightsMapInitialSlot(Light::Type lightType) const;
+    uint getDirLightsLimit() const;
+    uint getPointLightsLimit() const;
+    uint getDirMapInitialSlot() const;
+    uint getPointMapInitialSlot() const;
     const ShaderProgramPtr& getLightShader() const;
     const ShaderProgramPtr& getPointLightShadowShader() const;
     const BaseUniformBlock& getUniformBlock() const;
@@ -67,21 +71,35 @@ public:
     void writeBias(const PointLight &light, uint index);
 
 private:
-    typedef tulz::Array<uint> LightOffsets;
+    struct DirLightOffsets {
+        uint kc, kl, kq, pos, color;
+        uint minBias, maxBias, lightMatrix;
+    };
+
+    struct PointLightOffsets {
+        uint kc, kl, kq, pos, color;
+        uint far, bias;
+    };
+
+    struct LightOffsets {
+        tulz::Array<DirLightOffsets> dir;
+        tulz::Array<PointLightOffsets> point;
+
+        uint dirCount, pointCount;
+        uint shadowOpacity, shadowDiskRadiusK, shadowDiskRadiusMin;
+    };
 
 private:
-    uint m_lightsLimit[Light::TypesCount];
-    uint m_lightsInitialSlot[Light::TypesCount];
+    uint m_dirLightsLimit, m_pointLightsLimit;
+    uint m_dirLightsInitialSlot, m_pointLightsInitialSlot;
     ShaderProgramPtr m_lightShader;
     ShaderProgramPtr m_pointShadowShader;
 
 private:
     BufferWriter m_bufferWriter;
     BaseUniformBlock m_uniformBlock;
-    tulz::Array<LightOffsets> m_offsets[Light::TypesCount];
-    uint m_lightsCountOffset[Light::TypesCount];
-    uint m_shadowOpacityOffset, m_shadowDiskRadiusKOffset, m_shadowDiskRadiusMinOffset;
-    int m_shadowMapsLocations[Light::TypesCount];
+    LightOffsets m_offsets;
+    int m_dirShadowMapLoc, m_pointShadowMapLoc;
     int m_shadowShaderPosLoc; // point light shadow shader locations; Loc means Location
     int m_shadowShaderFarPlaneLoc;
     int m_shadowShaderMatricesLoc;
