@@ -97,6 +97,8 @@ file(READ src/common/core/glsl-modules/Shading/specularAnisotropic.glsl GLSLModu
 file(READ src/common/core/glsl-modules/Shading/specularBlinnPhong.glsl GLSLModules_Shading_specularBlinnPhong)
 file(READ src/common/core/glsl-modules/Shading/specularCookTorrance.glsl GLSLModules_Shading_specularCookTorrance)
 file(READ src/common/core/glsl-modules/Shading/specularPhong.glsl GLSLModules_Shading_specularPhong)
+file(READ src/common/core/glsl-modules/Shading/dirLightShadow.glsl GLSLModules_Shading_dirLightShadow)
+file(READ src/common/core/glsl-modules/Shading/pointLightShadow.glsl GLSLModules_Shading_pointLightShadow)
 
 configure_file(src/common/core/glsl-modules/GLSLModules.h.in src/common/core/glsl-modules/GLSLModules.h)
 

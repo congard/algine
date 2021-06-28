@@ -3,15 +3,10 @@
 
 #define constant(name, val) constexpr char name[] = val;
 
-namespace algine {
-namespace Module {
-namespace Lighting {
+namespace algine::Module::Lighting {
     namespace Settings {
-        constant(Attenuation, "ALGINE_ATTENUATION_MODE_ENABLED")
         constant(PointLightsLimit, "MAX_POINT_LIGHTS_COUNT")
         constant(DirLightsLimit, "MAX_DIR_LIGHTS_COUNT")
-        constant(ShadowMappingPCF, "ALGINE_SHADOW_MAPPING_MODE_ENABLED")
-        constant(ShadowMapping, "ALGINE_SHADOW_MAPPING_MODE_SIMPLE")
     }
 
     namespace Vars {
@@ -42,8 +37,6 @@ namespace Lighting {
             constant(ShadowOpacity, "shadowOpacity")
         }
     }
-}
-}
 }
 
 #undef constant
