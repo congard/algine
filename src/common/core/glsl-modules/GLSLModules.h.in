@@ -58,7 +58,10 @@ constexpr std::pair<const char*, const char*> modules[] = {
     {"Shading/specularCookTorrance", R"(${GLSLModules_Shading_specularCookTorrance})"},
     {"Shading/specularPhong", R"(${GLSLModules_Shading_specularPhong})"},
     {"Shading/dirLightShadow", R"(${GLSLModules_Shading_dirLightShadow})"},
-    {"Shading/pointLightShadow", R"(${GLSLModules_Shading_pointLightShadow})"}
+    {"Shading/pointLightShadow", R"(${GLSLModules_Shading_pointLightShadow})"},
+
+    {"DOF/cinematicCoC", R"(${GLSLModules_DOF_cinematicCoC})"},
+    {"DOF/linearCoC", R"(${GLSLModules_DOF_linearCoC})"}
 };
 }
 
