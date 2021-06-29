@@ -245,8 +245,6 @@ set(ALGINE_STD_SOURCES
 
 set(ALGINE_EXT_SOURCES
         include/common/algine/ext/constants/BlurShader.h
-        include/common/algine/ext/constants/BloomSearchShader.h
-
         include/common/algine/ext/debug.h
 
         include/common/algine/ext/lighting/LightingConstants.h
