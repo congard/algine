@@ -104,6 +104,11 @@ file(READ src/common/core/glsl-modules/DOF/all.glsl GLSLModules_DOF_all)
 file(READ src/common/core/glsl-modules/DOF/cinematicCoC.glsl GLSLModules_DOF_cinematicCoC)
 file(READ src/common/core/glsl-modules/DOF/linearCoC.glsl GLSLModules_DOF_linearCoC)
 
+file(READ src/common/core/glsl-modules/Luminance/all.glsl GLSLModules_Luminance_all)
+file(READ src/common/core/glsl-modules/Luminance/luminance.glsl GLSLModules_Luminance_luminance)
+file(READ src/common/core/glsl-modules/Luminance/luminanceHSP.glsl GLSLModules_Luminance_luminanceHSP)
+file(READ src/common/core/glsl-modules/Luminance/luminanceW3.glsl GLSLModules_Luminance_luminanceW3)
+
 configure_file(src/common/core/glsl-modules/GLSLModules.h.in src/common/core/glsl-modules/GLSLModules.h)
 
 set(ALGINE_CORE_SOURCES
