@@ -1,7 +1,7 @@
 #ifndef ALGINE_GLSLMODULES_H_IN
 #define ALGINE_GLSLMODULES_H_IN
 
-#include <map>
+#include <utility>
 
 namespace algine::GLSLModules {
 constexpr std::pair<const char*, const char*> modules[] = {
