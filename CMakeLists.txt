@@ -202,6 +202,7 @@ set(ALGINE_STD_SOURCES
         include/common/algine/constants/ShadowShader.h
         include/common/algine/constants/QuadShader.h
         include/common/algine/constants/CubemapShader.h
+        include/common/algine/std/BlurShaderConstants.h
 
         include/common/algine/std/QuadRendererPtr.h
         include/common/algine/std/CubeRendererPtr.h
@@ -241,10 +242,10 @@ set(ALGINE_STD_SOURCES
         src/common/std/Scalable.cpp include/common/algine/std/Scalable.h
         src/common/std/AMTLMaterialManager.cpp include/common/algine/std/AMTLMaterialManager.h
         src/common/std/AMTLManager.cpp include/common/algine/std/AMTLManager.h
-        src/common/std/Material.cpp include/common/algine/std/Material.h)
+        src/common/std/Material.cpp include/common/algine/std/Material.h
+        src/common/std/Blur.cpp include/common/algine/std/Blur.h)
 
 set(ALGINE_EXT_SOURCES
-        include/common/algine/ext/constants/BlurShader.h
         include/common/algine/ext/debug.h
 
         include/common/algine/ext/lighting/LightingConstants.h
@@ -253,8 +254,7 @@ set(ALGINE_EXT_SOURCES
         src/common/ext/lighting/PointLight.cpp include/common/algine/ext/lighting/PointLight.h
         src/common/ext/lighting/DirLight.cpp include/common/algine/ext/lighting/DirLight.h
         src/common/ext/lighting/PointLamp.cpp include/common/algine/ext/lighting/PointLamp.h
-        src/common/ext/lighting/DirLamp.cpp include/common/algine/ext/lighting/DirLamp.h
-        src/common/ext/Blur.cpp include/common/algine/ext/Blur.h)
+        src/common/ext/lighting/DirLamp.cpp include/common/algine/ext/lighting/DirLamp.h)
 
 if (NOT ANDROID)
     set(ALGINE_DESKTOP_SOURCES

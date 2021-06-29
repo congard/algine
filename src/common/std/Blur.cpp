@@ -1,5 +1,5 @@
-#include <algine/ext/Blur.h>
-#include <algine/ext/constants/BlurShader.h>
+#include <algine/std/Blur.h>
+#include <algine/std/BlurShaderConstants.h>
 
 #include <algine/core/PtrMaker.h>
 #include <algine/core/Engine.h>
@@ -40,7 +40,7 @@ void Blur::configureKernel(const uint radius, const float sigma) {
 
         for (uint j = 0; j < radius; ++j) {
             ShaderProgram::setFloat(
-                pingpongShader->getLocation(BlurShader::Vars::Kernel) + static_cast<int>((radius - 1 - j)), kernel[j]
+                pingpongShader->getLocation(BlurShaderConstants::Vars::Kernel) + static_cast<int>((radius - 1 - j)), kernel[j]
             );
         }
     }
