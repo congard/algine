@@ -7,7 +7,7 @@ uniform float farPlane; // shadow matrix far plane
 void main() {
     float lightDistance = length(fragPos.xyz - lightPos);
 
-    // map to [0;1] range by dividing by farPlane
+    // map to [0; 1] range by dividing by farPlane
     lightDistance = lightDistance / farPlane;
 
     // write this as modified depth

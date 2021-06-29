@@ -1,0 +1,16 @@
+#ifndef ALGINE_GLSLSHADERS_H_IN
+#define ALGINE_GLSLSHADERS_H_IN
+
+#include <utility>
+
+namespace algine::GLSLShaders {
+constexpr std::pair<const char*, const char*> shaders[] = {
+    {"Blur.fs.glsl", R"(${GLSLShaders_Blur_fs})"},
+    {"Quad.vs.glsl", R"(${GLSLShaders_Quad_vs})"},
+    {"Shadow.vs.glsl", R"(${GLSLShaders_Shadow_vs})"},
+    {"Shadow.fs.glsl", R"(${GLSLShaders_Shadow_fs})"},
+    {"Shadow.gs.glsl", R"(${GLSLShaders_Shadow_gs})"}
+};
+}
+
+#endif //ALGINE_GLSLSHADERS_H_IN

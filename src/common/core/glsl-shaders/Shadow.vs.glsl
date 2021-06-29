@@ -2,8 +2,8 @@
 
 in vec4 a_Position;
 
-// if dif light transformationMatrix = lightSpaceMatrix * modelMatrix
-// if point light transformationMatrix = modelMatrix
+// if directional light, then transformationMatrix = lightSpaceMatrix * modelMatrix
+// if point light, then transformationMatrix = modelMatrix
 uniform mat4 transformationMatrix;
 
 void main() {

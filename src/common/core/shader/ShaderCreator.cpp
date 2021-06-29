@@ -11,6 +11,7 @@
 
 #include "internal/PublicObjectTools.h"
 #include "GLSLModules.h"
+#include "GLSLShaders.h"
 
 using namespace nlohmann;
 using namespace std;
@@ -136,7 +137,22 @@ inline void cfgSourceImpl(ShaderCreator *self) {
             throw runtime_error("Source and path are empty");
         }
 
-        self->setSource(self->readStr(Path::join(workingDirectory, path)));
+        constexpr char algineShaders[] = "@algine/";
+
+        if (path.find(algineShaders) == 0) {
+            string name = path.substr(strlen(algineShaders));
+
+            for (const auto &p : GLSLShaders::shaders) {
+                if (p.first == name) {
+                    self->setSource(p.second);
+                    return;
+                }
+            }
+
+            throw runtime_error("Built-in shader '" + name + "' not found");
+        } else {
+            self->setSource(self->readStr(Path::join(workingDirectory, path)));
+        }
     }
 }
 
