@@ -198,7 +198,7 @@ set(ALGINE_CORE_SOURCES
         src/common/core/glsl-modules/GLSLModules.h.in)
 
 set(ALGINE_STD_SOURCES
-        include/common/algine/constants/BoneSystem.h
+        include/common/algine/std/animation/BoneSystemModuleConstants.h
         include/common/algine/constants/ShadowShader.h
         include/common/algine/constants/QuadShader.h
         include/common/algine/constants/CubemapShader.h

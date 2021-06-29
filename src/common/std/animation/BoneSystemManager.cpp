@@ -3,7 +3,7 @@
 #include <algine/std/model/Model.h>
 #include <algine/std/model/Shape.h>
 
-#include <algine/constants/BoneSystem.h>
+#include <algine/std/animation/BoneSystemModuleConstants.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -14,7 +14,7 @@ namespace algine {
 constexpr uint empty_block = 0;
 
 void BoneSystemManager::init() {
-    using namespace Module::BoneSystem::Vars::Block;
+    using namespace BoneSystemModuleConstants::Vars::Block;
 
     m_uniformBlock.setName(Name);
     m_uniformBlock.setVarNames({Bones, BoneAttribsPerVertex});
