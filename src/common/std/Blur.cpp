@@ -1,5 +1,4 @@
 #include <algine/std/Blur.h>
-#include <algine/std/BlurShaderConstants.h>
 
 #include <algine/core/shader/ShaderCreator.h>
 #include <algine/core/PtrMaker.h>
@@ -8,7 +7,23 @@
 using namespace std;
 using namespace tulz;
 
+#define constant constexpr auto
+
 namespace algine {
+namespace Settings {
+constant OutputType = "vecout";
+constant TexComponent = "texComponent";
+
+constant Vertical = "ALGINE_VERTICAL";
+constant Horizontal = "ALGINE_HORIZONTAL";
+constant KernelRadius = "KERNEL_RADIUS";
+}
+
+namespace Vars {
+constant BaseImage = "image";
+constant Kernel = "kernel[0]";
+}
+
 Blur::Blur(const TextureCreateInfo &textureCreateInfo)
     : m_pingpongShaders(),
       m_quadRenderer(),
@@ -40,7 +55,7 @@ void Blur::configureKernel(uint radius, float sigma) {
 
         for (uint j = 0; j < radius; ++j) {
             ShaderProgram::setFloat(
-                pingpongShader->getLocation(BlurShaderConstants::Vars::Kernel) + static_cast<int>((radius - 1 - j)), kernel[j]
+                pingpongShader->getLocation(Vars::Kernel) + static_cast<int>((radius - 1 - j)), kernel[j]
             );
         }
     }
@@ -143,8 +158,8 @@ pair<ShaderProgramPtr, ShaderProgramPtr> Blur::getPingPongShaders(uint kernelRad
 
     ShaderCreator fragmentCreator(Shader::Fragment);
     fragmentCreator.setPath("@algine/Blur.fs.glsl");
-    fragmentCreator.define(BlurShaderConstants::Settings::KernelRadius, kernelRadius);
-    fragmentCreator.define(BlurShaderConstants::Settings::OutputType, [&]() {
+    fragmentCreator.define(Settings::KernelRadius, kernelRadius);
+    fragmentCreator.define(Settings::OutputType, [&]() {
         switch (blurComponent.size()) {
             case 1: return "float";
             case 2: return "vec2";
@@ -153,13 +168,13 @@ pair<ShaderProgramPtr, ShaderProgramPtr> Blur::getPingPongShaders(uint kernelRad
             default: throw invalid_argument("Must be: 1 <= blurComponent.size() <= 4");
         }
     }());
-    fragmentCreator.define(BlurShaderConstants::Settings::TexComponent, blurComponent);
+    fragmentCreator.define(Settings::TexComponent, blurComponent);
 
-    fragmentCreator.define(BlurShaderConstants::Settings::Horizontal);
+    fragmentCreator.define(Settings::Horizontal);
     fragmentPing = fragmentCreator.create();
 
-    fragmentCreator.removeDefinition(BlurShaderConstants::Settings::Horizontal);
-    fragmentCreator.define(BlurShaderConstants::Settings::Vertical);
+    fragmentCreator.removeDefinition(Settings::Horizontal);
+    fragmentCreator.define(Settings::Vertical);
     fragmentPong = fragmentCreator.create();
 
     ShaderProgramPtr ping = PtrMaker::make();

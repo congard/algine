@@ -211,7 +211,6 @@ set(ALGINE_STD_SOURCES
         include/common/algine/constants/ShadowShader.h
         include/common/algine/constants/QuadShader.h
         include/common/algine/constants/CubemapShader.h
-        include/common/algine/std/BlurShaderConstants.h
 
         include/common/algine/std/QuadRendererPtr.h
         include/common/algine/std/CubeRendererPtr.h
