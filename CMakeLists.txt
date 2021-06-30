@@ -314,6 +314,7 @@ set(ASSIMP_NO_EXPORT ON)
 
 add_subdirectory(contrib/tulz)
 add_subdirectory(contrib/assimp)
+add_subdirectory(contrib/freetype)
 
 add_library(algine
         ${ALGINE_CORE_SOURCES}
@@ -329,6 +330,7 @@ target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common
 target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders)
 
 target_include_directories(algine PRIVATE contrib/assimp/include)
+target_include_directories(algine PRIVATE contrib/freetype/include)
 
 target_include_directories(algine PUBLIC contrib/tulz/include)
 target_include_directories(algine PUBLIC contrib/glm)
@@ -355,11 +357,11 @@ endif()
 
 # linking
 if (ANDROID)
-    target_link_libraries(algine assimp android log GLESv3 EGL tulz)
+    target_link_libraries(algine assimp android log GLESv3 EGL tulz freetype)
 elseif (WIN32)
-    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 tulz)
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 tulz freetype)
 elseif (UNIX)
-    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw GL tulz)
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw GL tulz freetype)
 endif()
 
 # include some helpful scripts for Windows

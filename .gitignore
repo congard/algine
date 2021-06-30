@@ -6,6 +6,7 @@ contrib/*
 !contrib/glfw
 !contrib/glew
 !contrib/glm
+!contrib/freetype
 
 # Visual Studio Code dir
 .vscode
