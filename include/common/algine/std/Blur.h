@@ -33,6 +33,7 @@ public:
     void setAmount(uint amount);
     void setQuadRenderer(const QuadRendererPtr &quadRenderer);
     void setPingPongShaders(const ShaderProgramPtr &hor, const ShaderProgramPtr &vert);
+    void setPingPongShaders(const std::pair<ShaderProgramPtr, ShaderProgramPtr> &pingPong);
 
     uint getAmount() const;
     QuadRendererPtr& getQuadRenderer();
@@ -42,6 +43,9 @@ public:
     FramebufferPtr* getPingPongFramebuffers();
 
     static tulz::Array<float> getKernel(int size, float sigma);
+
+    static std::pair<ShaderProgramPtr, ShaderProgramPtr>
+    getPingPongShaders(uint kernelRadius, const std::string &blurComponent);
 
 private:
     Texture2DPtr m_pingpongTex[2];

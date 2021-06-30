@@ -1,6 +1,7 @@
 #include <algine/std/Blur.h>
 #include <algine/std/BlurShaderConstants.h>
 
+#include <algine/core/shader/ShaderCreator.h>
 #include <algine/core/PtrMaker.h>
 #include <algine/core/Engine.h>
 
@@ -20,8 +21,7 @@ Blur::Blur(const TextureCreateInfo &textureCreateInfo)
         m_pingpongTex[0], m_pingpongTex[1]
     );
 
-    for (uint i = 0; i < 2; ++i)
-    {
+    for (uint i = 0; i < 2; ++i) {
         m_pingpongTex[i]->applyTextureCreateInfo(textureCreateInfo);
 
         m_pingpongFb[i]->bind();
@@ -30,7 +30,7 @@ Blur::Blur(const TextureCreateInfo &textureCreateInfo)
     }
 }
 
-void Blur::configureKernel(const uint radius, const float sigma) {
+void Blur::configureKernel(uint radius, float sigma) {
     uint kernelSize = radius * 2 - 1;
     auto kernel = getKernel(kernelSize, sigma);
 
@@ -89,6 +89,11 @@ void Blur::setPingPongShaders(const ShaderProgramPtr &hor, const ShaderProgramPt
     m_pingpongShaders[1] = vert;
 }
 
+void Blur::setPingPongShaders(const pair<ShaderProgramPtr, ShaderProgramPtr> &pingPong) {
+    m_pingpongShaders[0] = pingPong.first;
+    m_pingpongShaders[1] = pingPong.second;
+}
+
 uint Blur::getAmount() const {
     return m_amount;
 }
@@ -113,7 +118,7 @@ FramebufferPtr* Blur::getPingPongFramebuffers() {
     return m_pingpongFb;
 }
 
-Array<float> Blur::getKernel(const int size, const float sigma) {
+Array<float> Blur::getKernel(int size, float sigma) {
     Array<float> kernel(size);
 
     int mean = size / 2;
@@ -129,5 +134,46 @@ Array<float> Blur::getKernel(const int size, const float sigma) {
         kernel[x] /= sum;
 
     return kernel;
+}
+
+pair<ShaderProgramPtr, ShaderProgramPtr> Blur::getPingPongShaders(uint kernelRadius, const string &blurComponent) {
+    ShaderPtr vertex = QuadRenderer::getVertexShader();
+    ShaderPtr fragmentPing;
+    ShaderPtr fragmentPong;
+
+    ShaderCreator fragmentCreator(Shader::Fragment);
+    fragmentCreator.setPath("@algine/Blur.fs.glsl");
+    fragmentCreator.define(BlurShaderConstants::Settings::KernelRadius, kernelRadius);
+    fragmentCreator.define(BlurShaderConstants::Settings::OutputType, [&]() {
+        switch (blurComponent.size()) {
+            case 1: return "float";
+            case 2: return "vec2";
+            case 3: return "vec3";
+            case 4: return "vec4";
+            default: throw invalid_argument("Must be: 1 <= blurComponent.size() <= 4");
+        }
+    }());
+    fragmentCreator.define(BlurShaderConstants::Settings::TexComponent, blurComponent);
+
+    fragmentCreator.define(BlurShaderConstants::Settings::Horizontal);
+    fragmentPing = fragmentCreator.create();
+
+    fragmentCreator.removeDefinition(BlurShaderConstants::Settings::Horizontal);
+    fragmentCreator.define(BlurShaderConstants::Settings::Vertical);
+    fragmentPong = fragmentCreator.create();
+
+    ShaderProgramPtr ping = PtrMaker::make();
+    ping->attachShader(*vertex);
+    ping->attachShader(*fragmentPing);
+    ping->link();
+    ping->loadActiveLocations();
+
+    ShaderProgramPtr pong = PtrMaker::make();
+    pong->attachShader(*vertex);
+    pong->attachShader(*fragmentPong);
+    pong->link();
+    pong->loadActiveLocations();
+
+    return {ping, pong};
 }
 }
