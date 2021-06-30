@@ -204,7 +204,11 @@ set(ALGINE_CORE_SOURCES
         src/common/core/io/StandardIOStream.cpp include/common/algine/core/io/StandardIOStream.h
         src/common/core/io/IOProvider.cpp include/common/algine/core/io/IOProvider.h
         src/common/core/IOStreamUtils.h
-        src/common/core/glsl-modules/GLSLModules.h.in)
+        src/common/core/glsl-modules/GLSLModules.h.in
+        src/common/core/font/Font.cpp include/common/algine/core/font/Font.h
+        src/common/core/font/FontEngine.cpp include/common/algine/core/font/FontEngine.h
+        src/common/core/font/FontRenderer.cpp include/common/algine/core/font/FontRenderer.h
+        src/common/core/font/TextRenderer.cpp include/common/algine/core/font/TextRenderer.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h
