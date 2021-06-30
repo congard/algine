@@ -3,7 +3,7 @@
 
 #include <algine/core/InputLayout.h>
 #include <algine/core/buffers/ArrayBuffer.h>
-#include <tulz/macros.h>
+#include <algine/core/shader/ShaderPtr.h>
 
 namespace algine {
 class QuadRenderer {
@@ -15,6 +15,8 @@ public:
 
     InputLayout *getInputLayout() const;
     ArrayBuffer *getArrayBuffer() const;
+
+    static ShaderPtr getVertexShader();
 
 public:
     InputLayout *m_inputLayout;

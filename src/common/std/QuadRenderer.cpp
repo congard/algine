@@ -1,5 +1,7 @@
 #include <algine/std/QuadRenderer.h>
 
+#include <algine/core/shader/ShaderCreator.h>
+
 #include <algine/gl.h>
 
 namespace algine {
@@ -32,7 +34,6 @@ QuadRenderer::~QuadRenderer() {
 }
 
 void QuadRenderer::draw() {
-    // NOTE: add check for current CR binding
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
@@ -42,5 +43,19 @@ InputLayout* QuadRenderer::getInputLayout() const {
 
 ArrayBuffer* QuadRenderer::getArrayBuffer() const {
     return m_arrayBuffer;
+}
+
+ShaderPtr QuadRenderer::getVertexShader() {
+    constexpr auto name = "Quad.vs";
+
+    if (const ShaderPtr &ptr = Shader::getByName(name); ptr != nullptr) {
+        return ptr;
+    } else {
+        ShaderCreator creator(Shader::Vertex);
+        creator.setAccess(Creator::Access::Public);
+        creator.setName(name);
+        creator.setPath("@algine/Quad.vs.glsl");
+        return creator.create();
+    }
 }
 }
