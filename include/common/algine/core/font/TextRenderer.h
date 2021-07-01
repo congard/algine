@@ -11,6 +11,7 @@ namespace algine {
 class TextRenderer {
 public:
     TextRenderer();
+    ~TextRenderer();
 
 public:
     void setViewport(uint width, uint height);
@@ -28,6 +29,10 @@ public:
     void end();
 
     void render();
+
+    static void setAutoCacheOptimization(bool optimization);
+    static void optimizeCache();
+    static void clearCache();
 
 private:
     struct Character {
@@ -56,8 +61,21 @@ private:
 
 private:
     FontRenderer m_fontRenderer;
-    std::unordered_map<char16_t, Character> m_characters;
     std::u16string m_text;
+    unsigned long m_hash;
+
+private:
+    void updateHash();
+    void disownHash();
+
+private:
+    struct Characters {
+        std::unordered_map<char16_t, Character> characters;
+        int counter {0};
+    };
+
+    static bool m_cacheOptimization;
+    static std::unordered_map<unsigned long, Characters> m_characters;
 };
 }
 

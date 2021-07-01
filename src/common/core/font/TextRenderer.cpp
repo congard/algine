@@ -13,7 +13,27 @@
 
 #include "TextRendererShaders.h"
 
+using namespace std;
+
 namespace algine {
+bool TextRenderer::m_cacheOptimization = false;
+
+// <hash, loaded characters + counter>
+// hash is generated using font name, width, height and style
+unordered_map<unsigned long, TextRenderer::Characters> TextRenderer::m_characters;
+
+// Source: http://www.cse.yorku.ca/~oz/hash.html
+unsigned long hash_djb2(unsigned char *str) {
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++) {
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    }
+
+    return hash;
+}
+
 TextRenderer::TextRenderer()
     : m_scale(1.0f),
       m_x(0.0f),
@@ -22,7 +42,8 @@ TextRenderer::TextRenderer()
       m_projection(glm::ortho(0.0f, 512.0f, 0.0f, 512.0f)),
       m_wasDepthTestEnabled(),
       m_wasBlendingEnabled(),
-      m_prevSrcAlphaBlendMode()
+      m_prevSrcAlphaBlendMode(),
+      m_hash(0)
 {
     constexpr auto programName = "@algine/TextRenderer";
 
@@ -68,6 +89,10 @@ TextRenderer::TextRenderer()
     m_layout->unbind();
 }
 
+TextRenderer::~TextRenderer() {
+    disownHash();
+}
+
 void TextRenderer::setViewport(uint width, uint height) {
     m_projection = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
 }
@@ -106,10 +131,12 @@ void TextRenderer::setText(const std::string &text) {
 void TextRenderer::setFont(const Font &font, uint size) {
     m_fontRenderer.setFont(font);
     m_fontRenderer.setFontHeight(size);
+    updateHash();
 }
 
 void TextRenderer::setFontSize(uint size) {
     m_fontRenderer.setFontHeight(size);
+    updateHash();
 }
 
 void TextRenderer::begin() {
@@ -153,9 +180,11 @@ void TextRenderer::render() {
     float x = m_x;
     float y = m_y;
 
+    auto &characters = m_characters[m_hash].characters;
+
     for (auto symbol : m_text) {
         // if symbol has not been loaded yet - load it
-        if (m_characters.find(symbol) == m_characters.end()) {
+        if (characters.find(symbol) == characters.end()) {
             auto character = m_fontRenderer.getCharacter(symbol);
 
             Texture2DPtr tex = PtrMaker::make();
@@ -178,12 +207,12 @@ void TextRenderer::render() {
             readyCharacter.bearingLeft = static_cast<float>(character.bearingLeft);
             readyCharacter.advance = character.advance;
 
-            m_characters[symbol] = readyCharacter;
+            characters[symbol] = readyCharacter;
         }
 
         // render symbol
 
-        const Character &character = m_characters[symbol];
+        const Character &character = characters[symbol];
 
         auto width = static_cast<float>(character.texture->getWidth());
         auto height = static_cast<float>(character.texture->getHeight());
@@ -213,6 +242,51 @@ void TextRenderer::render() {
         Engine::drawArrays(0, 6);
 
         x += static_cast<float>(character.advance >> 6) * m_scale;
+    }
+}
+
+void TextRenderer::setAutoCacheOptimization(bool optimization) {
+    m_cacheOptimization = optimization;
+}
+
+void TextRenderer::optimizeCache() {
+    for (auto it = m_characters.begin(); it != m_characters.end();) {
+        if (it->second.counter == 0) {
+            it = m_characters.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void TextRenderer::clearCache() {
+    m_characters = {};
+}
+
+void TextRenderer::updateHash() {
+    string fontName = m_fontRenderer.getFont().getName();
+    string fontWidth = to_string(m_fontRenderer.getFontWidth());
+    string fontHeight = to_string(m_fontRenderer.getFontHeight());
+    string fontStyle = to_string(static_cast<uint>(m_fontRenderer.getFont().getStyle()));
+
+    disownHash();
+
+    m_hash = hash_djb2((unsigned char *) (fontName + " " + fontWidth + " " + fontHeight + " " + fontStyle).c_str());
+
+    if (m_characters.find(m_hash) == m_characters.end()) {
+        m_characters[m_hash] = Characters {};
+    }
+
+    m_characters[m_hash].counter++;
+}
+
+void TextRenderer::disownHash() {
+    if (auto it = m_characters.find(m_hash); it != m_characters.end()) {
+        it->second.counter--;
+
+        if (m_cacheOptimization && it->second.counter == 0) {
+            m_characters.erase(it);
+        }
     }
 }
 }
