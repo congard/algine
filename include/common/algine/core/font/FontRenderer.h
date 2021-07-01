@@ -27,12 +27,16 @@ public:
     Character getCharacter(uint c) const;
 
     void setFontHeight(uint height);
+    uint getFontHeight() const;
+
     void setFontWidth(uint width);
+    uint getFontWidth() const;
 
     void setFontSize(uint width, uint height);
     void setFontSize(uint size);
 
     void setFont(const Font &font);
+    const Font& getFont() const;
 
 private:
     void applySize();

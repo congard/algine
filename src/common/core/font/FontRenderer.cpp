@@ -29,9 +29,17 @@ void FontRenderer::setFontHeight(uint height) {
     applySize();
 }
 
+uint FontRenderer::getFontHeight() const {
+    return m_height;
+}
+
 void FontRenderer::setFontWidth(uint width) {
     m_width = width;
     applySize();
+}
+
+uint FontRenderer::getFontWidth() const {
+    return m_width;
 }
 
 void FontRenderer::setFontSize(uint width, uint height) {
@@ -46,6 +54,10 @@ void FontRenderer::setFontSize(uint size) {
 
 void FontRenderer::setFont(const Font &font) {
     m_font = font;
+}
+
+const Font& FontRenderer::getFont() const {
+    return m_font;
 }
 
 FontRenderer::Character FontRenderer::getCharacter(uint c) const {
