@@ -120,6 +120,12 @@ file(READ src/common/core/glsl-shaders/Shadow.vs.glsl GLSLShaders_Shadow_vs)
 
 configure_file(src/common/core/glsl-shaders/GLSLShaders.h.in src/common/core/glsl-shaders/GLSLShaders.h)
 
+# font shaders
+file(READ src/common/core/font/TextRenderer.vs.glsl TextRenderer_vs)
+file(READ src/common/core/font/TextRenderer.fs.glsl TextRenderer_fs)
+
+configure_file(src/common/core/font/TextRendererShaders.h.in src/common/core/font/TextRendererShaders.h)
+
 set(ALGINE_CORE_SOURCES
         src/common/internal/PublicObjectTools.h
         src/common/internal/SOP.h
@@ -332,6 +338,7 @@ set_target_properties(algine PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(algine PRIVATE src/common)
 target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules)
 target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders)
+target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/font)
 
 target_include_directories(algine PRIVATE contrib/assimp/include)
 target_include_directories(algine PRIVATE contrib/freetype/include)

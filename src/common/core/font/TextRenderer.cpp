@@ -11,7 +11,7 @@
 #include <codecvt>
 #include <locale>
 
-// TODO: embed shaders to the code
+#include "TextRendererShaders.h"
 
 namespace algine {
 TextRenderer::TextRenderer()
@@ -24,18 +24,26 @@ TextRenderer::TextRenderer()
       m_wasBlendingEnabled(),
       m_prevSrcAlphaBlendMode()
 {
-    ShaderCreator text_vertex(Shader::Vertex);
-    text_vertex.setPath("text.vs");
+    constexpr auto programName = "@algine/TextRenderer";
 
-    ShaderCreator text_fragment(Shader::Fragment);
-    text_fragment.setPath("text.fs");
+    if (const auto &program = ShaderProgram::getByName(programName); program != nullptr) {
+        m_shader = program;
+    } else {
+        ShaderCreator text_vertex(Shader::Vertex);
+        text_vertex.setSource(TextRendererShaders::vertexShader);
 
-    ShaderProgramCreator textShaderProgramManager;
-    textShaderProgramManager.addShader(text_vertex);
-    textShaderProgramManager.addShader(text_fragment);
+        ShaderCreator text_fragment(Shader::Fragment);
+        text_fragment.setSource(TextRendererShaders::fragmentShader);
 
-    m_shader = textShaderProgramManager.get();
-    m_shader->loadActiveLocations();
+        ShaderProgramCreator textShaderProgramCreator;
+        textShaderProgramCreator.setAccess(Creator::Access::Public);
+        textShaderProgramCreator.setName(programName);
+        textShaderProgramCreator.addShader(text_vertex);
+        textShaderProgramCreator.addShader(text_fragment);
+
+        m_shader = textShaderProgramCreator.get();
+        m_shader->loadActiveLocations();
+    }
 
     // TODO: implement in the engine
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -138,7 +146,7 @@ void TextRenderer::end() {
 }
 
 void TextRenderer::render() {
-    m_shader->setVec3("textColor", m_color);
+    m_shader->setVec3("charColor", m_color);
 
     float x = m_x;
     float y = m_y;
