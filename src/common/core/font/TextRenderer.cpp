@@ -16,7 +16,7 @@
 using namespace std;
 
 namespace algine {
-bool TextRenderer::m_cacheOptimization = false;
+bool TextRenderer::m_cacheOptimization = true;
 
 // <hash, loaded characters + counter>
 // hash is generated using font name, width, height and style
