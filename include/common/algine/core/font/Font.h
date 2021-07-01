@@ -1,6 +1,8 @@
 #ifndef ALGINE_FONT_H
 #define ALGINE_FONT_H
 
+#include <algine/core/io/IOSystem.h>
+
 #include <string>
 #include <memory>
 
@@ -21,7 +23,7 @@ public:
     explicit Font(const std::string &path);
 
     void load(const std::string &name, Style style);
-    void loadPath(const std::string &path);
+    void loadPath(const std::string &path, const std::shared_ptr<IOSystem> &io = nullptr);
 
     Style getStyle() const;
 
@@ -44,7 +46,7 @@ public:
 
     bool isLoaded() const;
 
-    const std::shared_ptr<void>& native_handle() const;
+    void* native_handle() const;
 
 private:
     std::shared_ptr<void> m_face;

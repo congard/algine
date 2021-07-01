@@ -1,5 +1,6 @@
 #include <algine/core/font/Font.h>
 #include <algine/core/font/FontEngine.h>
+#include <algine/core/Engine.h>
 
 #include <freetype/ftsnames.h>
 #include <freetype/ttnameid.h>
@@ -36,7 +37,7 @@ FontSearchInfo findFont(const std::forward_list<Path> &children, const string &n
         } else {
             Font font(child.toString());
 
-            if (font.getName() == name && (font.getStyle() == style || style == Font::Style::Any)) {
+            if (font.isLoaded() && (font.getName() == name) && (font.getStyle() == style || style == Font::Style::Any)) {
                 return {true, font};
             }
         }
@@ -75,22 +76,42 @@ void Font::load(const string &name, Style style) {
     }
 }
 
-void Font::loadPath(const string &path) {
+struct LoadedFont {
+    FT_Byte *buffer {nullptr};
+    long bufferSize {};
+    FT_Face face {};
+};
+
+void Font::loadPath(const string &path, const shared_ptr<IOSystem> &inIo) {
+    shared_ptr<IOSystem> io = inIo ? inIo : Engine::getDefaultIOSystem();
+
+    auto stream = io->open(path, IOStream::Mode::Read);
+    long size = static_cast<long>(stream->size());
+    auto buffer = new FT_Byte[size];
+    stream->read(buffer, size, 1);
+    stream->close();
+
     FT_Face face;
 
-    auto error = FT_New_Face(reinterpret_cast<FT_Library>(FontEngine::m_fontLibrary), path.c_str(), 0, &face);
+    auto error = FT_New_Memory_Face(
+            reinterpret_cast<FT_Library>(FontEngine::m_fontLibrary),
+            buffer, size, 0, &face);
 
     if (!error) {
-        m_face.reset(face, [&](FT_Face face) {
+        m_face.reset(new LoadedFont {buffer, size, face}, [&](LoadedFont *font) {
             if (isLoaded()) {
-                FT_Done_Face(face);
+                FT_Done_Face(font->face);
             }
+
+            delete[] font->buffer;
         });
+    } else {
+        delete[] buffer;
     }
 }
 
 inline string getProperty(FT_UShort property, const shared_ptr<void> &ftFace) {
-    auto face = static_cast<FT_Face>(ftFace.get());
+    auto face = static_cast<LoadedFont*>(ftFace.get())->face;
 
     for (int i = 0; i < FT_Get_Sfnt_Name_Count(face); i++) {
         FT_SfntName_ properties {};
@@ -187,7 +208,7 @@ bool Font::isLoaded() const {
     return m_face != nullptr;
 }
 
-const shared_ptr<void>& Font::native_handle() const {
-    return m_face;
+void* Font::native_handle() const {
+    return static_cast<LoadedFont*>(m_face.get())->face;
 }
 }

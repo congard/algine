@@ -5,7 +5,7 @@
 
 #include <utility>
 
-#define face static_cast<FT_Face>(m_font.native_handle().get())
+#define face static_cast<FT_Face>(m_font.native_handle())
 
 namespace algine {
 FontRenderer::FontRenderer()
