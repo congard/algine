@@ -28,6 +28,7 @@ class Engine {
     friend class Buffer;
     friend class ShaderProgram;
     friend class InputLayout;
+    friend class Font;
 
 public:
     enum class GraphicsAPI {
@@ -126,6 +127,7 @@ public:
 private:
     static std::unique_ptr<DebugWriter> m_debugWriter;
     static std::shared_ptr<IOSystem> m_defaultIOSystem;
+    static void *m_fontLibrary;
 
     static int m_apiVersion;
     static GraphicsAPI m_graphicsAPI;

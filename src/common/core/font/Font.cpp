@@ -1,5 +1,4 @@
 #include <algine/core/font/Font.h>
-#include <algine/core/font/FontEngine.h>
 #include <algine/core/Engine.h>
 
 #include <freetype/ftsnames.h>
@@ -94,7 +93,7 @@ void Font::loadPath(const string &path, const shared_ptr<IOSystem> &inIo) {
     FT_Face face;
 
     auto error = FT_New_Memory_Face(
-            reinterpret_cast<FT_Library>(FontEngine::m_fontLibrary),
+            reinterpret_cast<FT_Library>(Engine::m_fontLibrary),
             buffer, size, 0, &face);
 
     if (!error) {

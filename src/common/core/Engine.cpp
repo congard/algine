@@ -14,6 +14,9 @@
 
 #include <chrono>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include "core/debug/Debug.h"
 
 #ifndef __ANDROID__
@@ -43,6 +46,7 @@ using namespace std;
 namespace algine {
 unique_ptr<DebugWriter> Engine::m_debugWriter;
 shared_ptr<IOSystem> Engine::m_defaultIOSystem;
+void* Engine::m_fontLibrary;
 
 int Engine::m_apiVersion;
 Engine::GraphicsAPI Engine::m_graphicsAPI;
@@ -134,6 +138,8 @@ void Engine::init() {
     m_defaultIOSystem = make_shared<AssetsIOSystem>();
 #endif
 
+    FT_Init_FreeType(reinterpret_cast<FT_Library *>(&m_fontLibrary));
+
     initExtra();
 }
 
@@ -151,6 +157,8 @@ void Engine::destroy() {
     free(m_defaultInputLayout);
 
     TypeRegistry::clear();
+
+    FT_Done_FreeType(static_cast<FT_Library>(m_fontLibrary));
 
     enable_if_desktop(glfwTerminate()); // Terminate GLFW, clearing any resources allocated by GLFW
 }
