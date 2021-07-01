@@ -64,7 +64,7 @@ TextRenderer::TextRenderer()
 
     m_layout->addAttribute(attribDescription, m_buffer.get());
 
-    m_buffer->unbind();
+    //m_buffer->unbind(); // already done by m_layout->addAttribute call
     m_layout->unbind();
 }
 
@@ -127,6 +127,8 @@ void TextRenderer::begin() {
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    Texture2D::activateSlot(0);
 }
 
 void TextRenderer::end() {
@@ -134,8 +136,8 @@ void TextRenderer::end() {
         glDisable(GL_BLEND);
     }
 
-    if (!m_wasDepthTestEnabled) {
-        Engine::disableDepthTest();
+    if (m_wasDepthTestEnabled) {
+        Engine::enableDepthTest();
     }
 
     glBlendFunc(GL_SRC_ALPHA, m_prevSrcAlphaBlendMode);
@@ -158,7 +160,7 @@ void TextRenderer::render() {
 
             Texture2DPtr tex = PtrMaker::make();
             tex->bind();
-            tex->setFormat(Texture::Red);
+            tex->setFormat(Texture::Red8);
             tex->setWidth(character.width);
             tex->setHeight(character.height);
             tex->update(Texture::Red, DataType::UnsignedByte, character.data.array());
