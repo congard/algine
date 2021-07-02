@@ -11,11 +11,11 @@ class FontRenderer {
 public:
     struct Character {
         tulz::Array<ubyte> data;
-        uint width; // TODO: create class FontMetrics
+        uint width;
         uint height;
         int bearingLeft;
         int bearingTop;
-        long advance; // смещение до следующего глифа
+        long advance;
     };
 
 public:
@@ -37,9 +37,6 @@ public:
 
     void setFont(const Font &font);
     const Font& getFont() const;
-
-private:
-    void applySize();
 
 private:
     Font m_font;

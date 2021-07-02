@@ -9,24 +9,18 @@
 
 namespace algine {
 FontRenderer::FontRenderer()
-    : m_width(0) {}
+    : m_width(0), m_height(0) {}
 
 FontRenderer::FontRenderer(Font font, uint width, uint height)
-    : m_font(std::move(font))
-{
-    setFontSize(width, height);
-}
+    : m_font(std::move(font)),
+      m_width(width), m_height(height) {}
 
 FontRenderer::FontRenderer(Font font, uint height)
     : m_font(std::move(font)),
-      m_width(0)
-{
-    setFontHeight(height);
-}
+      m_width(0), m_height(height) {}
 
 void FontRenderer::setFontHeight(uint height) {
     m_height = height;
-    applySize();
 }
 
 uint FontRenderer::getFontHeight() const {
@@ -35,7 +29,6 @@ uint FontRenderer::getFontHeight() const {
 
 void FontRenderer::setFontWidth(uint width) {
     m_width = width;
-    applySize();
 }
 
 uint FontRenderer::getFontWidth() const {
@@ -45,7 +38,6 @@ uint FontRenderer::getFontWidth() const {
 void FontRenderer::setFontSize(uint width, uint height) {
     m_height = height;
     m_width = width;
-    applySize();
 }
 
 void FontRenderer::setFontSize(uint size) {
@@ -61,6 +53,7 @@ const Font& FontRenderer::getFont() const {
 }
 
 FontRenderer::Character FontRenderer::getCharacter(uint c) const {
+    FT_Set_Pixel_Sizes(face, m_width, m_height);
     FT_Load_Char(face, c, FT_LOAD_RENDER);
 
     Character character;
@@ -78,9 +71,5 @@ FontRenderer::Character FontRenderer::getCharacter(uint c) const {
     }
 
     return character;
-}
-
-void FontRenderer::applySize() {
-    FT_Set_Pixel_Sizes(face, m_width, m_height);
 }
 }
