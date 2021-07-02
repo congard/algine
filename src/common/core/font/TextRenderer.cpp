@@ -94,7 +94,7 @@ TextRenderer::~TextRenderer() {
 }
 
 void TextRenderer::setViewport(uint width, uint height) {
-    m_projection = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+    m_projection = glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f);
 }
 
 void TextRenderer::setX(float x) {
@@ -150,7 +150,6 @@ void TextRenderer::begin() {
     m_wasBlendingEnabled = glIsEnabled(GL_BLEND); // TODO: to Engine
     glGetIntegerv(GL_BLEND_SRC_ALPHA, &m_prevSrcAlphaBlendMode); // TODO: to Engine
 
-    //Engine::enableFaceCulling(); // Do we really need this call?
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -220,19 +219,20 @@ void TextRenderer::render() {
         // s_ means "symbol" or "scaled"
 
         float s_x = x + character.bearingLeft * m_scale;
-        float s_y = y - (height - character.bearingTop) * m_scale;
+        float s_y = y + (height - character.bearingTop) * m_scale;
 
         float s_w = width * m_scale;
         float s_h = height * m_scale;
 
+        // TODO: triangle strip instead
         float vertices[] = {
-                s_x,        s_y + s_h,  0.0f, 0.0f,
+                s_x,        s_y - s_h,  0.0f, 0.0f,
                 s_x,        s_y,        0.0f, 1.0f,
                 s_x + s_w,  s_y,        1.0f, 1.0f,
 
-                s_x,        s_y + s_h,  0.0f, 0.0f,
+                s_x,        s_y - s_h,  0.0f, 0.0f,
                 s_x + s_w,  s_y,        1.0f, 1.0f,
-                s_x + s_w,  s_y + s_h,  1.0f, 0.0f
+                s_x + s_w,  s_y - s_h,  1.0f, 0.0f
         };
 
         character.texture->bind();
