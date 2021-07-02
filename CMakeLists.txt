@@ -213,7 +213,8 @@ set(ALGINE_CORE_SOURCES
         src/common/core/glsl-modules/GLSLModules.h.in
         src/common/core/font/Font.cpp include/common/algine/core/font/Font.h
         src/common/core/font/FontRenderer.cpp include/common/algine/core/font/FontRenderer.h
-        src/common/core/font/TextRenderer.cpp include/common/algine/core/font/TextRenderer.h)
+        src/common/core/font/TextRenderer.cpp include/common/algine/core/font/TextRenderer.h
+        include/common/algine/core/Point.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h
