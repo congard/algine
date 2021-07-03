@@ -97,7 +97,10 @@ public:
     };
 
     enum class PolyType {
-        Triangle = 0x0004
+        Line = 0x1,
+        Triangle = 0x4,
+        TriangleStrip = 0x5,
+        TriangleFan = 0x6
     };
 
 public:
