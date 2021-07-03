@@ -224,14 +224,10 @@ void TextRenderer::render() {
         float s_w = width * m_scale;
         float s_h = height * m_scale;
 
-        // TODO: triangle strip instead
         float vertices[] = {
-                s_x,        s_y - s_h,  0.0f, 0.0f,
                 s_x,        s_y,        0.0f, 1.0f,
                 s_x + s_w,  s_y,        1.0f, 1.0f,
-
                 s_x,        s_y - s_h,  0.0f, 0.0f,
-                s_x + s_w,  s_y,        1.0f, 1.0f,
                 s_x + s_w,  s_y - s_h,  1.0f, 0.0f
         };
 
@@ -239,7 +235,7 @@ void TextRenderer::render() {
 
         m_buffer->updateData(0, sizeof(vertices), vertices);
 
-        Engine::drawArrays(0, 6);
+        Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 
         x += static_cast<float>(character.advance >> 6) * m_scale;
     }
