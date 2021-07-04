@@ -74,7 +74,7 @@ TextRenderer::TextRenderer()
 
     m_buffer->bind();
     m_layout->bind();
-    m_buffer->setData(sizeof(float) * 6 * 4, nullptr, Buffer::DynamicDraw);
+    m_buffer->setData(sizeof(float) * 4 * 4, nullptr, Buffer::DynamicDraw);
 
     InputAttributeDescription attribDescription;
     attribDescription.setLocation(0);
