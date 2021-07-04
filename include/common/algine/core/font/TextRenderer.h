@@ -6,6 +6,7 @@
 #include <algine/core/InputLayout.h>
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/font/FontRenderer.h>
+#include <algine/core/Color.h>
 
 namespace algine {
 class TextRenderer {
@@ -13,17 +14,25 @@ public:
     TextRenderer();
     ~TextRenderer();
 
-public:
     void setViewport(uint width, uint height);
     void setX(float x);
     void setY(float y);
     void setPos(float x, float y);
     void setPos(const glm::vec2 &pos);
     void setScale(float scale);
-    void setColor(const glm::vec3 &color);
+    void setColor(const Color &color);
     void setText(const std::string &text);
+    void setText(const std::u16string &text);
     void setFont(const Font &font, uint size = 16);
     void setFontSize(uint size);
+
+    float getX() const;
+    float getY() const;
+    float getScale() const;
+    const Color& getColor() const;
+    const std::u16string& getText() const;
+    const Font& getFont() const;
+    uint getFontSize() const;
 
     void begin();
     void end();
@@ -51,7 +60,7 @@ private:
     float m_scale;
     float m_x;
     float m_y;
-    glm::vec3 m_color;
+    Color m_color;
     glm::mat4 m_projection;
 
 private:

@@ -119,13 +119,17 @@ void TextRenderer::setScale(float scale) {
     m_scale = scale;
 }
 
-void TextRenderer::setColor(const glm::vec3 &color) {
+void TextRenderer::setColor(const Color &color) {
     m_color = color;
 }
 
 void TextRenderer::setText(const std::string &text) {
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utfConv;
     m_text = utfConv.from_bytes(text);
+}
+
+void TextRenderer::setText(const std::u16string &text) {
+    m_text = text;
 }
 
 void TextRenderer::setFont(const Font &font, uint size) {
@@ -137,6 +141,34 @@ void TextRenderer::setFont(const Font &font, uint size) {
 void TextRenderer::setFontSize(uint size) {
     m_fontRenderer.setFontHeight(size);
     updateHash();
+}
+
+float TextRenderer::getX() const {
+    return m_x;
+}
+
+float TextRenderer::getY() const {
+    return m_y;
+}
+
+float TextRenderer::getScale() const {
+    return m_scale;
+}
+
+const Color& TextRenderer::getColor() const {
+    return m_color;
+}
+
+const std::u16string &TextRenderer::getText() const {
+    return m_text;
+}
+
+const Font& TextRenderer::getFont() const {
+    return m_fontRenderer.getFont();
+}
+
+uint TextRenderer::getFontSize() const {
+    return m_fontRenderer.getFontHeight();
 }
 
 void TextRenderer::begin() {
@@ -174,7 +206,7 @@ void TextRenderer::end() {
 }
 
 void TextRenderer::render() {
-    m_shader->setVec3("charColor", m_color);
+    m_shader->setVec4("charColor", m_color.redF(), m_color.greenF(), m_color.blueF(), m_color.alphaF());
 
     float x = m_x;
     float y = m_y;
