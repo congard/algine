@@ -172,54 +172,62 @@ void ShaderProgram::unbind() {
     glUseProgram(0);
 }
 
-void ShaderProgram::setBool(const int location, const bool p) {
+void ShaderProgram::setBool(int location, bool p) {
     glUniform1i(location, p);
 }
 
-void ShaderProgram::setInt(const int location, const int p) {
+void ShaderProgram::setInt(int location, int p) {
     glUniform1i(location, p);
 }
 
-void ShaderProgram::setUint(const int location, const uint p) {
+void ShaderProgram::setUint(int location, uint p) {
     glUniform1ui(location, p);
 }
 
-void ShaderProgram::setFloat(const int location, const float p) {
+void ShaderProgram::setFloat(int location, float p) {
     glUniform1f(location, p);
 }
 
-void ShaderProgram::setVec3(const int location, const glm::vec3 &p) {
+void ShaderProgram::setVec3(int location, const glm::vec3 &p) {
     glUniform3fv(location, 1, glm::value_ptr(p));
 }
 
-void ShaderProgram::setVec4(const int location, const glm::vec4 &p) {
+void ShaderProgram::setVec3(int location, float p0, float p1, float p2) {
+    glUniform3f(location, p0, p1, p2);
+}
+
+void ShaderProgram::setVec4(int location, const glm::vec4 &p) {
     glUniform4fv(location, 1, glm::value_ptr(p));
 }
 
-void ShaderProgram::setMat3(const int location, const glm::mat3 &p) {
+void ShaderProgram::setVec4(int location, float p0, float p1, float p2, float p3) {
+    glUniform4f(location, p0, p1, p2, p3);
+}
+
+void ShaderProgram::setMat3(int location, const glm::mat3 &p) {
     glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(p));
 }
 
-void ShaderProgram::setMat4(const int location, const glm::mat4 &p) {
+void ShaderProgram::setMat4(int location, const glm::mat4 &p) {
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(p));
 }
 
-void ShaderProgram::setBool(const string &location, const bool p) {
+void ShaderProgram::setBool(const string &location, bool p) {
     checkBinding()
     setBool(getLocation(location), p);
 }
 
-void ShaderProgram::setInt(const string &location, const int p) {
+void ShaderProgram::setInt(const string &location, int p) {
     checkBinding()
     setInt(getLocation(location), p);
 }
 
-void ShaderProgram::setUint(const string &location, const uint p) {
+void ShaderProgram::setUint(const string &location, uint p) {
     checkBinding()
     setUint(getLocation(location), p);
 }
 
-void ShaderProgram::setFloat(const string &location, const float p) {
+void ShaderProgram::setFloat(const string &location, float p) {
     checkBinding()
     setFloat(getLocation(location), p);
 }
@@ -229,9 +237,19 @@ void ShaderProgram::setVec3(const string &location, const glm::vec3 &p) {
     setVec3(getLocation(location), p);
 }
 
+void ShaderProgram::setVec3(const std::string &location, float p0, float p1, float p2) {
+    checkBinding()
+    setVec3(getLocation(location), p0, p1, p2);
+}
+
 void ShaderProgram::setVec4(const string &location, const glm::vec4 &p) {
     checkBinding()
     setVec4(getLocation(location), p);
+}
+
+void ShaderProgram::setVec4(const std::string &location, float p0, float p1, float p2, float p3) {
+    checkBinding()
+    setVec4(getLocation(location), p0, p1, p2, p3);
 }
 
 void ShaderProgram::setMat3(const string &location, const glm::mat3 &p) {

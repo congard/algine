@@ -6,7 +6,6 @@
 #include <algine/core/shader/Shader.h>
 
 #include <algine/types.h>
-#include <algine/templates.h>
 
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
@@ -42,7 +41,9 @@ public:
     static void setUint(int location, uint p);
     static void setFloat(int location, float p);
     static void setVec3(int location, const glm::vec3 &p);
+    static void setVec3(int location, float p0, float p1, float p2);
     static void setVec4(int location, const glm::vec4 &p);
+    static void setVec4(int location, float p0, float p1, float p2, float p3);
     static void setMat3(int location, const glm::mat3 &p);
     static void setMat4(int location, const glm::mat4 &p);
 
@@ -51,7 +52,9 @@ public:
     void setUint(const std::string &location, uint p);
     void setFloat(const std::string &location, float p);
     void setVec3(const std::string &location, const glm::vec3 &p);
+    void setVec3(const std::string &location, float p0, float p1, float p2);
     void setVec4(const std::string &location, const glm::vec4 &p);
+    void setVec4(const std::string &location, float p0, float p1, float p2, float p3);
     void setMat3(const std::string &location, const glm::mat3 &p);
     void setMat4(const std::string &location, const glm::mat4 &p);
 
