@@ -159,6 +159,7 @@ void Engine::destroy() {
     TypeRegistry::clear();
 
     FT_Done_FreeType(static_cast<FT_Library>(m_fontLibrary));
+    m_fontLibrary = nullptr;
 
     enable_if_desktop(glfwTerminate()); // Terminate GLFW, clearing any resources allocated by GLFW
 }

@@ -97,8 +97,8 @@ void Font::loadPath(const string &path, const shared_ptr<IOSystem> &inIo) {
             buffer, size, 0, &face);
 
     if (!error) {
-        m_face.reset(new LoadedFont {buffer, size, face}, [&](LoadedFont *font) {
-            if (isLoaded()) {
+        m_face.reset(new LoadedFont {buffer, size, face}, [](LoadedFont *font) {
+            if (Engine::m_fontLibrary != nullptr && font != nullptr && font->face != nullptr) {
                 FT_Done_Face(font->face);
             }
 
