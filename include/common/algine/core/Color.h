@@ -1,11 +1,13 @@
 #ifndef ALGINE_COLOR_H
 #define ALGINE_COLOR_H
 
+#include <algine/types.h>
+
 namespace algine {
 class Color {
 public:
     Color();
-    explicit Color(int color);
+    explicit Color(uint color);
     Color(int r, int g, int b, int a = 255);
 
     int red() const;
@@ -18,9 +20,9 @@ public:
     float blueF() const;
     float alphaF() const;
 
-    int value() const;
+    uint value() const;
 
-    void setValue(int color);
+    void setValue(uint color);
     void setRgb(int r, int g, int b, int a = 255);
     void setRgbF(float r, float g, float b, float a = 1.0f);
 

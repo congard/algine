@@ -4,7 +4,7 @@ namespace algine {
 Color::Color()
     : m_red(0), m_green(0), m_blue(0), m_alpha(0) {}
 
-Color::Color(int color)
+Color::Color(uint color)
     : m_red((color >> 16) & 0xff),
       m_green((color >> 8) & 0xff),
       m_blue(color & 0xff),
@@ -45,11 +45,11 @@ float Color::alphaF() const {
     return static_cast<float>(m_alpha) / 255.0f;
 }
 
-int Color::value() const {
+uint Color::value() const {
     return (m_alpha & 0xff) << 24 | (m_red & 0xff) << 16 | (m_green & 0xff) << 8 | (m_blue & 0xff);
 }
 
-void Color::setValue(int color) {
+void Color::setValue(uint color) {
     m_red = (color >> 16) & 0xff;
     m_green = (color >> 8) & 0xff;
     m_blue = color & 0xff;
