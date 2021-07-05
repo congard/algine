@@ -10,6 +10,9 @@ public:
     explicit Color(uint color);
     Color(int r, int g, int b, int a = 255);
 
+    bool operator==(const Color &rhs) const;
+    bool operator!=(const Color &rhs) const;
+
     int red() const;
     int green() const;
     int blue() const;

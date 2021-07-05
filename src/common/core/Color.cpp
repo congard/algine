@@ -13,6 +13,14 @@ Color::Color(uint color)
 Color::Color(int r, int g, int b, int a)
     : m_red(r), m_green(g), m_blue(b), m_alpha(a) {}
 
+bool Color::operator==(const Color &rhs) const {
+    return (m_red == rhs.m_red) && (m_green == rhs.m_green) && (m_blue == rhs.m_blue) && (m_alpha == rhs.m_alpha);
+}
+
+bool Color::operator!=(const Color &rhs) const {
+    return !(*this == rhs);
+}
+
 int Color::red() const {
     return m_red;
 }
