@@ -10,6 +10,54 @@ public:
     Point(T x, T y)
         : m_x(x), m_y(y) {}
 
+    bool operator==(const Point &rhs) const {
+        return (m_x == rhs.m_x) && (m_y == rhs.m_y);
+    }
+
+    bool operator!=(const Point &rhs) const {
+        return !(*this == rhs);
+    }
+
+    Point operator+(const Point &rhs) const {
+        return {m_x + rhs.m_x, m_y + rhs.m_y};
+    }
+
+    Point operator-(const Point &rhs) const {
+        return {m_x - rhs.m_x, m_y - rhs.m_y};
+    }
+
+    Point operator*(T value) const {
+        return {m_x * value, m_y * value};
+    }
+
+    Point operator/(T value) const {
+        return {m_x / value, m_y / value};
+    }
+
+    Point& operator+=(const Point &rhs) {
+        m_x += rhs.m_x;
+        m_y += rhs.m_y;
+        return *this;
+    }
+
+    Point& operator-=(const Point &rhs) {
+        m_x -= rhs.m_x;
+        m_y -= rhs.m_y;
+        return *this;
+    }
+
+    Point& operator*=(T value) {
+        m_x *= value;
+        m_y *= value;
+        return *this;
+    }
+
+    Point& operator/=(T value) {
+        m_x /= value;
+        m_y /= value;
+        return *this;
+    }
+
     void setPos(T x, T y) {
         m_x = x;
         m_y = y;
