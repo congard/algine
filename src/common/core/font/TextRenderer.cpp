@@ -180,7 +180,7 @@ void TextRenderer::begin() {
 
     m_wasDepthTestEnabled = Engine::isDepthTestEnabled();
     m_wasBlendingEnabled = glIsEnabled(GL_BLEND); // TODO: to Engine
-    glGetIntegerv(GL_BLEND_SRC_ALPHA, &m_prevSrcAlphaBlendMode); // TODO: to Engine
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &m_prevSrcAlphaBlendMode); // TODO: to Engine
 
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
