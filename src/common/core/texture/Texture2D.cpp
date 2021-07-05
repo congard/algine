@@ -56,14 +56,17 @@ map<uint, uint> Texture2D::defaultParams() {
 }
 
 uint Texture2D::getActualFormat() const {
+    checkBinding()
     return TexturePrivateTools::getTexParam(m_target, GL_TEXTURE_INTERNAL_FORMAT);
 }
 
 uint Texture2D::getActualWidth() const {
+    checkBinding()
     return TexturePrivateTools::getTexParam(m_target, GL_TEXTURE_WIDTH);
 }
 
 uint Texture2D::getActualHeight() const {
+    checkBinding()
     return TexturePrivateTools::getTexParam(m_target, GL_TEXTURE_HEIGHT);
 }
 
