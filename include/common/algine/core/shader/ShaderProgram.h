@@ -36,10 +36,13 @@ public:
 
     void bind();
     void unbind();
+
     static void setBool(int location, bool p);
     static void setInt(int location, int p);
     static void setUint(int location, uint p);
     static void setFloat(int location, float p);
+    static void setVec2(int location, const glm::vec2 &p);
+    static void setVec2(int location, float p0, float p1);
     static void setVec3(int location, const glm::vec3 &p);
     static void setVec3(int location, float p0, float p1, float p2);
     static void setVec4(int location, const glm::vec4 &p);
@@ -51,6 +54,8 @@ public:
     void setInt(const std::string &location, int p);
     void setUint(const std::string &location, uint p);
     void setFloat(const std::string &location, float p);
+    void setVec2(const std::string &location, const glm::vec2 &p);
+    void setVec2(const std::string &location, float p0, float p1);
     void setVec3(const std::string &location, const glm::vec3 &p);
     void setVec3(const std::string &location, float p0, float p1, float p2);
     void setVec4(const std::string &location, const glm::vec4 &p);

@@ -188,6 +188,14 @@ void ShaderProgram::setFloat(int location, float p) {
     glUniform1f(location, p);
 }
 
+void ShaderProgram::setVec2(int location, const glm::vec2 &p) {
+    glUniform2fv(location, 1, glm::value_ptr(p));
+}
+
+void ShaderProgram::setVec2(int location, float p0, float p1) {
+    glUniform2f(location, p0, p1);
+}
+
 void ShaderProgram::setVec3(int location, const glm::vec3 &p) {
     glUniform3fv(location, 1, glm::value_ptr(p));
 }
@@ -230,6 +238,16 @@ void ShaderProgram::setUint(const string &location, uint p) {
 void ShaderProgram::setFloat(const string &location, float p) {
     checkBinding()
     setFloat(getLocation(location), p);
+}
+
+void ShaderProgram::setVec2(const string &location, const glm::vec2 &p) {
+    checkBinding()
+    setVec2(getLocation(location), p);
+}
+
+void ShaderProgram::setVec2(const std::string &location, float p0, float p1) {
+    checkBinding()
+    setVec2(getLocation(location), p0, p1);
 }
 
 void ShaderProgram::setVec3(const string &location, const glm::vec3 &p) {
