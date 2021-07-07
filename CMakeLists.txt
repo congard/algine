@@ -225,7 +225,10 @@ set(ALGINE_CORE_SOURCES
         src/common/core/font/FontMetrics.cpp include/common/algine/core/font/FontMetrics.h
         include/common/algine/core/Rect.h
         include/common/algine/core/Point.h
-        src/common/core/Color.cpp include/common/algine/core/Color.h)
+        src/common/core/Color.cpp include/common/algine/core/Color.h
+        src/common/core/painter/Painter.cpp include/common/algine/core/painter/Painter.h
+        src/common/core/painter/Paint.cpp include/common/algine/core/painter/Paint.h
+        include/common/algine/core/painter/RoundRect.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h
