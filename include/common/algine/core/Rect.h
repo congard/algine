@@ -52,6 +52,8 @@ private:
     T m_width;
     T m_height;
 };
+
+using RectF = Rect<float>;
 }
 
 #endif //ALGINE_RECT_H
