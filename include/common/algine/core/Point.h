@@ -91,6 +91,8 @@ private:
     T m_x;
     T m_y;
 };
+
+using PointF = Point<float>;
 }
 
 #endif //ALGINE_POINT_H
