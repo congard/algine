@@ -126,6 +126,14 @@ file(READ src/common/core/font/TextRenderer.fs.glsl TextRenderer_fs)
 
 configure_file(src/common/core/font/TextRendererShaders.h.in src/common/core/font/TextRendererShaders.h)
 
+# painter shaders
+file(READ src/common/core/painter/painter.vs.glsl Painter_painter_vs)
+file(READ src/common/core/painter/fill.fs.glsl Painter_fill_fs)
+file(READ src/common/core/painter/circle-fill.fs.glsl Painter_circle_fill_fs)
+file(READ src/common/core/painter/roundRect-fill.fs.glsl Painter_round_rect_fill_fs)
+
+configure_file(src/common/core/painter/PainterShaders.h.in src/common/core/painter/PainterShaders.h)
+
 set(ALGINE_CORE_SOURCES
         src/common/internal/PublicObjectTools.h
         src/common/internal/SOP.h
@@ -342,6 +350,7 @@ target_include_directories(algine PRIVATE src/common)
 target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules)
 target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders)
 target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/font)
+target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter)
 
 target_include_directories(algine PRIVATE contrib/assimp/include)
 target_include_directories(algine PRIVATE contrib/freetype/include)
