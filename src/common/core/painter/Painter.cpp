@@ -21,7 +21,8 @@ Painter::Painter()
       m_prevSrcAlphaBlendMode(),
       m_colorTex(PtrMaker::make<Texture2D>()),
       m_activeColor(Color(0xff000000)),
-      m_renderHints(0)
+      m_renderHints(0),
+      m_transform(1.0f)
 {
     m_layout = PtrMaker::make();
     m_buffer = PtrMaker::make();
@@ -177,6 +178,14 @@ void Painter::setRenderHints(RenderHints renderHints) {
 
 Painter::RenderHints Painter::getRenderHints() const {
     return m_renderHints;
+}
+
+void Painter::setTransform(const glm::mat4 &transform) {
+    m_transform = transform;
+}
+
+const glm::mat4& Painter::getTransform() const {
+    return m_transform;
 }
 
 void Painter::drawLine(const PointF &p1, const PointF &p2) {
@@ -430,7 +439,8 @@ void Painter::writeRectToBuffer(const RectF &rect) {
 }
 
 void Painter::writeTransformation(const ShaderProgramPtr &program) {
-    program->setMat4("transformation", m_paint.getTransform());
+    program->setMat4("transformation", m_transform);
+    program->setMat4("paintTransformation", m_paint.getTransform());
 }
 
 void Painter::changeColor() {
