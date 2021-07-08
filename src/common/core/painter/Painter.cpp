@@ -84,13 +84,11 @@ void Painter::begin() {
 
     // TODO: implement MSAA
 
-    if (isRenderHintEnabled(RenderHint::AlphaBlending)) {
-        m_wasBlendingEnabled = glIsEnabled(GL_BLEND); // TODO: to Engine
-        glGetIntegerv(GL_BLEND_DST_ALPHA, &m_prevSrcAlphaBlendMode); // TODO: to Engine
+    m_wasBlendingEnabled = glIsEnabled(GL_BLEND); // TODO: to Engine
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &m_prevSrcAlphaBlendMode); // TODO: to Engine
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     Texture::activateSlot(0);
 
@@ -109,13 +107,11 @@ void Painter::end() {
         Engine::enableDepthTest();
     }
 
-    if (isRenderHintEnabled(RenderHint::AlphaBlending)) {
-        if (!m_wasBlendingEnabled) {
-            glDisable(GL_BLEND);
-        }
-
-        glBlendFunc(GL_SRC_ALPHA, m_prevSrcAlphaBlendMode);
+    if (!m_wasBlendingEnabled) {
+        glDisable(GL_BLEND);
     }
+
+    glBlendFunc(GL_SRC_ALPHA, m_prevSrcAlphaBlendMode);
 
     m_buffer->unbind();
     m_layout->unbind();
@@ -159,10 +155,6 @@ uint Painter::getFontSize() const {
 }
 
 void Painter::setRenderHint(RenderHint renderHint, bool on) {
-    if (renderHint == RenderHint::Antialiasing && on) {
-        setRenderHint(RenderHint::AlphaBlending);
-    }
-
     uint hint = static_cast<uint>(renderHint);
     m_renderHints = on ? (m_renderHints | hint) : (m_renderHints & ~hint);
 }
