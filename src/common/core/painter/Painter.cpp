@@ -5,25 +5,48 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <codecvt>
+#include <locale>
+
 #include "PainterShaders.h"
 
 namespace algine {
 ShaderProgramPtr Painter::m_fill;
 ShaderProgramPtr Painter::m_circleFill;
 ShaderProgramPtr Painter::m_roundRectFill;
+ShaderProgramPtr Painter::m_textFill;
+
+// <hash, loaded characters + counter>
+// hash is generated using font name, width, height and style
+std::unordered_map<unsigned long, Painter::Characters> Painter::m_characters;
+
+// Source: http://www.cse.yorku.ca/~oz/hash.html
+inline unsigned long hash_djb2(unsigned char *str) {
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++) {
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    }
+
+    return hash;
+}
 
 Painter::Painter()
     : m_projection(),
       m_paint(),
-      m_textRenderer(PtrMaker::make<TextRenderer>()),
       m_wasDepthTestEnabled(),
       m_wasBlendingEnabled(),
       m_prevSrcAlphaBlendMode(),
       m_colorTex(PtrMaker::make<Texture2D>()),
       m_activeColor(Color(0xff000000)),
       m_renderHints(0),
-      m_transform(1.0f)
+      m_transform(1.0f),
+      m_fontHash(0)
 {
+    // TODO: implement in the engine
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     m_layout = PtrMaker::make();
     m_buffer = PtrMaker::make();
 
@@ -59,6 +82,10 @@ Painter::Painter()
         initProgram(m_fill, vs, PainterShaders::fill_fs);
         initProgram(m_circleFill, vs, PainterShaders::circle_fill_fs);
         initProgram(m_roundRectFill, vs, PainterShaders::round_rect_fill_fs);
+        initProgram(m_textFill, vs, PainterShaders::text_fill_fs);
+
+        m_textFill->bind();
+        m_textFill->setInt("char", 1);
     }
 
     m_colorTex->bind();
@@ -73,6 +100,10 @@ Painter::Painter()
     });
 
     changeColor();
+}
+
+Painter::~Painter() {
+    disownFontHash();
 }
 
 void Painter::begin() {
@@ -90,8 +121,6 @@ void Painter::begin() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Texture::activateSlot(0);
-
     m_fill->bind();
     m_fill->setMat4("projection", m_projection);
 
@@ -100,6 +129,9 @@ void Painter::begin() {
 
     m_roundRectFill->bind();
     m_roundRectFill->setMat4("projection", m_projection);
+
+    m_textFill->bind();
+    m_textFill->setMat4("projection", m_projection);
 }
 
 void Painter::end() {
@@ -119,7 +151,6 @@ void Painter::end() {
 
 void Painter::setViewport(uint width, uint height) {
     m_projection = glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f);
-    m_textRenderer->setViewport(width, height);
 }
 
 void Painter::setPaint(const Paint &paint) {
@@ -135,23 +166,27 @@ Paint& Painter::paint() {
 }
 
 void Painter::setFont(const Font &font, uint size) {
-    m_textRenderer->setFont(font, size);
+    m_fontRenderer.setFont(font);
+    m_fontRenderer.setFontSize(size);
+    updateFontHash();
 }
 
 void Painter::setFont(const Font &font) {
-    m_textRenderer->setFont(font, m_textRenderer->getFontSize());
+    m_fontRenderer.setFont(font);
+    updateFontHash();
 }
 
 void Painter::setFontSize(uint size) {
-    m_textRenderer->setFontSize(size);
+    m_fontRenderer.setFontSize(size);
+    updateFontHash();
 }
 
 const Font& Painter::getFont() const {
-    return m_textRenderer->getFont();
+    return m_fontRenderer.getFont();
 }
 
 uint Painter::getFontSize() const {
-    return m_textRenderer->getFontSize();
+    return m_fontRenderer.getFontHeight();
 }
 
 void Painter::setRenderHint(RenderHint renderHint, bool on) {
@@ -366,33 +401,112 @@ void Painter::drawCircle(float x, float y, float radius) {
     drawCircle({x, y}, radius);
 }
 
-void Painter::drawText(const std::string &text, const PointF &p) {
-    m_textRenderer->setColor(m_paint.getColor());
-    m_textRenderer->setPos(p.getX(), p.getY());
-    m_textRenderer->setText(text);
-    m_textRenderer->begin();
-    m_textRenderer->render();
-    m_textRenderer->end();
+void Painter::drawText(const std::u16string &text, const PointF &p) {
+    applyColor();
 
-    m_layout->bind();
-    m_buffer->bind();
+    m_textFill->bind();
+    writeTransformation(m_textFill);
+
+    constexpr float scale = 1.0f;
+
+    float x = p.getX();
+    float y = p.getY();
+
+    auto &characters = m_characters[m_fontHash].characters;
+
+    for (auto symbol : text) {
+        // if symbol has not been loaded yet - load it
+        if (characters.find(symbol) == characters.end()) {
+            auto character = m_fontRenderer.getCharacter(symbol);
+
+            Texture2DPtr tex = PtrMaker::make();
+            tex->bind();
+            tex->setFormat(Texture::Red8);
+            tex->setWidth(character.width);
+            tex->setHeight(character.height);
+            tex->update(Texture::Red, DataType::UnsignedByte, character.data.array());
+
+            tex->setParams(std::map<uint, uint> {
+                    {Texture::WrapU, Texture::ClampToEdge},
+                    {Texture::WrapV, Texture::ClampToEdge},
+                    {Texture::MinFilter, Texture::Linear},
+                    {Texture::MagFilter, Texture::Linear}
+            });
+
+            Character readyCharacter;
+            readyCharacter.texture = tex;
+            readyCharacter.bearingTop = static_cast<float>(character.bearingTop);
+            readyCharacter.bearingLeft = static_cast<float>(character.bearingLeft);
+            readyCharacter.advance = static_cast<float>(character.advance) / 64.0f;
+
+            characters[symbol] = readyCharacter;
+        }
+
+        // render symbol
+
+        const Character &character = characters[symbol];
+
+        auto width = static_cast<float>(character.texture->getWidth());
+        auto height = static_cast<float>(character.texture->getHeight());
+
+        // s_ means "symbol" or "scaled"
+
+        float s_x = x + character.bearingLeft * scale;
+        float s_y = y + (height - character.bearingTop) * scale;
+
+        float s_w = width * scale;
+        float s_h = height * scale;
+
+        float vertices[] = {
+                s_x,        s_y,        0.0f, 1.0f,
+                s_x + s_w,  s_y,        1.0f, 1.0f,
+                s_x,        s_y - s_h,  0.0f, 0.0f,
+                s_x + s_w,  s_y - s_h,  1.0f, 0.0f
+        };
+
+        character.texture->use(1);
+
+        if (m_buffer->size() < sizeof(vertices)) {
+            m_buffer->setData(sizeof(vertices), vertices, Buffer::DynamicDraw);
+        } else {
+            m_buffer->updateData(0, sizeof(vertices), vertices);
+        }
+
+        Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
+
+        x += character.advance * scale;
+    }
+}
+
+void Painter::drawText(const std::string &text, const PointF &p) {
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utfConv;
+    auto utf16 = utfConv.from_bytes(text);
+    drawText(utf16, p);
 }
 
 void Painter::drawText(const std::string &text, float x, float y) {
     drawText(text, {x, y});
 }
 
+inline void writeTransformation(const ShaderProgramPtr &program,
+    const glm::mat4 &transform, const glm::mat4 &paintTransform)
+{
+    program->setMat4("transformation", transform);
+    program->setMat4("paintTransformation", paintTransform);
+}
+
 void Painter::drawTexture(const Texture2DPtr &texture, const RectF &rect) {
     writeRectToBuffer(rect);
-    texture->bind();
+    texture->use(0);
 
     m_fill->bind();
+    algine::writeTransformation(m_fill, m_transform, glm::mat4(1.0f));
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
 
 void Painter::drawTexture(const Texture2DPtr &texture, const PointF &p) {
-    texture->bind();
+    texture->use(0);
 
     writeRectToBuffer({
         p.getX(),
@@ -402,12 +516,27 @@ void Painter::drawTexture(const Texture2DPtr &texture, const PointF &p) {
     });
 
     m_fill->bind();
+    algine::writeTransformation(m_fill, m_transform, glm::mat4(1.0f));
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
 
 void Painter::drawTexture(const Texture2DPtr &texture, float x, float y) {
     drawTexture(texture, {x, y});
+}
+
+void Painter::optimizeFontCache() {
+    for (auto it = m_characters.begin(); it != m_characters.end();) {
+        if (it->second.counter == 0) {
+            it = m_characters.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void Painter::clearFontCache() {
+    m_characters = {};
 }
 
 void Painter::writeRectToBuffer(const RectF &rect) {
@@ -431,8 +560,7 @@ void Painter::writeRectToBuffer(const RectF &rect) {
 }
 
 void Painter::writeTransformation(const ShaderProgramPtr &program) {
-    program->setMat4("transformation", m_transform);
-    program->setMat4("paintTransformation", m_paint.getTransform());
+    algine::writeTransformation(program, m_transform, m_paint.getTransform());
 }
 
 void Painter::changeColor() {
@@ -447,7 +575,7 @@ void Painter::changeColor() {
 void Painter::applyColor() {
     switch (m_paint.getSource()) {
         case Paint::Source::Color:
-            m_colorTex->bind();
+            m_colorTex->use(0);
 
             if (m_activeColor != m_paint.getColor()) {
                 changeColor();
@@ -455,9 +583,36 @@ void Painter::applyColor() {
 
             break;
         case Paint::Source::Texture:
-            m_paint.getTexture()->bind();
+            m_paint.getTexture()->use(0);
             break;
         default: throw std::invalid_argument("Invalid paint source");
+    }
+}
+
+void Painter::updateFontHash() {
+    std::string fontName = m_fontRenderer.getFont().getName();
+    std::string fontWidth = std::to_string(m_fontRenderer.getFontWidth());
+    std::string fontHeight = std::to_string(m_fontRenderer.getFontHeight());
+    std::string fontStyle = std::to_string(static_cast<uint>(m_fontRenderer.getFont().getStyle()));
+
+    disownFontHash();
+
+    m_fontHash = hash_djb2((unsigned char *) (fontName + " " + fontWidth + " " + fontHeight + " " + fontStyle).c_str());
+
+    if (m_characters.find(m_fontHash) == m_characters.end()) {
+        m_characters[m_fontHash] = Characters {};
+    }
+
+    m_characters[m_fontHash].counter++;
+}
+
+void Painter::disownFontHash() {
+    if (auto it = m_characters.find(m_fontHash); it != m_characters.end()) {
+        it->second.counter--;
+
+        if (isRenderHintEnabled(RenderHint::OptimizeFontCache) && it->second.counter == 0) {
+            m_characters.erase(it);
+        }
     }
 }
 }

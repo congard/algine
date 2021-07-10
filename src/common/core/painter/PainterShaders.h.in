@@ -7,6 +7,7 @@ constexpr auto painter_vs = R"(${Painter_painter_vs})";
 constexpr auto fill_fs = R"(${Painter_fill_fs})";
 constexpr auto circle_fill_fs = R"(${Painter_circle_fill_fs})";
 constexpr auto round_rect_fill_fs = R"(${Painter_round_rect_fill_fs})";
+constexpr auto text_fill_fs = R"(${Painter_text_fill_fs})";
 }
 
 #endif //ALGINE_PAINTERSHADERS_H

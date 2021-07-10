@@ -1,9 +1,0 @@
-#ifndef ALGINE_TEXTRENDERERSHADERS_H
-#define ALGINE_TEXTRENDERERSHADERS_H
-
-namespace algine::TextRendererShaders {
-constexpr auto vertexShader = R"(${TextRenderer_vs})";
-constexpr auto fragmentShader = R"(${TextRenderer_fs})";
-}
-
-#endif //ALGINE_TEXTRENDERERSHADERS_H

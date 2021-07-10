@@ -1,7 +1,10 @@
 #ifndef ALGINE_PAINTER_H
 #define ALGINE_PAINTER_H
 
-#include <algine/core/font/TextRenderer.h>
+#include <algine/core/font/FontRenderer.h>
+#include <algine/core/shader/ShaderProgram.h>
+#include <algine/core/buffers/ArrayBuffer.h>
+#include <algine/core/InputLayout.h>
 #include <algine/core/painter/RoundRect.h>
 #include <algine/core/painter/Paint.h>
 #include <algine/core/Rect.h>
@@ -11,13 +14,15 @@ namespace algine {
 class Painter {
 public:
     enum class RenderHint {
-        Antialiasing = 0b01
+        Antialiasing = 0b01,
+        OptimizeFontCache = 0b10
     };
 
     using RenderHints = uint;
 
 public:
     Painter();
+    ~Painter();
 
     void begin();
     void end();
@@ -58,6 +63,7 @@ public:
     void drawCircle(const PointF &origin, float radius);
     void drawCircle(float x, float y, float radius);
 
+    void drawText(const std::u16string &text, const PointF &p);
     void drawText(const std::string &text, const PointF &p);
     void drawText(const std::string &text, float x, float y);
 
@@ -65,16 +71,23 @@ public:
     void drawTexture(const Texture2DPtr &texture, const PointF &p);
     void drawTexture(const Texture2DPtr &texture, float x, float y);
 
+    static void optimizeFontCache();
+    static void clearFontCache();
+
 private:
+    Painter(const Painter&);
+    Painter& operator=(const Painter&);
+
     void writeRectToBuffer(const RectF &rect);
     void writeTransformation(const ShaderProgramPtr &program);
     void changeColor();
     void applyColor();
+    void updateFontHash();
+    void disownFontHash();
 
 private:
     glm::mat4 m_projection;
     Paint m_paint;
-    Ptr<TextRenderer> m_textRenderer;
     Ptr<ArrayBuffer> m_buffer;
     Ptr<InputLayout> m_layout;
 
@@ -85,6 +98,10 @@ private:
     glm::mat4 m_transform;
 
 private:
+    FontRenderer m_fontRenderer;
+    unsigned long m_fontHash;
+
+private:
     bool m_wasDepthTestEnabled;
     bool m_wasBlendingEnabled;
     int m_prevSrcAlphaBlendMode;
@@ -93,6 +110,22 @@ private:
     static ShaderProgramPtr m_fill;
     static ShaderProgramPtr m_circleFill;
     static ShaderProgramPtr m_roundRectFill;
+    static ShaderProgramPtr m_textFill;
+
+private:
+    struct Character {
+        Texture2DPtr texture;
+        float bearingLeft;
+        float bearingTop;
+        float advance;
+    };
+
+    struct Characters {
+        std::unordered_map<char16_t, Character> characters;
+        int counter {0};
+    };
+
+    static std::unordered_map<unsigned long, Characters> m_characters;
 };
 }
 
