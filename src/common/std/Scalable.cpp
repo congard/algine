@@ -62,11 +62,11 @@ float Scalable::getScaleZ() const {
     return m_scale.z;
 }
 
-vec3 Scalable::getScale() const {
+const vec3& Scalable::getScale() const {
     return m_scale;
 }
 
-glm::mat4 Scalable::getScalingMatrix() const {
+const glm::mat4& Scalable::getScalingMatrix() const {
     return m_scaling;
 }
 

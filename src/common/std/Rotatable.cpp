@@ -99,7 +99,7 @@ float Rotatable::getRoll() const {
     return m_rotator->getRoll();
 }
 
-mat4 Rotatable::getRotationMatrix() const {
+const mat4& Rotatable::getRotationMatrix() const {
     return m_rotation;
 }
 
