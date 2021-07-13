@@ -33,7 +33,7 @@ public:
     float getPitch() const;
     float getYaw() const;
     float getRoll() const;
-    glm::mat4 getRotationMatrix() const;
+    const glm::mat4& getRotationMatrix() const;
     glm::vec3 getRotate() const;
     glm::vec3 getForward() const;
     glm::vec3 getBack() const;

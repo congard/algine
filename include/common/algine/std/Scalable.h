@@ -23,8 +23,8 @@ public:
     float getScaleX() const;
     float getScaleY() const;
     float getScaleZ() const;
-    glm::vec3 getScale() const;
-    glm::mat4 getScalingMatrix() const;
+    const glm::vec3& getScale() const;
+    const glm::mat4& getScalingMatrix() const;
 
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
