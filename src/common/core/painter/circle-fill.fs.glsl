@@ -18,7 +18,7 @@ void main() {
             float delta = 1.5f;
             float alpha = smoothstep(radius - delta, radius, d);
 
-            fragColor.a *= 1 - alpha;
+            fragColor.a *= 1.0f - alpha;
         }
     } else {
         discard;

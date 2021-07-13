@@ -34,8 +34,8 @@ uniform bool antialiasing;
 // D(z, w); r4; s4
 
 // nearest radius & distance for corner
-float nearest_r = -2;
-float nearest_d = -1;
+float nearest_r = -2.0f;
+float nearest_d = -1.0f;
 
 bool inCorner(vec2 p, float sy, float r) {
     return pos.x >= p.x && pos.x <= p.x + r && pos.y >= p.y && pos.y <= p.y + r * sy;
@@ -47,7 +47,7 @@ bool outsideEllipse(vec2 origin, float sy, float r) {
 
     float dist = length(d);
 
-    if (nearest_d > dist || nearest_d == -1) {
+    if (nearest_d > dist || nearest_d == -1.0f) {
         nearest_d = dist;
         nearest_r = r;
     }
@@ -60,7 +60,7 @@ bool isDiscard(vec2 cornerStart, vec2 ellipseOrigin, float sy, float r) {
 }
 
 float getAlpha(float d0, float d) {
-    float alpha = smoothstep(0, antialiasingDelta, d);
+    float alpha = smoothstep(0.0f, antialiasingDelta, d);
     return alpha;
 }
 
@@ -83,15 +83,15 @@ void main() {
         if (nearest_d <= nearest_r) {
             float alpha = smoothstep(nearest_r - antialiasingDelta, nearest_r, nearest_d);
 
-            antialiasedAlpha = 1 - alpha;
+            antialiasedAlpha = 1.0f - alpha;
         }
 
         float w = p1p2.z - p1p2.x;
         float h = p1p2.w - p1p2.y;
-        float alpha = getAlpha(w / 2, pos.x - p1p2.x);
-        alpha *= getAlpha(w / 2, p1p2.z - pos.x);
-        alpha *= getAlpha(h / 2, pos.y - p1p2.y);
-        alpha *= getAlpha(h / 2, p1p2.w - pos.y);
+        float alpha = getAlpha(w / 2.0f, pos.x - p1p2.x);
+        alpha *= getAlpha(w / 2.0f, p1p2.z - pos.x);
+        alpha *= getAlpha(h / 2.0f, pos.y - p1p2.y);
+        alpha *= getAlpha(h / 2.0f, p1p2.w - pos.y);
 
         fragColor.a *= min(antialiasedAlpha, alpha);
     }
