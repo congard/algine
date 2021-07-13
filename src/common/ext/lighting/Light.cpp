@@ -1,5 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
-
 #include <algine/ext/lighting/Light.h>
 
 #include <glm/gtc/matrix_transform.hpp>

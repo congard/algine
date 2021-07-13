@@ -1,4 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
 #include <algine/std/Translatable.h>
 
 #include <algine/core/transfer/GLMTransferrer.h>
@@ -17,6 +16,10 @@ constant(Pos, "pos");
 }
 
 namespace algine {
+Translatable::Translatable()
+    : m_pos(0.0f),
+      m_translation(1.0f) {}
+
 void Translatable::setPos(float x, float y, float z) {
     m_pos.x = x;
     m_pos.y = y;

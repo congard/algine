@@ -17,7 +17,7 @@ public:
 
 public:
     std::string name;
-    std::vector<Node> childs;
+    std::vector<Node> children;
     glm::mat4 defaultTransform = glm::mat4(1.0f);
 };
 

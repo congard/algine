@@ -11,10 +11,10 @@
 namespace algine {
 class AnimationBlender {
 public:
-    enum BlendListModes {
-        BlendListDisable,
-        BlendListExclude,
-        BlendListInclude
+    enum class BlendListMode {
+        Disable,
+        Exclude,
+        Include
     };
 
 public:
@@ -25,7 +25,7 @@ public:
     void initInverseBoneMatrices();
 
     void addBlendListItem(uint item);
-    void setBlendListMode(uint mode);
+    void setBlendListMode(BlendListMode mode);
     void setBlendList(const std::vector<uint> &blendList);
     void setFactor(float factor);
     void changeFactor(float step);
@@ -34,7 +34,7 @@ public:
     void setRhsAnim(uint index);
 
     std::vector<uint> getBlendList() const;
-    uint getBlendListMode() const;
+    BlendListMode getBlendListMode() const;
     uint getLhsAnim() const;
     uint getRhsAnim() const;
     float getFactor() const;
@@ -48,8 +48,8 @@ private:
     std::vector<uint> m_blendList;
     std::vector<glm::mat4> m_bones;
     std::vector<glm::mat4> m_inverseBoneMatrices;
-    glm::mat4 inverseGlobalInverseTransform;
-    uint m_blendListMode = BlendListDisable;
+    glm::mat4 m_inverseGlobalInverseTransform;
+    BlendListMode m_blendListMode = BlendListMode::Disable;
     uint m_lhsAnim = 0, m_rhsAnim = 0;
     ModelPtr m_model = nullptr;
     float m_factor = 0.0f;

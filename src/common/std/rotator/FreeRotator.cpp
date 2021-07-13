@@ -1,16 +1,17 @@
-#define GLM_FORCE_CTOR_INIT
 #include <algine/std/rotator/FreeRotator.h>
 
 using namespace glm;
 
 namespace algine {
-FreeRotator::FreeRotator() {
+FreeRotator::FreeRotator()
+    : qRotation({1.0f, 1.0f, 1.0f}) // TODO: test
+{
     m_type = Type::Free;
 }
 
 void FreeRotator::rotate(mat4 &matrix) {
     // temporary frame quaternion from pitch, yaw, roll
-    quat qPYR = quat(vec3(m_pitch, m_yaw, m_roll));
+    quat qPYR {{m_pitch, m_yaw, m_roll}};
     // reset values
     m_pitch = m_yaw = m_roll = 0;
 

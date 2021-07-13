@@ -1,4 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
 #include <algine/std/animation/Animator.h>
 
 #include <algine/std/model/Model.h>
@@ -25,7 +24,7 @@ Animator::Animator(Model *model, Index animationIndex)
       m_animationIndex(animationIndex) {}
 
 void Animator::animate(float timeInSeconds) {
-    mat4 identity;
+    mat4 identity {1.0f};
 
     const auto &shape = m_model->getShape();
     const auto &animation = shape->getAnimation(m_animationIndex);
@@ -207,7 +206,7 @@ void Animator::readNodeHierarchy(float animationTime, const Node &node, const ma
         vec3 scaling;
         calcInterpolatedScaling(scaling, animationTime, animNode);
 
-        mat4 scalingM = scale(mat4(1.0), scaling);
+        mat4 scalingM = scale(mat4(1.0f), scaling);
 
         // Интерполируем вращение и генерируем матрицу вращения
         quat rotationQ;
@@ -219,7 +218,7 @@ void Animator::readNodeHierarchy(float animationTime, const Node &node, const ma
         vec3 translation;
         calcInterpolatedPosition(translation, animationTime, animNode);
 
-        mat4 translationM = translate(mat4(1.0), translation);
+        mat4 translationM = translate(mat4(1.0f), translation);
 
         // Объединяем преобразования
         nodeTransformation = translationM * rotationM * scalingM;
@@ -236,7 +235,7 @@ void Animator::readNodeHierarchy(float animationTime, const Node &node, const ma
         dstBone = shape->getGlobalInverseTransform() * globalTransformation * bone.boneMatrix;
     }
 
-    for (const auto &child : node.childs) {
+    for (const auto &child : node.children) {
         readNodeHierarchy(animationTime, child, globalTransformation);
     }
 }

@@ -1,4 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
 #include <algine/std/model/ModelCreator.h>
 
 #include <algine/std/model/Model.h>

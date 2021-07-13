@@ -1,4 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
 #include <algine/std/model/ShapeCreator.h>
 
 #include <algine/std/animation/BoneInfo.h>

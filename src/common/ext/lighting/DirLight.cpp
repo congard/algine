@@ -1,5 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
-
 #include <algine/ext/lighting/DirLight.h>
 
 #include <algine/core/PtrMaker.h>
@@ -11,7 +9,7 @@ using namespace std;
 
 namespace algine {
 DirLight::DirLight(Rotator::Type rotatorType)
-    : Rotatable(rotatorType)
+    : Rotatable(rotatorType), m_lightSpace(1.0f)
 {
     m_type = Type::Dir;
 }

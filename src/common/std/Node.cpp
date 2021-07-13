@@ -11,18 +11,18 @@ Node::Node(const aiNode *node) {
     name = node->mName.data;
     defaultTransform = getMat4(node->mTransformation);
 
-    childs.reserve(node->mNumChildren); // allocating memory
+    children.reserve(node->mNumChildren); // allocating memory
     for (size_t i = 0; i < node->mNumChildren; i++)
-        childs.emplace_back(node->mChildren[i]);
+        children.emplace_back(node->mChildren[i]);
 }
 
 Node* Node::getNode(const std::string &nodeName) {
-    for (auto &child : childs) {
+    for (auto &child : children) {
         if (child.name == nodeName)
             return &child;
     }
 
-    for (auto &child : childs) {
+    for (auto &child : children) {
         Node *node = child.getNode(nodeName);
         if (node != nullptr)
             return node;

@@ -1,4 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
 #include <algine/std/Rotatable.h>
 
 #include <algine/core/transfer/GLMTransferrer.h>
@@ -25,10 +24,12 @@ void Rotatable::swap(Rotatable &other) {
 }
 
 Rotatable::Rotatable(Rotator::Type rotatorType)
-    : m_rotator(Rotator::create(rotatorType)) {}
+    : m_rotator(Rotator::create(rotatorType)),
+      m_rotation(1.0f) {}
 
 Rotatable::Rotatable()
-    : m_rotator(nullptr) {}
+    : m_rotator(nullptr),
+      m_rotation(1.0f) {}
 
 Rotatable::Rotatable(const Rotatable &src)
     : m_rotation(src.m_rotation),
@@ -39,15 +40,15 @@ Rotatable::Rotatable(Rotatable &&src) noexcept {
 }
 
 Rotatable& Rotatable::operator=(const Rotatable &rhs) {
-    if (&rhs != this)
+    if (&rhs != this) {
         Rotatable(rhs).swap(*this);
+    }
 
     return *this;
 }
 
 Rotatable& Rotatable::operator=(Rotatable &&rhs) noexcept {
     rhs.swap(*this);
-
     return *this;
 }
 
@@ -57,7 +58,6 @@ Rotatable::~Rotatable() {
 
 void Rotatable::setRotatorType(Rotator::Type rotatorType) {
     delete m_rotator;
-
     m_rotator = Rotator::create(rotatorType);
 }
 

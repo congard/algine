@@ -9,6 +9,8 @@
 namespace algine {
 class Translatable: public Transferable {
 public:
+    Translatable();
+
     void setPos(float x, float y, float z);
     void setPos(const glm::vec3 &pos);
     void setX(float x);

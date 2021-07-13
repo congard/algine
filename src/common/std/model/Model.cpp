@@ -1,4 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
 #include <algine/std/model/Model.h>
 
 #include <algine/std/model/Shape.h>
@@ -13,7 +12,7 @@ namespace algine {
 vector<ModelPtr> Model::publicObjects;
 
 Model::Model(const ShapePtr &shape, Rotator::Type rotatorType)
-    : Rotatable(rotatorType)
+    : Rotatable(rotatorType), m_transform(1.0f)
 {
     if (shape) {
         setShape(shape);
@@ -21,9 +20,10 @@ Model::Model(const ShapePtr &shape, Rotator::Type rotatorType)
 }
 
 Model::Model(Rotator::Type rotatorType)
-    : Rotatable(rotatorType) {}
+    : Rotatable(rotatorType), m_transform(1.0f) {}
 
-Model::Model() = default;
+Model::Model()
+    : m_transform(1.0f) {}
 
 Model::~Model() {
     deletePtr(m_animator)
@@ -104,7 +104,7 @@ void Model::setShape(const ShapePtr &shape) {
     }
 
     // configure transformations array
-    m_boneTransformations.resize(m_shape->getBonesAmount(), mat4(1.0));
+    m_boneTransformations.resize(m_shape->getBonesAmount(), mat4(1.0f));
 }
 
 void Model::setBones(const BoneMatrices *bones) {

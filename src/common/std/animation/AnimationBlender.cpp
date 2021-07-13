@@ -1,4 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
 #include <algine/std/animation/AnimationBlender.h>
 
 #include <algine/std/model/Model.h>
@@ -10,11 +9,14 @@ using namespace std;
 using namespace glm;
 
 namespace algine {
-AnimationBlender::AnimationBlender(const ModelPtr &model) {
+AnimationBlender::AnimationBlender(const ModelPtr &model)
+    : m_inverseGlobalInverseTransform(1.0f)
+{
     setModel(model);
 }
 
-AnimationBlender::AnimationBlender() = default;
+AnimationBlender::AnimationBlender()
+    : m_inverseGlobalInverseTransform(1.0f) {}
 
 mat4 AnimationBlender::blendBones(uint index) const {
     const auto &shape = m_model->getShape();
@@ -26,8 +28,8 @@ mat4 AnimationBlender::blendBones(uint index) const {
     const mat4 &inverseBoneMatrix = m_inverseBoneMatrices[index];
 
     // extracting bone transformation
-    mat4 lhsTransform = inverseGlobalInverseTransform * lhs * inverseBoneMatrix;
-    mat4 rhsTransform = inverseGlobalInverseTransform * rhs * inverseBoneMatrix;
+    mat4 lhsTransform = m_inverseGlobalInverseTransform * lhs * inverseBoneMatrix;
+    mat4 rhsTransform = m_inverseGlobalInverseTransform * rhs * inverseBoneMatrix;
 
     // blending lhsTransform and rhsTransform
     quat lhsQuat = quat_cast(lhsTransform);
@@ -47,16 +49,16 @@ mat4 AnimationBlender::blendBones(uint index) const {
 
 void AnimationBlender::blend() {
     switch (m_blendListMode) {
-        case BlendListDisable: {
+        case BlendListMode::Disable: {
             for (uint i = 0; i < m_bones.size(); i++) {
                 m_bones[i] = blendBones(i);
             }
 
             break;
         }
-        case BlendListInclude:
-        case BlendListExclude: {
-            bool isInclude = m_blendListMode == BlendListInclude;
+        case BlendListMode::Include:
+        case BlendListMode::Exclude: {
+            bool isInclude = m_blendListMode == BlendListMode::Include;
 
             for (uint i = 0; i < m_bones.size(); ++i) {
                 bool include = !isInclude;
@@ -78,7 +80,7 @@ void AnimationBlender::blend() {
         }
         default: {
             throw invalid_argument(
-                "Unknown m_blendListMode value: " + to_string(m_blendListMode) + "\n"
+                "Unknown m_blendListMode value: " + to_string(static_cast<int>(m_blendListMode)) + "\n"
                 "Valid values:\n"
                 "  0. AnimationBlender::BlendListDisable\n"
                 "  1. AnimationBlender::BlendListExclude\n"
@@ -98,11 +100,11 @@ void AnimationBlender::initInverseBoneMatrices() {
     }
 }
 
-void AnimationBlender::addBlendListItem(const uint item) {
+void AnimationBlender::addBlendListItem(uint item) {
     m_blendList.emplace_back(item);
 }
 
-void AnimationBlender::setBlendListMode(const uint mode) {
+void AnimationBlender::setBlendListMode(BlendListMode mode) {
     m_blendListMode = mode;
 }
 
@@ -110,19 +112,19 @@ void AnimationBlender::setBlendList(const vector<uint> &blendList) {
     m_blendList = blendList;
 }
 
-inline float checkBounds(const float p, const float lowerBound, const float upperBound) {
+inline float checkBounds(float p, float lowerBound, float upperBound) {
     return (p >= lowerBound && p <= upperBound) ? p : ((p < lowerBound) ? lowerBound : upperBound);
 }
 
-inline float checkFactorBounds(const float factor) {
+inline float checkFactorBounds(float factor) {
     return checkBounds(factor, 0.0f, 1.0f);
 }
 
-void AnimationBlender::setFactor(const float factor) {
+void AnimationBlender::setFactor(float factor) {
     m_factor = checkFactorBounds(factor);
 }
 
-void AnimationBlender::changeFactor(const float step) {
+void AnimationBlender::changeFactor(float step) {
     m_factor = checkFactorBounds(m_factor + step);
 }
 
@@ -131,16 +133,16 @@ void AnimationBlender::setModel(const ModelPtr &model) {
 
     m_model = model;
     m_bones.resize(shape->getBonesAmount());
-    inverseGlobalInverseTransform = inverse(shape->getGlobalInverseTransform());
+    m_inverseGlobalInverseTransform = inverse(shape->getGlobalInverseTransform());
 
     initInverseBoneMatrices();
 }
 
-void AnimationBlender::setLhsAnim(const uint index) {
+void AnimationBlender::setLhsAnim(uint index) {
     m_lhsAnim = index;
 }
 
-void AnimationBlender::setRhsAnim(const uint index) {
+void AnimationBlender::setRhsAnim(uint index) {
     m_rhsAnim = index;
 }
 
@@ -148,7 +150,7 @@ vector<uint> AnimationBlender::getBlendList() const {
     return m_blendList;
 }
 
-uint AnimationBlender::getBlendListMode() const {
+AnimationBlender::BlendListMode AnimationBlender::getBlendListMode() const {
     return m_blendListMode;
 }
 

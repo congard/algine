@@ -1,4 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
 #include <algine/std/rotator/EulerRotator.h>
 
 #include <glm/gtc/quaternion.hpp>

@@ -1,4 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
 #include <algine/std/Scalable.h>
 
 #include <algine/core/JsonHelper.h>
@@ -17,6 +16,10 @@ constant(Scale, "scale");
 }
 
 namespace algine {
+Scalable::Scalable()
+    : m_scale(1.0f),
+      m_scaling(1.0f) {}
+
 void Scalable::changeScale(const vec3 &dScale) {
     m_scale += dScale;
 }

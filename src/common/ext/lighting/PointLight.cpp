@@ -1,5 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
-
 #include <algine/ext/lighting/PointLight.h>
 
 #include <algine/core/PtrMaker.h>
@@ -22,7 +20,9 @@ const glm::mat4 PointLight::m_lightViews[] = {
     lightView( 0,  0, -1,   0, -1,  0 )
 };
 
-PointLight::PointLight() {
+PointLight::PointLight()
+    : m_lightSpaceMatrices()
+{
     m_type = Type::Point;
 }
 
