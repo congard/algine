@@ -10,10 +10,21 @@ class Bone {
 public:
     Bone(std::string name, const BoneMatrix &matrix);
 
-public:
-    std::string name;
-    BoneMatrix boneMatrix;
+    inline const std::string& getName() const;
+    inline const BoneMatrix& getMatrix() const;
+
+private:
+    std::string m_name;
+    BoneMatrix m_boneMatrix;
 };
+
+const std::string& Bone::getName() const {
+    return m_name;
+}
+
+const BoneMatrix& Bone::getMatrix() const {
+    return m_boneMatrix;
+}
 }
 
 #endif //ALGINE_BONE_H

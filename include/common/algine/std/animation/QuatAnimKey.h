@@ -10,12 +10,26 @@ class QuatAnimKey {
 public:
     explicit QuatAnimKey(const aiQuatKey *key);
 
-    float getTime() const;
+    inline double getTime64() const;
+    inline float getTime() const;
+    inline const glm::quat& getValue() const;
 
-public:
-    double time;
-    glm::quat value;
+private:
+    double m_time;
+    glm::quat m_value;
 };
+
+double QuatAnimKey::getTime64() const {
+    return m_time;
+}
+
+float QuatAnimKey::getTime() const {
+    return static_cast<float>(m_time);
+}
+
+const glm::quat& QuatAnimKey::getValue() const {
+    return m_value;
+}
 }
 
 #endif //ALGINE_QUATANIMKEY_H

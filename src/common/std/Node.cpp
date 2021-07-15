@@ -7,28 +7,30 @@
 namespace algine {
 Node::Node() = default;
 
-Node::Node(const aiNode *node) {
-    name = node->mName.data;
-    defaultTransform = getMat4(node->mTransformation);
+Node::Node(const aiNode *node)
+    : m_name(node->mName.data),
+      m_defaultTransform(getMat4(node->mTransformation))
+{
+    m_children.reserve(node->mNumChildren); // allocating memory
 
-    children.reserve(node->mNumChildren); // allocating memory
-    for (size_t i = 0; i < node->mNumChildren; i++)
-        children.emplace_back(node->mChildren[i]);
+    for (size_t i = 0; i < node->mNumChildren; i++) {
+        m_children.emplace_back(node->mChildren[i]);
+    }
 }
 
 Node* Node::getNode(const std::string &nodeName) {
-    for (auto &child : children) {
-        if (child.name == nodeName)
+    for (auto &child : m_children) {
+        if (child.getName() == nodeName) {
             return &child;
+        }
     }
 
-    for (auto &child : children) {
-        Node *node = child.getNode(nodeName);
-        if (node != nullptr)
+    for (auto &child : m_children) {
+        if (Node *node = child.getNode(nodeName); node != nullptr) {
             return node;
+        }
     }
 
     return nullptr;
 }
-
-} /* namespace algine */
+}

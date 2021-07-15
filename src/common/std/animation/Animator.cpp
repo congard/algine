@@ -29,11 +29,11 @@ void Animator::animate(float timeInSeconds) {
     const auto &shape = m_model->getShape();
     const auto &animation = shape->getAnimation(m_animationIndex);
 
-    auto animTicksPerSecond = static_cast<float>(animation.ticksPerSecond);
+    float animTicksPerSecond = animation.getTicksPerSecond();
     float ticksPerSecond = animTicksPerSecond != 0 ? animTicksPerSecond : 25.0f;
 
     float timeInTicks = timeInSeconds * ticksPerSecond;
-    float animationTime = fmodf(timeInTicks, static_cast<float>(animation.duration));
+    float animationTime = fmodf(timeInTicks, animation.getDuration());
 
     readNodeHierarchy(animationTime, shape->getRootNode(), identity);
 }
@@ -55,7 +55,7 @@ void Animator::setAnimation(const string &name) {
         string available;
 
         for (uint i = 0; i < shape->getAnimationsAmount(); i++)
-            available += "  " + to_string(i) + ". '" + shape->getAnimation(i).name + "'\n";
+            available += "  " + to_string(i) + ". '" + shape->getAnimation(i).getName() + "'\n";
 
         throw runtime_error("Animation '" + name + "' not found\nAvailable animations:\n" + available);
     }
@@ -70,10 +70,10 @@ Index Animator::getAnimationIndex() const {
 }
 
 inline usize findPosition(float animationTime, const AnimNode *animNode) {
-    assert(!animNode->positionKeys.empty());
+    assert(!animNode->getPositionKeys().empty());
 
-    for (usize i = 0; i < animNode->positionKeys.size() - 1; i++) {
-        if (animationTime < (float)animNode->positionKeys[i + 1].time) {
+    for (usize i = 0; i < animNode->positionKeysCount() - 1; i++) {
+        if (animationTime < animNode->getScalingKey(i + 1).getTime()) {
             return i;
         }
     }
@@ -82,35 +82,41 @@ inline usize findPosition(float animationTime, const AnimNode *animNode) {
 }
 
 inline void calcInterpolatedPosition(vec3 &out, float animationTime, const AnimNode *animNode) {
-    if (animNode->positionKeys.size() == 1) {
-        out = animNode->positionKeys[0].value;
+    if (animNode->positionKeysCount() == 1) {
+        out = animNode->getPositionKey(0).getValue();
         return;
     }
 
     usize positionIndex = findPosition(animationTime, animNode);
     usize nextPositionIndex = positionIndex + 1;
 
-    assert(nextPositionIndex < animNode->positionKeys.size());
+    assert(nextPositionIndex < animNode->getPositionKeys().size());
 
-    auto deltaTime = (float)(animNode->positionKeys[nextPositionIndex].time - animNode->positionKeys[positionIndex].time);
-    auto factor = (animationTime - (float)animNode->positionKeys[positionIndex].time) / deltaTime;
+    const auto &positionKey = animNode->getPositionKey(positionIndex);
+    const auto &nextPositionKey = animNode->getPositionKey(nextPositionIndex);
+
+    auto keyTime = positionKey.getTime();
+    auto nextKeyTime = nextPositionKey.getTime();
+
+    auto deltaTime = nextKeyTime - keyTime;
+    auto factor = (animationTime - keyTime) / deltaTime;
 
 #ifdef mkAssert
     assert(factor >= 0.0f && factor <= 1.0f);
 #endif
 
-    const vec3 &start = animNode->positionKeys[positionIndex].value;
-    const vec3 &end = animNode->positionKeys[nextPositionIndex].value;
+    const vec3 &start = positionKey.getValue();
+    const vec3 &end = nextPositionKey.getValue();
     vec3 delta = end - start;
 
     out = start + factor * delta;
 }
 
 inline usize findRotation(float animationTime, const AnimNode *animNode) {
-    assert(!animNode->rotationKeys.empty());
+    assert(!animNode->getRotationKeys().empty());
 
-    for (usize i = 0; i < animNode->rotationKeys.size() - 1; i++) {
-        if (animationTime < (float)animNode->rotationKeys[i + 1].time) {
+    for (usize i = 0; i < animNode->rotationKeysCount() - 1; i++) {
+        if (animationTime < animNode->getRotationKey(i + 1).getTime()) {
             return i;
         }
     }
@@ -119,36 +125,42 @@ inline usize findRotation(float animationTime, const AnimNode *animNode) {
 }
 
 inline void calcInterpolatedRotation(quat &out, float animationTime, const AnimNode *animNode) {
-    // we need at least two values to interpolate...
-    if (animNode->rotationKeys.size() == 1) {
-        out = animNode->rotationKeys[0].value;
+    // we need at least two values to interpolate
+    if (animNode->rotationKeysCount() == 1) {
+        out = animNode->getRotationKey(0).getValue();
         return;
     }
 
     usize rotationIndex = findRotation(animationTime, animNode);
     usize nextRotationIndex = rotationIndex + 1;
 
-    assert(nextRotationIndex < animNode->rotationKeys.size());
+    assert(nextRotationIndex < animNode->rotationKeysCount());
 
-    auto deltaTime = (float)(animNode->rotationKeys[nextRotationIndex].time - animNode->rotationKeys[rotationIndex].time);
-    auto factor = (animationTime - (float)animNode->rotationKeys[rotationIndex].time) / deltaTime;
+    const auto &rotationKey = animNode->getRotationKey(rotationIndex);
+    const auto &nextRotationKey = animNode->getRotationKey(nextRotationIndex);
+
+    auto keyTime = rotationKey.getTime();
+    auto nextKeyTime = nextRotationKey.getTime();
+
+    auto deltaTime = nextKeyTime - keyTime;
+    auto factor = (animationTime - keyTime) / deltaTime;
 
 #ifdef mkAssert
     assert(factor >= 0.0f && factor <= 1.0f);
 #endif
 
-    const quat &startRotationQ = animNode->rotationKeys[rotationIndex].value;
-    const quat &endRotationQ   = animNode->rotationKeys[nextRotationIndex].value;
+    const quat &startRotationQ = rotationKey.getValue();
+    const quat &endRotationQ = nextRotationKey.getValue();
 
     out = slerp(startRotationQ, endRotationQ, factor); // aiQuaternion::Interpolate
     out = normalize(out);
 }
 
 inline usize findScaling(float animationTime, const AnimNode *animNode) {
-    assert(!animNode->scalingKeys.empty());
+    assert(!animNode->getScalingKeys().empty());
 
-    for (usize i = 0; i < animNode->scalingKeys.size() - 1; i++) {
-        if (animationTime < (float)animNode->scalingKeys[i + 1].time) {
+    for (usize i = 0; i < animNode->scalingKeysCount() - 1; i++) {
+        if (animationTime < animNode->getScalingKey(i + 1).getTime()) {
             return i;
         }
     }
@@ -157,36 +169,40 @@ inline usize findScaling(float animationTime, const AnimNode *animNode) {
 }
 
 inline void calcInterpolatedScaling(vec3 &out, float animationTime, const AnimNode *animNode) {
-    if (animNode->scalingKeys.size() == 1) {
-        out = animNode->scalingKeys[0].value;
+    if (animNode->scalingKeysCount() == 1) {
+        out = animNode->getScalingKey(0).getValue();
         return;
     }
 
     usize scalingIndex = findScaling(animationTime, animNode);
     usize nextScalingIndex = scalingIndex + 1;
 
-    assert(nextScalingIndex < animNode->scalingKeys.size());
+    assert(nextScalingIndex < animNode->scalingKeysCount());
 
-    auto deltaTime = (float)(animNode->scalingKeys[nextScalingIndex].time - animNode->scalingKeys[scalingIndex].time);
-    auto factor = (animationTime - (float)animNode->scalingKeys[scalingIndex].time) / deltaTime;
+    const auto &scalingKey = animNode->getScalingKey(scalingIndex);
+    const auto &nextScalingKey = animNode->getScalingKey(nextScalingIndex);
+
+    auto keyTime = scalingKey.getTime();
+    auto nextKeyTime = nextScalingKey.getTime();
+
+    auto deltaTime = nextKeyTime - keyTime;
+    auto factor = (animationTime - keyTime) / deltaTime;
 
 #ifdef mkAssert
     assert(factor >= 0.0f && factor <= 1.0f);
 #endif
 
-    const vec3 &start = animNode->scalingKeys[scalingIndex].value;
-    const vec3 &end = animNode->scalingKeys[nextScalingIndex].value;
+    const vec3 &start = scalingKey.getValue();
+    const vec3 &end = nextScalingKey.getValue();
     vec3 delta = end - start;
 
     out = start + factor * delta;
 }
 
 inline const AnimNode* findNodeAnim(const Animation *animation, const string &nodeName) {
-    for (usize i = 0 ; i < animation->channels.size(); i++) {
-        const AnimNode *channel = &animation->channels[i];
-
-        if (channel->name == nodeName) {
-            return channel;
+    for (const auto &channel : animation->getChannels()) {
+        if (channel.getName() == nodeName) {
+            return &channel;
         }
     }
 
@@ -196,10 +212,10 @@ inline const AnimNode* findNodeAnim(const Animation *animation, const string &no
 void Animator::readNodeHierarchy(float animationTime, const Node &node, const mat4 &parentTransform) {
     const auto &shape = m_model->getShape();
 
-    const string &nodeName = node.name;
+    const string &nodeName = node.getName();
     const Animation &animation = shape->getAnimation(m_animationIndex);
     const AnimNode *animNode = findNodeAnim(&animation, nodeName);
-    mat4 nodeTransformation = node.defaultTransform;
+    mat4 nodeTransformation = node.getTransform();
 
     if (animNode) {
         // Интерполируем масштабирование и генерируем матрицу преобразования масштаба
@@ -232,10 +248,10 @@ void Animator::readNodeHierarchy(float animationTime, const Node &node, const ma
         auto &dstBone = m_model->m_animBones[m_animationIndex][index];
 
         globalTransformation *= boneTransformation;
-        dstBone = shape->getGlobalInverseTransform() * globalTransformation * bone.boneMatrix;
+        dstBone = shape->getGlobalInverseTransform() * globalTransformation * bone.getMatrix();
     }
 
-    for (const auto &child : node.children) {
+    for (const auto &child : node.getChildren()) {
         readNodeHierarchy(animationTime, child, globalTransformation);
     }
 }

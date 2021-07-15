@@ -4,6 +4,6 @@
 
 namespace algine {
 Bone::Bone(std::string boneName, const BoneMatrix &matrix)
-    : name(std::move(boneName)),
-      boneMatrix(matrix) {}
+    : m_name(std::move(boneName)),
+      m_boneMatrix(matrix) {}
 }

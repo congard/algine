@@ -24,7 +24,7 @@ mat4 AnimationBlender::blendBones(uint index) const {
     const mat4 &lhs = m_model->m_animBones[m_lhsAnim][index];
     const mat4 &rhs = m_model->m_animBones[m_rhsAnim][index];
 
-    const mat4 &boneMatrix = shape->m_bones[index].boneMatrix;
+    const mat4 &boneMatrix = shape->m_bones[index].getMatrix();
     const mat4 &inverseBoneMatrix = m_inverseBoneMatrices[index];
 
     // extracting bone transformation
@@ -96,7 +96,7 @@ void AnimationBlender::initInverseBoneMatrices() {
     m_inverseBoneMatrices.resize(shape->getBonesAmount());
 
     for (uint i = 0; i < m_inverseBoneMatrices.size(); ++i) {
-        m_inverseBoneMatrices[i] = inverse(shape->m_bones[i].boneMatrix);
+        m_inverseBoneMatrices[i] = inverse(shape->m_bones[i].getMatrix());
     }
 }
 

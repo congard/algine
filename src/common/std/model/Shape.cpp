@@ -125,7 +125,7 @@ const Animation& Shape::getAnimation(Index index) const {
 
 Index Shape::getAnimationIndexByName(const string &name) const {
     for (Index i = 0; i < m_animations.size(); i++) {
-        if (m_animations[i].name == name) {
+        if (m_animations[i].getName() == name) {
             return i;
         }
     }
