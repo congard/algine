@@ -18,6 +18,14 @@ public:
           m_width(p2.getX() - p1.getX()),
           m_height(p2.getY() - p1.getY()) {}
 
+    bool operator==(const Rect &rhs) const {
+        return (m_x == rhs.m_x) && (m_y == rhs.m_y) && (m_width == rhs.m_width) && (m_height == rhs.m_height);
+    }
+
+    bool operator!=(const Rect &rhs) const {
+        return !(*this == rhs);
+    }
+
     void setPos(T x, T y) {
         m_x = x;
         m_y = y;
@@ -28,6 +36,22 @@ public:
         m_y = y1;
         m_width = x2 - x1;
         m_height = y2 - y1;
+    }
+
+    void setX(T x) {
+        m_x = x;
+    }
+
+    void setY(T y) {
+        m_y = y;
+    }
+
+    void setWidth(T width) {
+        m_width = width;
+    }
+
+    void setHeight(T height) {
+        m_height = height;
     }
 
     T getX() const {
