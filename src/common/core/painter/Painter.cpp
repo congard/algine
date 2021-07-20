@@ -120,18 +120,6 @@ void Painter::begin() {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    m_fill->bind();
-    m_fill->setMat4("projection", m_projection);
-
-    m_circleFill->bind();
-    m_circleFill->setMat4("projection", m_projection);
-
-    m_roundRectFill->bind();
-    m_roundRectFill->setMat4("projection", m_projection);
-
-    m_textFill->bind();
-    m_textFill->setMat4("projection", m_projection);
 }
 
 void Painter::end() {
@@ -251,6 +239,7 @@ void Painter::drawLine(const PointF &p1, const PointF &p2) {
     applyColor();
 
     m_fill->bind();
+    writeProjection(m_fill);
     writeTransformation(m_fill);
 
     Engine::drawArrays(0, 2, Engine::PolyType::Line);
@@ -322,6 +311,7 @@ void Painter::drawTriangle(const PointF &p1, const PointF &p2, const PointF &p3)
     applyColor();
 
     m_fill->bind();
+    writeProjection(m_fill);
     writeTransformation(m_fill);
 
     Engine::drawArrays(0, 3);
@@ -332,6 +322,7 @@ void Painter::drawRect(const RectF &rect) {
     applyColor();
 
     m_fill->bind();
+    writeProjection(m_fill);
     writeTransformation(m_fill);
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
@@ -365,6 +356,7 @@ void Painter::drawRoundRect(const RoundRect &roundRect) {
     m_roundRectFill->setVec4("scale", s1, s2, s3, s4);
     m_roundRectFill->setBool("antialiasing", isRenderHintEnabled(RenderHint::Antialiasing));
 
+    writeProjection(m_roundRectFill);
     writeTransformation(m_roundRectFill);
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
@@ -392,6 +384,7 @@ void Painter::drawCircle(const PointF &origin, float radius) {
     m_circleFill->setFloat("radius", radius);
     m_circleFill->setBool("antialiasing", isRenderHintEnabled(RenderHint::Antialiasing));
 
+    writeProjection(m_circleFill);
     writeTransformation(m_circleFill);
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
@@ -405,6 +398,7 @@ void Painter::drawText(const std::u16string &text, const PointF &p) {
     applyColor();
 
     m_textFill->bind();
+    writeProjection(m_textFill);
     writeTransformation(m_textFill);
 
     constexpr float scale = 1.0f;
@@ -500,6 +494,7 @@ void Painter::drawTexture(const Texture2DPtr &texture, const RectF &rect) {
     texture->use(0);
 
     m_fill->bind();
+    writeProjection(m_fill);
     algine::writeTransformation(m_fill, m_transform, glm::mat4(1.0f));
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
@@ -516,6 +511,7 @@ void Painter::drawTexture(const Texture2DPtr &texture, const PointF &p) {
     });
 
     m_fill->bind();
+    writeProjection(m_fill);
     algine::writeTransformation(m_fill, m_transform, glm::mat4(1.0f));
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
@@ -561,6 +557,10 @@ void Painter::writeRectToBuffer(const RectF &rect) {
 
 void Painter::writeTransformation(const ShaderProgramPtr &program) {
     algine::writeTransformation(program, m_transform, m_paint.getTransform());
+}
+
+void Painter::writeProjection(const ShaderProgramPtr &program) {
+    program->setMat4("projection", m_projection);
 }
 
 void Painter::changeColor() {

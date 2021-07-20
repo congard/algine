@@ -80,6 +80,7 @@ private:
 
     void writeRectToBuffer(const RectF &rect);
     void writeTransformation(const ShaderProgramPtr &program);
+    void writeProjection(const ShaderProgramPtr &program);
     void changeColor();
     void applyColor();
     void updateFontHash();
