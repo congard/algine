@@ -39,6 +39,32 @@ inline constexpr TextureDataInfo getDataInfo(uint dataFormat) {
         case Texture::DepthComponent32F:
             format = Texture::DepthComponent;
             break;
+        case Texture::Red8UI:
+        case Texture::RG8UI:
+        case Texture::RGB8UI:
+        case Texture::RGBA8UI:
+        case Texture::Red8I:
+        case Texture::RG8I:
+        case Texture::RGB8I:
+        case Texture::RGBA8I:
+        case Texture::Red16UI:
+        case Texture::RG16UI:
+        case Texture::RGB16UI:
+        case Texture::RGBA16UI:
+        case Texture::Red16I:
+        case Texture::RG16I:
+        case Texture::RGB16I:
+        case Texture::RGBA16I:
+        case Texture::Red32UI:
+        case Texture::RG32UI:
+        case Texture::RGB32UI:
+        case Texture::RGBA32UI:
+        case Texture::Red32I:
+        case Texture::RG32I:
+        case Texture::RGB32I:
+        case Texture::RGBA32I:
+            format = Texture::RedInteger;
+            break;
         default:
             format = Texture::Red;
             break;
@@ -91,6 +117,54 @@ inline constexpr TextureDataInfo getDataInfo(uint dataFormat) {
             return {Texture::RGBA, DataType::HalfFloat};
         case Texture::RGBA32F:
             return {Texture::RGBA, DataType::Float};
+        case Texture::Red8UI:
+            return {Texture::RedInteger, DataType::UnsignedByte};
+        case Texture::RG8UI:
+            return {Texture::RGInteger, DataType::UnsignedByte};
+        case Texture::RGB8UI:
+            return {Texture::RGBInteger, DataType::UnsignedByte};
+        case Texture::RGBA8UI:
+            return {Texture::RGBAInteger, DataType::UnsignedByte};
+        case Texture::Red8I:
+            return {Texture::RedInteger, DataType::Byte};
+        case Texture::RG8I:
+            return {Texture::RGInteger, DataType::Byte};
+        case Texture::RGB8I:
+            return {Texture::RGBInteger, DataType::Byte};
+        case Texture::RGBA8I:
+            return {Texture::RGBAInteger, DataType::Byte};
+        case Texture::Red16UI:
+            return {Texture::RedInteger, DataType::UnsignedShort};
+        case Texture::RG16UI:
+            return {Texture::RGInteger, DataType::UnsignedShort};
+        case Texture::RGB16UI:
+            return {Texture::RGBInteger, DataType::UnsignedShort};
+        case Texture::RGBA16UI:
+            return {Texture::RGBAInteger, DataType::UnsignedShort};
+        case Texture::Red16I:
+            return {Texture::RedInteger, DataType::Short};
+        case Texture::RG16I:
+            return {Texture::RGInteger, DataType::Short};
+        case Texture::RGB16I:
+            return {Texture::RGBInteger, DataType::Short};
+        case Texture::RGBA16I:
+            return {Texture::RGBAInteger, DataType::Short};
+        case Texture::Red32UI:
+            return {Texture::RedInteger, DataType::UnsignedInt};
+        case Texture::RG32UI:
+            return {Texture::RGInteger, DataType::UnsignedInt};
+        case Texture::RGB32UI:
+            return {Texture::RGBInteger, DataType::UnsignedInt};
+        case Texture::RGBA32UI:
+            return {Texture::RGBAInteger, DataType::UnsignedInt};
+        case Texture::Red32I:
+            return {Texture::RedInteger, DataType::Int};
+        case Texture::RG32I:
+            return {Texture::RGInteger, DataType::Int};
+        case Texture::RGB32I:
+            return {Texture::RGBInteger, DataType::Int};
+        case Texture::RGBA32I:
+            return {Texture::RGBAInteger, DataType::Int};
         default: {
             throw std::runtime_error("Unsupported internal format " + std::to_string(dataFormat));
         }
