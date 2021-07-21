@@ -104,6 +104,12 @@ public:
     };
 
 public:
+    struct FormatInfo {
+        int baseFormat;
+        DataType dataType;
+    };
+
+public:
     Texture();
     ~Texture();
 
@@ -144,6 +150,7 @@ public:
     virtual uint getActualHeight() const = 0;
 
     static void activateSlot(uint slot);
+    static FormatInfo getFormatInfo(uint format);
 
 protected:
     uint m_target = 0; // texture 2d, texture cube etc
