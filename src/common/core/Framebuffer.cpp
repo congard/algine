@@ -179,52 +179,22 @@ inline pair<uint, uint> getTexFormatInfo(uint format) {
     }
 }
 
-inline PixelData getPixels2D(uint mode, uint x, uint y, uint width, uint height, const pair<uint, uint> &formatInfo)
-{
-    PixelData pixelData;
-    pixelData.width = width;
-    pixelData.height = height;
-    pixelData.componentsCount = formatInfo.second;
-    pixelData.pixels = Array<float>(width * height * pixelData.componentsCount);
-
-    glReadBuffer(mode);
-    glReadPixels(x, y, width, height, formatInfo.first, GL_FLOAT, pixelData.pixels.m_array);
-
-    return pixelData;
-}
-
-PixelData Framebuffer::getPixels2D(uint mode, uint x, uint y, uint width, uint height, int format) const
+void Framebuffer::readPixels(uint attachment,
+    int x, int y, int width, int height,
+    int format, DataType type, void *buffer) const
 {
     checkBinding()
-
-    auto &texture = m_texture2DAttachments.at(mode);
-
-    if (format == -1) {
-        texture->bind();
-        format = texture->getActualFormat();
-        texture->unbind();
-    }
-
-    return algine::getPixels2D(mode, x, y, width, height, getTexFormatInfo(format));
+    glReadBuffer(attachment);
+    glReadPixels(x, y, width, height, format, static_cast<GLenum>(type), buffer);
 }
 
-PixelData Framebuffer::getAllPixels2D(uint attachment, int format) const {
-    checkBinding()
-
-    uint width, height;
-
+void Framebuffer::readPixels(uint attachment, int x, int y, int width, int height, void *buffer) const {
     auto &texture = m_texture2DAttachments.at(attachment);
-
     texture->bind();
 
-    if (format == -1)
-        format = texture->getActualFormat();
+    auto formatInfo = Texture::getFormatInfo(texture->getActualFormat());
 
-    width = texture->getActualWidth();
-    height = texture->getActualHeight();
-    texture->unbind();
-
-    return algine::getPixels2D(attachment, 0, 0, width, height, getTexFormatInfo(format));
+    readPixels(attachment, x, y, width, height, formatInfo.baseFormat, formatInfo.dataType, buffer);
 }
 
 PixelData Framebuffer::getAllPixelsCube(TextureCube::Face face, uint attachment, int format) const {

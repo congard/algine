@@ -69,8 +69,8 @@ public:
     void clearDepthBuffer();
     void clearStencilBuffer();
 
-    PixelData getPixels2D(uint mode, uint x, uint y, uint width, uint height, int format = -1) const;
-    PixelData getAllPixels2D(uint attachment, int format = -1) const;
+    void readPixels(uint attachment, int x, int y, int width, int height, int format, DataType type, void *buffer) const;
+    void readPixels(uint attachment, int x, int y, int width, int height, void *buffer) const;
     PixelData getAllPixelsCube(TextureCube::Face face, uint attachment, int format = -1) const;
 
     uint getId() const;
