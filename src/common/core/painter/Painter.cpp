@@ -85,7 +85,7 @@ Painter::Painter()
         initProgram(m_textFill, vs, PainterShaders::text_fill_fs);
 
         m_textFill->bind();
-        m_textFill->setInt("char", 1);
+        m_textFill->setInt("symbol", 1);
     }
 
     m_colorTex->bind();
