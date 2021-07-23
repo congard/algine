@@ -77,6 +77,7 @@ private:
     T m_height;
 };
 
+using RectI = Rect<int>;
 using RectF = Rect<float>;
 }
 
