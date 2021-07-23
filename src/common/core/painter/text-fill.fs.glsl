@@ -1,3 +1,4 @@
+in vec2 rawTexCoords;
 in vec2 texCoords;
 
 out vec4 fragColor;
@@ -6,6 +7,6 @@ uniform sampler2D color;
 uniform sampler2D symbol;
 
 void main() {
-    vec4 sampled = vec4(1.0f, 1.0f, 1.0f, texture(symbol, texCoords).r);
+    vec4 sampled = vec4(1.0f, 1.0f, 1.0f, texture(symbol, rawTexCoords).r);
     fragColor = texture(color, texCoords) * sampled;
 }
