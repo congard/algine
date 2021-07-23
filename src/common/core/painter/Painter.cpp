@@ -225,9 +225,9 @@ void Painter::drawLine(const PointF &p1, const PointF &p2) {
         uv_p2.y() /= k.getY();
 
         vertices[2] = uv_p1.getX();
-        vertices[3] = uv_p1.getY();
+        vertices[3] = 1.0f - uv_p1.getY();
         vertices[6] = uv_p2.getX();
-        vertices[7] = uv_p2.getY();
+        vertices[7] = 1.0f - uv_p2.getY();
     }
 
     if (m_buffer->size() < sizeof(vertices)) {
@@ -295,11 +295,11 @@ void Painter::drawTriangle(const PointF &p1, const PointF &p2, const PointF &p3)
         uv_c.y() /= k.getY();
 
         vertices[2] = uv_a.getX();
-        vertices[3] = uv_a.getY();
+        vertices[3] = 1.0f - uv_a.getY();
         vertices[6] = uv_b.getX();
-        vertices[7] = uv_b.getY();
+        vertices[7] = 1.0f - uv_b.getY();
         vertices[10] = uv_c.getX();
-        vertices[11] = uv_c.getY();
+        vertices[11] = 1.0f - uv_c.getY();
     }
 
     if (m_buffer->size() < sizeof(vertices)) {
@@ -452,10 +452,10 @@ void Painter::drawText(const std::u16string &text, const PointF &p) {
         float s_h = height * scale;
 
         float vertices[] = {
-                s_x,        s_y,        0.0f, 1.0f,
-                s_x + s_w,  s_y,        1.0f, 1.0f,
-                s_x,        s_y - s_h,  0.0f, 0.0f,
-                s_x + s_w,  s_y - s_h,  1.0f, 0.0f
+                s_x,        s_y,        0.0f, 0.0f,
+                s_x + s_w,  s_y,        1.0f, 0.0f,
+                s_x,        s_y - s_h,  0.0f, 1.0f,
+                s_x + s_w,  s_y - s_h,  1.0f, 1.0f
         };
 
         character.texture->use(1);
@@ -542,10 +542,10 @@ void Painter::writeRectToBuffer(const RectF &rect) {
     float height = rect.getHeight();
 
     float vertices[] = {
-            x,          y + height,  0.0f, 1.0f,
-            x + width,  y + height,  1.0f, 1.0f,
-            x,          y,           0.0f, 0.0f,
-            x + width,  y,           1.0f, 0.0f
+            x,          y + height,  0.0f, 0.0f,
+            x + width,  y + height,  1.0f, 0.0f,
+            x,          y,           0.0f, 1.0f,
+            x + width,  y,           1.0f, 1.0f
     };
 
     if (m_buffer->size() < sizeof(vertices)) {

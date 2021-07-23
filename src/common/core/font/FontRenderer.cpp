@@ -67,7 +67,15 @@ FontRenderer::Character FontRenderer::getCharacter(uint c) const {
     auto buffer = face->glyph->bitmap.buffer;
 
     for (uint i = 0; i < character.data.size(); i++) {
-        character.data[i] = buffer[i];
+        const auto width = character.width;
+        const auto height = character.height;
+
+        uint x = i % width;
+        uint y = height - i / width - 1; // flip vertically
+
+        uint index = y * width + x;
+
+        character.data[i] = buffer[index];
     }
 
     return character;
