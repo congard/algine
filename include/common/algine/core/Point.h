@@ -92,6 +92,7 @@ private:
     T m_y;
 };
 
+using PointI = Point<int>;
 using PointF = Point<float>;
 }
 
