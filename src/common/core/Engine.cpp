@@ -304,8 +304,12 @@ void Engine::setFaceCullingMode(FaceCulling mode) {
     glCullFace(static_cast<GLenum>(mode));
 }
 
-void Engine::setViewport(uint width, uint height, uint x, uint y) {
+void Engine::setViewport(int x, int y, int width, int height) {
     glViewport(x, y, width, height);
+}
+
+void Engine::setViewport(int width, int height) {
+    glViewport(0, 0, width, height);
 }
 
 long Engine::time() {

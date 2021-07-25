@@ -121,7 +121,8 @@ public:
 
     static void setDepthTestMode(DepthTest mode);
     static void setFaceCullingMode(FaceCulling mode);
-    static void setViewport(uint width, uint height, uint x = 0, uint y = 0);
+    static void setViewport(int x, int y, int width, int height);
+    static void setViewport(int width, int height);
 
 public:
     static long time();
