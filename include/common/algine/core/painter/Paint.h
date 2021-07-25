@@ -11,7 +11,8 @@ class Paint {
 public:
     enum class Source {
         Color,
-        Texture
+        Texture,
+        None
     };
 
 public:

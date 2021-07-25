@@ -6,7 +6,7 @@ namespace algine {
 Paint::Paint()
     : m_color(0xff000000),
       m_texture(nullptr),
-      m_source(Source::Color),
+      m_source(Source::None),
       m_transform(1.0f) {}
 
 Paint::Paint(const Color &color)
