@@ -17,7 +17,7 @@ inline uint getTexParam(const uint target, const uint name) {
     return value;
 }
 
-inline constexpr Texture::FormatInfo getDataInfo(uint dataFormat) {
+inline Texture::FormatInfo getDataInfo(uint dataFormat) {
     // last 3 params for glTexImage2D are never used, but must be correct:
     // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
 
