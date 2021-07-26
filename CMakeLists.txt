@@ -222,7 +222,11 @@ set(ALGINE_CORE_SOURCES
         src/common/core/Color.cpp include/common/algine/core/Color.h
         src/common/core/painter/Painter.cpp include/common/algine/core/painter/Painter.h
         src/common/core/painter/Paint.cpp include/common/algine/core/painter/Paint.h
-        include/common/algine/core/painter/RoundRect.h)
+        include/common/algine/core/painter/RoundRect.h
+        src/common/core/widgets/Widget.cpp include/common/algine/core/widgets/Widget.h
+        include/common/algine/core/widgets/WidgetPtr.h
+        src/common/core/widgets/Container.cpp include/common/algine/core/widgets/Container.h
+        include/common/algine/core/widgets/ContainerPtr.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h
