@@ -20,3 +20,6 @@
 [submodule "contrib/freetype"]
 	path = contrib/freetype
 	url = https://gitlab.freedesktop.org/freetype/freetype.git
+[submodule "contrib/pugixml"]
+	path = contrib/pugixml
+	url = https://github.com/zeux/pugixml

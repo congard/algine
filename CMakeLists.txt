@@ -130,6 +130,8 @@ file(READ src/common/core/painter/text-fill.fs.glsl Painter_text_fill_fs)
 configure_file(src/common/core/painter/PainterShaders.h.in src/common/core/painter/PainterShaders.h)
 
 set(ALGINE_CORE_SOURCES
+        contrib/pugixml/src/pugixml.cpp
+
         src/common/internal/PublicObjectTools.h
         src/common/internal/SOP.h
         src/common/internal/SOPError.h
@@ -337,6 +339,7 @@ set(ASSIMP_NO_EXPORT ON)
 add_subdirectory(contrib/tulz)
 add_subdirectory(contrib/assimp)
 add_subdirectory(contrib/freetype)
+add_subdirectory(contrib/pugixml)
 
 add_library(algine
         ${ALGINE_CORE_SOURCES}
@@ -354,6 +357,7 @@ target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common
 
 target_include_directories(algine PRIVATE contrib/assimp/include)
 target_include_directories(algine PRIVATE contrib/freetype/include)
+target_include_directories(algine PRIVATE contrib/pugixml/src)
 
 target_include_directories(algine PUBLIC contrib/tulz/include)
 target_include_directories(algine PUBLIC contrib/glm)

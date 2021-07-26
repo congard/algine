@@ -7,6 +7,7 @@ contrib/*
 !contrib/glew
 !contrib/glm
 !contrib/freetype
+!contrib/pugixml
 
 # Visual Studio Code dir
 .vscode
