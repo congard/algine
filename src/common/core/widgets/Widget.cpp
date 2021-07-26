@@ -15,10 +15,10 @@
 
 namespace algine {
 
-Widget::Widget(WidgetPtr parent)
+Widget::Widget()
     : m_flags(static_cast<Flags>(Flag::Visible)),
       m_geometry(0, 0, 128, 128),
-      m_parent(std::move(parent)),
+      m_parent(nullptr),
       m_minWidth(),
       m_minHeight(),
       m_maxWidth(),
@@ -273,7 +273,11 @@ float Widget::getScaleY() const {
     return m_scaleY;
 }
 
-const WidgetPtr& Widget::getParent() const {
+void Widget::setParent(Widget *parent) {
+    m_parent = parent;
+}
+
+Widget* Widget::getParent() const {
     return m_parent;
 }
 

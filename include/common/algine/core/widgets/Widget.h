@@ -40,7 +40,7 @@ public:
     };
 
 public:
-    explicit Widget(WidgetPtr parent);
+    Widget();
     virtual ~Widget() = default;
 
     virtual void setGeometry(RectI geometry);
@@ -102,7 +102,8 @@ public:
     float getScaleX() const;
     float getScaleY() const;
 
-    const WidgetPtr& getParent() const;
+    void setParent(Widget *parent);
+    Widget* getParent() const;
 
     void invalidate();
 
@@ -124,7 +125,7 @@ protected:
 protected:
     Flags m_flags;
     RectI m_geometry;
-    WidgetPtr m_parent;
+    Widget *m_parent;
     std::string m_name;
     Paint m_background;
 

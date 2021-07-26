@@ -9,8 +9,8 @@
 #include <utility>
 
 namespace algine {
-Container::Container(WidgetPtr parent)
-    : Widget(std::move(parent)) {}
+Container::Container()
+    : Widget() {}
 
 void Container::addChild(const WidgetPtr &child) {
     m_children.emplace_back(child);

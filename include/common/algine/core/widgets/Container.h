@@ -9,7 +9,7 @@
 namespace algine {
 class Container: public Widget {
 public:
-    explicit Container(WidgetPtr parent);
+    Container();
 
     void addChild(const WidgetPtr &child);
     bool removeChild(const WidgetPtr &child);
