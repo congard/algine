@@ -14,6 +14,9 @@ struct FontData {
 
 #define c_metrics (static_cast<FontData*>(m_data)->metrics)
 
+FontMetrics::FontMetrics()
+    : m_size(0), m_data(nullptr) {}
+
 FontMetrics::FontMetrics(Font font, uint size)
     : m_font(std::move(font)),
       m_size(size),

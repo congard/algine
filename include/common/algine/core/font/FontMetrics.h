@@ -7,6 +7,7 @@
 namespace algine {
 class FontMetrics {
 public:
+    FontMetrics();
     FontMetrics(Font font, uint size);
     ~FontMetrics();
 
