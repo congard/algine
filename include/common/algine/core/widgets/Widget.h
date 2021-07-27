@@ -13,8 +13,13 @@
 
 #include <glm/mat4x4.hpp>
 
+namespace pugi {
+class xml_node;
+}
+
 namespace algine {
 class Painter;
+class IOSystem;
 
 class Widget {
     friend class Container;
@@ -110,6 +115,12 @@ public:
     void display(const DisplayOptions &options);
 
     PointI toLocalPoint(const PointI &globalPoint) const;
+
+    virtual void fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io);
+    bool fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io);
+    bool fromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io);
+    bool fromXML(const std::string &xml);
+    bool fromXMLFile(const std::string &file);
 
 protected:
     virtual void measure();

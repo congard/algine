@@ -28,6 +28,8 @@ public:
     WidgetPtr notContainerAt(const PointI &point);
     ContainerPtr containerAt(const PointI &point);
 
+    void fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) override;
+
 protected:
     void draw(Painter &painter) override;
 

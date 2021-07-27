@@ -7,9 +7,12 @@
 #include <algine/core/PtrMaker.h>
 #include <algine/core/Engine.h>
 
+#include <tulz/StringUtils.h>
 #include <glm/ext/matrix_transform.hpp>
 
-#include <utility>
+#include <pugixml.hpp>
+
+#include <cstring>
 
 #define requireParentRedraw() if (m_parent) m_parent->setFlag(Flag::RedrawRequired)
 
@@ -390,4 +393,110 @@ void Widget::drawBackground(Painter &painter) {
 }
 
 void Widget::geometryChanged(const RectI &geometry) {}
+
+void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) {
+    for (pugi::xml_attribute attr : node.attributes()) {
+        auto isAttr = [&](const char *name) {
+            return strcmp(attr.name(), name) == 0;
+        };
+
+        if (isAttr("visible")) {
+            setFlag(Flag::Visible, attr.as_bool());
+        } else if (isAttr("x")) {
+            setX(attr.as_int());
+        } else if (isAttr("y")) {
+            setY(attr.as_int());
+        } else if (isAttr("width")) {
+            setWidth(attr.as_int());
+        } else if (isAttr("height")) {
+            setHeight(attr.as_int());
+        } else if (isAttr("minWidth")) {
+            setMinWidth(attr.as_int());
+        } else if (isAttr("minHeight")) {
+            setMinHeight(attr.as_int());
+        } else if (isAttr("maxWidth")) {
+            setMaxWidth(attr.as_int());
+        } else if (isAttr("maxHeight")) {
+            setMaxHeight(attr.as_int());
+        } else if (isAttr("name")) {
+            setName(attr.as_string());
+        } else if (isAttr("background")) {
+            TextureFileInfo info;
+            info.flip = true;
+            info.path = attr.as_string();
+            info.ioSystem = io;
+
+            Texture2DPtr background = PtrMaker::make();
+            background->bind();
+            background->fromFile(info);
+
+            m_background.setTexture(background);
+        } else if (isAttr("backgroundColor")) {
+            std::string s = attr.as_string();
+
+            if (s.front() == '#') {
+                s.erase(s.begin());
+            }
+
+            if (s.size() == 6) {
+                s.insert(0, "ff");
+            }
+
+            auto color = std::stoul(s, nullptr, 16);
+            m_background.setColor(Color(color));
+        } else if (isAttr("padding")) {
+            auto padding = tulz::StringUtils::split(attr.as_string(), " ");
+
+            auto left = std::stoi(padding[0]);
+            auto top = std::stoi(padding[1]);
+            auto right = std::stoi(padding[2]);
+            auto bottom = std::stoi(padding[3]);
+
+            setPadding(left, top, right, bottom);
+        } else if (isAttr("paddingLeft")) {
+            setPaddingLeft(attr.as_int());
+        } else if (isAttr("paddingTop")) {
+            setPaddingTop(attr.as_int());
+        } else if (isAttr("paddingRight")) {
+            setPaddingRight(attr.as_int());
+        } else if (isAttr("paddingBottom")) {
+            setPaddingBottom(attr.as_int());
+        } else if (isAttr("rotate")) {
+            setRotate(attr.as_float());
+        } else if (isAttr("scaleX")) {
+            setScaleX(attr.as_float());
+        } else if (isAttr("scaleY")) {
+            setScaleY(attr.as_float());
+        }
+    }
+}
+
+bool Widget::fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io) {
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_string(xml.c_str());
+
+    if (!result) {
+        fprintf(stderr, "Widget: XML parsing error: %s\n", result.description());
+        return false;
+    }
+
+    fromXML(doc.document_element(), io);
+
+    return true;
+}
+
+bool Widget::fromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io) {
+    auto stream = io->open(file, IOStream::Mode::ReadText);
+    auto xml = stream->readStr();
+    stream->close();
+    return fromXML(xml, io);
+}
+
+bool Widget::fromXML(const std::string &xml) {
+    return fromXML(xml, Engine::getDefaultIOSystem());
+}
+
+bool Widget::fromXMLFile(const std::string &file) {
+    return fromXMLFile(file, Engine::getDefaultIOSystem());
+}
 }

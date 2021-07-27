@@ -9,6 +9,7 @@
 #include <algine/core/shader/ShaderProgram.h>
 #include <algine/core/InputLayout.h>
 #include <algine/core/TypeRegistry.h>
+#include <algine/core/widgets/Container.h>
 
 #include <algine/gl.h>
 
@@ -139,6 +140,8 @@ void Engine::init() {
 #endif
 
     FT_Init_FreeType(reinterpret_cast<FT_Library *>(&m_fontLibrary));
+
+    alRegisterType(Container);
 
     initExtra();
 }

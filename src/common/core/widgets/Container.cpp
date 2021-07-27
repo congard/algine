@@ -2,11 +2,13 @@
 
 #include <algine/core/painter/Painter.h>
 #include <algine/core/Framebuffer.h>
+#include <algine/core/TypeRegistry.h>
 
 #include <tulz/StringUtils.h>
 
+#include <pugixml.hpp>
+
 #include <algorithm>
-#include <utility>
 
 namespace algine {
 Container::Container()
@@ -175,6 +177,16 @@ void Container::draw(Painter &painter) {
 
     for (auto &child : m_children) {
         child->display(options);
+    }
+}
+
+void Container::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) {
+    Widget::fromXML(node, io);
+
+    for (auto child : node.children()) {
+        WidgetPtr childPtr(TypeRegistry::create<Widget>(child.name()));
+        childPtr->fromXML(child, io);
+        addChild(childPtr);
     }
 }
 }
