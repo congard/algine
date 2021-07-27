@@ -47,6 +47,7 @@ public:
     bool isLoaded() const;
 
     void* native_handle() const;
+    long use_count() const;
 
 private:
     std::shared_ptr<void> m_face;

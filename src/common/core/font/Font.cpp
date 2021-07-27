@@ -1,4 +1,5 @@
 #include <algine/core/font/Font.h>
+#include <algine/core/font/FontLibrary.h>
 #include <algine/core/Engine.h>
 
 #include <freetype/ftsnames.h>
@@ -38,6 +39,12 @@ FontSearchInfo findFont(const std::forward_list<Path> &children, const string &n
 
             if (font.isLoaded() && (font.getName() == name) && (font.getStyle() == style || style == Font::Style::Any)) {
                 return {true, font};
+            } else if (font.isLoaded() && font.use_count() == 2) {
+                // removes font from FontLibrary if it has not been previously added
+                // 2 because font owned by this and by FontLibrary; this check is
+                // performed just in case, findFont shouldn't be called if font with
+                // the same name and style has been already loaded
+                FontLibrary::remove(font);
             }
         }
     }
@@ -68,10 +75,14 @@ Font::Font(const string &path) {
 }
 
 void Font::load(const string &name, Style style) {
-    auto info = findFont(name, style);
+    if (FontLibrary::exists(name, style)) {
+        *this = FontLibrary::get(name, style);
+    } else {
+        auto info = findFont(name, style);
 
-    if (info.found) {
-        std::swap(*this, info.font);
+        if (info.found) {
+            std::swap(*this, info.font);
+        }
     }
 }
 
@@ -104,6 +115,12 @@ void Font::loadPath(const string &path, const shared_ptr<IOSystem> &inIo) {
 
             delete[] font->buffer;
         });
+
+        if (FontLibrary::exists(getName(), getStyle())) {
+            *this = FontLibrary::get(getName(), getStyle());
+        } else {
+            FontLibrary::add(*this);
+        }
     } else {
         delete[] buffer;
     }
@@ -209,5 +226,9 @@ bool Font::isLoaded() const {
 
 void* Font::native_handle() const {
     return static_cast<LoadedFont*>(m_face.get())->face;
+}
+
+long Font::use_count() const {
+    return m_face.use_count();
 }
 }
