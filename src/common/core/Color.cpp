@@ -83,4 +83,18 @@ Color Color::fromRgbF(float r, float g, float b, float a) {
     color.setRgbF(r, g, b, a);
     return color;
 }
+
+Color Color::parseColor(std::string color) {
+    if (color.front() == '#') {
+        color.erase(color.begin());
+    }
+
+    if (color.size() == 6) {
+        color.insert(0, "ff");
+    }
+
+    auto colorValue = std::stoul(color, nullptr, 16);
+
+    return Color(colorValue);
+}
 }

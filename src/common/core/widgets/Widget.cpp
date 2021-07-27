@@ -432,18 +432,7 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
 
             m_background.setTexture(background);
         } else if (isAttr("backgroundColor")) {
-            std::string s = attr.as_string();
-
-            if (s.front() == '#') {
-                s.erase(s.begin());
-            }
-
-            if (s.size() == 6) {
-                s.insert(0, "ff");
-            }
-
-            auto color = std::stoul(s, nullptr, 16);
-            m_background.setColor(Color(color));
+            m_background.setColor(Color::parseColor(attr.as_string()));
         } else if (isAttr("padding")) {
             auto padding = tulz::StringUtils::split(attr.as_string(), " ");
 

@@ -3,6 +3,8 @@
 
 #include <algine/types.h>
 
+#include <string>
+
 namespace algine {
 class Color {
 public:
@@ -30,6 +32,7 @@ public:
     void setRgbF(float r, float g, float b, float a = 1.0f);
 
     static Color fromRgbF(float r, float g, float b, float a = 1.0f);
+    static Color parseColor(std::string color);
 
 private:
     int m_red;
