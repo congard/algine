@@ -384,8 +384,6 @@ void Painter::drawCircle(float x, float y, float radius) {
 }
 
 void Painter::drawText(const std::u16string &text, const PointF &p) {
-    applyColor();
-
     m_textFill->bind();
     writeProjection(m_textFill);
     writeTransformation(m_textFill);
@@ -447,6 +445,7 @@ void Painter::drawText(const std::u16string &text, const PointF &p) {
                 s_x + s_w,  s_y - s_h,  1.0f, 1.0f
         };
 
+        applyColor();
         character.texture->use(1);
 
         if (m_buffer->size() < sizeof(vertices)) {
