@@ -9,6 +9,7 @@
 #include <locale>
 
 #include "PainterShaders.h"
+#include "../djb2.h"
 
 namespace algine {
 ShaderProgramPtr Painter::m_fill;
@@ -19,18 +20,6 @@ ShaderProgramPtr Painter::m_textFill;
 // <hash, loaded characters + counter>
 // hash is generated using font name, width, height and style
 std::unordered_map<unsigned long, Painter::Characters> Painter::m_characters;
-
-// Source: http://www.cse.yorku.ca/~oz/hash.html
-inline unsigned long hash_djb2(unsigned char *str) {
-    unsigned long hash = 5381;
-    int c;
-
-    while (c = *str++) {
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-    }
-
-    return hash;
-}
 
 Painter::Painter()
     : m_projection(),
