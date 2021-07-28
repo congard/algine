@@ -10,6 +10,7 @@
 #include <algine/core/InputLayout.h>
 #include <algine/core/TypeRegistry.h>
 #include <algine/core/widgets/Container.h>
+#include <algine/core/widgets/Label.h>
 
 #include <algine/gl.h>
 
@@ -142,6 +143,7 @@ void Engine::init() {
     FT_Init_FreeType(reinterpret_cast<FT_Library *>(&m_fontLibrary));
 
     alRegisterType(Container);
+    alRegisterType(Label);
 
     initExtra();
 }
