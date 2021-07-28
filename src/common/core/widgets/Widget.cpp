@@ -318,6 +318,8 @@ void Widget::display(const DisplayOptions &options) {
 
     painter->setTransform(glm::mat4(1.0f));
 
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // TODO: move to Engine
+
     auto width = static_cast<float>(getWidth());
     auto height = static_cast<float>(getHeight());
     auto x = static_cast<float>(getX());
@@ -365,12 +367,16 @@ void Widget::measure() {}
 
 void Widget::drawingStart(Painter &painter) {
     m_framebuffer->bind();
-    m_framebuffer->clearColorBuffer();
 
     if (isFlagEnabled(Flag::SizeChanged)) {
         setFlag(Flag::SizeChanged, false);
         m_framebuffer->resizeAttachments(getWidth(), getHeight());
     }
+
+    m_framebuffer->setClearColor(0, 0, 0, 0);
+    m_framebuffer->clearColorBuffer();
+
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // TODO: move to Engine
 
     Engine::setViewport(getWidth(), getHeight());
     painter.setViewport(getWidth(), getHeight());
