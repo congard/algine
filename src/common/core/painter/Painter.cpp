@@ -99,28 +99,39 @@ void Painter::begin() {
     m_layout->bind();
     m_buffer->bind();
 
-    m_wasDepthTestEnabled = Engine::isDepthTestEnabled();
-    Engine::disableDepthTest();
-
     // TODO: implement MSAA
 
-    m_wasBlendingEnabled = glIsEnabled(GL_BLEND); // TODO: to Engine
-    glGetIntegerv(GL_BLEND_DST_ALPHA, &m_prevSrcAlphaBlendMode); // TODO: to Engine
+    if (!isRenderHintEnabled(RenderHint::DisableStateSaving)) {
+        m_wasDepthTestEnabled = Engine::isDepthTestEnabled();
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        if (!isRenderHintEnabled(RenderHint::DisableAlphaBlending)) {
+            m_wasBlendingEnabled = glIsEnabled(GL_BLEND); // TODO: to Engine
+            glGetIntegerv(GL_BLEND_DST_ALPHA, &m_prevSrcAlphaBlendMode); // TODO: to Engine
+        }
+    }
+
+    if (!isRenderHintEnabled(RenderHint::DisableAlphaBlending)) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    Engine::disableDepthTest();
 }
 
 void Painter::end() {
-    if (m_wasDepthTestEnabled) {
-        Engine::enableDepthTest();
-    }
+    if (!isRenderHintEnabled(RenderHint::DisableStateSaving)) {
+        if (m_wasDepthTestEnabled) {
+            Engine::enableDepthTest();
+        }
 
-    if (!m_wasBlendingEnabled) {
-        glDisable(GL_BLEND);
-    }
+        if (!isRenderHintEnabled(RenderHint::DisableAlphaBlending)) {
+            if (!m_wasBlendingEnabled) {
+                glDisable(GL_BLEND);
+            }
 
-    glBlendFunc(GL_SRC_ALPHA, m_prevSrcAlphaBlendMode);
+            glBlendFunc(GL_SRC_ALPHA, m_prevSrcAlphaBlendMode);
+        }
+    }
 
     m_buffer->unbind();
     m_layout->unbind();

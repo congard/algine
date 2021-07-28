@@ -14,8 +14,10 @@ namespace algine {
 class Painter {
 public:
     enum class RenderHint {
-        Antialiasing = 0b01,
-        OptimizeFontCache = 0b10
+        Antialiasing         = 0b0001,
+        OptimizeFontCache    = 0b0010,
+        DisableStateSaving   = 0b0100,
+        DisableAlphaBlending = 0b1000
     };
 
     using RenderHints = uint;
