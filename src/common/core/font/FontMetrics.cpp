@@ -15,15 +15,48 @@ struct FontData {
 #define c_metrics (static_cast<FontData*>(m_data)->metrics)
 
 FontMetrics::FontMetrics()
-    : m_size(0), m_data(nullptr) {}
+    : m_size(0), m_data(new FontData) {}
 
 FontMetrics::FontMetrics(Font font, uint size)
     : m_font(std::move(font)),
       m_size(size),
       m_data(new FontData) {}
 
+FontMetrics::FontMetrics(FontMetrics &&src) noexcept {
+    src.swap(*this);
+}
+
+FontMetrics& FontMetrics::operator=(FontMetrics &&rhs) noexcept {
+    rhs.swap(*this);
+    return *this;
+}
+
 FontMetrics::~FontMetrics() {
     delete (FontData*) m_data;
+}
+
+void FontMetrics::setFont(const Font &font) {
+    m_font = font;
+    static_cast<FontData*>(m_data)->c = 0;
+}
+
+void FontMetrics::setFont(const Font &font, uint size) {
+    m_font = font;
+    m_size = size;
+    static_cast<FontData*>(m_data)->c = 0;
+}
+
+void FontMetrics::setFontSize(uint size) {
+    m_size = size;
+    static_cast<FontData*>(m_data)->c = 0;
+}
+
+const Font& FontMetrics::getFont() const {
+    return m_font;
+}
+
+uint FontMetrics::getFontSize() const {
+    return m_size;
 }
 
 int FontMetrics::width(char16_t c) {
@@ -66,12 +99,12 @@ int FontMetrics::topVerticalBearing(char16_t c) {
     return c_metrics.vertBearingY >> 6;
 }
 
-Rect<int> FontMetrics::boundingRect(const std::string &str) {
+RectI FontMetrics::boundingRect(const std::string &str) {
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utfConv;
     return boundingRect(utfConv.from_bytes(str));
 }
 
-Rect<int> FontMetrics::boundingRect(const std::u16string &str) {
+RectI FontMetrics::boundingRect(const std::u16string &str) {
     if (str.empty()) {
         return {0, 0, 0, 0};
     }
@@ -106,6 +139,12 @@ bool FontMetrics::hasHorizontal() {
 
 bool FontMetrics::hasVertical() {
     return FT_HAS_VERTICAL(static_cast<FT_Face>(m_font.native_handle()));
+}
+
+void FontMetrics::swap(FontMetrics &src) {
+    std::swap(m_font, src.m_font);
+    std::swap(m_size, src.m_size);
+    std::swap(m_data, src.m_data);
 }
 
 void FontMetrics::updateData(char16_t c) {
