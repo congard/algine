@@ -75,14 +75,31 @@ Font::Font(const string &path) {
 }
 
 void Font::load(const string &name, Style style) {
-    if (FontLibrary::exists(name, style)) {
-        *this = FontLibrary::get(name, style);
-    } else {
+    auto fromLibrary = [&](Style style) {
+        if (FontLibrary::exists(name, style)) {
+            *this = FontLibrary::get(name, style);
+            return true;
+        }
+
+        return false;
+    };
+
+    auto fromSystem = [&]() {
         auto info = findFont(name, style);
 
         if (info.found) {
             std::swap(*this, info.font);
         }
+    };
+
+    if (style == Style::Any) {
+        if (fromLibrary(Style::Regular) || fromLibrary(Style::Bold) || fromLibrary(Style::Italic)) {
+            return;
+        }
+
+        fromSystem();
+    } else if (!fromLibrary(style)) {
+        fromSystem();
     }
 }
 
