@@ -89,8 +89,8 @@ private:
 private:
     glm::mat4 m_projection;
     Paint m_paint;
-    Ptr<ArrayBuffer> m_buffer;
-    Ptr<InputLayout> m_layout;
+    std::unique_ptr<ArrayBuffer> m_buffer;
+    std::unique_ptr<InputLayout> m_layout;
 
 private:
     Texture2DPtr m_colorTex;

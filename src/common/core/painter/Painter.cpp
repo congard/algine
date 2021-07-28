@@ -36,8 +36,8 @@ Painter::Painter()
     // TODO: implement in the engine
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    m_layout = PtrMaker::make();
-    m_buffer = PtrMaker::make();
+    m_layout = std::make_unique<InputLayout>();
+    m_buffer = std::make_unique<ArrayBuffer>();
 
     InputAttributeDescription attribDescription;
     attribDescription.setLocation(0);
