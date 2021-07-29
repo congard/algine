@@ -164,6 +164,60 @@ ContainerPtr Container::containerAt(const PointI &point) {
     return std::dynamic_pointer_cast<Container>(child);
 }
 
+void Container::measure(int &width, int &height) {
+    auto keepMax = [](int &in, int p) {
+        if (in < p) {
+            in = p;
+        }
+    };
+
+    if (m_horizontalPolicy == SizePolicy::Preferred && m_verticalPolicy == SizePolicy::Preferred) {
+        int maxX = -1;
+        int maxY = -1;
+
+        for (auto &child : m_children) {
+            auto boundingRect = child->boundingRect();
+            keepMax(maxX, boundingRect.getX() + boundingRect.getWidth());
+            keepMax(maxY, boundingRect.getY() + boundingRect.getHeight());
+        }
+
+        width = maxX;
+        height = maxY;
+
+        return;
+    }
+
+    switch (m_horizontalPolicy) {
+        case SizePolicy::Preferred: {
+            int maxX = -1;
+
+            for (auto &child : m_children) {
+                auto boundingRect = child->boundingRect();
+                keepMax(maxX, boundingRect.getX() + boundingRect.getWidth());
+            }
+
+            width = maxX;
+            break;
+        }
+        default: break;
+    }
+
+    switch (m_verticalPolicy) {
+        case SizePolicy::Preferred: {
+            int maxY = -1;
+
+            for (auto &child : m_children) {
+                auto boundingRect = child->boundingRect();
+                keepMax(maxY, boundingRect.getY() + boundingRect.getHeight());
+            }
+
+            height = maxY;
+            break;
+        }
+        default: break;
+    }
+}
+
 void Container::draw(Painter &painter) {
     DisplayOptions options;
     options.parentWidth = getWidth();
