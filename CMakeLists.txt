@@ -228,7 +228,12 @@ set(ALGINE_CORE_SOURCES
         src/common/core/widgets/Widget.cpp include/common/algine/core/widgets/Widget.h
         include/common/algine/core/widgets/WidgetPtr.h
         src/common/core/widgets/Container.cpp include/common/algine/core/widgets/Container.h
-        include/common/algine/core/widgets/ContainerPtr.h)
+        include/common/algine/core/widgets/ContainerPtr.h
+        src/common/core/widgets/Label.cpp include/common/algine/core/widgets/Label.h
+        include/common/algine/core/widgets/LabelPtr.h
+        include/common/algine/core/widgets/Alignment.h
+        src/common/core/font/FontLibrary.cpp include/common/algine/core/font/FontLibrary.h
+        src/common/core/djb2.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h
