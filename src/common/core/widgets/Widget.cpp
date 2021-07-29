@@ -405,6 +405,48 @@ PointI Widget::toLocalPoint(const PointI &globalPoint) const {
     return localPoint;
 }
 
+RectI Widget::boundingRect() const {
+    if (m_rotate == 0.0f && m_scaleX == 1.0f && m_scaleY == 1.0f) {
+        return m_geometry;
+    }
+
+    auto width = static_cast<float>(getWidth());
+    auto height = static_cast<float>(getHeight());
+    auto x = static_cast<float>(getX());
+    auto y = static_cast<float>(getY());
+
+    glm::vec4 p1 {-width / 2.0f,  height / 2.0f, 0.0f, 1.0f};
+    glm::vec4 p2 { width / 2.0f,  height / 2.0f, 0.0f, 1.0f};
+    glm::vec4 p3 { width / 2.0f, -height / 2.0f, 0.0f, 1.0f};
+    glm::vec4 p4 {-width / 2.0f, -height / 2.0f, 0.0f, 1.0f};
+
+    glm::mat4 scaling = glm::scale(glm::mat4(1.0f), {m_scaleX, m_scaleY, 1.0f});
+    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(m_rotate), {0.0f, 0.0f, 1.0f});
+    glm::mat4 translation = glm::translate(glm::mat4(1.0f), {x + width / 2, y + height / 2, 0.0f});
+
+    glm::mat4 transform = translation * rotation * scaling;
+
+    p1 = transform * p1;
+    p2 = transform * p2;
+    p3 = transform * p3;
+    p4 = transform * p4;
+
+    auto min = [](float p1, float p2) { return glm::min(p1, p2); };
+    auto max = [](float p1, float p2) { return glm::max(p1, p2); };
+
+    float minX = min(p1.x, min(p2.x, min(p3.x, p4.x)));
+    float minY = min(p1.y, min(p2.y, min(p3.y, p4.y)));
+    float maxX = max(p1.x, max(p2.x, max(p3.x, p4.x)));
+    float maxY = max(p1.y, max(p2.y, max(p3.y, p4.y)));
+
+    return {
+        static_cast<int>(minX),
+        static_cast<int>(minY),
+        static_cast<int>(maxX - minX),
+        static_cast<int>(maxY - minY)
+    };
+}
+
 void Widget::measure(int &width, int &height) {
     auto contentWidth = [&](int width) {
         return width - getPaddingLeft() - getPaddingRight();

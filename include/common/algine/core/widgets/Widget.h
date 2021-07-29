@@ -123,6 +123,7 @@ public:
     void display(const DisplayOptions &options);
 
     PointI toLocalPoint(const PointI &globalPoint) const;
+    RectI boundingRect() const;
 
     virtual void fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io);
     bool fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io);
