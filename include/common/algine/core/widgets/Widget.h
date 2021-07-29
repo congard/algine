@@ -1,6 +1,7 @@
 #ifndef ALGINE_WIDGET_H
 #define ALGINE_WIDGET_H
 
+#include <algine/core/widgets/SizePolicy.h>
 #include <algine/core/widgets/WidgetPtr.h>
 #include <algine/core/shader/ShaderProgramPtr.h>
 #include <algine/core/texture/Texture2DPtr.h>
@@ -110,6 +111,13 @@ public:
     void setParent(Widget *parent);
     Widget* getParent() const;
 
+    void setSizePolicy(SizePolicy horizontal, SizePolicy vertical);
+    void setHorizontalSizePolicy(SizePolicy policy);
+    void setVerticalSizePolicy(SizePolicy policy);
+
+    SizePolicy getHorizontalSizePolicy() const;
+    SizePolicy getVerticalSizePolicy() const;
+
     void invalidate();
 
     void display(const DisplayOptions &options);
@@ -129,7 +137,7 @@ public:
     static WidgetPtr constructFromXMLFile(const std::string &file);
 
 protected:
-    virtual void measure();
+    virtual void measure(int &width, int &height);
     virtual void drawingStart(Painter &painter);
     virtual void drawBackground(Painter &painter);
     virtual void draw(Painter &painter) = 0;
@@ -160,6 +168,9 @@ protected:
 
     float m_scaleX;
     float m_scaleY;
+
+    SizePolicy m_horizontalPolicy;
+    SizePolicy m_verticalPolicy;
 };
 }
 

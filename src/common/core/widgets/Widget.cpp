@@ -34,7 +34,9 @@ Widget::Widget()
       m_paddingBottom(0),
       m_rotate(0.0f),
       m_scaleX(1.0f),
-      m_scaleY(1.0f)
+      m_scaleY(1.0f),
+      m_horizontalPolicy(SizePolicy::Fixed),
+      m_verticalPolicy(SizePolicy::Fixed)
 {
     m_texture = PtrMaker::make();
     m_texture->bind();
@@ -64,10 +66,12 @@ void Widget::setGeometry(RectI geometry) {
     }
 
     if (m_geometry != geometry) {
-        requireParentRedraw();
-
-        if (geometry.getWidth() != m_geometry.getWidth() || geometry.getHeight() != m_geometry.getHeight()) {
+        if (geometry.getWidth() != getWidth() || geometry.getHeight() != getHeight()) {
             setFlag(Flag::SizeChanged);
+        }
+
+        if (geometry.getX() != getX() || geometry.getY() != getY()) {
+            requireParentRedraw();
         }
 
         geometryChanged(geometry);
@@ -286,6 +290,30 @@ Widget* Widget::getParent() const {
     return m_parent;
 }
 
+void Widget::setSizePolicy(SizePolicy horizontal, SizePolicy vertical) {
+    setFlag(Flag::RedrawRequired);
+    m_horizontalPolicy = horizontal;
+    m_verticalPolicy = vertical;
+}
+
+void Widget::setHorizontalSizePolicy(SizePolicy policy) {
+    setFlag(Flag::RedrawRequired);
+    m_horizontalPolicy = policy;
+}
+
+void Widget::setVerticalSizePolicy(SizePolicy policy) {
+    setFlag(Flag::RedrawRequired);
+    m_verticalPolicy = policy;
+}
+
+SizePolicy Widget::getHorizontalSizePolicy() const {
+    return m_horizontalPolicy;
+}
+
+SizePolicy Widget::getVerticalSizePolicy() const {
+    return m_verticalPolicy;
+}
+
 void Widget::invalidate() {
     setFlag(Flag::RedrawRequired);
     setFlag(Flag::SizeChanged);
@@ -299,8 +327,20 @@ void Widget::display(const DisplayOptions &options) {
     auto painter = options.painter;
 
     if (isFlagEnabled(Flag::RedrawRequired)) {
+        int width = getContentWidth();
+        int height = getContentHeight();
+
+        // calculate content width/height
+        measure(width, height);
+
+        setGeometry({
+            getX(),
+            getY(),
+            width + getPaddingLeft() + getPaddingRight(),
+            height + getPaddingTop() + getPaddingBottom()
+        });
+
         setFlag(Flag::RedrawRequired, false);
-        measure();
         drawingStart(*painter);
         draw(*painter);
     }
@@ -365,7 +405,37 @@ PointI Widget::toLocalPoint(const PointI &globalPoint) const {
     return localPoint;
 }
 
-void Widget::measure() {}
+void Widget::measure(int &width, int &height) {
+    auto contentWidth = [&](int width) {
+        return width - getPaddingLeft() - getPaddingRight();
+    };
+
+    auto contentHeight = [&](int height) {
+        return height - getPaddingTop() - getPaddingBottom();
+    };
+
+    switch (m_horizontalPolicy) {
+        case SizePolicy::Minimum: width = contentWidth(getMinWidth()); break;
+        case SizePolicy::Maximum: width = contentWidth(getMaxWidth()); break;
+        case SizePolicy::MatchParent:
+            if (m_parent) {
+                width = contentWidth(m_parent->getContentWidth());
+            }
+            break;
+        default: break;
+    }
+
+    switch (m_verticalPolicy) {
+        case SizePolicy::Minimum: height = contentHeight(getMinHeight()); break;
+        case SizePolicy::Maximum: height = contentHeight(getMaxHeight()); break;
+        case SizePolicy::MatchParent:
+            if (m_parent) {
+                height = contentHeight(m_parent->getContentHeight());
+            }
+            break;
+        default: break;
+    }
+}
 
 void Widget::drawingStart(Painter &painter) {
     m_framebuffer->bind();
@@ -406,6 +476,26 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
     for (pugi::xml_attribute attr : node.attributes()) {
         auto isAttr = [&](const char *name) {
             return strcmp(attr.name(), name) == 0;
+        };
+
+        auto parseSizePolicy = [&]() {
+            auto value = attr.value();
+
+            if (strcmp(value, "fixed") == 0) {
+                return SizePolicy::Fixed;
+            } else if (strcmp(value, "minimum") == 0) {
+                return SizePolicy::Minimum;
+            } else if (strcmp(value, "maximum") == 0) {
+                return SizePolicy::Maximum;
+            } else if (strcmp(value, "preferred") == 0) {
+                return SizePolicy::Preferred;
+            } else if (strcmp(value, "match_parent") == 0) {
+                return SizePolicy::MatchParent;
+            }
+
+            Log::error("Widget") << "Unknown size policy '" << value << "'" << Log::end;
+
+            return SizePolicy::Fixed;
         };
 
         if (isAttr("visible")) {
@@ -464,6 +554,10 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
             setScaleX(attr.as_float());
         } else if (isAttr("scaleY")) {
             setScaleY(attr.as_float());
+        } else if (isAttr("horizontalSizePolicy")) {
+            setHorizontalSizePolicy(parseSizePolicy());
+        } else if (isAttr("verticalSizePolicy")) {
+            setVerticalSizePolicy(parseSizePolicy());
         }
     }
 }

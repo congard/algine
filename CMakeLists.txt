@@ -233,7 +233,8 @@ set(ALGINE_CORE_SOURCES
         include/common/algine/core/widgets/LabelPtr.h
         include/common/algine/core/widgets/Alignment.h
         src/common/core/font/FontLibrary.cpp include/common/algine/core/font/FontLibrary.h
-        src/common/core/djb2.h)
+        src/common/core/djb2.h
+        include/common/algine/core/widgets/SizePolicy.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h

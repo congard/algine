@@ -69,11 +69,24 @@ uint Label::getTextAlignment() const {
     return m_textAlignment;
 }
 
-// TODO: it seems that measure() should take RectI as an argument: currently required size
+void Label::measure(int &width, int &height) {
+    Widget::measure(width, height);
 
-void Label::measure() {
-    Widget::measure();
-    // TODO: implement, add SizePolicy
+    switch (m_horizontalPolicy) {
+        case SizePolicy::Preferred: {
+            auto rect = m_fontMetrics.boundingRect(m_text);
+            width = rect.getWidth() - rect.getX();
+            break;
+        }
+        default: break;
+    }
+
+    switch (m_verticalPolicy) {
+        case SizePolicy::Preferred:
+            height = m_fontMetrics.boundingRect(m_text).getHeight();
+            break;
+        default: break;
+    }
 }
 
 void Label::draw(Painter &painter) {
