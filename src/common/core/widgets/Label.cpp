@@ -72,18 +72,30 @@ uint Label::getTextAlignment() const {
 void Label::measure(int &width, int &height) {
     Widget::measure(width, height);
 
+    auto preferredWidth = [](const RectI &rect) {
+        return rect.getWidth() - rect.getX();
+    };
+
+    auto preferredHeight = [](const RectI &rect) {
+        return rect.getHeight();
+    };
+
+    if (m_horizontalPolicy == SizePolicy::Preferred && m_verticalPolicy == SizePolicy::Preferred) {
+        auto rect = m_fontMetrics.boundingRect(m_text);
+        width = preferredWidth(rect);
+        height = preferredHeight(rect);
+    }
+
     switch (m_horizontalPolicy) {
-        case SizePolicy::Preferred: {
-            auto rect = m_fontMetrics.boundingRect(m_text);
-            width = rect.getWidth() - rect.getX();
+        case SizePolicy::Preferred:
+            width = preferredWidth(m_fontMetrics.boundingRect(m_text));
             break;
-        }
         default: break;
     }
 
     switch (m_verticalPolicy) {
         case SizePolicy::Preferred:
-            height = m_fontMetrics.boundingRect(m_text).getHeight();
+            height = preferredHeight(m_fontMetrics.boundingRect(m_text));
             break;
         default: break;
     }
