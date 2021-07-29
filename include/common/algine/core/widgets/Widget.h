@@ -122,6 +122,12 @@ public:
     bool fromXML(const std::string &xml);
     bool fromXMLFile(const std::string &file);
 
+    static WidgetPtr constructFromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io);
+    static WidgetPtr constructFromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io);
+    static WidgetPtr constructFromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io);
+    static WidgetPtr constructFromXML(const std::string &xml);
+    static WidgetPtr constructFromXMLFile(const std::string &file);
+
 protected:
     virtual void measure();
     virtual void drawingStart(Painter &painter);

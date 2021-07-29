@@ -6,6 +6,8 @@
 #include <algine/core/Framebuffer.h>
 #include <algine/core/PtrMaker.h>
 #include <algine/core/Engine.h>
+#include <algine/core/log/Log.h>
+#include <algine/core/TypeRegistry.h>
 
 #include <tulz/StringUtils.h>
 #include <glm/ext/matrix_transform.hpp>
@@ -466,18 +468,24 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
     }
 }
 
-bool Widget::fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io) {
+inline auto parseXML(const std::string &xml) {
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_string(xml.c_str());
 
     if (!result) {
-        fprintf(stderr, "Widget: XML parsing error: %s\n", result.description());
-        return false;
+        Log::error("Widget XML Parser") << result.description() << Log::end;
     }
 
-    fromXML(doc.document_element(), io);
+    return doc;
+}
 
-    return true;
+bool Widget::fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io) {
+    if (auto doc = parseXML(xml); !doc.document_element().empty()) {
+        fromXML(doc.document_element(), io);
+        return true;
+    }
+
+    return false;
 }
 
 bool Widget::fromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io) {
@@ -493,5 +501,34 @@ bool Widget::fromXML(const std::string &xml) {
 
 bool Widget::fromXMLFile(const std::string &file) {
     return fromXMLFile(file, Engine::getDefaultIOSystem());
+}
+
+WidgetPtr Widget::constructFromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) {
+    WidgetPtr rootWidget(TypeRegistry::create<Widget>(node.name()));
+    rootWidget->fromXML(node, io);
+    return rootWidget;
+}
+
+WidgetPtr Widget::constructFromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io) {
+    if (auto doc = parseXML(xml); !doc.document_element().empty()) {
+        return constructFromXML(doc.document_element(), io);
+    }
+
+    return nullptr;
+}
+
+WidgetPtr Widget::constructFromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io) {
+    auto stream = io->open(file, IOStream::Mode::ReadText);
+    auto xml = stream->readStr();
+    stream->close();
+    return constructFromXML(xml, io);
+}
+
+WidgetPtr Widget::constructFromXML(const std::string &xml) {
+    return constructFromXML(xml, Engine::getDefaultIOSystem());
+}
+
+WidgetPtr Widget::constructFromXMLFile(const std::string &file) {
+    return constructFromXMLFile(file, Engine::getDefaultIOSystem());
 }
 }
