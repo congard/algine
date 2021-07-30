@@ -4,6 +4,8 @@
 #include <algine/core/font/Font.h>
 #include <algine/core/Rect.h>
 
+#include <unordered_map>
+
 namespace algine {
 class FontMetrics {
 public:
@@ -41,12 +43,35 @@ private:
     FontMetrics(const FontMetrics&);
     FontMetrics& operator=(const FontMetrics&);
 
-    void updateData(char16_t c);
+    void updateMetricsHash();
+    void disownMetricsHash();
 
 private:
     Font m_font;
     uint m_size;
-    void* m_data;
+
+    unsigned long m_metricsHash;
+
+private:
+    struct CharMetrics {
+        int width;
+        int height;
+        int horizontalAdvance;
+        int verticalAdvance;
+        int leftHorizontalBearing;
+        int topHorizontalBearing;
+        int leftVerticalBearing;
+        int topVerticalBearing;
+    };
+
+    struct Metrics {
+        std::unordered_map<char16_t, CharMetrics> characters;
+        int counter {0};
+    };
+
+    static std::unordered_map<unsigned long, Metrics> m_metrics;
+
+    CharMetrics& charMetrics(char16_t c);
 };
 }
 

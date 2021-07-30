@@ -6,21 +6,21 @@
 #include <codecvt>
 #include <locale>
 
-namespace algine {
-struct FontData {
-    FT_Glyph_Metrics metrics;
-    char16_t c;
-};
+#include "core/djb2.h"
 
-#define c_metrics (static_cast<FontData*>(m_data)->metrics)
+namespace algine {
+std::unordered_map<unsigned long, FontMetrics::Metrics> FontMetrics::m_metrics;
 
 FontMetrics::FontMetrics()
-    : m_size(0), m_data(new FontData) {}
+    : m_size(0), m_metricsHash(0) {}
 
 FontMetrics::FontMetrics(Font font, uint size)
     : m_font(std::move(font)),
       m_size(size),
-      m_data(new FontData) {}
+      m_metricsHash(0)
+{
+    updateMetricsHash();
+}
 
 FontMetrics::FontMetrics(FontMetrics &&src) noexcept {
     src.swap(*this);
@@ -32,23 +32,23 @@ FontMetrics& FontMetrics::operator=(FontMetrics &&rhs) noexcept {
 }
 
 FontMetrics::~FontMetrics() {
-    delete (FontData*) m_data;
+    disownMetricsHash();
 }
 
 void FontMetrics::setFont(const Font &font) {
     m_font = font;
-    static_cast<FontData*>(m_data)->c = 0;
+    updateMetricsHash();
 }
 
 void FontMetrics::setFont(const Font &font, uint size) {
     m_font = font;
     m_size = size;
-    static_cast<FontData*>(m_data)->c = 0;
+    updateMetricsHash();
 }
 
 void FontMetrics::setFontSize(uint size) {
     m_size = size;
-    static_cast<FontData*>(m_data)->c = 0;
+    updateMetricsHash();
 }
 
 const Font& FontMetrics::getFont() const {
@@ -60,43 +60,35 @@ uint FontMetrics::getFontSize() const {
 }
 
 int FontMetrics::width(char16_t c) {
-    updateData(c);
-    return c_metrics.width >> 6;
+    return charMetrics(c).width;
 }
 
 int FontMetrics::height(char16_t c) {
-    updateData(c);
-    return c_metrics.height >> 6;
+    return charMetrics(c).height;
 }
 
 int FontMetrics::horizontalAdvance(char16_t c) {
-    updateData(c);
-    return c_metrics.horiAdvance >> 6;
+    return charMetrics(c).horizontalAdvance;
 }
 
 int FontMetrics::verticalAdvance(char16_t c) {
-    updateData(c);
-    return c_metrics.vertAdvance >> 6;
+    return charMetrics(c).verticalAdvance;
 }
 
 int FontMetrics::leftHorizontalBearing(char16_t c) {
-    updateData(c);
-    return c_metrics.horiBearingX >> 6;
+    return charMetrics(c).leftHorizontalBearing;
 }
 
 int FontMetrics::topHorizontalBearing(char16_t c) {
-    updateData(c);
-    return c_metrics.horiBearingY >> 6;
+    return charMetrics(c).topHorizontalBearing;
 }
 
 int FontMetrics::leftVerticalBearing(char16_t c) {
-    updateData(c);
-    return c_metrics.vertBearingX >> 6;
+    return charMetrics(c).leftVerticalBearing;
 }
 
 int FontMetrics::topVerticalBearing(char16_t c) {
-    updateData(c);
-    return c_metrics.vertBearingY >> 6;
+    return charMetrics(c).topVerticalBearing;
 }
 
 RectI FontMetrics::boundingRect(const std::string &str) {
@@ -144,19 +136,63 @@ bool FontMetrics::hasVertical() {
 void FontMetrics::swap(FontMetrics &src) {
     std::swap(m_font, src.m_font);
     std::swap(m_size, src.m_size);
-    std::swap(m_data, src.m_data);
+    std::swap(m_metricsHash, src.m_metricsHash);
 }
 
-void FontMetrics::updateData(char16_t c) {
-    auto data = static_cast<FontData*>(m_data);
-    auto face = static_cast<FT_Face>(m_font.native_handle());
+void FontMetrics::updateMetricsHash() {
+    if (!m_font.isLoaded()) {
+        return;
+    }
 
-    if (data->c != c) {
+    std::string fontName = m_font.getName();
+    std::string fontSize = std::to_string(m_size);
+    std::string fontStyle = std::to_string(static_cast<uint>(m_font.getStyle()));
+
+    disownMetricsHash();
+
+    m_metricsHash = hash_djb2((unsigned char *) (fontName + " " + fontSize + " " + fontStyle).c_str());
+
+    if (m_metrics.find(m_metricsHash) == m_metrics.end()) {
+        m_metrics[m_metricsHash] = Metrics {};
+    }
+
+    m_metrics[m_metricsHash].counter++;
+}
+
+void FontMetrics::disownMetricsHash() {
+    if (auto it = m_metrics.find(m_metricsHash); it != m_metrics.end()) {
+        it->second.counter--;
+
+        if (it->second.counter == 0) {
+            m_metrics.erase(it);
+        }
+    }
+}
+
+FontMetrics::CharMetrics& FontMetrics::charMetrics(char16_t c) {
+    auto &characters = m_metrics[m_metricsHash].characters;
+
+    if (auto it = characters.find(c); it != characters.end()) {
+        return it->second;
+    } else {
+        auto face = static_cast<FT_Face>(m_font.native_handle());
+
         FT_Set_Pixel_Sizes(face, 0, m_size);
         FT_Load_Char(face, c, FT_LOAD_NO_BITMAP);
 
-        data->c = c;
-        data->metrics = face->glyph->metrics;
+        auto &rhs = face->glyph->metrics;
+        CharMetrics lhs {};
+
+        lhs.width = rhs.width >> 6;
+        lhs.height = rhs.height >> 6;
+        lhs.horizontalAdvance = rhs.horiAdvance >> 6;
+        lhs.verticalAdvance = rhs.vertAdvance >> 6;
+        lhs.leftHorizontalBearing = rhs.horiBearingX >> 6;
+        lhs.topHorizontalBearing = rhs.horiBearingY >> 6;
+        lhs.leftVerticalBearing = rhs.vertBearingX >> 6;
+        lhs.topVerticalBearing = rhs.vertBearingY >> 6;
+
+        return (characters[c] = lhs);
     }
 }
 }
