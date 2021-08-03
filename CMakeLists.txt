@@ -281,7 +281,8 @@ set(ALGINE_STD_SOURCES
         src/common/std/AMTLMaterialManager.cpp include/common/algine/std/AMTLMaterialManager.h
         src/common/std/AMTLManager.cpp include/common/algine/std/AMTLManager.h
         src/common/std/Material.cpp include/common/algine/std/Material.h
-        src/common/std/Blur.cpp include/common/algine/std/Blur.h)
+        src/common/std/Blur.cpp include/common/algine/std/Blur.h
+        src/common/std/ColorMap.cpp include/common/algine/std/ColorMap.h)
 
 set(ALGINE_EXT_SOURCES
         include/common/algine/ext/debug.h
