@@ -25,6 +25,11 @@ public:
     float blueF() const;
     float alphaF() const;
 
+    template<typename T> auto red() const;
+    template<typename T> auto green() const;
+    template<typename T> auto blue() const;
+    template<typename T> auto alpha() const;
+
     uint value() const;
 
     void setValue(uint color);
@@ -40,6 +45,50 @@ private:
     int m_blue;
     int m_alpha;
 };
+
+template<typename T>
+auto Color::red() const {
+    if constexpr(std::is_same_v<T, int>) {
+        return red();
+    }
+
+    if constexpr(std::is_same_v<T, float>) {
+        return redF();
+    }
+}
+
+template<typename T>
+auto Color::green() const {
+    if constexpr(std::is_same_v<T, int>) {
+        return green();
+    }
+
+    if constexpr(std::is_same_v<T, float>) {
+        return greenF();
+    }
+}
+
+template<typename T>
+auto Color::blue() const {
+    if constexpr(std::is_same_v<T, int>) {
+        return blue();
+    }
+
+    if constexpr(std::is_same_v<T, float>) {
+        return blueF();
+    }
+}
+
+template<typename T>
+auto Color::alpha() const {
+    if constexpr(std::is_same_v<T, int>) {
+        return alpha();
+    }
+
+    if constexpr(std::is_same_v<T, float>) {
+        return alphaF();
+    }
+}
 }
 
 #endif //ALGINE_COLOR_H
