@@ -94,8 +94,8 @@ void ColorMap::update() {
     auto width = getWidth();
     auto height = getHeight();
 
-    auto formatInfo = Texture::getFormatInfo(m_texture->getFormat());
-    auto components = componentsCount(formatInfo.baseFormat);
+    auto [baseFormat, dataType] = Texture::getFormatInfo(m_texture->getFormat());
+    auto components = componentsCount(baseFormat);
 
     void *data = calloc(components * width * height, 4);
 
@@ -103,12 +103,12 @@ void ColorMap::update() {
 
     m_texture->bind();
 
-    if (formatInfo.dataType == DataType::Float) {
+    if (dataType == DataType::Float || dataType == DataType::HalfFloat) {
         fillData((float*) data, m_colors, components, width);
-        m_texture->update(formatInfo.baseFormat, DataType::Float, data);
+        m_texture->update(baseFormat, DataType::Float, data);
     } else {
         fillData((int*) data, m_colors, components, width);
-        m_texture->update(formatInfo.baseFormat, DataType::Int, data);
+        m_texture->update(baseFormat, DataType::Int, data);
     }
 
     free(data);
