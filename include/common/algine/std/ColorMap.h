@@ -34,6 +34,10 @@ public:
     const glm::ivec2& getUV(const Color &color) const;
     const Color& getColor(const glm::ivec2 &uv) const;
 
+    glm::vec2 getNormalizedUV(const Color &color) const;
+    glm::vec2 normalizeUV(const glm::ivec2 &uv) const;
+    glm::ivec2 denormalizeUV(const glm::vec2 &uv) const;
+
     void setWidth(uint width);
     void setHeight(uint height);
     void setFormat(uint format);

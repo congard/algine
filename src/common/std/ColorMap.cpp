@@ -140,6 +140,24 @@ const Color& ColorMap::getColor(const glm::ivec2 &uv) const {
     throw std::runtime_error("Color at " + glm::to_string(uv) + " not found");
 }
 
+glm::vec2 ColorMap::getNormalizedUV(const Color &color) const {
+    return normalizeUV(getUV(color));
+}
+
+glm::vec2 ColorMap::normalizeUV(const glm::ivec2 &uv) const {
+    return {
+        (float) uv.x / (float) getWidth(),
+        (float) uv.y / (float) getHeight()
+    };
+}
+
+glm::ivec2 ColorMap::denormalizeUV(const glm::vec2 &uv) const {
+    return {
+        static_cast<int>(uv.x * (float) getWidth()),
+        static_cast<int>(uv.y * (float) getHeight())
+    };
+}
+
 void ColorMap::setWidth(uint width) {
     m_texture->setWidth(width);
 }
