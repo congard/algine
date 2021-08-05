@@ -18,7 +18,7 @@ class Texture: public Object {
     friend class Engine;
 
 public:
-    enum Params {
+    enum Param {
         MinFilter = GL_TEXTURE_MIN_FILTER,
         MagFilter = GL_TEXTURE_MAG_FILTER,
         WrapU = GL_TEXTURE_WRAP_S,
@@ -26,7 +26,7 @@ public:
         WrapW = GL_TEXTURE_WRAP_R
     };
 
-    enum Values {
+    enum Value {
         Nearest = GL_NEAREST,
         Linear = GL_LINEAR,
         ClampToEdge = GL_CLAMP_TO_EDGE,
@@ -39,7 +39,7 @@ public:
         )
     };
 
-    enum BaseFormats {
+    enum BaseFormat {
         DepthComponent = GL_DEPTH_COMPONENT,
         DepthStencil = GL_DEPTH_STENCIL,
         Red = GL_RED,
@@ -52,7 +52,7 @@ public:
         RGBAInteger = GL_RGBA_INTEGER
     };
 
-    enum SizedFormats {
+    enum SizedFormat {
         DepthComponent16 = GL_DEPTH_COMPONENT16,
         DepthComponent24 = GL_DEPTH_COMPONENT24,
         DepthComponent32F = GL_DEPTH_COMPONENT32F,
@@ -144,6 +144,8 @@ public:
     uint getWidth() const;
     uint getHeight() const;
     uint getId() const;
+
+    uint getParam(uint param) const;
 
     virtual uint getActualFormat() const = 0;
     virtual uint getActualWidth() const = 0;

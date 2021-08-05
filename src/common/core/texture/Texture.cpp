@@ -153,6 +153,15 @@ uint Texture::getId() const {
     return m_id;
 }
 
+uint Texture::getParam(uint param) const {
+    checkBinding()
+
+    int p = 0;
+    glGetTexParameteriv(m_target, param, &p);
+
+    return p;
+}
+
 void Texture::activateSlot(uint slot) {
     glActiveTexture(GL_TEXTURE0 + slot);
 }
