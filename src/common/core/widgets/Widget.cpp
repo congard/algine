@@ -317,6 +317,21 @@ SizePolicy Widget::getVerticalSizePolicy() const {
     return m_verticalPolicy;
 }
 
+void Widget::setFiltering(Filtering filtering) {
+    const uint filtering_integer = static_cast<uint>(filtering);
+
+    m_texture->bind();
+    m_texture->setParams(std::map<uint, uint> {
+        {Texture::MinFilter, filtering_integer},
+        {Texture::MagFilter, filtering_integer}
+    });
+}
+
+Widget::Filtering Widget::getFiltering() const {
+    m_texture->bind();
+    return static_cast<Filtering>(m_texture->getParam(Texture::MagFilter));
+}
+
 void Widget::invalidate() {
     setFlag(Flag::RedrawRequired);
     setFlag(Flag::SizeChanged);
@@ -603,6 +618,14 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
             setHorizontalSizePolicy(parseSizePolicy());
         } else if (isAttr("verticalSizePolicy")) {
             setVerticalSizePolicy(parseSizePolicy());
+        } else if (isAttr("filtering")) {
+            if (auto filtering = attr.as_string(); strcmp(filtering, "nearest") == 0) {
+                setFiltering(Filtering::Nearest);
+            } else if (strcmp(filtering, "linear") == 0) {
+                setFiltering(Filtering::Linear);
+            } else {
+                Log::error("Widget") << "Unknown filtering method '" << filtering << "'" << Log::end;
+            }
         }
     }
 }

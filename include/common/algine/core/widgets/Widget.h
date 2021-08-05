@@ -34,6 +34,11 @@ public:
 
     using Flags = uint;
 
+    enum class Filtering {
+        Nearest = 0x2600,
+        Linear = 0x2601
+    };
+
     struct DisplayOptions {
         int parentWidth;
         int parentHeight;
@@ -117,6 +122,9 @@ public:
 
     SizePolicy getHorizontalSizePolicy() const;
     SizePolicy getVerticalSizePolicy() const;
+
+    void setFiltering(Filtering filtering);
+    Filtering getFiltering() const;
 
     void invalidate();
 
