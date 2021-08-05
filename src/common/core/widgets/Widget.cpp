@@ -40,9 +40,12 @@ Widget::Widget()
 {
     m_texture = PtrMaker::make();
     m_texture->bind();
-    m_texture->setFormat(Texture::RGBA32F);
+    m_texture->setFormat(Texture::RGBA16F);
     m_texture->setDimensions(getWidth(), getHeight());
-    m_texture->setParams(Texture2D::defaultParams());
+    m_texture->setParams(std::map<uint, uint> {
+        {Texture::MinFilter, Texture::Nearest},
+        {Texture::MagFilter, Texture::Nearest}
+    });
     m_texture->update();
 
     m_framebuffer = PtrMaker::make();
