@@ -106,30 +106,35 @@ void Label::draw(Painter &painter) {
     float y;
     auto boundingRect = m_fontMetrics.boundingRect(m_text);
 
+    auto br_x = boundingRect.getX();
+    auto br_y = boundingRect.getY();
+    auto br_width = boundingRect.getWidth();
+    auto br_height = boundingRect.getHeight();
+
     uint alignmentX = m_textAlignment & 0b0011u;
     uint alignmentY = m_textAlignment & 0b1100u;
 
     switch (alignmentX) {
         case Alignment::Right:
-            x = (float) (getContentWidth() - boundingRect.getWidth() - boundingRect.getX());
+            x = (float) (getContentWidth() - br_width - br_x);
             break;
         case Alignment::Left:
-            x = (float) -boundingRect.getX();
+            x = (float) -br_x;
             break;
         default:
-            x = (float) (getContentWidth() - (boundingRect.getWidth() + boundingRect.getX())) / 2.0f;
+            x = (float) (getContentWidth() - (br_width + br_x)) / 2.0f;
             break;
     }
 
     switch (alignmentY) {
         case Alignment::Top:
-            y = (float) boundingRect.getHeight();
+            y = (float) -br_y;
             break;
         case Alignment::Bottom:
-            y = (float) getContentHeight();
+            y = (float) (getContentHeight() - br_height - br_y);
             break;
         default:
-            y = (float) (getContentHeight() + boundingRect.getHeight()) / 2.0f;
+            y = (float) (getContentHeight() + br_height) / 2.0f - (float) (br_height + br_y);
             break;
     }
 
