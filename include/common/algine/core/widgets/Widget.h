@@ -130,6 +130,11 @@ public:
 
     void display(const DisplayOptions &options);
 
+    void measure();
+
+    void setBoundingRectPos(int x, int y, const RectI &rect);
+    void setBoundingRectPos(int x, int y);
+
     PointI toLocalPoint(const PointI &globalPoint) const;
     RectI boundingRect() const;
 

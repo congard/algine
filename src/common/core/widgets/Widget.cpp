@@ -318,6 +318,8 @@ SizePolicy Widget::getVerticalSizePolicy() const {
 }
 
 void Widget::setFiltering(Filtering filtering) {
+    requireParentRedraw();
+
     const uint filtering_integer = static_cast<uint>(filtering);
 
     m_texture->bind();
@@ -345,20 +347,10 @@ void Widget::display(const DisplayOptions &options) {
     auto painter = options.painter;
 
     if (isFlagEnabled(Flag::RedrawRequired)) {
-        int width = getContentWidth();
-        int height = getContentHeight();
-
-        // calculate content width/height
-        measure(width, height);
-
-        setGeometry({
-            getX(),
-            getY(),
-            width + getPaddingLeft() + getPaddingRight(),
-            height + getPaddingTop() + getPaddingBottom()
-        });
+        measure();
 
         setFlag(Flag::RedrawRequired, false);
+
         drawingStart(*painter);
         draw(*painter);
     }
@@ -395,6 +387,39 @@ void Widget::display(const DisplayOptions &options) {
         painter->setTransform(translation * rotation * scaling);
         painter->drawTexture(m_texture, {-width / 2, -height / 2, width, height});
     }
+}
+
+void Widget::measure() {
+    int width = getContentWidth();
+    int height = getContentHeight();
+
+    // calculate content width/height
+    measure(width, height);
+
+    setGeometry({
+        getX(),
+        getY(),
+        width + getPaddingLeft() + getPaddingRight(),
+        height + getPaddingTop() + getPaddingBottom()
+    });
+}
+
+void Widget::setBoundingRectPos(int x, int y, const RectI &rect) {
+    // 1. Move bounding rect to (0, 0)
+    // 2. Center the widget in it so the origin of the bounding rect
+    //    and the origin of the widget are the same
+    // 3. Translate on (x, y)
+
+    setGeometry({
+        x + (rect.getWidth() - getWidth()) / 2,
+        y + (rect.getHeight() - getHeight()) / 2,
+        getWidth(),
+        getHeight()
+    });
+}
+
+void Widget::setBoundingRectPos(int x, int y) {
+    setBoundingRectPos(x, y, boundingRect());
 }
 
 PointI Widget::toLocalPoint(const PointI &globalPoint) const {
