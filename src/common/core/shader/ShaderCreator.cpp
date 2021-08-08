@@ -119,14 +119,6 @@ void ShaderCreator::resetGenerated() {
     m_gen = "";
 }
 
-inline void cfgWorkingDirectoryImpl(string &workingDirectory, const string &path) {
-    if (workingDirectory.empty() && !path.empty()) {
-        workingDirectory = Path(path).getParentDirectory().toString();
-    }
-}
-
-#define cfgWorkingDirectory() cfgWorkingDirectoryImpl(m_workingDirectory, m_path)
-
 inline void cfgSourceImpl(ShaderCreator *self) {
     const string &source = self->getSource();
     const string &path = self->getPath();
@@ -161,7 +153,6 @@ inline void cfgSourceImpl(ShaderCreator *self) {
 void ShaderCreator::generate() {
     constexpr char versionRegex[] = R"~([ \t]*#[ \t]*version[ \t]+[0-9]+(?:[ \t]+[a-z]+|[ \t]*)(?:\r\n|\n|$))~";
 
-    cfgWorkingDirectory();
     cfgSource();
 
     m_gen = m_source;
@@ -202,7 +193,7 @@ void ShaderCreator::generate() {
     // expand includes
     // base include path (path where file is located)
     // it is working directory (if specified)
-    m_gen = processDirectives(m_gen, Path(m_workingDirectory));
+    m_gen = processDirectives(m_gen, !m_path.empty() ? Path(m_path).getParentDirectory() : Path(m_workingDirectory));
 }
 
 const string& ShaderCreator::getGenerated() const {
@@ -281,7 +272,6 @@ JsonHelper ShaderCreator::dump() {
 
     // write source or path
     if (m_dumperUseSources) {
-        cfgWorkingDirectory();
         cfgSource();
         setString(Source, m_source);
     } else {
