@@ -93,6 +93,7 @@ file(READ src/common/core/glsl-modules/Blending/vivid-light.glsl GLSLModules_Ble
 file(READ src/common/core/glsl-modules/Shading/all.glsl GLSLModules_Shading_all)
 file(READ src/common/core/glsl-modules/Shading/attenuation.glsl GLSLModules_Shading_attenuation)
 file(READ src/common/core/glsl-modules/Shading/diffuseLambert.glsl GLSLModules_Shading_diffuseLambert)
+file(READ src/common/core/glsl-modules/Shading/diffuseOrenNayar.glsl GLSLModules_Shading_diffuseOrenNayar)
 file(READ src/common/core/glsl-modules/Shading/specularAnisotropic.glsl GLSLModules_Shading_specularAnisotropic)
 file(READ src/common/core/glsl-modules/Shading/specularBlinnPhong.glsl GLSLModules_Shading_specularBlinnPhong)
 file(READ src/common/core/glsl-modules/Shading/specularCookTorrance.glsl GLSLModules_Shading_specularCookTorrance)
@@ -131,6 +132,10 @@ configure_file(src/common/core/painter/PainterShaders.h.in src/common/core/paint
 
 set(ALGINE_CORE_SOURCES
         contrib/pugixml/src/pugixml.cpp
+
+        src/common/core/glsl-modules/GLSLModules.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules/GLSLModules.h
+        src/common/core/glsl-shaders/GLSLShaders.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders/GLSLShaders.h
+        src/common/core/painter/PainterShaders.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter/PainterShaders.h
 
         src/common/internal/PublicObjectTools.h
         src/common/internal/SOP.h

@@ -53,6 +53,7 @@ constexpr std::pair<const char*, const char*> modules[] = {
     {"Shading", R"(${GLSLModules_Shading_all})"},
     {"Shading/attenuation", R"(${GLSLModules_Shading_attenuation})"},
     {"Shading/diffuseLambert", R"(${GLSLModules_Shading_diffuseLambert})"},
+    {"Shading/diffuseOrenNayar", R"(${GLSLModules_Shading_diffuseOrenNayar})"},
     {"Shading/specularAnisotropic", R"(${GLSLModules_Shading_specularAnisotropic})"},
     {"Shading/specularBlinnPhong", R"(${GLSLModules_Shading_specularBlinnPhong})"},
     {"Shading/specularCookTorrance", R"(${GLSLModules_Shading_specularCookTorrance})"},
