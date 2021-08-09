@@ -20,7 +20,7 @@ public:
      * @param radius blur kernel radius
      * @param sigma blur kernel sigma
      */
-    void configureKernel(uint radius, float sigma);
+    void configureKernel(int radius, float sigma, bool linearSampling = true);
 
     /**
      * <b>quadRenderer must be bound</b>, call blur->getQuadRenderer()->bind() if you need
@@ -45,7 +45,7 @@ public:
     static tulz::Array<float> getKernel(int size, float sigma);
 
     static std::pair<ShaderProgramPtr, ShaderProgramPtr>
-    getPingPongShaders(uint kernelRadius, const std::string &blurComponent);
+    getPingPongShaders(uint kernelRadius, const std::string &blurComponent, bool linearSampling = true);
 
 private:
     Texture2DPtr m_pingpongTex[2];

@@ -21,7 +21,8 @@ constant KernelRadius = "KERNEL_RADIUS";
 
 namespace Vars {
 constant BaseImage = "image";
-constant Kernel = "kernel[0]";
+constant Offsets = "offsets[0]";
+constant Weights = "weights[0]";
 }
 
 Blur::Blur(const TextureCreateInfo &textureCreateInfo)
@@ -45,18 +46,61 @@ Blur::Blur(const TextureCreateInfo &textureCreateInfo)
     }
 }
 
-void Blur::configureKernel(uint radius, float sigma) {
-    uint kernelSize = radius * 2 - 1;
+void Blur::configureKernel(int radius, float sigma, bool linearSampling) {
+    int kernelSize = radius * 2 - 1;
     auto kernel = getKernel(kernelSize, sigma);
 
-    // sending to shader center of kernel and right part
-    for (auto & pingpongShader : m_pingpongShaders) {
-        pingpongShader->bind();
+    if (!linearSampling) {
+        // sending to shader center of kernel and right part
+        for (auto & pingpongShader : m_pingpongShaders) {
+            pingpongShader->bind();
 
-        for (uint j = 0; j < radius; ++j) {
-            ShaderProgram::setFloat(
-                pingpongShader->getLocation(Vars::Kernel) + static_cast<int>((radius - 1 - j)), kernel[j]
-            );
+            for (int j = 0; j < radius; ++j) {
+                ShaderProgram::setFloat(pingpongShader->getLocation(Vars::Weights) + (radius - 1 - j), kernel[j]);
+                ShaderProgram::setFloat(pingpongShader->getLocation(Vars::Offsets) + j, (float) j);
+            }
+        }
+    } else {
+        int size = radius / 2 + 1;
+
+        Array<float> weights(size);
+        Array<float> offsets(size);
+
+        // Based on: https://rastergrid.com/blog/2010/09/efficient-gaussian-blur-with-linear-sampling/
+
+        weights[0] = kernel[radius - 1]; // center element
+        offsets[0] = 0.0f;
+
+        for (int i = 1; i < size; ++i) {
+            auto offset_d_1 = (float) (i * 2 - 1);
+            auto offset_d_2 = offset_d_1 + 1;
+
+            int weight_d_1_index = radius + (i - 1) * 2 + 0;
+            int weight_d_2_index = weight_d_1_index + 1;
+
+            if (weight_d_2_index == kernel.size()) {
+                weights[i] = kernel[weight_d_1_index];
+                offsets[i] = offset_d_1;
+                break;
+            }
+
+            float weight_d_1 = kernel[weight_d_1_index];
+            float weight_d_2 = kernel[weight_d_2_index];
+
+            float weight_l_1_2 = weight_d_1 + weight_d_2;
+            float offset_l_1_2 = (offset_d_1 * weight_d_1 + offset_d_2 * weight_d_2) / weight_l_1_2;
+
+            weights[i] = weight_l_1_2;
+            offsets[i] = offset_l_1_2;
+        }
+
+        for (auto &pingpongShader : m_pingpongShaders) {
+            pingpongShader->bind();
+
+            for (int i = 0; i < size; ++i) {
+                ShaderProgram::setFloat(pingpongShader->getLocation(Vars::Weights) + i, weights[i]);
+                ShaderProgram::setFloat(pingpongShader->getLocation(Vars::Offsets) + i, offsets[i]);
+            }
         }
     }
 
@@ -151,14 +195,14 @@ Array<float> Blur::getKernel(int size, float sigma) {
     return kernel;
 }
 
-pair<ShaderProgramPtr, ShaderProgramPtr> Blur::getPingPongShaders(uint kernelRadius, const string &blurComponent) {
+pair<ShaderProgramPtr, ShaderProgramPtr> Blur::getPingPongShaders(uint kernelRadius, const string &blurComponent, bool linearSampling) {
     ShaderPtr vertex = QuadRenderer::getVertexShader();
     ShaderPtr fragmentPing;
     ShaderPtr fragmentPong;
 
     ShaderCreator fragmentCreator(Shader::Fragment);
     fragmentCreator.setPath("@algine/Blur.fs.glsl");
-    fragmentCreator.define(Settings::KernelRadius, kernelRadius);
+    fragmentCreator.define(Settings::KernelRadius, linearSampling ? (kernelRadius / 2 + 1) : kernelRadius);
     fragmentCreator.define(Settings::OutputType, [&]() {
         switch (blurComponent.size()) {
             case 1: return "float";
