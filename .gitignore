@@ -1,14 +1,3 @@
-# contrib libs
-contrib/*
-!contrib/contrib.py
-!contrib/tulz
-!contrib/assimp
-!contrib/glfw
-!contrib/glew
-!contrib/glm
-!contrib/freetype
-!contrib/pugixml
-
 # Visual Studio Code dir
 .vscode
 
