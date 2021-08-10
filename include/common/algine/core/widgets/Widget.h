@@ -11,6 +11,8 @@
 #include <algine/types.h>
 
 #include <string>
+#include <variant>
+#include <map>
 
 #include <glm/mat4x4.hpp>
 
@@ -48,6 +50,31 @@ public:
         int parentPaddingBottom {0};
         Framebuffer *parentFramebuffer {nullptr};
         Painter *painter;
+    };
+
+    class Property {
+    public:
+        using property = std::variant<bool, int, float, std::string, char*, void*, Ptr<void>>;
+
+    public:
+        Property() = default;
+
+        template<typename T>
+        Property(T &&value);
+
+        template<typename T>
+        Property& operator=(T &&rhs);
+
+        template<typename T>
+        constexpr T& get();
+
+        template<typename T>
+        constexpr bool is() const;
+
+        const property& get_std() const;
+
+    private:
+        property m_prop;
     };
 
 public:
@@ -138,6 +165,11 @@ public:
     PointI toLocalPoint(const PointI &globalPoint) const;
     RectI boundingRect() const;
 
+    void setProperty(const char *name, const Property &property);
+    const Property& getProperty(const char *name) const;
+    Property& property(const char *name);
+    bool hasProperty(const char *name) const;
+
     virtual void fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io);
     bool fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io);
     bool fromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io);
@@ -185,7 +217,33 @@ protected:
 
     SizePolicy m_horizontalPolicy;
     SizePolicy m_verticalPolicy;
+
+    std::map<unsigned long, Property> m_properties;
 };
+
+template<typename T>
+inline Widget::Property::Property(T &&value)
+    : m_prop(std::forward<T>(value)) {}
+
+template<typename T>
+inline Widget::Property& Widget::Property::operator=(T &&rhs) {
+    m_prop = std::forward<T>(rhs);
+    return *this;
+}
+
+template<typename T>
+inline constexpr T& Widget::Property::get() {
+    return std::get<T>(m_prop);
+}
+
+template<typename T>
+inline constexpr bool Widget::Property::is() const {
+    return std::get_if<T>(&m_prop);
+}
+
+inline const Widget::Property::property& Widget::Property::get_std() const {
+    return m_prop;
+}
 }
 
 #endif //ALGINE_WIDGET_H

@@ -16,6 +16,8 @@
 
 #include <cstring>
 
+#include "core/djb2.h"
+
 #define requireParentRedraw() if (m_parent) m_parent->setFlag(Flag::RedrawRequired)
 
 namespace algine {
@@ -490,6 +492,26 @@ RectI Widget::boundingRect() const {
     };
 }
 
+void Widget::setProperty(const char *name, const Property &property) {
+    auto hash = hash_djb2((unsigned char *) name);
+    m_properties[hash] = property;
+}
+
+const Widget::Property& Widget::getProperty(const char *name) const {
+    auto hash = hash_djb2((unsigned char *) name);
+    return m_properties.at(hash);
+}
+
+Widget::Property& Widget::property(const char *name) {
+    auto hash = hash_djb2((unsigned char *) name);
+    return m_properties[hash];
+}
+
+bool Widget::hasProperty(const char *name) const {
+    auto hash = hash_djb2((unsigned char *) name);
+    return m_properties.find(hash) != m_properties.end();
+}
+
 void Widget::measure(int &width, int &height) {
     auto contentWidth = [&](int width) {
         return width - getPaddingLeft() - getPaddingRight();
@@ -650,6 +672,26 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
                 setFiltering(Filtering::Linear);
             } else {
                 Log::error("Widget") << "Unknown filtering method '" << filtering << "'" << Log::end;
+            }
+        } else if (auto name = attr.name(); strstr(name, "p_") == name) { // property
+            name += strlen("p_");
+
+            auto value = attr.value();
+
+            char* end;
+
+            if (auto int_value = (int) strtol(value, &end, 0); *end == '\0') {
+                setProperty(name, int_value);
+            } else if (float float_value = strtof(value, &end); *end == '\0') {
+                setProperty(name, float_value);
+            } else {
+                if (strcmp(value, "true") == 0) {
+                    setProperty(name, true);
+                } else if (strcmp(value, "false") == 0) {
+                    setProperty(name, false);
+                } else { // std::string
+                    setProperty(name, value);
+                }
             }
         }
     }
