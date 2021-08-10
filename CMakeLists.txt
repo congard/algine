@@ -131,7 +131,7 @@ file(READ src/common/core/painter/text-fill.fs.glsl Painter_text_fill_fs)
 configure_file(src/common/core/painter/PainterShaders.h.in src/common/core/painter/PainterShaders.h)
 
 set(ALGINE_CORE_SOURCES
-        contrib/pugixml/src/pugixml.cpp
+        libs/pugixml/src/pugixml.cpp
 
         src/common/core/glsl-modules/GLSLModules.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules/GLSLModules.h
         src/common/core/glsl-shaders/GLSLShaders.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders/GLSLShaders.h
@@ -326,13 +326,13 @@ if (NOT ANDROID)
         add_definitions(-DGLEW_STATIC)
     endif()
 
-    add_subdirectory(contrib/glew/build/cmake)
+    add_subdirectory(libs/glew/build/cmake)
 
     set(GLFW_BUILD_DOCS OFF)
     set(GLFW_BUILD_EXAMPLES OFF)
     set(GLFW_BUILD_TESTS OFF)
 
-    add_subdirectory(contrib/glfw)
+    add_subdirectory(libs/glfw)
 else()
     set(ALGINE_ANDROID_SOURCES
             include/android/algine/Android.h
@@ -348,10 +348,10 @@ set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
 set(ASSIMP_BUILD_TESTS OFF)
 set(ASSIMP_NO_EXPORT ON)
 
-add_subdirectory(contrib/tulz)
-add_subdirectory(contrib/assimp)
-add_subdirectory(contrib/freetype)
-add_subdirectory(contrib/pugixml)
+add_subdirectory(libs/tulz)
+add_subdirectory(libs/assimp)
+add_subdirectory(libs/freetype)
+add_subdirectory(libs/pugixml)
 
 add_library(algine
         ${ALGINE_CORE_SOURCES}
@@ -367,31 +367,31 @@ target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common
 target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders)
 target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter)
 
-target_include_directories(algine PRIVATE contrib/assimp/include)
-target_include_directories(algine PRIVATE contrib/freetype/include)
-target_include_directories(algine PRIVATE contrib/pugixml/src)
+target_include_directories(algine PRIVATE libs/assimp/include)
+target_include_directories(algine PRIVATE libs/freetype/include)
+target_include_directories(algine PRIVATE libs/pugixml/src)
 
-target_include_directories(algine PUBLIC contrib/tulz/include)
-target_include_directories(algine PUBLIC contrib/glm)
+target_include_directories(algine PUBLIC libs/tulz/include)
+target_include_directories(algine PUBLIC libs/glm)
 target_include_directories(algine PUBLIC include/common)
-target_include_directories(algine PUBLIC contrib)
+target_include_directories(algine PUBLIC libs)
 
 # TODO: ^^^ maybe move one header libs to, for example, libname/include/libname/file.hpp instead of libname/file.hpp
 
 if (NOT ANDROID)
     target_include_directories(algine PRIVATE src/desktop)
 
-    target_include_directories(algine PRIVATE contrib/glfw/include)
+    target_include_directories(algine PRIVATE libs/glfw/include)
 
-    target_include_directories(algine PUBLIC contrib/glew/include) # TODO: mark PRIVATE in the future (see Texture.h)
+    target_include_directories(algine PUBLIC libs/glew/include) # TODO: mark PRIVATE in the future (see Texture.h)
     target_include_directories(algine PUBLIC include/desktop)
 else()
-    target_include_directories(algine PUBLIC contrib/tulz/android/include)
+    target_include_directories(algine PUBLIC libs/tulz/android/include)
     target_include_directories(algine PUBLIC include/android)
 endif()
 
 if (MSVC OR ANDROID)
-    target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/contrib/assimp/include)
+    target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/libs/assimp/include)
 endif()
 
 # linking
