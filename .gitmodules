@@ -1,25 +1,25 @@
-[submodule "contrib/tulz"]
-	path = contrib/tulz
+[submodule "libs/tulz"]
+	path = libs/tulz
 	url = https://github.com/congard/tulz
-[submodule "contrib/glfw"]
-	path = contrib/glfw
+[submodule "libs/glfw"]
+	path = libs/glfw
 	url = https://github.com/glfw/glfw.git
 	branch = 3.3-stable
-[submodule "contrib/assimp"]
-	path = contrib/assimp
+[submodule "libs/assimp"]
+	path = libs/assimp
 	url = https://github.com/assimp/assimp.git
 	branch = assimp_5.0_release
 	ignore = dirty
-[submodule "contrib/glew"]
-	path = contrib/glew
+[submodule "libs/glew"]
+	path = libs/glew
 	url = https://github.com/nigels-com/glew.git
 	ignore = dirty
-[submodule "contrib/glm"]
-	path = contrib/glm
+[submodule "libs/glm"]
+	path = libs/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "contrib/freetype"]
-	path = contrib/freetype
+[submodule "libs/freetype"]
+	path = libs/freetype
 	url = https://gitlab.freedesktop.org/freetype/freetype.git
-[submodule "contrib/pugixml"]
-	path = contrib/pugixml
+[submodule "libs/pugixml"]
+	path = libs/pugixml
 	url = https://github.com/zeux/pugixml
