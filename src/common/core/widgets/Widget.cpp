@@ -512,6 +512,17 @@ bool Widget::hasProperty(const char *name) const {
     return m_properties.find(hash) != m_properties.end();
 }
 
+bool Widget::removeProperty(const char *name) {
+    auto hash = hash_djb2((unsigned char *) name);
+
+    if (auto it = m_properties.find(hash); it != m_properties.end()) {
+        m_properties.erase(it);
+        return true;
+    }
+
+    return false;
+}
+
 void Widget::measure(int &width, int &height) {
     auto contentWidth = [&](int width) {
         return width - getPaddingLeft() - getPaddingRight();

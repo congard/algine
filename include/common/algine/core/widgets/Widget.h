@@ -66,7 +66,7 @@ public:
         Property& operator=(T &&rhs);
 
         template<typename T>
-        constexpr T& get();
+        constexpr T& as();
 
         template<typename T>
         constexpr bool is() const;
@@ -169,6 +169,7 @@ public:
     const Property& getProperty(const char *name) const;
     Property& property(const char *name);
     bool hasProperty(const char *name) const;
+    bool removeProperty(const char *name);
 
     virtual void fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io);
     bool fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io);
@@ -232,7 +233,7 @@ inline Widget::Property& Widget::Property::operator=(T &&rhs) {
 }
 
 template<typename T>
-inline constexpr T& Widget::Property::get() {
+inline constexpr T& Widget::Property::as() {
     return std::get<T>(m_prop);
 }
 
