@@ -1,6 +1,16 @@
 # Windows Build Instructions
 
-Please note that currently only MinGW is supported.
+## GLEW: make OpenGL extensions
+
+In order to [make GLEW](https://github.com/nigels-com/glew#code-generation) OpenGL extensions you need
+to [install MSYS2](https://www.msys2.org) even if you are using VisualStudio (MSVC).
+
+After successful installation open msys2 console and execute:
+```bash
+pacman -S make git python
+cd algine_root_folder/libs/glew
+make extensions
+```
 
 ## Symbolic links
 
