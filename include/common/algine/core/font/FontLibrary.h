@@ -2,6 +2,7 @@
 #define ALGINE_FONTLIBRARY_H
 
 #include <algine/core/font/Font.h>
+#include <algine/types.h>
 
 #include <map>
 
