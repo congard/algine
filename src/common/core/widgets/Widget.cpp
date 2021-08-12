@@ -523,6 +523,14 @@ bool Widget::removeProperty(const char *name) {
     return false;
 }
 
+int Widget::matchParentWidth(Widget *child) {
+    return getContentWidth();
+}
+
+int Widget::matchParentHeight(Widget *child) {
+    return getContentHeight();
+}
+
 void Widget::measure(int &width, int &height) {
     auto contentWidth = [&](int width) {
         return width - getPaddingLeft() - getPaddingRight();
@@ -537,7 +545,7 @@ void Widget::measure(int &width, int &height) {
         case SizePolicy::Maximum: width = contentWidth(getMaxWidth()); break;
         case SizePolicy::MatchParent:
             if (m_parent) {
-                width = contentWidth(m_parent->getContentWidth());
+                width = contentWidth(m_parent->matchParentWidth(this));
             }
             break;
         default: break;
@@ -548,7 +556,7 @@ void Widget::measure(int &width, int &height) {
         case SizePolicy::Maximum: height = contentHeight(getMaxHeight()); break;
         case SizePolicy::MatchParent:
             if (m_parent) {
-                height = contentHeight(m_parent->getContentHeight());
+                height = contentHeight(m_parent->matchParentHeight(this));
             }
             break;
         default: break;

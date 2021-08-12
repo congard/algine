@@ -184,6 +184,9 @@ public:
     static WidgetPtr constructFromXMLFile(const std::string &file);
 
 protected:
+    virtual int matchParentWidth(Widget *child);
+    virtual int matchParentHeight(Widget *child);
+
     virtual void measure(int &width, int &height);
     virtual void drawingStart(Painter &painter);
     virtual void drawBackground(Painter &painter);
