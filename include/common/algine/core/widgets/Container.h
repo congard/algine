@@ -16,7 +16,9 @@ public:
     bool removeChild(const std::string &name);
     void removeAllChildren();
 
-    WidgetPtr findChild(const std::string &name) const;
+    template<typename T = Widget>
+    Ptr<T> findChild(const std::string &name) const;
+
     std::list<WidgetPtr> findChildren(const std::string &regex) const;
 
     const WidgetPtr& getChildAt(Index index) const;
@@ -36,7 +38,19 @@ protected:
 
 protected:
     std::list<WidgetPtr> m_children;
+
+private:
+    WidgetPtr findChildImpl(const std::string &name) const;
 };
+
+template<typename T>
+Ptr<T> Container::findChild(const std::string &name) const {
+    if constexpr(std::is_same_v<T, Widget>) {
+        return findChildImpl(name);
+    } else {
+        return std::dynamic_pointer_cast<T>(findChildImpl(name));
+    }
+}
 }
 
 #endif //ALGINE_CONTAINER_H

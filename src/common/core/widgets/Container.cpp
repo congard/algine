@@ -66,7 +66,7 @@ void Container::removeAllChildren() {
     m_children = {};
 }
 
-WidgetPtr Container::findChild(const std::string &name) const {
+WidgetPtr Container::findChildImpl(const std::string &name) const {
     for (auto &child : m_children) {
         if (child->getName() == name) {
             return child;
