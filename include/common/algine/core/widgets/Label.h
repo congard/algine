@@ -2,7 +2,6 @@
 #define ALGINE_LABEL_H
 
 #include <algine/core/widgets/Widget.h>
-#include <algine/core/widgets/Alignment.h>
 #include <algine/core/font/Font.h>
 #include <algine/core/font/FontMetrics.h>
 

@@ -1,7 +1,6 @@
 #include <algine/core/widgets/Label.h>
+#include <algine/core/widgets/Alignment.h>
 #include <algine/core/painter/Painter.h>
-
-#include <tulz/StringUtils.h>
 
 #include <pugixml.hpp>
 
@@ -167,24 +166,7 @@ void Label::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> 
         } else if (isAttr("fontColor")) {
             setFontColor(Color::parseColor(attr.as_string()));
         } else if (isAttr("textAlignment")) {
-            auto alignmentValues = tulz::StringUtils::split(attr.as_string(), "|");
-            uint alignment = Alignment::Center;
-
-            for (std::string &value : alignmentValues) {
-                if (value == "center") {
-                    alignment |= Alignment::Center;
-                } else if (value == "left") {
-                    alignment |= Alignment::Left;
-                } else if (value == "right") {
-                    alignment |= Alignment::Right;
-                } else if (value == "top") {
-                    alignment |= Alignment::Top;
-                } else if (value == "bottom") {
-                    alignment |= Alignment::Bottom;
-                }
-            }
-
-            setTextAlignment(alignment);
+            setTextAlignment(Alignment::parse(attr.as_string()));
         }
     }
 
