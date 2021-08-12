@@ -176,6 +176,7 @@ void Container::measure(int &width, int &height) {
         int maxY = -1;
 
         for (auto &child : m_children) {
+            child->measure();
             auto boundingRect = child->boundingRect();
             keepMax(maxX, boundingRect.getX() + boundingRect.getWidth());
             keepMax(maxY, boundingRect.getY() + boundingRect.getHeight());
@@ -192,6 +193,7 @@ void Container::measure(int &width, int &height) {
             int maxX = -1;
 
             for (auto &child : m_children) {
+                child->measure();
                 auto boundingRect = child->boundingRect();
                 keepMax(maxX, boundingRect.getX() + boundingRect.getWidth());
             }
@@ -207,6 +209,7 @@ void Container::measure(int &width, int &height) {
             int maxY = -1;
 
             for (auto &child : m_children) {
+                child->measure();
                 auto boundingRect = child->boundingRect();
                 keepMax(maxY, boundingRect.getY() + boundingRect.getHeight());
             }
