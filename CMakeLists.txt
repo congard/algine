@@ -236,7 +236,7 @@ set(ALGINE_CORE_SOURCES
         include/common/algine/core/widgets/ContainerPtr.h
         src/common/core/widgets/Label.cpp include/common/algine/core/widgets/Label.h
         include/common/algine/core/widgets/LabelPtr.h
-        include/common/algine/core/widgets/Alignment.h
+        src/common/core/widgets/Alignment.cpp include/common/algine/core/widgets/Alignment.h
         src/common/core/font/FontLibrary.cpp include/common/algine/core/font/FontLibrary.h
         src/common/core/djb2.h
         include/common/algine/core/widgets/SizePolicy.h)
