@@ -239,7 +239,8 @@ set(ALGINE_CORE_SOURCES
         src/common/core/widgets/Alignment.cpp include/common/algine/core/widgets/Alignment.h
         src/common/core/font/FontLibrary.cpp include/common/algine/core/font/FontLibrary.h
         src/common/core/djb2.h
-        include/common/algine/core/widgets/SizePolicy.h)
+        include/common/algine/core/widgets/SizePolicy.h
+        include/common/algine/core/AutoRawPtr.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h
