@@ -639,7 +639,7 @@ void Widget::onMeasure(int &width, int &height) {
 void Widget::onLayout() {}
 
 void Widget::draw(Painter &painter) {
-    print_call("onDraw(): " + getName());
+    print_call("draw(): " + getName());
 
     m_framebuffer->bind();
 
