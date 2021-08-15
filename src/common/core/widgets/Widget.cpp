@@ -18,12 +18,22 @@
 
 #include "core/djb2.h"
 
-#define requireParentRedraw() if (m_parent) m_parent->setFlag(Flag::RedrawRequired)
+#define requireParentRedraw() if (m_parent) m_parent->invalidate()
+#define requireParentLayout() if (m_parent) m_parent->requestLayout()
+
+#define continue_if(condition) if (!(condition)) return
+
+//#define ALGINE_WIDGET_TRACE_CALLS
+
+#ifdef ALGINE_WIDGET_TRACE_CALLS
+#define print_call(str) Log::info("Widget") << (str) << Log::end
+#else
+#define print_call(str)
+#endif
 
 namespace algine {
-
 Widget::Widget()
-    : m_flags(static_cast<Flags>(Flag::Visible)),
+    : m_flags(),
       m_geometry(0, 0, 128, 128),
       m_parent(nullptr),
       m_minWidth(),
@@ -54,6 +64,11 @@ Widget::Widget()
     m_framebuffer->bind();
     m_framebuffer->attachTexture(m_texture, Framebuffer::ColorAttachmentZero);
 
+    setFlag(Flag::SizeChanged);
+
+    setVisible(true);
+
+    requestLayout();
     invalidate();
 }
 
@@ -73,6 +88,8 @@ void Widget::setGeometry(RectI geometry) {
     if (m_geometry != geometry) {
         if (geometry.getWidth() != getWidth() || geometry.getHeight() != getHeight()) {
             setFlag(Flag::SizeChanged);
+            requestLayout();
+            invalidate();
         }
 
         if (geometry.getX() != getX() || geometry.getY() != getY()) {
@@ -80,6 +97,7 @@ void Widget::setGeometry(RectI geometry) {
         }
 
         geometryChanged(geometry);
+        requireParentLayout();
 
         m_geometry = geometry;
     }
@@ -89,21 +107,18 @@ const RectI& Widget::getGeometry() const {
     return m_geometry;
 }
 
-void Widget::setFlag(Flag flag, bool on) {
-    if (flag == Flag::SizeChanged && on) {
-        setFlag(Flag::RedrawRequired);
-    }
-
-    if (flag == Flag::Visible || (flag == Flag::RedrawRequired && on)) {
-        requireParentRedraw();
-    }
-
+inline uint asBitFlag(Widget::Flag flag) {
     uint fl = static_cast<uint>(flag);
+    return 1u << fl;
+}
+
+void Widget::setFlag(Flag flag, bool on) {
+    uint fl = asBitFlag(flag);
     m_flags = on ? (m_flags | fl) : (m_flags & ~fl);
 }
 
 bool Widget::isFlagEnabled(Flag flag) const {
-    uint fl = static_cast<uint>(flag);
+    uint fl = asBitFlag(flag);
     return m_flags & fl;
 }
 
@@ -116,6 +131,9 @@ Widget::Flags Widget::getFlags() const {
 }
 
 void Widget::setVisible(bool visible) {
+    continue_if(visible != isFlagEnabled(Flag::Visible));
+    requireParentLayout();
+    requireParentRedraw();
     setFlag(Flag::Visible, visible);
 }
 
@@ -200,6 +218,7 @@ const std::string& Widget::getName() const {
 }
 
 void Widget::setBackground(const Paint &paint) {
+    invalidate();
     m_background = paint;
 }
 
@@ -208,6 +227,9 @@ const Paint& Widget::getBackground() const {
 }
 
 void Widget::setPadding(int left, int top, int right, int bottom) {
+    continue_if(left != m_paddingLeft || top != m_paddingTop || right != m_paddingRight || bottom != m_paddingBottom);
+    requestLayout();
+    invalidate();
     m_paddingLeft = left;
     m_paddingTop = top;
     m_paddingRight = right;
@@ -215,18 +237,30 @@ void Widget::setPadding(int left, int top, int right, int bottom) {
 }
 
 void Widget::setPaddingLeft(int padding) {
+    continue_if(padding != m_paddingLeft);
+    requestLayout();
+    invalidate();
     m_paddingLeft = padding;
 }
 
 void Widget::setPaddingTop(int padding) {
+    continue_if(padding != m_paddingTop);
+    requestLayout();
+    invalidate();
     m_paddingTop = padding;
 }
 
 void Widget::setPaddingRight(int padding) {
+    continue_if(padding != m_paddingRight);
+    requestLayout();
+    invalidate();
     m_paddingRight = padding;
 }
 
 void Widget::setPaddingBottom(int padding) {
+    continue_if(padding != m_paddingBottom);
+    requestLayout();
+    invalidate();
     m_paddingBottom = padding;
 }
 
@@ -255,7 +289,8 @@ int Widget::getContentHeight() const {
 }
 
 void Widget::setRotate(float degrees) {
-    setFlag(Flag::RedrawRequired);
+    continue_if(degrees != m_rotate);
+    requireParentRedraw();
     m_rotate = degrees;
 }
 
@@ -264,16 +299,19 @@ float Widget::getRotate() const {
 }
 
 void Widget::setScaleX(float scale) {
+    continue_if(scale != m_scaleX);
     requireParentRedraw();
     m_scaleX = scale;
 }
 
 void Widget::setScaleY(float scale) {
+    continue_if(scale != m_scaleY);
     requireParentRedraw();
     m_scaleY = scale;
 }
 
 void Widget::setScale(float scale) {
+    continue_if(scale != m_scaleX || scale != m_scaleY);
     requireParentRedraw();
     m_scaleX = scale;
     m_scaleY = scale;
@@ -296,18 +334,24 @@ Widget* Widget::getParent() const {
 }
 
 void Widget::setSizePolicy(SizePolicy horizontal, SizePolicy vertical) {
-    setFlag(Flag::RedrawRequired);
+    continue_if(horizontal != m_horizontalPolicy || vertical != m_verticalPolicy);
+    requestLayout();
+    invalidate();
     m_horizontalPolicy = horizontal;
     m_verticalPolicy = vertical;
 }
 
 void Widget::setHorizontalSizePolicy(SizePolicy policy) {
-    setFlag(Flag::RedrawRequired);
+    continue_if(policy != m_horizontalPolicy);
+    requestLayout();
+    invalidate();
     m_horizontalPolicy = policy;
 }
 
 void Widget::setVerticalSizePolicy(SizePolicy policy) {
-    setFlag(Flag::RedrawRequired);
+    continue_if(policy != m_verticalPolicy);
+    requestLayout();
+    invalidate();
     m_verticalPolicy = policy;
 }
 
@@ -336,9 +380,22 @@ Widget::Filtering Widget::getFiltering() const {
     return static_cast<Filtering>(m_texture->getParam(Texture::MagFilter));
 }
 
+void Widget::forceLayout() {
+    setFlag(Flag::MeasurementRequired);
+    setFlag(Flag::LayoutRequired);
+    measure();
+    layout();
+}
+
+void Widget::requestLayout() {
+    setFlag(Flag::MeasurementRequired);
+    setFlag(Flag::LayoutRequired);
+    requireParentLayout();
+}
+
 void Widget::invalidate() {
     setFlag(Flag::RedrawRequired);
-    setFlag(Flag::SizeChanged);
+    requireParentRedraw();
 }
 
 void Widget::display(const DisplayOptions &options) {
@@ -348,9 +405,10 @@ void Widget::display(const DisplayOptions &options) {
 
     auto painter = options.painter;
 
-    if (isFlagEnabled(Flag::RedrawRequired)) {
-        measure();
+    measure();
+    layout();
 
+    if (isFlagEnabled(Flag::RedrawRequired)) {
         setFlag(Flag::RedrawRequired, false);
 
         drawingStart(*painter);
@@ -392,6 +450,11 @@ void Widget::display(const DisplayOptions &options) {
 }
 
 void Widget::measure() {
+    if (!isFlagEnabled(Flag::MeasurementRequired))
+        return;
+
+    print_call("measure(): " + getName());
+
     int width = getContentWidth();
     int height = getContentHeight();
 
@@ -404,6 +467,19 @@ void Widget::measure() {
         width + getPaddingLeft() + getPaddingRight(),
         height + getPaddingTop() + getPaddingBottom()
     });
+
+    setFlag(Flag::MeasurementRequired, false);
+}
+
+void Widget::layout() {
+    if (!isFlagEnabled(Flag::LayoutRequired))
+        return;
+
+    print_call("layout(): " + getName());
+
+    onLayout();
+
+    setFlag(Flag::LayoutRequired, false);
 }
 
 void Widget::setBoundingRectPos(int x, int y, const RectI &rect) {
@@ -563,7 +639,11 @@ void Widget::measure(int &width, int &height) {
     }
 }
 
+void Widget::onLayout() {}
+
 void Widget::drawingStart(Painter &painter) {
+    print_call("draw(): " + getName());
+
     m_framebuffer->bind();
 
     if (isFlagEnabled(Flag::SizeChanged)) {

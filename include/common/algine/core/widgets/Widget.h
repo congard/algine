@@ -25,13 +25,13 @@ class Painter;
 class IOSystem;
 
 class Widget {
-    friend class Container;
-
 public:
     enum class Flag {
-        RedrawRequired = 0b0001,
-        SizeChanged = 0b0010,
-        Visible = 0b0100
+        RedrawRequired,
+        SizeChanged,
+        Visible,
+        MeasurementRequired,
+        LayoutRequired
     };
 
     using Flags = uint;
@@ -153,11 +153,14 @@ public:
     void setFiltering(Filtering filtering);
     Filtering getFiltering() const;
 
+    void forceLayout();
+    void requestLayout();
     void invalidate();
 
     void display(const DisplayOptions &options);
 
     void measure();
+    void layout();
 
     void setBoundingRectPos(int x, int y, const RectI &rect);
     void setBoundingRectPos(int x, int y);
@@ -188,6 +191,7 @@ protected:
     virtual int matchParentHeight(Widget *child);
 
     virtual void measure(int &width, int &height);
+    virtual void onLayout();
     virtual void drawingStart(Painter &painter);
     virtual void drawBackground(Painter &painter);
     virtual void draw(Painter &painter) = 0;
