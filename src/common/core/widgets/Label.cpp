@@ -19,7 +19,8 @@ Label::Label(const std::string &text): Label() {
 }
 
 void Label::setText(const std::string &text) {
-    setFlag(Widget::Flag::RedrawRequired);
+    requestLayout();
+    invalidate();
     m_text = text;
 }
 
@@ -28,22 +29,25 @@ const std::string& Label::getText() const {
 }
 
 void Label::setFont(const Font &font) {
-    setFlag(Widget::Flag::RedrawRequired);
+    requestLayout();
+    invalidate();
     m_fontMetrics.setFont(font);
 }
 
 void Label::setFont(const Font &font, uint size) {
-    setFlag(Widget::Flag::RedrawRequired);
+    requestLayout();
+    invalidate();
     m_fontMetrics.setFont(font, size);
 }
 
 void Label::setFontSize(uint size) {
-    setFlag(Widget::Flag::RedrawRequired);
+    requestLayout();
+    invalidate();
     m_fontMetrics.setFontSize(size);
 }
 
 void Label::setFontColor(const Color &color) {
-    setFlag(Widget::Flag::RedrawRequired);
+    invalidate();
     m_fontColor = color;
 }
 
@@ -60,7 +64,7 @@ const Color& Label::getFontColor() const {
 }
 
 void Label::setTextAlignment(uint alignment) {
-    setFlag(Widget::Flag::RedrawRequired);
+    invalidate();
     m_textAlignment = alignment;
 }
 

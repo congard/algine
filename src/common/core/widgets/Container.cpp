@@ -15,7 +15,8 @@ Container::Container()
     : Widget() {}
 
 void Container::addChild(const WidgetPtr &child) {
-    setFlag(Widget::Flag::RedrawRequired);
+    requestLayout();
+    invalidate();
     child->setParent(this);
     m_children.emplace_back(child);
 }
@@ -34,7 +35,8 @@ inline bool removeChildOfBy(std::list<WidgetPtr> &children, const T &value) {
 
 bool Container::removeChild(const WidgetPtr &child) {
     if (auto it = std::find(m_children.begin(), m_children.end(), child); it != m_children.end()) {
-        setFlag(Widget::Flag::RedrawRequired);
+        requestLayout();
+        invalidate();
         child->setParent(nullptr);
         m_children.erase(it);
         return true;
@@ -46,7 +48,8 @@ bool Container::removeChild(const WidgetPtr &child) {
 bool Container::removeChild(const std::string &name) {
     for (auto it = m_children.begin(); it != m_children.end(); ++it) {
         if (auto &child = *it; child->getName() == name) {
-            setFlag(Widget::Flag::RedrawRequired);
+            requestLayout();
+            invalidate();
             child->setParent(nullptr);
             m_children.erase(it);
             return true;
@@ -57,7 +60,8 @@ bool Container::removeChild(const std::string &name) {
 }
 
 void Container::removeAllChildren() {
-    setFlag(Widget::Flag::RedrawRequired);
+    requestLayout();
+    invalidate();
 
     for (auto &child : m_children) {
         child->setParent(nullptr);
