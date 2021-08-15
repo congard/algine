@@ -189,7 +189,9 @@ protected:
     virtual int matchParentWidth(Widget *child);
     virtual int matchParentHeight(Widget *child);
 
-    virtual void measure(int &width, int &height);
+    virtual void setMeasuredDimension(int width, int height);
+
+    virtual void onMeasure(int &width, int &height);
     virtual void onLayout();
     virtual void draw(Painter &painter);
     virtual void onDrawBackground(Painter &painter);

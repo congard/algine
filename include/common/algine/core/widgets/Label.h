@@ -29,7 +29,7 @@ public:
     void fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) override;
 
 protected:
-    void measure(int &width, int &height) override;
+    void onMeasure(int &width, int &height) override;
     void onDraw(Painter &painter) override;
 
 private:

@@ -72,8 +72,8 @@ uint Label::getTextAlignment() const {
     return m_textAlignment;
 }
 
-void Label::measure(int &width, int &height) {
-    Widget::measure(width, height);
+void Label::onMeasure(int &width, int &height) {
+    Widget::onMeasure(width, height);
 
     auto preferredWidth = [](const RectI &rect) {
         return rect.getWidth() - rect.getX();

@@ -168,7 +168,7 @@ ContainerPtr Container::containerAt(const PointI &point) {
     return std::dynamic_pointer_cast<Container>(child);
 }
 
-void Container::measure(int &width, int &height) {
+void Container::onMeasure(int &width, int &height) {
     auto keepMax = [](int &in, int p) {
         if (in < p) {
             in = p;

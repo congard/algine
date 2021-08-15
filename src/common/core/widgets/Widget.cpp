@@ -436,14 +436,9 @@ void Widget::measure() {
     int height = getContentHeight();
 
     // calculate content width/height
-    measure(width, height);
+    onMeasure(width, height);
 
-    setGeometry({
-        getX(),
-        getY(),
-        width + getPaddingLeft() + getPaddingRight(),
-        height + getPaddingTop() + getPaddingBottom()
-    });
+    setMeasuredDimension(width, height);
 
     setFlag(Flag::MeasurementRequired, false);
 }
@@ -600,7 +595,16 @@ int Widget::matchParentHeight(Widget *child) {
     return getContentHeight();
 }
 
-void Widget::measure(int &width, int &height) {
+void Widget::setMeasuredDimension(int width, int height) {
+    setGeometry({
+        getX(),
+        getY(),
+        width + getPaddingLeft() + getPaddingRight(),
+        height + getPaddingTop() + getPaddingBottom()
+    });
+}
+
+void Widget::onMeasure(int &width, int &height) {
     auto contentWidth = [&](int width) {
         return width - getPaddingLeft() - getPaddingRight();
     };
