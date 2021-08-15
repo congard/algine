@@ -191,10 +191,10 @@ protected:
 
     virtual void measure(int &width, int &height);
     virtual void onLayout();
-    virtual void drawingStart(Painter &painter);
-    virtual void drawBackground(Painter &painter);
-    virtual void draw(Painter &painter) = 0;
-    virtual void geometryChanged(const RectI &geometry);
+    virtual void draw(Painter &painter);
+    virtual void onDrawBackground(Painter &painter);
+    virtual void onDraw(Painter &painter) = 0;
+    virtual void onGeometryChanged(const RectI &geometry);
 
 protected:
     Texture2DPtr m_texture;

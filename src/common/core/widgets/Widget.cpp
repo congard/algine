@@ -96,7 +96,7 @@ void Widget::setGeometry(RectI geometry) {
             requireParentRedraw();
         }
 
-        geometryChanged(geometry);
+        onGeometryChanged(geometry);
         requireParentLayout();
 
         m_geometry = geometry;
@@ -388,8 +388,8 @@ void Widget::display(const DisplayOptions &options) {
     if (isFlagEnabled(Flag::RedrawRequired)) {
         setFlag(Flag::RedrawRequired, false);
 
-        drawingStart(*painter);
         draw(*painter);
+        onDraw(*painter);
     }
 
     if (options.parentFramebuffer) {
@@ -634,8 +634,8 @@ void Widget::measure(int &width, int &height) {
 
 void Widget::onLayout() {}
 
-void Widget::drawingStart(Painter &painter) {
-    print_call("draw(): " + getName());
+void Widget::draw(Painter &painter) {
+    print_call("onDraw(): " + getName());
 
     m_framebuffer->bind();
 
@@ -655,7 +655,7 @@ void Widget::drawingStart(Painter &painter) {
     painter.setTransform(glm::mat4(1.0f));
 
     if (m_background.getSource() != Paint::Source::None) {
-        drawBackground(painter);
+        onDrawBackground(painter);
     }
 
     Engine::setViewport(m_paddingLeft, m_paddingBottom, getContentWidth(), getContentHeight());
@@ -664,12 +664,12 @@ void Widget::drawingStart(Painter &painter) {
     painter.setPaint({});
 }
 
-void Widget::drawBackground(Painter &painter) {
+void Widget::onDrawBackground(Painter &painter) {
     painter.setPaint(m_background);
     painter.drawRect(0, 0, getWidth(), getHeight());
 }
 
-void Widget::geometryChanged(const RectI &geometry) {}
+void Widget::onGeometryChanged(const RectI &geometry) {}
 
 void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) {
     for (pugi::xml_attribute attr : node.attributes()) {

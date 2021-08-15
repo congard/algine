@@ -225,7 +225,7 @@ void Container::measure(int &width, int &height) {
     }
 }
 
-void Container::draw(Painter &painter) {
+void Container::onDraw(Painter &painter) {
     DisplayOptions options;
     options.parentWidth = getWidth();
     options.parentHeight = getHeight();

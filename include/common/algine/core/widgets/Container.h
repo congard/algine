@@ -34,7 +34,7 @@ public:
 
 protected:
     void measure(int &width, int &height) override;
-    void draw(Painter &painter) override;
+    void onDraw(Painter &painter) override;
 
 protected:
     std::list<WidgetPtr> m_children;

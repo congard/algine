@@ -104,7 +104,7 @@ void Label::measure(int &width, int &height) {
     }
 }
 
-void Label::draw(Painter &painter) {
+void Label::onDraw(Painter &painter) {
     float x;
     float y;
     auto boundingRect = m_fontMetrics.boundingRect(m_text);
