@@ -169,6 +169,11 @@ ContainerPtr Container::containerAt(const PointI &point) {
 }
 
 void Container::onMeasure(int &width, int &height) {
+    Widget::onMeasure(width, height);
+
+    if (m_horizontalPolicy != SizePolicy::Preferred && m_verticalPolicy != SizePolicy::Preferred)
+        return;
+
     auto keepMax = [](int &in, int p) {
         if (in < p) {
             in = p;
@@ -189,7 +194,7 @@ void Container::onMeasure(int &width, int &height) {
         width = maxX;
         height = maxY;
 
-        return;
+        goto end;
     }
 
     switch (m_horizontalPolicy) {
@@ -222,6 +227,18 @@ void Container::onMeasure(int &width, int &height) {
             break;
         }
         default: break;
+    }
+
+    end:
+    setMeasuredDimension(width, height);
+
+    for (auto &child : m_children) {
+        auto policy_v = child->getVerticalSizePolicy();
+        auto policy_h = child->getHorizontalSizePolicy();
+
+        if (child->isVisible() && (policy_v == SizePolicy::MatchParent || policy_h == SizePolicy::MatchParent)) {
+            child->forceLayout();
+        }
     }
 }
 
