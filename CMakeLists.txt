@@ -241,7 +241,8 @@ set(ALGINE_CORE_SOURCES
         src/common/core/djb2.h
         include/common/algine/core/widgets/SizePolicy.h
         include/common/algine/core/AutoRawPtr.h
-        src/common/core/widgets/Layout.cpp include/common/algine/core/widgets/Layout.h)
+        src/common/core/widgets/Layout.cpp include/common/algine/core/widgets/Layout.h
+        src/common/core/widgets/LinearLayout.cpp include/common/algine/core/widgets/LinearLayout.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h
