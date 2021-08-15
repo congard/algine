@@ -107,29 +107,6 @@ const RectI& Widget::getGeometry() const {
     return m_geometry;
 }
 
-inline uint asBitFlag(Widget::Flag flag) {
-    uint fl = static_cast<uint>(flag);
-    return 1u << fl;
-}
-
-void Widget::setFlag(Flag flag, bool on) {
-    uint fl = asBitFlag(flag);
-    m_flags = on ? (m_flags | fl) : (m_flags & ~fl);
-}
-
-bool Widget::isFlagEnabled(Flag flag) const {
-    uint fl = asBitFlag(flag);
-    return m_flags & fl;
-}
-
-void Widget::setFlags(Flags flags) {
-    m_flags = flags;
-}
-
-Widget::Flags Widget::getFlags() const {
-    return m_flags;
-}
-
 void Widget::setVisible(bool visible) {
     continue_if(visible != isFlagEnabled(Flag::Visible));
     requireParentLayout();
@@ -597,6 +574,22 @@ bool Widget::removeProperty(const char *name) {
     }
 
     return false;
+}
+
+template<typename T>
+inline uint asBitFlag(T flag) {
+    uint fl = static_cast<uint>(flag);
+    return 1u << fl;
+}
+
+void Widget::setFlag(Flag flag, bool on) {
+    uint fl = asBitFlag(flag);
+    m_flags = on ? (m_flags | fl) : (m_flags & ~fl);
+}
+
+bool Widget::isFlagEnabled(Flag flag) const {
+    uint fl = asBitFlag(flag);
+    return m_flags & fl;
 }
 
 int Widget::matchParentWidth(Widget *child) {

@@ -26,16 +26,6 @@ class IOSystem;
 
 class Widget {
 public:
-    enum class Flag {
-        RedrawRequired,
-        SizeChanged,
-        Visible,
-        MeasurementRequired,
-        LayoutRequired
-    };
-
-    using Flags = uint;
-
     enum class Filtering {
         Nearest = 0x2600,
         Linear = 0x2601
@@ -83,11 +73,6 @@ public:
 
     virtual void setGeometry(RectI geometry);
     const RectI& getGeometry() const;
-
-    void setFlag(Flag flag, bool on = true);
-    bool isFlagEnabled(Flag flag) const;
-    void setFlags(Flags flags);
-    Flags getFlags() const;
 
     void setVisible(bool visible);
     bool isVisible() const;
@@ -185,6 +170,20 @@ public:
     static WidgetPtr constructFromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io);
     static WidgetPtr constructFromXML(const std::string &xml);
     static WidgetPtr constructFromXMLFile(const std::string &file);
+
+protected:
+    enum class Flag {
+        RedrawRequired,
+        SizeChanged,
+        Visible,
+        MeasurementRequired,
+        LayoutRequired
+    };
+
+    using Flags = uint;
+
+    void setFlag(Flag flag, bool on = true);
+    bool isFlagEnabled(Flag flag) const;
 
 protected:
     virtual int matchParentWidth(Widget *child);
