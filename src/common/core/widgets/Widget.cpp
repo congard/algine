@@ -17,6 +17,7 @@
 #include <cstring>
 
 #include "core/djb2.h"
+#include "TexturePathLoader.h"
 
 #define requireParentRedraw() if (m_parent) m_parent->invalidate()
 #define requireParentLayout() if (m_parent) m_parent->requestLayout()
@@ -733,16 +734,7 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
         } else if (isAttr("name")) {
             setName(attr.as_string());
         } else if (isAttr("background")) {
-            TextureFileInfo info;
-            info.flip = true;
-            info.path = attr.as_string();
-            info.ioSystem = io;
-
-            Texture2DPtr background = PtrMaker::make();
-            background->bind();
-            background->fromFile(info);
-
-            m_background.setTexture(background);
+            m_background.setTexture(TexturePathLoader::load(attr.as_string(), io).texture);
         } else if (isAttr("backgroundColor")) {
             m_background.setColor(Color::parseColor(attr.as_string()));
         } else if (isAttr("padding")) {
