@@ -13,6 +13,7 @@
 #include <algine/core/widgets/Container.h>
 #include <algine/core/widgets/Label.h>
 #include <algine/core/widgets/LinearLayout.h>
+#include <algine/core/widgets/ImageWidget.h>
 
 #include <algine/gl.h>
 
@@ -147,6 +148,7 @@ void Engine::init() {
     alRegisterType(Container);
     alRegisterType(Label);
     alRegisterType(LinearLayout);
+    alRegisterType(ImageWidget);
 
     initExtra();
 }

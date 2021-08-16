@@ -243,7 +243,8 @@ set(ALGINE_CORE_SOURCES
         include/common/algine/core/AutoRawPtr.h
         src/common/core/widgets/Layout.cpp include/common/algine/core/widgets/Layout.h
         src/common/core/widgets/LinearLayout.cpp include/common/algine/core/widgets/LinearLayout.h
-        src/common/core/widgets/TexturePathLoader.h)
+        src/common/core/widgets/TexturePathLoader.h
+        src/common/core/widgets/ImageWidget.cpp include/common/algine/core/widgets/ImageWidget.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h
