@@ -675,6 +675,17 @@ void Widget::onDrawBackground(Painter &painter) {
 
 void Widget::onGeometryChanged(const RectI &geometry) {}
 
+Widget::Filtering Widget::parseFiltering(const char *str) {
+    if (strcmp(str, "nearest") == 0) {
+        return Filtering::Nearest;
+    } else if (strcmp(str, "linear") == 0) {
+        return Filtering::Linear;
+    } else {
+        Log::error("Widget") << "Unknown filtering method '" << str << "'" << Log::end;
+        return Filtering::Nearest;
+    }
+}
+
 void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) {
     for (pugi::xml_attribute attr : node.attributes()) {
         auto isAttr = [&](const char *name) {
@@ -762,13 +773,7 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
         } else if (isAttr("verticalSizePolicy")) {
             setVerticalSizePolicy(parseSizePolicy());
         } else if (isAttr("filtering")) {
-            if (auto filtering = attr.as_string(); strcmp(filtering, "nearest") == 0) {
-                setFiltering(Filtering::Nearest);
-            } else if (strcmp(filtering, "linear") == 0) {
-                setFiltering(Filtering::Linear);
-            } else {
-                Log::error("Widget") << "Unknown filtering method '" << filtering << "'" << Log::end;
-            }
+            setFiltering(parseFiltering(attr.as_string()));
         } else if (auto name = attr.name(); strstr(name, "p_") == name) { // property
             name += strlen("p_");
 

@@ -199,6 +199,9 @@ protected:
     virtual void onGeometryChanged(const RectI &geometry);
 
 protected:
+    static Filtering parseFiltering(const char *str);
+
+protected:
     Texture2DPtr m_texture;
     FramebufferPtr m_framebuffer;
 
