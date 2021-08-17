@@ -122,6 +122,10 @@ RectI FontMetrics::boundingRect(const std::u16string &str) {
         }
     }
 
+    auto last = str.back();
+    x -= horizontalAdvance(last); // horizontalAdvance = leftHorizontalBearing + width + extra
+    x += leftHorizontalBearing(last) + width(last);
+
     return {minX, minY, x - minX, maxY - minY};
 }
 
