@@ -76,7 +76,7 @@ void Label::onMeasure(int &width, int &height) {
     Widget::onMeasure(width, height);
 
     auto preferredWidth = [](const RectI &rect) {
-        return rect.getWidth() - rect.getX();
+        return rect.getWidth();
     };
 
     auto preferredHeight = [](const RectI &rect) {
