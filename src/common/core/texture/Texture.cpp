@@ -260,7 +260,7 @@ Texture::FormatInfo Texture::getFormatInfo(uint format) {
     }
 }
 
-void Texture::texFromFile(uint target, const TextureFileInfo &info) {
+void Texture::texFromFile(uint target, const TextureFileInfo &info) { // TODO: TextureFileInfo remove 'dataType': it is always UnsignedByte
     stbi_set_flip_vertically_on_load(info.flip);
 
     auto bytes = IOStreamUtils::readAll<stbi_uc>(info.path, info.ioSystem);
@@ -272,13 +272,7 @@ void Texture::texFromFile(uint target, const TextureFileInfo &info) {
     int formats[] = {Red, RG, RGB, RGBA};
     int dataFormat = formats[channels - 1];
 
-    enable_if_android(
-        if (channels < 3) {
-            m_format = RGB;
-        } else {
-            m_format = dataFormat;
-        }
-    )
+    m_format = dataFormat;
 
     if (data) {
         glTexImage2D(target, m_lod, m_format, m_width, m_height, 0, dataFormat, static_cast<uint>(info.dataType), data);
