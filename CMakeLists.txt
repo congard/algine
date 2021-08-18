@@ -147,6 +147,9 @@ set(ALGINE_CORE_SOURCES
         include/common/algine/types.h
         include/common/algine/gl.h
 
+        include/common/algine/core/input/MouseKey.h
+        include/common/algine/core/input/KeyboardKey.h
+
         include/common/algine/core/transfer/Transferable.h
         include/common/algine/core/transfer/GLMTransferrer.h
         include/common/algine/core/texture/PixelData.h
@@ -307,9 +310,6 @@ set(ALGINE_EXT_SOURCES
 
 if (NOT ANDROID)
     set(ALGINE_DESKTOP_SOURCES
-            include/desktop/algine/core/input/MouseKey.h
-            include/desktop/algine/core/input/KeyboardKey.h
-
             src/desktop/core/input/MouseKeyConverter.h
             src/desktop/core/input/KeyboardKeyConverter.h
             src/desktop/core/window/Window.cpp include/desktop/algine/core/window/Window.h
