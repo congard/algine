@@ -249,17 +249,7 @@ void Window::setEventHandler(WindowEventHandler *eventHandler) {
 }
 
 inline auto WEH(EventHandler *eventHandler) {
-    return static_cast<WindowEventHandler *>(eventHandler);
-}
-
-inline WindowEventHandler* getEventHandlerIfPresent(GLFWwindow *glfwWindow) {
-    auto window = static_cast<Window *>(glfwGetWindowUserPointer(glfwWindow));
-
-    if (window) {
-        return WEH(window->getEventHandler());
-    }
-
-    return nullptr;
+    return static_cast<WindowEventHandler*>(eventHandler);
 }
 
 void Window::setMouseTracking(bool tracking) {
@@ -282,19 +272,19 @@ void Window::setMouseTracking(bool tracking) {
 
                 // send press event
                 if (eventHandler != nullptr) {
-                    eventHandler->mouseKeyPress(mouseKey);
+                    eventHandler->mouseKeyPress(mouseKey, *window);
                 }
             } else if (action == GLFW_RELEASE) {
                 if (eventHandler != nullptr) {
                     // send release event
-                    eventHandler->mouseKeyRelease(mouseKey);
+                    eventHandler->mouseKeyRelease(mouseKey, *window);
 
                     // check click event conditions
                     long releaseTime = Engine::time();
                     long deltaTime = releaseTime - mouseKeysInfo[button].pressTime;
 
                     if (mouseKeysInfo[button].maxDelta <= maxClickDistance && deltaTime <= maxClickDeltaTime) {
-                        eventHandler->mouseClick(mouseKey);
+                        eventHandler->mouseClick(mouseKey, *window);
                     }
 
                     mouseKeysInfo.erase(button);
@@ -325,7 +315,7 @@ void Window::setMouseTracking(bool tracking) {
 
             // send move event
             if (auto eventHandler = WEH(window->getEventHandler()); eventHandler != nullptr) {
-                eventHandler->mouseMove(x, y);
+                eventHandler->mouseMove(x, y, *window);
             }
         });
     } else {
@@ -338,19 +328,24 @@ void Window::setKeyboardTracking(bool tracking) {
     m_keyboardTracking = tracking;
 
     if (tracking) {
-        glfwSetKeyCallback(m_window, [](GLFWwindow *window, int key, int scancode, int action, int mode) {
-            if (auto eventHandler = getEventHandlerIfPresent(window); eventHandler != nullptr) {
+        glfwSetKeyCallback(m_window, [](GLFWwindow *glfwWindow, int key, int scancode, int action, int mode) {
+            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+
+            if (window == nullptr)
+                return;
+
+            if (auto eventHandler = WEH(window->getEventHandler()); eventHandler != nullptr) {
                 switch (action) {
                     case GLFW_PRESS: {
-                        eventHandler->keyboardKeyPress(getKeyboardKey(key));
+                        eventHandler->keyboardKeyPress(getKeyboardKey(key), *window);
                         break;
                     }
                     case GLFW_REPEAT: {
-                        eventHandler->keyboardKeyRepeat(getKeyboardKey(key));
+                        eventHandler->keyboardKeyRepeat(getKeyboardKey(key), *window);
                         break;
                     }
                     case GLFW_RELEASE: {
-                        eventHandler->keyboardKeyRelease(getKeyboardKey(key));
+                        eventHandler->keyboardKeyRelease(getKeyboardKey(key), *window);
                         break;
                     }
                     default: {
@@ -369,23 +364,31 @@ void Window::setWindowStateTracking(bool tracking) {
 
     if (tracking) {
         glfwSetWindowSizeCallback(m_window, [](GLFWwindow *glfwWindow, int width, int height) {
-            if (auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow)); window != nullptr) {
-                if (auto &content = window->getContent(); content != nullptr) {
-                    window->requestViewport();
+            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
 
-                    content->m_width = window->m_viewport.x;
-                    content->m_height = window->m_viewport.y;
-                }
+            if (window == nullptr)
+                return;
+
+            if (auto &content = window->getContent(); content != nullptr) {
+                window->requestViewport();
+
+                content->m_width = window->m_viewport.x;
+                content->m_height = window->m_viewport.y;
             }
 
-            if (auto eventHandler = getEventHandlerIfPresent(glfwWindow); eventHandler != nullptr) {
-                eventHandler->windowSizeChange(width, height);
+            if (auto eventHandler = WEH(window->getEventHandler()); eventHandler != nullptr) {
+                eventHandler->windowSizeChange(width, height, *window);
             }
         });
 
-        glfwSetWindowPosCallback(m_window, [](GLFWwindow *window, int x, int y) {
-            if (auto eventHandler = getEventHandlerIfPresent(window); eventHandler != nullptr) {
-                eventHandler->windowPosChange(x, y);
+        glfwSetWindowPosCallback(m_window, [](GLFWwindow *glfwWindow, int x, int y) {
+            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+
+            if (window == nullptr)
+                return;
+
+            if (auto eventHandler = WEH(window->getEventHandler()); eventHandler != nullptr) {
+                eventHandler->windowPosChange(x, y, *window);
             }
         });
     } else {

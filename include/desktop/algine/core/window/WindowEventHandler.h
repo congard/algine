@@ -7,19 +7,21 @@
 #include <algine/core/input/KeyboardKey.h>
 
 namespace algine {
+class Window;
+
 class WindowEventHandler: public EventHandler {
 public:
-    virtual void mouseMove(double x, double y);
-    virtual void mouseClick(MouseKey key);
-    virtual void mouseKeyPress(MouseKey key);
-    virtual void mouseKeyRelease(MouseKey key);
+    virtual void mouseMove(double x, double y, Window &window);
+    virtual void mouseClick(MouseKey key, Window &window);
+    virtual void mouseKeyPress(MouseKey key, Window &window);
+    virtual void mouseKeyRelease(MouseKey key, Window &window);
 
-    virtual void keyboardKeyPress(KeyboardKey key);
-    virtual void keyboardKeyRelease(KeyboardKey key);
-    virtual void keyboardKeyRepeat(KeyboardKey key);
+    virtual void keyboardKeyPress(KeyboardKey key, Window &window);
+    virtual void keyboardKeyRelease(KeyboardKey key, Window &window);
+    virtual void keyboardKeyRepeat(KeyboardKey key, Window &window);
 
-    virtual void windowSizeChange(int width, int height);
-    virtual void windowPosChange(int x, int y);
+    virtual void windowSizeChange(int width, int height, Window &window);
+    virtual void windowPosChange(int x, int y, Window &window);
 };
 }
 
