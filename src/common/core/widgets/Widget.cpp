@@ -57,7 +57,9 @@ Widget::Widget()
     m_texture->setDimensions(getWidth(), getHeight());
     m_texture->setParams(std::map<uint, uint> {
         {Texture::MinFilter, Texture::Nearest},
-        {Texture::MagFilter, Texture::Nearest}
+        {Texture::MagFilter, Texture::Nearest},
+        {Texture::WrapU, Texture::ClampToEdge},
+        {Texture::WrapV, Texture::ClampToEdge}
     });
     m_texture->update();
 
