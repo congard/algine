@@ -7,35 +7,24 @@
 #include <algine/core/OutputListCreator.h>
 #include <algine/core/FramebufferPtr.h>
 
+#include <variant>
 #include <string>
 #include <map>
 
 namespace algine {
 class FramebufferCreator: public Creator {
 public:
+    struct Path { std::string str; };
+    struct Name { std::string str; };
+
     template<typename T>
-    class Attachments {
-        friend class FramebufferCreator;
+    struct Attachments {
+        using type = T;
+        std::map<Attachment, std::variant<T, Path, Name>> value;
 
-    public:
-        void set(const std::map<Attachment, T> &creators);
-        void setPaths(const std::map<Attachment, std::string> &paths);
-        void setNames(const std::map<Attachment, std::string> &names);
-
-        void add(const T &creator, Attachment attachment);
-        void addPath(const std::string &path, Attachment attachment);
-        void addName(const std::string &name, Attachment attachment);
-
-        const std::map<Attachment, T>& get() const;
-        const std::map<Attachment, std::string>& getPaths() const;
-        const std::map<Attachment, std::string>& getNames() const;
-
-    private:
-        Attachments();
-
-    private:
-        std::map<Attachment, T> m_creators;
-        std::map<Attachment, std::string> m_paths, m_names;
+        inline void add(const T &p1, Attachment attachment) { value[attachment] = p1; }
+        inline void addPath(const std::string &p1, Attachment attachment) { value[attachment] = Path {p1}; }
+        inline void addName(const std::string &p1, Attachment attachment) { value[attachment] = Name {p1}; }
     };
 
     using RenderbufferAttachments = Attachments<RenderbufferCreator>;

@@ -17,58 +17,6 @@ constant(Attachments, "attachments");
 constant(OutputLists, "outputLists");
 }
 
-template<typename TMgr>
-void FramebufferCreator::Attachments<TMgr>::set(const map<Attachment, TMgr> &creators) {
-    m_creators = creators;
-}
-
-template<typename TMgr>
-void FramebufferCreator::Attachments<TMgr>::setPaths(const map<Attachment, string> &paths) {
-    m_paths = paths;
-}
-
-template<typename TMgr>
-void FramebufferCreator::Attachments<TMgr>::setNames(const map<Attachment, string> &names) {
-    m_names = names;
-}
-
-template<typename TMgr>
-void FramebufferCreator::Attachments<TMgr>::add(const TMgr &creator, Attachment attachment) {
-    m_creators[attachment] = creator;
-}
-
-template<typename TMgr>
-void FramebufferCreator::Attachments<TMgr>::addPath(const string &path, Attachment attachment) {
-    m_paths[attachment] = path;
-}
-
-template<typename TMgr>
-void FramebufferCreator::Attachments<TMgr>::addName(const string &name, Attachment attachment) {
-    m_names[attachment] = name;
-}
-
-template<typename TMgr>
-const map<Attachment, TMgr>& FramebufferCreator::Attachments<TMgr>::get() const {
-    return m_creators;
-}
-
-template<typename TMgr>
-const map<Attachment, string>& FramebufferCreator::Attachments<TMgr>::getPaths() const {
-    return m_paths;
-}
-
-template<typename TMgr>
-const map<Attachment, string>& FramebufferCreator::Attachments<TMgr>::getNames() const {
-    return m_names;
-}
-
-template<typename TMgr>
-FramebufferCreator::Attachments<TMgr>::Attachments() = default;
-
-template class FramebufferCreator::Attachments<RenderbufferCreator>;
-template class FramebufferCreator::Attachments<Texture2DCreator>;
-template class FramebufferCreator::Attachments<TextureCubeCreator>;
-
 void FramebufferCreator::setOutputLists(const vector<OutputList> &lists) {
     m_outputLists = {};
 
@@ -124,10 +72,8 @@ FramebufferPtr FramebufferCreator::create() {
     }
 
     // attach objects
-    auto attachAll = [&](auto &attachments, auto type)
-    {
-        auto attach = [&](const auto &ptr, Attachment attachment)
-        {
+    auto attachAll = [&](auto &attachments, auto type) {
+        auto attach = [&](const auto &ptr, Attachment attachment) {
             using Type = PtrMaker::PtrType<remove_reference_t<decltype(ptr)>>;
 
             if constexpr (is_same_v<Type, Renderbuffer>) {
@@ -139,8 +85,7 @@ FramebufferPtr FramebufferCreator::create() {
             }
         };
 
-        auto attachByPath = [&](const string &path, Attachment attachment, auto creatorType)
-        {
+        auto attachByPath = [&](const string &path, Attachment attachment, auto creatorType) {
             using TCreator = type_holder_get(creatorType);
 
             TCreator creator;
@@ -151,8 +96,7 @@ FramebufferPtr FramebufferCreator::create() {
             attach(creator.get(), attachment);
         };
 
-        auto attachByName = [&](const string &name, Attachment attachment, auto objType)
-        {
+        auto attachByName = [&](const string &name, Attachment attachment, auto objType) {
             using Type = type_holder_get(objType);
 
             // try to find object by name
@@ -167,20 +111,19 @@ FramebufferPtr FramebufferCreator::create() {
 
         // attach using creators, paths and names
 
-        using T = typename decltype(attachments.m_creators)::mapped_type;
+        using T = typename std::remove_reference_t<decltype(attachments)>::type;
 
-        for (auto &p : attachments.m_creators) {
-            auto &creator = p.second;
-            creator.setIOSystem(io());
-            attach(creator.get(), p.first);
-        }
+        for (auto &p : attachments.value) {
+            auto &v = p.second;
 
-        for (const auto &p : attachments.m_paths) {
-            attachByPath(p.second, p.first, type_holder<T>());
-        }
-
-        for (const auto &p : attachments.m_names) {
-            attachByName(p.second, p.first, type);
+            if (auto path = std::get_if<Path>(&v); path) {
+                attachByPath(path->str, p.first, type_holder<T>());
+            } else if (auto name = std::get_if<Name>(&v); name) {
+                attachByName(name->str, p.first, type);
+            } else if (auto creator = std::get_if<T>(&v); creator) {
+                creator->setIOSystem(io());
+                attach(creator->get(), p.first);
+            }
         }
     };
 
@@ -217,28 +160,25 @@ inline string typeName() {
 void FramebufferCreator::import(const JsonHelper &jsonHelper) {
     const json &config = jsonHelper.json;
 
-    auto importAttachments = [&](auto &obj)
-    {
+    auto importAttachments = [&](auto &obj) {
         const json &attachments = config[Config::Attachments];
 
         for (const auto & item : attachments) {
-            using namespace Config;
+            if (item[Config::Type] == typeName<decltype(obj)>()) {
+                auto attachment = Config::stringToAttachment(item[Config::Attachment]);
 
-            if (item[Type] == typeName<decltype(obj)>()) {
-                auto attachment = stringToAttachment(item[Config::Attachment]);
-
-                if (item.contains(Dump)) {
-                    using TCreator = typename decltype(obj.m_creators)::mapped_type;
+                if (item.contains(Config::Dump)) {
+                    using TCreator = typename std::remove_reference_t<decltype(obj)>::type;
 
                     TCreator creator;
                     creator.setWorkingDirectory(m_workingDirectory);
-                    creator.import(item[Dump]);
+                    creator.import(item[Config::Dump]);
 
                     obj.add(creator, attachment);
-                } else if (item.contains(Path)) {
-                    obj.addPath(item[Path], attachment);
-                } else if (item.contains(Name)) {
-                    obj.addName(item[Name], attachment);
+                } else if (item.contains(Config::Path)) {
+                    obj.addPath(item[Config::Path], attachment);
+                } else if (item.contains(Config::Name)) {
+                    obj.addName(item[Config::Name], attachment);
                 }
             }
         }
@@ -272,13 +212,11 @@ JsonHelper FramebufferCreator::dump() {
         json attachments;
 
         // dump Attachments object and append it to the attachments json
-        auto append = [&](auto &obj)
-        {
+        auto append = [&](auto &obj) {
             // array with attachments of obj type
             json attachmentsType;
 
-            auto writeBlock = [&](const string &storeMethod, const json &data, uint attachment)
-            {
+            auto writeBlock = [&](const string &storeMethod, const json &data, uint attachment) {
                 json block;
                 block[Config::Type] = typeName<decltype(obj)>();
                 block[Config::Attachment] = Config::attachmentToString(attachment);
@@ -286,14 +224,20 @@ JsonHelper FramebufferCreator::dump() {
                 attachmentsType.emplace_back(block);
             };
 
-            for (auto &p : obj.m_creators)
-                writeBlock(Config::Dump, p.second.dump().json, p.first);
+            // Creator type
+            using T = typename std::remove_reference_t<decltype(obj)>::type;
 
-            for (auto &p : obj.m_paths)
-                writeBlock(Config::Path, p.second, p.first);
+            for (auto &p : obj.value) {
+                auto &v = p.second;
 
-            for (auto &p : obj.m_names)
-                writeBlock(Config::Name, p.second, p.first);
+                if (auto path = std::get_if<Path>(&v); path) {
+                    writeBlock(Config::Path, path->str, p.first);
+                } else if (auto name = std::get_if<Name>(&v); name) {
+                    writeBlock(Config::Name, name->str, p.first);
+                } else if (auto creator = std::get_if<T>(&v); creator) {
+                    writeBlock(Config::Dump, creator->dump().json, p.first);
+                }
+            }
 
             // append to attachments
             if (!attachmentsType.empty()) {
