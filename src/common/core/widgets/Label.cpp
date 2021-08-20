@@ -126,7 +126,7 @@ void Label::onDraw(Painter &painter) {
             x = (float) -br_x;
             break;
         default:
-            x = (float) (getContentWidth() - (br_width + br_x)) / 2.0f;
+            x = (float) -br_x + (float) (getContentWidth() - br_width) / 2.0f;
             break;
     }
 
