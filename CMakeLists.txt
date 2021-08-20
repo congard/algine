@@ -248,6 +248,7 @@ set(ALGINE_CORE_SOURCES
         src/common/core/widgets/LinearLayout.cpp include/common/algine/core/widgets/LinearLayout.h
         src/common/core/widgets/TexturePathLoader.h
         src/common/core/widgets/ImageWidget.cpp include/common/algine/core/widgets/ImageWidget.h
+        src/common/core/widgets/Units.cpp include/common/algine/core/widgets/Units.h
         src/common/core/XEventHandler.cpp include/common/algine/core/XEventHandler.h)
 
 set(ALGINE_STD_SOURCES
