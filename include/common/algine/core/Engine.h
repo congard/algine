@@ -52,6 +52,9 @@ public:
     static int getAPIVersion();
     static GraphicsAPI getGraphicsAPI();
 
+    static void setDPI(uint dpi);
+    static uint getDPI();
+
     static Framebuffer* getBoundFramebuffer();
     static Renderbuffer* getBoundRenderbuffer();
     static Texture2D* getBoundTexture2D();
@@ -135,6 +138,8 @@ private:
 
     static int m_apiVersion;
     static GraphicsAPI m_graphicsAPI;
+
+    static uint m_dpi;
 
 private:
     static long m_startTime;

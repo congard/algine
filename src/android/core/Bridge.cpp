@@ -122,6 +122,28 @@ Java_com_algine_android_module_Bridge_init(JNIEnv *env,
             AssetManager::setJavaAssetManager(assetManager);
         }
 
+        // get density & calculate dpi value
+        // activity.getResources().getDisplayMetrics().density
+        // for more information read https://developer.android.com/reference/android/util/DisplayMetrics#density
+        {
+            jclass activity_class = env->GetObjectClass(activity);
+
+            jmethodID activity_getResources =
+                    env->GetMethodID(activity_class, "getResources", "()Landroid/content/res/Resources;");
+            jobject resources = env->CallObjectMethod(activity, activity_getResources); // activity.getResources()
+            jclass resources_class = env->GetObjectClass(resources);
+
+            jmethodID resources_getDisplayMetrics =
+                    env->GetMethodID(resources_class, "getDisplayMetrics", "()Landroid/util/DisplayMetrics;");
+            jobject displayMetrics = env->CallObjectMethod(resources, resources_getDisplayMetrics); // resources.getDisplayMetrics()
+            jclass displayMetrics_class = env->GetObjectClass(displayMetrics);
+
+            jfieldID displayMetrics_density = env->GetFieldID(displayMetrics_class, "density", "F");
+            jfloat density = env->GetFloatField(displayMetrics, displayMetrics_density);
+
+            Engine::setDPI(density * 160.0f);
+        }
+
         { // init screen size
             auto dimensions = AndroidBridge::getViewDimensions();
 

@@ -56,6 +56,8 @@ void* Engine::m_fontLibrary;
 int Engine::m_apiVersion;
 Engine::GraphicsAPI Engine::m_graphicsAPI;
 
+uint Engine::m_dpi = 96;
+
 long Engine::m_startTime;
 
 Framebuffer* Engine::m_defaultFramebuffer;
@@ -77,6 +79,42 @@ IndexBuffer* Engine::m_boundIndexBuffer;
 UniformBuffer* Engine::m_boundUniformBuffer;
 ShaderProgram* Engine::m_boundShaderProgram;
 InputLayout* Engine::m_boundInputLayout;
+
+string exec(const char *cmd) {
+    string result;
+    FILE* pipe = popen(cmd, "r");
+
+    if (!pipe)
+        throw runtime_error("popen() failed!");
+
+    try {
+        char buffer[256];
+
+        while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+            result += buffer;
+        }
+    } catch (...) {
+        pclose(pipe);
+        throw;
+    }
+
+    pclose(pipe);
+
+    return result;
+}
+
+void linux_detect_dpi() {
+    auto dpi_str = exec("xrdb -query | grep 'Xft.dpi' | cut -f 2");
+
+    if (auto pos = dpi_str.find('\n'); pos != string::npos)
+        dpi_str.erase(pos);
+
+    char *end;
+
+    if (auto dpi = strtol(dpi_str.c_str(), &end, 0); *end == '\0') {
+        Engine::setDPI(dpi);
+    }
+}
 
 void Engine::init() {
     enable_if_desktop(
@@ -150,6 +188,10 @@ void Engine::init() {
     alRegisterType(LinearLayout);
     alRegisterType(ImageWidget);
 
+#if defined(__linux__) && !defined(__ANDROID__)
+    linux_detect_dpi();
+#endif
+
     initExtra();
 }
 
@@ -207,6 +249,14 @@ int Engine::getAPIVersion() {
 
 Engine::GraphicsAPI Engine::getGraphicsAPI() {
     return m_graphicsAPI;
+}
+
+void Engine::setDPI(uint dpi) {
+    m_dpi = dpi;
+}
+
+uint Engine::getDPI() {
+    return m_dpi;
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS
