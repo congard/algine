@@ -1,4 +1,5 @@
 #include <algine/core/widgets/ImageWidget.h>
+#include <algine/core/widgets/Units.h>
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/painter/Painter.h>
 #include <algine/core/PtrMaker.h>
@@ -63,9 +64,9 @@ void ImageWidget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSy
             isImageUnique = data.unique;
             setImage(data.texture);
         } else if (isAttr("imageWidth")) {
-            setWidth(attr.as_int() + getPaddingLeft() + getPaddingRight());
+            setWidth(Units::parse<int>(attr.as_string()) + getPaddingLeft() + getPaddingRight());
         } else if (isAttr("imageHeight")) {
-            setHeight(attr.as_int() + getPaddingTop() + getPaddingBottom());
+            setHeight(Units::parse<int>(attr.as_string()) + getPaddingTop() + getPaddingBottom());
         } else if (isAttr("imageFiltering")) {
             imageFiltering = static_cast<uint>(parseFiltering(attr.as_string()));
         }

@@ -1,5 +1,5 @@
 #include <algine/core/widgets/Widget.h>
-
+#include <algine/core/widgets/Units.h>
 #include <algine/core/shader/ShaderCreator.h>
 #include <algine/core/painter/Painter.h>
 #include <algine/core/texture/Texture2D.h>
@@ -715,24 +715,28 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
             return SizePolicy::Fixed;
         };
 
+        auto metrics_parse = [&]() {
+            return Units::parse<int>(attr.as_string());
+        };
+
         if (isAttr("visible")) {
             setFlag(Flag::Visible, attr.as_bool());
         } else if (isAttr("x")) {
-            setX(attr.as_int());
+            setX(metrics_parse());
         } else if (isAttr("y")) {
-            setY(attr.as_int());
+            setY(metrics_parse());
         } else if (isAttr("width")) {
-            setWidth(attr.as_int());
+            setWidth(metrics_parse());
         } else if (isAttr("height")) {
-            setHeight(attr.as_int());
+            setHeight(metrics_parse());
         } else if (isAttr("minWidth")) {
-            setMinWidth(attr.as_int());
+            setMinWidth(metrics_parse());
         } else if (isAttr("minHeight")) {
-            setMinHeight(attr.as_int());
+            setMinHeight(metrics_parse());
         } else if (isAttr("maxWidth")) {
-            setMaxWidth(attr.as_int());
+            setMaxWidth(metrics_parse());
         } else if (isAttr("maxHeight")) {
-            setMaxHeight(attr.as_int());
+            setMaxHeight(metrics_parse());
         } else if (isAttr("name")) {
             setName(attr.as_string());
         } else if (isAttr("background")) {
@@ -742,20 +746,20 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
         } else if (isAttr("padding")) {
             auto padding = tulz::StringUtils::split(attr.as_string(), " ");
 
-            auto left = std::stoi(padding[0]);
-            auto top = std::stoi(padding[1]);
-            auto right = std::stoi(padding[2]);
-            auto bottom = std::stoi(padding[3]);
+            auto left = Units::parse<int>(padding[0].c_str());
+            auto top = Units::parse<int>(padding[1].c_str());
+            auto right = Units::parse<int>(padding[2].c_str());
+            auto bottom = Units::parse<int>(padding[3].c_str());
 
             setPadding(left, top, right, bottom);
         } else if (isAttr("paddingLeft")) {
-            setPaddingLeft(attr.as_int());
+            setPaddingLeft(metrics_parse());
         } else if (isAttr("paddingTop")) {
-            setPaddingTop(attr.as_int());
+            setPaddingTop(metrics_parse());
         } else if (isAttr("paddingRight")) {
-            setPaddingRight(attr.as_int());
+            setPaddingRight(metrics_parse());
         } else if (isAttr("paddingBottom")) {
-            setPaddingBottom(attr.as_int());
+            setPaddingBottom(metrics_parse());
         } else if (isAttr("rotate")) {
             setRotate(attr.as_float());
         } else if (isAttr("scaleX")) {
@@ -780,7 +784,11 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
             } else if (float float_value = strtof(value, &end); *end == '\0') {
                 setProperty(name, float_value);
             } else {
-                if (strcmp(value, "true") == 0) {
+                bool unitError;
+
+                if (auto unit_value = Units::try_parse(value, &unitError); !unitError) {
+                    setProperty(name, unit_value);
+                } else if (strcmp(value, "true") == 0) {
                     setProperty(name, true);
                 } else if (strcmp(value, "false") == 0) {
                     setProperty(name, false);

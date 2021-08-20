@@ -55,7 +55,15 @@ void Layout::setMarginBottom(WidgetAutoRawPtr widget, int margin) {
 
 inline int getMarginProperty(const Layout::WidgetAutoRawPtr &widget, const char *name) {
     if (widget->hasProperty(name)) {
-        return widget->property(name).as<int>();
+        auto &property = widget->property(name);
+
+        if (property.is<int>()) {
+            return property.as<int>();
+        } else if (property.is<float>()) {
+            return static_cast<int>(property.as<float>());
+        } else {
+            throw std::invalid_argument("Invalid margin type");
+        }
     } else {
         return 0;
     }

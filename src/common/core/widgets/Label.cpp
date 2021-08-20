@@ -1,5 +1,6 @@
 #include <algine/core/widgets/Label.h>
 #include <algine/core/widgets/Alignment.h>
+#include <algine/core/widgets/Units.h>
 #include <algine/core/painter/Painter.h>
 
 #include <pugixml.hpp>
@@ -11,7 +12,7 @@ Label::Label()
     : m_textAlignment(Alignment::Center),
       m_fontColor(0xff000000)
 {
-    m_fontMetrics.setFontSize(24);
+    m_fontMetrics.setFontSize(24_dp);
 }
 
 Label::Label(const std::string &text): Label() {
@@ -166,7 +167,7 @@ void Label::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> 
         } else if (isAttr("fontSrc")) {
             setFont(Font(attr.as_string()));
         } else if (isAttr("fontSize")) {
-            setFontSize(attr.as_uint());
+            setFontSize(Units::parse<uint>(attr.as_string()));
         } else if (isAttr("fontColor")) {
             setFontColor(Color::parseColor(attr.as_string()));
         } else if (isAttr("textAlignment")) {
