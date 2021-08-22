@@ -5,7 +5,7 @@
     #if ALGINE_SOP_LEVEL == 0
         #include <algine/core/log/Log.h>
 
-        #define ALGINE_SOP_ERROR(message) Log::error("AlgineSOP") << message
+        #define ALGINE_SOP_ERROR(message) Log::error("AlgineSOP") << message << Log::end
     #elif ALGINE_SOP_LEVEL == 1
         #include <stdexcept>
 
