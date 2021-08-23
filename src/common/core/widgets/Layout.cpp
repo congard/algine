@@ -3,6 +3,8 @@
 
 #include <stdexcept>
 
+#include "LayoutProperties.h"
+
 namespace algine {
 inline void requestParentUpdate(Layout::WidgetAutoRawPtr widget) {
     if (auto parent = widget->getParent(); parent != nullptr) {
@@ -10,12 +12,6 @@ inline void requestParentUpdate(Layout::WidgetAutoRawPtr widget) {
         parent->invalidate();
     }
 }
-
-#define Property_MarginLeft "marginLeft"
-#define Property_MarginTop "marginTop"
-#define Property_MarginRight "marginRight"
-#define Property_MarginBottom "marginBottom"
-#define Property_Alignment "layoutAlignment"
 
 inline void setMarginProperty(const Layout::WidgetAutoRawPtr &widget, const char *name, int value) {
     if (value == 0) {
