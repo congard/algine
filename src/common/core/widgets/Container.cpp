@@ -180,56 +180,22 @@ void Container::onMeasure(int &width, int &height) {
         }
     };
 
-    if (m_horizontalPolicy == SizePolicy::Preferred && m_verticalPolicy == SizePolicy::Preferred) {
-        int maxX = -1;
-        int maxY = -1;
+    int maxX = -1;
+    int maxY = -1;
 
-        for (auto &child : m_children) {
-            child->measure();
-            auto boundingRect = child->boundingRect();
-            keepMax(maxX, boundingRect.getX() + boundingRect.getWidth());
-            keepMax(maxY, boundingRect.getY() + boundingRect.getHeight());
-        }
+    for (auto &child : m_children) {
+        child->measure();
+        auto boundingRect = child->boundingRect();
+        keepMax(maxX, boundingRect.getX() + boundingRect.getWidth());
+        keepMax(maxY, boundingRect.getY() + boundingRect.getHeight());
+    }
 
+    if (m_horizontalPolicy == SizePolicy::Preferred)
         width = maxX;
+
+    if (m_verticalPolicy == SizePolicy::Preferred)
         height = maxY;
 
-        goto end;
-    }
-
-    switch (m_horizontalPolicy) {
-        case SizePolicy::Preferred: {
-            int maxX = -1;
-
-            for (auto &child : m_children) {
-                child->measure();
-                auto boundingRect = child->boundingRect();
-                keepMax(maxX, boundingRect.getX() + boundingRect.getWidth());
-            }
-
-            width = maxX;
-            break;
-        }
-        default: break;
-    }
-
-    switch (m_verticalPolicy) {
-        case SizePolicy::Preferred: {
-            int maxY = -1;
-
-            for (auto &child : m_children) {
-                child->measure();
-                auto boundingRect = child->boundingRect();
-                keepMax(maxY, boundingRect.getY() + boundingRect.getHeight());
-            }
-
-            height = maxY;
-            break;
-        }
-        default: break;
-    }
-
-    end:
     setMeasuredDimension(width, height);
 
     for (auto &child : m_children) {
