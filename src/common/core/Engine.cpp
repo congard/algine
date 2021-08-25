@@ -11,8 +11,9 @@
 #include <algine/core/TypeRegistry.h>
 
 #include <algine/core/widgets/Container.h>
-#include <algine/core/widgets/Label.h>
 #include <algine/core/widgets/LinearLayout.h>
+#include <algine/core/widgets/RelativeLayout.h>
+#include <algine/core/widgets/Label.h>
 #include <algine/core/widgets/ImageWidget.h>
 
 #include <algine/gl.h>
@@ -184,8 +185,9 @@ void Engine::init() {
     FT_Init_FreeType(reinterpret_cast<FT_Library *>(&m_fontLibrary));
 
     alRegisterType(Container);
-    alRegisterType(Label);
     alRegisterType(LinearLayout);
+    alRegisterType(RelativeLayout);
+    alRegisterType(Label);
     alRegisterType(ImageWidget);
 
 #if defined(__linux__) && !defined(__ANDROID__)
