@@ -99,7 +99,7 @@ void LinearLayout::place_vertically(const WidgetPtr &child, int &y) {
         case Alignment::Right:
             setChildXDirectly(child, getContentWidth() - Layout::getMarginRight(child) - child->getWidth());
             break;
-        default: throw std::invalid_argument("Invalid vertical alignment value");
+        default: throw std::invalid_argument("Invalid horizontal alignment value");
     }
 }
 
@@ -122,7 +122,7 @@ void LinearLayout::place_horizontally(const WidgetPtr &child, int &x) {
         case Alignment::Bottom:
             setChildYDirectly(child, getContentHeight() - Layout::getMarginBottom(child) - child->getHeight());
             break;
-        default: throw std::invalid_argument("Invalid horizontal alignment value");
+        default: throw std::invalid_argument("Invalid vertical alignment value");
     }
 }
 
