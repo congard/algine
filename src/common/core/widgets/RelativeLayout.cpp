@@ -195,28 +195,6 @@ RelativeLayout::WidgetInfo& RelativeLayout::layout_for(Widget *widget, std::list
 
     PointI prevPos {widget->getX(), widget->getY()};
 
-    if (widget->hasProperty(Property_Above)) {
-        auto &base = getBase(Property_Above);
-        widgetInfo.setY(base.getY() - getMarginTop(base) - getMarginBottom(widget) - widget->getHeight());
-        widgetInfo.setX(base.getX());
-        goto done;
-    } else if (widget->hasProperty(Property_Below)) {
-        auto &base = getBase(Property_Below);
-        widgetInfo.setY(base.getY() + base.getHeight() + getMarginBottom(base) + getMarginTop(widget));
-        widgetInfo.setX(base.getX());
-        goto done;
-    } else if (widget->hasProperty(Property_ToRightOf)) {
-        auto &base = getBase(Property_ToRightOf);
-        widgetInfo.setX(base.getX() + base.getWidth() + getMarginRight(base) + getMarginLeft(widget));
-        widgetInfo.setY(base.getY());
-        goto done;
-    } else if (widget->hasProperty(Property_ToLeftOf)) {
-        auto &base = getBase(Property_ToLeftOf);
-        widgetInfo.setX(base.getX() - getMarginLeft(base) - getMarginRight(widget) - widget->getWidth());
-        widgetInfo.setY(base.getY());
-        goto done;
-    }
-
     if (widget->hasProperty(Property_Alignment)) {
         uint alignment = getAlignment(widget);
         uint alignment_x = alignment & 0b0011u;
@@ -251,22 +229,44 @@ RelativeLayout::WidgetInfo& RelativeLayout::layout_for(Widget *widget, std::list
         goto done;
     }
 
+    // these properties can be used in pair with properties
+    // such as alignTop, alignBottom, alignRight, alignLeft
+
+    if (widget->hasProperty(Property_Above)) {
+        auto &base = getBase(Property_Above);
+        widgetInfo.setY(base.getY() - getMarginTop(base) - getMarginBottom(widget) - widget->getHeight());
+        widgetInfo.setX(base.getX());
+    } else if (widget->hasProperty(Property_Below)) {
+        auto &base = getBase(Property_Below);
+        widgetInfo.setY(base.getY() + base.getHeight() + getMarginBottom(base) + getMarginTop(widget));
+        widgetInfo.setX(base.getX());
+    } else if (widget->hasProperty(Property_ToRightOf)) {
+        auto &base = getBase(Property_ToRightOf);
+        widgetInfo.setX(base.getX() + base.getWidth() + getMarginRight(base) + getMarginLeft(widget));
+        widgetInfo.setY(base.getY());
+    } else if (widget->hasProperty(Property_ToLeftOf)) {
+        auto &base = getBase(Property_ToLeftOf);
+        widgetInfo.setX(base.getX() - getMarginLeft(base) - getMarginRight(widget) - widget->getWidth());
+        widgetInfo.setY(base.getY());
+    }
+
     // relative alignment must be performed at the very end,
-    // as it can be horizontal and/or vertical. Because of this,
-    // we shouldn't call `goto done`
+    // as it can be horizontal and/or vertical and/or can be
+    // used in pair with properties such as above, below,
+    // toRightOf, toLeftOf
 
     if (widget->hasProperty(Property_AlignTop)) {
-        widgetInfo.setY(getBase(Property_AlignTop).getY());
+        widgetInfo.setY(getBase(Property_AlignTop).getY() + getMarginTop(widget));
     } else if (widget->hasProperty(Property_AlignBottom)) {
         auto &base = getBase(Property_AlignBottom);
-        widgetInfo.setY(base.getY() + base.getHeight() - widget->getHeight());
+        widgetInfo.setY(base.getY() + base.getHeight() - widget->getHeight() - getMarginBottom(widget));
     }
 
     if (widget->hasProperty(Property_AlignRight)) {
         auto &base = getBase(Property_AlignRight);
-        widgetInfo.setX(base.getX() + base.getWidth() - widget->getWidth());
+        widgetInfo.setX(base.getX() + base.getWidth() - widget->getWidth() - getMarginRight(widget));
     } else if (widget->hasProperty(Property_AlignLeft)) {
-        widgetInfo.setX(getBase(Property_AlignLeft).getX());
+        widgetInfo.setX(getBase(Property_AlignLeft).getX() + getMarginLeft(widget));
     }
 
     done: {
