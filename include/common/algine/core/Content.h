@@ -28,8 +28,8 @@ public:
     void setSurface(Surface *surface);
     Surface* getSurface() const;
 
-    uint width() const;
-    uint height() const;
+    int width() const;
+    int height() const;
 
     bool isInitialized() const;
 
@@ -47,7 +47,7 @@ public:
 
 private:
     Surface *m_surface;
-    uint m_width, m_height;
+    int m_width, m_height;
     bool m_isInitialized;
 };
 }

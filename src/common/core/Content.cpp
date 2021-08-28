@@ -27,11 +27,11 @@ Surface* Content::getSurface() const {
     return m_surface;
 }
 
-uint Content::width() const {
+int Content::width() const {
     return m_width;
 }
 
-uint Content::height() const {
+int Content::height() const {
     return m_height;
 }
 
