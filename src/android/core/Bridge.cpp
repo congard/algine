@@ -244,7 +244,8 @@ namespace AndroidBridge {
 template<typename ...Args>
 inline void callVoidMethod(const char *name, const char *sig, Args&& ...args) {
     executeCallback(callback_capture {
-        env->CallStaticVoidMethod(bridge, env->GetStaticMethodID(bridge, name, sig), args...);
+        jmethodID methodId = env->GetStaticMethodID(bridge, name, sig);
+        env->CallStaticVoidMethod(bridge, methodId, args...);
     });
 }
 
@@ -253,7 +254,8 @@ inline bool callBooleanMethod(const char *name, const char *sig, Args&& ...args)
     bool result;
 
     executeCallback(callback_capture {
-        result = env->CallStaticBooleanMethod(bridge, env->GetStaticMethodID(bridge, name, sig), args...);
+        jmethodID methodId = env->GetStaticMethodID(bridge, name, sig);
+        result = env->CallStaticBooleanMethod(bridge, methodId, args...);
     });
 
     return result;
@@ -264,7 +266,8 @@ inline float callFloatMethod(const char *name, const char *sig, Args&& ...args) 
     float result;
 
     executeCallback(callback_capture {
-        result = env->CallStaticFloatMethod(bridge, env->GetStaticMethodID(bridge, name, sig), args...);
+        jmethodID methodId = env->GetStaticMethodID(bridge, name, sig);
+        result = env->CallStaticFloatMethod(bridge, methodId, args...);
     });
 
     return result;
@@ -314,8 +317,8 @@ glm::vec2 getPointerPos(int pointerId) {
     glm::vec2 result;
 
     executeCallback(callback_capture {
-        auto javaArray = (jfloatArray) env->CallStaticObjectMethod(bridge,
-                env->GetStaticMethodID(bridge, "getPointerPos", "(I)[F"), pointerId);
+        jmethodID methodId = env->GetStaticMethodID(bridge, "getPointerPos", "(I)[F");
+        auto javaArray = (jfloatArray) env->CallStaticObjectMethod(bridge, methodId, pointerId);
 
         auto array = env->GetFloatArrayElements(javaArray, nullptr);
 
@@ -332,8 +335,8 @@ glm::ivec2 getViewDimensions() {
     glm::ivec2 result;
 
     executeCallback(callback_capture {
-        auto javaArray = (jintArray) env->CallStaticObjectMethod(bridge,
-                env->GetStaticMethodID(bridge, "getViewDimensions", "()[I"));
+        jmethodID methodId = env->GetStaticMethodID(bridge, "getViewDimensions", "()[I");
+        auto javaArray = (jintArray) env->CallStaticObjectMethod(bridge, methodId);
 
         auto array = env->GetIntArrayElements(javaArray, nullptr);
 
@@ -344,5 +347,13 @@ glm::ivec2 getViewDimensions() {
     });
 
     return result;
+}
+
+void showToast(std::string_view text, int length) {
+    executeCallback(callback_capture {
+        jstring jstr = env->NewStringUTF(text.data());
+        jmethodID methodId = env->GetStaticMethodID(bridge, "showToast", "(Ljava/lang/String;I)V");
+        env->CallStaticVoidMethod(bridge, methodId, jstr, length);
+    });
 }
 }

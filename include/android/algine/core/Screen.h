@@ -3,8 +3,16 @@
 
 #include <algine/core/Surface.h>
 
+#include <string_view>
+
 namespace algine {
 class Screen: public Surface {
+public:
+    enum class ToastLength {
+        Short = 0,
+        Long = 1
+    };
+
 public:
     Screen();
 
@@ -27,6 +35,8 @@ public:
     }
 
     static void destroyInstance();
+
+    static void showToast(std::string_view text, ToastLength length = ToastLength::Short);
 
     // this function is for internal calls only!
     // do not call it!

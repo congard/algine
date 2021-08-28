@@ -2,6 +2,9 @@ package com.algine.android.module;
 
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Toast;
 
 import static com.algine.android.module.Algine.algineViewActionHandler;
 
@@ -75,5 +78,10 @@ public class Bridge {
 
     public static int[] getViewDimensions() {
         return new int[] {Algine.getView().getWidth(), Algine.getView().getHeight()};
+    }
+
+    public static void showToast(String text, int length) {
+        new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(Algine.getActivity(), text, length).show());
     }
 }

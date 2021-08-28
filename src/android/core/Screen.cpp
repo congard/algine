@@ -64,6 +64,10 @@ void Screen::destroyInstance() {
     deletePtr(m_screen)
 }
 
+void Screen::showToast(std::string_view text, ToastLength length) {
+    AndroidBridge::showToast(text, static_cast<int>(length));
+}
+
 void Screen::__resized(int width, int height) {
     if (m_screen) {
         m_screen->m_viewport.x = width;
