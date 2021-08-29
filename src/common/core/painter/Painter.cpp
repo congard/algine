@@ -177,13 +177,19 @@ uint Painter::getFontSize() const {
     return m_fontRenderer.getFontHeight();
 }
 
+template<typename T>
+inline uint asRenderHint(T hint) {
+    uint fl = static_cast<uint>(hint);
+    return 1u << fl;
+}
+
 void Painter::setRenderHint(RenderHint renderHint, bool on) {
-    uint hint = static_cast<uint>(renderHint);
+    uint hint = asRenderHint(renderHint);
     m_renderHints = on ? (m_renderHints | hint) : (m_renderHints & ~hint);
 }
 
 bool Painter::isRenderHintEnabled(RenderHint renderHint) const {
-    uint hint = static_cast<uint>(renderHint);
+    uint hint = asRenderHint(renderHint);
     return m_renderHints & hint;
 }
 
