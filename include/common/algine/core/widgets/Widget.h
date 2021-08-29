@@ -125,6 +125,9 @@ public:
     float getScaleX() const;
     float getScaleY() const;
 
+    void setOpacity(float opacity);
+    float getOpacity() const;
+
     void setParent(Widget *parent);
     Widget* getParent() const;
 
@@ -226,6 +229,8 @@ protected:
 
     float m_scaleX;
     float m_scaleY;
+
+    float m_opacity;
 
     SizePolicy m_horizontalPolicy;
     SizePolicy m_verticalPolicy;

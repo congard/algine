@@ -48,6 +48,7 @@ Widget::Widget()
       m_rotate(0.0f),
       m_scaleX(1.0f),
       m_scaleY(1.0f),
+      m_opacity(1.0f),
       m_horizontalPolicy(SizePolicy::Fixed),
       m_verticalPolicy(SizePolicy::Fixed)
 {
@@ -305,6 +306,17 @@ float Widget::getScaleY() const {
     return m_scaleY;
 }
 
+void Widget::setOpacity(float opacity) {
+    continue_if(opacity != m_opacity);
+    assert(opacity >= 0.0f && opacity <= 1.0f);
+    requireParentRedraw();
+    m_opacity = opacity;
+}
+
+float Widget::getOpacity() const {
+    return m_opacity;
+}
+
 void Widget::setParent(Widget *parent) {
     m_parent = parent;
 }
@@ -379,7 +391,7 @@ void Widget::invalidate() {
 }
 
 void Widget::display(const DisplayOptions &options) {
-    if (!isVisible()) {
+    if (!isVisible() || m_opacity == 0.0f) {
         return;
     }
 
@@ -410,12 +422,14 @@ void Widget::display(const DisplayOptions &options) {
 
     painter->setTransform(glm::mat4(1.0f));
 
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // TODO: move to Engine
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA); // TODO: move to Engine
 
     auto width = static_cast<float>(getWidth());
     auto height = static_cast<float>(getHeight());
     auto x = static_cast<float>(getX());
     auto y = static_cast<float>(getY());
+
+    painter->setOpacity(m_opacity);
 
     if (m_rotate == 0.0f && m_scaleX == 1.0f && m_scaleY == 1.0f) {
         painter->drawTexture(m_texture, {x, y, width, height});
@@ -660,6 +674,7 @@ void Widget::draw(Painter &painter) {
     painter.setViewport(getWidth(), getHeight());
 
     painter.setTransform(glm::mat4(1.0f));
+    painter.setOpacity(1.0f);
 
     if (m_background.getSource() != Paint::Source::None) {
         onDrawBackground(painter);
@@ -766,6 +781,8 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
             setScaleX(attr.as_float());
         } else if (isAttr("scaleY")) {
             setScaleY(attr.as_float());
+        } else if (isAttr("opacity")) {
+            setOpacity(attr.as_float());
         } else if (isAttr("horizontalSizePolicy")) {
             setHorizontalSizePolicy(parseSizePolicy());
         } else if (isAttr("verticalSizePolicy")) {

@@ -50,6 +50,9 @@ public:
     void setTransform(const glm::mat4 &transform);
     const glm::mat4& getTransform() const;
 
+    void setOpacity(float opacity);
+    float getOpacity() const;
+
     void drawLine(const PointF &p1, const PointF &p2);
     void drawLine(float x1, float y1, float x2, float y2);
 
@@ -99,6 +102,7 @@ private:
     Color m_activeColor;
     RenderHints m_renderHints;
     glm::mat4 m_transform;
+    float m_opacity;
 
 private:
     FontRenderer m_fontRenderer;

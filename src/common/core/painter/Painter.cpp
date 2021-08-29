@@ -31,6 +31,7 @@ Painter::Painter()
       m_activeColor(Color(0xff000000)),
       m_renderHints(0),
       m_transform(1.0f),
+      m_opacity(1.0f),
       m_fontHash(0)
 {
     // TODO: implement in the engine
@@ -209,6 +210,14 @@ const glm::mat4& Painter::getTransform() const {
     return m_transform;
 }
 
+void Painter::setOpacity(float opacity) {
+    m_opacity = opacity;
+}
+
+float Painter::getOpacity() const {
+    return m_opacity;
+}
+
 void Painter::drawLine(const PointF &p1, const PointF &p2) {
     float vertices[] = {
             p1.getX(), p1.getY(),  0.0f, 0.0f,
@@ -245,6 +254,7 @@ void Painter::drawLine(const PointF &p1, const PointF &p2) {
     applyColor();
 
     m_fill->bind();
+    m_fill->setFloat("opacity", m_opacity);
     writeProjection(m_fill);
     writeTransformation(m_fill);
 
@@ -317,6 +327,7 @@ void Painter::drawTriangle(const PointF &p1, const PointF &p2, const PointF &p3)
     applyColor();
 
     m_fill->bind();
+    m_fill->setFloat("opacity", m_opacity);
     writeProjection(m_fill);
     writeTransformation(m_fill);
 
@@ -328,6 +339,7 @@ void Painter::drawRect(const RectF &rect) {
     applyColor();
 
     m_fill->bind();
+    m_fill->setFloat("opacity", m_opacity);
     writeProjection(m_fill);
     writeTransformation(m_fill);
 
@@ -355,6 +367,7 @@ void Painter::drawRoundRect(const RoundRect &roundRect) {
     applyColor();
 
     m_roundRectFill->bind();
+    m_roundRectFill->setFloat("opacity", m_opacity);
     m_roundRectFill->setVec4("p1p2",
         rect.getX(), rect.getY(),
         rect.getX() + rect.getWidth(), rect.getY() + rect.getHeight());
@@ -386,6 +399,7 @@ void Painter::drawCircle(const PointF &origin, float radius) {
     applyColor();
 
     m_circleFill->bind();
+    m_circleFill->setFloat("opacity", m_opacity);
     m_circleFill->setVec2("origin", origin.getX(), origin.getY());
     m_circleFill->setFloat("radius", radius);
     m_circleFill->setBool("antialiasing", isRenderHintEnabled(RenderHint::Antialiasing));
@@ -402,6 +416,7 @@ void Painter::drawCircle(float x, float y, float radius) {
 
 void Painter::drawText(const std::u16string &text, const PointF &p) {
     m_textFill->bind();
+    m_textFill->setFloat("opacity", m_opacity);
     writeProjection(m_textFill);
     writeTransformation(m_textFill);
 
@@ -499,6 +514,7 @@ void Painter::drawTexture(const Texture2DPtr &texture, const RectF &rect) {
     texture->use(0);
 
     m_fill->bind();
+    m_fill->setFloat("opacity", m_opacity);
     writeProjection(m_fill);
     algine::writeTransformation(m_fill, m_transform, glm::mat4(1.0f));
 
@@ -516,6 +532,7 @@ void Painter::drawTexture(const Texture2DPtr &texture, const PointF &p) {
     });
 
     m_fill->bind();
+    m_fill->setFloat("opacity", m_opacity);
     writeProjection(m_fill);
     algine::writeTransformation(m_fill, m_transform, glm::mat4(1.0f));
 

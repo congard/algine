@@ -4,6 +4,7 @@ in vec2 texCoords;
 out vec4 fragColor;
 
 uniform sampler2D color;
+uniform float opacity;
 uniform vec4 p1p2; // p1(x, y); p2(z, w)
 uniform vec4 radius;
 uniform vec4 scale; // y-scale
@@ -73,6 +74,7 @@ void main() {
         discard;
     } else {
         fragColor = texture(color, texCoords);
+        fragColor.a *= opacity;
 
         if (!antialiasing) {
             return;
