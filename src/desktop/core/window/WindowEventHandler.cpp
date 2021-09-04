@@ -14,4 +14,8 @@ void WindowEventHandler::keyboardKeyRepeat(KeyboardKey key, Window &window) {}
 
 void WindowEventHandler::windowSizeChange(int width, int height, Window &window) {}
 void WindowEventHandler::windowPosChange(int x, int y, Window &window) {}
+void WindowEventHandler::windowIconify(Window &window) {}
+void WindowEventHandler::windowRestore(Window &window) {}
+void WindowEventHandler::windowFocusLost(Window &window) {}
+void WindowEventHandler::windowFocus(Window &window) {}
 }

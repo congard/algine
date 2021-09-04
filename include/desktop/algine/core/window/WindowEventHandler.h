@@ -22,6 +22,10 @@ public:
 
     virtual void windowSizeChange(int width, int height, Window &window);
     virtual void windowPosChange(int x, int y, Window &window);
+    virtual void windowIconify(Window &window);
+    virtual void windowRestore(Window &window);
+    virtual void windowFocusLost(Window &window);
+    virtual void windowFocus(Window &window);
 };
 }
 

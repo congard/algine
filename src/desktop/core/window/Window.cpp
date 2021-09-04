@@ -391,9 +391,41 @@ void Window::setWindowStateTracking(bool tracking) {
                 eventHandler->windowPosChange(x, y, *window);
             }
         });
+
+        glfwSetWindowIconifyCallback(m_window, [](GLFWwindow* glfwWindow, int iconified) {
+            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+
+            if (window == nullptr)
+                return;
+
+            if (auto eventHandler = WEH(window->getEventHandler()); eventHandler != nullptr) {
+                if (iconified) {
+                    eventHandler->windowIconify(*window);
+                } else {
+                    eventHandler->windowRestore(*window);
+                }
+            }
+        });
+
+        glfwSetWindowFocusCallback(m_window, [](GLFWwindow* glfwWindow, int focused) {
+            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+
+            if (window == nullptr)
+                return;
+
+            if (auto eventHandler = WEH(window->getEventHandler()); eventHandler != nullptr) {
+                if (focused) {
+                    eventHandler->windowFocus(*window);
+                } else {
+                    eventHandler->windowFocusLost(*window);
+                }
+            }
+        });
     } else {
         glfwSetWindowSizeCallback(m_window, nullptr);
         glfwSetWindowPosCallback(m_window, nullptr);
+        glfwSetWindowIconifyCallback(m_window, nullptr);
+        glfwSetWindowFocusCallback(m_window, nullptr);
     }
 }
 
