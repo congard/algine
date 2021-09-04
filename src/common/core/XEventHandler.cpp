@@ -18,6 +18,8 @@ void XEventHandler::onKeyboardKeyRepeat(KeyboardKey key) {}
 
 void XEventHandler::onSizeChanged(int width, int height) {}
 
+void XEventHandler::onFocusChanged(FocusInfo info) {}
+
 #ifdef __ANDROID__
 bool XEventHandler::PointerInfo::isPointerActive(Pointer pointer) const {
     if (std::get_if<MouseKey>(&pointer) != nullptr) { // MouseKey pointer is not available on android as for now
@@ -53,6 +55,14 @@ void XEventHandler::pointerClick(float x, float y, int pointerId) {
 
 void XEventHandler::surfaceResized(int width, int height) {
     onSizeChanged(width, height);
+}
+
+void XEventHandler::onPause() {
+    onFocusChanged({FocusInfo::Reason::AppPaused});
+}
+
+void XEventHandler::onResume() {
+    onFocusChanged({FocusInfo::Reason::AppResumed});
 }
 #else
 bool XEventHandler::PointerInfo::isPointerActive(Pointer pointer) const {
@@ -111,6 +121,22 @@ void XEventHandler::keyboardKeyRepeat(KeyboardKey key, Window &window) {
 
 void XEventHandler::windowSizeChange(int width, int height, Window &window) {
     onSizeChanged(width, height);
+}
+
+void XEventHandler::windowIconify(Window &window) {
+    onFocusChanged({FocusInfo::WindowIconified, window});
+}
+
+void XEventHandler::windowRestore(Window &window) {
+    onFocusChanged({FocusInfo::WindowRestored, window});
+}
+
+void XEventHandler::windowFocusLost(Window &window) {
+    onFocusChanged({FocusInfo::FocusLost, window});
+}
+
+void XEventHandler::windowFocus(Window &window) {
+    onFocusChanged({FocusInfo::Focused, window});
 }
 #endif
 }

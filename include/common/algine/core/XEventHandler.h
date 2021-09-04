@@ -24,6 +24,7 @@ class XEventHandler: public
         enable_if_android(ScreenEventHandler) {
 public:
     class PointerInfo;
+    class FocusInfo;
 
 public:
     virtual void onPointerMove(PointerInfo info);
@@ -37,6 +38,8 @@ public:
 
     virtual void onSizeChanged(int width, int height);
 
+    virtual void onFocusChanged(FocusInfo info);
+
 #ifdef __ANDROID__
     void pointerDown(float x, float y, int pointerId) override;
     void pointerMove(float x, float y, int pointerId) override;
@@ -44,6 +47,9 @@ public:
     void pointerClick(float x, float y, int pointerId) override;
 
     void surfaceResized(int width, int height) override;
+
+    void onPause() override;
+    void onResume() override;
 #else
     void mouseMove(double x, double y, Window &window) override;
     void mouseClick(MouseKey key, Window &window) override;
@@ -55,6 +61,10 @@ public:
     void keyboardKeyRepeat(KeyboardKey key, Window &window) override;
 
     void windowSizeChange(int width, int height, Window &window) override;
+    void windowIconify(Window &window) override;
+    void windowRestore(Window &window) override;
+    void windowFocusLost(Window &window) override;
+    void windowFocus(Window &window) override;
 #endif
 };
 
@@ -77,6 +87,8 @@ public:
     template<typename T>
     PointerInfo(const glm::vec2 &pos, T pointer, Window &window)
         : m_pos(pos), m_pointer(pointer), m_window(window) {}
+
+    inline Window& getWindow() { return m_window; }
 #endif
 
     void setPos(const glm::vec2 &pos);
@@ -152,6 +164,48 @@ inline MouseKey XEventHandler::PointerInfo::getMouseKey() const {
 
 inline int XEventHandler::PointerInfo::getFinger() const {
     return std::get<int>(m_pointer);
+}
+
+class XEventHandler::FocusInfo {
+public:
+    enum Reason {
+        Unknown,
+        Focused,
+        FocusLost,
+        WindowIconified,
+        WindowRestored,
+        AppPaused,
+        AppResumed
+    };
+
+public:
+#ifdef __ANDROID__
+    inline FocusInfo(Reason reason)
+        : m_reason(reason) {}
+#else
+    inline FocusInfo(Reason reason, Window &window)
+        : m_reason(reason), m_window(window) {}
+
+    inline Window& getWindow() { return m_window; }
+#endif
+
+    void setReason(Reason reason);
+    Reason getReason() const;
+
+private:
+    Reason m_reason {Reason::Unknown};
+
+#ifndef __ANDROID__
+    Window &m_window;
+#endif
+};
+
+inline void XEventHandler::FocusInfo::setReason(Reason reason) {
+    m_reason = reason;
+}
+
+inline XEventHandler::FocusInfo::Reason XEventHandler::FocusInfo::getReason() const {
+    return m_reason;
 }
 }
 
