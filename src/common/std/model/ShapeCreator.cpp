@@ -125,67 +125,67 @@ const string& ShapeCreator::getClassName() const {
     return m_className;
 }
 
-const vector<float>& ShapeCreator::getVertices() const {
+const ShapeCreator::BufferData<float>& ShapeCreator::getVertices() const {
     return m_vertices;
 }
 
-void ShapeCreator::setVertices(const vector<float> &vertices) {
+void ShapeCreator::setVertices(const BufferData<float> &vertices) {
     m_vertices = vertices;
 }
 
-const vector<float>& ShapeCreator::getNormals() const {
+const ShapeCreator::BufferData<float>& ShapeCreator::getNormals() const {
     return m_normals;
 }
 
-void ShapeCreator::setNormals(const vector<float> &normals) {
+void ShapeCreator::setNormals(const BufferData<float> &normals) {
     m_normals = normals;
 }
 
-const vector<float>& ShapeCreator::getTexCoords() const {
+const ShapeCreator::BufferData<float>& ShapeCreator::getTexCoords() const {
     return m_texCoords;
 }
 
-void ShapeCreator::setTexCoords(const vector<float> &texCoords) {
+void ShapeCreator::setTexCoords(const BufferData<float> &texCoords) {
     m_texCoords = texCoords;
 }
 
-const vector<float>& ShapeCreator::getTangents() const {
+const ShapeCreator::BufferData<float>& ShapeCreator::getTangents() const {
     return m_tangents;
 }
 
-void ShapeCreator::setTangents(const vector<float> &tangents) {
+void ShapeCreator::setTangents(const BufferData<float> &tangents) {
     m_tangents = tangents;
 }
 
-const vector<float>& ShapeCreator::getBitangents() const {
+const ShapeCreator::BufferData<float>& ShapeCreator::getBitangents() const {
     return m_bitangents;
 }
 
-void ShapeCreator::setBitangents(const vector<float> &bitangents) {
+void ShapeCreator::setBitangents(const BufferData<float> &bitangents) {
     m_bitangents = bitangents;
 }
 
-const vector<float>& ShapeCreator::getBoneWeights() const {
+const ShapeCreator::BufferData<float>& ShapeCreator::getBoneWeights() const {
     return m_boneWeights;
 }
 
-void ShapeCreator::setBoneWeights(const vector<float> &boneWeights) {
+void ShapeCreator::setBoneWeights(const BufferData<float> &boneWeights) {
     m_boneWeights = boneWeights;
 }
 
-const vector<uint>& ShapeCreator::getBoneIds() const {
+const ShapeCreator::BufferData<uint>& ShapeCreator::getBoneIds() const {
     return m_boneIds;
 }
 
-void ShapeCreator::setBoneIds(const vector<uint> &boneIds) {
+void ShapeCreator::setBoneIds(const BufferData<uint> &boneIds) {
     m_boneIds = boneIds;
 }
 
-const vector<uint>& ShapeCreator::getIndices() const {
+const ShapeCreator::BufferData<uint>& ShapeCreator::getIndices() const {
     return m_indices;
 }
 
-void ShapeCreator::setIndices(const vector<uint> &indices) {
+void ShapeCreator::setIndices(const BufferData<uint> &indices) {
     m_indices = indices;
 }
 
@@ -504,7 +504,7 @@ void ShapeCreator::loadShape() {
     for (const auto p : algine::getParams<PARAMS_TYPE_ALGINE>(m_params)) {
         switch (p) {
             case Param::InverseNormals: {
-                for (float &normal : m_normals) {
+                for (float &normal : m_normals.data) {
                     normal *= -1;
                 }
 
@@ -595,8 +595,8 @@ void ShapeCreator::loadBones(const aiMesh *aimesh) {
     // converting to a suitable view
     for (const auto & binfo : binfos) {
         for (size_t j = 0; j < m_bonesPerVertex; j++) {
-            m_boneIds.push_back(binfo.getId(j));
-            m_boneWeights.push_back(binfo.getWeight(j));
+            m_boneIds->push_back(binfo.getId(j));
+            m_boneWeights->push_back(binfo.getWeight(j));
         }
     }
 }
@@ -621,60 +621,60 @@ void ShapeCreator::processNode(const aiNode *node, const aiScene *scene) {
 
 void ShapeCreator::processMesh(const aiMesh *aimesh, const aiScene *scene) {
     Mesh mesh;
-    mesh.start = m_indices.size();
-    uint verticesAtBeginning = m_vertices.size() / 3;
+    mesh.start = m_indices->size();
+    uint verticesAtBeginning = m_vertices->size() / 3;
 
     // allocating space for vertices, normals, texCoords, tangents and bitangents
-    m_vertices.reserve(aimesh->mNumVertices * 3);
+    m_vertices->reserve(aimesh->mNumVertices * 3);
 
     if (aimesh->HasNormals()) {
-        m_normals.reserve(aimesh->mNumVertices * 3);
+        m_normals->reserve(aimesh->mNumVertices * 3);
     } if (aimesh->HasTextureCoords(0)) {
-        m_texCoords.reserve(aimesh->mNumVertices * 2);
+        m_texCoords->reserve(aimesh->mNumVertices * 2);
     } if (aimesh->HasTangentsAndBitangents()) {
-        m_tangents.reserve(aimesh->mNumVertices * 3);
-        m_bitangents.reserve(aimesh->mNumVertices * 3);
+        m_tangents->reserve(aimesh->mNumVertices * 3);
+        m_bitangents->reserve(aimesh->mNumVertices * 3);
     }
 
     for (size_t i = 0; i < aimesh->mNumVertices; i++) {
         // vertices
-        m_vertices.push_back(aimesh->mVertices[i].x);
-        m_vertices.push_back(aimesh->mVertices[i].y);
-        m_vertices.push_back(aimesh->mVertices[i].z);
+        m_vertices->push_back(aimesh->mVertices[i].x);
+        m_vertices->push_back(aimesh->mVertices[i].y);
+        m_vertices->push_back(aimesh->mVertices[i].z);
 
         // normals
         if (aimesh->HasNormals()) {
-            m_normals.push_back(aimesh->mNormals[i].x);
-            m_normals.push_back(aimesh->mNormals[i].y);
-            m_normals.push_back(aimesh->mNormals[i].z);
+            m_normals->push_back(aimesh->mNormals[i].x);
+            m_normals->push_back(aimesh->mNormals[i].y);
+            m_normals->push_back(aimesh->mNormals[i].z);
         }
 
         // texCoords
         if (aimesh->HasTextureCoords(0)) {
-            m_texCoords.push_back(aimesh->mTextureCoords[0][i].x);
-            m_texCoords.push_back(aimesh->mTextureCoords[0][i].y);
+            m_texCoords->push_back(aimesh->mTextureCoords[0][i].x);
+            m_texCoords->push_back(aimesh->mTextureCoords[0][i].y);
         }
 
         // tangents and bitangents
         if (aimesh->HasTangentsAndBitangents()) {
-            m_tangents.push_back(aimesh->mTangents[i].x);
-            m_tangents.push_back(aimesh->mTangents[i].y);
-            m_tangents.push_back(aimesh->mTangents[i].z);
+            m_tangents->push_back(aimesh->mTangents[i].x);
+            m_tangents->push_back(aimesh->mTangents[i].y);
+            m_tangents->push_back(aimesh->mTangents[i].z);
 
-            m_bitangents.push_back(aimesh->mBitangents[i].x);
-            m_bitangents.push_back(aimesh->mBitangents[i].y);
-            m_bitangents.push_back(aimesh->mBitangents[i].z);
+            m_bitangents->push_back(aimesh->mBitangents[i].x);
+            m_bitangents->push_back(aimesh->mBitangents[i].y);
+            m_bitangents->push_back(aimesh->mBitangents[i].z);
         }
     }
 
     // faces
     for (size_t i = 0; i < aimesh->mNumFaces; i++) {
         for (size_t j = 0; j < aimesh->mFaces[i].mNumIndices; j++) {
-            m_indices.push_back(aimesh->mFaces[i].mIndices[j] + verticesAtBeginning);
+            m_indices->push_back(aimesh->mFaces[i].mIndices[j] + verticesAtBeginning);
         }
     }
 
-    mesh.count = m_indices.size() - mesh.start;
+    mesh.count = m_indices->size() - mesh.start;
 
     // load classic & AMTL material
     aiMaterial *pAiMaterial = scene->mMaterials[aimesh->mMaterialIndex];
@@ -768,11 +768,11 @@ void ShapeCreator::processMesh(const aiMesh *aimesh, const aiScene *scene) {
 }
 
 template<typename BufferType, typename DataType>
-inline BufferType* createBuffer(const vector<DataType> &data) {
-    if (!data.empty()) {
+inline BufferType* createBuffer(ShapeCreator::BufferData<DataType> &data) {
+    if (!data->empty()) {
         auto bufferType = new BufferType();
         bufferType->bind();
-        bufferType->setData(sizeof(data[0]) * data.size(), &data[0], Buffer::StaticDraw);
+        bufferType->setData(sizeof(DataType) * data->size(), data->data(), data.usage);
         bufferType->unbind();
         return bufferType;
     }

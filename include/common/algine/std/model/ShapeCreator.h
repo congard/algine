@@ -29,6 +29,14 @@ public:
         Dump
     };
 
+    template<typename T>
+    struct BufferData {
+        inline auto operator->() { return &data; }
+
+        std::vector<T> data;
+        int usage = Buffer::StaticDraw;
+    };
+
 public:
     ShapeCreator();
 
@@ -54,29 +62,29 @@ public:
     uint getBonesPerVertex() const;
     const std::string& getClassName() const;
 
-    const std::vector<float>& getVertices() const;
-    void setVertices(const std::vector<float> &vertices);
+    const BufferData<float>& getVertices() const;
+    void setVertices(const BufferData<float> &vertices);
 
-    const std::vector<float>& getNormals() const;
-    void setNormals(const std::vector<float> &normals);
+    const BufferData<float>& getNormals() const;
+    void setNormals(const BufferData<float> &normals);
 
-    const std::vector<float>& getTexCoords() const;
-    void setTexCoords(const std::vector<float> &texCoords);
+    const BufferData<float>& getTexCoords() const;
+    void setTexCoords(const BufferData<float> &texCoords);
 
-    const std::vector<float>& getTangents() const;
-    void setTangents(const std::vector<float> &tangents);
+    const BufferData<float>& getTangents() const;
+    void setTangents(const BufferData<float> &tangents);
 
-    const std::vector<float>& getBitangents() const;
-    void setBitangents(const std::vector<float> &bitangents);
+    const BufferData<float>& getBitangents() const;
+    void setBitangents(const BufferData<float> &bitangents);
 
-    const std::vector<float>& getBoneWeights() const;
-    void setBoneWeights(const std::vector<float> &boneWeights);
+    const BufferData<float>& getBoneWeights() const;
+    void setBoneWeights(const BufferData<float> &boneWeights);
 
-    const std::vector<uint>& getBoneIds() const;
-    void setBoneIds(const std::vector<uint> &boneIds);
+    const BufferData<uint>& getBoneIds() const;
+    void setBoneIds(const BufferData<uint> &boneIds);
 
-    const std::vector<uint>& getIndices() const;
-    void setIndices(const std::vector<uint> &indices);
+    const BufferData<uint>& getIndices() const;
+    void setIndices(const BufferData<uint> &indices);
 
     void loadFile();
     void loadShape();
@@ -103,8 +111,8 @@ private:
     AMTLDumpMode m_amtlDumpMode;
 
 private:
-    std::vector<float> m_vertices, m_normals, m_texCoords, m_tangents, m_bitangents, m_boneWeights;
-    std::vector<uint> m_indices, m_boneIds;
+    BufferData<float> m_vertices, m_normals, m_texCoords, m_tangents, m_bitangents, m_boneWeights;
+    BufferData<uint> m_indices, m_boneIds;
 
 private:
     std::vector<Param> m_params;
