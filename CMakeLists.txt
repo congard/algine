@@ -254,6 +254,7 @@ set(ALGINE_CORE_SOURCES
         src/common/core/widgets/RelativeLayout.cpp include/common/algine/core/widgets/RelativeLayout.h
         include/common/algine/core/widgets/Dimen.h src/common/core/widgets/Dimen.cpp
         include/common/algine/core/widgets/Unit.h
+        src/common/core/Resources.cpp include/common/algine/core/Resources.h
         include/common/algine/core/Variant.h)
 
 set(ALGINE_STD_SOURCES
