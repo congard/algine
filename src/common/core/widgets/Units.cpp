@@ -1,28 +1,25 @@
 #include <algine/core/widgets/Units.h>
+#include <algine/core/widgets/Unit.h>
 
 #include <tulz/Array.h>
 
 #include <cstring>
 
 namespace algine {
-float Units::parseImpl(const char *str, bool *error) {
-    enum class Unit {
-        px, dp
-    };
-
-    Unit unit = Unit::px;
+Dimen Units::try_parse_dimen(const char *str, bool *error) {
+    Dimen dimen;
 
     constexpr auto dp_suffix = "dp";
     constexpr auto px_suffix = "px";
 
     auto str_len = strlen(str);
 
-    auto isUnit = [&](const char *suffix, Unit _unit) {
+    auto isUnit = [&](const char *suffix, Unit unit) {
         auto suffix_len = strlen(suffix);
 
         if (strncmp(str + str_len - suffix_len, suffix, suffix_len) == 0) {
             str_len -= suffix_len;
-            unit = _unit;
+            dimen.setUnit(unit);
             return true;
         }
 
@@ -41,16 +38,11 @@ float Units::parseImpl(const char *str, bool *error) {
         if (error != nullptr)
             *error = false;
 
-        if (unit == Unit::dp) {
-            return Units::dp(float_value);
-        } else {
-            return float_value;
-        }
-    } else {
-        if (error != nullptr)
-            *error = true;
-
-        return 0.0f;
+        dimen.setValue(float_value);
+    } else if (error != nullptr) {
+        *error = true;
     }
+
+    return dimen;
 }
 }

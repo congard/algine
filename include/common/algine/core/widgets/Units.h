@@ -1,6 +1,7 @@
 #ifndef ALGINE_UNITS_H
 #define ALGINE_UNITS_H
 
+#include <algine/core/widgets/Dimen.h>
 #include <algine/core/Engine.h>
 
 namespace algine {
@@ -11,25 +12,28 @@ public:
         return static_cast<T>((float) value * ((float) Engine::getDPI() / 96.0f));
     }
 
-    template<typename T = float>
-    static inline T parse(const char *str) {
+    static inline Dimen parse_dimen(const char *str) {
         bool error;
-        auto value = static_cast<T>(parseImpl(str, &error));
+        auto value = try_parse_dimen(str, &error);
 
         if (error) {
-            throw std::runtime_error("Units::parse: parsing failed");
+            throw std::runtime_error("Units::parse_dimen: parsing failed");
         }
 
         return value;
     }
 
+    static Dimen try_parse_dimen(const char *str, bool *error);
+
     template<typename T = float>
-    static inline T try_parse(const char *str, bool *error) {
-        return static_cast<T>(parseImpl(str, error));
+    static inline T parse(const char *str) {
+        return static_cast<T>(parse_dimen(str).pixels());
     }
 
-private:
-    static float parseImpl(const char *str, bool *error);
+    template<typename T = float>
+    static inline T try_parse(const char *str, bool *error) {
+        return static_cast<T>(try_parse_dimen(str, error).pixels());
+    }
 };
 
 inline auto operator""_px(unsigned long long int value) {
