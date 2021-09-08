@@ -251,7 +251,8 @@ set(ALGINE_CORE_SOURCES
         src/common/core/widgets/ImageWidget.cpp include/common/algine/core/widgets/ImageWidget.h
         src/common/core/widgets/Units.cpp include/common/algine/core/widgets/Units.h
         src/common/core/XEventHandler.cpp include/common/algine/core/XEventHandler.h
-        src/common/core/widgets/RelativeLayout.cpp include/common/algine/core/widgets/RelativeLayout.h)
+        src/common/core/widgets/RelativeLayout.cpp include/common/algine/core/widgets/RelativeLayout.h
+        include/common/algine/core/Variant.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h

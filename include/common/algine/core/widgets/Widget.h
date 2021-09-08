@@ -8,6 +8,7 @@
 #include <algine/core/FramebufferPtr.h>
 #include <algine/core/painter/Paint.h>
 #include <algine/core/Rect.h>
+#include <algine/core/Variant.h>
 #include <algine/types.h>
 
 #include <string>
@@ -42,30 +43,7 @@ public:
         Painter *painter;
     };
 
-    class Property {
-    public:
-        using property = std::variant<bool, int, float, std::string, char*, void*, Ptr<void>>;
-
-    public:
-        Property() = default;
-
-        template<typename T>
-        Property(T &&value);
-
-        template<typename T>
-        Property& operator=(T &&rhs);
-
-        template<typename T>
-        constexpr T& as();
-
-        template<typename T>
-        constexpr bool is() const;
-
-        const property& get_std() const;
-
-    private:
-        property m_prop;
-    };
+    using Property = Variant<bool, int, float, std::string, char*, void*, Ptr<void>>;
 
 public:
     Widget();
@@ -237,30 +215,6 @@ protected:
 
     std::map<unsigned long, Property> m_properties;
 };
-
-template<typename T>
-inline Widget::Property::Property(T &&value)
-    : m_prop(std::forward<T>(value)) {}
-
-template<typename T>
-inline Widget::Property& Widget::Property::operator=(T &&rhs) {
-    m_prop = std::forward<T>(rhs);
-    return *this;
-}
-
-template<typename T>
-inline constexpr T& Widget::Property::as() {
-    return std::get<T>(m_prop);
-}
-
-template<typename T>
-inline constexpr bool Widget::Property::is() const {
-    return std::get_if<T>(&m_prop);
-}
-
-inline const Widget::Property::property& Widget::Property::get_std() const {
-    return m_prop;
-}
 }
 
 #endif //ALGINE_WIDGET_H
