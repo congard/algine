@@ -36,6 +36,8 @@ public:
     void setRgb(int r, int g, int b, int a = 255);
     void setRgbF(float r, float g, float b, float a = 1.0f);
 
+    std::string toString() const;
+
     static Color fromRgbF(float r, float g, float b, float a = 1.0f);
     static Color parseColor(std::string color);
 

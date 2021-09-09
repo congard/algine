@@ -1,5 +1,7 @@
 #include <algine/core/Color.h>
 
+#include <iomanip>
+
 namespace algine {
 Color::Color()
     : m_red(0), m_green(0), m_blue(0), m_alpha(0) {}
@@ -76,6 +78,21 @@ void Color::setRgbF(float r, float g, float b, float a) {
     m_green = static_cast<int>(g * 255);
     m_blue = static_cast<int>(b * 255);
     m_alpha = static_cast<int>(a * 255);
+}
+
+std::string Color::toString() const {
+    std::stringstream stream;
+    stream << std::hex << value();
+
+    std::string str = stream.str();
+    auto result = str.c_str();
+
+    // if alpha is 255, exclude it from result
+    if (alpha() == 255) {
+        result += 2; // ff
+    }
+
+    return "#" + std::string(result);
 }
 
 Color Color::fromRgbF(float r, float g, float b, float a) {
