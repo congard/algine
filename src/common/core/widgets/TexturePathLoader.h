@@ -11,7 +11,9 @@ struct Data {
     bool unique;
 };
 
-inline Data load(const char *str, const std::shared_ptr<IOSystem> &io) {
+inline Data load(std::string_view str_v, const std::shared_ptr<IOSystem> &io) {
+    auto str = str_v.data();
+
     if (auto ext = strrchr(str, '.'); strcmp(ext, ".json") == 0) {
         Texture2DCreator creator;
         creator.setIOSystem(io);
