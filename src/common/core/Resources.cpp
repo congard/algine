@@ -11,6 +11,7 @@
 #define Key_Int "int"
 #define Key_Float "float"
 #define Key_Dimen "dimen"
+#define Key_Color "color"
 
 namespace algine {
 std::unique_ptr<Resources> Resources::m_instance {nullptr};
@@ -31,6 +32,10 @@ void Resources::setDimens(const std::map<std::string, Dimen> &dimens) {
     m_dimens = dimens;
 }
 
+void Resources::setColors(const std::map<std::string, Color> &colors) {
+    m_colors = colors;
+}
+
 const std::map<std::string, std::string>& Resources::getStrings() const {
     return m_strings;
 }
@@ -47,6 +52,10 @@ const std::map<std::string, Dimen>& Resources::getDimens() const {
     return m_dimens;
 }
 
+const std::map<std::string, Color>& Resources::getColors() const {
+    return m_colors;
+}
+
 void Resources::setString(std::string_view name, std::string_view value) {
     m_strings[std::string(name)] = value;
 }
@@ -61,6 +70,10 @@ void Resources::setFloat(std::string_view name, float value) {
 
 void Resources::setDimen(std::string_view name, Dimen value) {
     m_dimens[std::string(name)] = value;
+}
+
+void Resources::setColor(std::string_view name, Color value) {
+    m_colors[std::string(name)] = value;
 }
 
 template<typename T>
@@ -84,6 +97,10 @@ bool Resources::hasDimen(const std::string &name) const {
     return has(m_dimens, name);
 }
 
+bool Resources::hasColor(const std::string &name) const {
+    return has(m_colors, name);
+}
+
 const std::string& Resources::getString(const std::string &name) const {
     return m_strings.at(name);
 }
@@ -100,11 +117,16 @@ const Dimen& Resources::getDimen(const std::string &name) const {
     return m_dimens.at(name);
 }
 
+const Color& Resources::getColor(const std::string &name) const {
+    return m_colors.at(name);
+}
+
 Resources::Resource Resources::parse(std::string_view str_v, bool *error) const {
     // @string/name
     // @int/name
     // @float/name
     // @dimen/name
+    // @color/name
 
     auto setError = [&](bool e) { if (error) *error = e; };
 
@@ -118,7 +140,7 @@ Resources::Resource Resources::parse(std::string_view str_v, bool *error) const 
     ++str;
 
     enum Type {
-        Unknown, String, Int, Float, Dimen
+        Unknown, String, Int, Float, Dimen, Color
     };
 
     Type type {Unknown};
@@ -138,7 +160,8 @@ Resources::Resource Resources::parse(std::string_view str_v, bool *error) const 
         return false;
     };
 
-    isType(Key_String, String) || isType(Key_Int, Int) || isType(Key_Float, Float) || isType(Key_Dimen, Dimen);
+    isType(Key_String, String) || isType(Key_Int, Int) || isType(Key_Float, Float) ||
+    isType(Key_Dimen, Dimen) || isType(Key_Color, Color);
 
     auto getExistingFrom = [&](const auto &m) -> typename std::remove_reference_t<decltype(m)>::mapped_type {
         if (auto it = m.find(str); it != m.end()) {
@@ -156,6 +179,7 @@ Resources::Resource Resources::parse(std::string_view str_v, bool *error) const 
         case Int: return getExistingFrom(m_ints);
         case Float: return getExistingFrom(m_floats);
         case Dimen: return getExistingFrom(m_dimens);
+        case Color: return getExistingFrom(m_colors);
         default: {
             setError(true);
             Log::error(TAG) << "Unknown resource type: " << str_v.data() << Log::end;
@@ -189,6 +213,8 @@ void Resources::fromXML(const pugi::xml_node &node) {
             setFloat(name, value.as_float());
         } else if (isChild(Key_Dimen)) {
             setDimen(name, Units::parse_dimen(value.as_string()));
+        } else if (isChild(Key_Color)) {
+            setColor(name, Color::parseColor(value.as_string()));
         } else {
             Log::error(TAG) << "Unknown resource type: " << child.name() << Log::end;
         }
@@ -232,6 +258,7 @@ pugi::xml_document Resources::toXML() const {
     appendNodes(m_ints, Key_Int, [](int i) { return std::to_string(i); });
     appendNodes(m_floats, Key_Float, [](float f) { return std::to_string(f); });
     appendNodes(m_dimens, Key_Dimen, [](const Dimen &dimen) { return dimen.toString(); });
+    appendNodes(m_colors, Key_Color, [](const Color &color) { return color.toString(); });
 
     return doc;
 }
