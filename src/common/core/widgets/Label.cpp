@@ -147,43 +147,47 @@ void Label::onDraw(Painter &painter) {
     painter.drawText(m_text, x, y);
 }
 
+// Explicit attributes: fontStyle, textAlignment
+
 void Label::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) {
     Widget::fromXML(node, io);
 
-    const pugi::char_t *fontName = nullptr;
-    const pugi::char_t *fontStyle = nullptr;
+    std::string fontName;
+    std::string fontStyle;
 
     for (pugi::xml_attribute attr : node.attributes()) {
         auto isAttr = [&](const char *name) {
             return strcmp(attr.name(), name) == 0;
         };
 
+        auto attr_str = attr.as_string();
+
         if (isAttr("text")) {
-            setText(attr.as_string());
+            setText(getString(attr_str));
         } else if (isAttr("font")) {
-            fontName = attr.as_string();
+            fontName = getString(attr_str);
         } else if (isAttr("fontStyle")) {
-            fontStyle = attr.as_string();
+            fontStyle = attr_str;
         } else if (isAttr("fontSrc")) {
-            setFont(Font(attr.as_string()));
+            setFont(Font(getString(attr_str)));
         } else if (isAttr("fontSize")) {
-            setFontSize(Units::parse<uint>(attr.as_string()));
+            setFontSize(getDimenPx(attr_str));
         } else if (isAttr("fontColor")) {
-            setFontColor(Color::parseColor(attr.as_string()));
+            setFontColor(getColor(attr_str));
         } else if (isAttr("textAlignment")) {
-            setTextAlignment(Alignment::parse(attr.as_string()));
+            setTextAlignment(Alignment::parse(attr_str));
         }
     }
 
-    if (fontName) {
+    if (!fontName.empty()) {
         Font::Style style = Font::Style::Any;
 
-        if (fontStyle) {
-            if (strcmp(fontStyle, "regular") == 0) {
+        if (!fontStyle.empty()) {
+            if (fontStyle == "regular") {
                 style = Font::Style::Regular;
-            } else if (strcmp(fontStyle, "bold") == 0) {
+            } else if (fontStyle == "bold") {
                 style = Font::Style::Bold;
-            } else if (strcmp(fontStyle, "italic") == 0) {
+            } else if (fontStyle == "italic") {
                 style = Font::Style::Italic;
             }
         }

@@ -180,7 +180,12 @@ protected:
     virtual void onGeometryChanged(const RectI &geometry);
 
 protected:
-    static Filtering parseFiltering(const char *str);
+    static Filtering parseFiltering(std::string_view str);
+
+    static std::string getString(const char *str);
+    static float getDimenPxF(const char *str);
+    static int getDimenPx(const char *str);
+    static Color getColor(const char *str);
 
 protected:
     Texture2DPtr m_texture;

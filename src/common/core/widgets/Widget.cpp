@@ -8,6 +8,7 @@
 #include <algine/core/Engine.h>
 #include <algine/core/log/Log.h>
 #include <algine/core/TypeRegistry.h>
+#include <algine/core/Resources.h>
 
 #include <tulz/StringUtils.h>
 #include <glm/ext/matrix_transform.hpp>
@@ -693,16 +694,50 @@ void Widget::onDrawBackground(Painter &painter) {
 
 void Widget::onGeometryChanged(const RectI &geometry) {}
 
-Widget::Filtering Widget::parseFiltering(const char *str) {
-    if (strcmp(str, "nearest") == 0) {
+Widget::Filtering Widget::parseFiltering(std::string_view str) {
+    if (str == "nearest") {
         return Filtering::Nearest;
-    } else if (strcmp(str, "linear") == 0) {
+    } else if (str == "linear") {
         return Filtering::Linear;
     } else {
-        Log::error("Widget") << "Unknown filtering method '" << str << "'" << Log::end;
+        Log::error("Widget") << "Unknown filtering method '" << str.data() << "'" << Log::end;
         return Filtering::Nearest;
     }
 }
+
+std::string Widget::getString(const char *str) {
+    return Resources::instance()->parse(str).as<std::string>();
+}
+
+float Widget::getDimenPxF(const char *str) {
+    bool error;
+    auto result = Resources::instance()->parse(str, &error);
+
+    if (error) { // try to parse using Units, not Resources
+        return Units::parse(str);
+    }
+
+    return result.as<Dimen>().pixels();
+}
+
+int Widget::getDimenPx(const char *str) {
+    return static_cast<int>(getDimenPxF(str));
+}
+
+Color Widget::getColor(const char *str) {
+    bool error;
+    auto result = Resources::instance()->parse(str, &error);
+
+    if (error) { // try to parse using Color, not Resources
+        return Color::parseColor(str);
+    }
+
+    return result.as<Color>();
+}
+
+// Note: you can use resources (e.g. @string/app_name) for all Widget attributes, except the following:
+// visible, name, horizontalSizePolicy, verticalSizePolicy, filtering
+// these attributes must be specified explicitly (further - explicit attributes)
 
 void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) {
     for (pugi::xml_attribute attr : node.attributes()) {
@@ -711,28 +746,39 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
         };
 
         auto parseSizePolicy = [&]() {
-            auto value = attr.value();
+            std::string_view value = attr.as_string();
 
-            if (strcmp(value, "fixed") == 0) {
+            if (value == "fixed") {
                 return SizePolicy::Fixed;
-            } else if (strcmp(value, "minimum") == 0) {
+            } else if (value == "minimum") {
                 return SizePolicy::Minimum;
-            } else if (strcmp(value, "maximum") == 0) {
+            } else if (value == "maximum") {
                 return SizePolicy::Maximum;
-            } else if (strcmp(value, "preferred") == 0) {
+            } else if (value == "preferred") {
                 return SizePolicy::Preferred;
-            } else if (strcmp(value, "match_parent") == 0) {
+            } else if (value == "match_parent") {
                 return SizePolicy::MatchParent;
             }
 
-            Log::error("Widget") << "Unknown size policy '" << value << "'" << Log::end;
+            Log::error("Widget") << "Unknown size policy '" << value.data() << "'" << Log::end;
 
             return SizePolicy::Fixed;
         };
 
-        auto metrics_parse = [&]() {
-            return Units::parse<int>(attr.as_string());
+        auto metrics_parse = [&]() { return getDimenPx(attr.as_string()); };
+
+        auto getFloat = [&]() {
+            bool error;
+            auto result = Resources::instance()->parse(attr.as_string(), &error);
+
+            if (error) { // try to parse using pugixml
+                return attr.as_float();
+            }
+
+            return result.as<float>();
         };
+
+        auto getString = [&]() { return Widget::getString(attr.as_string()); };
 
         if (isAttr("visible")) {
             setFlag(Flag::Visible, attr.as_bool());
@@ -755,11 +801,11 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
         } else if (isAttr("name")) {
             setName(attr.as_string());
         } else if (isAttr("background")) {
-            m_background.setTexture(TexturePathLoader::load(attr.as_string(), io).texture);
+            m_background.setTexture(TexturePathLoader::load(getString(), io).texture);
         } else if (isAttr("backgroundColor")) {
-            m_background.setColor(Color::parseColor(attr.as_string()));
+            m_background.setColor(getColor(attr.as_string()));
         } else if (isAttr("padding")) {
-            auto padding = tulz::StringUtils::split(attr.as_string(), " ");
+            auto padding = tulz::StringUtils::split(getString(), " ");
 
             auto left = Units::parse<int>(padding[0].c_str());
             auto top = Units::parse<int>(padding[1].c_str());
@@ -776,13 +822,13 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
         } else if (isAttr("paddingBottom")) {
             setPaddingBottom(metrics_parse());
         } else if (isAttr("rotate")) {
-            setRotate(attr.as_float());
+            setRotate(getFloat());
         } else if (isAttr("scaleX")) {
-            setScaleX(attr.as_float());
+            setScaleX(getFloat());
         } else if (isAttr("scaleY")) {
-            setScaleY(attr.as_float());
+            setScaleY(getFloat());
         } else if (isAttr("opacity")) {
-            setOpacity(attr.as_float());
+            setOpacity(getFloat());
         } else if (isAttr("horizontalSizePolicy")) {
             setHorizontalSizePolicy(parseSizePolicy());
         } else if (isAttr("verticalSizePolicy")) {
@@ -801,9 +847,21 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
             } else if (float float_value = strtof(value, &end); *end == '\0') {
                 setProperty(name, float_value);
             } else {
-                bool unitError;
+                bool error;
 
-                if (auto unit_value = Units::try_parse(value, &unitError); !unitError) {
+                if (auto res_value = Resources::instance()->parse(value, &error); !error) {
+                    if (res_value.is<std::string>()) {
+                        setProperty(name, res_value.as<std::string>());
+                    } else if (res_value.is<int>()) {
+                        setProperty(name, res_value.as<int>());
+                    } else if (res_value.is<float>()) {
+                        setProperty(name, res_value.as<float>());
+                    } else if (res_value.is<Dimen>()) {
+                        setProperty(name, res_value.as<Dimen>().pixels());
+                    } else if (res_value.is<Color>()) {
+                        setProperty(name, static_cast<int>(res_value.as<Color>().value()));
+                    }
+                } else if (auto unit_value = Units::try_parse(value, &error); !error) {
                     setProperty(name, unit_value);
                 } else if (strcmp(value, "true") == 0) {
                     setProperty(name, true);

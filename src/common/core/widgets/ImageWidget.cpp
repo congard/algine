@@ -46,6 +46,8 @@ void ImageWidget::onDraw(Painter &painter) {
     });
 }
 
+// Explicit attributes: imageFiltering
+
 void ImageWidget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) {
     Widget::fromXML(node, io);
 
@@ -57,18 +59,20 @@ void ImageWidget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSy
             return strcmp(attr.name(), name) == 0;
         };
 
+        auto attr_str = attr.as_string();
+
         if (isAttr("image")) {
-            setImage(Texture2D::getByName(attr.as_string()));
+            setImage(Texture2D::getByName(getString(attr_str)));
         } else if (isAttr("imageSrc")) {
-            auto data = TexturePathLoader::load(attr.as_string(), io);
+            auto data = TexturePathLoader::load(getString(attr_str), io);
             isImageUnique = data.unique;
             setImage(data.texture);
         } else if (isAttr("imageWidth")) {
-            setWidth(Units::parse<int>(attr.as_string()) + getPaddingLeft() + getPaddingRight());
+            setWidth(getDimenPx(attr_str) + getPaddingLeft() + getPaddingRight());
         } else if (isAttr("imageHeight")) {
-            setHeight(Units::parse<int>(attr.as_string()) + getPaddingTop() + getPaddingBottom());
+            setHeight(getDimenPx(attr_str) + getPaddingTop() + getPaddingBottom());
         } else if (isAttr("imageFiltering")) {
-            imageFiltering = static_cast<uint>(parseFiltering(attr.as_string()));
+            imageFiltering = static_cast<uint>(parseFiltering(attr_str));
         }
     }
 
