@@ -1,6 +1,6 @@
 #include <algine/core/Color.h>
 
-#include <iomanip>
+#include <sstream>
 
 namespace algine {
 Color::Color()
