@@ -2,9 +2,12 @@ package com.algine.android.module;
 
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
+
+import java.util.Locale;
 
 import static com.algine.android.module.Algine.algineViewActionHandler;
 
@@ -83,5 +86,14 @@ public class Bridge {
     public static void showToast(String text, int length) {
         new Handler(Looper.getMainLooper()).post(() ->
                 Toast.makeText(Algine.getActivity(), text, length).show());
+    }
+
+    public static Locale getCurrentLocale() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Algine.getActivity().getResources().getConfiguration().getLocales().get(0);
+        } else {
+            //noinspection deprecation
+            return Algine.getActivity().getResources().getConfiguration().locale;
+        }
     }
 }

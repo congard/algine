@@ -144,6 +144,26 @@ Java_com_algine_android_module_Bridge_init(JNIEnv *env,
             Engine::setDPI(density * 160.0f);
         }
 
+        { // get current user's language and country
+            jmethodID bridge_getCurrentLocale = env->GetStaticMethodID(bridge, "getCurrentLocale", "()Ljava/util/Locale;");
+            jobject locale = env->CallStaticObjectMethod(bridge, bridge_getCurrentLocale);
+            jclass locale_class = env->GetObjectClass(locale);
+
+            jmethodID locale_getLanguage = env->GetMethodID(locale_class, "getLanguage", "()Ljava/lang/String;");
+            auto language = static_cast<jstring>(env->CallObjectMethod(locale, locale_getLanguage));
+            auto language_str = env->GetStringUTFChars(language, nullptr);
+
+            jmethodID locale_getCountry = env->GetMethodID(locale_class, "getCountry", "()Ljava/lang/String;");
+            auto country = static_cast<jstring>(env->CallObjectMethod(locale, locale_getCountry));
+            auto country_str = env->GetStringUTFChars(country, nullptr);
+
+            Engine::setLanguage(language_str);
+            Engine::setCountry(country_str);
+
+            env->ReleaseStringUTFChars(language, language_str);
+            env->ReleaseStringUTFChars(country, country_str);
+        }
+
         { // init screen size
             auto dimensions = AndroidBridge::getViewDimensions();
 

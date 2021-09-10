@@ -28,6 +28,8 @@
 #ifndef __ANDROID__
     #include <algine/core/io/StandardIOSystem.h>
     #include <GLFW/glfw3.h>
+    #include <tulz/LocaleInfo.h>
+    #include <locale>
 #else
     #include <algine/core/io/AssetsIOSystem.h>
 #endif
@@ -58,6 +60,9 @@ int Engine::m_apiVersion;
 Engine::GraphicsAPI Engine::m_graphicsAPI;
 
 uint Engine::m_dpi = 96;
+
+std::string Engine::m_languageCode;
+std::string Engine::m_countryCode;
 
 long Engine::m_startTime;
 
@@ -178,6 +183,10 @@ void Engine::init() {
 
 #ifndef __ANDROID__
     m_defaultIOSystem = make_shared<StandardIOSystem>();
+
+    auto localeInfo = tulz::LocaleInfo::get(locale("").name().c_str());
+    setLanguage(localeInfo.languageCode);
+    setCountry(localeInfo.countryCode);
 #else
     m_defaultIOSystem = make_shared<AssetsIOSystem>();
 #endif
@@ -259,6 +268,22 @@ void Engine::setDPI(uint dpi) {
 
 uint Engine::getDPI() {
     return m_dpi;
+}
+
+void Engine::setLanguage(std::string_view isoCode) {
+    m_languageCode = isoCode;
+}
+
+void Engine::setCountry(std::string_view isoCode) {
+    m_countryCode = isoCode;
+}
+
+const std::string& Engine::getLanguage() {
+    return m_languageCode;
+}
+
+const std::string& Engine::getCountry() {
+    return m_countryCode;
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS

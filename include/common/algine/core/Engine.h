@@ -55,6 +55,12 @@ public:
     static void setDPI(uint dpi);
     static uint getDPI();
 
+    static void setLanguage(std::string_view isoCode);
+    static void setCountry(std::string_view isoCode);
+
+    static const std::string& getLanguage();
+    static const std::string& getCountry();
+
     static Framebuffer* getBoundFramebuffer();
     static Renderbuffer* getBoundRenderbuffer();
     static Texture2D* getBoundTexture2D();
@@ -140,6 +146,9 @@ private:
     static GraphicsAPI m_graphicsAPI;
 
     static uint m_dpi;
+
+    static std::string m_languageCode;
+    static std::string m_countryCode;
 
 private:
     static long m_startTime;
