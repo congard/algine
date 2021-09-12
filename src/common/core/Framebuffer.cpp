@@ -4,7 +4,7 @@
 
 #include <algine/gl.h>
 
-#define SOP_BOUND_PTR Engine::m_boundFramebuffer
+#define SOP_BOUND_PTR Engine::getBoundFramebuffer()
 #define SOP_OBJECT_TYPE SOPConstants::FramebufferObject
 #define SOP_OBJECT_ID m_id
 #define SOP_OBJECT_NAME SOPConstants::FramebufferStr

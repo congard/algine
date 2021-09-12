@@ -3,10 +3,13 @@
 
 #include <algine/core/debug/DebugWriter.h>
 #include <algine/core/io/IOSystem.h>
+#include <algine/core/ContextConfig.h>
 #include <algine/types.h>
 
+#include <unordered_map>
 #include <string>
 #include <memory>
+#include <mutex>
 
 namespace algine {
 class Framebuffer;
@@ -29,6 +32,7 @@ class Engine {
     friend class ShaderProgram;
     friend class InputLayout;
     friend class Font;
+    friend class Window;
 
 public:
     enum class GraphicsAPI {
@@ -60,6 +64,13 @@ public:
 
     static const std::string& getLanguage();
     static const std::string& getCountry();
+
+    static const Context& getApplicationContext();
+
+    static Context getCurrentContext();
+
+    static Context createContext(const ContextConfig &config = {});
+    static bool destroyContext(const Context &context);
 
     static Framebuffer* getBoundFramebuffer();
     static Renderbuffer* getBoundRenderbuffer();
@@ -150,6 +161,13 @@ private:
     static std::string m_languageCode;
     static std::string m_countryCode;
 
+    static Context m_appContext;
+
+#ifndef __ANDROID__
+    static std::mutex m_contextCreationMutex;
+    static std::mutex m_contextDestructionMutex;
+#endif
+
 private:
     static long m_startTime;
 
@@ -164,19 +182,49 @@ private:
     static ShaderProgram *m_defaultShaderProgram;
     static InputLayout *m_defaultInputLayout;
 
+#ifdef ALGINE_SECURE_OPERATIONS
 private:
     static void setBoundObject(uint type, const void *obj);
+    static void contextDestroyed(void *context);
 
 private:
-    static Framebuffer *m_boundFramebuffer;
-    static Renderbuffer *m_boundRenderbuffer;
-    static Texture2D *m_boundTexture2D;
-    static TextureCube *m_boundTextureCube;
-    static ArrayBuffer *m_boundArrayBuffer;
-    static IndexBuffer *m_boundIndexBuffer;
-    static UniformBuffer *m_boundUniformBuffer;
-    static ShaderProgram *m_boundShaderProgram;
-    static InputLayout *m_boundInputLayout;
+    template<typename T>
+    class ContextObjectMap {
+    public:
+        inline void write(void *key, T *val) {
+            std::lock_guard guard(mutex);
+            value[key] = val;
+        }
+
+        inline T* read(void *key) {
+            std::lock_guard guard(mutex);
+
+            if (auto it = value.find(key); it != value.end()) {
+                return (*it).second;
+            } else {
+                return nullptr;
+            }
+        }
+
+        inline void erase(void *key) {
+            std::lock_guard guard(mutex);
+            value.erase(key);
+        }
+
+        std::unordered_map<void*, T*> value; // pair<context, object>
+        std::mutex mutex;
+    };
+
+    static ContextObjectMap<Framebuffer> m_boundFramebuffer;
+    static ContextObjectMap<Renderbuffer> m_boundRenderbuffer;
+    static ContextObjectMap<Texture2D> m_boundTexture2D;
+    static ContextObjectMap<TextureCube> m_boundTextureCube;
+    static ContextObjectMap<ArrayBuffer> m_boundArrayBuffer;
+    static ContextObjectMap<IndexBuffer> m_boundIndexBuffer;
+    static ContextObjectMap<UniformBuffer> m_boundUniformBuffer;
+    static ContextObjectMap<ShaderProgram> m_boundShaderProgram;
+    static ContextObjectMap<InputLayout> m_boundInputLayout;
+#endif
 };
 }
 

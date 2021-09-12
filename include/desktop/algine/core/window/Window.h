@@ -6,6 +6,7 @@
 #include <algine/core/input/KeyboardKey.h>
 #include <algine/core/input/MouseKey.h>
 #include <algine/core/Surface.h>
+#include <algine/core/Context.h>
 #include <algine/core/Ptr.h>
 #include <algine/types.h>
 
@@ -29,8 +30,8 @@ public:
     };
 
 public:
-    Window();
-    Window(std::string title, uint width, uint height);
+    explicit Window(Context context = {});
+    Window(std::string title, uint width, uint height, Context context = {});
 
     void close();
     void iconify();
@@ -80,6 +81,8 @@ public:
     const glm::ivec2& getFullscreenDimensions() const;
     const glm::ivec2& getViewport() override;
     CursorMode getCursorMode() const;
+    Context getContext() const;
+    Context getParentContext() const;
     float getOpacity() const;
 
     bool isRenderLoopRunning() const;
@@ -114,6 +117,7 @@ private:
     Cursor m_cursor;
     glm::ivec2 m_pos, m_dimensions, m_fullscreenDimensions;
     CursorMode m_cursorMode;
+    Context m_parentContext;
     bool m_mouseTracking, m_keyboardTracking, m_windowStateTracking;
 
 private:

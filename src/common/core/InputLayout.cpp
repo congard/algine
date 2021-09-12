@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#define SOP_BOUND_PTR Engine::m_boundInputLayout
+#define SOP_BOUND_PTR Engine::getBoundInputLayout()
 #define SOP_OBJECT_TYPE SOPConstants::InputLayoutObject
 #define SOP_OBJECT_ID m_id
 #define SOP_OBJECT_NAME SOPConstants::InputLayoutStr

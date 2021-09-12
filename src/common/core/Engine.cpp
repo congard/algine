@@ -9,6 +9,7 @@
 #include <algine/core/shader/ShaderProgram.h>
 #include <algine/core/InputLayout.h>
 #include <algine/core/TypeRegistry.h>
+#include <algine/core/log/Log.h>
 
 #include <algine/core/widgets/Container.h>
 #include <algine/core/widgets/LinearLayout.h>
@@ -32,6 +33,15 @@
     #include <locale>
 #else
     #include <algine/core/io/AssetsIOSystem.h>
+    #include <EGL/egl.h>
+#endif
+
+#ifdef ALGINE_SECURE_OPERATIONS
+    #include "internal/SOPConstants.h"
+
+    #define sop_context_destroyed(context) contextDestroyed(context)
+#else
+    #define sop_context_destroyed(context)
 #endif
 
 #ifndef ALGINE_CORE_ONLY
@@ -64,6 +74,13 @@ uint Engine::m_dpi = 96;
 std::string Engine::m_languageCode;
 std::string Engine::m_countryCode;
 
+Context Engine::m_appContext;
+
+#ifndef __ANDROID__
+std::mutex Engine::m_contextCreationMutex;
+std::mutex Engine::m_contextDestructionMutex;
+#endif
+
 long Engine::m_startTime;
 
 Framebuffer* Engine::m_defaultFramebuffer;
@@ -75,16 +92,6 @@ IndexBuffer* Engine::m_defaultIndexBuffer;
 UniformBuffer* Engine::m_defaultUniformBuffer;
 ShaderProgram* Engine::m_defaultShaderProgram;
 InputLayout* Engine::m_defaultInputLayout;
-
-Framebuffer* Engine::m_boundFramebuffer;
-Renderbuffer* Engine::m_boundRenderbuffer;
-Texture2D* Engine::m_boundTexture2D;
-TextureCube* Engine::m_boundTextureCube;
-ArrayBuffer* Engine::m_boundArrayBuffer;
-IndexBuffer* Engine::m_boundIndexBuffer;
-UniformBuffer* Engine::m_boundUniformBuffer;
-ShaderProgram* Engine::m_boundShaderProgram;
-InputLayout* Engine::m_boundInputLayout;
 
 string exec(const char *cmd) {
     string result;
@@ -171,16 +178,6 @@ void Engine::init() {
     m_defaultInputLayout = (InputLayout*) malloc(sizeof(InputLayout));
     m_defaultInputLayout->m_id = 0;
 
-    m_boundFramebuffer = m_defaultFramebuffer;
-    m_boundRenderbuffer = m_defaultRenderbuffer;
-    m_boundTexture2D = m_defaultTexture2D;
-    m_boundTextureCube = m_defaultTextureCube;
-    m_boundArrayBuffer = m_defaultArrayBuffer;
-    m_boundIndexBuffer = m_defaultIndexBuffer;
-    m_boundUniformBuffer = m_defaultUniformBuffer;
-    m_boundShaderProgram = m_defaultShaderProgram;
-    m_boundInputLayout = m_defaultInputLayout;
-
 #ifndef __ANDROID__
     m_defaultIOSystem = make_shared<StandardIOSystem>();
 
@@ -189,6 +186,7 @@ void Engine::init() {
     setCountry(localeInfo.countryCode);
 #else
     m_defaultIOSystem = make_shared<AssetsIOSystem>();
+    m_appContext = getCurrentContext();
 #endif
 
     FT_Init_FreeType(reinterpret_cast<FT_Library *>(&m_fontLibrary));
@@ -286,9 +284,211 @@ const std::string& Engine::getCountry() {
     return m_countryCode;
 }
 
+const Context& Engine::getApplicationContext() {
+    return m_appContext;
+}
+
+Context Engine::createContext(const ContextConfig &config) {
+    if (!m_appContext.context)
+        throw runtime_error("Application context hasn't been initialized yet");
+
+    auto printContextCreationErrorMessage = []() {
+        Log::error("Engine::createContext") << "Context creation failed" << Log::end;
+    };
+
+    Context context;
+
+    int majorVersion = m_apiVersion / 100;
+    int minorVersion = (m_apiVersion - majorVersion * 100) / 10;
+
+    auto &debugWriter = Engine::getDebugWriter();
+
+#ifndef __ANDROID__
+    m_contextCreationMutex.lock(); // without locking, segfault may occur (tested on X11)
+
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVersion);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVersion);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, debugWriter != nullptr);
+
+    // nContext - native context
+    GLFWwindow* nContext = glfwCreateWindow(config.width, config.height, "",
+            nullptr, static_cast<GLFWwindow*>(config.parent.context));
+
+    if (!nContext) {
+        printContextCreationErrorMessage();
+        return {};
+    }
+
+    glfwMakeContextCurrent(nContext);
+
+    m_contextCreationMutex.unlock();
+
+    context.context = nContext;
+#else
+    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+    int vers[2];
+    eglInitialize(dpy, &vers[0], &vers[1]);
+
+    // select egl config
+
+    int configAttr[] = {
+            EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
+            EGL_LEVEL, 0,
+            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+            EGL_NONE
+    };
+
+    EGLConfig eglConfig;
+    int numConfig;
+
+    eglChooseConfig(dpy, configAttr, &eglConfig, 1, &numConfig);
+
+    if (numConfig == 0) {
+        Log::error("Engine::createContext") << "No config found" << Log::end;
+        return {};
+    }
+
+    // create surface
+
+    int surfAttr[] = {
+            EGL_WIDTH, config.width,
+            EGL_HEIGHT, config.height,
+            EGL_NONE
+    };
+
+    EGLSurface surf = eglCreatePbufferSurface(dpy, eglConfig, surfAttr);
+
+    // create context
+
+    int ctxAttrib[] = {
+            EGL_CONTEXT_MAJOR_VERSION, majorVersion,
+            EGL_CONTEXT_MINOR_VERSION, minorVersion,
+            EGL_NONE
+    };
+
+    EGLContext nContext = eglCreateContext(dpy, eglConfig, config.parent.context, ctxAttrib);
+
+    if (!nContext) {
+        printContextCreationErrorMessage();
+        return {};
+    }
+
+    eglMakeCurrent(dpy, surf, surf, nContext);
+
+    context.context = nContext;
+    context.display = dpy;
+    context.surface = surf;
+#endif
+
+    if (debugWriter != nullptr) {
+        debugWriter->begin();
+
+        auto &stream = debugWriter->stream();
+        stream << '[' << Engine::time() << "] Context " << nContext << " has been initialized";
+
+        debugWriter->end();
+
+        enableDebugOutput();
+    }
+
+    return context;
+}
+
+#ifndef __ANDROID__
+inline auto curr_ctx() {
+    return glfwGetCurrentContext();
+}
+
+Context Engine::getCurrentContext() {
+    return {curr_ctx()};
+}
+
+bool Engine::destroyContext(const Context &context) {
+    if (context.context) {
+        m_contextDestructionMutex.lock();
+
+        glfwDestroyWindow(static_cast<GLFWwindow*>(context.context));
+        auto error = glfwGetError(nullptr);
+
+        m_contextDestructionMutex.unlock();
+
+        if (!error) {
+            sop_context_destroyed(context.context);
+        }
+
+        return !error;
+    } else {
+        return false;
+    }
+}
+#else
+inline auto curr_ctx() {
+    return eglGetCurrentContext();
+}
+
+Context Engine::getCurrentContext() {
+    return {curr_ctx()};
+}
+
+bool Engine::destroyContext(const Context &context) {
+    auto ctx = context.context;
+    auto dpy = context.display;
+    auto surf = context.surface;
+
+    if (!ctx || !dpy || !surf) {
+        Log::error("Engine::destroyContext") <<
+            "Context is incomplete:\n"
+            "context is " << ctx << "\n"
+            "display is " << dpy << "\n"
+            "surface is " << surf << "\n"
+            "Note: you can call Engine::destroyContext only for contexts returned by Engine::createContext"
+        << Log::end;
+        return false;
+    }
+
+    eglMakeCurrent(dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+    bool r_destroySurf = eglDestroySurface(dpy, surf);
+    bool r_destroyCtx  = eglDestroyContext(dpy, ctx);
+    bool r_terminate   = eglTerminate(dpy);
+
+    if (r_destroyCtx) {
+        sop_context_destroyed(ctx);
+    }
+
+    if (!r_destroySurf || !r_destroyCtx || !r_terminate) {
+        Log::error("Engine::destroyContext") <<
+            "The context is not completely destroyed:\n"
+            "surface destroyed: " << r_destroySurf << "\n"
+            "context destroyed: " << r_destroyCtx << "\n"
+            "display terminated: " << r_terminate << Log::end;
+        return false;
+    }
+
+    return true;
+}
+#endif
+
 #ifdef ALGINE_SECURE_OPERATIONS
+Engine::ContextObjectMap<Framebuffer> Engine::m_boundFramebuffer;
+Engine::ContextObjectMap<Renderbuffer> Engine::m_boundRenderbuffer;
+Engine::ContextObjectMap<Texture2D> Engine::m_boundTexture2D;
+Engine::ContextObjectMap<TextureCube> Engine::m_boundTextureCube;
+Engine::ContextObjectMap<ArrayBuffer> Engine::m_boundArrayBuffer;
+Engine::ContextObjectMap<IndexBuffer> Engine::m_boundIndexBuffer;
+Engine::ContextObjectMap<UniformBuffer> Engine::m_boundUniformBuffer;
+Engine::ContextObjectMap<ShaderProgram> Engine::m_boundShaderProgram;
+Engine::ContextObjectMap<InputLayout> Engine::m_boundInputLayout;
+
 #define returnBound(type, name, boundObj, defaultObj) \
-    type* Engine::name() { return boundObj == nullptr ? defaultObj : boundObj; }
+    type* Engine::name() {                            \
+        if (auto obj = boundObj.read(curr_ctx()); obj) return obj; \
+        else return defaultObj; \
+    }
 
 returnBound(Framebuffer, getBoundFramebuffer, m_boundFramebuffer, m_defaultFramebuffer)
 returnBound(Renderbuffer, getBoundRenderbuffer, m_boundRenderbuffer, m_defaultRenderbuffer)
@@ -410,41 +610,52 @@ long Engine::timeFromStart() {
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS
-#include "internal/SOPConstants.h"
-
 void Engine::setBoundObject(uint type, const void *obj) {
+    auto ctx = curr_ctx();
+
     switch (type) {
         case SOPConstants::FramebufferObject:
-            m_boundFramebuffer = (Framebuffer*) obj;
+            m_boundFramebuffer.write(ctx, (Framebuffer*) obj);
             break;
         case SOPConstants::RenderbufferObject:
-            m_boundRenderbuffer = (Renderbuffer*) obj;
+            m_boundRenderbuffer.write(ctx, (Renderbuffer*) obj);
             break;
         case SOPConstants::Texture2DObject:
-            m_boundTexture2D = (Texture2D*) obj;
+            m_boundTexture2D.write(ctx, (Texture2D*) obj);
             break;
         case SOPConstants::TextureCubeObject:
-            m_boundTextureCube = (TextureCube*) obj;
+            m_boundTextureCube.write(ctx, (TextureCube*) obj);
             break;
         case SOPConstants::ArrayBufferObject:
-            m_boundArrayBuffer = (ArrayBuffer*) obj;
+            m_boundArrayBuffer.write(ctx, (ArrayBuffer*) obj);
             break;
         case SOPConstants::IndexBufferObject:
-            m_boundIndexBuffer = (IndexBuffer*) obj;
+            m_boundIndexBuffer.write(ctx, (IndexBuffer*) obj);
             break;
         case SOPConstants::UniformBufferObject:
-            m_boundUniformBuffer = (UniformBuffer*) obj;
+            m_boundUniformBuffer.write(ctx, (UniformBuffer*) obj);
             break;
         case SOPConstants::ShaderProgramObject:
-            m_boundShaderProgram = (ShaderProgram*) obj;
+            m_boundShaderProgram.write(ctx, (ShaderProgram*) obj);
             break;
         case SOPConstants::InputLayoutObject:
-            m_boundInputLayout = (InputLayout*) obj;
+            m_boundInputLayout.write(ctx, (InputLayout*) obj);
             break;
         default:
             break;
     }
 }
 
+void Engine::contextDestroyed(void *context) {
+    m_boundFramebuffer.erase(context);
+    m_boundRenderbuffer.erase(context);
+    m_boundTexture2D.erase(context);
+    m_boundTextureCube.erase(context);
+    m_boundArrayBuffer.erase(context);
+    m_boundIndexBuffer.erase(context);
+    m_boundUniformBuffer.erase(context);
+    m_boundShaderProgram.erase(context);
+    m_boundInputLayout.erase(context);
+}
 #endif
 }

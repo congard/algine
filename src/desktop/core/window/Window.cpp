@@ -33,19 +33,21 @@ constexpr static auto maxClickDeltaTime = 250L; // in ms
     m_windowStateTracking(false), \
     m_renderLoopRunning(false)
 
-Window::Window()
+Window::Window(Context context)
     : initList,
       m_title("Algine Window"),
-      m_dimensions(512)
+      m_dimensions(512),
+      m_parentContext(context)
 {
     initSurfaceFields();
     create();
 }
 
-Window::Window(string title, uint width, uint height)
+Window::Window(string title, uint width, uint height, Context context)
     : initList,
       m_title(std::move(title)),
-      m_dimensions(width, height)
+      m_dimensions(width, height),
+      m_parentContext(context)
 {
     initSurfaceFields();
     create();
@@ -76,7 +78,8 @@ void Window::create() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, debugWriter != nullptr);
 
-    m_window = glfwCreateWindow(m_dimensions.x, m_dimensions.y, m_title.c_str(), nullptr, nullptr);
+    m_window = glfwCreateWindow(m_dimensions.x, m_dimensions.y, m_title.c_str(),
+            nullptr, static_cast<GLFWwindow*>(m_parentContext.context));
 
     if (m_window == nullptr) {
         glfwTerminate();
@@ -106,6 +109,10 @@ void Window::create() {
         debugWriter->end();
 
         enableDebugOutput();
+    }
+
+    if (!Engine::m_appContext.context) {
+        Engine::m_appContext.context = m_window;
     }
 }
 
@@ -452,7 +459,7 @@ void Window::setFullscreen(bool fullscreen) {
         );
     } else {
         // restore last window size and position
-        glfwSetWindowMonitor(m_window, nullptr,  m_pos.x, m_pos.y, m_dimensions.x, m_dimensions.y, 0);
+        glfwSetWindowMonitor(m_window, nullptr, m_pos.x, m_pos.y, m_dimensions.x, m_dimensions.y, 0);
     }
 }
 
@@ -512,6 +519,14 @@ const ivec2& Window::getViewport() {
 
 Window::CursorMode Window::getCursorMode() const {
     return m_cursorMode;
+}
+
+Context Window::getContext() const {
+    return {m_window};
+}
+
+Context Window::getParentContext() const {
+    return m_parentContext;
 }
 
 float Window::getOpacity() const {

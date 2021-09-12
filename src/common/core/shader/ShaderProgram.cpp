@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-#define SOP_BOUND_PTR Engine::m_boundShaderProgram
+#define SOP_BOUND_PTR Engine::getBoundShaderProgram()
 #define SOP_OBJECT_TYPE SOPConstants::ShaderProgramObject
 #define SOP_OBJECT_ID id
 #define SOP_OBJECT_NAME SOPConstants::ShaderProgramStr
