@@ -144,6 +144,9 @@ public:
     static void setViewport(int x, int y, int width, int height);
     static void setViewport(int width, int height);
 
+    static void waitForExecution();
+    static void flushCommandBuffer();
+
 public:
     static long time();
     static long timeFromStart();

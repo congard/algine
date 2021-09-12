@@ -599,6 +599,14 @@ void Engine::setViewport(int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+void Engine::waitForExecution() {
+    glFinish();
+}
+
+void Engine::flushCommandBuffer() {
+    glFlush();
+}
+
 long Engine::time() {
     using namespace chrono;
 
