@@ -700,7 +700,7 @@ Widget::Filtering Widget::parseFiltering(std::string_view str) {
     } else if (str == "linear") {
         return Filtering::Linear;
     } else {
-        Log::error("Widget") << "Unknown filtering method '" << str.data() << "'" << Log::end;
+        Log::error("Widget") << "Unknown filtering method '" << str.data() << "'";
         return Filtering::Nearest;
     }
 }
@@ -760,7 +760,7 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
                 return SizePolicy::MatchParent;
             }
 
-            Log::error("Widget") << "Unknown size policy '" << value.data() << "'" << Log::end;
+            Log::error("Widget") << "Unknown size policy '" << value.data() << "'";
 
             return SizePolicy::Fixed;
         };
@@ -880,7 +880,7 @@ inline auto parseXML(const std::string &xml) {
     pugi::xml_parse_result result = doc.load_string(xml.c_str());
 
     if (!result) {
-        Log::error("Widget XML Parser") << result.description() << Log::end;
+        Log::error("Widget XML Parser", result.description());
     }
 
     return doc;

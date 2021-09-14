@@ -8,10 +8,6 @@
 namespace algine {
 class Log {
 public:
-    // deprecated
-    constexpr static auto end = "";
-
-public:
     static Logger info(const std::string &tag = "Algine");
     static Logger error(const std::string &tag = "Algine");
 

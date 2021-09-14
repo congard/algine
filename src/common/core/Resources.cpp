@@ -169,7 +169,7 @@ Resources::Resource Resources::parse(std::string_view str_v, bool *error) const 
             return (*it).second;
         } else {
             setError(true);
-            Log::error(TAG) << "Resource " << str_v.data() << " does not exist" << Log::end;
+            Log::error(TAG) << "Resource " << str_v.data() << " does not exist";
             return {};
         }
     };
@@ -182,7 +182,7 @@ Resources::Resource Resources::parse(std::string_view str_v, bool *error) const 
         case Color: return getExistingFrom(m_colors);
         default: {
             setError(true);
-            Log::error(TAG) << "Unknown resource type: " << str_v.data() << Log::end;
+            Log::error(TAG) << "Unknown resource type: " << str_v.data();
             return std::string(str_v);
         }
     }
@@ -216,7 +216,7 @@ void Resources::fromXML(const pugi::xml_node &node) {
         } else if (isChild(Key_Color)) {
             setColor(name, Color::parseColor(value.as_string()));
         } else {
-            Log::error(TAG) << "Unknown resource type: " << child.name() << Log::end;
+            Log::error(TAG) << "Unknown resource type: " << child.name();
         }
     }
 }
@@ -226,7 +226,7 @@ bool Resources::fromXML(const std::string &xml) {
     pugi::xml_parse_result result = doc.load_string(xml.c_str());
 
     if (!result) {
-        Log::error("Resources XML Parser") << result.description() << Log::end;
+        Log::error("Resources XML Parser", result.description());
         return false;
     } else {
         fromXML(doc.document_element());

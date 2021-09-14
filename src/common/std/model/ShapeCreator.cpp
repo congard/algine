@@ -464,7 +464,7 @@ void ShapeCreator::loadFile() {
 
     // If the import failed, report it
     if (!scene) {
-        Log::error(TAG) << "Assimp error: " << importer.GetErrorString() << Log::end;
+        Log::error(TAG) << "Assimp error: " << importer.GetErrorString();
         return;
     }
 
@@ -515,7 +515,7 @@ void ShapeCreator::loadShape() {
                 break;
             }
             default: {
-                Log::error(TAG) << "Unknown algine param " << static_cast<uint>(p) << Log::end;
+                Log::error(TAG) << "Unknown algine param " << static_cast<uint>(p);
                 break;
             }
         }

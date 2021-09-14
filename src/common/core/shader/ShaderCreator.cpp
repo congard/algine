@@ -405,7 +405,7 @@ string ShaderCreator::processDirectives(const string &src, const Path &baseInclu
             Path filePath(fileMatches[0].matches[1]);
 
             auto fileNotFoundError = [&]() {
-                Log::error(TAG) << "ShaderCreator: Error: file " << filePath.toString() << " not found\n" << matches.matches[0] << Log::end;
+                Log::error(TAG) << "ShaderCreator: Error: file " << filePath.toString() << " not found\n" << matches.matches[0];
             };
 
             auto exists = [&](const Path &p) {
@@ -456,7 +456,7 @@ string ShaderCreator::processDirectives(const string &src, const Path &baseInclu
             insert(result, matches.pos, matches.size,
                    "#define " + fileMatches[0].matches[2] + " " + fileMatches[0].matches[1]);
         } else {
-            Log::error(TAG) << "Unknown pragma " << pragmaName << "\n" << matches.matches[0] << Log::end;
+            Log::error(TAG) << "Unknown pragma " << pragmaName << "\n" << matches.matches[0];
         }
     }
 
