@@ -4,7 +4,7 @@
 namespace algine {
 Logger ConsoleDebugWriter::logger() {
     Logger logger;
-    logger.setTag("ConsoleDebugLogger");
+    logger.setTag("ConsoleDebugWriter");
     logger.setInputEndListener(this);
     return logger;
 }
