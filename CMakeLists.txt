@@ -256,7 +256,7 @@ set(ALGINE_CORE_SOURCES
         include/common/algine/core/widgets/Unit.h
         src/common/core/Resources.cpp include/common/algine/core/Resources.h
         include/common/algine/core/Variant.h
-        include/common/algine/core/Context.h
+        src/common/core/Context.cpp include/common/algine/core/Context.h
         include/common/algine/core/ContextConfig.h)
 
 set(ALGINE_STD_SOURCES

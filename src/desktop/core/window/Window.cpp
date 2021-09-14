@@ -79,7 +79,7 @@ void Window::create() {
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, debugWriter != nullptr);
 
     m_window = glfwCreateWindow(m_dimensions.x, m_dimensions.y, m_title.c_str(),
-            nullptr, static_cast<GLFWwindow*>(m_parentContext.context));
+            nullptr, static_cast<GLFWwindow*>(m_parentContext.m_context));
 
     if (m_window == nullptr) {
         glfwTerminate();
@@ -107,8 +107,8 @@ void Window::create() {
         enableDebugOutput();
     }
 
-    if (!Engine::m_appContext.context) {
-        Engine::m_appContext.context = m_window;
+    if (!Engine::m_appContext.m_context) {
+        Engine::m_appContext.m_context = m_window;
     }
 }
 

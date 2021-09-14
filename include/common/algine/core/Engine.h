@@ -33,6 +33,7 @@ class Engine {
     friend class InputLayout;
     friend class Font;
     friend class Window;
+    friend class Context;
 
 public:
     enum class GraphicsAPI {
@@ -66,11 +67,6 @@ public:
     static const std::string& getCountry();
 
     static const Context& getApplicationContext();
-
-    static Context getCurrentContext();
-
-    static Context createContext(const ContextConfig &config = {});
-    static bool destroyContext(const Context &context);
 
     static Framebuffer* getBoundFramebuffer();
     static Renderbuffer* getBoundRenderbuffer();
@@ -165,11 +161,6 @@ private:
     static std::string m_countryCode;
 
     static Context m_appContext;
-
-#ifndef __ANDROID__
-    static std::mutex m_contextCreationMutex;
-    static std::mutex m_contextDestructionMutex;
-#endif
 
 private:
     static long m_startTime;
