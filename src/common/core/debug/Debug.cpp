@@ -10,102 +10,98 @@ void debugMessagesHandler(GLenum source, GLenum type, GLuint id, GLenum severity
                           const void *userParam)
 {
     auto writer = static_cast<DebugWriter*>(const_cast<void*>(userParam));
-    writer->begin();
-
-    auto &stream = writer->stream();
+    auto logger = writer->logger();
 
     // Some debug messages are just annoying informational messages
     if (id == 131185) // glBufferData
         return;
 
-    stream << "Message: " << message << "\n";
-    stream << "Source: ";
+    logger << "Message: " << message << "\n";
+    logger << "Source: ";
 
     switch (source) {
         case GL_DEBUG_SOURCE_API:
-            stream << "API";
+            logger << "API";
             break;
         case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-            stream << "Window System";
+            logger << "Window System";
             break;
         case GL_DEBUG_SOURCE_SHADER_COMPILER:
-            stream << "Shader Compiler";
+            logger << "Shader Compiler";
             break;
         case GL_DEBUG_SOURCE_THIRD_PARTY:
-            stream << "Third Party";
+            logger << "Third Party";
             break;
         case GL_DEBUG_SOURCE_APPLICATION:
-            stream << "Application";
+            logger << "Application";
             break;
         case GL_DEBUG_SOURCE_OTHER:
-            stream << "Other";
+            logger << "Other";
             break;
         default:
-            stream << "Unknown source " << source << "\n";
+            logger << "Unknown source " << source << "\n";
             break;
     }
 
-    stream << "\n";
-    stream << "Type: ";
+    logger << "\n";
+    logger << "Type: ";
 
     switch (type) {
         case GL_DEBUG_TYPE_ERROR:
-            stream << "Error";
+            logger << "Error";
             break;
         case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-            stream << "Deprecated Behaviour";
+            logger << "Deprecated Behaviour";
             break;
         case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-            stream << "Undefined Behaviour";
+            logger << "Undefined Behaviour";
             break;
         case GL_DEBUG_TYPE_PORTABILITY:
-            stream << "Portability";
+            logger << "Portability";
             break;
         case GL_DEBUG_TYPE_PERFORMANCE:
-            stream << "Performance";
+            logger << "Performance";
             break;
         case GL_DEBUG_TYPE_MARKER:
-            stream << "Marker";
+            logger << "Marker";
             break;
         case GL_DEBUG_TYPE_PUSH_GROUP:
-            stream << "Push Group";
+            logger << "Push Group";
             break;
         case GL_DEBUG_TYPE_POP_GROUP:
-            stream << "Pop Group";
+            logger << "Pop Group";
             break;
         case GL_DEBUG_TYPE_OTHER:
-            stream << "Other";
+            logger << "Other";
             break;
         default:
-            stream << "Unknown type " << type << "\n";
+            logger << "Unknown type " << type << "\n";
             break;
     }
 
-    stream << "\n";
-    stream << "ID: " << id << "\n";
-    stream << "Severity: ";
+    logger << "\n";
+    logger << "ID: " << id << "\n";
+    logger << "Severity: ";
 
     switch (severity) {
         case GL_DEBUG_SEVERITY_HIGH:
-            stream << "High";
+            logger << "High";
             break;
         case GL_DEBUG_SEVERITY_MEDIUM:
-            stream << "Medium";
+            logger << "Medium";
             break;
         case GL_DEBUG_SEVERITY_LOW:
-            stream << "Low";
+            logger << "Low";
             break;
         case GL_DEBUG_SEVERITY_NOTIFICATION:
-            stream << "Notification";
+            logger << "Notification";
             break;
         default:
-            stream << "Unknown severity " << severity << "\n";
+            logger << "Unknown severity " << severity << "\n";
             break;
     }
 
-    stream << "\n";
-
-    writer->end();
+    logger << "\n";
 }
 
 void enableDebugOutput() {

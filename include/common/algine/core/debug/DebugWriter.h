@@ -1,17 +1,14 @@
 #ifndef ALGINE_DEBUGWRITER_H
 #define ALGINE_DEBUGWRITER_H
 
-#include <ostream>
+#include <algine/core/log/Logger.h>
 
 namespace algine {
-class DebugWriter {
+class DebugWriter: protected Logger::InputEndListener {
 public:
-    virtual ~DebugWriter();
+    virtual ~DebugWriter() = default;
 
-    virtual void begin();
-    virtual void end();
-
-    virtual std::ostream& stream() = 0;
+    virtual Logger logger() = 0;
 };
 }
 

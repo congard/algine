@@ -1,17 +1,15 @@
 #include <algine/core/debug/ConsoleDebugWriter.h>
-
 #include <algine/core/log/Log.h>
 
 namespace algine {
-void ConsoleDebugWriter::begin() {
-    m_logger = &Log::info("ConsoleDebugWriter");
+Logger ConsoleDebugWriter::logger() {
+    Logger logger;
+    logger.setTag("ConsoleDebugWriter");
+    logger.setInputEndListener(this);
+    return logger;
 }
 
-void ConsoleDebugWriter::end() {
-    (*m_logger) << Log::end;
-}
-
-std::ostream& ConsoleDebugWriter::stream() {
-    return m_logger->stream();
+void ConsoleDebugWriter::onInputEnd(Logger &logger) {
+    Log::info(logger.getTag(), logger.str());
 }
 }

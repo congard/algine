@@ -3,18 +3,13 @@
 
 #include <algine/core/debug/DebugWriter.h>
 
-#include <algine/core/log/Logger.h>
-
 namespace algine {
 class ConsoleDebugWriter: public DebugWriter {
 public:
-    void begin() override;
-    void end() override;
-
-    std::ostream& stream() override;
+    Logger logger() override;
 
 private:
-    Logger *m_logger;
+    void onInputEnd(Logger &logger) override;
 };
 }
 
