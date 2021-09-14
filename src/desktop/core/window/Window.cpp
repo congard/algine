@@ -99,14 +99,10 @@ void Window::create() {
     }
 
     if (debugWriter != nullptr) {
-        debugWriter->begin();
-
-        auto &stream = debugWriter->stream();
-        stream << "Time: " << Engine::time() << "\n";
-        stream << "GPU Vendor: " << Engine::getGPUVendor() << "\n";
-        stream << "GPU Renderer: " << Engine::getGPURenderer() << "\n";
-
-        debugWriter->end();
+        auto logger = debugWriter->logger();
+        logger << "Time: " << Engine::time() << "\n";
+        logger << "GPU Vendor: " << Engine::getGPUVendor() << "\n";
+        logger << "GPU Renderer: " << Engine::getGPURenderer() << "\n";
 
         enableDebugOutput();
     }

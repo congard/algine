@@ -3,18 +3,29 @@
 
 #include <algine/core/log/Logger.h>
 
+#include <mutex>
+
 namespace algine {
 class Log {
 public:
-    constexpr static auto end = "\0";
+    // deprecated
+    constexpr static auto end = "";
 
 public:
-    static Logger& info(const std::string &tag = "Algine");
-    static Logger& error(const std::string &tag = "Algine");
+    static Logger info(const std::string &tag = "Algine");
+    static Logger error(const std::string &tag = "Algine");
+
+    static void info(const std::string &tag, std::string_view str);
+    static void error(const std::string &tag, std::string_view str);
 
 private:
-    static Logger m_info;
-    static Logger m_error;
+    class InputEndListener: public Logger::InputEndListener {
+    public:
+        void onInputEnd(Logger &logger) override;
+    };
+
+    static std::mutex m_mutex;
+    static InputEndListener m_endListener;
 };
 }
 

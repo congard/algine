@@ -1,27 +1,25 @@
 #include <algine/core/log/Logger.h>
 
-#include <algine/core/log/Log.h>
-
-#ifdef __ANDROID__
-    #include <android/log.h>
-
-    #define LOG(format, ...) __android_log_print(m_priority, m_tag.c_str(), format, __VA_ARGS__)
-#else
-    #include <cstdio>
-
-    #define LOG(format, ...) fprintf((FILE*) m_output, (m_tag + ": " format "\n").c_str(), __VA_ARGS__)
-#endif
-
-#include <cstring>
-
 namespace algine {
-Logger::Logger(Type type) {
-    if (type == Type::Info) {
-        enable_if_desktop(m_output = stdout);
-        enable_if_android(m_priority = ANDROID_LOG_INFO);
-    } else {
-        enable_if_desktop(m_output = stderr);
-        enable_if_android(m_priority = ANDROID_LOG_ERROR);
+Logger::Logger(Logger &&other) noexcept {
+    std::swap(m_id, other.m_id);
+    std::swap(m_tag, other.m_tag);
+    std::swap(m_stream, other.m_stream);
+    std::swap(m_endListener, other.m_endListener);
+}
+
+Logger& Logger::operator=(Logger &&other) noexcept {
+    if (this == &other)
+        return *this;
+
+    std::swap(*this, other);
+
+    return *this;
+}
+
+Logger::~Logger() {
+    if (m_endListener) {
+        m_endListener->onInputEnd(*this);
     }
 }
 
@@ -68,14 +66,7 @@ Logger& Logger::operator<<(long double val) {
 }
 
 Logger& Logger::operator<<(const char *val) {
-    if (strcmp(val, Log::end) == 0) {
-        LOG("%s", m_stream.str().c_str());
-        m_stream = std::ostringstream();
-    } else {
-        m_stream << val;
-    }
-
-    return *this;
+    writeLog(val);
 }
 
 Logger& Logger::operator<<(void *val) {
@@ -90,7 +81,23 @@ void Logger::setTag(const std::string &tag) {
     m_tag = tag;
 }
 
-std::ostream& Logger::stream() {
-    return m_stream;
+void Logger::setId(int id) {
+    m_id = id;
+}
+
+void Logger::setInputEndListener(InputEndListener *listener) {
+    m_endListener = listener;
+}
+
+const std::string& Logger::getTag() const {
+    return m_tag;
+}
+
+int Logger::getId() const {
+    return m_id;
+}
+
+std::string Logger::str() const {
+    return m_stream.str();
 }
 }

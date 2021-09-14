@@ -207,7 +207,7 @@ set(ALGINE_CORE_SOURCES
         src/common/core/shader/ShaderProgram.cpp include/common/algine/core/shader/ShaderProgram.h
         src/common/core/shader/BaseUniformBlock.cpp include/common/algine/core/shader/BaseUniformBlock.h
         src/common/core/shader/UniformBlock.cpp include/common/algine/core/shader/UniformBlock.h
-        src/common/core/debug/DebugWriter.cpp include/common/algine/core/debug/DebugWriter.h
+        include/common/algine/core/debug/DebugWriter.h
         src/common/core/debug/ConsoleDebugWriter.cpp include/common/algine/core/debug/ConsoleDebugWriter.h
         src/common/core/debug/FileDebugWriter.cpp include/common/algine/core/debug/FileDebugWriter.h
         src/common/core/Engine.cpp include/common/algine/core/Engine.h
