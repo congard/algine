@@ -1,11 +1,27 @@
 #ifndef ALGINE_CONTEXT_H
 #define ALGINE_CONTEXT_H
 
-#include <mutex>
-
 namespace algine {
 class ContextConfig;
 
+/**
+ * Note: due to GLFW limitations, functions
+ * <b>create() and destroy() must be called from
+ * the main thread</b>, otherwise your app may crash.
+ * <br><br>
+ * However, these functions can be called from
+ * any thread on Android, but due to cross-platform
+ * considerations, it is highly recommended to call
+ * these functions only from the main thread.
+ * <br><br>
+ * <ul>
+ * References:
+ * <ol>
+ * <li>https://www.glfw.org/docs/3.3/context_guide.html</li>
+ * <li>https://www.glfw.org/docs/3.3/group__window.html#ga5c336fddf2cbb5b92f65f10fb6043344</li>
+ * </ol>
+ * </ul>
+ */
 class Context {
 public:
     bool create(const ContextConfig &config);
@@ -25,8 +41,6 @@ public:
 #ifndef __ANDROID__
     void *m_context {nullptr};
 
-private:
-    static std::mutex m_contextMutex;
 #else
     void *m_context {nullptr};
     void *m_display {nullptr};

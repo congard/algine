@@ -20,10 +20,6 @@
 #endif
 
 namespace algine {
-#ifndef __ANDROID__
-std::mutex Context::m_contextMutex;
-#endif
-
 inline void printContextNotInitializedError() {
     Log::error("Context", "Context has not been initialized yet");
 }
@@ -46,8 +42,6 @@ bool Context::create(const ContextConfig &config) {
     auto &debugWriter = Engine::getDebugWriter();
 
 #ifndef __ANDROID__
-    m_contextMutex.lock(); // without locking, segfault may occur (tested on X11)
-
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVersion);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVersion);
@@ -62,8 +56,6 @@ bool Context::create(const ContextConfig &config) {
         printContextCreationErrorMessage();
         return false;
     }
-
-    m_contextMutex.unlock();
 
     m_context = nContext;
 #else
@@ -145,12 +137,8 @@ inline void enableDebugOutputIfPossible() {
 #ifndef __ANDROID__
 bool Context::destroy() {
     if (isInitialized()) {
-        m_contextMutex.lock();
-
         glfwDestroyWindow(static_cast<GLFWwindow*>(m_context));
         auto error = glfwGetError(nullptr);
-
-        m_contextMutex.unlock();
 
         if (!error) {
             sop_context_destroyed(m_context);
@@ -168,18 +156,13 @@ bool Context::makeCurrent() const {
         printContextNotInitializedError();
         return false;
     } else {
-        m_contextMutex.lock();
         glfwMakeContextCurrent(static_cast<GLFWwindow*>(m_context));
-        m_contextMutex.unlock();
-
         enableDebugOutputIfPossible();
-
         return true;
     }
 }
 
 bool Context::detach() const {
-    std::lock_guard lockGuard(m_contextMutex);
     glfwMakeContextCurrent(nullptr);
     return true;
 }
