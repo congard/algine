@@ -451,9 +451,8 @@ private:
 };
 
 void ShapeCreator::loadFile() {
-    if (m_shape == nullptr) {
+    if (m_shape == nullptr)
         m_shape.reset(TypeRegistry::create<Shape>(m_className));
-    }
 
     // Create an instance of the Importer class
     Assimp::Importer importer;
@@ -496,9 +495,14 @@ void ShapeCreator::loadFile() {
 }
 
 void ShapeCreator::loadShape() {
-    if (m_shape == nullptr) {
+    applyParams();
+    genBuffers();
+    createInputLayouts();
+}
+
+void ShapeCreator::applyParams() {
+    if (m_shape == nullptr)
         m_shape.reset(TypeRegistry::create<Shape>(m_className));
-    }
 
     // apply algine params
     for (const auto p : algine::getParams<PARAMS_TYPE_ALGINE>(m_params)) {
@@ -522,11 +526,12 @@ void ShapeCreator::loadShape() {
     }
 
     m_shape->m_bonesPerVertex = m_bonesPerVertex;
+}
 
-    // generate buffers
-    genBuffers();
+void ShapeCreator::createInputLayouts() {
+    if (m_shape == nullptr)
+        m_shape.reset(TypeRegistry::create<Shape>(m_className));
 
-    // add input layouts
     for (auto &item : m_locations) {
         item.setIOSystem(io());
         m_shape->createInputLayout(item.create());
@@ -781,6 +786,9 @@ inline BufferType* createBuffer(ShapeCreator::BufferData<DataType> &data) {
 }
 
 void ShapeCreator::genBuffers() {
+    if (m_shape == nullptr)
+        m_shape.reset(TypeRegistry::create<Shape>(m_className));
+
     m_shape->m_vertices = createBuffer<ArrayBuffer>(m_vertices);
     m_shape->m_normals = createBuffer<ArrayBuffer>(m_normals);
     m_shape->m_texCoords = createBuffer<ArrayBuffer>(m_texCoords);
