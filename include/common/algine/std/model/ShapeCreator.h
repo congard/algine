@@ -88,6 +88,9 @@ public:
 
     void loadFile();
     void loadShape();
+    void applyParams();
+    void genBuffers();
+    void createInputLayouts();
 
     ShapePtr& getCurrentShape();
 
@@ -104,7 +107,6 @@ private:
     void loadBones(const aiMesh *aimesh);
     void processNode(const aiNode *node, const aiScene *scene);
     void processMesh(const aiMesh *aimesh, const aiScene *scene);
-    void genBuffers();
 
 private:
     ShapePtr m_shape;
