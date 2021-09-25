@@ -10,7 +10,8 @@
 namespace algine {
 Label::Label()
     : m_textAlignment(Alignment::Center),
-      m_fontColor(0xff000000)
+      m_fontColor(0xff000000),
+      m_textX(), m_textY()
 {
     m_fontMetrics.setFontSize(24_dp);
 }
@@ -76,38 +77,24 @@ uint Label::getTextAlignment() const {
 void Label::onMeasure(int &width, int &height) {
     Widget::onMeasure(width, height);
 
-    auto preferredWidth = [](const RectI &rect) {
-        return rect.getWidth();
-    };
-
-    auto preferredHeight = [](const RectI &rect) {
-        return rect.getHeight();
-    };
-
-    if (m_horizontalPolicy == SizePolicy::Preferred && m_verticalPolicy == SizePolicy::Preferred) {
-        auto rect = m_fontMetrics.boundingRect(m_text);
-        width = preferredWidth(rect);
-        height = preferredHeight(rect);
-    }
+    auto rect = m_fontMetrics.boundingRect(m_text);
 
     switch (m_horizontalPolicy) {
         case SizePolicy::Preferred:
-            width = preferredWidth(m_fontMetrics.boundingRect(m_text));
+            width = rect.getWidth();
             break;
         default: break;
     }
 
     switch (m_verticalPolicy) {
         case SizePolicy::Preferred:
-            height = preferredHeight(m_fontMetrics.boundingRect(m_text));
+            height = rect.getHeight();
             break;
         default: break;
     }
 }
 
-void Label::onDraw(Painter &painter) {
-    float x;
-    float y;
+void Label::onLayout() {
     auto boundingRect = m_fontMetrics.boundingRect(m_text);
 
     auto br_x = boundingRect.getX();
@@ -120,31 +107,33 @@ void Label::onDraw(Painter &painter) {
 
     switch (alignmentX) {
         case Alignment::Right:
-            x = (float) (getContentWidth() - br_width - br_x);
+            m_textX = (float) (getContentWidth() - br_width - br_x);
             break;
         case Alignment::Left:
-            x = (float) -br_x;
+            m_textX = (float) -br_x;
             break;
         default:
-            x = (float) -br_x + (float) (getContentWidth() - br_width) / 2.0f;
+            m_textX = (float) -br_x + (float) (getContentWidth() - br_width) / 2.0f;
             break;
     }
 
     switch (alignmentY) {
         case Alignment::Top:
-            y = (float) -br_y;
+            m_textY = (float) -br_y;
             break;
         case Alignment::Bottom:
-            y = (float) (getContentHeight() - br_height - br_y);
+            m_textY = (float) (getContentHeight() - br_height - br_y);
             break;
         default:
-            y = (float) (getContentHeight() + br_height) / 2.0f - (float) (br_height + br_y);
+            m_textY = (float) (getContentHeight() + br_height) / 2.0f - (float) (br_height + br_y);
             break;
     }
+}
 
+void Label::onDraw(Painter &painter) {
     painter.setFont(getFont(), getFontSize());
     painter.setPaint(Paint(m_fontColor));
-    painter.drawText(m_text, x, y);
+    painter.drawText(m_text, m_textX, m_textY);
 }
 
 // Explicit attributes: fontStyle, textAlignment

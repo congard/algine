@@ -30,6 +30,7 @@ public:
 
 protected:
     void onMeasure(int &width, int &height) override;
+    void onLayout() override;
     void onDraw(Painter &painter) override;
 
 private:
@@ -37,6 +38,8 @@ private:
     uint m_textAlignment;
     FontMetrics m_fontMetrics;
     Color m_fontColor;
+    float m_textX;
+    float m_textY;
 };
 }
 
