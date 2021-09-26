@@ -91,12 +91,12 @@ int FontMetrics::topVerticalBearing(char16_t c) {
     return charMetrics(c).topVerticalBearing;
 }
 
-RectI FontMetrics::boundingRect(const std::string &str) {
+RectI FontMetrics::boundingRect(std::string_view str) {
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utfConv;
-    return boundingRect(utfConv.from_bytes(str));
+    return boundingRect(utfConv.from_bytes(str.begin(), str.end()));
 }
 
-RectI FontMetrics::boundingRect(const std::u16string &str) {
+RectI FontMetrics::boundingRect(std::u16string_view str) {
     if (str.empty()) {
         return {0, 0, 0, 0};
     }

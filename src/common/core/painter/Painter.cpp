@@ -414,7 +414,7 @@ void Painter::drawCircle(float x, float y, float radius) {
     drawCircle({x, y}, radius);
 }
 
-void Painter::drawText(const std::u16string &text, const PointF &p) {
+void Painter::drawText(std::u16string_view text, const PointF &p) {
     m_textFill->bind();
     m_textFill->setFloat("opacity", m_opacity);
     writeProjection(m_textFill);
@@ -492,13 +492,13 @@ void Painter::drawText(const std::u16string &text, const PointF &p) {
     }
 }
 
-void Painter::drawText(const std::string &text, const PointF &p) {
+void Painter::drawText(std::string_view text, const PointF &p) {
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utfConv;
-    auto utf16 = utfConv.from_bytes(text);
+    auto utf16 = utfConv.from_bytes(text.begin(), text.end());
     drawText(utf16, p);
 }
 
-void Painter::drawText(const std::string &text, float x, float y) {
+void Painter::drawText(std::string_view text, float x, float y) {
     drawText(text, {x, y});
 }
 

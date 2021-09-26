@@ -32,8 +32,8 @@ public:
     int leftVerticalBearing(char16_t c);
     int topVerticalBearing(char16_t c);
 
-    RectI boundingRect(const std::string &str);
-    RectI boundingRect(const std::u16string &str);
+    RectI boundingRect(std::string_view str);
+    RectI boundingRect(std::u16string_view str);
 
     bool hasHorizontal();
     bool hasVertical();

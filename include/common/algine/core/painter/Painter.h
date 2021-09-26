@@ -68,9 +68,9 @@ public:
     void drawCircle(const PointF &origin, float radius);
     void drawCircle(float x, float y, float radius);
 
-    void drawText(const std::u16string &text, const PointF &p);
-    void drawText(const std::string &text, const PointF &p);
-    void drawText(const std::string &text, float x, float y);
+    void drawText(std::u16string_view text, const PointF &p);
+    void drawText(std::string_view text, const PointF &p);
+    void drawText(std::string_view text, float x, float y);
 
     void drawTexture(const Texture2DPtr &texture, const RectF &rect);
     void drawTexture(const Texture2DPtr &texture, const PointF &p);
