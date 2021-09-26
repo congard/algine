@@ -369,6 +369,33 @@ glm::ivec2 getViewDimensions() {
     return result;
 }
 
+std::string getAppDataDirectory() {
+    std::string result;
+
+    executeCallback(callback_capture {
+        jclass algine_class = env->FindClass("com/algine/android/module/Algine");
+
+        jmethodID algine_getActivity =
+                env->GetStaticMethodID(algine_class, "getActivity", "()Lcom/algine/android/module/AlgineActivity;");
+        jobject activity = env->CallStaticObjectMethod(algine_class, algine_getActivity);
+        jclass activity_class = env->GetObjectClass(activity);
+
+        jmethodID activity_getDataDir = env->GetMethodID(activity_class, "getDataDir", "()Ljava/io/File;");
+        jobject file = env->CallObjectMethod(activity, activity_getDataDir);
+        jclass file_class = env->GetObjectClass(file);
+
+        jmethodID file_toString = env->GetMethodID(file_class, "toString", "()Ljava/lang/String;");
+        auto obj_str = static_cast<jstring>(env->CallObjectMethod(file, file_toString));
+        auto str = env->GetStringUTFChars(obj_str, nullptr);
+
+        result = str;
+
+        env->ReleaseStringUTFChars(obj_str, str);
+    });
+
+    return result;
+}
+
 void showToast(std::string_view text, int length) {
     executeCallback(callback_capture {
         jstring jstr = env->NewStringUTF(text.data());

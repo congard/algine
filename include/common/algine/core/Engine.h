@@ -147,6 +147,14 @@ public:
     static long time();
     static long timeFromStart();
 
+#ifdef __ANDROID__
+public:
+    class Android {
+    public:
+        static std::string getAppDataDirectory();
+    };
+#endif
+
 private:
     static std::unique_ptr<DebugWriter> m_debugWriter;
     static std::shared_ptr<IOSystem> m_defaultIOSystem;

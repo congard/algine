@@ -32,6 +32,7 @@
     #include <locale>
 #else
     #include <algine/core/io/AssetsIOSystem.h>
+    #include "../../src/android/core/Bridge.h"
 #endif
 
 #ifdef ALGINE_SECURE_OPERATIONS
@@ -420,6 +421,12 @@ long Engine::time() {
 long Engine::timeFromStart() {
     return Engine::time() - m_startTime;
 }
+
+#ifdef __ANDROID__
+std::string Engine::Android::getAppDataDirectory() {
+    return AndroidBridge::getAppDataDirectory();
+}
+#endif
 
 #ifdef ALGINE_SECURE_OPERATIONS
 void Engine::setBoundObject(uint type, const void *obj) {

@@ -20,6 +20,8 @@ glm::vec2 getPointerPos(int pointerId);
 
 glm::ivec2 getViewDimensions();
 
+std::string getAppDataDirectory();
+
 void showToast(std::string_view text, int length);
 }
 
