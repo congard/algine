@@ -502,14 +502,14 @@ void Painter::drawText(std::string_view text, float x, float y) {
     drawText(text, {x, y});
 }
 
-inline void writeTransformation(const ShaderProgramPtr &program,
+inline void writeTransformation(AutoRawPtr<ShaderProgram> program,
     const glm::mat4 &transform, const glm::mat4 &paintTransform)
 {
     program->setMat4("transformation", transform);
     program->setMat4("paintTransformation", paintTransform);
 }
 
-void Painter::drawTexture(const Texture2DPtr &texture, const RectF &rect) {
+void Painter::drawTexture(AutoRawPtr<Texture2D> texture, const RectF &rect) {
     writeRectToBuffer(rect);
     texture->use(0);
 
@@ -521,7 +521,7 @@ void Painter::drawTexture(const Texture2DPtr &texture, const RectF &rect) {
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
 
-void Painter::drawTexture(const Texture2DPtr &texture, const PointF &p) {
+void Painter::drawTexture(AutoRawPtr<Texture2D> texture, const PointF &p) {
     texture->use(0);
 
     writeRectToBuffer({
@@ -539,7 +539,7 @@ void Painter::drawTexture(const Texture2DPtr &texture, const PointF &p) {
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
 
-void Painter::drawTexture(const Texture2DPtr &texture, float x, float y) {
+void Painter::drawTexture(AutoRawPtr<Texture2D> texture, float x, float y) {
     drawTexture(texture, {x, y});
 }
 
@@ -577,11 +577,11 @@ void Painter::writeRectToBuffer(const RectF &rect) {
     }
 }
 
-void Painter::writeTransformation(const ShaderProgramPtr &program) {
+void Painter::writeTransformation(AutoRawPtr<ShaderProgram> program) {
     algine::writeTransformation(program, m_transform, m_paint.getTransform());
 }
 
-void Painter::writeProjection(const ShaderProgramPtr &program) {
+void Painter::writeProjection(AutoRawPtr<ShaderProgram> program) {
     program->setMat4("projection", m_projection);
 }
 

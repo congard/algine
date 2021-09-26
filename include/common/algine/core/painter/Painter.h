@@ -8,6 +8,7 @@
 #include <algine/core/painter/RoundRect.h>
 #include <algine/core/painter/Paint.h>
 #include <algine/core/Rect.h>
+#include <algine/core/AutoRawPtr.h>
 #include <algine/types.h>
 
 namespace algine {
@@ -72,9 +73,9 @@ public:
     void drawText(std::string_view text, const PointF &p);
     void drawText(std::string_view text, float x, float y);
 
-    void drawTexture(const Texture2DPtr &texture, const RectF &rect);
-    void drawTexture(const Texture2DPtr &texture, const PointF &p);
-    void drawTexture(const Texture2DPtr &texture, float x, float y);
+    void drawTexture(AutoRawPtr<Texture2D> texture, const RectF &rect);
+    void drawTexture(AutoRawPtr<Texture2D> texture, const PointF &p);
+    void drawTexture(AutoRawPtr<Texture2D> texture, float x, float y);
 
     static void optimizeFontCache();
     static void clearFontCache();
@@ -84,8 +85,8 @@ private:
     Painter& operator=(const Painter&);
 
     void writeRectToBuffer(const RectF &rect);
-    void writeTransformation(const ShaderProgramPtr &program);
-    void writeProjection(const ShaderProgramPtr &program);
+    void writeTransformation(AutoRawPtr<ShaderProgram> program);
+    void writeProjection(AutoRawPtr<ShaderProgram> program);
     void changeColor();
     void applyColor();
     void updateFontHash();
