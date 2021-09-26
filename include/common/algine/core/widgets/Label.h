@@ -33,7 +33,7 @@ protected:
     void onLayout() override;
     void onDraw(Painter &painter) override;
 
-private:
+protected:
     std::string m_text;
     uint m_textAlignment;
     FontMetrics m_fontMetrics;
