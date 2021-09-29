@@ -7,19 +7,19 @@ Paint::Paint()
     : m_color(0xff000000),
       m_texture(nullptr),
       m_source(Source::None),
-      m_transform(1.0f) {}
+      m_transform(glm::mat4(1.0f)) {}
 
 Paint::Paint(const Color &color)
     : m_color(color),
       m_texture(nullptr),
       m_source(Source::Color),
-      m_transform(1.0f) {}
+      m_transform(glm::mat4(1.0f)) {}
 
 Paint::Paint(Texture2DPtr texture)
     : m_color(0xff000000),
       m_texture(std::move(texture)),
       m_source(Source::Texture),
-      m_transform(1.0f) {}
+      m_transform(glm::mat4(1.0f)) {}
 
 void Paint::setColor(const Color &color) {
     m_source = Source::Color;
@@ -52,6 +52,6 @@ Paint::Source Paint::getSource() const {
 }
 
 const glm::mat4& Paint::getTransform() const {
-    return m_transform;
+    return m_transform.read();
 }
 }

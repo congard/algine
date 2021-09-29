@@ -3,11 +3,14 @@
 
 #include <algine/core/texture/Texture2DPtr.h>
 #include <algine/core/Color.h>
+#include <algine/core/MutableValue.h>
 
 #include <glm/mat4x4.hpp>
 
 namespace algine {
 class Paint {
+    friend class Painter;
+
 public:
     enum class Source {
         Color,
@@ -34,7 +37,7 @@ private:
     Color m_color;
     Texture2DPtr m_texture;
     Source m_source;
-    glm::mat4 m_transform;
+    MutableValue<glm::mat4> m_transform;
 };
 }
 
