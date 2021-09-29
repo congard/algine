@@ -30,9 +30,10 @@ Painter::Painter()
       m_colorTex(PtrMaker::make<Texture2D>()),
       m_activeColor(Color(0xff000000)),
       m_renderHints(0),
-      m_transform(1.0f),
+      m_transform(glm::mat4(1.0f)),
       m_opacity(1.0f),
-      m_fontHash(0)
+      m_fontHash(0),
+      m_activeProgram(nullptr)
 {
     // TODO: implement in the engine
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -89,6 +90,8 @@ Painter::Painter()
             {Texture::MagFilter, Texture::Nearest}
     });
 
+    setRenderHint(RenderHint::ContinuousDrawing);
+
     changeColor();
 }
 
@@ -99,6 +102,8 @@ Painter::~Painter() {
 void Painter::begin() {
     m_layout->bind();
     m_buffer->bind();
+
+    m_activeProgram = nullptr;
 
     // TODO: implement MSAA
 
@@ -185,6 +190,10 @@ inline uint asRenderHint(T hint) {
 }
 
 void Painter::setRenderHint(RenderHint renderHint, bool on) {
+    if (renderHint == RenderHint::ContinuousDrawing && !on) {
+        m_activeProgram = nullptr;
+    }
+
     uint hint = asRenderHint(renderHint);
     m_renderHints = on ? (m_renderHints | hint) : (m_renderHints & ~hint);
 }
@@ -207,7 +216,7 @@ void Painter::setTransform(const glm::mat4 &transform) {
 }
 
 const glm::mat4& Painter::getTransform() const {
-    return m_transform;
+    return m_transform.read();
 }
 
 void Painter::setOpacity(float opacity) {
@@ -215,7 +224,7 @@ void Painter::setOpacity(float opacity) {
 }
 
 float Painter::getOpacity() const {
-    return m_opacity;
+    return m_opacity.read();
 }
 
 void Painter::drawLine(const PointF &p1, const PointF &p2) {
@@ -253,10 +262,7 @@ void Painter::drawLine(const PointF &p1, const PointF &p2) {
 
     applyColor();
 
-    m_fill->bind();
-    m_fill->setFloat("opacity", m_opacity);
-    writeProjection(m_fill);
-    writeTransformation(m_fill);
+    bindFillProgram();
 
     Engine::drawArrays(0, 2, Engine::PolyType::Line);
 }
@@ -326,10 +332,7 @@ void Painter::drawTriangle(const PointF &p1, const PointF &p2, const PointF &p3)
 
     applyColor();
 
-    m_fill->bind();
-    m_fill->setFloat("opacity", m_opacity);
-    writeProjection(m_fill);
-    writeTransformation(m_fill);
+    bindFillProgram();
 
     Engine::drawArrays(0, 3);
 }
@@ -338,16 +341,35 @@ void Painter::drawRect(const RectF &rect) {
     writeRectToBuffer(rect);
     applyColor();
 
-    m_fill->bind();
-    m_fill->setFloat("opacity", m_opacity);
-    writeProjection(m_fill);
-    writeTransformation(m_fill);
+    bindFillProgram();
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
 
 void Painter::drawRect(float x1, float y1, float x2, float y2) {
     drawRect({{x1, y1}, {x2, y2}});
+}
+
+template<typename T>
+inline void bindProgramImpl(Painter *painter, ShaderProgram *program, ShaderProgram *&activeProgram, T &&write) {
+    if (painter->isRenderHintEnabled(Painter::RenderHint::ContinuousDrawing)) {
+        if (program != activeProgram) {
+            activeProgram = program;
+        } else {
+            write(std::false_type{});
+            return;
+        }
+    }
+
+    program->bind();
+    write(std::true_type{});
+}
+
+#define bindProgram(program, ...) bindProgramImpl(this, program.get(), m_activeProgram, __VA_ARGS__)
+
+template<typename T>
+inline constexpr bool isForcibly(T&&) {
+    return std::is_same_v<std::remove_reference_t<T>, std::true_type>;
 }
 
 void Painter::drawRoundRect(const RoundRect &roundRect) {
@@ -366,17 +388,21 @@ void Painter::drawRoundRect(const RoundRect &roundRect) {
     writeRectToBuffer(rect);
     applyColor();
 
-    m_roundRectFill->bind();
-    m_roundRectFill->setFloat("opacity", m_opacity);
-    m_roundRectFill->setVec4("p1p2",
-        rect.getX(), rect.getY(),
-        rect.getX() + rect.getWidth(), rect.getY() + rect.getHeight());
-    m_roundRectFill->setVec4("radius", r1, r2, r3, r4);
-    m_roundRectFill->setVec4("scale", s1, s2, s3, s4);
-    m_roundRectFill->setBool("antialiasing", isRenderHintEnabled(RenderHint::Antialiasing));
+    bindProgram(m_roundRectFill, [&](auto forcibly_t) {
+        constexpr bool forcibly = isForcibly(forcibly_t);
 
-    writeProjection(m_roundRectFill);
-    writeTransformation(m_roundRectFill);
+        writeFloat<forcibly>("opacity", m_opacity, m_roundRectFill);
+        writeProjection<forcibly>(m_roundRectFill);
+        writeTransform<forcibly>(m_roundRectFill);
+        writePaintTransform<forcibly>(m_roundRectFill);
+
+        m_roundRectFill->setVec4("p1p2",
+            rect.getX(), rect.getY(),
+            rect.getX() + rect.getWidth(), rect.getY() + rect.getHeight());
+        m_roundRectFill->setVec4("radius", r1, r2, r3, r4);
+        m_roundRectFill->setVec4("scale", s1, s2, s3, s4);
+        m_roundRectFill->setBool("antialiasing", isRenderHintEnabled(RenderHint::Antialiasing));
+    });
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
@@ -398,14 +424,18 @@ void Painter::drawCircle(const PointF &origin, float radius) {
     });
     applyColor();
 
-    m_circleFill->bind();
-    m_circleFill->setFloat("opacity", m_opacity);
-    m_circleFill->setVec2("origin", origin.getX(), origin.getY());
-    m_circleFill->setFloat("radius", radius);
-    m_circleFill->setBool("antialiasing", isRenderHintEnabled(RenderHint::Antialiasing));
+    bindProgram(m_circleFill, [&](auto forcibly_t) {
+        constexpr bool forcibly = isForcibly(forcibly_t);
 
-    writeProjection(m_circleFill);
-    writeTransformation(m_circleFill);
+        writeFloat<forcibly>("opacity", m_opacity, m_circleFill);
+        writeProjection<forcibly>(m_circleFill);
+        writeTransform<forcibly>(m_circleFill);
+        writePaintTransform<forcibly>(m_circleFill);
+
+        m_circleFill->setVec2("origin", origin.getX(), origin.getY());
+        m_circleFill->setFloat("radius", radius);
+        m_circleFill->setBool("antialiasing", isRenderHintEnabled(RenderHint::Antialiasing));
+    });
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
@@ -415,10 +445,13 @@ void Painter::drawCircle(float x, float y, float radius) {
 }
 
 void Painter::drawText(std::u16string_view text, const PointF &p) {
-    m_textFill->bind();
-    m_textFill->setFloat("opacity", m_opacity);
-    writeProjection(m_textFill);
-    writeTransformation(m_textFill);
+    bindProgram(m_textFill, [this](auto forcibly_t) {
+        constexpr bool forcibly = isForcibly(forcibly_t);
+        writeFloat<forcibly>("opacity", m_opacity, m_textFill);
+        writeProjection<forcibly>(m_textFill);
+        writeTransform<forcibly>(m_textFill);
+        writePaintTransform<forcibly>(m_textFill);
+    });
 
     constexpr float scale = 1.0f;
 
@@ -502,21 +535,11 @@ void Painter::drawText(std::string_view text, float x, float y) {
     drawText(text, {x, y});
 }
 
-inline void writeTransformation(AutoRawPtr<ShaderProgram> program,
-    const glm::mat4 &transform, const glm::mat4 &paintTransform)
-{
-    program->setMat4("transformation", transform);
-    program->setMat4("paintTransformation", paintTransform);
-}
-
 void Painter::drawTexture(AutoRawPtr<Texture2D> texture, const RectF &rect) {
     writeRectToBuffer(rect);
     texture->use(0);
 
-    m_fill->bind();
-    m_fill->setFloat("opacity", m_opacity);
-    writeProjection(m_fill);
-    algine::writeTransformation(m_fill, m_transform, glm::mat4(1.0f));
+    bindFillTexProgram();
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
@@ -531,10 +554,7 @@ void Painter::drawTexture(AutoRawPtr<Texture2D> texture, const PointF &p) {
         static_cast<float>(texture->getActualHeight())
     });
 
-    m_fill->bind();
-    m_fill->setFloat("opacity", m_opacity);
-    writeProjection(m_fill);
-    algine::writeTransformation(m_fill, m_transform, glm::mat4(1.0f));
+    bindFillTexProgram();
 
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
@@ -557,6 +577,30 @@ void Painter::clearFontCache() {
     m_characters = {};
 }
 
+void Painter::bindFillProgram() {
+    bindProgram(m_fill, [this](auto forcibly_t) {
+        constexpr bool forcibly = isForcibly(forcibly_t);
+        writeFloat<forcibly>("opacity", m_opacity, m_fill);
+        writeProjection<forcibly>(m_fill);
+        writeTransform<forcibly>(m_fill);
+        writePaintTransform<forcibly>(m_fill);
+    });
+}
+
+void Painter::bindFillTexProgram() {
+    bindProgram(m_fill, [this](auto forcibly_t) {
+        constexpr bool forcibly = isForcibly(forcibly_t);
+
+        writeFloat<forcibly>("opacity", m_opacity, m_fill);
+        writeProjection<forcibly>(m_fill);
+        writeTransform<forcibly>(m_fill);
+
+        if (forcibly) {
+            m_fill->setMat4("paintTransformation", glm::mat4(1.0f));
+        }
+    });
+}
+
 void Painter::writeRectToBuffer(const RectF &rect) {
     float x = rect.getX();
     float y = rect.getY();
@@ -575,14 +619,6 @@ void Painter::writeRectToBuffer(const RectF &rect) {
     } else {
         m_buffer->updateData(0, sizeof(vertices), vertices);
     }
-}
-
-void Painter::writeTransformation(AutoRawPtr<ShaderProgram> program) {
-    algine::writeTransformation(program, m_transform, m_paint.getTransform());
-}
-
-void Painter::writeProjection(AutoRawPtr<ShaderProgram> program) {
-    program->setMat4("projection", m_projection);
 }
 
 void Painter::changeColor() {

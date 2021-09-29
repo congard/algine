@@ -9,6 +9,7 @@
 #include <algine/core/painter/Paint.h>
 #include <algine/core/Rect.h>
 #include <algine/core/AutoRawPtr.h>
+#include <algine/core/MutableValue.h>
 #include <algine/types.h>
 
 namespace algine {
@@ -18,7 +19,8 @@ public:
         Antialiasing,
         OptimizeFontCache,
         DisableStateSaving,
-        DisableAlphaBlending
+        DisableAlphaBlending,
+        ContinuousDrawing
     };
 
     using RenderHints = uint;
@@ -84,26 +86,65 @@ private:
     Painter(const Painter&);
     Painter& operator=(const Painter&);
 
+    void bindFillProgram();
+    void bindFillTexProgram();
+
     void writeRectToBuffer(const RectF &rect);
-    void writeTransformation(AutoRawPtr<ShaderProgram> program);
-    void writeProjection(AutoRawPtr<ShaderProgram> program);
     void changeColor();
     void applyColor();
     void updateFontHash();
     void disownFontHash();
 
+    template<bool forcibly, typename T, typename U>
+    inline void write_mv(T &&setter, MutableValue<U> &value) {
+        if constexpr(forcibly) {
+            setter();
+        } else {
+            if (value.hasChanged()) {
+                setter();
+            }
+        }
+    }
+
+    template<bool forcibly>
+    inline void writeMat4(const char *name, MutableValue<glm::mat4> &value, AutoRawPtr<ShaderProgram> program) {
+        write_mv<forcibly>([&]() { program->setMat4(name, value); }, value);
+    }
+
+    template<bool forcibly>
+    inline void writeFloat(const char *name, MutableValue<float> &value, AutoRawPtr<ShaderProgram> program) {
+        write_mv<forcibly>([&]() { program->setFloat(name, value); }, value);
+    }
+
+    template<bool forcibly>
+    inline void writeTransform(AutoRawPtr<ShaderProgram> program) {
+        writeMat4<forcibly>("transformation", m_transform, program);
+    }
+
+    template<bool forcibly>
+    inline void writePaintTransform(AutoRawPtr<ShaderProgram> program) {
+        writeMat4<forcibly>("paintTransformation", m_paint.m_transform, program);
+    }
+
+    template<bool forcibly>
+    inline void writeProjection(AutoRawPtr<ShaderProgram> program) {
+        writeMat4<forcibly>("projection", m_projection, program);
+    }
+
 private:
-    glm::mat4 m_projection;
+    MutableValue<glm::mat4> m_projection;
+    MutableValue<glm::mat4> m_transform;
+    MutableValue<float> m_opacity;
     Paint m_paint;
     std::unique_ptr<ArrayBuffer> m_buffer;
     std::unique_ptr<InputLayout> m_layout;
+
+    ShaderProgram *m_activeProgram;
 
 private:
     Texture2DPtr m_colorTex;
     Color m_activeColor;
     RenderHints m_renderHints;
-    glm::mat4 m_transform;
-    float m_opacity;
 
 private:
     FontRenderer m_fontRenderer;
