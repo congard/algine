@@ -257,7 +257,8 @@ set(ALGINE_CORE_SOURCES
         src/common/core/Resources.cpp include/common/algine/core/Resources.h
         include/common/algine/core/Variant.h
         src/common/core/Context.cpp include/common/algine/core/Context.h
-        include/common/algine/core/ContextConfig.h)
+        include/common/algine/core/ContextConfig.h
+        include/common/algine/core/MutableValue.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h
