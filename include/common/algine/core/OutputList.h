@@ -4,6 +4,7 @@
 #include <algine/types.h>
 
 #include <vector>
+#include <cstddef>
 
 namespace algine {
 class OutputList {
