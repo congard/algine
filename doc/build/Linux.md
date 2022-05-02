@@ -1,4 +1,4 @@
-# Debian Build Instructions
+# Linux Build Instructions
 
 ## GLEW: make OpenGL extensions
 
@@ -9,7 +9,15 @@ cd algine_root_folder/libs/glew
 make extensions
 ```
 
-## Dependencies
+## Fedora
+
+```bash
+sudo dnf install mesa-libGL-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel
+```
+
+Tested on Fedora 36, Xorg session.
+
+## Debian
 
 ```bash
 sudo apt build-dep glfw3
@@ -37,3 +45,5 @@ you must create symlinks to problem libraries:
 ```bash
 sudo ln -s /usr/lib/x86_64-linux-gnu/libNAME.so /usr/lib/libNAME.so
 ```
+
+Tested on Debian 10 and 11, Xorg session.

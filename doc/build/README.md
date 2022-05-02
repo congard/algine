@@ -10,5 +10,5 @@ Some dependencies are already included into codebase, but some of them you need 
 
 ## Platform-specific steps
 
-* [Debian](Debian.md)
+* [Linux](Linux.md)
 * [Windows](Windows.md)
