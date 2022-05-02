@@ -11,6 +11,10 @@
         #include <GLES3/gl3.h>
     #endif
 #else
+    #if defined(__unix__) && !defined(GLEW_NO_GLU)
+        #define GLEW_NO_GLU
+    #endif
+
     #include <GL/glew.h>
 #endif
 
