@@ -2,8 +2,8 @@
 
 #include <algine/core/Content.h>
 #include <algine/core/Engine.h>
+#include <algine/gl.h>
 
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
