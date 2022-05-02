@@ -7,6 +7,10 @@ if (MSVC)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS true)
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-fPIC)
+endif()
+
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     if (NOT MSVC)
         message(STATUS "Algine debug mode - adding -g option")
