@@ -7,7 +7,7 @@ if (MSVC)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS true)
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if (UNIX)
     add_compile_options(-fPIC)
 endif()
 
