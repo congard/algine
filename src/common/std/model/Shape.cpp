@@ -29,8 +29,7 @@ void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
     InputAttributeDescription attribDescription;
     attribDescription.setCount(3);
 
-    auto addAttribute = [&](const ArrayBuffer *arrayBuffer)
-    {
+    auto addAttribute = [&](const ArrayBuffer *arrayBuffer) {
         if (attribDescription.m_location != InputAttributeDescription::LocationAbsent && arrayBuffer != nullptr) {
             inputLayout->addAttribute(attribDescription, arrayBuffer);
         }
@@ -63,7 +62,9 @@ void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
         addAttribute(m_boneIds);
     }
 
-    inputLayout->setIndexBuffer(m_indices);
+    if (m_indices)
+        inputLayout->setIndexBuffer(m_indices);
+
     inputLayout->unbind();
 }
 
