@@ -9,6 +9,7 @@
 #include <algine/core/shader/ShaderProgram.h>
 #include <algine/core/InputLayout.h>
 #include <algine/core/TypeRegistry.h>
+#include <algine/core/log/Log.h>
 
 #include <algine/core/widgets/Container.h>
 #include <algine/core/widgets/LinearLayout.h>
@@ -173,7 +174,16 @@ void Engine::init() {
 #ifndef __ANDROID__
     m_defaultIOSystem = make_shared<StandardIOSystem>();
 
-    auto localeInfo = tulz::LocaleInfo::get(locale("").name().c_str());
+    tulz::LocaleInfo::Info localeInfo;
+
+    // if LC_ALL is not defined, std::locale("") will throw an exception
+    if (is_linux() && !getenv("LC_ALL")) {
+        localeInfo = tulz::LocaleInfo::get("en_GB.UTF-8");
+        Log::error("Algine", "LC_ALL is not defined, locale was set to en_GB.UTF-8");
+    } else {
+        localeInfo = tulz::LocaleInfo::get(locale("").name().c_str());
+    }
+
     setLanguage(localeInfo.languageCode);
     setCountry(localeInfo.countryCode);
 #else
