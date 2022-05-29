@@ -5,10 +5,9 @@
 
 namespace algine {
 struct ShadersInfo {
-    std::string
-            vertex,
-            fragment,
-            geometry = "";
+    std::string vertex;
+    std::string fragment;
+    std::string geometry;
 };
 }
 
