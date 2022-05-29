@@ -372,6 +372,8 @@ add_subdirectory(libs/tulz)
 add_subdirectory(libs/assimp)
 add_subdirectory(libs/freetype)
 add_subdirectory(libs/pugixml)
+add_subdirectory(libs/lua)
+add_subdirectory(libs/sol2)
 
 add_library(algine
         ${ALGINE_CORE_SOURCES}
@@ -382,19 +384,23 @@ add_library(algine
 
 set_target_properties(algine PROPERTIES LINKER_LANGUAGE CXX)
 
-target_include_directories(algine PRIVATE src/common)
-target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules)
-target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders)
-target_include_directories(algine PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter)
+target_include_directories(algine PRIVATE
+        src/common
+        ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules
+        ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders
+        ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter)
 
-target_include_directories(algine PRIVATE libs/assimp/include)
-target_include_directories(algine PRIVATE libs/freetype/include)
-target_include_directories(algine PRIVATE libs/pugixml/src)
+target_include_directories(algine PRIVATE
+        libs/assimp/include
+        libs/freetype/include
+        libs/pugixml/src)
 
-target_include_directories(algine PUBLIC libs/tulz/include)
-target_include_directories(algine PUBLIC libs/glm)
-target_include_directories(algine PUBLIC include/common)
-target_include_directories(algine PUBLIC libs)
+target_include_directories(algine PUBLIC
+        libs/tulz/include
+        libs/glm
+        libs/sol2/include
+        include/common
+        libs)
 
 # TODO: ^^^ maybe move one header libs to, for example, libname/include/libname/file.hpp instead of libname/file.hpp
 
@@ -416,11 +422,11 @@ endif()
 
 # linking
 if (ANDROID)
-    target_link_libraries(algine assimp android log GLESv3 EGL tulz freetype)
+    target_link_libraries(algine assimp android log GLESv3 EGL tulz freetype lua_static)
 elseif (WIN32)
-    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 tulz freetype)
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 tulz freetype lua_static)
 elseif (UNIX)
-    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw GL tulz freetype)
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw GL tulz freetype lua_static)
 endif()
 
 # include some helpful scripts for Windows
