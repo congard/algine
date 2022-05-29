@@ -262,7 +262,14 @@ set(ALGINE_CORE_SOURCES
         include/common/algine/core/Variant.h
         src/common/core/Context.cpp include/common/algine/core/Context.h
         include/common/algine/core/ContextConfig.h
-        include/common/algine/core/MutableValue.h)
+        include/common/algine/core/MutableValue.h
+        src/common/core/lua/Lua.cpp include/common/algine/core/lua/Lua.h
+        src/common/core/lua/Scriptable.cpp include/common/algine/core/lua/Scriptable.h
+        include/common/algine/core/Pair.h
+        src/common/core/lua/GLMLuaTypes.cpp include/common/algine/core/lua/GLMLuaTypes.h
+        src/common/core/lua/TulzLuaTypes.cpp include/common/algine/core/lua/TulzLuaTypes.h
+        src/common/core/lua/glm_string_cast.h src/common/core/lua/glm_string_cast.cpp
+        src/common/core/lua/AlgineCore.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h

@@ -63,15 +63,15 @@ ShaderCreator::ShaderCreator()
     : m_type(),
       m_dumperUseSources(false) {}
 
-ShaderCreator::ShaderCreator(uint type)
+ShaderCreator::ShaderCreator(Shader::Type type)
     : m_type(type),
       m_dumperUseSources(false) {}
 
-void ShaderCreator::setType(uint type) {
+void ShaderCreator::setType(Shader::Type type) {
     m_type = type;
 }
 
-uint ShaderCreator::getType() const {
+Shader::Type ShaderCreator::getType() const {
     return m_type;
 }
 
@@ -249,10 +249,10 @@ void ShaderCreator::import(const JsonHelper &jsonHelper) {
     }
 
     // load type
-    m_type = map<string, uint> {
-        {Vertex, Shader::Vertex},
-        {Fragment, Shader::Fragment},
-        {Geometry, Shader::Geometry}
+    m_type = map<string, Shader::Type> {
+        {Vertex, Shader::Type::Vertex},
+        {Fragment, Shader::Type::Fragment},
+        {Geometry, Shader::Type::Geometry}
     } [config[Type]];
 
     Creator::import(jsonHelper);
@@ -284,7 +284,7 @@ JsonHelper ShaderCreator::dump() {
 
     // write type
     // note: Shader must keep types order
-    config[Type] = vector<string> {Vertex, Fragment, Geometry} [m_type];
+    config[Type] = vector<string> {Vertex, Fragment, Geometry} [static_cast<int>(m_type)];
 
     JsonHelper result(config);
     result.append(Creator::dump());
@@ -295,6 +295,49 @@ JsonHelper ShaderCreator::dump() {
 
 void ShaderCreator::importFromFile(const string &path) {
     Creator::importFromFile(path);
+}
+
+void ShaderCreator::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "ShaderCreator"))
+        return;
+
+    lua->registerUsertype<Shader, Creator, ShaderDefinitionGenerator>();
+
+    auto ctors = sol::constructors<ShaderCreator(), ShaderCreator(Shader::Type)>();
+    auto usertype = lua->state()->new_usertype<ShaderCreator>(
+            "ShaderCreator",
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors,
+            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ShaderDefinitionGenerator>());
+
+    Lua::new_property(usertype, "type", "getType", "setType", &ShaderCreator::getType, &ShaderCreator::setType);
+    Lua::new_property(usertype, "path", "getPath", "setPath", &ShaderCreator::getPath, &ShaderCreator::setPath);
+    Lua::new_property(usertype, "includePaths", "getIncludePaths", "setIncludePaths",
+        &ShaderCreator::getIncludePaths,
+        [](ShaderCreator &self, vector<string> paths) { self.setIncludePaths(paths); });
+    Lua::new_property(usertype, "source", "getSource", "setSource", &ShaderCreator::getSource, &ShaderCreator::setSource);
+
+    usertype["addIncludePaths"] = [](ShaderCreator &self, vector<string> paths) { self.addIncludePaths(paths); };
+    usertype["addIncludePath"] = &ShaderCreator::addIncludePath;
+    usertype["removeIncludePath"] = &ShaderCreator::removeIncludePath;
+    usertype["resetGenerated"] = &ShaderCreator::resetGenerated;
+    usertype["generate"] = &ShaderCreator::generate;
+    usertype["getGenerated"] = &ShaderCreator::getGenerated;
+    usertype["makeGenerated"] = &ShaderCreator::makeGenerated;
+    usertype["get"] = &ShaderCreator::get;
+    usertype["create"] = &ShaderCreator::create;
+
+    // static methods
+    usertype["getGlobalIncludePaths"] = &ShaderCreator::getGlobalIncludePaths;
+    usertype["setGlobalIncludePaths"] = [](std::vector<std::string> paths) { setGlobalIncludePaths(paths); };
+    usertype["addGlobalIncludePath"] = &ShaderCreator::addGlobalIncludePath;
+    usertype["removeGlobalIncludePath"] = &ShaderCreator::removeGlobalIncludePath;
+}
+
+void ShaderCreator::exec(const std::string &s, bool path, Lua *lua) {
+    exec_t<ShaderCreator>(s, path, lua);
 }
 
 void ShaderCreator::setGlobalIncludePaths(const vector<string> &includePaths) {

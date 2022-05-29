@@ -4,44 +4,60 @@ Algine - OpenGL 3.3+ engine written in C++
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/40d3479da92040c79c5570336aff3697)](https://www.codacy.com/manual/congard/algine?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=congard/algine&amp;utm_campaign=Badge_Grade)
 
-Version: 1.6 alpha
-<br>Note: at the moment, new versions are released only for updating changelog
+**Supported platforms**: Linux, Android, Windows
+<br>**Target platforms**: Linux (clang), Android
 
-Supported systems: Linux, Windows (with MinGW-w64)
-
-Engine tested on Asus x302uv (Intel Core I5-6200U, Nvidia GeForce 920mx, 8GB RAM, Debian GNU/Linux buster/sid, ArchLinux, 1920x1080 screen) and showed good results
-
-If you find any errors or you have recommendations for improving the project - a big one please let me know!
-
-Click on picture to watch video
 [![Algine v1.6 alpha](pictures/1.png)](https://youtu.be/pYUXtRl-LTs)
 
 ## Functionality
 
-*   Textures
-*   Mapping (ambient, diffuse, specular, normal)
-*   Lighting (with a huge number of properties)
-*   Colorful lighting
-*   Unlimited count of light sources
-*   Shadow mapping
-*   Soft shadows
-*   Directional lighting (shadow mapping)
-*   Point lighting
-*   Bloom
-*   Depth of field (DOF)
-*   SSR (Screen Space Reflections)
-*   Cinematic Depth of field
-*   Support of 40+ 3D model formats (thanks to [Assimp](https://github.com/assimp/assimp))
-*   Support of materials
-*   Skeletal animations / bone system. Limitations on the _number of bones_ / _number of bones per vertex_ are **hardware only**.
-*   Effect management
-*   Etc.
+Short overview:
 
-Take into account, this is a test (alpha) version! All major functions will be added in later versions.
+* Core
+  * Textures
+  * Framebuffers & Renderbuffers
+  * Shaders & Shader programs
+  * Buffers (Array, Index, Uniform etc)
+  * Contexts / multithreading
+  * Widgets (font rendering, canvas, layouts etc)
+  * Logging
+  * Debugging (including Algine SOP)
+  * Custom shader preprocessor
+  * Built-in GLSL modules and shaders
+  * Platform-specific functionality
+  * Lua as main scripting language (coming soon)
+  * etc
+* Std
+  * Skeletal animations
+  * Model loading (support of 40+ 3D model formats thanks to [Assimp](https://github.com/assimp/assimp))
+  * Custom materials (amtl)
+  * Cameras
+  * Basic effects
+  * etc
+* Ext
+  * Lighting
+  * Shadow mapping
+
+The engine has a modular design.
+
+## Roadmap
+
+Main goals for now (in priority order):
+
+- [ ] [Lua as main scripting language](doc/lua.md)
+  - [ ] Creators
+  - [ ] Core components (Engine, Texture2D, Framebuffer etc)
+  - [ ] Widgets
+  - [x] GLM classes (vec3, vec4, mat3, mat4, quat) and core functionality
+  - [ ] Replace JSON configs with Lua scripts
+  - [ ] Remove classes `Transferable` and `FileTransferable`
+- [ ] Editor <span style="font-size:0.5em">(UI: Lua + AlgineWidgets; Core: C++)</span>
 
 ## Examples
 
-Here the repository with examples of usage: [algine-examples](https://github.com/congard/algine-examples)
+Repository with my sandbox: [algine-examples](https://github.com/congard/algine-examples)
+
+More examples will be published soon.
 
 ## Building
 
@@ -49,12 +65,10 @@ See [doc/build](doc/build/README.md)
 
 ## Contact
 
-You can contact me via telegram or email:
-
 *   Telegram: [congard](https://t.me/congard)
 *   Email: [dbcongard@gmail.com](mailto:dbcongard@gmail.com)
 
-## You can support me financially
+## Donate
 
 <b>Payeer:</b> P36281059
 

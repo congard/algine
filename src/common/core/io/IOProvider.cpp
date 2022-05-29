@@ -30,6 +30,27 @@ std::string IOProvider::readStr(const std::string &path) const {
     return str;
 }
 
+void IOProvider::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "IOProvider"))
+        return;
+
+    Scriptable::registerLuaUsertype(lua);
+
+    auto usertype = lua->state()->new_usertype<IOProvider>("IOProvider", sol::base_classes, sol::bases<Scriptable>());
+    usertype["setIOSystem_raw"] = static_cast<void (IOProvider::*)(IOSystem*)>(&IOProvider::setIOSystem);
+    usertype["writeStr"] = &IOProvider::writeStr;
+    usertype["readStr"] = &IOProvider::readStr;
+
+    Lua::new_property(usertype, "ioSystem", "getIOSystem", "setIOSystem",
+        &IOProvider::getIOSystem, static_cast<void (IOProvider::*)(const std::shared_ptr<IOSystem>&)>(&IOProvider::setIOSystem));
+}
+
+void IOProvider::exec(const std::string &s, bool path, Lua *lua) {
+    exec_t<IOProvider>(s, path, lua);
+}
+
 const std::shared_ptr<IOSystem>& IOProvider::io() const {
     if (m_ioSystem == nullptr) {
         return Engine::getDefaultIOSystem();

@@ -2,15 +2,17 @@
 #define ALGINE_SHADERDEFINITIONGENERATOR_H
 
 #include <algine/core/transfer/Transferable.h>
+#include "algine/core/lua/Scriptable.h"
+#include <algine/core/Pair.h>
 #include <algine/types.h>
 
 #include <string>
 #include <vector>
 
 namespace algine {
-class ShaderDefinitionGenerator: public Transferable {
+class ShaderDefinitionGenerator: public Transferable, public virtual Scriptable {
 public:
-    typedef std::pair<std::string, std::string> Definition;
+    typedef Pair<std::string, std::string> Definition;
 
 public:
     void define(const std::string &macro, const std::string &value = std::string());
@@ -25,6 +27,11 @@ public:
 
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
+
+    static void registerLuaUsertype(Lua *lua);
+
+protected:
+    void exec(const std::string &s, bool path, Lua *lua) override;
 
 protected:
     std::vector<Definition> m_definitions;

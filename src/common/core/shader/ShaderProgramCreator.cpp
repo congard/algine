@@ -20,15 +20,15 @@ constant(Name, "name");
 }
 
 namespace algine {
-void ShaderProgramCreator::setShaders(const vector<ShaderCreator> &shaders) {
+void ShaderProgramCreator::setCreators(const vector<ShaderCreator> &shaders) {
     m_shaders = shaders;
 }
 
-void ShaderProgramCreator::addShader(const ShaderCreator &creator) {
+void ShaderProgramCreator::addCreator(const ShaderCreator &creator) {
     m_shaders.emplace_back(creator);
 }
 
-const vector<ShaderCreator>& ShaderProgramCreator::getShaders() const {
+const vector<ShaderCreator>& ShaderProgramCreator::getCreators() const {
     return m_shaders;
 }
 
@@ -180,5 +180,38 @@ JsonHelper ShaderProgramCreator::dump() {
 
 void ShaderProgramCreator::importFromFile(const std::string &path) {
     Creator::importFromFile(path);
+}
+
+void ShaderProgramCreator::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "ShaderProgramCreator"))
+        return;
+
+    lua->registerUsertype<ShaderProgram, ShaderCreator, ShaderDefinitionGenerator>();
+
+    auto ctors = sol::constructors<ShaderProgramCreator()>();
+    auto usertype = lua->state()->new_usertype<ShaderProgramCreator>(
+            "ShaderProgramCreator",
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors,
+            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ShaderDefinitionGenerator>());
+
+    Lua::new_property(usertype, "creators", "getCreators", "setCreators",
+        &ShaderProgramCreator::getCreators,
+        [](const sol::object &self, vector<ShaderCreator> creators) { self.as<ShaderProgramCreator>().setCreators(creators); });
+
+    Lua::new_property(usertype, "names", "getNames", "setNames",
+        &ShaderProgramCreator::getShaderNames,
+        [](const sol::object &self, vector<string> names) { self.as<ShaderProgramCreator>().setShaderNames(names); });
+
+    usertype["addCreator"] = &ShaderProgramCreator::addCreator;
+    usertype["addName"] = &ShaderProgramCreator::addShaderName;
+    usertype["get"] = &ShaderProgramCreator::get;
+    usertype["create"] = &ShaderProgramCreator::create;
+}
+
+void ShaderProgramCreator::exec(const std::string &s, bool path, Lua *lua) {
+    exec_t<ShaderProgramCreator>(s, path, lua);
 }
 }

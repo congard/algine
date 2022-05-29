@@ -25,6 +25,8 @@ public:
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
 
+    static void registerLuaUsertype(Lua *lua);
+
 protected:
     std::string m_name;
     Access m_access;

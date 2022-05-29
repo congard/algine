@@ -15,7 +15,7 @@ using namespace algine::internal;
 namespace algine {
 vector<ShaderPtr> Shader::publicObjects;
 
-Shader::Shader(const uint type) {
+Shader::Shader(Type type) {
     create(type);
 }
 
@@ -25,19 +25,19 @@ Shader::~Shader() {
     glDeleteShader(m_id);
 }
 
-void Shader::create(const uint type) {
+void Shader::create(Type type) {
     switch (type) {
-        case Vertex:
+        case Type::Vertex:
             m_id = glCreateShader(GL_VERTEX_SHADER);
             break;
-        case Fragment:
+        case Type::Fragment:
             m_id = glCreateShader(GL_FRAGMENT_SHADER);
             break;
-        case Geometry:
+        case Type::Geometry:
             m_id = glCreateShader(GL_GEOMETRY_SHADER);
             break;
         default:
-            cerr << "Unknown shader type " << type << "\n";
+            cerr << "Unknown shader type " << static_cast<int>(type) << "\n";
     }
 }
 
@@ -62,11 +62,38 @@ uint Shader::getId() const {
     return m_id;
 }
 
-ShaderPtr Shader::getByName(const string &name) {
+void Shader::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "Shader"))
+        return;
+
+    lua->registerUsertype<Object>();
+
+    auto factories = sol::factories(
+            []() { return PtrMaker::make<Shader>(); },
+            [](Type type) { return PtrMaker::make<Shader>(type); });
+
+    auto usertype = lua->state()->new_usertype<Shader>(
+            "Shader",
+            sol::call_constructor, factories,
+            sol::meta_function::construct, factories,
+            sol::base_classes, sol::bases<Object>());
+    usertype["create"] = &Shader::create;
+    usertype["fromSource"] = &Shader::fromSource;
+    usertype["fromFile"] = &Shader::fromFile;
+    usertype["getId"] = &Shader::getId;
+
+    // static
+    usertype["getByName"] = &Shader::getByName;
+    usertype["byName"] = &Shader::byName;
+}
+
+ShaderPtr Shader::getByName(string_view name) {
     return PublicObjectTools::getByName<ShaderPtr>(name);
 }
 
-Shader* Shader::byName(const string &name) {
+Shader* Shader::byName(string_view name) {
     return PublicObjectTools::byName<Shader>(name);
 }
 }

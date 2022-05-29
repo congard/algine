@@ -1,4 +1,5 @@
 #include <algine/core/log/Log.h>
+#include <algine/core/Engine.h>
 
 namespace algine {
 // Android inserts prefixes (I/, E/ etc) automatically
@@ -61,5 +62,28 @@ void Log::info(const std::string &tag, std::string_view str) {
 void Log::error(const std::string &tag, std::string_view str) {
     std::lock_guard lockGuard(m_mutex);
     LOG_ERROR(LOG_ERROR_TAG(tag), "%s", str.data());
+}
+
+void Log::registerLuaUsertype(Lua *lua) {
+    lua = lua ? lua : &Engine::getLua();
+    auto &state = *lua->state();
+
+    if (state["Log"].valid())
+        return;
+
+    auto usertype = state.new_usertype<Log>(
+            "Log",
+            sol::call_constructor, sol::no_constructor,
+            sol::meta_function::construct, sol::no_constructor);
+
+    usertype["info"] = sol::overload(
+        static_cast<void (*)(const std::string&, std::string_view)>(&Log::info),
+        [](std::string_view str) { Log::info("AlgineLua", str); }
+    );
+
+    usertype["error"] = sol::overload(
+        static_cast<void (*)(const std::string&, std::string_view)>(&Log::error),
+        [](std::string_view str) { Log::error("AlgineLua", str); }
+    );
 }
 }

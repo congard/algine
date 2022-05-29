@@ -106,4 +106,39 @@ JsonHelper ShaderDefinitionGenerator::dump() {
 
     return config;
 }
+
+void ShaderDefinitionGenerator::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "ShaderDefinitionGenerator"))
+        return;
+
+    Scriptable::registerLuaUsertype(lua);
+
+    auto &state = *lua->state();
+
+    auto usertype = state.new_usertype<ShaderDefinitionGenerator>(
+            "ShaderDefinitionGenerator", sol::base_classes, sol::bases<Scriptable>());
+
+    Lua::new_property(usertype, "definitions", "getDefinitions", "setDefinitions",
+        &ShaderDefinitionGenerator::getDefinitions,
+        [](const sol::object &self, vector<Definition> defs) { self.as<ShaderDefinitionGenerator>().setDefinitions(defs); });
+
+    usertype["define"] = static_cast<void (ShaderDefinitionGenerator::*)(const string&, const string&)>(&ShaderDefinitionGenerator::define);
+    usertype["removeDefinition"] = &ShaderDefinitionGenerator::removeDefinition;
+    usertype["resetDefinitions"] = &ShaderDefinitionGenerator::resetDefinitions;
+    usertype["appendDefinitions"] = [](const sol::object &self, vector<Definition> defs) { self.as<ShaderDefinitionGenerator>().appendDefinitions(defs); };
+
+    auto defCtors = sol::constructors<Definition(), Definition(const std::string&, const std::string&)>();
+    auto defUsertype = state["ShaderDefinitionGenerator"].get<sol::table>().new_usertype<Definition>(
+            "Definition",
+            sol::meta_function::construct, defCtors,
+            sol::call_constructor, defCtors);
+    defUsertype["key"] = &Definition::first;
+    defUsertype["value"] = &Definition::second;
+}
+
+void ShaderDefinitionGenerator::exec(const std::string &s, bool path, Lua *lua) {
+    exec_t<ShaderDefinitionGenerator>(s, path, lua);
+}
 }

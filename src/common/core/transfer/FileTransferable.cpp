@@ -33,4 +33,22 @@ void FileTransferable::importFromFile(const string &path) {
 void FileTransferable::dumpToFile(const string &path) {
     writeStr(path, dump().toString());
 }
+
+void FileTransferable::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "FileTransferable"))
+        return;
+
+    IOProvider::registerLuaUsertype(lua);
+
+    auto usertype = lua->state()->new_usertype<FileTransferable>(
+            "FileTransferable",
+            sol::meta_function::construct, sol::no_constructor,
+            sol::call_constructor, sol::no_constructor,
+            sol::base_classes, sol::bases<IOProvider>());
+
+    Lua::new_property(usertype, "workingDirectory", "getWorkingDirectory", "setWorkingDirectory",
+                      &FileTransferable::getWorkingDirectory, &FileTransferable::setWorkingDirectory);
+}
 }

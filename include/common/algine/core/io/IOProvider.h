@@ -2,13 +2,15 @@
 #define ALGINE_IOPROVIDER_H
 
 #include <algine/core/io/IOSystem.h>
+#include "algine/core/lua/Scriptable.h"
 
 #include <memory>
 
 namespace algine {
-class IOProvider {
+class IOProvider: public virtual Scriptable {
 public:
     IOProvider();
+    virtual ~IOProvider() = default;
 
     void setIOSystem(IOSystem *ioSystem);
     void setIOSystem(const std::shared_ptr<IOSystem> &ioSystem);
@@ -17,7 +19,10 @@ public:
     void writeStr(const std::string &path, const std::string &str) const;
     std::string readStr(const std::string &path) const;
 
+    static void registerLuaUsertype(Lua *lua);
+
 protected:
+    void exec(const std::string &s, bool path, Lua *lua) override;
     const std::shared_ptr<IOSystem>& io() const;
 
 private:

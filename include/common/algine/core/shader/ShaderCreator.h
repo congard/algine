@@ -18,10 +18,10 @@ namespace algine {
 class ShaderCreator: public ShaderDefinitionGenerator, public Creator {
 public:
     ShaderCreator();
-    explicit ShaderCreator(uint type);
+    explicit ShaderCreator(Shader::Type type);
 
-    void setType(uint type);
-    uint getType() const;
+    void setType(Shader::Type type);
+    Shader::Type getType() const;
 
     void setPath(const std::string &path);
     void setIncludePaths(const std::vector<std::string> &includePaths);
@@ -51,6 +51,11 @@ public:
 
     void importFromFile(const std::string &path) override;
 
+    static void registerLuaUsertype(Lua *lua);
+
+protected:
+    void exec(const std::string &s, bool path, Lua *lua) override;
+
 public:
     static void setGlobalIncludePaths(const std::vector<std::string> &includePaths);
     static void addGlobalIncludePaths(const std::vector<std::string> &includePaths);
@@ -67,7 +72,7 @@ private:
     std::string m_path;
     std::string m_source;
     std::string m_gen;
-    uint m_type;
+    Shader::Type m_type;
     bool m_dumperUseSources;
 
 private:

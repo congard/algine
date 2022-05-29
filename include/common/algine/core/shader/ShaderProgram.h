@@ -20,9 +20,9 @@ public:
     ShaderProgram();
     ~ShaderProgram();
 
-    void fromSource(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string()); // unnecessary can be left empty
+    void fromSource(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string());
     void fromSource(const ShadersInfo &shaders); // calls fromSource(v, f, g)
-    void fromFile(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string()); // unnecessary can be left empty
+    void fromFile(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string());
     void fromFile(const ShadersInfo &paths); // calls fromFile(v, f, g)
     void attachShader(const Shader &shader);
     void link();
@@ -65,13 +65,15 @@ public:
 
     uint getId() const;
 
-public: // TODO: make private
+    static void registerLuaUsertype(Lua *lua);
+
+public: // TODO: make private; add operator[]
     uint id;
     std::unordered_map<std::string, int> locations;
 
 public:
-    static ShaderProgramPtr getByName(const std::string &name);
-    static ShaderProgram* byName(const std::string &name);
+    static ShaderProgramPtr getByName(std::string_view name);
+    static ShaderProgram* byName(std::string_view name);
 
 public:
     static std::vector<ShaderProgramPtr> publicObjects;

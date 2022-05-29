@@ -71,6 +71,8 @@ std::string Engine::m_countryCode;
 
 Context Engine::m_appContext;
 
+Lua Engine::m_lua;
+
 long Engine::m_startTime;
 
 Framebuffer* Engine::m_defaultFramebuffer;
@@ -276,6 +278,12 @@ const std::string& Engine::getCountry() {
 
 const Context& Engine::getApplicationContext() {
     return m_appContext;
+}
+
+Lua& Engine::getLua() {
+    if (!m_lua.isInitialized())
+        m_lua.init();
+    return m_lua;
 }
 
 #ifdef ALGINE_SECURE_OPERATIONS

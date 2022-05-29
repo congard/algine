@@ -1,5 +1,4 @@
 #include <algine/core/Creator.h>
-
 #include <algine/core/JsonHelper.h>
 
 #include <algine/types.h>
@@ -68,5 +67,25 @@ JsonHelper Creator::dump() {
     config[Config::Access] = vector<string> {Private, Public} [static_cast<uint>(m_access)];
 
     return config;
+}
+
+void Creator::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "Creator"))
+        return;
+
+    lua->registerUsertype<FileTransferable>();
+
+    sol::usertype<Creator> usertype = lua->state()->new_usertype<Creator>(
+            "Creator", sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable>());
+
+    Lua::new_property(usertype, "name", "getName", "setName", &Creator::getName, &Creator::setName);
+    Lua::new_property(usertype, "access", "getAccess", "setAccess", &Creator::getAccess, &Creator::setAccess);
+
+    (*lua->state())["Creator"].get<sol::table>().new_enum(
+            "Access",
+            "Private", Access::Private,
+            "Public", Access::Public);
 }
 }

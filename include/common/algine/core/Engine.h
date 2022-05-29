@@ -4,6 +4,7 @@
 #include <algine/core/debug/DebugWriter.h>
 #include <algine/core/io/IOSystem.h>
 #include <algine/core/ContextConfig.h>
+#include "algine/core/lua/Lua.h"
 #include <algine/types.h>
 
 #include <unordered_map>
@@ -67,6 +68,8 @@ public:
     static const std::string& getCountry();
 
     static const Context& getApplicationContext();
+
+    static Lua& getLua();
 
     static Framebuffer* getBoundFramebuffer();
     static Renderbuffer* getBoundRenderbuffer();
@@ -169,6 +172,8 @@ private:
     static std::string m_countryCode;
 
     static Context m_appContext;
+
+    static Lua m_lua;
 
 private:
     static long m_startTime;

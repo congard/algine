@@ -8,14 +8,15 @@
 namespace algine {
 class ShaderProgramCreator: public ShaderDefinitionGenerator, public Creator {
 public:
-    void setShaders(const std::vector<ShaderCreator> &shaders);
-    void addShader(const ShaderCreator &creator);
-    const std::vector<ShaderCreator>& getShaders() const;
+    void setCreators(const std::vector<ShaderCreator> &shaders);
+    void addCreator(const ShaderCreator &creator);
+    const std::vector<ShaderCreator>& getCreators() const;
 
     void setShaderNames(const std::vector<std::string> &names);
     void addShaderName(const std::string &name);
     const std::vector<std::string>& getShaderNames() const;
 
+    // TODO: deprecated, will be removed in the future
     void setShaderPaths(const std::vector<std::string> &paths);
     void addShaderPath(const std::string &path);
     const std::vector<std::string>& getShaderPaths() const;
@@ -27,6 +28,11 @@ public:
     JsonHelper dump() override;
 
     void importFromFile(const std::string &path) override;
+
+    static void registerLuaUsertype(Lua *lua);
+
+protected:
+    void exec(const std::string &s, bool path, Lua *lua) override;
 
 private:
     std::vector<ShaderCreator> m_shaders;
