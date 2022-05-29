@@ -51,7 +51,7 @@ ShaderPtr QuadRenderer::getVertexShader() {
     if (const ShaderPtr &ptr = Shader::getByName(name); ptr != nullptr) {
         return ptr;
     } else {
-        ShaderCreator creator(Shader::Vertex);
+        ShaderCreator creator(Shader::Type::Vertex);
         creator.setAccess(Creator::Access::Public);
         creator.setName(name);
         creator.setPath("@algine/Quad.vs.glsl");

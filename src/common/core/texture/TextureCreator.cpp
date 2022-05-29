@@ -58,8 +58,8 @@ void TextureCreator::import(const JsonHelper &jsonHelper) {
 
     // load type
     m_type = map<string, Type> {
-        {Texture2D, Type::Texture2D},
-        {TextureCube, Type::TextureCube}
+        {Config::Texture2D, Type::Texture2D},
+        {Config::TextureCube, Type::TextureCube}
     } [config[Config::Type]];
 
     // load data type
@@ -84,7 +84,7 @@ JsonHelper TextureCreator::dump() {
     json config;
 
     // write type
-    config[Config::Type] = vector<string> {Texture2D, TextureCube} [static_cast<uint>(m_type)];
+    config[Config::Type] = vector<string> {Config::Texture2D, Config::TextureCube} [static_cast<uint>(m_type)];
 
     // write data type
     if (m_writeFileSection)

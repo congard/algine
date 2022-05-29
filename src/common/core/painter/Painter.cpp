@@ -53,7 +53,7 @@ Painter::Painter()
     m_layout->unbind();
 
     auto initProgram = [](ShaderProgramPtr &program, const ShaderPtr &vs, const char* fsSource) {
-        ShaderCreator fsCreator(Shader::Fragment);
+        ShaderCreator fsCreator(Shader::Type::Fragment);
         fsCreator.setSource(fsSource);
 
         program = PtrMaker::make();
@@ -65,7 +65,7 @@ Painter::Painter()
 
     // init shaders if haven't been inited yet
     if (m_fill == nullptr) {
-        ShaderCreator vsCreator(Shader::Vertex);
+        ShaderCreator vsCreator(Shader::Type::Vertex);
         vsCreator.setSource(PainterShaders::painter_vs);
 
         auto vs = vsCreator.create();

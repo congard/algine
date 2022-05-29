@@ -200,7 +200,7 @@ pair<ShaderProgramPtr, ShaderProgramPtr> Blur::getPingPongShaders(uint kernelRad
     ShaderPtr fragmentPing;
     ShaderPtr fragmentPong;
 
-    ShaderCreator fragmentCreator(Shader::Fragment);
+    ShaderCreator fragmentCreator(Shader::Type::Fragment);
     fragmentCreator.setPath("@algine/Blur.fs.glsl");
     fragmentCreator.define(Settings::KernelRadius, linearSampling ? (kernelRadius / 2 + 1) : kernelRadius);
     fragmentCreator.define(Settings::OutputType, [&]() {
