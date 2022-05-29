@@ -15,9 +15,9 @@ namespace algine::internal::PublicObjectTools {
 constexpr uint notFound = static_cast<uint>(-1);
 
 template<typename TPtr>
-inline uint indexByName(const vector<TPtr> &array, const string &name) {
+inline uint indexByName(const vector<TPtr> &array, string_view name) {
     for (uint i = 0; i < array.size(); i++) {
-        if (array[i]->name == name) {
+        if (array[i]->getName() == name) {
             return i;
         }
     }
@@ -26,7 +26,7 @@ inline uint indexByName(const vector<TPtr> &array, const string &name) {
 }
 
 template<typename TPtr>
-inline TPtr getByName(const string &name) {
+inline TPtr getByName(string_view name) {
     const auto &array = PtrMaker::PtrType<TPtr>::publicObjects;
 
     uint index = indexByName(array, name);
@@ -38,7 +38,7 @@ inline TPtr getByName(const string &name) {
 }
 
 template<typename T>
-inline T* byName(const string &name) {
+inline T* byName(string_view name) {
     const auto &array = T::publicObjects;
 
     uint index = indexByName(array, name);
