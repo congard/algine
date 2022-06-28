@@ -1,10 +1,6 @@
 #include <algine/core/shader/BaseUniformBlock.h>
-
 #include <algine/core/Engine.h>
-
 #include <algine/gl.h>
-
-using namespace std;
 
 namespace algine {
 void BaseUniformBlock::init(const ShaderProgram *shaderProgram) {
@@ -49,7 +45,7 @@ void BaseUniformBlock::setBuffer(UniformBuffer *buffer) {
     m_uniformBuffer = buffer;
 }
 
-void BaseUniformBlock::setName(const string &name) {
+void BaseUniformBlock::setName(std::string_view name) {
     m_name = name;
 }
 
@@ -62,7 +58,7 @@ UniformBuffer* BaseUniformBlock::getBuffer() const {
     return m_uniformBuffer;
 }
 
-string BaseUniformBlock::getName() const {
+const std::string& BaseUniformBlock::getName() const {
     return m_name;
 }
 
@@ -78,16 +74,14 @@ uint BaseUniformBlock::getSize() const {
     return m_blockSize;
 }
 
-// TODO: use std::string_view instead
-
-uint BaseUniformBlock::getVarIndex(const std::string &name, const ShaderProgram *shaderProgram) {
+uint BaseUniformBlock::getVarIndex(std::string_view name, const ShaderProgram *shaderProgram) {
     uint index;
-    auto varName = name.c_str();
+    auto varName = name.data();
     glGetUniformIndices(shaderProgram->getId(), 1, &varName, &index);
     return index;
 }
 
-uint BaseUniformBlock::getVarOffset(const std::string &name, const ShaderProgram *shaderProgram) {
+uint BaseUniformBlock::getVarOffset(std::string_view name, const ShaderProgram *shaderProgram) {
     uint varIndex = getVarIndex(name, shaderProgram);
 
     // If skip this check and the GLSL compiler removes the variable (if it unused, e.g in packed format),
@@ -102,7 +96,7 @@ uint BaseUniformBlock::getVarOffset(const std::string &name, const ShaderProgram
     return VariableNotFound;
 }
 
-bool BaseUniformBlock::isVarValid(const std::string &name, const ShaderProgram *shaderProgram) {
+bool BaseUniformBlock::isVarValid(std::string_view name, const ShaderProgram *shaderProgram) {
     return getVarIndex(name, shaderProgram) != VariableNotFound;
 }
 }

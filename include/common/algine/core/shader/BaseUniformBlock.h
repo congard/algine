@@ -20,24 +20,25 @@ public:
     void unbindBuffer() const;
 
     void setBuffer(UniformBuffer *buffer);
-    void setName(const std::string &name);
+    void setName(std::string_view name);
     void setBindingPoint(uint bindingPoint);
 
     UniformBuffer* getBuffer() const;
-    std::string getName() const;
+    const std::string& getName() const;
     uint getBindingPoint() const;
     uint getIndex(const ShaderProgram *shaderProgram) const;
     uint getSize() const;
 
 public:
-    static uint getVarIndex(const std::string &name, const ShaderProgram *shaderProgram);
-    static uint getVarOffset(const std::string &name, const ShaderProgram *shaderProgram);
-    static bool isVarValid(const std::string &name, const ShaderProgram *shaderProgram);
+    static uint getVarIndex(std::string_view name, const ShaderProgram *shaderProgram);
+    static uint getVarOffset(std::string_view name, const ShaderProgram *shaderProgram);
+    static bool isVarValid(std::string_view name, const ShaderProgram *shaderProgram);
 
 protected:
     std::string m_name;
     UniformBuffer *m_uniformBuffer;
-    uint m_bindingPoint = 0, m_blockSize;
+    uint m_bindingPoint = 0;
+    uint m_blockSize;
 };
 }
 
