@@ -14,8 +14,19 @@ void registerArray(std::string_view name, sol::state &lua) {
 
         std::string result = "[";
 
-        for (int i = 0; i < self.size(); ++i)
-            result += std::to_string(self[i]) + ", ";
+        if constexpr(std::is_same_v<T, sol::object>) {
+            sol::state_view stateView(self[0].lua_state());
+            sol::function tostring = stateView["tostring"];
+
+            for (int i = 0; i < self.size(); ++i) {
+                const sol::object &obj = self[i];
+                result += tostring(obj).get<std::string>() + ", ";
+            }
+        } else {
+            for (int i = 0; i < self.size(); ++i) {
+                result += std::to_string(self[i]) + ", ";
+            }
+        }
 
         result.erase(result.length() - 1);
         result[result.length() - 1] = ']';
@@ -29,7 +40,7 @@ void registerArray(std::string_view name, sol::state &lua) {
             sol::call_constructor, ctors,
             sol::meta_function::construct, ctors,
             sol::meta_function::index, static_cast<const T& (array::*)(size_t) const>(&array::operator[]),
-            sol::meta_function::new_index, [](array &self, size_t index, T value) { self[index] = value; },
+            sol::meta_function::new_index, [](array &self, size_t index, T value) { self[index] = std::move(value); },
             sol::meta_function::length, &array::size,
             sol::meta_function::to_string, to_string);
 
@@ -44,6 +55,7 @@ void TulzLuaTypes::registerLuaUsertype(Lua *lua) {
     lua = lua ? lua : &Engine::getLua();
     auto &state = *lua->state();
 
+    registerArray<sol::object>("Array", state);
     registerArray<uint>("UnsignedArray", state);
     registerArray<int>("IntArray", state);
     registerArray<float>("FloatArray", state);

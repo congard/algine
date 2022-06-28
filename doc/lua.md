@@ -97,6 +97,7 @@ Glm:
 
 Tulz:
 
+- [x] Array
 - [x] UnsignedArray
 - [x] IntArray
 - [x] FloatArray
