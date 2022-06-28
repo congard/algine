@@ -8,13 +8,11 @@
 class Shader;
 class ShaderProgram;
 
-namespace algine {
-namespace ShaderTools {
+namespace algine::ShaderTools {
 std::string getShaderInfoLogById(uint shader, uint type);
 std::string getProgramInfoLogById(uint program, uint type);
 std::string getShaderInfoLog(const Shader *shader, uint type);
 std::string getProgramInfoLog(const ShaderProgram *program, uint type);
-}
 }
 
 #endif //ALGINE_SHADERTOOLS_H

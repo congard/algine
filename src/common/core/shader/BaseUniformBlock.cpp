@@ -9,12 +9,12 @@ using namespace std;
 namespace algine {
 void BaseUniformBlock::init(const ShaderProgram *shaderProgram) {
     const uint blockIndex = getIndex(shaderProgram);
-    glGetActiveUniformBlockiv(shaderProgram->id, blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE,
+    glGetActiveUniformBlockiv(shaderProgram->getId(), blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE,
                               reinterpret_cast<int*>(&m_blockSize));
 }
 
 void BaseUniformBlock::assignBindingPoint(const ShaderProgram *shaderProgram) const {
-    glUniformBlockBinding(shaderProgram->id, getIndex(shaderProgram), m_bindingPoint);
+    glUniformBlockBinding(shaderProgram->getId(), getIndex(shaderProgram), m_bindingPoint);
 }
 
 void BaseUniformBlock::allocateSuitableBufferSize() {
@@ -71,18 +71,19 @@ uint BaseUniformBlock::getBindingPoint() const {
 }
 
 uint BaseUniformBlock::getIndex(const ShaderProgram *shaderProgram) const {
-    return glGetUniformBlockIndex(shaderProgram->id, m_name.c_str());;
+    return glGetUniformBlockIndex(shaderProgram->getId(), m_name.c_str());;
 }
 
 uint BaseUniformBlock::getSize() const {
     return m_blockSize;
 }
 
+// TODO: use std::string_view instead
+
 uint BaseUniformBlock::getVarIndex(const std::string &name, const ShaderProgram *shaderProgram) {
     uint index;
     auto varName = name.c_str();
-    glGetUniformIndices(shaderProgram->id, 1, &varName, &index);
-
+    glGetUniformIndices(shaderProgram->getId(), 1, &varName, &index);
     return index;
 }
 
@@ -94,7 +95,7 @@ uint BaseUniformBlock::getVarOffset(const std::string &name, const ShaderProgram
     // Since varIndex will contain VariableNotFound
     if (varIndex != VariableNotFound) {
         int offset;
-        glGetActiveUniformsiv(shaderProgram->id, 1, &varIndex, GL_UNIFORM_OFFSET, &offset);
+        glGetActiveUniformsiv(shaderProgram->getId(), 1, &varIndex, GL_UNIFORM_OFFSET, &offset);
         return offset;
     }
 

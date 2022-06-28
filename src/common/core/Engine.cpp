@@ -166,7 +166,7 @@ void Engine::init() {
     m_defaultUniformBuffer->m_target = GL_UNIFORM_BUFFER;
 
     m_defaultShaderProgram = (ShaderProgram*) malloc(sizeof(ShaderProgram));
-    m_defaultShaderProgram->id = 0;
+    m_defaultShaderProgram->m_id = 0;
 
     m_defaultInputLayout = (InputLayout*) malloc(sizeof(InputLayout));
     m_defaultInputLayout->m_id = 0;

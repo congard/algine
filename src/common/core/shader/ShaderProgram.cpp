@@ -14,7 +14,7 @@
 
 #define SOP_BOUND_PTR Engine::getBoundShaderProgram()
 #define SOP_OBJECT_TYPE SOPConstants::ShaderProgramObject
-#define SOP_OBJECT_ID id
+#define SOP_OBJECT_ID m_id
 #define SOP_OBJECT_NAME SOPConstants::ShaderProgramStr
 #include "internal/SOP.h"
 #include "internal/SOPConstants.h"
@@ -29,10 +29,10 @@ namespace algine {
 vector<ShaderProgramPtr> ShaderProgram::publicObjects;
 
 ShaderProgram::ShaderProgram()
-    : id(glCreateProgram()) {}
+    : m_id(glCreateProgram()) {}
 
 ShaderProgram::~ShaderProgram() {
-    glDeleteProgram(id);
+    glDeleteProgram(m_id);
 }
 
 void ShaderProgram::fromSource(const string &vertex, const string &fragment, const string &geometry) {
@@ -73,22 +73,22 @@ void ShaderProgram::fromFile(const ShadersInfo &paths) {
 }
 
 void ShaderProgram::attachShader(const Shader &shader) {
-    glAttachShader(id, shader.getId());
+    glAttachShader(m_id, shader.getId());
 }
 
 void ShaderProgram::link() {
-    glLinkProgram(id);
+    glLinkProgram(m_id);
 
-    string infoLog = ShaderTools::getProgramInfoLogById(id, GL_LINK_STATUS);
+    string infoLog = ShaderTools::getProgramInfoLogById(m_id, GL_LINK_STATUS);
 
     if (!infoLog.empty()) {
-        cerr << "Info log of ShaderProgram with id " << id << ": " << infoLog;
+        cerr << "Info log of ShaderProgram with id " << m_id << ": " << infoLog;
     }
 }
 
 void ShaderProgram::loadUniformLocation(const string &name) {
-    if (locations.find(name) == locations.end()) {
-        locations[name] = glGetUniformLocation(id, name.c_str());
+    if (m_locations.find(name) == m_locations.end()) {
+        m_locations[name] = glGetUniformLocation(m_id, name.c_str());
     }
 }
 
@@ -99,8 +99,8 @@ void ShaderProgram::loadUniformLocations(const vector<string> &names) {
 }
 
 void ShaderProgram::loadAttribLocation(const string &name) {
-    if (locations.find(name) == locations.end()) {
-        locations[name] = glGetAttribLocation(id, name.c_str());
+    if (m_locations.find(name) == m_locations.end()) {
+        m_locations[name] = glGetAttribLocation(m_id, name.c_str());
     }
 }
 
@@ -114,8 +114,8 @@ void ShaderProgram::loadActiveLocations() {
     int numActiveAttribs = 0;
     int numActiveUniforms = 0;
 
-    glGetProgramInterfaceiv(id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numActiveAttribs);
-    glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
+    glGetProgramInterfaceiv(m_id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numActiveAttribs);
+    glGetProgramInterfaceiv(m_id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
 
     vector<char> nameData;
     uint properties[] = {GL_NAME_LENGTH};
@@ -123,12 +123,12 @@ void ShaderProgram::loadActiveLocations() {
 
     auto getName = [&](uint type, uint index)
     {
-        glGetProgramResourceiv(id, type, index, getArraySize(properties),
+        glGetProgramResourceiv(m_id, type, index, getArraySize(properties),
                                &properties[0], getArraySize(values), nullptr, &values[0]);
 
         nameData.resize(values[0]); // the length of the name
 
-        glGetProgramResourceName(id, type, index, nameData.size(), nullptr, &nameData[0]);
+        glGetProgramResourceName(m_id, type, index, nameData.size(), nullptr, &nameData[0]);
 
         return string(&nameData[0], nameData.size() - 1);
     };
@@ -144,11 +144,11 @@ void ShaderProgram::loadActiveLocations() {
 
 int ShaderProgram::getLocation(const string &name) {
 #ifdef ALGINE_SECURE_OPERATIONS
-    auto it = locations.find(name);
+    auto it = m_locations.find(name);
 
-    if (it == locations.end()) {
+    if (it == m_locations.end()) {
         ALGINE_SOP_ERROR(
-            "Variable " + name + " does not exist in program with id " + to_string(id) + "\n"
+            "Variable " + name + " does not exist in program with id " + to_string(m_id) + "\n"
             "Maybe you have forgotten to call loadActiveLocations() first?"
         );
     } else {
@@ -163,7 +163,7 @@ int ShaderProgram::getLocation(const string &name) {
 
 void ShaderProgram::bind() {
     commitBinding()
-    glUseProgram(id);
+    glUseProgram(m_id);
 }
 
 void ShaderProgram::unbind() {
@@ -281,7 +281,7 @@ void ShaderProgram::setMat4(const string &location, const glm::mat4 &p) {
 }
 
 uint ShaderProgram::getId() const {
-    return id;
+    return m_id;
 }
 
 void ShaderProgram::registerLuaUsertype(Lua *lua) {

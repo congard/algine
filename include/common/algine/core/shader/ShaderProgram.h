@@ -16,6 +16,8 @@
 
 namespace algine {
 class ShaderProgram: public Object {
+    friend class Engine;
+
 public:
     ShaderProgram();
     ~ShaderProgram();
@@ -67,9 +69,9 @@ public:
 
     static void registerLuaUsertype(Lua *lua);
 
-public: // TODO: make private; add operator[]
-    uint id;
-    std::unordered_map<std::string, int> locations;
+private:
+    uint m_id;
+    std::unordered_map<std::string, int> m_locations;
 
 public:
     static ShaderProgramPtr getByName(std::string_view name);

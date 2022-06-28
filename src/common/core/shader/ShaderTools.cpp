@@ -8,50 +8,48 @@
 using namespace std;
 using namespace tulz;
 
-namespace algine {
-namespace ShaderTools {
-string getShaderInfoLogById(const uint shader, const uint type) {
+namespace algine::ShaderTools {
+string getShaderInfoLogById(uint shader, uint type) {
     GLint infoLogSize, success;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogSize);
 
     if (infoLogSize == 0)
-        return string();
+        return {};
 
     Array<char> infoLog(infoLogSize);
     glGetShaderiv(shader, type, &success);
 
     if (!success) {
         glGetShaderInfoLog(shader, infoLogSize, nullptr, infoLog.array());
-        return string(infoLog.array());
+        return infoLog.array();
     }
 
-    return string();
+    return {};
 }
 
-string getProgramInfoLogById(const uint program, const uint type) {
+string getProgramInfoLogById(uint program, uint type) {
     GLint infoLogSize, success;
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogSize);
 
     if (infoLogSize == 0)
-        return string();
+        return {};
 
     Array<char> infoLog(infoLogSize);
     glGetProgramiv(program, type, &success);
 
     if (!success) {
         glGetProgramInfoLog(program, infoLogSize, nullptr, infoLog.array());
-        return string(infoLog.array());
+        return infoLog.array();
     }
 
-    return string();
+    return {};
 }
 
-string getShaderInfoLog(const Shader *const shader, const uint type) {
+string getShaderInfoLog(const Shader *shader, uint type) {
     return getShaderInfoLogById(shader->getId(), type);
 }
 
-string getProgramInfoLog(const ShaderProgram *const program, const uint type) {
-    return getProgramInfoLogById(program->id, type);
-}
+string getProgramInfoLog(const ShaderProgram *program, uint type) {
+    return getProgramInfoLogById(program->getId(), type);
 }
 }
