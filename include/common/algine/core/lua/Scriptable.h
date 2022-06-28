@@ -1,7 +1,7 @@
 #ifndef ALGINE_SCRIPTABLE_H
 #define ALGINE_SCRIPTABLE_H
 
-#include "algine/core/Engine.h"
+#include <algine/core/Engine.h>
 
 namespace algine {
 class Scriptable {
@@ -36,10 +36,10 @@ protected:
             // in case if exceptions are disabled
             if (!result.valid()) {
                 sol::error error = result;
-                std::cout << error.what() << std::endl;
+                fprintf(stderr, "%s\n", error.what());
             }
-        } catch (...) {
-            // TODO
+        } catch (sol::error &error) {
+            fprintf(stderr, "%s\n", error.what());
         }
     }
 };
