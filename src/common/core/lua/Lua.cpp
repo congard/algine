@@ -3,6 +3,7 @@
 #include <algine/core/lua/TulzLuaTypes.h>
 
 #include "AlgineCore.h"
+#include "CoreLua.h"
 
 namespace algine {
 void Lua::init() {
@@ -19,19 +20,7 @@ void Lua::init() {
         }
     });
 
-    m_lua->script(R"(
-local lua_require = require
-
-require = function(name)
-    local algineStrLen = string.len("algine")
-
-    if string.sub(name, 1, algineStrLen) == "algine" then
-        return algine_require(string.sub(name, algineStrLen + 2))
-    else
-        return lua_require(name)
-    end
-end
-)");
+    m_lua->script(core_lua);
 }
 
 bool Lua::isInitialized() const {

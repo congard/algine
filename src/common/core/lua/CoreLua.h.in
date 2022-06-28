@@ -1,0 +1,8 @@
+#ifndef ALGINE_CORELUA_H
+#define ALGINE_CORELUA_H
+
+namespace algine {
+constexpr auto core_lua = R"(${Lua_core_lua})";
+}
+
+#endif //ALGINE_CORELUA_H

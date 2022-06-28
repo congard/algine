@@ -134,12 +134,18 @@ file(READ src/common/core/painter/text-fill.fs.glsl Painter_text_fill_fs)
 
 configure_file(src/common/core/painter/PainterShaders.h.in src/common/core/painter/PainterShaders.h)
 
+# lua files
+file(READ src/common/core/lua/core.lua Lua_core_lua)
+
+configure_file(src/common/core/lua/CoreLua.h.in src/common/core/lua/CoreLua.h)
+
 set(ALGINE_CORE_SOURCES
         libs/pugixml/src/pugixml.cpp
 
         src/common/core/glsl-modules/GLSLModules.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules/GLSLModules.h
         src/common/core/glsl-shaders/GLSLShaders.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders/GLSLShaders.h
         src/common/core/painter/PainterShaders.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter/PainterShaders.h
+        src/common/core/lua/CoreLua.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/CoreLua.h
 
         src/common/internal/PublicObjectTools.h
         src/common/internal/SOP.h
@@ -395,7 +401,8 @@ target_include_directories(algine PRIVATE
         src/common
         ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules
         ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders
-        ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter)
+        ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter
+        ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua)
 
 target_include_directories(algine PRIVATE
         libs/assimp/include

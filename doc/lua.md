@@ -11,7 +11,7 @@ json configs that we are now using in Creators.
 Secondly, we need Lua to simplify developer's lives - not all projects need to be written in
 C++, so in this case easy to learn language like Lua would be a great solution.
 
-And finally, we need Lua to create Editor, since it will much easier to create it using language like Lua.
+And finally, we need Lua to create Editor, since it will be much easier to create it using language like Lua.
 
 ## Classes
 
@@ -108,6 +108,8 @@ In reality this list will be much bigger
 ## TODOs
 
 - [x] Redefine Lua's `require` to load Algine types (base, widgets, core (base+widgets), std, glm, tulz), e.g. `require('algine:core')`
+- [x] Redefine Lua's `tostring` for tables
+- [x] Redefine Lua's `print` to add ability to print tables
 
 ## Useful pages
 
