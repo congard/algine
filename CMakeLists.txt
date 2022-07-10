@@ -275,7 +275,8 @@ set(ALGINE_CORE_SOURCES
         src/common/core/lua/GLMLuaTypes.cpp include/common/algine/core/lua/GLMLuaTypes.h
         src/common/core/lua/TulzLuaTypes.cpp include/common/algine/core/lua/TulzLuaTypes.h
         src/common/core/lua/glm_string_cast.h src/common/core/lua/glm_string_cast.cpp
-        src/common/core/lua/AlgineCore.h)
+        src/common/core/lua/AlgineCore.h
+        src/common/core/lua/DataType.cpp include/common/algine/core/lua/DataType.h)
 
 set(ALGINE_STD_SOURCES
         include/common/algine/std/animation/BoneSystemModuleConstants.h
