@@ -40,7 +40,9 @@ void Object::registerLuaUsertype(Lua *lua) {
     // class will not be created in Lua, implemented in
     // inheritance purposes
 
-    auto usertype = lua->state()->new_usertype<Object>("Object");
+    auto usertype = lua->state()->new_usertype<Object>(
+            "Object",
+            sol::base_classes, sol::bases<Scriptable>());
     Lua::new_property(usertype, "name", "getName", "setName", &Object::getName, &Object::setName);
 }
 }
