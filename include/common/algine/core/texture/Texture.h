@@ -111,7 +111,7 @@ public:
 
 public:
     Texture();
-    ~Texture();
+    virtual ~Texture();
 
     void bind() const;
     void unbind() const;
@@ -154,12 +154,15 @@ public:
     static void activateSlot(uint slot);
     static FormatInfo getFormatInfo(uint format);
 
+    static void registerLuaUsertype(Lua *lua);
+
 protected:
     uint m_target = 0; // texture 2d, texture cube etc
     uint m_id = 0;
     uint m_lod = 0;
     uint m_format = RGB16F;
-    uint m_width = 512, m_height = 512;
+    uint m_width = 512;
+    uint m_height = 512;
 
 protected:
     explicit Texture(uint target);

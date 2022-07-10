@@ -9,14 +9,19 @@ class Texture2DCreator: public TextureCreator {
 public:
     Texture2DCreator();
 
-    void setPath(const std::string &path);
-    std::string getPath() const;
+    void setPath(std::string_view path);
+    const std::string& getPath() const;
 
     Texture2DPtr get();
     Texture2DPtr create();
 
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
+
+    static void registerLuaUsertype(Lua *lua);
+
+protected:
+    void exec(const std::string &s, bool path, Lua *lua) override;
 
 private:
     std::string m_path;

@@ -23,10 +23,10 @@ Creators:
 - [x] ShaderCreator
 - [x] ShaderDefinitionGenerator
 - [x] ShaderProgramCreator
-- [ ] TextureCreator
-- [ ] Texture2DCreator
-- [ ] TextureCubeCreator
-- [ ] ImageCreator
+- [x] TextureCreator
+- [x] Texture2DCreator
+- [x] TextureCubeCreator
+- [x] ImageCreator
 - [ ] FramebufferCreator
 - [ ] RenderbufferCreator
 - [ ] OutputListCreator
@@ -52,9 +52,9 @@ Core:
 - [ ] UniformBuffer
 - [x] Shader
 - [x] ShaderProgram
-- [ ] Texture
-- [ ] Texture2D
-- [ ] TextureCube
+- [x] Texture
+- [x] Texture2D
+- [x] TextureCube
 - [ ] Framebuffer
 - [ ] Renderbuffer
 - [ ] InputLayout

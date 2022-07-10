@@ -27,11 +27,11 @@ TextureCubeCreator::TextureCubeCreator() {
     m_defaultParams = TextureCube::defaultParams();
 }
 
-void TextureCubeCreator::setPath(const string &path, TextureCube::Face face) {
+void TextureCubeCreator::setPath(std::string_view path, TextureCube::Face face) {
     m_paths[face] = path;
 }
 
-string TextureCubeCreator::getPath(TextureCube::Face face) const {
+const std::string& TextureCubeCreator::getPath(TextureCube::Face face) const {
     return m_paths.at(face);
 }
 
@@ -130,5 +130,32 @@ JsonHelper TextureCubeCreator::dump() {
     config.append(TextureCreator::dump());
 
     return config;
+}
+
+void TextureCubeCreator::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "TextureCubeCreator"))
+        return;
+
+    lua->registerUsertype<TextureCreator, TextureCube>();
+
+    auto ctors = sol::constructors<TextureCubeCreator()>();
+    auto usertype = lua->state()->new_usertype<TextureCubeCreator>(
+            "TextureCubeCreator",
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors,
+            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ImageCreator, TextureCreator>());
+
+    usertype["get"] = &TextureCubeCreator::get;
+    usertype["create"] = &TextureCubeCreator::create;
+    usertype["setPath"] = &TextureCubeCreator::setPath;
+    usertype["getPath"] = &TextureCubeCreator::getPath;
+    usertype["setPaths"] = [](TextureCubeCreator &self, std::map<TextureCube::Face, std::string> paths) { self.setPaths(paths); };
+    usertype["getPaths"] = &TextureCubeCreator::getPaths;
+}
+
+void TextureCubeCreator::exec(const std::string &s, bool path, Lua *lua) {
+    exec_t<TextureCubeCreator>(s, path, lua);
 }
 }

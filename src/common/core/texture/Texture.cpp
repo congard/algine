@@ -1,5 +1,6 @@
 #include <algine/core/texture/Texture.h>
 #include <algine/core/Engine.h>
+#include <algine/core/lua/DataType.h>
 
 #include <iostream>
 
@@ -283,5 +284,102 @@ void Texture::texFromFile(uint target, const TextureFileInfo &info) { // TODO: T
     }
 
     stbi_image_free(data);
+}
+
+void Texture::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "Texture"))
+        return;
+
+    lua->registerUsertype<Object, lua::DataType>();
+
+    auto &state = *lua->state();
+
+    auto usertype = state.new_usertype<Texture>(
+            "Texture",
+            sol::meta_function::construct, sol::no_constructor,
+            sol::call_constructor, sol::no_constructor,
+            sol::base_classes, sol::bases<Scriptable, Object>());
+
+    usertype["bind"] = &Texture::bind;
+    usertype["unbind"] = &Texture::unbind;
+    usertype["use"] = &Texture::use;
+    usertype["setParams"] = [](Texture &self, std::map<uint, uint> params) { self.setParams(params); };
+    usertype["setParamsf"] = [](Texture &self, std::map<uint, float> params) { self.setParams(params); };
+    usertype["applyTextureCreateInfo"] = &Texture::applyTextureCreateInfo;
+    usertype["setDimensions"] = &Texture::setDimensions;
+    usertype["getId"] = &Texture::getId;
+    usertype["getParam"] = &Texture::getParam;
+    usertype["getActualFormat"] = &Texture::getActualFormat;
+    usertype["getActualWidth"] = &Texture::getActualWidth;
+    usertype["getActualHeight"] = &Texture::getActualHeight;
+
+    Lua::new_property(usertype, "lod", "getLOD", "setLOD", &Texture::getLOD, &Texture::setLOD);
+    Lua::new_property(usertype, "format", "getFormat", "setFormat", &Texture::getFormat, &Texture::setFormat);
+    Lua::new_property(usertype, "width", "getWidth", "setWidth", &Texture::getWidth, &Texture::setWidth);
+
+    usertype["activateSlot"] = &Texture::activateSlot;
+    usertype["getFormatInfo"] = &Texture::getFormatInfo;
+
+    auto table = state["Texture"].get<sol::table>();
+
+    // register classes
+    auto formatInfo = table.new_usertype<FormatInfo>("FormatInfo");
+    formatInfo["baseFormat"] = &FormatInfo::baseFormat;
+    formatInfo["dataType"] = &FormatInfo::dataType;
+
+    auto textureCreateInfoCtors = sol::constructors<TextureCreateInfo()>();
+    auto textureCreateInfo = state.new_usertype<TextureCreateInfo>(
+            "TextureCreateInfo",
+            sol::meta_function::construct, textureCreateInfoCtors,
+            sol::call_constructor, textureCreateInfoCtors);
+    textureCreateInfo["lod"] = &TextureCreateInfo::lod;
+    textureCreateInfo["format"] = &TextureCreateInfo::format;
+    textureCreateInfo["width"] = &TextureCreateInfo::width;
+    textureCreateInfo["height"] = &TextureCreateInfo::height;
+    textureCreateInfo["params"] = &TextureCreateInfo::params;
+
+    auto textureFileInfoCtors = sol::constructors<TextureFileInfo()>();
+    auto textureFileInfo = state.new_usertype<TextureFileInfo>(
+            "TextureFileInfo",
+            sol::meta_function::construct, textureFileInfoCtors,
+            sol::call_constructor, textureFileInfoCtors);
+    textureFileInfo["path"] = &TextureFileInfo::path;
+    textureFileInfo["ioSystem"] = &TextureFileInfo::ioSystem;
+    textureFileInfo["dataType"] = &TextureFileInfo::dataType;
+    textureFileInfo["flip"] = &TextureFileInfo::flip;
+
+    // register enums
+    // TODO: remove ImageConfigTools
+
+#define kv(val) #val, Texture::val
+
+    table.new_enum("Param",
+        kv(MinFilter), kv(MagFilter),
+        kv(WrapU), kv(WrapV), kv(WrapW)
+    );
+
+    table.new_enum("Value",
+        kv(Nearest),
+        kv(Linear),
+        kv(ClampToEdge),
+        kv(ClampToBorder),
+        kv(Repeat),
+        kv(MirroredRepeat)
+        enable_if_desktop(, kv(desktop_MirrorClampToEdge))
+    );
+
+    table.new_enum("Format",
+        kv(DepthComponent), kv(DepthComponent16), kv(DepthComponent24), kv(DepthComponent32F),
+        kv(DepthStencil), kv(Depth24Stencil8), kv(Depth32FStencil8),
+        kv(Red), kv(RG), kv(RGB), kv(RGBA),
+        kv(Red8), kv(RG8), kv(RGB8), kv(RGBA8),
+        kv(Red16F), kv(RG16F), kv(RGB16F), kv(RGBA16F),
+        kv(Red32F), kv(RG32F), kv(RGB32F), kv(RGBA32F)
+        enable_if_desktop(, kv(desktop_Red16), kv(desktop_RG16), kv(desktop_RGB16), kv(desktop_RGBA16))
+    );
+
+#undef kv
 }
 }

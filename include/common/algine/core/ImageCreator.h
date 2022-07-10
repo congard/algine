@@ -21,9 +21,12 @@ public:
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
 
+    static void registerLuaUsertype(Lua *lua);
+
 protected:
     uint m_format;
-    uint m_width, m_height;
+    uint m_width;
+    uint m_height;
 };
 }
 

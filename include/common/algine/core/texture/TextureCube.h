@@ -44,6 +44,8 @@ public:
     uint getActualWidth() const override;
     uint getActualHeight() const override;
 
+    static void registerLuaUsertype(Lua *lua);
+
 public:
     static TextureCubePtr getByName(const std::string &name);
     static TextureCube* byName(const std::string &name);

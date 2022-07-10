@@ -10,8 +10,8 @@ class TextureCubeCreator: public TextureCreator {
 public:
     TextureCubeCreator();
 
-    void setPath(const std::string &path, TextureCube::Face face);
-    std::string getPath(TextureCube::Face face) const;
+    void setPath(std::string_view path, TextureCube::Face face);
+    const std::string& getPath(TextureCube::Face face) const;
 
     void setPaths(const std::map<TextureCube::Face, std::string> &paths);
     const std::map<TextureCube::Face, std::string>& getPaths() const;
@@ -21,6 +21,11 @@ public:
 
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
+
+    static void registerLuaUsertype(Lua *lua);
+
+protected:
+    void exec(const std::string &s, bool path, Lua *lua) override;
 
 private:
     std::map<TextureCube::Face, std::string> m_paths;

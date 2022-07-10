@@ -79,4 +79,39 @@ TextureCubePtr TextureCube::getByName(const string &name) {
 TextureCube* TextureCube::byName(const string &name) {
     return PublicObjectTools::byName<TextureCube>(name);
 }
+
+void TextureCube::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "TextureCube"))
+        return;
+
+    lua->registerUsertype<Texture>();
+
+    auto factories = sol::factories([]() { return PtrMaker::make<TextureCube>(); });
+    auto usertype = lua->state()->new_usertype<TextureCube>(
+            "TextureCube",
+            sol::meta_function::construct, factories,
+            sol::call_constructor, factories,
+            sol::base_classes, sol::bases<Scriptable, Object, Texture>());
+
+    usertype["fromFile"] = sol::overload(
+            static_cast<void (TextureCube::*)(Face, const TextureFileInfo&)>(&TextureCube::fromFile),
+            static_cast<void (TextureCube::*)(Face, const std::string&)>(&TextureCube::fromFile));
+    usertype["update"] = &TextureCube::update;
+
+    // static
+    usertype["defaultParams"] = &TextureCube::defaultParams;
+    usertype["getByName"] = &TextureCube::getByName;
+    usertype["byName"] = &TextureCube::byName;
+
+    // enums
+    (*lua->state())["TextureCube"].get<sol::table>().new_enum("Face",
+        "Right", Face::Right,
+        "Left", Face::Left,
+        "Top", Face::Top,
+        "Bottom", Face::Bottom,
+        "Back", Face::Back,
+        "Front", Face::Front);
+}
 }

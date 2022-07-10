@@ -1,7 +1,8 @@
 #include <algine/core/texture/TextureCreator.h>
-
 #include <algine/core/texture/Texture.h>
 #include <algine/core/JsonHelper.h>
+
+#include <algine/core/lua/DataType.h>
 
 #include "../TextureConfigTools.h"
 
@@ -98,5 +99,29 @@ JsonHelper TextureCreator::dump() {
     result.append(ImageCreator::dump());
 
     return result;
+}
+
+void TextureCreator::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "TextureCreator"))
+        return;
+
+    lua->registerUsertype<ImageCreator, lua::DataType>();
+
+    auto usertype = lua->state()->new_usertype<TextureCreator>(
+            "TextureCreator",
+            sol::meta_function::construct, sol::no_constructor,
+            sol::call_constructor, sol::no_constructor,
+            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ImageCreator>());
+
+    usertype["getType"] = &TextureCreator::getType;
+    usertype["type"] = sol::readonly_property(&TextureCreator::getType);
+
+    Lua::new_property(usertype, "dataType", "getDataType", "setDataType", &TextureCreator::getDataType, &TextureCreator::setDataType);
+    Lua::new_property(usertype, "params", "getParams", "setParams", &TextureCreator::getParams,
+                      [](TextureCreator &self, std::map<uint, uint> params) { self.setParams(params); });
+    Lua::new_property(usertype, "defaultParams", "getDefaultParams", "setDefaultParams", &TextureCreator::getDefaultParams,
+                      [](TextureCreator &self, std::map<uint, uint> params) { self.setDefaultParams(params); });
 }
 }

@@ -19,11 +19,11 @@ Texture2DCreator::Texture2DCreator() {
     m_defaultParams = Texture2D::defaultParams();
 }
 
-void Texture2DCreator::setPath(const string &path) {
+void Texture2DCreator::setPath(std::string_view path) {
     m_path = path;
 }
 
-std::string Texture2DCreator::getPath() const {
+const std::string& Texture2DCreator::getPath() const {
     return m_path;
 }
 
@@ -84,5 +84,30 @@ JsonHelper Texture2DCreator::dump() {
     config.append(TextureCreator::dump());
 
     return config;
+}
+
+void Texture2DCreator::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "Texture2DCreator"))
+        return;
+
+    lua->registerUsertype<TextureCreator, Texture2D>();
+
+    auto ctors = sol::constructors<Texture2DCreator()>();
+    auto usertype = lua->state()->new_usertype<Texture2DCreator>(
+            "Texture2DCreator",
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors,
+            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ImageCreator, TextureCreator>());
+
+    usertype["get"] = &Texture2DCreator::get;
+    usertype["create"] = &Texture2DCreator::create;
+
+    Lua::new_property(usertype, "path", "getPath", "setPath", &Texture2DCreator::getPath, &Texture2DCreator::setPath);
+}
+
+void Texture2DCreator::exec(const std::string &s, bool path, Lua *lua) {
+    exec_t<Texture2DCreator>(s, path, lua);
 }
 }

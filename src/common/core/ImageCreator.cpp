@@ -73,4 +73,23 @@ JsonHelper ImageCreator::dump() {
 
     return result;
 }
+
+void ImageCreator::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "ImageCreator"))
+        return;
+
+    lua->registerUsertype<Creator, Texture>();
+
+    auto usertype = lua->state()->new_usertype<ImageCreator>(
+            "ImageCreator",
+            sol::meta_function::construct, sol::no_constructor,
+            sol::call_constructor, sol::no_constructor,
+            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator>());
+
+    Lua::new_property(usertype, "format", "getFormat", "setFormat", &ImageCreator::getFormat, &ImageCreator::setFormat);
+    Lua::new_property(usertype, "width", "getWidth", "setWidth", &ImageCreator::getWidth, &ImageCreator::setWidth);
+    Lua::new_property(usertype, "height", "getHeight", "setHeight", &ImageCreator::getHeight, &ImageCreator::setHeight);
+}
 }
