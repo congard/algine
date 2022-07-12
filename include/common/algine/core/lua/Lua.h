@@ -22,6 +22,9 @@ public:
         std::string_view propName, std::string_view getterName, std::string_view setterName,
         G &&getter, S &&setter);
 
+    template<typename T, typename G, typename S>
+    static void new_property(sol::usertype<T> &usertype, std::string_view propName, G &&getter, S &&setter);
+
     template<typename T, typename... Args>
     void registerUsertype();
 
@@ -40,6 +43,13 @@ void Lua::new_property(sol::usertype<T> &usertype,
     usertype[propName] = sol::property(getter, setter);
     usertype[getterName] = getter;
     usertype[setterName] = setter;
+}
+
+template<typename T, typename G, typename S>
+void Lua::new_property(sol::usertype<T> &usertype, std::string_view propName, G &&getter, S &&setter) {
+    std::string prop = propName.data();
+    prop[0] = static_cast<char>(toupper(prop[0]));
+    new_property(usertype, propName, "get" + prop, "set" + prop, getter, setter);
 }
 
 template<typename T, typename... Args>
