@@ -85,6 +85,8 @@ public:
     static void setClearDepth(float depth);
     static void setClearStencil(int s);
 
+    static void registerLuaUsertype(Lua *lua);
+
 public:
     static FramebufferPtr getByName(const std::string &name);
     static Framebuffer* byName(const std::string &name);

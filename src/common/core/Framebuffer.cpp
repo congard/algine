@@ -69,8 +69,7 @@ void Framebuffer::attachRenderbuffer(const RenderbufferPtr &renderbuffer, Attach
 }
 
 void Framebuffer::resizeAttachments(uint width, uint height) {
-    auto resize = [&](const auto &m)
-    {
+    auto resize = [&](const auto &m) {
         for (const auto & [attachment, obj] : m) {
             obj->bind();
             obj->setDimensions(width, height);
@@ -234,8 +233,7 @@ bool Framebuffer::hasAttachment(Attachment attachment) {
 }
 
 Framebuffer::AttachedObjectType Framebuffer::getAttachedObjectType(Attachment attachment) {
-    auto isContains = [&](const auto &m)
-    {
+    auto isContains = [&](const auto &m) {
         return m.find(attachment) != m.end();
     };
 
@@ -281,5 +279,83 @@ FramebufferPtr Framebuffer::getByName(const string &name) {
 
 Framebuffer* Framebuffer::byName(const string &name) {
     return PublicObjectTools::byName<Framebuffer>(name);
+}
+
+void Framebuffer::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "Framebuffer"))
+        return;
+
+    lua->registerUsertype<Object>();
+
+    auto factories = sol::factories([] { return PtrMaker::make<Framebuffer>(); });
+    auto usertype = lua->state()->new_usertype<Framebuffer>(
+            "Framebuffer",
+            sol::meta_function::construct, factories,
+            sol::call_constructor, factories,
+            sol::base_classes, sol::bases<Scriptable, Object>());
+
+    usertype["bind"] = &Framebuffer::bind;
+    usertype["unbind"] = &Framebuffer::unbind;
+    usertype["attachTexture"] = sol::overload(
+        static_cast<void (Framebuffer::*)(const Texture2DPtr&, Attachment)>(&Framebuffer::attachTexture),
+        static_cast<void (Framebuffer::*)(const TextureCubePtr&, Attachment)>(&Framebuffer::attachTexture)
+    );
+    usertype["attachRenderbuffer"] = &Framebuffer::attachRenderbuffer;
+    usertype["resizeAttachments"] = &Framebuffer::resizeAttachments;
+    usertype["setActiveOutputList"] = &Framebuffer::setActiveOutputList;
+    usertype["setOutputLists"] = [](Framebuffer &self, std::vector<OutputList> lists) { self.setOutputLists(lists); };
+    usertype["addOutputList"] = sol::overload(
+        &Framebuffer::addOutputList,
+        [](Framebuffer &self) { self.addOutputList(); }
+    );
+    usertype["removeOutputLists"] = &Framebuffer::removeOutputLists;
+    usertype["getActiveOutputListIndex"] = &Framebuffer::getActiveOutputListIndex;
+    usertype["getActiveOutputList"] = &Framebuffer::getActiveOutputList;
+    usertype["getLastOutputList"] = &Framebuffer::getLastOutputList;
+    usertype["getOutputList"] = &Framebuffer::getOutputList;
+    usertype["getOutputLists"] = &Framebuffer::getOutputLists;
+    usertype["update"] = &Framebuffer::update;
+    usertype["clear"] = &Framebuffer::clear;
+    usertype["clearColorBuffer"] = &Framebuffer::clearColorBuffer;
+    usertype["clearDepthBuffer"] = &Framebuffer::clearDepthBuffer;
+    usertype["clearStencilBuffer"] = &Framebuffer::clearStencilBuffer;
+    usertype["readPixels"] = sol::overload(
+        static_cast<void (Framebuffer::*)(uint, int, int, int, int, int, DataType, void*) const>(&Framebuffer::readPixels),
+        static_cast<void (Framebuffer::*)(uint, int, int, int, int, void*) const>(&Framebuffer::readPixels)
+    ); // TODO: getAllPixelsCube
+    usertype["getId"] = &Framebuffer::getId;
+    usertype["hasAttachment"] = &Framebuffer::hasAttachment;
+    usertype["getAttachedObjectType"] = &Framebuffer::getAttachedObjectType;
+    usertype["getAttachedRenderbuffer"] = &Framebuffer::getAttachedRenderbuffer;
+    usertype["getAttachedTexture2D"] = &Framebuffer::getAttachedTexture2D;
+    usertype["getAttachedTextureCube"] = &Framebuffer::getAttachedTextureCube;
+
+    usertype["setClearColor"] = &Framebuffer::setClearColor;
+    usertype["setClearDepth"] = &Framebuffer::setClearDepth;
+    usertype["setClearStencil"] = &Framebuffer::setClearStencil;
+    usertype["getByName"] = &Framebuffer::getByName;
+    usertype["byName"] = &Framebuffer::byName;
+
+    auto usertypeTable = (*lua->state())["Framebuffer"].get<sol::table>();
+
+    usertypeTable.new_enum("Attachment",
+        "ColorAttachmentZero", AttachmentType::ColorAttachmentZero,
+        "DepthAttachment", AttachmentType::DepthAttachment,
+        "StencilAttachment", AttachmentType::StencilAttachment,
+        "DepthStencilAttachment", AttachmentType::DepthStencilAttachment,
+        "EmptyAttachment", AttachmentType::EmptyAttachment);
+
+    usertypeTable.new_enum("BufferMask",
+        "ColorBuffer", BufferMask::ColorBuffer,
+        "DepthBuffer", BufferMask::DepthBuffer,
+        "StencilBuffer", BufferMask::StencilBuffer);
+
+    usertypeTable.new_enum("AttachedObjectType",
+        "None", AttachedObjectType::None,
+        "Renderbuffer", AttachedObjectType::Renderbuffer,
+        "Texture2D", AttachedObjectType::Texture2D,
+        "TextureCube", AttachedObjectType::TextureCube);
 }
 }

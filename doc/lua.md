@@ -27,9 +27,9 @@ Creators:
 - [x] Texture2DCreator
 - [x] TextureCubeCreator
 - [x] ImageCreator
-- [ ] FramebufferCreator
+- [x] FramebufferCreator _(json support was removed)_
 - [ ] RenderbufferCreator
-- [ ] OutputListCreator
+- [x] ~~OutputListCreator~~ _(removed, some functionality was moved to OutputList)_
 - [ ] InputLayoutShapeLocationsCreator
 - [ ] ModelCreator
 - [ ] ShapeCreator
@@ -55,10 +55,10 @@ Core:
 - [x] Texture
 - [x] Texture2D
 - [x] TextureCube
-- [ ] Framebuffer
+- [x] Framebuffer
 - [ ] Renderbuffer
 - [ ] InputLayout
-- [ ] OutputList
+- [x] OutputList
 - [ ] Resources
 
 Widgets:

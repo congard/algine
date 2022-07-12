@@ -1,5 +1,4 @@
 #include <algine/core/FramebufferCreator.h>
-
 #include <algine/core/JsonHelper.h>
 #include <algine/core/PtrMaker.h>
 
@@ -11,29 +10,15 @@ using namespace nlohmann;
 using namespace algine::internal;
 
 namespace algine {
-namespace Config {
-constant(Attachment, "attachment");
-constant(Attachments, "attachments");
-constant(OutputLists, "outputLists");
-}
-
 void FramebufferCreator::setOutputLists(const vector<OutputList> &lists) {
-    m_outputLists = {};
-
-    for (const auto & list : lists) {
-        m_outputLists.emplace_back(list);
-    }
-}
-
-void FramebufferCreator::setOutputLists(const vector<OutputListCreator> &lists) {
     m_outputLists = lists;
 }
 
-void FramebufferCreator::addOutputList(const OutputListCreator &list) {
+void FramebufferCreator::addOutputList(const OutputList &list) {
     m_outputLists.emplace_back(list);
 }
 
-const vector<OutputListCreator>& FramebufferCreator::getOutputLists() const {
+const vector<OutputList>& FramebufferCreator::getOutputLists() const {
     return m_outputLists;
 }
 
@@ -67,9 +52,8 @@ FramebufferPtr FramebufferCreator::create() {
     // init output lists
     framebuffer->removeOutputLists();
 
-    for (const auto & list : m_outputLists) {
-        framebuffer->addOutputList(list.create());
-    }
+    for (const auto & list : m_outputLists)
+        framebuffer->addOutputList(list);
 
     // attach objects
     auto attachAll = [&](auto &attachments, auto type) {
@@ -83,17 +67,6 @@ FramebufferPtr FramebufferCreator::create() {
             if constexpr (is_same_v<Type, Texture2D> || is_same_v<Type, TextureCube>) {
                 framebuffer->attachTexture(ptr, attachment);
             }
-        };
-
-        auto attachByPath = [&](const string &path, Attachment attachment, auto creatorType) {
-            using TCreator = type_holder_get(creatorType);
-
-            TCreator creator;
-            creator.setIOSystem(io());
-            creator.setWorkingDirectory(m_workingDirectory);
-            creator.importFromFile(path);
-
-            attach(creator.get(), attachment);
         };
 
         auto attachByName = [&](const string &name, Attachment attachment, auto objType) {
@@ -116,9 +89,7 @@ FramebufferPtr FramebufferCreator::create() {
         for (auto &p : attachments.value) {
             auto &v = p.second;
 
-            if (auto path = std::get_if<Path>(&v); path) {
-                attachByPath(path->str, p.first, type_holder<T>());
-            } else if (auto name = std::get_if<Name>(&v); name) {
+            if (auto name = std::get_if<Name>(&v); name) {
                 attachByName(name->str, p.first, type);
             } else if (auto creator = std::get_if<T>(&v); creator) {
                 creator->setIOSystem(io());
@@ -141,133 +112,59 @@ FramebufferPtr FramebufferCreator::create() {
     return framebuffer;
 }
 
-template<typename T>
-inline string typeName() {
-    using TPlain = remove_reference_t<T>;
-
-    if constexpr (is_same_v<TPlain, FramebufferCreator::RenderbufferAttachments>)
-        return Config::Renderbuffer;
-
-    if constexpr (is_same_v<TPlain, FramebufferCreator::Texture2DAttachments>)
-        return Config::Texture2D;
-
-    if constexpr (is_same_v<TPlain, FramebufferCreator::TextureCubeAttachments>)
-        return Config::TextureCube;
-
-    throw invalid_argument("Invalid template type");
-}
+// TODO: remove
 
 void FramebufferCreator::import(const JsonHelper &jsonHelper) {
-    const json &config = jsonHelper.json;
 
-    auto importAttachments = [&](auto &obj) {
-        const json &attachments = config[Config::Attachments];
-
-        for (const auto & item : attachments) {
-            if (item[Config::Type] == typeName<decltype(obj)>()) {
-                auto attachment = Config::stringToAttachment(item[Config::Attachment]);
-
-                if (item.contains(Config::Dump)) {
-                    using TCreator = typename std::remove_reference_t<decltype(obj)>::type;
-
-                    TCreator creator;
-                    creator.setWorkingDirectory(m_workingDirectory);
-                    creator.import(item[Config::Dump]);
-
-                    obj.add(creator, attachment);
-                } else if (item.contains(Config::Path)) {
-                    obj.addPath(item[Config::Path], attachment);
-                } else if (item.contains(Config::Name)) {
-                    obj.addName(item[Config::Name], attachment);
-                }
-            }
-        }
-    };
-
-    // load XXXAttachments
-    if (config.contains(Config::Attachments)) {
-        importAttachments(m_renderbufferAttachments);
-        importAttachments(m_texture2DAttachments);
-        importAttachments(m_textureCubeAttachments);
-    }
-
-    // load output lists
-    if (config.contains(Config::OutputLists)) {
-        for (const auto & list : config[Config::OutputLists]) {
-            OutputListCreator outputListCreator;
-            outputListCreator.import(list);
-            m_outputLists.emplace_back(outputListCreator);
-        }
-    }
-
-    Creator::import(jsonHelper);
 }
 
 JsonHelper FramebufferCreator::dump() {
-    json config;
+    return {};
+}
 
-    // write attachments
-    {
-        // array with attachments of all types
-        json attachments;
+template<typename T>
+void registerAttachments(sol::table &table, std::string_view name) {
+    auto ctors = sol::constructors<T()>();
+    auto usertype = table.new_usertype<T>(
+            name,
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors);
 
-        // dump Attachments object and append it to the attachments json
-        auto append = [&](auto &obj) {
-            // array with attachments of obj type
-            json attachmentsType;
+    usertype["addCreator"] = &T::addCreator;
+    usertype["addName"] = &T::addName;
+}
 
-            auto writeBlock = [&](const string &storeMethod, const json &data, uint attachment) {
-                json block;
-                block[Config::Type] = typeName<decltype(obj)>();
-                block[Config::Attachment] = Config::attachmentToString(attachment);
-                block[storeMethod] = data;
-                attachmentsType.emplace_back(block);
-            };
+void FramebufferCreator::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
 
-            // Creator type
-            using T = typename std::remove_reference_t<decltype(obj)>::type;
+    if (isRegistered(*lua, "FramebufferCreator"))
+        return;
 
-            for (auto &p : obj.value) {
-                auto &v = p.second;
+    lua->registerUsertype<Creator, Framebuffer>();
 
-                if (auto path = std::get_if<Path>(&v); path) {
-                    writeBlock(Config::Path, path->str, p.first);
-                } else if (auto name = std::get_if<Name>(&v); name) {
-                    writeBlock(Config::Name, name->str, p.first);
-                } else if (auto creator = std::get_if<T>(&v); creator) {
-                    writeBlock(Config::Dump, creator->dump().json, p.first);
-                }
-            }
+    auto ctors = sol::constructors<FramebufferCreator()>();
+    auto usertype = lua->state()->new_usertype<FramebufferCreator>(
+            "FramebufferCreator",
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors,
+            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator>());
 
-            // append to attachments
-            if (!attachmentsType.empty()) {
-                if (attachments.empty()) {
-                    attachments = attachmentsType;
-                } else {
-                    attachments.insert(attachments.end(), attachmentsType.begin(), attachmentsType.end());
-                }
-            }
-        };
+    usertype["setOutputLists"] = [](FramebufferCreator &self, std::vector<OutputList> lists) { self.setOutputLists(lists); };
+    usertype["addOutputList"] = &FramebufferCreator::addOutputList;
+    usertype["getOutputLists"] = &FramebufferCreator::getOutputLists;
+    usertype["renderbufferAttachments"] = &FramebufferCreator::renderbufferAttachments;
+    usertype["texture2DAttachments"] = &FramebufferCreator::texture2DAttachments;
+    usertype["textureCubeAttachments"] = &FramebufferCreator::textureCubeAttachments;
+    usertype["get"] = &FramebufferCreator::get;
+    usertype["create"] = &FramebufferCreator::create;
 
-        append(m_renderbufferAttachments);
-        append(m_texture2DAttachments);
-        append(m_textureCubeAttachments);
+    sol::table usertypeTable = (*lua->state())["FramebufferCreator"].get<sol::table>();
+    registerAttachments<RenderbufferAttachments>(usertypeTable, "RenderbufferAttachments");
+    registerAttachments<Texture2DAttachments>(usertypeTable, "Texture2DAttachments");
+    registerAttachments<TextureCubeAttachments>(usertypeTable, "TextureCubeAttachments");
+}
 
-        if (!attachments.empty()) {
-            config[Config::Attachments] = attachments;
-        }
-    }
-
-    // write output lists
-    for (auto & outputList : m_outputLists) {
-        if (const auto &list = outputList.dump(); !list.empty()) {
-            config[Config::OutputLists].emplace_back(list.json);
-        }
-    }
-
-    JsonHelper result(config);
-    result.append(Creator::dump());
-
-    return result;
+void FramebufferCreator::exec(const std::string &s, bool path, Lua *lua) {
+    exec_t<FramebufferCreator>(s, path, lua);
 }
 }

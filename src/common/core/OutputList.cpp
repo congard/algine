@@ -1,5 +1,4 @@
 #include <algine/core/OutputList.h>
-
 #include <algine/core/Framebuffer.h>
 
 #include <stdexcept>
@@ -7,10 +6,17 @@
 using namespace std;
 
 namespace algine {
+OutputList::OutputList(const std::map<Index, Attachment> &list) {
+    set(list);
+}
+
 OutputList::OutputList()
-    : m_list({Framebuffer::ColorAttachmentZero})
-{
-    // see initializer list above
+    : m_list({Framebuffer::ColorAttachmentZero}) {}
+
+void OutputList::set(const std::map<Index, Attachment> &list) {
+    for (const auto &p : list) {
+        add(p.first, p.second);
+    }
 }
 
 void OutputList::set(const vector<Attachment> &list) {
@@ -21,13 +27,8 @@ void OutputList::add(Index index, Attachment attachment) {
     if (index == m_list.size()) {
         m_list.emplace_back(attachment);
     } else if (index > m_list.size()) {
-        vector<uint> tmp(index + 1, Framebuffer::EmptyAttachment);
-
-        for (uint i = 0; i < m_list.size(); ++i)
-            tmp[i] = m_list[i];
-
-        tmp[index] = attachment;
-        m_list = tmp;
+        m_list.resize(index + 1, Framebuffer::EmptyAttachment);
+        m_list[index] = attachment;
     } else {
         m_list[index] = attachment;
     }
@@ -57,6 +58,10 @@ void OutputList::remove(Index index, bool optimizeList) {
     }
 }
 
+void OutputList::removeAll() {
+    m_list.clear();
+}
+
 void OutputList::optimize() {
     for (int i = static_cast<int>(m_list.size()) - 1; i >= 0; --i) {
         if (m_list[i] != Framebuffer::EmptyAttachment) {
@@ -78,5 +83,48 @@ const vector<Attachment>& OutputList::get() const {
 
 const Attachment* OutputList::data() const {
     return m_list.data();
+}
+
+void OutputList::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "OutputList"))
+        return;
+
+    lua->registerUsertype<Scriptable>();
+
+    auto ctors = sol::constructors<OutputList()>();
+    auto usertype = lua->state()->new_usertype<OutputList>(
+            "OutputList",
+            sol::meta_function::length, &OutputList::size,
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors,
+            sol::base_classes, sol::bases<Scriptable>());
+
+    usertype["set"] = sol::overload(
+        [](OutputList &self, std::vector<Attachment> list) { self.set(list); },
+        [](OutputList &self, const sol::table &list) {
+            self.removeAll();
+            for (const auto &p : list) self.add(p.first.as<Index>(), p.second.as<Attachment>());
+        }
+    );
+    usertype["add"] = &OutputList::add;
+    usertype["addColor"] = sol::overload(
+        static_cast<void (OutputList::*)(Index, Index)>(&OutputList::addColor),
+        static_cast<void (OutputList::*)(Index)>(&OutputList::addColor)
+    );
+    usertype["remove"] = sol::overload(
+        &OutputList::remove,
+        [](OutputList &self, Index index) { self.remove(index); }
+    );
+    usertype["removeAll"] = &OutputList::removeAll;
+    usertype["optimize"] = &OutputList::optimize;
+    usertype["size"] = &OutputList::size;
+    usertype["get"] = &OutputList::get;
+    usertype["data"] = &OutputList::data;
+}
+
+void OutputList::exec(const std::string &s, bool path, Lua *lua) {
+    exec_t<OutputList>(s, path, lua);
 }
 }
