@@ -1,3 +1,5 @@
+-- algine:core.lua
+
 -- Returns true if t is array, otherwise false
 function isArray(t)
     local i = 0
