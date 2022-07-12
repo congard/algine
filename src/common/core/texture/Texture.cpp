@@ -316,9 +316,11 @@ void Texture::registerLuaUsertype(Lua *lua) {
     usertype["getActualHeight"] = &Texture::getActualHeight;
 
     Lua::new_property(usertype, "lod", "getLOD", "setLOD", &Texture::getLOD, &Texture::setLOD);
-    Lua::new_property(usertype, "format", "getFormat", "setFormat", &Texture::getFormat, &Texture::setFormat);
-    Lua::new_property(usertype, "width", "getWidth", "setWidth", &Texture::getWidth, &Texture::setWidth);
+    Lua::new_property(usertype, "format", &Texture::getFormat, &Texture::setFormat);
+    Lua::new_property(usertype, "width", &Texture::getWidth, &Texture::setWidth);
+    Lua::new_property(usertype, "height", &Texture::getHeight, &Texture::setHeight);
 
+    // static
     usertype["activateSlot"] = &Texture::activateSlot;
     usertype["getFormatInfo"] = &Texture::getFormatInfo;
 
@@ -357,8 +359,7 @@ void Texture::registerLuaUsertype(Lua *lua) {
 
     table.new_enum("Param",
         kv(MinFilter), kv(MagFilter),
-        kv(WrapU), kv(WrapV), kv(WrapW)
-    );
+        kv(WrapU), kv(WrapV), kv(WrapW));
 
     table.new_enum("Value",
         kv(Nearest),
@@ -367,8 +368,7 @@ void Texture::registerLuaUsertype(Lua *lua) {
         kv(ClampToBorder),
         kv(Repeat),
         kv(MirroredRepeat)
-        enable_if_desktop(, kv(desktop_MirrorClampToEdge))
-    );
+        enable_if_desktop(, kv(desktop_MirrorClampToEdge)));
 
     table.new_enum("Format",
         kv(DepthComponent), kv(DepthComponent16), kv(DepthComponent24), kv(DepthComponent32F),
@@ -377,8 +377,7 @@ void Texture::registerLuaUsertype(Lua *lua) {
         kv(Red8), kv(RG8), kv(RGB8), kv(RGBA8),
         kv(Red16F), kv(RG16F), kv(RGB16F), kv(RGBA16F),
         kv(Red32F), kv(RG32F), kv(RGB32F), kv(RGBA32F)
-        enable_if_desktop(, kv(desktop_Red16), kv(desktop_RG16), kv(desktop_RGB16), kv(desktop_RGBA16))
-    );
+        enable_if_desktop(, kv(desktop_Red16), kv(desktop_RG16), kv(desktop_RGB16), kv(desktop_RGBA16)));
 
 #undef kv
 }
