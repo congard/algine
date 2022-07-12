@@ -14,6 +14,8 @@
 #include <algine/core/texture/TextureCube.h>
 #include <algine/core/FramebufferCreator.h>
 #include <algine/core/Framebuffer.h>
+#include <algine/core/RenderbufferCreator.h>
+#include <algine/core/Renderbuffer.h>
 #include <algine/core/lua/DataType.h>
 
 namespace algine {
@@ -27,7 +29,8 @@ using AlgineCore = Lua::TypeList<
         ImageCreator,
         TextureCreator, Texture2DCreator, TextureCubeCreator, Texture, Texture2D, TextureCube,
         OutputList,
-        FramebufferCreator, Framebuffer>;
+        FramebufferCreator, Framebuffer,
+        RenderbufferCreator, Renderbuffer>;
 }
 
 #endif //ALGINE_ALGINECORE_H

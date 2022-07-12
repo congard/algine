@@ -36,6 +36,8 @@ public:
     uint getHeight() const;
     uint getId() const;
 
+    static void registerLuaUsertype(Lua *lua);
+
 public:
     static RenderbufferPtr getByName(const std::string &name);
     static Renderbuffer* byName(const std::string &name);

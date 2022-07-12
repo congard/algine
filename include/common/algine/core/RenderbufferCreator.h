@@ -3,13 +3,17 @@
 
 #include <algine/core/ImageCreator.h>
 #include <algine/core/RenderbufferPtr.h>
-#include <algine/core/Renderbuffer.h>
 
 namespace algine {
 class RenderbufferCreator: public ImageCreator {
 public:
     RenderbufferPtr get();
     RenderbufferPtr create();
+
+    static void registerLuaUsertype(Lua *lua);
+
+protected:
+    void exec(const std::string &s, bool path, Lua *lua) override;
 };
 }
 

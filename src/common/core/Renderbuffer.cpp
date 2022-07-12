@@ -1,5 +1,4 @@
 #include <algine/core/Renderbuffer.h>
-
 #include <algine/core/texture/Texture.h>
 #include <algine/core/Engine.h>
 
@@ -87,5 +86,35 @@ RenderbufferPtr Renderbuffer::getByName(const string &name) {
 
 Renderbuffer* Renderbuffer::byName(const string &name) {
     return PublicObjectTools::byName<Renderbuffer>(name);
+}
+
+void Renderbuffer::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "Renderbuffer"))
+        return;
+
+    lua->registerUsertype<Object>();
+
+    auto factories = sol::factories([] { return PtrMaker::make<Renderbuffer>(); });
+    auto usertype = lua->state()->new_usertype<Renderbuffer>(
+            "Renderbuffer",
+            sol::meta_function::construct, factories,
+            sol::call_constructor, factories,
+            sol::base_classes, sol::bases<Scriptable, Object>());
+
+    usertype["bind"] = &Renderbuffer::bind;
+    usertype["unbind"] = &Renderbuffer::unbind;
+    usertype["update"] = &Renderbuffer::update;
+    usertype["setDimensions"] = &Renderbuffer::setDimensions;
+    usertype["getId"] = &Renderbuffer::getId;
+
+    Lua::new_property(usertype, "format", &Renderbuffer::getFormat, &Renderbuffer::setFormat);
+    Lua::new_property(usertype, "width", &Renderbuffer::getWidth, &Renderbuffer::setWidth);
+    Lua::new_property(usertype, "height", &Renderbuffer::getHeight, &Renderbuffer::setHeight);
+
+    // static
+    usertype["getByName"] = &Renderbuffer::getByName;
+    usertype["byName"] = &Renderbuffer::byName;
 }
 }
