@@ -45,7 +45,7 @@ The engine has a modular design.
 Main goals for now (in priority order):
 
 - [ ] [Lua as main scripting language](doc/lua.md)
-  - [ ] Creators
+  - [x] Creators
   - [ ] Core components (Engine, Texture2D, Framebuffer etc)
   - [ ] Widgets
   - [x] GLM classes (vec3, vec4, mat3, mat4, quat) and core functionality
