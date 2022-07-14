@@ -186,7 +186,6 @@ set(ALGINE_CORE_SOURCES
         src/common/core/ImageCreator.cpp include/common/algine/core/ImageCreator.h
         src/common/core/transfer/FileTransferable.cpp include/common/algine/core/transfer/FileTransferable.h
         src/common/core/OutputList.cpp include/common/algine/core/OutputList.h
-        src/common/core/FramebufferConfigTools.h
         src/common/core/Framebuffer.cpp include/common/algine/core/Framebuffer.h
         src/common/core/FramebufferCreator.cpp include/common/algine/core/FramebufferCreator.h
         src/common/core/Renderbuffer.cpp include/common/algine/core/Renderbuffer.h

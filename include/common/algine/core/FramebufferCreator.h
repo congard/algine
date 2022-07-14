@@ -41,9 +41,6 @@ public:
     FramebufferPtr get();
     FramebufferPtr create();
 
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
-
     static void registerLuaUsertype(Lua *lua);
 
 protected:

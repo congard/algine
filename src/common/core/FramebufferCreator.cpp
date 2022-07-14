@@ -1,12 +1,10 @@
 #include <algine/core/FramebufferCreator.h>
-#include <algine/core/JsonHelper.h>
+#include <algine/core/Framebuffer.h>
 #include <algine/core/PtrMaker.h>
 
-#include "FramebufferConfigTools.h"
 #include "internal/PublicObjectTools.h"
 
 using namespace std;
-using namespace nlohmann;
 using namespace algine::internal;
 
 namespace algine {
@@ -110,16 +108,6 @@ FramebufferPtr FramebufferCreator::create() {
     PublicObjectTools::postCreateAccessOp("Framebuffer", this, framebuffer);
 
     return framebuffer;
-}
-
-// TODO: remove
-
-void FramebufferCreator::import(const JsonHelper &jsonHelper) {
-
-}
-
-JsonHelper FramebufferCreator::dump() {
-    return {};
 }
 
 template<typename T>
