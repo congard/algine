@@ -19,8 +19,8 @@ public:
     void set(const Bone &bone);
 
     uint size() const;
-    Index getIndex(const std::string &name) const;
-    bool isExists(const std::string &name) const;
+    Index getIndex(std::string_view name) const;
+    bool isExists(std::string_view name) const;
 
     Bone& operator[](Index index);
 

@@ -19,7 +19,7 @@ uint BonesStorage::size() const {
     return m_bones.size();
 }
 
-Index BonesStorage::getIndex(const std::string &name) const {
+Index BonesStorage::getIndex(std::string_view name) const {
     for (Index i = 0; i < m_bones.size(); ++i) {
         if (m_bones[i].getName() == name) {
             return i;
@@ -29,7 +29,7 @@ Index BonesStorage::getIndex(const std::string &name) const {
     return BoneNotFound;
 }
 
-bool BonesStorage::isExists(const std::string &name) const {
+bool BonesStorage::isExists(std::string_view name) const {
     return getIndex(name) != BoneNotFound;
 }
 
