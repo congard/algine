@@ -1,15 +1,6 @@
 #include <algine/core/Object.h>
 
-#include <algine/core/JsonHelper.h>
-
-using namespace nlohmann;
 using namespace std;
-
-#define constant(name, val) constexpr char name[] = val
-
-namespace Config {
-constant(Name, "name");
-}
 
 namespace algine {
 void Object::setName(const string &name) {
@@ -18,16 +9,6 @@ void Object::setName(const string &name) {
 
 const string& Object::getName() const {
     return m_name;
-}
-
-void Object::import(const JsonHelper &jsonHelper) {
-    m_name = jsonHelper.readValue<string>(Config::Name);
-}
-
-JsonHelper Object::dump() {
-    json config;
-    config[Config::Name] = m_name;
-    return config;
 }
 
 void Object::registerLuaUsertype(Lua *lua) {
@@ -43,6 +24,6 @@ void Object::registerLuaUsertype(Lua *lua) {
     auto usertype = lua->state()->new_usertype<Object>(
             "Object",
             sol::base_classes, sol::bases<Scriptable>());
-    Lua::new_property(usertype, "name", "getName", "setName", &Object::getName, &Object::setName);
+    Lua::new_property(usertype, "name", &Object::getName, &Object::setName);
 }
 }
