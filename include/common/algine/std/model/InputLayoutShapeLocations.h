@@ -1,19 +1,46 @@
 #ifndef ALGINE_INPUTLAYOUTSHAPELOCATIONS_H
 #define ALGINE_INPUTLAYOUTSHAPELOCATIONS_H
 
+#include <algine/core/lua/Scriptable.h>
+#include <algine/core/shader/ShaderProgramPtr.h>
+
+#include <string>
+#include <map>
+
 namespace algine {
-class InputLayoutShapeLocations {
+class InputLayoutShapeLocations: public Scriptable {
 public:
     constexpr static int None = -1;
+    constexpr static auto Position = "position";
+    constexpr static auto TexCoord = "texCoord";
+    constexpr static auto Normal = "normal";
+    constexpr static auto Tangent = "tangent";
+    constexpr static auto Bitangent = "bitangent";
+    constexpr static auto BoneWeights = "boneWeights";
+    constexpr static auto BoneIds = "boneIds";
 
 public:
-    int position = None;
-    int texCoord = None;
-    int normal = None;
-    int tangent = None;
-    int bitangent = None;
-    int boneWeights = None;
-    int boneIds = None;
+    InputLayoutShapeLocations() = default;
+    InputLayoutShapeLocations(const ShaderProgramPtr &program, const std::map<std::string, std::string> &locations);
+
+    int operator[](const std::string &name) const;
+    int& operator[](const std::string &name);
+
+    void load(const ShaderProgramPtr &program, const std::map<std::string, std::string> &locations);
+
+    int get(const std::string &name) const;
+    void set(const std::string &name, int value);
+
+    static InputLayoutShapeLocations fromFile(const std::string &path);
+    static InputLayoutShapeLocations fromScript(const std::string &script);
+
+    static void registerLuaUsertype(Lua *lua);
+
+protected:
+    void exec(const std::string &s, bool path, Lua *lua) override;
+
+public:
+    std::map<std::string, int> data;
 };
 }
 

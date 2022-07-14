@@ -17,29 +17,29 @@ class Model: public Object, public Rotatable, public Translatable, public Scalab
     friend class AnimationBlender;
 
 public:
-    explicit Model(const ShapePtr &shape, Rotator::Type rotatorType);
-    explicit Model(Rotator::Type rotatorType);
+    Model(const ShapePtr &shape, Rotator::Type rotatorType);
     Model();
+    explicit Model(Rotator::Type rotatorType);
     virtual ~Model();
 
     void transform();
 
     void activateAnimations();
     void activateAnimation(Index index);
-    void activateAnimation(const std::string &name);
+    void activateAnimation(std::string_view name);
     void deactivateAnimation(Index index);
-    void deactivateAnimation(const std::string &name);
+    void deactivateAnimation(std::string_view name);
 
     bool isAnimationActivated(uint index) const;
     bool isBonesPresent() const;
 
-    void setBoneTransform(const std::string &boneName, const BoneMatrix &transformation);
+    void setBoneTransform(std::string_view boneName, const BoneMatrix &transformation);
     void setBoneTransform(Index index, const BoneMatrix &transformation);
 
     void setShape(const ShapePtr &shape);
     void setBones(const BoneMatrices *bones);
     void setBonesFromAnimation(Index animationIndex);
-    void setBonesFromAnimation(const std::string &animationName);
+    void setBonesFromAnimation(std::string_view animationName);
     void setBoneTransformations(const BoneMatrices &transformations);
 
     const ShapePtr& getShape() const;
@@ -48,6 +48,8 @@ public:
     const BoneMatrices* getBones() const;
     const BoneMatrix& getBone(Index index) const;
     const BoneMatrices& getBoneTransformations() const;
+
+    static void registerLuaUsertype(Lua *lua);
 
 public:
     static ModelPtr getByName(const std::string &name);

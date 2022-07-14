@@ -35,29 +35,29 @@ void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
         }
     };
 
-    attribDescription.setLocation(locations.position);
+    attribDescription.setLocation(locations[InputLayoutShapeLocations::Position]);
     addAttribute(m_vertices);
 
-    attribDescription.setLocation(locations.normal);
+    attribDescription.setLocation(locations[InputLayoutShapeLocations::Normal]);
     addAttribute(m_normals);
 
-    attribDescription.setLocation(locations.tangent);
+    attribDescription.setLocation(locations[InputLayoutShapeLocations::Tangent]);
     addAttribute(m_tangents);
 
-    attribDescription.setLocation(locations.bitangent);
+    attribDescription.setLocation(locations[InputLayoutShapeLocations::Bitangent]);
     addAttribute(m_bitangents);
 
-    attribDescription.setLocation(locations.texCoord);
+    attribDescription.setLocation(locations[InputLayoutShapeLocations::TexCoord]);
     attribDescription.setCount(2);
     addAttribute(m_texCoords);
 
     if (isBonesPresent()) {
         attribDescription.setCount(4);
 
-        attribDescription.setLocation(locations.boneWeights);
+        attribDescription.setLocation(locations[InputLayoutShapeLocations::BoneWeights]);
         addAttribute(m_boneWeights);
 
-        attribDescription.setLocation(locations.boneIds);
+        attribDescription.setLocation(locations[InputLayoutShapeLocations::BoneIds]);
         attribDescription.setDataType(DataType::UnsignedInt);
         addAttribute(m_boneIds);
     }
@@ -124,7 +124,7 @@ const Animation& Shape::getAnimation(Index index) const {
     return m_animations[index];
 }
 
-Index Shape::getAnimationIndexByName(const string &name) const {
+Index Shape::getAnimationIndexByName(string_view name) const {
     for (Index i = 0; i < m_animations.size(); i++) {
         if (m_animations[i].getName() == name) {
             return i;
@@ -188,5 +188,56 @@ ShapePtr Shape::getByName(const string &name) {
 
 Shape* Shape::byName(const string &name) {
     return PublicObjectTools::byName<Shape>(name);
+}
+
+void Shape::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "Shape"))
+        return;
+
+    lua->registerUsertype<Object>();
+
+    auto factories = sol::factories([] { return PtrMaker::make<Shape>(); });
+    auto usertype = lua->state()->new_usertype<Shape>(
+            "Shape",
+            sol::meta_function::construct, factories,
+            sol::call_constructor, factories,
+            sol::base_classes, sol::bases<Scriptable, Object>());
+
+    usertype["createInputLayout"] = &Shape::createInputLayout;
+
+    Lua::new_property(usertype, "meshes", &Shape::getMeshes, [](Shape &self, std::vector<Mesh> meshes) { self.setMeshes(meshes); });
+    Lua::new_property(usertype, "animations", &Shape::getAnimations,
+        [](Shape &self, std::vector<Animation> animations) { self.setAnimations(animations); });
+
+    usertype["addMesh"] = &Shape::addMesh;
+    usertype["addAnimation"] = &Shape::addAnimation;
+    usertype["isBonesPresent"] = &Shape::isBonesPresent;
+    usertype["isAnimationsPresent"] = &Shape::isAnimationsPresent;
+    usertype["getInputLayouts"] = &Shape::getInputLayouts;
+    usertype["getGlobalInverseTransform"] = &Shape::getGlobalInverseTransform;
+    usertype["getBones"] = &Shape::getBones;
+    usertype["getRootNode"] = &Shape::getRootNode;
+    usertype["getBonesPerVertex"] = &Shape::getBonesPerVertex;
+    usertype["getAnimation"] = &Shape::getAnimation;
+    usertype["getAnimationIndexByName"] = &Shape::getAnimationIndexByName;
+    usertype["getAnimationsAmount"] = &Shape::getAnimationsAmount;
+    usertype["getBonesAmount"] = &Shape::getBonesAmount;
+    usertype["getInputLayoutsAmount"] = &Shape::getInputLayoutsAmount;
+    usertype["getInputLayout"] = &Shape::getInputLayout;
+
+    usertype["getVerticesBuffer"] = &Shape::getVerticesBuffer;
+    usertype["getNormalsBuffer"] = &Shape::getNormalsBuffer;
+    usertype["getTexCoordsBuffer"] = &Shape::getTexCoordsBuffer;
+    usertype["getTangentsBuffer"] = &Shape::getTangentsBuffer;
+    usertype["getBitangentsBuffer"] = &Shape::getBitangentsBuffer;
+    usertype["getBoneWeightsBuffer"] = &Shape::getBoneWeightsBuffer;
+    usertype["getBoneIdsBuffer"] = &Shape::getBoneIdsBuffer;
+    usertype["getIndicesBuffer"] = &Shape::getIndicesBuffer;
+
+    // static
+    usertype["getByName"] = &Shape::getByName;
+    usertype["byName"] = &Shape::byName;
 }
 }

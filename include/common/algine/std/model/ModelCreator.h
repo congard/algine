@@ -11,22 +11,10 @@
 namespace algine {
 class ModelCreator: public Creator {
 public:
-    enum class ShapeDumpMode {
-        None,
-        Path,
-        Dump,
-        Name
-    };
-
-    enum class ActivatedAnimationsDumpMode {
-        All,
-        List
-    };
-
-public:
     class AnimationInfo {
     public:
         constexpr static Index None = -1;
+        constexpr static Index All = -2;
 
     public:
         explicit AnimationInfo(std::string name);
@@ -53,36 +41,24 @@ public:
     void activateAnimation(Index index);
 
     void setClassName(const std::string &name);
-
-    void setShapeDumpMode(ShapeDumpMode mode);
-    void setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode mode);
-
-    void setShapePath(const std::string &path);
     void setShapeName(const std::string &name);
     void setShape(const ShapeCreator &creator);
 
+    const std::string& getClassName() const;
+    const std::string& getShapeName() const;
+    const ShapeCreator& getShape() const;
+
     void setActiveAnimationName(const std::string &name);
     void setActiveAnimationIndex(Index index);
-
     void setActivatedAnimations(const std::set<AnimationInfo> &animations);
+
+    const AnimationInfo& getActiveAnimation() const;
+    const std::set<AnimationInfo>& getActivatedAnimations() const;
 
     void setRotatorType(Rotator::Type type);
     void setPos(const glm::vec3 &pos);
     void setRotate(const glm::vec3 &rotate);
     void setScale(const glm::vec3 &scale);
-
-    const std::string& getClassName() const;
-
-    ShapeDumpMode getShapeDumpMode() const;
-    ActivatedAnimationsDumpMode getActivatedAnimationsDumpMode() const;
-
-    const std::string& getShapePath() const;
-    const std::string& getShapeName() const;
-    const ShapeCreator& getShape() const;
-
-    const AnimationInfo& getActiveAnimation() const;
-
-    const std::set<AnimationInfo>& getActivatedAnimations() const;
 
     Rotator::Type getRotatorType() const;
     const glm::vec3& getPos() const;
@@ -92,17 +68,15 @@ public:
     ModelPtr get();
     ModelPtr create();
 
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
+    static void registerLuaUsertype(Lua *lua);
 
-private:
-    ShapeDumpMode m_shapeDumpMode;
-    ActivatedAnimationsDumpMode m_activatedAnimationsDumpMode;
+protected:
+    void exec(const std::string &s, bool path, Lua *lua) override;
 
 private:
     std::string m_className;
 
-    std::string m_shapePath, m_shapeName;
+    std::string m_shapeName;
     ShapeCreator m_shape;
 
     AnimationInfo m_activeAnimation;

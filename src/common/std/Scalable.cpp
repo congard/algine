@@ -1,19 +1,8 @@
 #include <algine/std/Scalable.h>
 
-#include <algine/core/JsonHelper.h>
-#include <algine/core/transfer/GLMTransferrer.h>
-
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace glm;
-using namespace nlohmann;
-
-#define constant(name, val) constexpr char name[] = val
-
-namespace Config {
-constant(Scaling, "scaling");
-constant(Scale, "scale");
-}
 
 namespace algine {
 Scalable::Scalable()
@@ -70,17 +59,27 @@ const glm::mat4& Scalable::getScalingMatrix() const {
     return m_scaling;
 }
 
-void Scalable::import(const JsonHelper &jsonHelper) {
-    m_scaling = GLMTransferrer::import<mat4>(jsonHelper.readValue(Config::Scaling));
-    m_scale = GLMTransferrer::import<vec3>(jsonHelper.readValue(Config::Scale));
-}
+void Scalable::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
 
-JsonHelper Scalable::dump() {
-    json config;
+    if (isRegistered(*lua, "Scalable"))
+        return;
 
-    config[Config::Scaling] = GLMTransferrer::dump(m_scaling).json;
-    config[Config::Scale] = GLMTransferrer::dump(m_scale).json;
+    lua->registerUsertype<Scriptable>();
 
-    return config;
+    auto usertype = lua->state()->new_usertype<Scalable>(
+            "Scalable",
+            sol::meta_function::construct, sol::no_constructor,
+            sol::call_constructor, sol::no_constructor,
+            sol::base_classes, sol::bases<Scriptable>());
+
+    Lua::new_property(usertype, "scale", &Scalable::getScale, static_cast<void (Scalable::*)(const glm::vec3&)>(&Scalable::setScale));
+    Lua::new_property(usertype, "scaleX", &Scalable::getScaleX, &Scalable::setScaleX);
+    Lua::new_property(usertype, "scaleY", &Scalable::getScaleY, &Scalable::setScaleY);
+    Lua::new_property(usertype, "scaleZ", &Scalable::getScaleZ, &Scalable::setScaleZ);
+
+    usertype["changeScale"] = &Scalable::changeScale;
+    usertype["scale"] = &Scalable::scale;
+    usertype["getScalingMatrix"] = &Scalable::getScalingMatrix;
 }
 }

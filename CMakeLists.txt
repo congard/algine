@@ -161,7 +161,6 @@ set(ALGINE_CORE_SOURCES
         include/common/algine/core/input/KeyboardKey.h
 
         include/common/algine/core/transfer/Transferable.h
-        include/common/algine/core/transfer/GLMTransferrer.h
         include/common/algine/core/texture/PixelData.h
         include/common/algine/core/texture/TextureCreateInfo.h
         include/common/algine/core/shader/ShaderPtr.h
@@ -274,6 +273,7 @@ set(ALGINE_CORE_SOURCES
         src/common/core/lua/TulzLuaTypes.cpp include/common/algine/core/lua/TulzLuaTypes.h
         src/common/core/lua/glm_string_cast.h src/common/core/lua/glm_string_cast.cpp
         src/common/core/lua/AlgineCore.h
+        src/common/core/lua/AlgineStd.h
         src/common/core/lua/DataType.cpp include/common/algine/core/lua/DataType.h)
 
 set(ALGINE_STD_SOURCES
@@ -287,16 +287,14 @@ set(ALGINE_STD_SOURCES
         include/common/algine/std/model/ShapePtr.h
         include/common/algine/std/model/Mesh.h
         include/common/algine/std/model/ModelPtr.h
-        include/common/algine/std/model/InputLayoutShapeLocations.h
         include/common/algine/std/animation/BoneMatrix.h
         include/common/algine/std/animation/BoneMatrices.h
 
         src/common/std/assimp2glm.h
         src/common/std/model/Model.cpp include/common/algine/std/model/Model.h
-        src/common/std/model/ShapeConfigTools.h
         src/common/std/model/Shape.cpp include/common/algine/std/model/Shape.h
         src/common/std/model/ShapeCreator.cpp include/common/algine/std/model/ShapeCreator.h
-        src/common/std/model/InputLayoutShapeLocationsCreator.cpp include/common/algine/std/model/InputLayoutShapeLocationsCreator.h
+        src/common/std/model/InputLayoutShapeLocations.cpp include/common/algine/std/model/InputLayoutShapeLocations.h
         src/common/std/model/ModelCreator.cpp include/common/algine/std/model/ModelCreator.h
         src/common/std/Node.cpp include/common/algine/std/Node.h
         src/common/std/animation/VecAnimKey.cpp include/common/algine/std/animation/VecAnimKey.h

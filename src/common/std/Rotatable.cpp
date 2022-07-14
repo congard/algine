@@ -1,21 +1,10 @@
 #include <algine/std/Rotatable.h>
 
-#include <algine/core/transfer/GLMTransferrer.h>
-#include <algine/core/JsonHelper.h>
-
 #include <tulz/macros.h>
 
 #include <algorithm>
 
 using namespace glm;
-using namespace nlohmann;
-
-#define constant(name, val) constexpr char name[] = val
-
-namespace Config {
-constant(Rotation, "rotation");
-constant(Rotator, "rotator");
-}
 
 namespace algine {
 void Rotatable::swap(Rotatable &other) {
@@ -139,17 +128,35 @@ Rotator* Rotatable::getRotator() const {
     return m_rotator;
 }
 
-JsonHelper Rotatable::dump() {
-    json config;
+void Rotatable::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
 
-    config[Config::Rotation] = GLMTransferrer::dump(m_rotation).json;
-    config[Config::Rotator] = m_rotator->dump().json;
+    if (isRegistered(*lua, "Rotatable"))
+        return;
 
-    return config;
-}
+    lua->registerUsertype<Scriptable>();
 
-void Rotatable::import(const JsonHelper &jsonHelper) {
-    m_rotation = GLMTransferrer::import<mat4>(jsonHelper.readValue(Config::Rotation));
-    m_rotator->import(jsonHelper.readValue(Config::Rotator));
+    auto usertype = lua->state()->new_usertype<Rotatable>(
+            "Rotatable",
+            sol::meta_function::construct, sol::no_constructor,
+            sol::call_constructor, sol::no_constructor,
+            sol::base_classes, sol::bases<Scriptable>());
+
+    usertype["setRotatorType"] = &Rotatable::setRotatorType;
+    usertype["setRotate"] = &Rotatable::setRotate;
+    usertype["changeRotation"] = &Rotatable::changeRotation;
+    usertype["rotate"] = &Rotatable::rotate;
+
+    Lua::new_property(usertype, "pitch", &Rotatable::getPitch, &Rotatable::setPitch);
+    Lua::new_property(usertype, "yaw", &Rotatable::getYaw, &Rotatable::setYaw);
+    Lua::new_property(usertype, "roll", &Rotatable::getRoll, &Rotatable::setRoll);
+
+    usertype["getRotationMatrix"] = &Rotatable::getRotationMatrix;
+    usertype["getRotate"] = &Rotatable::getRotate;
+    usertype["getForward"] = &Rotatable::getForward;
+    usertype["getBack"] = &Rotatable::getBack;
+    usertype["getRight"] = &Rotatable::getRight;
+    usertype["getLeft"] = &Rotatable::getLeft;
+    usertype["getRotator"] = &Rotatable::getRotator;
 }
 }

@@ -3,6 +3,7 @@
 #include <algine/core/lua/TulzLuaTypes.h>
 
 #include "AlgineCore.h"
+#include "AlgineStd.h"
 #include "CoreLua.h"
 
 namespace algine {
@@ -13,6 +14,8 @@ void Lua::init() {
     m_lua->set("algine_require", [this](std::string_view lib) {
         if (lib == "core") {
             registerUsertype(AlgineCore());
+        } if (lib == "std") {
+            registerUsertype(AlgineStd());
         } else if (lib == "glm") {
             GLMLuaTypes::registerLuaUsertype(this);
         } else if (lib == "tulz") {

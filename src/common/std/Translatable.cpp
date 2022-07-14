@@ -1,19 +1,8 @@
 #include <algine/std/Translatable.h>
 
-#include <algine/core/transfer/GLMTransferrer.h>
-#include <algine/core/JsonHelper.h>
-
 #include <glm/gtc/matrix_transform.hpp>
 
-using namespace nlohmann;
 using namespace glm;
-
-#define constant(name, val) constexpr char name[] = val
-
-namespace Config {
-constant(Translation, "translation");
-constant(Pos, "pos");
-}
 
 namespace algine {
 Translatable::Translatable()
@@ -70,17 +59,27 @@ const mat4& Translatable::getTranslationMatrix() const {
     return m_translation;
 }
 
-void Translatable::import(const JsonHelper &jsonHelper) {
-    m_translation = GLMTransferrer::import<mat4>(jsonHelper.readValue(Config::Translation));
-    m_pos = GLMTransferrer::import<vec3>(jsonHelper.readValue(Config::Pos));
-}
+void Translatable::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
 
-JsonHelper Translatable::dump() {
-    json config;
+    if (isRegistered(*lua, "Translatable"))
+        return;
 
-    config[Config::Translation] = GLMTransferrer::dump(m_translation).json;
-    config[Config::Pos] = GLMTransferrer::dump(m_pos).json;
+    lua->registerUsertype<Scriptable>();
 
-    return config;
+    auto usertype = lua->state()->new_usertype<Translatable>(
+            "Translatable",
+            sol::meta_function::construct, sol::no_constructor,
+            sol::call_constructor, sol::no_constructor,
+            sol::base_classes, sol::bases<Scriptable>());
+
+    Lua::new_property(usertype, "pos", &Translatable::getPos, static_cast<void (Translatable::*)(const glm::vec3&)>(&Translatable::setPos));
+    Lua::new_property(usertype, "x", &Translatable::getX, &Translatable::setX);
+    Lua::new_property(usertype, "y", &Translatable::getY, &Translatable::setY);
+    Lua::new_property(usertype, "z", &Translatable::getZ, &Translatable::setZ);
+
+    usertype["changePos"] = &Translatable::changePos;
+    usertype["translate"] = &Translatable::translate;
+    usertype["getTranslationMatrix"] = &Translatable::getTranslationMatrix;
 }
 }

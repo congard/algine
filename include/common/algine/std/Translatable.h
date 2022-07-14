@@ -1,13 +1,13 @@
 #ifndef ALGINE_TRANSLATABLE_H
 #define ALGINE_TRANSLATABLE_H
 
-#include <algine/core/transfer/Transferable.h>
+#include <algine/core/lua/Scriptable.h>
 
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
 namespace algine {
-class Translatable: public Transferable {
+class Translatable: public virtual Scriptable {
 public:
     Translatable();
 
@@ -27,10 +27,9 @@ public:
     const glm::vec3& getPos() const;
     const glm::mat4& getTranslationMatrix() const;
 
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
+    static void registerLuaUsertype(Lua *lua);
 
-public:
+public: // TODO: make private
     glm::vec3 m_pos;
     glm::mat4 m_translation;
 };

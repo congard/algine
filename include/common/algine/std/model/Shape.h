@@ -48,7 +48,7 @@ public:
     uint getBonesPerVertex() const;
 
     const Animation& getAnimation(Index index) const;
-    Index getAnimationIndexByName(const std::string &name) const;
+    Index getAnimationIndexByName(std::string_view name) const;
     uint getAnimationsAmount() const;
     uint getBonesAmount() const;
     uint getInputLayoutsAmount() const;
@@ -63,6 +63,8 @@ public:
     RawPtr<ArrayBuffer> getBoneIdsBuffer() const;
 
     RawPtr<IndexBuffer> getIndicesBuffer() const;
+
+    static void registerLuaUsertype(Lua *lua);
 
 public:
     static ShapePtr getByName(const std::string &name);

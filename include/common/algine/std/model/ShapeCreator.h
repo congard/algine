@@ -1,7 +1,6 @@
 #ifndef ALGINE_SHAPECREATOR_H
 #define ALGINE_SHAPECREATOR_H
 
-#include <algine/std/model/InputLayoutShapeLocationsCreator.h>
 #include <algine/std/model/ShapePtr.h>
 #include <algine/std/model/Shape.h>
 #include <algine/std/AMTLManager.h>
@@ -23,12 +22,6 @@ public:
         DisableBones
     };
 
-    enum class AMTLDumpMode {
-        None,
-        Path,
-        Dump
-    };
-
     template<typename T>
     struct BufferData {
         inline auto operator->() { return &data; }
@@ -43,21 +36,16 @@ public:
     void addParam(Param param);
     void addParams(const std::vector<Param> &params);
     void setParams(const std::vector<Param> &params);
-    void addInputLayoutLocations(const InputLayoutShapeLocationsCreator &locations);
-    void setInputLayoutLocations(const std::vector<InputLayoutShapeLocationsCreator> &locations);
-    void addInputLayoutLocationsPath(const std::string &path);
-    void setInputLayoutLocationsPaths(const std::vector<std::string> &paths);
+    void addInputLayoutLocations(const InputLayoutShapeLocations &locations);
+    void setInputLayoutLocations(const std::vector<InputLayoutShapeLocations> &locations);
     void setModelPath(const std::string &path);
-    void setAMTLPath(const std::string &path);
     void setAMTL(const AMTLManager &amtlManager);
     void setBonesPerVertex(uint bonesPerVertex);
     void setClassName(const std::string &name);
 
     const std::vector<Param>& getParams() const;
-    const std::vector<InputLayoutShapeLocationsCreator>& getInputLayoutLocations() const;
-    const std::vector<std::string>& getInputLayoutLocationsPaths() const;
+    const std::vector<InputLayoutShapeLocations>& getInputLayoutLocations() const;
     const std::string& getModelPath() const;
-    const std::string& getAMTLPath() const;
     const AMTLManager& getAMTL() const;
     uint getBonesPerVertex() const;
     const std::string& getClassName() const;
@@ -97,11 +85,10 @@ public:
     ShapePtr get();
     ShapePtr create();
 
-    void setAMTLDumpMode(AMTLDumpMode mode);
-    AMTLDumpMode getAMTLDumpMode() const;
+    static void registerLuaUsertype(Lua *lua);
 
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
+protected:
+    void exec(const std::string &s, bool path, Lua *lua) override;
 
 private:
     void loadBones(const aiMesh *aimesh);
@@ -110,7 +97,6 @@ private:
 
 private:
     ShapePtr m_shape;
-    AMTLDumpMode m_amtlDumpMode;
 
 private:
     BufferData<float> m_vertices, m_normals, m_texCoords, m_tangents, m_bitangents, m_boneWeights;
@@ -118,9 +104,8 @@ private:
 
 private:
     std::vector<Param> m_params;
-    std::vector<InputLayoutShapeLocationsCreator> m_locations;
-    std::vector<std::string> m_locationsPaths;
-    std::string m_modelPath, m_amtlPath;
+    std::vector<InputLayoutShapeLocations> m_locations;
+    std::string m_modelPath;
 
     AMTLManager m_amtlManager;
     uint m_bonesPerVertex;

@@ -2,11 +2,10 @@
 #define ALGINE_ROTATABLE_H
 
 #include <algine/std/rotator/Rotator.h>
-
-#include <algine/core/transfer/Transferable.h>
+#include <algine/core/lua/Scriptable.h>
 
 namespace algine {
-class Rotatable: public Transferable {
+class Rotatable: public virtual Scriptable {
 protected:
     void swap(Rotatable &other);
 
@@ -41,8 +40,7 @@ public:
     glm::vec3 getLeft() const;
     Rotator* getRotator() const;
 
-    JsonHelper dump() override;
-    void import(const JsonHelper &jsonHelper) override;
+    static void registerLuaUsertype(Lua *lua);
 
 protected:
     Rotator *m_rotator;

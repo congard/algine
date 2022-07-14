@@ -1,45 +1,18 @@
 #include <algine/std/model/ModelCreator.h>
-
 #include <algine/std/model/Model.h>
-
-#include <algine/core/transfer/GLMTransferrer.h>
 #include <algine/core/PtrMaker.h>
 #include <algine/core/TypeRegistry.h>
 
-#include <iostream>
-#include <vector>
 #include <tuple>
 
 #include "internal/PublicObjectTools.h"
-#include "internal/ConfigStrings.h"
 
 using namespace std;
 using namespace glm;
-using namespace nlohmann;
 
 namespace algine {
-namespace Config {
-constant(Shape, "shape");
-constant(Rotator, "rotator");
-constant(ActiveAnimation, "activeAnimation");
-constant(ActivatedAnimations, "activatedAnimations");
-
-constant(All, "all");
-
-constant(Yaw, "yaw");
-constant(Pitch, "pitch");
-constant(Roll, "roll");
-
-constant(Simple, "simple");
-constant(Euler, "euler");
-constant(Free, "free");
-
-constant(Pos, "pos");
-constant(Scale, "scale");
-}
-
 namespace Default {
-constant(ClassName, "Model");
+constexpr auto ClassName = "Model";
 }
 
 ModelCreator::AnimationInfo::AnimationInfo(std::string name)
@@ -74,18 +47,20 @@ bool ModelCreator::AnimationInfo::operator<(const AnimationInfo &rhs) const {
 
 ModelCreator::ModelCreator()
     : m_className(Default::ClassName),
-      m_shapeDumpMode(ShapeDumpMode::None),
-      m_activatedAnimationsDumpMode(ActivatedAnimationsDumpMode::List),
       m_rotatorType(Rotator::Type::Euler),
       m_pos(),
       m_rotate(),
       m_scale(1.0f) {}
 
 void ModelCreator::activateAnimation(const string &name) {
+    if (m_activatedAnimations.find(AnimationInfo(AnimationInfo::All)) != m_activatedAnimations.end())
+        m_activatedAnimations.clear();
     m_activatedAnimations.insert(AnimationInfo(name));
 }
 
 void ModelCreator::activateAnimation(Index index) {
+    if (index == AnimationInfo::All || m_activatedAnimations.find(AnimationInfo(AnimationInfo::All)) != m_activatedAnimations.end())
+        m_activatedAnimations.clear();
     m_activatedAnimations.insert(AnimationInfo(index));
 }
 
@@ -93,26 +68,11 @@ void ModelCreator::setClassName(const string &name) {
     m_className = name;
 }
 
-void ModelCreator::setShapeDumpMode(ShapeDumpMode mode) {
-    m_shapeDumpMode = mode;
-}
-
-void ModelCreator::setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode mode) {
-    m_activatedAnimationsDumpMode = mode;
-}
-
-void ModelCreator::setShapePath(const string &path) {
-    setShapeDumpMode(ShapeDumpMode::Path);
-    m_shapePath = path;
-}
-
 void ModelCreator::setShapeName(const string &name) {
-    setShapeDumpMode(ShapeDumpMode::Name);
     m_shapeName = name;
 }
 
 void ModelCreator::setShape(const ShapeCreator &creator) {
-    setShapeDumpMode(ShapeDumpMode::Dump);
     m_shape = creator;
 }
 
@@ -146,18 +106,6 @@ void ModelCreator::setScale(const vec3 &scale) {
 
 const string& ModelCreator::getClassName() const {
     return m_className;
-}
-
-ModelCreator::ShapeDumpMode ModelCreator::getShapeDumpMode() const {
-    return m_shapeDumpMode;
-}
-
-ModelCreator::ActivatedAnimationsDumpMode ModelCreator::getActivatedAnimationsDumpMode() const {
-    return m_activatedAnimationsDumpMode;
-}
-
-const string &ModelCreator::getShapePath() const {
-    return m_shapePath;
 }
 
 const string &ModelCreator::getShapeName() const {
@@ -201,30 +149,11 @@ ModelPtr ModelCreator::create() {
     model->setRotatorType(m_rotatorType);
 
     // create model & add Shape
-    switch (m_shapeDumpMode) {
-        case ShapeDumpMode::Path: {
-            ShapeCreator creator;
-            creator.setIOSystem(io());
-            creator.setWorkingDirectory(m_workingDirectory);
-            creator.importFromFile(m_shapePath);
-
-            model->setShape(creator.get());
-
-            break;
-        }
-        case ShapeDumpMode::Dump: {
-            m_shape.setIOSystem(io());
-            model->setShape(m_shape.get());
-            break;
-        }
-        case ShapeDumpMode::Name: {
-            model->setShape(Shape::getByName(m_shapeName));
-            break;
-        }
-        case ShapeDumpMode::None: {
-            // Shape is nullptr
-            break;
-        }
+    if (!m_shapeName.empty()) {
+        model->setShape(Shape::getByName(m_shapeName));
+    } else if (!m_shape.getModelPath().empty()) {
+        m_shape.setIOSystem(io());
+        model->setShape(m_shape.get());
     }
 
     // configure animations
@@ -234,21 +163,15 @@ ModelPtr ModelCreator::create() {
         model->setBonesFromAnimation(m_activeAnimation.getName());
     }
 
-    switch (m_activatedAnimationsDumpMode) {
-        case ActivatedAnimationsDumpMode::All: {
-            model->activateAnimations();
-            break;
-        }
-        case ActivatedAnimationsDumpMode::List: {
-            for (const auto &info : m_activatedAnimations) {
-                if (info.hasIndex()) {
-                    model->activateAnimation(info.getIndex());
-                } else if (info.hasName()) {
-                    model->activateAnimation(info.getName());
-                }
+    if (m_activatedAnimations.find(AnimationInfo(AnimationInfo::All)) != m_activatedAnimations.end()) {
+        model->activateAnimations();
+    } else {
+        for (const auto &info : m_activatedAnimations) {
+            if (info.hasIndex()) {
+                model->activateAnimation(info.getIndex());
+            } else if (info.hasName()) {
+                model->activateAnimation(info.getName());
             }
-
-            break;
         }
     }
 
@@ -268,159 +191,60 @@ ModelPtr ModelCreator::create() {
     return model;
 }
 
-void ModelCreator::import(const JsonHelper &jsonHelper) {
-    using namespace Config;
+void ModelCreator::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
 
-    const json &config = jsonHelper.json;
+    if (isRegistered(*lua, "ModelCreator"))
+        return;
 
-    // load class name
-    if (config.contains(ClassName))
-        m_className = config[ClassName];
+    lua->registerUsertype<Creator, Model>();
 
-    // load shape
-    if (config.contains(Config::Shape)) {
-        const json &shape = config[Config::Shape];
+    auto ctors = sol::constructors<ModelCreator()>();
+    auto usertype = lua->state()->new_usertype<ModelCreator>(
+            "ModelCreator",
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors,
+            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator>());
 
-        if (shape.contains(Path)) {
-            setShapePath(shape[Path]);
-        } else if (shape.contains(Dump)) {
-            ShapeCreator creator;
-            creator.setWorkingDirectory(m_workingDirectory);
-            creator.import(shape[Dump]);
-            setShape(creator);
-        } else if (shape.contains(Name)) {
-            setShapeName(shape[Name]);
-        } else {
-            throw runtime_error("Broken config:\n" + shape.dump());
-        }
-    }
+    usertype["activateAnimation"] = sol::overload(
+        static_cast<void (ModelCreator::*)(const std::string&)>(&ModelCreator::activateAnimation),
+        static_cast<void (ModelCreator::*)(Index)>(&ModelCreator::activateAnimation));
+    usertype["setActiveAnimationName"] = &ModelCreator::setActiveAnimationName;
+    usertype["setActiveAnimationIndex"] = &ModelCreator::setActiveAnimationIndex;
+    usertype["getActiveAnimation"] = &ModelCreator::getActiveAnimation;
 
-    // load active animation
-    if (config.contains(ActiveAnimation)) {
-        if (const json &anim = config[ActiveAnimation]; anim.is_number_integer()) {
-            setActiveAnimationIndex(anim);
-        } else if (anim.is_string()) {
-            setActiveAnimationName(anim);
-        } else {
-            throw runtime_error("Broken config:\n" + anim.dump());
-        }
-    }
+    Lua::new_property(usertype, "className", &ModelCreator::getClassName, &ModelCreator::setClassName);
+    Lua::new_property(usertype, "shapeName", &ModelCreator::getShapeName, &ModelCreator::setShapeName);
+    Lua::new_property(usertype, "shape", &ModelCreator::getShape, &ModelCreator::setShape);
+    Lua::new_property(usertype, "rotatorType", &ModelCreator::getRotatorType, &ModelCreator::setRotatorType);
+    Lua::new_property(usertype, "pos", &ModelCreator::getPos, &ModelCreator::setPos);
+    Lua::new_property(usertype, "rotate", &ModelCreator::getRotate, &ModelCreator::setRotate);
+    Lua::new_property(usertype, "scale", &ModelCreator::getScale, &ModelCreator::setScale);
+    Lua::new_property(usertype, "activatedAnimations",
+        [](const sol::object &self) {
+            auto table = sol::state_view(self.lua_state()).create_table();
+            auto animations = self.as<ModelCreator>().getActivatedAnimations();
+            for (auto &anim : animations) table[table.size() + 1] = anim;
+            return table;
+        }, [](ModelCreator &self, std::set<AnimationInfo> animations) { self.setActivatedAnimations(animations); });
 
-    // load activated animations
-    if (config.contains(ActivatedAnimations)) {
-        if (const json &animations = config[ActivatedAnimations]; animations.is_string() && animations == All) {
-            setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode::All);
-        } else if (animations.is_array()) {
-            setActivatedAnimationsDumpMode(ActivatedAnimationsDumpMode::List);
+    usertype["get"] = &ModelCreator::get;
+    usertype["create"] = &ModelCreator::create;
 
-            for (const auto &anim : animations) {
-                if (anim.is_number()) {
-                    m_activatedAnimations.insert(AnimationInfo(anim.get<Index>()));
-                } else if (anim.is_string()) {
-                    m_activatedAnimations.insert(AnimationInfo(anim.get<string>()));
-                } else {
-                    throw runtime_error("Invalid activatedAnimations element:\n" + anim.dump());
-                }
-            }
-        } else {
-            throw runtime_error("Invalid activatedAnimations value:\n" + animations.dump());
-        }
-    }
-
-    // load rotator
-    if (config.contains(Config::Rotator)) {
-        const JsonHelper &rotator = config[Config::Rotator];
-
-        rotator.readValue(Pitch, m_rotate.x, 0.0f);
-        rotator.readValue(Yaw, m_rotate.y, 0.0f);
-        rotator.readValue(Roll, m_rotate.z, 0.0f);
-
-        if (rotator.json.contains(Type)) {
-            m_rotatorType = map<string, Rotator::Type> {
-                {Simple, Rotator::Type::Simple},
-                {Euler, Rotator::Type::Euler},
-                {Free, Rotator::Type::Free}
-            } [rotator.json[Type]];
-        }
-    }
-
-    // load position & scale
-    m_pos = GLMTransferrer::import<vec3>(jsonHelper.readValue(Pos));
-    m_scale = GLMTransferrer::import<vec3>(jsonHelper.readValue(Scale));
-
-    Creator::import(jsonHelper);
+    auto animationInfoCtors = sol::constructors<AnimationInfo(), AnimationInfo(std::string), AnimationInfo(Index)>();
+    auto animationInfo = (*lua->state())["ModelCreator"].get<sol::table>().new_usertype<AnimationInfo>(
+            "AnimationInfo",
+            sol::meta_function::construct, animationInfoCtors,
+            sol::call_constructor, animationInfoCtors);
+    animationInfo["None"] = sol::var(AnimationInfo::None);
+    animationInfo["All"] = sol::var(AnimationInfo::All);
+    animationInfo["getName"] = &AnimationInfo::getName;
+    animationInfo["getIndex"] = &AnimationInfo::getIndex;
+    animationInfo["hasName"] = &AnimationInfo::hasName;
+    animationInfo["hasIndex"] = &AnimationInfo::hasIndex;
 }
 
-JsonHelper ModelCreator::dump() {
-    json config;
-
-    // write class name
-    if (m_className != Default::ClassName)
-        config[Config::ClassName] = m_className;
-
-    // write shape
-    switch (m_shapeDumpMode) {
-        case ShapeDumpMode::Path: {
-            config[Config::Shape][Config::Path] = m_shapePath;
-            break;
-        }
-        case ShapeDumpMode::Dump: {
-            config[Config::Shape][Config::Dump] = m_shape.dump().get();
-            break;
-        }
-        case ShapeDumpMode::Name: {
-            config[Config::Shape][Config::Name] = m_shapeName;
-            break;
-        }
-        default: {
-            // empty
-        }
-    }
-
-    // write active animation
-    if (m_activeAnimation.hasIndex()) {
-        config[Config::ActiveAnimation] = m_activeAnimation.getIndex();
-    } else if (m_activeAnimation.hasName()) {
-        config[Config::ActiveAnimation] = m_activeAnimation.getName();
-    }
-
-    // write activated animations
-    switch (m_activatedAnimationsDumpMode) {
-        case ActivatedAnimationsDumpMode::All: {
-            config[Config::ActivatedAnimations] = Config::All;
-            break;
-        }
-        case ActivatedAnimationsDumpMode::List: {
-            for (const auto &info : m_activatedAnimations) {
-                if (info.hasIndex()) {
-                    config[Config::ActivatedAnimations].emplace_back(info.getIndex());
-                } else if (info.hasName()) {
-                    config[Config::ActivatedAnimations].emplace_back(info.getName());
-                }
-            }
-
-            break;
-        }
-    }
-
-    // write rotator
-    {
-        using namespace Config;
-
-        json &rotator = config[Config::Rotator];
-        rotator[Yaw] = m_rotate.y;
-        rotator[Pitch] = m_rotate.x;
-        rotator[Roll] = m_rotate.z;
-        rotator[Type] = (vector<string> {Simple, Euler, Free})[static_cast<uint>(m_rotatorType)];
-    }
-
-    // write position & scale
-    config[Config::Pos] = GLMTransferrer::dump(m_pos).get();
-    config[Config::Scale] = GLMTransferrer::dump(m_scale).get();
-
-    JsonHelper result(config);
-    result.append(Creator::dump());
-
-    return result;
+void ModelCreator::exec(const std::string &s, bool path, Lua *lua) {
+    exec_t<ModelCreator>(s, path, lua);
 }
 }

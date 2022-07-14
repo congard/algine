@@ -30,9 +30,9 @@ Creators:
 - [x] FramebufferCreator _(json support was removed)_
 - [x] RenderbufferCreator
 - [x] ~~OutputListCreator~~ _(removed, some functionality was moved to OutputList)_
-- [ ] InputLayoutShapeLocationsCreator
-- [ ] ModelCreator
-- [ ] ShapeCreator
+- [x] ~~InputLayoutShapeLocationsCreator~~ _(removed, InputLayoutShapeLocations was extended in functionality)_
+- [x] ModelCreator
+- [x] ShapeCreator
 
 Core:
 
@@ -81,10 +81,21 @@ Widgets:
 
 Std:
 
-- [ ] InputLayoutShapeLocations
+- [x] InputLayoutShapeLocations
 - [ ] Mesh
-- [ ] Model
-- [ ] Shape
+- [x] Model
+- [x] Shape
+- [ ] Mesh
+- [x] Rotatable
+- [x] Translatable
+- [x] Scalable
+- [ ] Animation
+- [ ] AnimationBlender
+- [ ] Animator
+- [ ] Bone
+- [ ] BonesStorage
+- [ ] Camera
+- [ ] Material
 
 Glm:
 

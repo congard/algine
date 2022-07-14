@@ -1,5 +1,4 @@
 #include <algine/std/model/Model.h>
-
 #include <algine/std/model/Shape.h>
 
 #include "internal/PublicObjectTools.h"
@@ -45,21 +44,19 @@ void Model::activateAnimations() {
 
 void Model::activateAnimation(Index index) {
     configureAnimationList();
-
     m_animBones[index].resize(m_shape->getBonesAmount());
 }
 
-void Model::activateAnimation(const std::string &name) {
+void Model::activateAnimation(std::string_view name) {
     activateAnimation(m_shape->getAnimationIndexByName(name));
 }
 
 void Model::deactivateAnimation(Index index) {
     configureAnimationList();
-
     m_animBones[index] = {};
 }
 
-void Model::deactivateAnimation(const std::string &name) {
+void Model::deactivateAnimation(std::string_view name) {
     deactivateAnimation(m_shape->getAnimationIndexByName(name));
 }
 
@@ -71,11 +68,11 @@ bool Model::isBonesPresent() const {
     return m_shape->isBonesPresent();
 }
 
-void Model::setBoneTransform(const string &boneName, const BoneMatrix &transformation) {
+void Model::setBoneTransform(string_view boneName, const BoneMatrix &transformation) {
     if (uint index = m_shape->m_bones.getIndex(boneName); index != BonesStorage::BoneNotFound) {
         m_boneTransformations[index] = transformation;
     } else {
-        throw runtime_error("Bone " + boneName + " does not found");
+        throw runtime_error("Bone " + string(boneName) + " does not found");
     }
 }
 
@@ -115,7 +112,7 @@ void Model::setBonesFromAnimation(Index animationIndex) {
     m_bones = &m_animBones[animationIndex];
 }
 
-void Model::setBonesFromAnimation(const string &animationName) {
+void Model::setBonesFromAnimation(string_view animationName) {
     setBonesFromAnimation(m_shape->getAnimationIndexByName(animationName));
 }
 
@@ -153,5 +150,53 @@ ModelPtr Model::getByName(const string &name) {
 
 Model* Model::byName(const string &name) {
     return PublicObjectTools::byName<Model>(name);
+}
+
+void Model::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "Model"))
+        return;
+
+    lua->registerUsertype<Object, Rotatable, Translatable, Scalable>();
+
+    auto factories = sol::factories(
+            [] { return PtrMaker::make<Model>(); },
+            [](const ShapePtr &shape, Rotator::Type rotatorType) { return PtrMaker::make<Model>(shape, rotatorType); },
+            [](Rotator::Type rotatorType) { return PtrMaker::make<Model>(rotatorType); });
+    auto usertype = lua->state()->new_usertype<Model>(
+            "Model",
+            sol::meta_function::construct, factories,
+            sol::call_constructor, factories,
+            sol::base_classes, sol::bases<Scriptable, Object, Rotatable, Translatable, Scalable>());
+
+    usertype["transform"] = &Model::transform;
+    usertype["activateAnimations"] = &Model::activateAnimations;
+    usertype["activateAnimation"] = sol::overload(
+        static_cast<void (Model::*)(Index)>(&Model::activateAnimation),
+        static_cast<void (Model::*)(std::string_view)>(&Model::activateAnimation));
+    usertype["deactivateAnimation"] = sol::overload(
+        static_cast<void (Model::*)(Index)>(&Model::deactivateAnimation),
+        static_cast<void (Model::*)(std::string_view)>(&Model::deactivateAnimation));
+    usertype["isAnimationActivated"] = &Model::isAnimationActivated;
+    usertype["isBonesPresent"] = &Model::isBonesPresent;
+    usertype["setBoneTransform"] = sol::overload(
+        static_cast<void (Model::*)(Index, const BoneMatrix&)>(&Model::setBoneTransform),
+        static_cast<void (Model::*)(std::string_view, const BoneMatrix&)>(&Model::setBoneTransform));
+
+    Lua::new_property(usertype, "shape", &Model::getShape, &Model::setShape);
+    Lua::new_property(usertype, "bones", &Model::getBones, &Model::setBones);
+    Lua::new_property(usertype, "boneTransformations", &Model::getBoneTransformations, &Model::setBoneTransformations);
+
+    usertype["setBonesFromAnimation"] = sol::overload(
+        static_cast<void (Model::*)(Index)>(&Model::setBonesFromAnimation),
+        static_cast<void (Model::*)(std::string_view)>(&Model::setBonesFromAnimation));
+    usertype["getAnimator"] = &Model::getAnimator;
+    usertype["transformation"] = &Model::transformation;
+    usertype["getBone"] = &Model::getBone;
+
+    // static
+    usertype["getByName"] = &Model::getByName;
+    usertype["byName"] = &Model::byName;
 }
 }

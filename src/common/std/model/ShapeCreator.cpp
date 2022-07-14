@@ -4,7 +4,6 @@
 
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/PtrMaker.h>
-#include <algine/core/JsonHelper.h>
 #include <algine/core/TypeRegistry.h>
 #include <algine/core/log/Log.h>
 
@@ -23,24 +22,20 @@
 
 #include "internal/PublicObjectTools.h"
 #include "../assimp2glm.h"
-#include "ShapeConfigTools.h"
 
 using namespace tulz;
 using namespace std;
-using namespace nlohmann;
 
 namespace algine {
 namespace Default {
 constexpr uint BonesPerVertex = 4;
-
-constant(ClassName, "Shape");
+constexpr auto ClassName = "Shape";
 }
 
-constant(TAG, "Algine ShapeCreator");
+constexpr auto TAG = "Algine ShapeCreator";
 
 ShapeCreator::ShapeCreator()
     : m_className(Default::ClassName),
-      m_amtlDumpMode(AMTLDumpMode::None),
       m_bonesPerVertex(Default::BonesPerVertex) {}
 
 void ShapeCreator::addParam(Param param) {
@@ -57,28 +52,16 @@ void ShapeCreator::setParams(const vector<Param> &params) {
     m_params = params;
 }
 
-void ShapeCreator::addInputLayoutLocations(const InputLayoutShapeLocationsCreator &locations) {
+void ShapeCreator::addInputLayoutLocations(const InputLayoutShapeLocations &locations) {
     m_locations.emplace_back(locations);
 }
 
-void ShapeCreator::setInputLayoutLocations(const vector<InputLayoutShapeLocationsCreator> &locations) {
+void ShapeCreator::setInputLayoutLocations(const vector<InputLayoutShapeLocations> &locations) {
     m_locations = locations;
-}
-
-void ShapeCreator::addInputLayoutLocationsPath(const string &path) {
-    m_locationsPaths.emplace_back(path);
-}
-
-void ShapeCreator::setInputLayoutLocationsPaths(const vector<string> &paths) {
-    m_locationsPaths = paths;
 }
 
 void ShapeCreator::setModelPath(const string &path) {
     m_modelPath = path;
-}
-
-void ShapeCreator::setAMTLPath(const string &path) {
-    m_amtlPath = path;
 }
 
 void ShapeCreator::setAMTL(const AMTLManager &amtlManager) {
@@ -97,20 +80,12 @@ const vector<ShapeCreator::Param>& ShapeCreator::getParams() const {
     return m_params;
 }
 
-const vector<InputLayoutShapeLocationsCreator>& ShapeCreator::getInputLayoutLocations() const {
+const vector<InputLayoutShapeLocations>& ShapeCreator::getInputLayoutLocations() const {
     return m_locations;
-}
-
-const vector<string>& ShapeCreator::getInputLayoutLocationsPaths() const {
-    return m_locationsPaths;
 }
 
 const string& ShapeCreator::getModelPath() const {
     return m_modelPath;
-}
-
-const string& ShapeCreator::getAMTLPath() const {
-    return m_amtlPath;
 }
 
 const AMTLManager& ShapeCreator::getAMTL() const {
@@ -205,113 +180,6 @@ ShapePtr ShapeCreator::create() {
     internal::PublicObjectTools::postCreateAccessOp("Shape", this, m_shape);
 
     return m_shape;
-}
-
-void ShapeCreator::setAMTLDumpMode(AMTLDumpMode mode) {
-    m_amtlDumpMode = mode;
-}
-
-ShapeCreator::AMTLDumpMode ShapeCreator::getAMTLDumpMode() const {
-    return m_amtlDumpMode;
-}
-
-void ShapeCreator::import(const JsonHelper &jsonHelper) {
-    using namespace Config;
-
-    const json &config = jsonHelper.json;
-
-    // load class name
-    if (config.contains(ClassName))
-        m_className = config[ClassName];
-
-    // load params
-    if (config.contains(Params)) {
-        for (const auto & p : config[Params]) {
-            m_params.emplace_back(stringToParam(p));
-        }
-    }
-
-    // load locations
-    if (config.contains(InputLayoutLocations)) {
-        for (const auto & item : config[InputLayoutLocations]) {
-            if (item.is_object()) {
-                InputLayoutShapeLocationsCreator locations;
-                locations.setWorkingDirectory(m_workingDirectory);
-                locations.import(item);
-                m_locations.emplace_back(locations);
-            } else if (item.is_string()) {
-                m_locationsPaths.emplace_back(item);
-            } else {
-                throw runtime_error("InputLayoutLocations can be specified by path (string) or by dump (object)");
-            }
-        }
-    }
-
-    // load shape path
-    m_modelPath = jsonHelper.readValue<string>(Path);
-
-    // load AMTL
-    if (config.contains(AMTL)) {
-        const auto &amtlData = config[AMTL];
-
-        if (amtlData.contains(Path)) {
-            m_amtlPath = amtlData[Path];
-            m_amtlDumpMode = AMTLDumpMode::Path;
-        } else if (amtlData.contains(Dump)) {
-            m_amtlManager.import(amtlData[Dump]);
-            m_amtlDumpMode = AMTLDumpMode::Dump;
-        }
-    }
-
-    // load bones per vertex
-    m_bonesPerVertex = jsonHelper.readValue<uint>(BonesPerVertex, Default::BonesPerVertex);
-
-    Creator::import(jsonHelper);
-}
-
-JsonHelper ShapeCreator::dump() {
-    using namespace Config;
-
-    json config;
-
-    // write class name
-    if (m_className != Default::ClassName)
-        config[Config::ClassName] = m_className;
-
-    // write params
-    for (const auto & p : m_params)
-        config[Params].emplace_back(paramToString(p));
-
-    // write locations
-    for (auto & locations : m_locations)
-        config[InputLayoutLocations].emplace_back(locations.dump().json);
-
-    for (auto & path : m_locationsPaths)
-        config[InputLayoutLocations].emplace_back(path);
-
-    // write shape path
-    if (!m_modelPath.empty())
-        config[Path] = m_modelPath;
-
-    // write AMTL
-    if (m_amtlDumpMode == AMTLDumpMode::Path) {
-        if (!m_amtlPath.empty()) {
-            config[AMTL][Path] = m_amtlPath;
-        }
-    } else if (m_amtlDumpMode == AMTLDumpMode::Dump) {
-        if (!m_amtlManager.getMaterials().empty()) {
-            config[AMTL][Dump] = m_amtlManager.dump().json;
-        }
-    }
-
-    // write bones per vertex
-    if (m_bonesPerVertex != Default::BonesPerVertex)
-        config[AMTL][BonesPerVertex] = m_bonesPerVertex;
-
-    JsonHelper result(config);
-    result.append(Creator::dump());
-
-    return result;
 }
 
 uint getMaxBonesPerVertex(const aiMesh *mesh) {
@@ -469,14 +337,12 @@ void ShapeCreator::loadFile() {
 
     m_shape->m_globalInverseTransform = glm::inverse(getMat4(scene->mRootNode->mTransformation));
 
-    // try to find AMTL if does not specified
+    // try to load AMTL from file if current material is empty
     if (m_amtlManager.getMaterials().empty()) {
-        if (m_amtlPath.empty()) {
-            m_amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
-        }
+        string amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
 
         // try to load AMTL
-        if (string fullAMTLPath = Path::join(m_workingDirectory, m_amtlPath); io()->exists(Path(fullAMTLPath).toString())) {
+        if (string fullAMTLPath = Path::join(m_workingDirectory, amtlPath); io()->exists(Path(fullAMTLPath).toString())) {
             m_amtlManager.setIOSystem(io());
             m_amtlManager.importFromFile(fullAMTLPath);
         }
@@ -533,16 +399,7 @@ void ShapeCreator::createInputLayouts() {
         m_shape.reset(TypeRegistry::create<Shape>(m_className));
 
     for (auto &item : m_locations) {
-        item.setIOSystem(io());
-        m_shape->createInputLayout(item.create());
-    }
-
-    for (auto &item : m_locationsPaths) {
-        InputLayoutShapeLocationsCreator locations;
-        locations.setIOSystem(io());
-        locations.setWorkingDirectory(m_workingDirectory);
-        locations.importFromFile(item);
-        m_shape->createInputLayout(locations.create());
+        m_shape->createInputLayout(item);
     }
 }
 
@@ -797,5 +654,80 @@ void ShapeCreator::genBuffers() {
     m_shape->m_boneWeights = createBuffer<ArrayBuffer>(m_boneWeights);
     m_shape->m_boneIds = createBuffer<ArrayBuffer>(m_boneIds);
     m_shape->m_indices = createBuffer<IndexBuffer>(m_indices);
+}
+
+template<typename T>
+void registerBufferData(sol::table &table, std::string_view name) {
+    auto ctors = sol::constructors<ShapeCreator::BufferData<T>()>();
+    auto usertype = table.new_usertype<ShapeCreator::BufferData<T>>(
+            name,
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors);
+    usertype["data"] = &ShapeCreator::BufferData<T>::data;
+    usertype["usage"] = &ShapeCreator::BufferData<T>::usage;
+}
+
+void ShapeCreator::registerLuaUsertype(Lua *lua) {
+    lua = getLua(lua);
+
+    if (isRegistered(*lua, "ShapeCreator"))
+        return;
+
+    lua->registerUsertype<Creator, Shape>();
+
+    auto ctors = sol::constructors<ShapeCreator()>();
+    auto usertype = lua->state()->new_usertype<ShapeCreator>(
+            "ShapeCreator",
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors,
+            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator>());
+
+    usertype["addParam"] = &ShapeCreator::addParam;
+    usertype["addParams"] = [](ShapeCreator &self, std::vector<Param> params) { self.addParams(params); };
+    usertype["addInputLayoutLocations"] = &ShapeCreator::addInputLayoutLocations;
+
+    Lua::new_property(usertype, "params", &ShapeCreator::getParams,
+        [](ShapeCreator &self, std::vector<Param> params) { self.setParams(params); });
+    Lua::new_property(usertype, "inputLayoutLocations", &ShapeCreator::getInputLayoutLocations,
+        [](ShapeCreator &self, std::vector<InputLayoutShapeLocations> locations) { self.setInputLayoutLocations(locations); });
+    Lua::new_property(usertype, "modelPath", &ShapeCreator::getModelPath, &ShapeCreator::setModelPath);
+    Lua::new_property(usertype, "amtl", "getAMTL", "setAMTL", &ShapeCreator::getAMTL, &ShapeCreator::setAMTL);
+    Lua::new_property(usertype, "bonesPerVertex", &ShapeCreator::getBonesPerVertex, &ShapeCreator::setBonesPerVertex);
+    Lua::new_property(usertype, "className", &ShapeCreator::getClassName, &ShapeCreator::setClassName);
+
+    Lua::new_property(usertype, "vertices", &ShapeCreator::getVertices, &ShapeCreator::setVertices);
+    Lua::new_property(usertype, "normals", &ShapeCreator::getNormals, &ShapeCreator::setNormals);
+    Lua::new_property(usertype, "texCoords", &ShapeCreator::getTexCoords, &ShapeCreator::setTexCoords);
+    Lua::new_property(usertype, "tangents", &ShapeCreator::getTangents, &ShapeCreator::setTangents);
+    Lua::new_property(usertype, "bitangents", &ShapeCreator::getBitangents, &ShapeCreator::setBitangents);
+    Lua::new_property(usertype, "boneWeights", &ShapeCreator::setBoneWeights, &ShapeCreator::getBoneWeights);
+    Lua::new_property(usertype, "boneIds", &ShapeCreator::getBoneIds, &ShapeCreator::setBoneIds);
+    Lua::new_property(usertype, "indices", &ShapeCreator::getIndices, &ShapeCreator::setIndices);
+
+    usertype["loadFile"] = &ShapeCreator::loadFile;
+    usertype["loadShape"] = &ShapeCreator::loadShape;
+    usertype["applyParams"] = &ShapeCreator::applyParams;
+    usertype["genBuffers"] = &ShapeCreator::genBuffers;
+    usertype["createInputLayouts"] = &ShapeCreator::createInputLayouts;
+    usertype["getCurrentShape"] = &ShapeCreator::getCurrentShape;
+    usertype["get"] = &ShapeCreator::get;
+    usertype["create"] = &ShapeCreator::create;
+
+    auto usertypeTable = (*lua->state())["ShapeCreator"].get<sol::table>();
+
+    usertypeTable.new_enum("Param",
+        "Triangulate", ShapeCreator::Param::Triangulate,
+        "SortByPolygonType", ShapeCreator::Param::SortByPolygonType,
+        "CalcTangentSpace", ShapeCreator::Param::CalcTangentSpace,
+        "JoinIdenticalVertices", ShapeCreator::Param::JoinIdenticalVertices,
+        "InverseNormals", ShapeCreator::Param::InverseNormals,
+        "DisableBones", ShapeCreator::Param::DisableBones);
+
+    registerBufferData<float>(usertypeTable, "FloatBufferData");
+    registerBufferData<uint>(usertypeTable, "UnsignedBufferData");
+}
+
+void ShapeCreator::exec(const std::string &s, bool path, Lua *lua) {
+    exec_t<ShapeCreator>(s, path, lua);
 }
 }
