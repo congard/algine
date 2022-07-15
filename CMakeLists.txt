@@ -219,7 +219,6 @@ set(ALGINE_CORE_SOURCES
         src/common/core/debug/FileDebugWriter.cpp include/common/algine/core/debug/FileDebugWriter.h
         src/common/core/Engine.cpp include/common/algine/core/Engine.h
         src/common/core/TypeRegistry.cpp include/common/algine/core/TypeRegistry.h
-        src/common/core/ImageConfigTools.h
         src/common/core/TextureConfigTools.h
         src/common/core/log/Logger.cpp include/common/algine/core/log/Logger.h
         src/common/core/log/Log.cpp include/common/algine/core/log/Log.h

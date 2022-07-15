@@ -18,9 +18,6 @@ public:
     uint getWidth() const;
     uint getHeight() const;
 
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
-
     static void registerLuaUsertype(Lua *lua);
 
 protected:

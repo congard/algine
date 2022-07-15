@@ -15,9 +15,6 @@ public:
     Texture2DPtr get();
     Texture2DPtr create();
 
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
-
     static void registerLuaUsertype(Lua *lua);
 
 protected:

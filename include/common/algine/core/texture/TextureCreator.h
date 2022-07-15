@@ -29,9 +29,6 @@ public:
     const std::map<uint, uint>& getParams() const;
     const std::map<uint, uint>& getDefaultParams() const;
 
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
-
     static void registerLuaUsertype(Lua *lua);
 
 protected:
@@ -41,9 +38,6 @@ protected:
 
 protected:
     std::map<uint, uint> m_defaultParams;
-
-protected:
-    bool m_writeFileSection;
 };
 }
 

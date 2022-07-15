@@ -1,16 +1,12 @@
 #include <algine/core/texture/Texture2DCreator.h>
-
 #include <algine/core/texture/Texture2D.h>
-#include <algine/core/JsonHelper.h>
 
 #include <tulz/Path.h>
 
-#include "internal/ConfigStrings.h"
 #include "internal/PublicObjectTools.h"
 
 using namespace std;
 using namespace tulz;
-using namespace nlohmann;
 using namespace algine::internal;
 
 namespace algine {
@@ -60,30 +56,6 @@ Texture2DPtr Texture2DCreator::create() {
     PublicObjectTools::postCreateAccessOp("Texture2D", this, texture);
 
     return texture;
-}
-
-void Texture2DCreator::import(const JsonHelper &jsonHelper) {
-    using namespace Config;
-
-    const json &config = jsonHelper.json;
-
-    if (config.contains(File) && config[File].contains(Path))
-        m_path = config[File][Path];
-
-    TextureCreator::import(jsonHelper);
-}
-
-JsonHelper Texture2DCreator::dump() {
-    JsonHelper config;
-
-    if (!m_path.empty())
-        config.json[Config::File][Config::Path] = m_path;
-
-    m_writeFileSection = !m_path.empty();
-
-    config.append(TextureCreator::dump());
-
-    return config;
 }
 
 void Texture2DCreator::registerLuaUsertype(Lua *lua) {
