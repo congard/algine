@@ -1,18 +1,17 @@
 #include <algine/core/lua/DataType.h>
-#include <algine/core/lua/Lua.h>
-#include <algine/core/Engine.h>
+#include <algine/core/lua/Scriptable.h>
 #include <algine/core/DataType.h>
 
 using EDataType = algine::DataType;
 
 namespace algine::lua {
-void DataType::registerLuaUsertype(Lua *lua) {
-    lua = lua ? lua : &Engine::getLua();
+void DataType::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = algine::Scriptable::getEnv(lua, tenv);
 
-    if ((*lua->state())["DataType"].valid())
+    if (algine::Scriptable::isRegistered(env, "DataType"))
         return;
 
-    lua->state()->new_enum("DataType",
+    env.new_enum("DataType",
         "Byte", EDataType::Byte,
         "UnsignedByte", EDataType::UnsignedByte,
         "Short", EDataType::Short,

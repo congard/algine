@@ -1,5 +1,4 @@
 #include <algine/core/shader/ShaderCreator.h>
-
 #include <algine/core/JsonHelper.h>
 #include <algine/core/Engine.h>
 #include <algine/core/log/Log.h>
@@ -297,16 +296,16 @@ void ShaderCreator::importFromFile(const string &path) {
     Creator::importFromFile(path);
 }
 
-void ShaderCreator::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void ShaderCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "ShaderCreator"))
+    if (isRegistered(env, "ShaderCreator"))
         return;
 
-    lua->registerUsertype<Shader, Creator, ShaderDefinitionGenerator>();
+    lua->registerUsertype<Shader, Creator, ShaderDefinitionGenerator>(tenv);
 
     auto ctors = sol::constructors<ShaderCreator(), ShaderCreator(Shader::Type)>();
-    auto usertype = lua->state()->new_usertype<ShaderCreator>(
+    auto usertype = env.new_usertype<ShaderCreator>(
             "ShaderCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
@@ -336,8 +335,8 @@ void ShaderCreator::registerLuaUsertype(Lua *lua) {
     usertype["removeGlobalIncludePath"] = &ShaderCreator::removeGlobalIncludePath;
 }
 
-void ShaderCreator::exec(const std::string &s, bool path, Lua *lua) {
-    exec_t<ShaderCreator>(s, path, lua);
+void ShaderCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<ShaderCreator>(s, path, lua, tenv);
 }
 
 void ShaderCreator::setGlobalIncludePaths(const vector<string> &includePaths) {

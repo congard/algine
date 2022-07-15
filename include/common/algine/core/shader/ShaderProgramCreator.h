@@ -29,10 +29,10 @@ public:
 
     void importFromFile(const std::string &path) override;
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 protected:
-    void exec(const std::string &s, bool path, Lua *lua) override;
+    void exec(const std::string &s, bool path, Lua *lua, sol::global_table *env) override;
 
 private:
     std::vector<ShaderCreator> m_shaders;

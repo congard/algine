@@ -122,16 +122,16 @@ void registerAttachments(sol::table &table, std::string_view name) {
     usertype["addName"] = &T::addName;
 }
 
-void FramebufferCreator::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void FramebufferCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "FramebufferCreator"))
+    if (isRegistered(env, "FramebufferCreator"))
         return;
 
-    lua->registerUsertype<Creator, Framebuffer>();
+    lua->registerUsertype<Creator, Framebuffer>(tenv);
 
     auto ctors = sol::constructors<FramebufferCreator()>();
-    auto usertype = lua->state()->new_usertype<FramebufferCreator>(
+    auto usertype = env.new_usertype<FramebufferCreator>(
             "FramebufferCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
@@ -146,13 +146,13 @@ void FramebufferCreator::registerLuaUsertype(Lua *lua) {
     usertype["get"] = &FramebufferCreator::get;
     usertype["create"] = &FramebufferCreator::create;
 
-    sol::table usertypeTable = (*lua->state())["FramebufferCreator"].get<sol::table>();
+    sol::table usertypeTable = env["FramebufferCreator"].get<sol::table>();
     registerAttachments<RenderbufferAttachments>(usertypeTable, "RenderbufferAttachments");
     registerAttachments<Texture2DAttachments>(usertypeTable, "Texture2DAttachments");
     registerAttachments<TextureCubeAttachments>(usertypeTable, "TextureCubeAttachments");
 }
 
-void FramebufferCreator::exec(const std::string &s, bool path, Lua *lua) {
-    exec_t<FramebufferCreator>(s, path, lua);
+void FramebufferCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<FramebufferCreator>(s, path, lua, tenv);
 }
 }

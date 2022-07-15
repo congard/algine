@@ -59,15 +59,15 @@ const glm::mat4& Scalable::getScalingMatrix() const {
     return m_scaling;
 }
 
-void Scalable::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Scalable::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Scalable"))
+    if (isRegistered(env, "Scalable"))
         return;
 
-    lua->registerUsertype<Scriptable>();
+    lua->registerUsertype<Scriptable>(tenv);
 
-    auto usertype = lua->state()->new_usertype<Scalable>(
+    auto usertype = env.new_usertype<Scalable>(
             "Scalable",
             sol::meta_function::construct, sol::no_constructor,
             sol::call_constructor, sol::no_constructor,

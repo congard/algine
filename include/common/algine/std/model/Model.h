@@ -49,7 +49,7 @@ public:
     const BoneMatrix& getBone(Index index) const;
     const BoneMatrices& getBoneTransformations() const;
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 public:
     static ModelPtr getByName(const std::string &name);

@@ -1,22 +1,23 @@
 #include <algine/core/lua/TulzLuaTypes.h>
 #include <algine/core/Engine.h>
+#include <algine/core/lua/Scriptable.h>
 
 #include <tulz/Array.h>
 
 namespace algine {
 template<typename T>
-void registerArray(std::string_view name, sol::state &lua) {
+void registerArray(std::string_view name, sol::global_table &env) {
     using array = tulz::Array<T>;
 
-    auto to_string = [](const array &self) -> std::string {
+    auto to_string = [](const array &self, sol::this_environment tenv) -> std::string {
         if (self.empty())
             return "[]";
 
+        auto env = *tenv.env;
         std::string result = "[";
 
         if constexpr(std::is_same_v<T, sol::object>) {
-            sol::state_view stateView(self[0].lua_state());
-            sol::function tostring = stateView["tostring"];
+            sol::function tostring = env["tostring"];
 
             for (int i = 0; i < self.size(); ++i) {
                 const sol::object &obj = self[i];
@@ -35,7 +36,7 @@ void registerArray(std::string_view name, sol::state &lua) {
     };
 
     auto ctors = sol::constructors<array(), array(size_t), array(size_t, const T&), array(const array&)>();
-    auto usertype = lua.new_usertype<array>(
+    auto usertype = env.new_usertype<array>(
             name,
             sol::call_constructor, ctors,
             sol::meta_function::construct, ctors,
@@ -51,14 +52,13 @@ void registerArray(std::string_view name, sol::state &lua) {
     );
 }
 
-void TulzLuaTypes::registerLuaUsertype(Lua *lua) {
-    lua = lua ? lua : &Engine::getLua();
-    auto &state = *lua->state();
+void TulzLuaTypes::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = Scriptable::getEnv(lua, tenv);
 
-    registerArray<sol::object>("Array", state);
-    registerArray<uint>("UnsignedArray", state);
-    registerArray<int>("IntArray", state);
-    registerArray<float>("FloatArray", state);
-    registerArray<double>("DoubleArray", state);
+    registerArray<sol::object>("Array", env);
+    registerArray<uint>("UnsignedArray", env);
+    registerArray<int>("IntArray", env);
+    registerArray<float>("FloatArray", env);
+    registerArray<double>("DoubleArray", env);
 }
 } // algine

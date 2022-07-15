@@ -1,49 +1,52 @@
 #include <algine/core/lua/Scriptable.h>
 
 namespace algine {
-void Scriptable::execute(const std::string &path, Lua *lua) {
-    exec(path, true, lua);
+void Scriptable::execute(const std::string &path, Lua *lua, sol::global_table *env) {
+    exec(path, true, lua, env);
 }
 
-void Scriptable::executeString(const std::string &str, Lua *lua) {
-    exec(str, false, lua);
+void Scriptable::executeString(const std::string &str, Lua *lua, sol::global_table *env) {
+    exec(str, false, lua, env);
 }
 
-void Scriptable::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Scriptable::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Scriptable"))
+    if (isRegistered(env, "Scriptable"))
         return;
 
-    auto usertype = lua->state()->new_usertype<Scriptable>(
+    auto usertype = env.new_usertype<Scriptable>(
             "Scriptable",
             sol::meta_function::construct, sol::no_constructor,
             sol::call_constructor, sol::no_constructor);
 
-    usertype["execute"] = [&](const sol::object &self, const std::string &path) {
-        self.as<Scriptable>().execute(path, lua);
+    usertype["execute"] = [lua, tenv](const sol::object &self, const std::string &path) {
+        self.as<Scriptable>().execute(path, lua, tenv);
     };
 
-    usertype["executeString"] = [&](const sol::object &self, const std::string &str) {
-        self.as<Scriptable>().executeString(str, lua);
+    usertype["executeString"] = [lua, tenv](const sol::object &self, const std::string &str) {
+        self.as<Scriptable>().executeString(str, lua, tenv);
     };
 }
 
-void Scriptable::exec(const std::string &s, bool path, Lua *lua) {
+void Scriptable::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
     throw std::runtime_error("Stub! Not implemented!");
 }
 
-Lua* Scriptable::getLua(Lua *lua) {
-    if (lua == nullptr)
-        return &Engine::getLua();
+sol::global_table& Scriptable::getEnv(Lua *lua, sol::global_table *env) {
+    if (env)
+        return *env;
+
+    if (!lua)
+        return Engine::getLua().state()->globals();
 
     if (!lua->isInitialized())
         lua->init();
 
-    return lua;
+    return lua->state()->globals();
 }
 
-bool Scriptable::isRegistered(Lua &lua, std::string_view type) {
-    return (*lua.state())[type].valid();
+bool Scriptable::isRegistered(sol::global_table &env, std::string_view type) {
+    return env[type].valid();
 }
 } // algine

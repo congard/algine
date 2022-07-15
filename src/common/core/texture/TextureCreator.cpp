@@ -47,15 +47,15 @@ const map<uint, uint>& TextureCreator::getDefaultParams() const {
     return m_defaultParams;
 }
 
-void TextureCreator::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void TextureCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "TextureCreator"))
+    if (isRegistered(env, "TextureCreator"))
         return;
 
-    lua->registerUsertype<ImageCreator, lua::DataType>();
+    lua->registerUsertype<ImageCreator, lua::DataType>(tenv);
 
-    auto usertype = lua->state()->new_usertype<TextureCreator>(
+    auto usertype = env.new_usertype<TextureCreator>(
             "TextureCreator",
             sol::meta_function::construct, sol::no_constructor,
             sol::call_constructor, sol::no_constructor,

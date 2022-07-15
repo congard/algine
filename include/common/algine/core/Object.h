@@ -11,7 +11,7 @@ public:
     void setName(const std::string &name);
     const std::string& getName() const;
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 private:
     std::string m_name;

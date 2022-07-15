@@ -1,5 +1,6 @@
 #include <algine/core/log/Log.h>
 #include <algine/core/Engine.h>
+#include <algine/core/lua/Scriptable.h>
 
 namespace algine {
 // Android inserts prefixes (I/, E/ etc) automatically
@@ -64,14 +65,13 @@ void Log::error(const std::string &tag, std::string_view str) {
     LOG_ERROR(LOG_ERROR_TAG(tag), "%s", str.data());
 }
 
-void Log::registerLuaUsertype(Lua *lua) {
-    lua = lua ? lua : &Engine::getLua();
-    auto &state = *lua->state();
+void Log::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = Scriptable::getEnv(lua, tenv);
 
-    if (state["Log"].valid())
+    if (Scriptable::isRegistered(env, "Log"))
         return;
 
-    auto usertype = state.new_usertype<Log>(
+    auto usertype = env.new_usertype<Log>(
             "Log",
             sol::call_constructor, sol::no_constructor,
             sol::meta_function::construct, sol::no_constructor);

@@ -6,32 +6,32 @@
 namespace algine {
 class Scriptable {
 public:
-    void execute(const std::string &path, Lua *lua = nullptr);
-    void executeString(const std::string &str, Lua *lua = nullptr);
+    void execute(const std::string &path, Lua *lua = nullptr, sol::global_table *env = nullptr);
+    void executeString(const std::string &str, Lua *lua = nullptr, sol::global_table *env = nullptr);
 
-    static void registerLuaUsertype(Lua *lua); // must be implemented in derived classes
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv = nullptr); // must be implemented in derived classes
+
+    static sol::global_table& getEnv(Lua *lua, sol::global_table *tenv = nullptr);
+    static bool isRegistered(sol::global_table &env, std::string_view type);
 
 protected:
-    virtual void exec(const std::string &s, bool path, Lua *lua);
-
-    static Lua* getLua(Lua *lua);
-    static bool isRegistered(Lua &lua, std::string_view type);
+    virtual void exec(const std::string &s, bool path, Lua *lua, sol::global_table *env);
 
     template<typename T>
-    void exec_t(const std::string &s, bool path, Lua *lua) {
-        lua = getLua(lua);
-        T::registerLuaUsertype(lua);
+    void exec_t(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+        auto &env = getEnv(lua, tenv);
+        T::registerLuaUsertype(lua, tenv);
 
-        auto &state = *lua->state();
+        auto &state = lua ? *lua->state() : *Engine::getLua().state();
 
         try {
             if (path) {
-                state.script_file(s);
+                state.script_file(s, sol::environment(env));
             } else {
-                state.script(s);
+                state.script(s, sol::environment(env));
             }
 
-            auto result = ((sol::function) state["main"])(dynamic_cast<T*>(this));
+            auto result = ((sol::function) env["main"])(dynamic_cast<T*>(this));
 
             // in case if exceptions are disabled
             if (!result.valid()) {

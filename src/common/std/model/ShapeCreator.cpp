@@ -1,5 +1,4 @@
 #include <algine/std/model/ShapeCreator.h>
-
 #include <algine/std/animation/BoneInfo.h>
 
 #include <algine/core/texture/Texture2D.h>
@@ -667,16 +666,16 @@ void registerBufferData(sol::table &table, std::string_view name) {
     usertype["usage"] = &ShapeCreator::BufferData<T>::usage;
 }
 
-void ShapeCreator::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void ShapeCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "ShapeCreator"))
+    if (isRegistered(env, "ShapeCreator"))
         return;
 
-    lua->registerUsertype<Creator, Shape>();
+    lua->registerUsertype<Creator, Shape>(tenv);
 
     auto ctors = sol::constructors<ShapeCreator()>();
-    auto usertype = lua->state()->new_usertype<ShapeCreator>(
+    auto usertype = env.new_usertype<ShapeCreator>(
             "ShapeCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
@@ -713,7 +712,7 @@ void ShapeCreator::registerLuaUsertype(Lua *lua) {
     usertype["get"] = &ShapeCreator::get;
     usertype["create"] = &ShapeCreator::create;
 
-    auto usertypeTable = (*lua->state())["ShapeCreator"].get<sol::table>();
+    auto usertypeTable = env["ShapeCreator"].get<sol::table>();
 
     usertypeTable.new_enum("Param",
         "Triangulate", ShapeCreator::Param::Triangulate,
@@ -727,7 +726,7 @@ void ShapeCreator::registerLuaUsertype(Lua *lua) {
     registerBufferData<uint>(usertypeTable, "UnsignedBufferData");
 }
 
-void ShapeCreator::exec(const std::string &s, bool path, Lua *lua) {
-    exec_t<ShapeCreator>(s, path, lua);
+void ShapeCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<ShapeCreator>(s, path, lua, tenv);
 }
 }

@@ -27,7 +27,7 @@ public:
     const glm::vec3& getPos() const;
     const glm::mat4& getTranslationMatrix() const;
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 public: // TODO: make private
     glm::vec3 m_pos;

@@ -22,7 +22,7 @@ namespace algine {
 using AlgineCore = Lua::TypeList<
         IOProvider,
         Log,
-        ShaderProgramCreator, ShaderProgram, ShaderDefinitionGenerator, Shader, ShaderProgram,
+        ShaderProgramCreator, ShaderCreator, ShaderDefinitionGenerator, Shader, ShaderProgram,
         Creator,
         Object,
         lua::DataType,

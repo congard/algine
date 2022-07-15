@@ -190,16 +190,16 @@ Shape* Shape::byName(const string &name) {
     return PublicObjectTools::byName<Shape>(name);
 }
 
-void Shape::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Shape::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Shape"))
+    if (isRegistered(env, "Shape"))
         return;
 
-    lua->registerUsertype<Object>();
+    lua->registerUsertype<Object>(tenv);
 
     auto factories = sol::factories([] { return PtrMaker::make<Shape>(); });
-    auto usertype = lua->state()->new_usertype<Shape>(
+    auto usertype = env.new_usertype<Shape>(
             "Shape",
             sol::meta_function::construct, factories,
             sol::call_constructor, factories,

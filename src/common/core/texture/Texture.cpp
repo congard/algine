@@ -286,17 +286,15 @@ void Texture::texFromFile(uint target, const TextureFileInfo &info) { // TODO: T
     stbi_image_free(data);
 }
 
-void Texture::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Texture::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Texture"))
+    if (isRegistered(env, "Texture"))
         return;
 
-    lua->registerUsertype<Object, lua::DataType>();
+    lua->registerUsertype<Object, lua::DataType>(tenv);
 
-    auto &state = *lua->state();
-
-    auto usertype = state.new_usertype<Texture>(
+    auto usertype = env.new_usertype<Texture>(
             "Texture",
             sol::meta_function::construct, sol::no_constructor,
             sol::call_constructor, sol::no_constructor,
@@ -324,7 +322,7 @@ void Texture::registerLuaUsertype(Lua *lua) {
     usertype["activateSlot"] = &Texture::activateSlot;
     usertype["getFormatInfo"] = &Texture::getFormatInfo;
 
-    auto table = state["Texture"].get<sol::table>();
+    auto table = env["Texture"].get<sol::table>();
 
     // register classes
     auto formatInfo = table.new_usertype<FormatInfo>("FormatInfo");
@@ -332,7 +330,7 @@ void Texture::registerLuaUsertype(Lua *lua) {
     formatInfo["dataType"] = &FormatInfo::dataType;
 
     auto textureCreateInfoCtors = sol::constructors<TextureCreateInfo()>();
-    auto textureCreateInfo = state.new_usertype<TextureCreateInfo>(
+    auto textureCreateInfo = env.new_usertype<TextureCreateInfo>(
             "TextureCreateInfo",
             sol::meta_function::construct, textureCreateInfoCtors,
             sol::call_constructor, textureCreateInfoCtors);
@@ -343,7 +341,7 @@ void Texture::registerLuaUsertype(Lua *lua) {
     textureCreateInfo["params"] = &TextureCreateInfo::params;
 
     auto textureFileInfoCtors = sol::constructors<TextureFileInfo()>();
-    auto textureFileInfo = state.new_usertype<TextureFileInfo>(
+    auto textureFileInfo = env.new_usertype<TextureFileInfo>(
             "TextureFileInfo",
             sol::meta_function::construct, textureFileInfoCtors,
             sol::call_constructor, textureFileInfoCtors);
@@ -353,7 +351,6 @@ void Texture::registerLuaUsertype(Lua *lua) {
     textureFileInfo["flip"] = &TextureFileInfo::flip;
 
     // register enums
-    // TODO: remove ImageConfigTools
 
 #define kv(val) #val, Texture::val
 

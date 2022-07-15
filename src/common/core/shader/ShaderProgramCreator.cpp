@@ -182,26 +182,26 @@ void ShaderProgramCreator::importFromFile(const std::string &path) {
     Creator::importFromFile(path);
 }
 
-void ShaderProgramCreator::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void ShaderProgramCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "ShaderProgramCreator"))
+    if (isRegistered(env, "ShaderProgramCreator"))
         return;
 
-    lua->registerUsertype<ShaderProgram, ShaderCreator, ShaderDefinitionGenerator>();
+    lua->registerUsertype<ShaderProgram, ShaderCreator, ShaderDefinitionGenerator>(tenv);
 
     auto ctors = sol::constructors<ShaderProgramCreator()>();
-    auto usertype = lua->state()->new_usertype<ShaderProgramCreator>(
+    auto usertype = env.new_usertype<ShaderProgramCreator>(
             "ShaderProgramCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
             sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ShaderDefinitionGenerator>());
 
-    Lua::new_property(usertype, "creators", "getCreators", "setCreators",
+    Lua::new_property(usertype, "creators",
         &ShaderProgramCreator::getCreators,
         [](const sol::object &self, vector<ShaderCreator> creators) { self.as<ShaderProgramCreator>().setCreators(creators); });
 
-    Lua::new_property(usertype, "names", "getNames", "setNames",
+    Lua::new_property(usertype, "names",
         &ShaderProgramCreator::getShaderNames,
         [](const sol::object &self, vector<string> names) { self.as<ShaderProgramCreator>().setShaderNames(names); });
 
@@ -211,7 +211,7 @@ void ShaderProgramCreator::registerLuaUsertype(Lua *lua) {
     usertype["create"] = &ShaderProgramCreator::create;
 }
 
-void ShaderProgramCreator::exec(const std::string &s, bool path, Lua *lua) {
-    exec_t<ShaderProgramCreator>(s, path, lua);
+void ShaderProgramCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *env) {
+    exec_t<ShaderProgramCreator>(s, path, lua, env);
 }
 }

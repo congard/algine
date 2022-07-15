@@ -67,7 +67,7 @@ public:
 
     uint getId() const;
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 private:
     uint m_id;

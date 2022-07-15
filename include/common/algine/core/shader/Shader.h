@@ -30,7 +30,7 @@ public:
 
     uint getId() const;
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 public:
     static ShaderPtr getByName(std::string_view name);

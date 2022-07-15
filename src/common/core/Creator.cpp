@@ -69,21 +69,21 @@ JsonHelper Creator::dump() {
     return config;
 }
 
-void Creator::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Creator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Creator"))
+    if (isRegistered(env, "Creator"))
         return;
 
-    lua->registerUsertype<FileTransferable>();
+    lua->registerUsertype<FileTransferable>(tenv);
 
-    sol::usertype<Creator> usertype = lua->state()->new_usertype<Creator>(
+    auto usertype = env.new_usertype<Creator>(
             "Creator", sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable>());
 
     Lua::new_property(usertype, "name", "getName", "setName", &Creator::getName, &Creator::setName);
     Lua::new_property(usertype, "access", "getAccess", "setAccess", &Creator::getAccess, &Creator::setAccess);
 
-    (*lua->state())["Creator"].get<sol::table>().new_enum(
+    env["Creator"].get<sol::table>().new_enum(
             "Access",
             "Private", Access::Private,
             "Public", Access::Public);

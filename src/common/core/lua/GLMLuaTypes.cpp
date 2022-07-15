@@ -1,5 +1,6 @@
 #include <algine/core/lua/GLMLuaTypes.h>
 #include <algine/core/Engine.h>
+#include <algine/core/lua/Scriptable.h>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -75,7 +76,7 @@ constexpr bool is_glm_mat() {
 }
 
 template<typename T, typename C>
-void registerGlmType(std::string_view name, sol::state &lua, C constructors) {
+void registerGlmType(std::string_view name, sol::global_table &env, C constructors) {
     auto newIndex = [](T &self, int i, const sol::object &val) -> auto& {
         if constexpr(is_glm_vec<T>() || std::is_same_v<T, glm::quat>) {
             return self[i] = val.as<float>();
@@ -84,7 +85,7 @@ void registerGlmType(std::string_view name, sol::state &lua, C constructors) {
         }
     };
 
-    auto usertype = lua.new_usertype<T>(
+    auto usertype = env.new_usertype<T>(
             name,
             sol::call_constructor, constructors,
             sol::meta_function::construct, constructors,
@@ -111,8 +112,8 @@ void registerGlmType(std::string_view name, sol::state &lua, C constructors) {
 
         usertype["normalize"] = static_cast<T (*)(const T&)>(&glm::normalize);
 
-        lua[name][sol::meta_function::length] = static_cast<float (*)(const T&)>(&glm::length);
-        lua[name][sol::meta_function::unary_minus] = static_cast<T (*)(const T&)>(&glm::operator-);
+        env[name][sol::meta_function::length] = static_cast<float (*)(const T&)>(&glm::length);
+        env[name][sol::meta_function::unary_minus] = static_cast<T (*)(const T&)>(&glm::operator-);
     }
 
     if constexpr(std::is_same_v<T, glm::vec3> || std::is_same_v<T, glm::quat>) {
@@ -131,8 +132,8 @@ void registerGlmType(std::string_view name, sol::state &lua, C constructors) {
         usertype["mix"] = static_cast<T (*)(const T&, const T&, typename T::value_type)>(&glm::mix);
         usertype["normalize"] = static_cast<T (*)(const T&)>(&glm::normalize);
 
-        lua[name][sol::meta_function::length] = static_cast<float (*)(const T&)>(&glm::length);
-        lua[name][sol::meta_function::unary_minus] = static_cast<T (*)(const T&)>(&glm::operator-);
+        env[name][sol::meta_function::length] = static_cast<float (*)(const T&)>(&glm::length);
+        env[name][sol::meta_function::unary_minus] = static_cast<T (*)(const T&)>(&glm::operator-);
     }
 
     if constexpr(is_glm_mat<T>()) {
@@ -141,40 +142,39 @@ void registerGlmType(std::string_view name, sol::state &lua, C constructors) {
     }
 }
 
-void GLMLuaTypes::registerLuaUsertype(Lua *lua) {
-    lua = lua ? lua : &Engine::getLua();
-    auto &state = *lua->state();
+void GLMLuaTypes::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = Scriptable::getEnv(lua, tenv);
 
     using namespace glm;
 
     registerGlmType<vec2>(
-            "vec2", state,
+            "vec2", env,
             sol::constructors<vec2(), vec2(const vec2&), vec2(float), vec2(float, float)>());
 
     registerGlmType<vec3>(
-            "vec3", state,
+            "vec3", env,
             sol::constructors<vec3(), vec3(const vec3&), vec3(const vec2&, float), vec3(float),
             vec3(float, float, float)>());
 
     registerGlmType<glm::vec4>(
-            "vec4", state,
+            "vec4", env,
             sol::constructors<vec4(), vec4(const vec4&), vec4(const vec3&, float),
             vec4(const vec2&, float, float), vec4(float), vec4(float, float, float, float)>());
 
     registerGlmType<mat2>(
-            "mat2", state,
+            "mat2", env,
             sol::constructors<mat2(), mat2(const mat2&), mat2(const mat3&), mat2(const mat4&), mat2(float)>());
 
     registerGlmType<mat3>(
-            "mat3", state,
+            "mat3", env,
             sol::constructors<mat3(), mat3(const mat3&), mat3(const mat4&), mat3(float)>());
 
     registerGlmType<mat4>(
-            "mat4", state,
+            "mat4", env,
             sol::constructors<mat4(), mat4(const mat4&), mat4(float)>());
 
     registerGlmType<quat>(
-            "quat", state,
+            "quat", env,
             sol::constructors<quat(), quat(const quat&), quat(float, const vec3&), quat(float, float, float, float),
             quat(const vec3&, const vec3&), quat(const vec3&), quat(const mat3&), quat(const mat4&)>());
 }

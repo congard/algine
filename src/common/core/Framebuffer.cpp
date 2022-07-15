@@ -1,7 +1,5 @@
 #include <algine/core/Framebuffer.h>
-
 #include <algine/core/Engine.h>
-
 #include <algine/gl.h>
 
 #define SOP_BOUND_PTR Engine::getBoundFramebuffer()
@@ -281,16 +279,16 @@ Framebuffer* Framebuffer::byName(const string &name) {
     return PublicObjectTools::byName<Framebuffer>(name);
 }
 
-void Framebuffer::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Framebuffer::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Framebuffer"))
+    if (isRegistered(env, "Framebuffer"))
         return;
 
-    lua->registerUsertype<Object>();
+    lua->registerUsertype<Object>(tenv);
 
     auto factories = sol::factories([] { return PtrMaker::make<Framebuffer>(); });
-    auto usertype = lua->state()->new_usertype<Framebuffer>(
+    auto usertype = env.new_usertype<Framebuffer>(
             "Framebuffer",
             sol::meta_function::construct, factories,
             sol::call_constructor, factories,
@@ -338,7 +336,7 @@ void Framebuffer::registerLuaUsertype(Lua *lua) {
     usertype["getByName"] = &Framebuffer::getByName;
     usertype["byName"] = &Framebuffer::byName;
 
-    auto usertypeTable = (*lua->state())["Framebuffer"].get<sol::table>();
+    auto usertypeTable = env["Framebuffer"].get<sol::table>();
 
     usertypeTable.new_enum("Attachment",
         "ColorAttachmentZero", AttachmentType::ColorAttachmentZero,

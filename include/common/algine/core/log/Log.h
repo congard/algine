@@ -2,7 +2,7 @@
 #define ALGINE_LOG_H
 
 #include <algine/core/log/Logger.h>
-
+#include <sol/forward.hpp>
 #include <mutex>
 
 namespace algine {
@@ -16,7 +16,7 @@ public:
     static void info(const std::string &tag, std::string_view str);
     static void error(const std::string &tag, std::string_view str);
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 private:
     class InputEndListener: public Logger::InputEndListener {

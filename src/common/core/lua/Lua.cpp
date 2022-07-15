@@ -10,20 +10,7 @@ namespace algine {
 void Lua::init() {
     m_lua = std::make_unique<sol::state>();
     m_lua->open_libraries();
-
-    m_lua->set("algine_require", [this](std::string_view lib) {
-        if (lib == "core") {
-            registerUsertype(AlgineCore());
-        } if (lib == "std") {
-            registerUsertype(AlgineStd());
-        } else if (lib == "glm") {
-            GLMLuaTypes::registerLuaUsertype(this);
-        } else if (lib == "tulz") {
-            TulzLuaTypes::registerLuaUsertype(this);
-        }
-    });
-
-    m_lua->script(core_lua);
+    initEnvironment(getGlobalEnvironment());
 }
 
 bool Lua::isInitialized() const {
@@ -32,5 +19,38 @@ bool Lua::isInitialized() const {
 
 const std::unique_ptr<sol::state>& Lua::state() const {
     return m_lua;
+}
+
+sol::global_table Lua::createEnvironment() {
+    sol::environment env(*m_lua, sol::create);
+    sol::global_table tenv = env;
+    initEnvironment(tenv);
+    return tenv;
+}
+
+sol::global_table Lua::createEnvironment(const sol::global_table &parent) {
+    return sol::environment(*m_lua, sol::create, sol::environment(parent));
+}
+
+sol::global_table& Lua::getGlobalEnvironment() const {
+    return m_lua->globals();
+}
+
+void Lua::initEnvironment(sol::global_table &env) {
+    env["algine_require"] = [this](std::string_view lib, sol::this_environment tenv) {
+        sol::global_table env = *tenv.env;
+
+        if (lib == "core") {
+            registerUsertype(&env, AlgineCore());
+        } if (lib == "std") {
+            registerUsertype(&env, AlgineStd());
+        } else if (lib == "glm") {
+            GLMLuaTypes::registerLuaUsertype(this, &env);
+        } else if (lib == "tulz") {
+            TulzLuaTypes::registerLuaUsertype(this, &env);
+        }
+    };
+
+    m_lua->script(core_lua, sol::environment(env));
 }
 } // algine

@@ -1,5 +1,4 @@
 #include <algine/core/shader/Shader.h>
-
 #include <algine/core/shader/ShaderTools.h>
 #include <algine/gl.h>
 
@@ -62,19 +61,19 @@ uint Shader::getId() const {
     return m_id;
 }
 
-void Shader::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Shader::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Shader"))
+    if (isRegistered(env, "Shader"))
         return;
 
-    lua->registerUsertype<Object>();
+    lua->registerUsertype<Object>(tenv);
 
     auto factories = sol::factories(
             []() { return PtrMaker::make<Shader>(); },
             [](Type type) { return PtrMaker::make<Shader>(type); });
 
-    auto usertype = lua->state()->new_usertype<Shader>(
+    auto usertype = env.new_usertype<Shader>(
             "Shader",
             sol::call_constructor, factories,
             sol::meta_function::construct, factories,

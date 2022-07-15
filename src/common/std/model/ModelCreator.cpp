@@ -191,16 +191,16 @@ ModelPtr ModelCreator::create() {
     return model;
 }
 
-void ModelCreator::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void ModelCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "ModelCreator"))
+    if (isRegistered(env, "ModelCreator"))
         return;
 
-    lua->registerUsertype<Creator, Model>();
+    lua->registerUsertype<Creator, Model>(tenv);
 
     auto ctors = sol::constructors<ModelCreator()>();
-    auto usertype = lua->state()->new_usertype<ModelCreator>(
+    auto usertype = env.new_usertype<ModelCreator>(
             "ModelCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
@@ -232,19 +232,19 @@ void ModelCreator::registerLuaUsertype(Lua *lua) {
     usertype["create"] = &ModelCreator::create;
 
     auto animationInfoCtors = sol::constructors<AnimationInfo(), AnimationInfo(std::string), AnimationInfo(Index)>();
-    auto animationInfo = (*lua->state())["ModelCreator"].get<sol::table>().new_usertype<AnimationInfo>(
+    auto animationInfo = env["ModelCreator"].get<sol::table>().new_usertype<AnimationInfo>(
             "AnimationInfo",
             sol::meta_function::construct, animationInfoCtors,
             sol::call_constructor, animationInfoCtors);
-    animationInfo["None"] = sol::var(AnimationInfo::None);
-    animationInfo["All"] = sol::var(AnimationInfo::All);
+    animationInfo["None"] = sol::readonly_property(sol::var(AnimationInfo::None));
+    animationInfo["All"] = sol::readonly_property(sol::var(AnimationInfo::All));
     animationInfo["getName"] = &AnimationInfo::getName;
     animationInfo["getIndex"] = &AnimationInfo::getIndex;
     animationInfo["hasName"] = &AnimationInfo::hasName;
     animationInfo["hasIndex"] = &AnimationInfo::hasIndex;
 }
 
-void ModelCreator::exec(const std::string &s, bool path, Lua *lua) {
-    exec_t<ModelCreator>(s, path, lua);
+void ModelCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<ModelCreator>(s, path, lua, tenv);
 }
 }

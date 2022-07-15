@@ -33,15 +33,15 @@ uint ImageCreator::getHeight() const {
     return m_height;
 }
 
-void ImageCreator::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void ImageCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "ImageCreator"))
+    if (isRegistered(env, "ImageCreator"))
         return;
 
-    lua->registerUsertype<Creator, Texture>();
+    lua->registerUsertype<Creator, Texture>(tenv);
 
-    auto usertype = lua->state()->new_usertype<ImageCreator>(
+    auto usertype = env.new_usertype<ImageCreator>(
             "ImageCreator",
             sol::meta_function::construct, sol::no_constructor,
             sol::call_constructor, sol::no_constructor,

@@ -85,16 +85,16 @@ const Attachment* OutputList::data() const {
     return m_list.data();
 }
 
-void OutputList::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void OutputList::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "OutputList"))
+    if (isRegistered(env, "OutputList"))
         return;
 
-    lua->registerUsertype<Scriptable>();
+    lua->registerUsertype<Scriptable>(tenv);
 
     auto ctors = sol::constructors<OutputList()>();
-    auto usertype = lua->state()->new_usertype<OutputList>(
+    auto usertype = env.new_usertype<OutputList>(
             "OutputList",
             sol::meta_function::length, &OutputList::size,
             sol::meta_function::construct, ctors,
@@ -124,7 +124,7 @@ void OutputList::registerLuaUsertype(Lua *lua) {
     usertype["data"] = &OutputList::data;
 }
 
-void OutputList::exec(const std::string &s, bool path, Lua *lua) {
-    exec_t<OutputList>(s, path, lua);
+void OutputList::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<OutputList>(s, path, lua, tenv);
 }
 }

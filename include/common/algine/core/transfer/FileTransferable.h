@@ -15,7 +15,7 @@ public:
     virtual void importFromFile(const std::string &path);
     virtual void dumpToFile(const std::string &path);
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 protected:
     std::string m_workingDirectory;

@@ -152,19 +152,19 @@ Model* Model::byName(const string &name) {
     return PublicObjectTools::byName<Model>(name);
 }
 
-void Model::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Model::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Model"))
+    if (isRegistered(env, "Model"))
         return;
 
-    lua->registerUsertype<Object, Rotatable, Translatable, Scalable>();
+    lua->registerUsertype<Object, Rotatable, Translatable, Scalable>(tenv);
 
     auto factories = sol::factories(
             [] { return PtrMaker::make<Model>(); },
             [](const ShapePtr &shape, Rotator::Type rotatorType) { return PtrMaker::make<Model>(shape, rotatorType); },
             [](Rotator::Type rotatorType) { return PtrMaker::make<Model>(rotatorType); });
-    auto usertype = lua->state()->new_usertype<Model>(
+    auto usertype = env.new_usertype<Model>(
             "Model",
             sol::meta_function::construct, factories,
             sol::call_constructor, factories,

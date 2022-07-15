@@ -128,15 +128,15 @@ Rotator* Rotatable::getRotator() const {
     return m_rotator;
 }
 
-void Rotatable::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Rotatable::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Rotatable"))
+    if (isRegistered(env, "Rotatable"))
         return;
 
-    lua->registerUsertype<Scriptable>();
+    lua->registerUsertype<Scriptable>(tenv);
 
-    auto usertype = lua->state()->new_usertype<Rotatable>(
+    auto usertype = env.new_usertype<Rotatable>(
             "Rotatable",
             sol::meta_function::construct, sol::no_constructor,
             sol::call_constructor, sol::no_constructor,

@@ -1,5 +1,4 @@
 #include <algine/core/texture/TextureCube.h>
-
 #include <algine/core/Engine.h>
 
 #include <map>
@@ -80,16 +79,16 @@ TextureCube* TextureCube::byName(const string &name) {
     return PublicObjectTools::byName<TextureCube>(name);
 }
 
-void TextureCube::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void TextureCube::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "TextureCube"))
+    if (isRegistered(env, "TextureCube"))
         return;
 
-    lua->registerUsertype<Texture>();
+    lua->registerUsertype<Texture>(tenv);
 
     auto factories = sol::factories([]() { return PtrMaker::make<TextureCube>(); });
-    auto usertype = lua->state()->new_usertype<TextureCube>(
+    auto usertype = env.new_usertype<TextureCube>(
             "TextureCube",
             sol::meta_function::construct, factories,
             sol::call_constructor, factories,
@@ -106,7 +105,7 @@ void TextureCube::registerLuaUsertype(Lua *lua) {
     usertype["byName"] = &TextureCube::byName;
 
     // enums
-    (*lua->state())["TextureCube"].get<sol::table>().new_enum("Face",
+    env["TextureCube"].get<sol::table>().new_enum("Face",
         "Right", Face::Right,
         "Left", Face::Left,
         "Top", Face::Top,

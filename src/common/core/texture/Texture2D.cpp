@@ -80,16 +80,16 @@ Texture2D* Texture2D::byName(const string &name) {
     return PublicObjectTools::byName<Texture2D>(name);
 }
 
-void Texture2D::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Texture2D::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Texture2D"))
+    if (isRegistered(env, "Texture2D"))
         return;
 
-    lua->registerUsertype<Texture>();
+    lua->registerUsertype<Texture>(tenv);
 
     auto factories = sol::factories([]() { return PtrMaker::make<Texture2D>(); });
-    auto usertype = lua->state()->new_usertype<Texture2D>(
+    auto usertype = env.new_usertype<Texture2D>(
             "Texture2D",
             sol::meta_function::construct, factories,
             sol::call_constructor, factories,

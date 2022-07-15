@@ -29,7 +29,7 @@ public:
     const std::map<uint, uint>& getParams() const;
     const std::map<uint, uint>& getDefaultParams() const;
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 protected:
     Type m_type;

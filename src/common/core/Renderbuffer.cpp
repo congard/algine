@@ -1,7 +1,6 @@
 #include <algine/core/Renderbuffer.h>
 #include <algine/core/texture/Texture.h>
 #include <algine/core/Engine.h>
-
 #include <algine/gl.h>
 
 #define SOP_BOUND_PTR Engine::getBoundRenderbuffer()
@@ -88,16 +87,16 @@ Renderbuffer* Renderbuffer::byName(const string &name) {
     return PublicObjectTools::byName<Renderbuffer>(name);
 }
 
-void Renderbuffer::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Renderbuffer::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Renderbuffer"))
+    if (isRegistered(env, "Renderbuffer"))
         return;
 
-    lua->registerUsertype<Object>();
+    lua->registerUsertype<Object>(tenv);
 
     auto factories = sol::factories([] { return PtrMaker::make<Renderbuffer>(); });
-    auto usertype = lua->state()->new_usertype<Renderbuffer>(
+    auto usertype = env.new_usertype<Renderbuffer>(
             "Renderbuffer",
             sol::meta_function::construct, factories,
             sol::call_constructor, factories,

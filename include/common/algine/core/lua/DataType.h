@@ -1,15 +1,13 @@
 #ifndef ALGINE_LUA_DATATYPE_H
 #define ALGINE_LUA_DATATYPE_H
 
-namespace algine {
-class Lua;
+#include <algine/core/lua/Lua.h>
 
-namespace lua {
+namespace algine::lua {
 class DataType {
 public:
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 };
-}
 }
 
 #endif //ALGINE_LUA_DATATYPE_H

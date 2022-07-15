@@ -36,7 +36,7 @@ public:
     uint getHeight() const;
     uint getId() const;
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 public:
     static RenderbufferPtr getByName(const std::string &name);

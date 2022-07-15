@@ -59,15 +59,15 @@ const mat4& Translatable::getTranslationMatrix() const {
     return m_translation;
 }
 
-void Translatable::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void Translatable::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "Translatable"))
+    if (isRegistered(env, "Translatable"))
         return;
 
-    lua->registerUsertype<Scriptable>();
+    lua->registerUsertype<Scriptable>(tenv);
 
-    auto usertype = lua->state()->new_usertype<Translatable>(
+    auto usertype = env.new_usertype<Translatable>(
             "Translatable",
             sol::meta_function::construct, sol::no_constructor,
             sol::call_constructor, sol::no_constructor,

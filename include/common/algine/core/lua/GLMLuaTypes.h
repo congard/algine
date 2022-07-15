@@ -6,7 +6,7 @@
 namespace algine {
 class GLMLuaTypes {
 public:
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 };
 }
 

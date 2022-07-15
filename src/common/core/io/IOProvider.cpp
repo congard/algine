@@ -30,15 +30,15 @@ std::string IOProvider::readStr(const std::string &path) const {
     return str;
 }
 
-void IOProvider::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void IOProvider::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "IOProvider"))
+    if (isRegistered(env, "IOProvider"))
         return;
 
-    Scriptable::registerLuaUsertype(lua);
+    Scriptable::registerLuaUsertype(lua, tenv);
 
-    auto usertype = lua->state()->new_usertype<IOProvider>("IOProvider", sol::base_classes, sol::bases<Scriptable>());
+    auto usertype = env.new_usertype<IOProvider>("IOProvider", sol::base_classes, sol::bases<Scriptable>());
     usertype["setIOSystem_raw"] = static_cast<void (IOProvider::*)(IOSystem*)>(&IOProvider::setIOSystem);
     usertype["writeStr"] = &IOProvider::writeStr;
     usertype["readStr"] = &IOProvider::readStr;
@@ -47,8 +47,8 @@ void IOProvider::registerLuaUsertype(Lua *lua) {
         &IOProvider::getIOSystem, static_cast<void (IOProvider::*)(const std::shared_ptr<IOSystem>&)>(&IOProvider::setIOSystem));
 }
 
-void IOProvider::exec(const std::string &s, bool path, Lua *lua) {
-    exec_t<IOProvider>(s, path, lua);
+void IOProvider::exec(const std::string &s, bool path, Lua *lua, sol::global_table *env) {
+    exec_t<IOProvider>(s, path, lua, env);
 }
 
 const std::shared_ptr<IOSystem>& IOProvider::io() const {

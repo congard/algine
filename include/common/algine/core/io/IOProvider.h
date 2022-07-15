@@ -19,10 +19,10 @@ public:
     void writeStr(const std::string &path, const std::string &str) const;
     std::string readStr(const std::string &path) const;
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 protected:
-    void exec(const std::string &s, bool path, Lua *lua) override;
+    void exec(const std::string &s, bool path, Lua *lua, sol::global_table *env) override;
     const std::shared_ptr<IOSystem>& io() const;
 
 private:

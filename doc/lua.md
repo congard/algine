@@ -129,6 +129,7 @@ In reality this list will be much bigger
 * Sol - property: https://sol2.readthedocs.io/en/latest/api/property.html
 * Sol - usertype: https://sol2.readthedocs.io/en/latest/api/usertype.html
 * Sol - ownership: https://sol2.readthedocs.io/en/latest/tutorial/ownership.html
+* Sol - environment: https://sol2.readthedocs.io/en/latest/api/environment.html
 * Programming in Lua: https://www.lua.org/pil/contents.html
 * Lua OOP: https://www.tutorialspoint.com/lua/lua_object_oriented.htm
 * How to pass table as vector to a c++ function: https://github.com/ThePhD/sol2/issues/1054

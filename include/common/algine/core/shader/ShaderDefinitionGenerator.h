@@ -28,10 +28,10 @@ public:
     void import(const JsonHelper &jsonHelper) override;
     JsonHelper dump() override;
 
-    static void registerLuaUsertype(Lua *lua);
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv = nullptr);
 
 protected:
-    void exec(const std::string &s, bool path, Lua *lua) override;
+    void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
 
 protected:
     std::vector<Definition> m_definitions;

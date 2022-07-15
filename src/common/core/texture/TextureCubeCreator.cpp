@@ -66,16 +66,16 @@ TextureCubePtr TextureCubeCreator::create() {
     return texture;
 }
 
-void TextureCubeCreator::registerLuaUsertype(Lua *lua) {
-    lua = getLua(lua);
+void TextureCubeCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    if (isRegistered(*lua, "TextureCubeCreator"))
+    if (isRegistered(env, "TextureCubeCreator"))
         return;
 
-    lua->registerUsertype<TextureCreator, TextureCube>();
+    lua->registerUsertype<TextureCreator, TextureCube>(tenv);
 
     auto ctors = sol::constructors<TextureCubeCreator()>();
-    auto usertype = lua->state()->new_usertype<TextureCubeCreator>(
+    auto usertype = env.new_usertype<TextureCubeCreator>(
             "TextureCubeCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
@@ -90,7 +90,7 @@ void TextureCubeCreator::registerLuaUsertype(Lua *lua) {
         [](TextureCubeCreator &self, std::map<TextureCube::Face, std::string> paths) { self.setPaths(paths); });
 }
 
-void TextureCubeCreator::exec(const std::string &s, bool path, Lua *lua) {
-    exec_t<TextureCubeCreator>(s, path, lua);
+void TextureCubeCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<TextureCubeCreator>(s, path, lua, tenv);
 }
 }
