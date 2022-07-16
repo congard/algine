@@ -9,6 +9,14 @@ void Scriptable::executeString(const std::string &str, Lua *lua, sol::global_tab
     exec(str, false, lua, env);
 }
 
+void Scriptable::setRootDir(std::string_view rootDir) {
+    m_rootDir = rootDir;
+}
+
+const std::string& Scriptable::getRootDir() const {
+    return m_rootDir;
+}
+
 void Scriptable::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
     auto &env = getEnv(lua, tenv);
 
@@ -27,6 +35,8 @@ void Scriptable::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
     usertype["executeString"] = [lua, tenv](const sol::object &self, const std::string &str) {
         self.as<Scriptable>().executeString(str, lua, tenv);
     };
+
+    Lua::new_property(usertype, "rootDir", &Scriptable::getRootDir, &Scriptable::setRootDir);
 }
 
 void Scriptable::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {

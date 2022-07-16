@@ -9,6 +9,9 @@ public:
     void execute(const std::string &path, Lua *lua = nullptr, sol::global_table *env = nullptr);
     void executeString(const std::string &str, Lua *lua = nullptr, sol::global_table *env = nullptr);
 
+    void setRootDir(std::string_view rootDir);
+    const std::string& getRootDir() const;
+
     static void registerLuaUsertype(Lua *lua, sol::global_table *tenv = nullptr); // must be implemented in derived classes
 
     static sol::global_table& getEnv(Lua *lua, sol::global_table *tenv = nullptr);
@@ -44,6 +47,9 @@ protected:
             fprintf(stderr, "%s\n", error.what());
         }
     }
+
+private:
+    std::string m_rootDir;
 };
 } // algine
 
