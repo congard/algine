@@ -25,13 +25,15 @@ protected:
         auto &state = lua ? *lua->state() : *Engine::getLua().state();
 
         try {
+            sol::environment luaEnv(env);
+
             if (path) {
-                state.script_file(s, sol::environment(env));
+                state.script_file(s, luaEnv);
             } else {
-                state.script(s, sol::environment(env));
+                state.script(s, luaEnv);
             }
 
-            auto result = ((sol::function) env["main"])(dynamic_cast<T*>(this));
+            auto result = ((sol::function) luaEnv["main"])(dynamic_cast<T*>(this));
 
             // in case if exceptions are disabled
             if (!result.valid()) {
