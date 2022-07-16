@@ -7,18 +7,17 @@
 #include <set>
 
 namespace algine {
-class AMTLMaterialManager: public Transferable, public IOProvider {
+class AMTLMaterialManager: public IOProvider {
     friend class AMTLManager;
 
 public:
     AMTLMaterialManager();
-    explicit AMTLMaterialManager(std::string name);
+    explicit AMTLMaterialManager(std::string_view name);
 
     void setName(const std::string &name);
     void setFloat(const std::string &name, float value);
     void setTexture(const std::string &name, const Texture2DCreator &texture);
     void setTextureName(const std::string &name, const std::string &texName);
-    void setTexturePath(const std::string &name, const std::string &path);
 
     const std::string& getName() const;
     float getFloat(const std::string &name) const;
@@ -28,14 +27,15 @@ public:
     const std::unordered_map<std::string, float>& getFloats() const;
     const std::unordered_map<std::string, Texture2DCreator>& getTextures() const;
     const std::unordered_map<std::string, std::string>& getTextureNames() const;
-    const std::unordered_map<std::string, std::string>& getTexturePaths() const;
 
     std::set<std::string> collectTextureNames() const;
 
     Texture2DPtr loadTexture(const std::string &texName);
 
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
+
+protected:
+    void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
 
 private:
     std::string m_workingDirectory;
@@ -43,7 +43,7 @@ private:
 
     std::unordered_map<std::string, float> m_floats;
     std::unordered_map<std::string, Texture2DCreator> m_textures;
-    std::unordered_map<std::string, std::string> m_texPaths, m_texNames;
+    std::unordered_map<std::string, std::string> m_texNames;
 };
 }
 

@@ -96,6 +96,8 @@ Std:
 - [ ] BonesStorage
 - [ ] Camera
 - [ ] Material
+- [x] AMTLManager
+- [x] AMTLMaterialManager
 
 Glm:
 

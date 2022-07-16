@@ -343,7 +343,8 @@ void ShapeCreator::loadFile() {
         // try to load AMTL
         if (string fullAMTLPath = Path::join(m_workingDirectory, amtlPath); io()->exists(Path(fullAMTLPath).toString())) {
             m_amtlManager.setIOSystem(io());
-            m_amtlManager.importFromFile(fullAMTLPath);
+            m_amtlManager.setRootDir(Path(fullAMTLPath).getParentDirectory().toString()); // TODO
+            m_amtlManager.loadFile(fullAMTLPath);
         }
     }
 

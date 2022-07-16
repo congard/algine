@@ -6,18 +6,26 @@
 #include <vector>
 
 namespace algine {
-class AMTLManager: public FileTransferable {
+class AMTLManager: public IOProvider {
 public:
     void setMaterials(const std::vector<AMTLMaterialManager> &materials);
-    void addMaterial(const AMTLMaterialManager &material, const std::string &name = {});
+    AMTLMaterialManager& addMaterial(const AMTLMaterialManager &material, const std::string &name = {});
 
     std::vector<AMTLMaterialManager>& getMaterials();
-    AMTLMaterialManager& getMaterial(const std::string &name);
+    AMTLMaterialManager& getMaterial(std::string_view name);
 
-    bool isMaterialExists(const std::string &name) const;
+    bool isMaterialExists(std::string_view name) const;
 
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
+    void loadFile(std::string_view path, Lua *lua = nullptr);
+    void loadScript(std::string_view script, Lua *lua = nullptr);
+
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
+
+protected:
+    void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
+
+private:
+    void load(std::string_view s, bool path, Lua *lua = nullptr);
 
 private:
     std::vector<AMTLMaterialManager> m_materials;

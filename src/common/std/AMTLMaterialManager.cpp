@@ -1,25 +1,13 @@
 #include <algine/std/AMTLMaterialManager.h>
-
-#include <algine/core/JsonHelper.h>
 #include <algine/core/texture/Texture2D.h>
 
-#include <stdexcept>
-#include <utility>
-
-#include "internal/ConfigStrings.h"
-
 using namespace std;
-using namespace nlohmann;
 
 namespace algine {
-namespace Config {
-constexpr auto Floats = "floats";
-}
-
 AMTLMaterialManager::AMTLMaterialManager() = default;
 
-AMTLMaterialManager::AMTLMaterialManager(string name)
-    : m_name(std::move(name)) {}
+AMTLMaterialManager::AMTLMaterialManager(string_view name)
+    : m_name(name) {}
 
 void AMTLMaterialManager::setName(const string &name) {
     m_name = name;
@@ -35,10 +23,6 @@ void AMTLMaterialManager::setTexture(const string &name, const Texture2DCreator 
 
 void AMTLMaterialManager::setTextureName(const string &name, const string &texName) {
     m_texNames[name] = name;
-}
-
-void AMTLMaterialManager::setTexturePath(const string &name, const string &path) {
-    m_texPaths[name] = path;
 }
 
 const string& AMTLMaterialManager::getName() const {
@@ -58,7 +42,7 @@ bool AMTLMaterialManager::hasTexture(const string &name) const {
         return m.find(name) != m.end();
     };
 
-    return hasTex(m_textures) || hasTex(m_texPaths) || hasTex(m_texNames);
+    return hasTex(m_textures) || hasTex(m_texNames);
 }
 
 const unordered_map<string, float>& AMTLMaterialManager::getFloats() const {
@@ -73,10 +57,6 @@ const unordered_map<string, string>& AMTLMaterialManager::getTextureNames() cons
     return m_texNames;
 }
 
-const unordered_map<string, string>& AMTLMaterialManager::getTexturePaths() const {
-    return m_texPaths;
-}
-
 set<string> AMTLMaterialManager::collectTextureNames() const {
     set<string> names;
 
@@ -88,7 +68,6 @@ set<string> AMTLMaterialManager::collectTextureNames() const {
 
     collect(m_textures);
     collect(m_texNames);
-    collect(m_texPaths);
 
     return names;
 }
@@ -99,14 +78,6 @@ Texture2DPtr AMTLMaterialManager::loadTexture(const string &texName) {
         return it->second.get();
     }
 
-    if (auto it = m_texPaths.find(texName); it != m_texPaths.end()) {
-        Texture2DCreator manager;
-        manager.setIOSystem(io());
-        manager.setWorkingDirectory(m_workingDirectory);
-        manager.importFromFile(it->second);
-        return manager.get();
-    }
-
     if (auto it = m_texNames.find(texName); it != m_texNames.end()) {
         return Texture2D::getByName(it->second);
     }
@@ -114,82 +85,37 @@ Texture2DPtr AMTLMaterialManager::loadTexture(const string &texName) {
     return nullptr;
 }
 
-void AMTLMaterialManager::import(const JsonHelper &jsonHelper) {
-    using namespace Config;
+void AMTLMaterialManager::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
 
-    const json &config = jsonHelper.json;
+    if (isRegistered(env, "AMTLMaterialManager"))
+        return;
 
-    // load name
-    m_name = jsonHelper.readValue<string>(Name);
+    lua->registerUsertype<IOProvider>(tenv);
 
-    // load float values
-    if (config.contains(Floats)) {
-        const json &floats = config[Floats];
+    auto ctors = sol::constructors<AMTLMaterialManager(), AMTLMaterialManager(std::string)>();
+    auto usertype = env.new_usertype<AMTLMaterialManager>(
+            "AMTLMaterialManager",
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors,
+            sol::base_classes, sol::bases<Scriptable, IOProvider>());
 
-        for (const auto &p : floats.items()) {
-            m_floats[p.key()] = p.value();
-        }
-    }
+    Lua::new_property(usertype, "name", &AMTLMaterialManager::getName, &AMTLMaterialManager::setName);
 
-    // load textures
-    if (config.contains(Textures)) {
-        const json &textures = config[Textures];
-
-        for (const auto &texture : textures.items()) {
-            const string &texName = texture.key();
-
-            auto isTypeLoaded = [&](const auto &m) {
-                return m.find(texName) != m.end();
-            };
-
-            if (isTypeLoaded(m_textures) || isTypeLoaded(m_texPaths) || isTypeLoaded(m_texNames))
-                throw runtime_error("Texture with the same name already exists. Name: " + texName);
-
-            const json &block = texture.value();
-
-            if (block.contains(Dump)) {
-                Texture2DCreator manager;
-                manager.setWorkingDirectory(m_workingDirectory);
-                manager.import(block[Dump]);
-                m_textures[texName] = manager;
-            } else if (block.contains(Path)) {
-                m_texPaths[texName] = block[Path];
-            } else if (block.contains(Name)) {
-                m_texNames[texName] = block[Name];
-            } else {
-                throw invalid_argument("Unknown Texture source '" + texture.key() + "'");
-            }
-        }
-    }
+    usertype["setFloat"] = &AMTLMaterialManager::setFloat;
+    usertype["setTexture"] = &AMTLMaterialManager::setTexture;
+    usertype["setTextureName"] = &AMTLMaterialManager::setTextureName;
+    usertype["getFloat"] = &AMTLMaterialManager::getFloat;
+    usertype["hasFloat"] = &AMTLMaterialManager::hasFloat;
+    usertype["hasTexture"] = &AMTLMaterialManager::hasTexture;
+    usertype["getFloats"] = &AMTLMaterialManager::getFloats;
+    usertype["getTextures"] = &AMTLMaterialManager::getTextures;
+    usertype["getTextureNames"] = &AMTLMaterialManager::getTextureNames;
+    usertype["collectTextureNames"] = &AMTLMaterialManager::collectTextureNames;
+    usertype["loadTexture"] = &AMTLMaterialManager::loadTexture;
 }
 
-JsonHelper AMTLMaterialManager::dump() {
-    using namespace Config;
-
-    json config;
-
-    // write name
-    if (!m_name.empty())
-        config[Name] = m_name;
-
-    // write float values
-    json &floats = config[Floats];
-
-    for (auto &p : m_floats)
-        floats[p.first] = p.second;
-
-    // write textures
-    json &textures = config[Textures];
-
-    for (auto &texture : m_textures)
-        textures[texture.first][Dump] = texture.second.dump().json;
-
-    for (auto &name : m_texNames)
-        textures[name.first][Name] = name.second;
-
-    for (auto &path : m_texPaths)
-        textures[path.first][Path] = path.second;
-
-    return config;
+void AMTLMaterialManager::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<AMTLMaterialManager>(s, path, lua, tenv);
 }
 }

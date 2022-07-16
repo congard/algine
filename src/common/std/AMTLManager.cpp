@@ -1,22 +1,23 @@
 #include <algine/std/AMTLManager.h>
+#include <algine/core/texture/Texture2D.h>
 
-#include <algine/core/JsonHelper.h>
+#include <tulz/Path.h>
 
 using namespace std;
-using namespace nlohmann;
+using namespace tulz;
 
 namespace algine {
 void AMTLManager::setMaterials(const vector<AMTLMaterialManager> &materials) {
     m_materials = materials;
 }
 
-void AMTLManager::addMaterial(const AMTLMaterialManager &material, const string &name) {
+AMTLMaterialManager& AMTLManager::addMaterial(const AMTLMaterialManager &material, const string &name) {
     if (name.empty()) {
-        m_materials.emplace_back(material);
+        return m_materials.emplace_back(material);
     } else {
         auto customNamedMaterial = material;
         customNamedMaterial.setName(name);
-        m_materials.emplace_back(customNamedMaterial);
+        return m_materials.emplace_back(customNamedMaterial);
     }
 }
 
@@ -24,7 +25,7 @@ vector<AMTLMaterialManager>& AMTLManager::getMaterials() {
     return m_materials;
 }
 
-inline int getMaterialIndex(const string &name, const vector<AMTLMaterialManager> &materials) {
+inline int getMaterialIndex(string_view name, const vector<AMTLMaterialManager> &materials) {
     for (int i = 0; i < materials.size(); i++) {
         if (materials[i].getName() == name) {
             return i;
@@ -34,7 +35,7 @@ inline int getMaterialIndex(const string &name, const vector<AMTLMaterialManager
     return -1;
 }
 
-AMTLMaterialManager& AMTLManager::getMaterial(const string &name) {
+AMTLMaterialManager& AMTLManager::getMaterial(string_view name) {
     int index = getMaterialIndex(name, m_materials);
 
     if (index != -1) {
@@ -42,30 +43,140 @@ AMTLMaterialManager& AMTLManager::getMaterial(const string &name) {
         return m_materials[index];
     }
 
-    throw runtime_error("AMTLMaterial '" + name + "' does not found");
+    throw runtime_error("AMTLMaterial '" + string(name) + "' does not found");
 }
 
-bool AMTLManager::isMaterialExists(const string &name) const {
+bool AMTLManager::isMaterialExists(string_view name) const {
     return getMaterialIndex(name, m_materials) != -1;
 }
 
-void AMTLManager::import(const JsonHelper &jsonHelper) {
-    const json &config = jsonHelper.json;
-
-    for (const auto & material : config) {
-        AMTLMaterialManager materialManager;
-        materialManager.m_workingDirectory = m_workingDirectory;
-        materialManager.import(material);
-        m_materials.emplace_back(materialManager);
-    }
+void AMTLManager::loadFile(std::string_view path, Lua *lua) {
+    load(path, true, lua);
 }
 
-JsonHelper AMTLManager::dump() {
-    json config;
+void AMTLManager::loadScript(std::string_view script, Lua *lua) {
+    load(script, false, lua);
+}
 
-    for (auto & material : m_materials)
-        config.push_back(material.dump().json);
+void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
+    AMTLMaterialManager *material {nullptr};
+    std::map<uint, uint> params = Texture2D::defaultParams();
 
-    return config;
+    auto checkMaterial = [&material]() {
+        if (!material) {
+            throw runtime_error("Error: material name was not specified");
+        }
+    };
+
+    lua = lua ? lua : &Engine::getLua();
+
+    auto &state = *lua->state();
+    auto tenv = lua->createEnvironment(lua->getGlobalEnvironment());
+    sol::environment env(tenv);
+
+    lua->registerUsertype<Texture, Texture2DCreator>(&tenv);
+
+    class Name {
+    public:
+        explicit Name(string_view name): m_name(name) {};
+        std::string m_name;
+    };
+
+    auto nameCtors = sol::constructors<Name(string_view)>();
+    env.new_usertype<Name>("Name", sol::meta_function::construct, nameCtors, sol::call_constructor, nameCtors);
+
+    env["material"] = [&](string_view name) {
+        if (!isMaterialExists(name)) {
+            material = &addMaterial(AMTLMaterialManager(name));
+        } else {
+            material = &getMaterial(name);
+        }
+    };
+
+    env["texParams"] = [&](std::map<uint, uint> p) {
+        std::swap(params, p);
+    };
+
+    env["set"] = sol::overload(
+        [&](const string &prop, const string &path, sol::optional<std::string> name) {
+            checkMaterial();
+
+            Texture2DCreator manager;
+            manager.setIOSystem(io());
+            manager.setWorkingDirectory(getRootDir());
+            manager.setDefaultParams(params);
+
+            if (name.has_value()) {
+                manager.setName(name.value());
+                manager.setAccess(Creator::Access::Public);
+            }
+
+            if (string_view(path.c_str() + path.size() - 3) == "lua") {
+                manager.execute(Path::join(getRootDir(), path), lua, &tenv); // TODO
+            } else {
+                manager.setPath(path);
+            }
+
+            material->setTexture(prop, manager);
+        },
+        [&](const string &prop, const Name &name) {
+            checkMaterial();
+            material->setTextureName(prop, name.m_name);
+        },
+        [&](const string &prop, Texture2DCreator &creator) {
+            checkMaterial();
+            creator.setDefaultParams(params);
+            material->setTexture(prop, creator);
+        },
+        [&](const string &prop, float n) {
+            checkMaterial();
+            material->setFloat(prop, n);
+        }
+    );
+
+    char buffer[128];
+
+    for (auto &func : {"ambient", "diffuse", "specular", "normal", "reflection", "jitter",
+                       "shininess", "ambientStrength", "diffuseStrength", "specularStrength"}) {
+        sprintf(buffer, "function %s(...) set('%s', ...) end", func, func);
+        state.script(buffer, env);
+    }
+
+    if (path) {
+        state.script(readStr(string(s)), env);
+    } else {
+        state.script(s, env);
+    }
+
+    env.abandon();
+}
+
+void AMTLManager::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = getEnv(lua, tenv);
+
+    if (isRegistered(env, "AMTLManager"))
+        return;
+
+    lua->registerUsertype<FileTransferable, AMTLMaterialManager>(tenv);
+
+    auto ctors = sol::constructors<AMTLManager()>();
+    auto usertype = env.new_usertype<AMTLManager>(
+            "AMTLManager",
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors,
+            sol::base_classes, sol::bases<Scriptable, IOProvider>());
+
+    Lua::new_property(usertype, "materials", &AMTLManager::getMaterials,
+        [](AMTLManager &self, std::vector<AMTLMaterialManager> materials) { self.setMaterials(materials); });
+
+    usertype["addMaterial"] = sol::overload(
+        &AMTLManager::addMaterial,
+        [](AMTLManager &self, const AMTLMaterialManager &material) { self.addMaterial(material); });
+    usertype["getMaterial"] = &AMTLManager::getMaterial;
+    usertype["isMaterialExists"] = &AMTLManager::isMaterialExists;
+}
+
+void AMTLManager::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<AMTLManager>(s, path, lua, tenv);
 }
 }
