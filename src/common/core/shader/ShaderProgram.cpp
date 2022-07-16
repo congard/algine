@@ -155,7 +155,7 @@ int ShaderProgram::getLocation(const string &name) {
 
     return -1;
 #else
-    return locations[name];
+    return m_locations[name];
 #endif
 }
 

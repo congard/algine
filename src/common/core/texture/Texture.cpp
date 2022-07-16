@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include "core/IOStreamUtils.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
@@ -18,8 +20,6 @@ using namespace std;
 #define SOP_OBJECT_TYPE getTextureObject(m_target)
 #define SOP_OBJECT_ID m_id
 #define SOP_OBJECT_NAME getTextureObjectName(m_target)
-
-#include "core/IOStreamUtils.h"
 
 inline void* getBoundTexture(const uint target) {
     switch (target) {
