@@ -9,6 +9,8 @@ public:
     EulerRotator();
 
     void rotate(glm::mat4 &matrix) override;
+
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 };
 }
 

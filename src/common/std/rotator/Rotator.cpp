@@ -1,9 +1,6 @@
 #include <algine/std/rotator/Rotator.h>
-
 #include <algine/std/rotator/EulerRotator.h>
 #include <algine/std/rotator/FreeRotator.h>
-
-#include <algine/core/JsonHelper.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -11,22 +8,6 @@
 
 using namespace std;
 using namespace glm;
-using namespace nlohmann;
-
-#define constant(name, val) constexpr char name[] = val
-
-namespace Config {
-constant(Type, "type");
-constant(Yaw, "yaw");
-constant(Pitch, "pitch");
-constant(Roll, "roll");
-
-namespace RotatorType {
-constant(Simple, "simple");
-constant(Euler, "euler");
-constant(Free, "free");
-}
-}
 
 namespace algine {
 Rotator::Rotator()
@@ -104,44 +85,37 @@ Rotator* Rotator::create(Type type) {
     }
 }
 
-void Rotator::import(const JsonHelper &jsonHelper) {
-    using namespace Config::RotatorType;
+void Rotator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
+    auto &env = Lua::getEnv(lua, tenv);
 
-    const json &config = jsonHelper.json;
+    if (Lua::isRegistered(env, "Rotator"))
+        return;
 
-    jsonHelper.readValue(Config::Yaw, m_yaw);
-    jsonHelper.readValue(Config::Pitch, m_pitch);
-    jsonHelper.readValue(Config::Roll, m_roll);
+    lua->registerUsertype<EulerRotator, FreeRotator>(tenv);
 
-    string type_str;
-    jsonHelper.readValue(Config::Type, type_str);
+    auto usertype = env.new_usertype<Rotator>(
+            "Rotator",
+            sol::meta_function::construct, sol::default_constructor,
+            sol::call_constructor, sol::default_constructor);
 
-    map<string, Type> types {
-        {Simple, Type::Simple},
-        {Euler, Type::Euler},
-        {Free, Type::Free}
-    };
+    usertype["rotate"] = &Rotator::rotate;
+    usertype["changeRotation"] = &Rotator::changeRotation;
+    usertype["changePitch"] = &Rotator::changePitch;
+    usertype["changeYaw"] = &Rotator::changeYaw;
+    usertype["changeRoll"] = &Rotator::changeRoll;
 
-    if (types.find(type_str) != types.end()) {
-        m_type = types[type_str];
-    } else {
-        throw runtime_error(
-            "Unknown Rotator type: " + type_str + "\n"
-            "Available: " + Simple + ", " + Euler + ", " + Free
-        );
-    }
-}
+    Lua::new_property(usertype, "pitch", &Rotator::getPitch, &Rotator::setPitch);
+    Lua::new_property(usertype, "yaw", &Rotator::getYaw, &Rotator::setYaw);
+    Lua::new_property(usertype, "roll", &Rotator::getRoll, &Rotator::setRoll);
 
-JsonHelper Rotator::dump() {
-    using namespace Config::RotatorType;
+    usertype["getType"] = &Rotator::getType;
 
-    json config;
+    // static
+    usertype["create"] = &Rotator::create;
 
-    config[Config::Yaw] = m_yaw;
-    config[Config::Pitch] = m_pitch;
-    config[Config::Roll] = m_roll;
-    config[Config::Type] = (vector<string> {Simple, Euler, Free})[static_cast<uint>(m_type)];
-
-    return config;
+    env["Rotator"].get<sol::table>().new_enum("Type",
+        "Simple", Type::Simple,
+        "Euler", Type::Euler,
+        "Free", Type::Free);
 }
 }

@@ -11,8 +11,9 @@ public:
     FreeRotator();
 
     void rotate(glm::mat4 &matrix) override;
-
     void changeRotation(const glm::vec3 &dRotate) override;
+
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 public:
     glm::quat qRotation;

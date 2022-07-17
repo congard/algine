@@ -1,14 +1,12 @@
 #ifndef ALGINE_ROTATOR_H
 #define ALGINE_ROTATOR_H
 
-#include <algine/core/transfer/Transferable.h>
-
-#include <algine/types.h>
+#include <algine/core/lua/Lua.h>
 
 #include <glm/mat4x4.hpp>
 
 namespace algine {
-class Rotator: public Transferable {
+class Rotator {
 public:
     enum class Type {
         Simple,
@@ -18,10 +16,9 @@ public:
 
 public:
     Rotator();
-    virtual ~Rotator() = default; // to hide -Wdelete-non-virtual-dtor
+    virtual ~Rotator() = default;
 
     virtual void rotate(glm::mat4 &matrix);
-
     virtual void changeRotation(const glm::vec3 &dRotate);
 
     void changePitch(float dPitch);
@@ -40,8 +37,7 @@ public:
 
     static Rotator* create(Type type);
 
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 protected:
     float m_pitch, m_yaw, m_roll;

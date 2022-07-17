@@ -134,7 +134,7 @@ void Rotatable::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
     if (Lua::isRegistered(env, "Rotatable"))
         return;
 
-    lua->registerUsertype<Scriptable>(tenv);
+    lua->registerUsertype<Scriptable, Rotator>(tenv);
 
     auto usertype = env.new_usertype<Rotatable>(
             "Rotatable",

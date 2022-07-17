@@ -27,7 +27,7 @@ Creators:
 - [x] Texture2DCreator
 - [x] TextureCubeCreator
 - [x] ImageCreator
-- [x] FramebufferCreator _(json support was removed)_
+- [x] FramebufferCreator
 - [x] RenderbufferCreator
 - [x] ~~OutputListCreator~~ _(removed, some functionality was moved to OutputList)_
 - [x] ~~InputLayoutShapeLocationsCreator~~ _(removed, InputLayoutShapeLocations was extended in functionality)_
@@ -85,10 +85,12 @@ Std:
 - [ ] Mesh
 - [x] Model
 - [x] Shape
-- [ ] Mesh
 - [x] Rotatable
 - [x] Translatable
 - [x] Scalable
+- [x] Rotator
+- [x] EulerRotator
+- [x] FreeRotator
 - [ ] Animation
 - [ ] AnimationBlender
 - [ ] Animator
