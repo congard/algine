@@ -21,6 +21,9 @@ public:
     sol::global_table createEnvironment(const sol::global_table &parent);
     sol::global_table& getGlobalEnvironment() const;
 
+    static sol::global_table& getEnv(Lua *lua, sol::global_table *env = nullptr);
+    static bool isRegistered(sol::global_table &env, std::string_view type);
+
     template<typename T, typename G, typename S>
     static void new_property(sol::usertype<T> &usertype,
         std::string_view propName, std::string_view getterName, std::string_view setterName,

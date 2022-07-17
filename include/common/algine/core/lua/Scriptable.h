@@ -6,6 +6,8 @@
 namespace algine {
 class Scriptable {
 public:
+    virtual ~Scriptable() = default;
+
     void execute(const std::string &path, Lua *lua = nullptr, sol::global_table *env = nullptr);
     void executeString(const std::string &str, Lua *lua = nullptr, sol::global_table *env = nullptr);
 
@@ -14,11 +16,11 @@ public:
 
     static void registerLuaUsertype(Lua *lua, sol::global_table *tenv = nullptr); // must be implemented in derived classes
 
-    static sol::global_table& getEnv(Lua *lua, sol::global_table *tenv = nullptr);
-    static bool isRegistered(sol::global_table &env, std::string_view type);
-
 protected:
-    virtual void exec(const std::string &s, bool path, Lua *lua, sol::global_table *env);
+    static inline auto& getEnv(Lua *lua, sol::global_table *tenv) { return Lua::getEnv(lua, tenv); }
+    static inline bool isRegistered(sol::global_table &env, std::string_view type) { return Lua::isRegistered(env, type); }
+
+    virtual void exec(const std::string &s, bool path, Lua *lua, sol::global_table *env) = 0;
 
     template<typename T>
     void exec_t(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {

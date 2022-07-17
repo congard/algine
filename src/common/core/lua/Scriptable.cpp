@@ -38,25 +38,4 @@ void Scriptable::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
 
     Lua::new_property(usertype, "rootDir", &Scriptable::getRootDir, &Scriptable::setRootDir);
 }
-
-void Scriptable::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
-    throw std::runtime_error("Stub! Not implemented!");
-}
-
-sol::global_table& Scriptable::getEnv(Lua *lua, sol::global_table *env) {
-    if (env)
-        return *env;
-
-    if (!lua)
-        return Engine::getLua().state()->globals();
-
-    if (!lua->isInitialized())
-        lua->init();
-
-    return lua->state()->globals();
-}
-
-bool Scriptable::isRegistered(sol::global_table &env, std::string_view type) {
-    return env[type].valid();
-}
 } // algine

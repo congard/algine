@@ -53,4 +53,21 @@ void Lua::initEnvironment(sol::global_table &env) {
 
     m_lua->script(core_lua, sol::environment(env));
 }
+
+sol::global_table& Lua::getEnv(Lua *lua, sol::global_table *env) {
+    if (env)
+        return *env;
+
+    if (!lua)
+        return Engine::getLua().state()->globals();
+
+    if (!lua->isInitialized())
+        lua->init();
+
+    return lua->state()->globals();
+}
+
+bool Lua::isRegistered(sol::global_table &env, std::string_view type) {
+    return env[type].valid();
+}
 } // algine
