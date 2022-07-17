@@ -86,6 +86,11 @@ void Shader::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
     // static
     usertype["getByName"] = &Shader::getByName;
     usertype["byName"] = &Shader::byName;
+
+    env["Shader"].get<sol::table>().new_enum("Type",
+        "Vertex", Type::Vertex,
+        "Fragment", Type::Fragment,
+        "Geometry", Type::Geometry);
 }
 
 ShaderPtr Shader::getByName(string_view name) {
