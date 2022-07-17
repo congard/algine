@@ -31,24 +31,18 @@ std::string IOProvider::readStr(const std::string &path) const {
 }
 
 void IOProvider::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
+    auto &env = Lua::getEnv(lua, tenv);
 
-    if (isRegistered(env, "IOProvider"))
+    if (Lua::isRegistered(env, "IOProvider"))
         return;
 
-    Scriptable::registerLuaUsertype(lua, tenv);
-
-    auto usertype = env.new_usertype<IOProvider>("IOProvider", sol::base_classes, sol::bases<Scriptable>());
+    auto usertype = env.new_usertype<IOProvider>("IOProvider");
     usertype["setIOSystem_raw"] = static_cast<void (IOProvider::*)(IOSystem*)>(&IOProvider::setIOSystem);
     usertype["writeStr"] = &IOProvider::writeStr;
     usertype["readStr"] = &IOProvider::readStr;
 
     Lua::new_property(usertype, "ioSystem", "getIOSystem", "setIOSystem",
         &IOProvider::getIOSystem, static_cast<void (IOProvider::*)(const std::shared_ptr<IOSystem>&)>(&IOProvider::setIOSystem));
-}
-
-void IOProvider::exec(const std::string &s, bool path, Lua *lua, sol::global_table *env) {
-    exec_t<IOProvider>(s, path, lua, env);
 }
 
 const std::shared_ptr<IOSystem>& IOProvider::io() const {

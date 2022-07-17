@@ -39,7 +39,7 @@ void RenderbufferCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv)
             "RenderbufferCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ImageCreator>());
+            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator, ImageCreator>());
 
     usertype["get"] = &RenderbufferCreator::get;
     usertype["create"] = &RenderbufferCreator::create;

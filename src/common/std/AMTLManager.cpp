@@ -50,7 +50,15 @@ bool AMTLManager::isMaterialExists(string_view name) const {
     return getMaterialIndex(name, m_materials) != -1;
 }
 
-void AMTLManager::loadFile(std::string_view path, Lua *lua) {
+void AMTLManager::loadFile(std::string_view path_view, Lua *lua) {
+    string path = path_view.data();
+
+    if (getRootDir().empty()) {
+        Path p(path);
+        setRootDir(p.getParentDirectory().toString());
+        path = p.getPathName();
+    }
+
     load(path, true, lua);
 }
 
@@ -103,7 +111,7 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
 
             Texture2DCreator manager;
             manager.setIOSystem(io());
-            manager.setWorkingDirectory(getRootDir());
+            manager.setRootDir(getRootDir());
             manager.setDefaultParams(params);
 
             if (name.has_value()) {
@@ -111,8 +119,8 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
                 manager.setAccess(Creator::Access::Public);
             }
 
-            if (string_view(path.c_str() + path.size() - 3) == "lua") {
-                manager.execute(Path::join(getRootDir(), path), lua, &tenv); // TODO
+            if (path.size() >= 4 && string_view(path.c_str() + path.size() - 4) == ".lua") {
+                manager.execute(path, lua, &tenv);
             } else {
                 manager.setPath(path);
             }
@@ -143,7 +151,7 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
     }
 
     if (path) {
-        state.script(readStr(string(s)), env);
+        state.script(readStr(Path::join(getRootDir(), string(s))), env);
     } else {
         state.script(s, env);
     }
@@ -157,7 +165,7 @@ void AMTLManager::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
     if (isRegistered(env, "AMTLManager"))
         return;
 
-    lua->registerUsertype<FileTransferable, AMTLMaterialManager>(tenv);
+    lua->registerUsertype<Scriptable, AMTLMaterialManager>(tenv);
 
     auto ctors = sol::constructors<AMTLManager()>();
     auto usertype = env.new_usertype<AMTLManager>(

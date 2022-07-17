@@ -45,7 +45,7 @@ void ImageCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "ImageCreator",
             sol::meta_function::construct, sol::no_constructor,
             sol::call_constructor, sol::no_constructor,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator>());
+            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator>());
 
     Lua::new_property(usertype, "format", &ImageCreator::getFormat, &ImageCreator::setFormat);
     Lua::new_property(usertype, "width", &ImageCreator::getWidth, &ImageCreator::setWidth);

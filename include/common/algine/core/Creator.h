@@ -1,12 +1,12 @@
 #ifndef ALGINE_CREATOR_H
 #define ALGINE_CREATOR_H
 
-#include <algine/core/transfer/FileTransferable.h>
+#include <algine/core/lua/Scriptable.h>
 
 #include <string>
 
 namespace algine {
-class Creator: public FileTransferable {
+class Creator: public virtual Scriptable {
 public:
     enum class Access {
         Private,
@@ -21,9 +21,6 @@ public:
 
     const std::string& getName() const;
     Access getAccess() const;
-
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
 
     static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 

@@ -59,7 +59,7 @@ void TextureCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "TextureCreator",
             sol::meta_function::construct, sol::no_constructor,
             sol::call_constructor, sol::no_constructor,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ImageCreator>());
+            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator, ImageCreator>());
 
     usertype["getType"] = &TextureCreator::getType;
     usertype["type"] = sol::readonly_property(&TextureCreator::getType);

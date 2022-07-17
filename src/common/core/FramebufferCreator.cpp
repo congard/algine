@@ -135,7 +135,7 @@ void FramebufferCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) 
             "FramebufferCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator>());
+            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator>());
 
     usertype["setOutputLists"] = [](FramebufferCreator &self, std::vector<OutputList> lists) { self.setOutputLists(lists); };
     usertype["addOutputList"] = &FramebufferCreator::addOutputList;

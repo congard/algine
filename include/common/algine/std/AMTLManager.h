@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace algine {
-class AMTLManager: public IOProvider {
+class AMTLManager: public Scriptable {
 public:
     void setMaterials(const std::vector<AMTLMaterialManager> &materials);
     AMTLMaterialManager& addMaterial(const AMTLMaterialManager &material, const std::string &name = {});

@@ -326,7 +326,7 @@ void ShapeCreator::loadFile() {
     importer.SetIOHandler(new AssimpCustomIOSystem(io()));
 
     const aiScene *scene = importer.ReadFile(
-            Path::join(m_workingDirectory, m_modelPath), algine::getParams<PARAMS_TYPE_ASSIMP>(m_params));
+            Path::join(getRootDir(), m_modelPath), algine::getParams<PARAMS_TYPE_ASSIMP>(m_params));
 
     // If the import failed, report it
     if (!scene) {
@@ -341,9 +341,8 @@ void ShapeCreator::loadFile() {
         string amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
 
         // try to load AMTL
-        if (string fullAMTLPath = Path::join(m_workingDirectory, amtlPath); io()->exists(Path(fullAMTLPath).toString())) {
+        if (string fullAMTLPath = Path::join(getRootDir(), amtlPath); io()->exists(Path(fullAMTLPath).toString())) {
             m_amtlManager.setIOSystem(io());
-            m_amtlManager.setRootDir(Path(fullAMTLPath).getParentDirectory().toString()); // TODO
             m_amtlManager.loadFile(fullAMTLPath);
         }
     }
@@ -599,7 +598,7 @@ void ShapeCreator::processMesh(const aiMesh *aimesh, const aiScene *scene) {
 
         Texture2DCreator creator;
         creator.setIOSystem(io());
-        creator.setWorkingDirectory(Path(Path::join(m_workingDirectory, m_modelPath)).getParentDirectory().toString());
+        creator.setRootDir(Path(Path::join(getRootDir(), m_modelPath)).getParentDirectory().toString());
         creator.setPath(path.C_Str());
         creator.setParams({
             {Texture::WrapU, getMapMode(mapModeU)},
@@ -680,7 +679,7 @@ void ShapeCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "ShapeCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator>());
+            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator>());
 
     usertype["addParam"] = &ShapeCreator::addParam;
     usertype["addParams"] = [](ShapeCreator &self, std::vector<Param> params) { self.addParams(params); };

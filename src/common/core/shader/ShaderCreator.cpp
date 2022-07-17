@@ -112,7 +112,7 @@ void ShaderCreator::resetGenerated() {
 inline void cfgSourceImpl(ShaderCreator *self) {
     const string &source = self->getSource();
     const string &path = self->getPath();
-    const string &workingDirectory = self->getWorkingDirectory();
+    const string &rootDir = self->getRootDir();
 
     if (source.empty()) {
         if (path.empty()) {
@@ -133,7 +133,7 @@ inline void cfgSourceImpl(ShaderCreator *self) {
 
             throw runtime_error("Built-in shader '" + name + "' not found");
         } else {
-            self->setSource(self->readStr(Path::join(workingDirectory, path)));
+            self->setSource(self->readStr(Path::join(rootDir, path)));
         }
     }
 }
@@ -183,7 +183,7 @@ void ShaderCreator::generate() {
     // expand includes
     // base include path (path where file is located)
     // it is working directory (if specified)
-    m_gen = processDirectives(m_gen, !m_path.empty() ? Path(m_path).getParentDirectory() : Path(m_workingDirectory));
+    m_gen = processDirectives(m_gen, !m_path.empty() ? Path(m_path).getParentDirectory() : Path(getRootDir()));
 }
 
 const string& ShaderCreator::getGenerated() const {
@@ -225,7 +225,7 @@ void ShaderCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "ShaderCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ShaderDefinitionGenerator>());
+            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator, ShaderDefinitionGenerator>());
 
     Lua::new_property(usertype, "type", &ShaderCreator::getType, &ShaderCreator::setType);
     Lua::new_property(usertype, "path", &ShaderCreator::getPath, &ShaderCreator::setPath);

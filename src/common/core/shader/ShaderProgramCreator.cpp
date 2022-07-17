@@ -104,7 +104,7 @@ void ShaderProgramCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv
             "ShaderProgramCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ShaderDefinitionGenerator>());
+            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator, ShaderDefinitionGenerator>());
 
     Lua::new_property(usertype, "creators",
         &ShaderProgramCreator::getCreators,

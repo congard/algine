@@ -14,10 +14,10 @@ struct Data {
 inline Data load(std::string_view str_v, const std::shared_ptr<IOSystem> &io) {
     auto str = str_v.data();
 
-    if (auto ext = strrchr(str, '.'); strcmp(ext, ".json") == 0) {
+    if (str_v.size() >= 4 && std::string_view(str + str_v.size() - 4) == ".lua") {
         Texture2DCreator creator;
         creator.setIOSystem(io);
-        creator.importFromFile(str);
+        creator.execute(str);
 
         return {
             creator.get(),

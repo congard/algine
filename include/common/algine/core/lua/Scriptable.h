@@ -2,19 +2,21 @@
 #define ALGINE_SCRIPTABLE_H
 
 #include <algine/core/Engine.h>
+#include <algine/core/io/IOProvider.h>
+#include <algine/core/log/Log.h>
+
+#include <tulz/Path.h>
 
 namespace algine {
-class Scriptable {
+class Scriptable: public IOProvider {
 public:
-    virtual ~Scriptable() = default;
-
     void execute(const std::string &path, Lua *lua = nullptr, sol::global_table *env = nullptr);
     void executeString(const std::string &str, Lua *lua = nullptr, sol::global_table *env = nullptr);
 
     void setRootDir(std::string_view rootDir);
     const std::string& getRootDir() const;
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv = nullptr); // must be implemented in derived classes
+    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv = nullptr);
 
 protected:
     static inline auto& getEnv(Lua *lua, sol::global_table *tenv) { return Lua::getEnv(lua, tenv); }
@@ -29,11 +31,19 @@ protected:
 
         auto &state = lua ? *lua->state() : *Engine::getLua().state();
 
+        auto printErr = [&](sol::error &error) {
+            if (!path) {
+                Log::error() << error.what();
+            } else {
+                Log::error() << "In " << tulz::Path::join(m_rootDir, s) << ":\n" << error.what();
+            }
+        };
+
         try {
             sol::environment luaEnv(env);
 
             if (path) {
-                state.script_file(s, luaEnv);
+                state.script(readStr(tulz::Path::join(m_rootDir, s)), luaEnv);
             } else {
                 state.script(s, luaEnv);
             }
@@ -43,10 +53,10 @@ protected:
             // in case if exceptions are disabled
             if (!result.valid()) {
                 sol::error error = result;
-                fprintf(stderr, "%s\n", error.what());
+                printErr(error);
             }
         } catch (sol::error &error) {
-            fprintf(stderr, "%s\n", error.what());
+            printErr(error);
         }
     }
 

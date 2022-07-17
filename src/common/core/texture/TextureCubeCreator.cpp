@@ -47,7 +47,7 @@ TextureCubePtr TextureCubeCreator::create() {
     if (!m_paths.empty()) {
         for (const auto &path : m_paths) {
             TextureFileInfo info;
-            info.path = Path::join(m_workingDirectory, path.second);
+            info.path = Path::join(getRootDir(), path.second);
             info.dataType = m_dataType;
             info.ioSystem = io();
             texture->fromFile(path.first, info);
@@ -79,7 +79,7 @@ void TextureCubeCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) 
             "TextureCubeCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ImageCreator, TextureCreator>());
+            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator, ImageCreator, TextureCreator>());
 
     usertype["get"] = &TextureCubeCreator::get;
     usertype["create"] = &TextureCubeCreator::create;

@@ -7,7 +7,7 @@
 #include <set>
 
 namespace algine {
-class AMTLMaterialManager: public IOProvider {
+class AMTLMaterialManager: public Scriptable {
     friend class AMTLManager;
 
 public:

@@ -204,7 +204,7 @@ void ModelCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "ModelCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator>());
+            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator>());
 
     usertype["activateAnimation"] = sol::overload(
         static_cast<void (ModelCreator::*)(const std::string&)>(&ModelCreator::activateAnimation),

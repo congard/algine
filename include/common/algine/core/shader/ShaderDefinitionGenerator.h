@@ -1,7 +1,6 @@
 #ifndef ALGINE_SHADERDEFINITIONGENERATOR_H
 #define ALGINE_SHADERDEFINITIONGENERATOR_H
 
-#include <algine/core/transfer/Transferable.h>
 #include "algine/core/lua/Scriptable.h"
 #include <algine/core/Pair.h>
 #include <algine/types.h>

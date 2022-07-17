@@ -39,7 +39,7 @@ Texture2DPtr Texture2DCreator::create() {
 
     if (!m_path.empty()) {
         TextureFileInfo info;
-        info.path = Path::join(m_workingDirectory, m_path);
+        info.path = Path::join(getRootDir(), m_path);
         info.dataType = m_dataType;
         info.flip = true;
         info.ioSystem = io();
@@ -71,7 +71,7 @@ void Texture2DCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "Texture2DCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ImageCreator, TextureCreator>());
+            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator, ImageCreator, TextureCreator>());
 
     usertype["get"] = &Texture2DCreator::get;
     usertype["create"] = &Texture2DCreator::create;

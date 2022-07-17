@@ -160,7 +160,6 @@ set(ALGINE_CORE_SOURCES
         include/common/algine/core/input/MouseKey.h
         include/common/algine/core/input/KeyboardKey.h
 
-        include/common/algine/core/transfer/Transferable.h
         include/common/algine/core/texture/PixelData.h
         include/common/algine/core/texture/TextureCreateInfo.h
         include/common/algine/core/shader/ShaderPtr.h
@@ -183,7 +182,6 @@ set(ALGINE_CORE_SOURCES
         src/common/core/Object.cpp include/common/algine/core/Object.h
         src/common/core/Creator.cpp include/common/algine/core/Creator.h
         src/common/core/ImageCreator.cpp include/common/algine/core/ImageCreator.h
-        src/common/core/transfer/FileTransferable.cpp include/common/algine/core/transfer/FileTransferable.h
         src/common/core/OutputList.cpp include/common/algine/core/OutputList.h
         src/common/core/Framebuffer.cpp include/common/algine/core/Framebuffer.h
         src/common/core/FramebufferCreator.cpp include/common/algine/core/FramebufferCreator.h
