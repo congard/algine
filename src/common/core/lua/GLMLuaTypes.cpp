@@ -1,6 +1,4 @@
 #include <algine/core/lua/GLMLuaTypes.h>
-#include <algine/core/Engine.h>
-#include <algine/core/lua/Scriptable.h>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -77,6 +75,9 @@ constexpr bool is_glm_mat() {
 
 template<typename T, typename C>
 void registerGlmType(std::string_view name, sol::global_table &env, C constructors) {
+    if (Lua::isRegistered(env, name))
+        return;
+
     auto newIndex = [](T &self, int i, const sol::object &val) -> auto& {
         if constexpr(is_glm_vec<T>() || std::is_same_v<T, glm::quat>) {
             return self[i] = val.as<float>();
@@ -143,7 +144,7 @@ void registerGlmType(std::string_view name, sol::global_table &env, C constructo
 }
 
 void GLMLuaTypes::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Scriptable::getEnv(lua, tenv);
+    auto &env = Lua::getEnv(lua, tenv);
 
     using namespace glm;
 

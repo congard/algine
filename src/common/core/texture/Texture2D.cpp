@@ -93,7 +93,7 @@ void Texture2D::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "Texture2D",
             sol::meta_function::construct, factories,
             sol::call_constructor, factories,
-            sol::base_classes, sol::bases<Scriptable, Object, Texture>());
+            sol::base_classes, sol::bases<Object, Texture>());
 
     usertype["fromFile"] = sol::overload(
         static_cast<void (Texture2D::*)(const TextureFileInfo&)>(&Texture2D::fromFile),

@@ -66,9 +66,9 @@ void Log::error(const std::string &tag, std::string_view str) {
 }
 
 void Log::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Scriptable::getEnv(lua, tenv);
+    auto &env = Lua::getEnv(lua, tenv);
 
-    if (Scriptable::isRegistered(env, "Log"))
+    if (Lua::isRegistered(env, "Log"))
         return;
 
     auto usertype = env.new_usertype<Log>(

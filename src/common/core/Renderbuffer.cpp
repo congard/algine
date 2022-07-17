@@ -100,7 +100,7 @@ void Renderbuffer::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "Renderbuffer",
             sol::meta_function::construct, factories,
             sol::call_constructor, factories,
-            sol::base_classes, sol::bases<Scriptable, Object>());
+            sol::base_classes, sol::bases<Object>());
 
     usertype["bind"] = &Renderbuffer::bind;
     usertype["unbind"] = &Renderbuffer::unbind;

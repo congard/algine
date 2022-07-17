@@ -7,7 +7,7 @@
 #include <glm/mat4x4.hpp>
 
 namespace algine {
-class Scalable: public virtual Scriptable {
+class Scalable {
 public:
     Scalable();
 

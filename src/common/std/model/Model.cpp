@@ -168,7 +168,7 @@ void Model::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "Model",
             sol::meta_function::construct, factories,
             sol::call_constructor, factories,
-            sol::base_classes, sol::bases<Scriptable, Object, Rotatable, Translatable, Scalable>());
+            sol::base_classes, sol::bases<Object, Rotatable, Translatable, Scalable>());
 
     usertype["transform"] = &Model::transform;
     usertype["activateAnimations"] = &Model::activateAnimations;

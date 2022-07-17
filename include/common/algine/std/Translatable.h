@@ -7,7 +7,7 @@
 #include <glm/mat4x4.hpp>
 
 namespace algine {
-class Translatable: public virtual Scriptable {
+class Translatable {
 public:
     Translatable();
 

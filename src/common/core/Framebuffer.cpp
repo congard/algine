@@ -292,7 +292,7 @@ void Framebuffer::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "Framebuffer",
             sol::meta_function::construct, factories,
             sol::call_constructor, factories,
-            sol::base_classes, sol::bases<Scriptable, Object>());
+            sol::base_classes, sol::bases<Object>());
 
     usertype["bind"] = &Framebuffer::bind;
     usertype["unbind"] = &Framebuffer::unbind;

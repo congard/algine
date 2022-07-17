@@ -298,7 +298,7 @@ void Texture::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "Texture",
             sol::meta_function::construct, sol::no_constructor,
             sol::call_constructor, sol::no_constructor,
-            sol::base_classes, sol::bases<Scriptable, Object>());
+            sol::base_classes, sol::bases<Object>());
 
     usertype["bind"] = &Texture::bind;
     usertype["unbind"] = &Texture::unbind;

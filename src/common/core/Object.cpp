@@ -21,7 +21,7 @@ void Object::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
     // class will not be created in Lua, implemented in
     // inheritance purposes
 
-    auto usertype = env.new_usertype<Object>("Object", sol::base_classes, sol::bases<Scriptable>());
+    auto usertype = env.new_usertype<Object>("Object");
     Lua::new_property(usertype, "name", &Object::getName, &Object::setName);
 }
 }

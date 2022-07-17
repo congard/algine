@@ -203,7 +203,7 @@ void Shape::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
             "Shape",
             sol::meta_function::construct, factories,
             sol::call_constructor, factories,
-            sol::base_classes, sol::bases<Scriptable, Object>());
+            sol::base_classes, sol::bases<Object>());
 
     usertype["createInputLayout"] = &Shape::createInputLayout;
 

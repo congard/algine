@@ -1,12 +1,14 @@
 #include <algine/core/lua/TulzLuaTypes.h>
 #include <algine/core/Engine.h>
-#include <algine/core/lua/Scriptable.h>
 
 #include <tulz/Array.h>
 
 namespace algine {
 template<typename T>
 void registerArray(std::string_view name, sol::global_table &env) {
+    if (Lua::isRegistered(env, name))
+        return;
+
     using array = tulz::Array<T>;
 
     auto to_string = [](const array &self, sol::this_environment tenv) -> std::string {
@@ -53,7 +55,7 @@ void registerArray(std::string_view name, sol::global_table &env) {
 }
 
 void TulzLuaTypes::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Scriptable::getEnv(lua, tenv);
+    auto &env = Lua::getEnv(lua, tenv);
 
     registerArray<sol::object>("Array", env);
     registerArray<uint>("UnsignedArray", env);
