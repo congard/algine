@@ -2,6 +2,9 @@
 #include <algine/core/Engine.h>
 
 #include <tulz/Array.h>
+#include <tulz/Path.h>
+
+using namespace tulz;
 
 namespace algine {
 template<typename T>
@@ -54,6 +57,39 @@ void registerArray(std::string_view name, sol::global_table &env) {
     );
 }
 
+void registerPath(sol::global_table &env) {
+    if (Lua::isRegistered(env, "Path"))
+        return;
+
+    auto ctors = sol::constructors<Path(), Path(const std::string&)>();
+    auto usertype = env.new_usertype<Path>(
+            "Path",
+            sol::meta_function::to_string, &Path::toString,
+            sol::meta_function::construct, ctors,
+            sol::call_constructor, ctors);
+
+    usertype["setPath"] = &Path::setPath;
+    usertype["exists"] = &Path::exists;
+    usertype["isFile"] = &Path::isFile;
+    usertype["isDirectory"] = &Path::isDirectory;
+    usertype["isAbsolute"] = &Path::isAbsolute;
+    usertype["size"] = &Path::size;
+    usertype["toString"] = &Path::toString;
+    usertype["getPathName"] = &Path::getPathName;
+    usertype["getParentDirectory"] = &Path::getParentDirectory;
+    usertype["listChildren"] = &Path::listChildren;
+
+    // static
+    usertype["setWorkingDirectory"] = sol::overload(
+        static_cast<void (*)(const Path&)>(&Path::setWorkingDirectory),
+        static_cast<void (*)(const std::string&)>(&Path::setWorkingDirectory));
+    usertype["getWorkingDirectory"] = &Path::getWorkingDirectory;
+    usertype["getSystemPath"] = &Path::getSystemPath;
+    usertype["join"] = sol::overload(
+        static_cast<Path (*)(const Path&, const Path&)>(&Path::join),
+        static_cast<std::string (*)(const std::string&, const std::string&)>(&Path::join));
+}
+
 void TulzLuaTypes::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
     auto &env = Lua::getEnv(lua, tenv);
 
@@ -62,5 +98,7 @@ void TulzLuaTypes::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
     registerArray<int>("IntArray", env);
     registerArray<float>("FloatArray", env);
     registerArray<double>("DoubleArray", env);
+
+    registerPath(env);
 }
 } // algine
