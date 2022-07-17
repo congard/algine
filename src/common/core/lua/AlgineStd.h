@@ -9,12 +9,16 @@
 #include <algine/std/model/ModelCreator.h>
 #include <algine/std/model/Model.h>
 #include <algine/std/model/InputLayoutShapeLocations.h>
+#include <algine/std/rotator/Rotator.h>
+#include <algine/std/rotator/EulerRotator.h>
+#include <algine/std/rotator/FreeRotator.h>
 
 namespace algine {
 using AlgineStd = Lua::TypeList<
         ShapeCreator, Shape,
         ModelCreator, Model,
-        InputLayoutShapeLocations>;
+        InputLayoutShapeLocations,
+        Rotator, EulerRotator, FreeRotator>;
 }
 #else
 namespace algine {
