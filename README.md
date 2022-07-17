@@ -4,8 +4,10 @@ Algine - OpenGL 3.3+ engine written in C++
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/40d3479da92040c79c5570336aff3697)](https://www.codacy.com/manual/congard/algine?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=congard/algine&amp;utm_campaign=Badge_Grade)
 
-**Supported platforms**: Linux, Android, Windows
-<br>**Target platforms**: Linux (clang), Android
+**Supported platforms:** Linux, Android, Windows
+<br>**Target platforms:** Linux (clang), Android
+
+**Recommended toolchain:** clang + mold 
 
 [![Algine v1.6 alpha](pictures/1.png)](https://youtu.be/pYUXtRl-LTs)
 
@@ -49,8 +51,8 @@ Main goals for now (in priority order):
   - [ ] Core components (Engine, Texture2D, Framebuffer etc)
   - [ ] Widgets
   - [x] GLM classes (vec3, vec4, mat3, mat4, quat) and core functionality
-  - [ ] Replace JSON configs with Lua scripts
-  - [ ] Remove classes `Transferable` and `FileTransferable`
+  - [x] Replace JSON configs with Lua scripts
+  - [x] Remove classes `Transferable` and `FileTransferable`
 - [ ] Editor <span style="font-size:0.5em">(UI: Lua + AlgineWidgets; Core: C++)</span>
 
 ## Examples
