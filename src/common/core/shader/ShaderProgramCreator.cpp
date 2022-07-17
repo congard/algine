@@ -1,23 +1,11 @@
 #include <algine/core/shader/ShaderProgramCreator.h>
 
-#include <algine/core/JsonHelper.h>
-
 #include <iostream>
 
 #include "internal/PublicObjectTools.h"
 
 using namespace std;
-using namespace nlohmann;
 using namespace algine::internal;
-
-#define constant(name, val) constexpr char name[] = val
-
-namespace Config {
-constant(Shaders, "shaders");
-constant(Path, "path");
-constant(Dump, "dump");
-constant(Name, "name");
-}
 
 namespace algine {
 void ShaderProgramCreator::setCreators(const vector<ShaderCreator> &shaders) {
@@ -44,18 +32,6 @@ const vector<string>& ShaderProgramCreator::getShaderNames() const {
     return m_shaderNames;
 }
 
-void ShaderProgramCreator::setShaderPaths(const vector<string> &paths) {
-    m_shaderPaths = paths;
-}
-
-void ShaderProgramCreator::addShaderPath(const string &path) {
-    m_shaderPaths.emplace_back(path);
-}
-
-const vector<string>& ShaderProgramCreator::getShaderPaths() const {
-    return m_shaderPaths;
-}
-
 ShaderProgramPtr ShaderProgramCreator::get() {
     return PublicObjectTools::getPtr<ShaderProgramPtr>(this);
 }
@@ -64,8 +40,7 @@ ShaderProgramPtr ShaderProgramCreator::create() {
     ShaderProgramPtr program = make_shared<ShaderProgram>();
     program->setName(m_name);
 
-    auto processMixedShader = [&](ShaderCreator &creator)
-    {
+    auto processMixedShader = [&](ShaderCreator &creator) {
         if (creator.getAccess() == ShaderCreator::Access::Public) {
             // note that if Shader public, then ShaderProgram
             // level definitions will not be applied
@@ -100,14 +75,6 @@ ShaderProgramPtr ShaderProgramCreator::create() {
         processMixedShader(creator);
     }
 
-    for (auto &path : m_shaderPaths) {
-        ShaderCreator creator;
-        creator.setIOSystem(io());
-        creator.setWorkingDirectory(m_workingDirectory);
-        creator.importFromFile(path);
-        processMixedShader(creator);
-    }
-
     for (auto &name : m_shaderNames) {
         auto shader = Shader::byName(name);
 
@@ -122,64 +89,6 @@ ShaderProgramPtr ShaderProgramCreator::create() {
     PublicObjectTools::postCreateAccessOp("ShaderProgram", this, program);
 
     return program;
-}
-
-void ShaderProgramCreator::import(const JsonHelper &jsonHelper) {
-    using namespace Config;
-
-    const json &shaders = jsonHelper.json[Shaders];
-
-    // load shaders
-    for (const auto & shader : shaders) {
-         if (shader.contains(Dump)) {
-            ShaderCreator shaderCreator;
-            shaderCreator.setWorkingDirectory(m_workingDirectory);
-            shaderCreator.import(shader[Dump]);
-            m_shaders.emplace_back(shaderCreator);
-        } else if (shader.contains(Path)) {
-             m_shaderPaths.emplace_back(shader[Path]);
-        } else if (shader.contains(Name)) {
-            m_shaderNames.emplace_back(shader[Name]);
-        } else {
-            throw invalid_argument("Unknown Shader source:\n" + shader.dump(4));
-        }
-    }
-
-    Creator::import(jsonHelper);
-    ShaderDefinitionGenerator::import(jsonHelper);
-}
-
-JsonHelper ShaderProgramCreator::dump() {
-    using namespace Config;
-
-    json config;
-
-    auto emplaceData = [&](const string &key, const json &value)
-    {
-        json kv;
-        kv[key] = value;
-        config[Shaders].emplace_back(kv);
-    };
-
-    // write shaders
-    for (auto & creator : m_shaders)
-        emplaceData(Dump, creator.dump().json);
-
-    for (auto & path : m_shaderPaths)
-        emplaceData(Path, path);
-
-    for (auto & name : m_shaderNames)
-        emplaceData(Name, name);
-
-    JsonHelper result(config);
-    result.append(Creator::dump());
-    result.append(ShaderDefinitionGenerator::dump());
-
-    return result;
-}
-
-void ShaderProgramCreator::importFromFile(const std::string &path) {
-    Creator::importFromFile(path);
 }
 
 void ShaderProgramCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {

@@ -18,7 +18,9 @@ namespace algine {
 class ShaderCreator: public ShaderDefinitionGenerator, public Creator {
 public:
     ShaderCreator();
+    ShaderCreator(Shader::Type type, const std::string &path);
     explicit ShaderCreator(Shader::Type type);
+    explicit ShaderCreator(const std::string &path);
 
     void setType(Shader::Type type);
     Shader::Type getType() const;
@@ -44,13 +46,6 @@ public:
     ShaderPtr get();
     ShaderPtr create();
 
-    void dumperUseSources(bool use);
-
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
-
-    void importFromFile(const std::string &path) override;
-
     static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 protected:
@@ -73,7 +68,6 @@ private:
     std::string m_source;
     std::string m_gen;
     Shader::Type m_type;
-    bool m_dumperUseSources;
 
 private:
     static std::vector<std::string> m_globalIncludePaths;

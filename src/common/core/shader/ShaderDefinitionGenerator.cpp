@@ -1,17 +1,6 @@
 #include <algine/core/shader/ShaderDefinitionGenerator.h>
 
-#include <algine/core/JsonHelper.h>
-
 using namespace std;
-using namespace nlohmann;
-
-#define constant(name, val) constexpr char name[] = val
-
-namespace Config {
-constant(Definitions, "definitions");
-constant(Params, "params");
-}
-
 namespace algine {
 inline int getMacroIndexImpl(const vector<ShaderDefinitionGenerator::Definition> &definitions,
                              const std::string &macro)
@@ -67,46 +56,6 @@ const vector<ShaderDefinitionGenerator::Definition>& ShaderDefinitionGenerator::
     return m_definitions;
 }
 
-void ShaderDefinitionGenerator::import(const JsonHelper &jsonHelper) {
-    using namespace Config;
-
-    const json &config = jsonHelper.json;
-
-    // load definitions
-    if (config.contains(Definitions)) {
-        const json &defs = config[Definitions];
-
-        for (const auto &def : defs.items()) {
-            m_definitions.emplace_back(def.key(), def.value());
-        }
-    }
-
-    // load params
-    if (config.contains(Params)) {
-        const json &params = config[Params];
-
-        for (const auto &param : params) {
-            m_definitions.emplace_back(param, "");
-        }
-    }
-}
-
-JsonHelper ShaderDefinitionGenerator::dump() {
-    using namespace Config;
-
-    json config;
-
-    for (const auto & def : m_definitions) {
-        if (def.second.empty()) {
-            config[Params].emplace_back(def.first); // if value empty - it is param, not definition
-        } else {
-            config[Definitions][def.first] = def.second;
-        }
-    }
-
-    return config;
-}
-
 void ShaderDefinitionGenerator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
     auto &env = getEnv(lua, tenv);
 
@@ -118,11 +67,14 @@ void ShaderDefinitionGenerator::registerLuaUsertype(Lua *lua, sol::global_table 
     auto usertype = env.new_usertype<ShaderDefinitionGenerator>(
             "ShaderDefinitionGenerator", sol::base_classes, sol::bases<Scriptable>());
 
-    Lua::new_property(usertype, "definitions", "getDefinitions", "setDefinitions",
+    Lua::new_property(usertype, "definitions",
         &ShaderDefinitionGenerator::getDefinitions,
         [](const sol::object &self, vector<Definition> defs) { self.as<ShaderDefinitionGenerator>().setDefinitions(defs); });
 
-    usertype["define"] = static_cast<void (ShaderDefinitionGenerator::*)(const string&, const string&)>(&ShaderDefinitionGenerator::define);
+    usertype["define"] = sol::overload(
+        static_cast<void (ShaderDefinitionGenerator::*)(const string&, const string&)>(&ShaderDefinitionGenerator::define),
+        static_cast<void (ShaderDefinitionGenerator::*)(const string&, size)>(&ShaderDefinitionGenerator::define),
+        [](ShaderDefinitionGenerator &self, const string &macro) { self.define(macro); });
     usertype["removeDefinition"] = &ShaderDefinitionGenerator::removeDefinition;
     usertype["resetDefinitions"] = &ShaderDefinitionGenerator::resetDefinitions;
     usertype["appendDefinitions"] = [](const sol::object &self, vector<Definition> defs) { self.as<ShaderDefinitionGenerator>().appendDefinitions(defs); };

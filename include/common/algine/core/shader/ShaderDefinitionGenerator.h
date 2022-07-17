@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace algine {
-class ShaderDefinitionGenerator: public Transferable, public virtual Scriptable {
+class ShaderDefinitionGenerator: public virtual Scriptable {
 public:
     typedef Pair<std::string, std::string> Definition;
 
@@ -24,9 +24,6 @@ public:
     void appendDefinitions(const std::vector<Definition> &definitions);
 
     const std::vector<Definition>& getDefinitions() const;
-
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
 
     static void registerLuaUsertype(Lua *lua, sol::global_table *tenv = nullptr);
 

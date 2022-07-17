@@ -1,5 +1,4 @@
 #include <algine/core/shader/ShaderCreator.h>
-#include <algine/core/JsonHelper.h>
 #include <algine/core/Engine.h>
 #include <algine/core/log/Log.h>
 
@@ -12,34 +11,18 @@
 #include "GLSLModules.h"
 #include "GLSLShaders.h"
 
-using namespace nlohmann;
 using namespace std;
 using namespace tulz;
 using namespace tulz::StringUtils;
 using namespace algine::internal;
 
-#define constant(name, val) constexpr char name[] = val
-
-// ALP means Algine Preprocessor
+// Algine Preprocessor
 namespace ALPKeywords {
-constant(Include, "include");
-constant(Link, "link");
+constexpr auto Include = "include";
+constexpr auto Link = "link";
 }
 
-namespace Config {
-constant(Type, "type");
-
-constant(Vertex, "vertex");
-constant(Fragment, "fragment");
-constant(Geometry, "geometry");
-
-constant(Source, "source");
-constant(Path, "path");
-
-constant(IncludePaths, "includePaths");
-}
-
-constant(TAG, "Algine ShaderCreator");
+constexpr auto TAG = "Algine ShaderCreator";
 
 namespace algine {
 template<typename T>
@@ -58,13 +41,21 @@ inline void removeElement(vector<T> &v, const T &e) {
 
 vector<string> ShaderCreator::m_globalIncludePaths;
 
-ShaderCreator::ShaderCreator()
-    : m_type(),
-      m_dumperUseSources(false) {}
+ShaderCreator::ShaderCreator(): m_type() {}
 
-ShaderCreator::ShaderCreator(Shader::Type type)
-    : m_type(type),
-      m_dumperUseSources(false) {}
+ShaderCreator::ShaderCreator(Shader::Type type, const std::string &path)
+    : m_type(type)
+{
+    if (string_view(path.c_str() + path.size() - 3) == "lua") {
+        execute(path);
+    } else {
+        setPath(path);
+    }
+}
+
+ShaderCreator::ShaderCreator(Shader::Type type): m_type(type) {}
+
+ShaderCreator::ShaderCreator(const std::string &path): ShaderCreator({}, path) {}
 
 void ShaderCreator::setType(Shader::Type type) {
     m_type = type;
@@ -220,82 +211,6 @@ ShaderPtr ShaderCreator::create() {
     return shader;
 }
 
-void ShaderCreator::dumperUseSources(bool use) {
-    m_dumperUseSources = use;
-}
-
-void ShaderCreator::import(const JsonHelper &jsonHelper) {
-    using namespace Config;
-
-    const json &config = jsonHelper.json;
-
-    // load shader path or source
-    if (config.contains(Source)) {
-        setSource(config[Source]);
-    } else if (config.contains(Config::Path)) {
-        setPath(config[Config::Path]);
-    } else {
-        throw runtime_error("ShaderCreator: broken file:\n" + jsonHelper.toString());
-    }
-
-    // load include paths
-    if (config.contains(IncludePaths)) {
-        const json &includeArray = config[IncludePaths];
-
-        for (const auto & i : includeArray) {
-            addIncludePath(i);
-        }
-    }
-
-    // load type
-    m_type = map<string, Shader::Type> {
-        {Vertex, Shader::Type::Vertex},
-        {Fragment, Shader::Type::Fragment},
-        {Geometry, Shader::Type::Geometry}
-    } [config[Type]];
-
-    Creator::import(jsonHelper);
-    ShaderDefinitionGenerator::import(jsonHelper);
-}
-
-JsonHelper ShaderCreator::dump() {
-    using namespace Config;
-
-    json config;
-
-    auto setString = [&](const string &key, const string &value) {
-        if (!value.empty()) {
-            config[key] = value;
-        }
-    };
-
-    // write source or path
-    if (m_dumperUseSources) {
-        cfgSource();
-        setString(Source, m_source);
-    } else {
-        setString(Config::Path, m_path);
-    }
-
-    // write include paths
-    if (!m_includePaths.empty())
-        config[IncludePaths] = m_includePaths;
-
-    // write type
-    // note: Shader must keep types order
-    config[Type] = vector<string> {Vertex, Fragment, Geometry} [static_cast<int>(m_type)];
-
-    JsonHelper result(config);
-    result.append(Creator::dump());
-    result.append(ShaderDefinitionGenerator::dump());
-
-    return result;
-}
-
-void ShaderCreator::importFromFile(const string &path) {
-    Creator::importFromFile(path);
-}
-
 void ShaderCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
     auto &env = getEnv(lua, tenv);
 
@@ -304,19 +219,20 @@ void ShaderCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
 
     lua->registerUsertype<Shader, Creator, ShaderDefinitionGenerator>(tenv);
 
-    auto ctors = sol::constructors<ShaderCreator(), ShaderCreator(Shader::Type)>();
+    auto ctors = sol::constructors<ShaderCreator(), ShaderCreator(Shader::Type),
+        ShaderCreator(Shader::Type, const string&), ShaderCreator(const string&)>();
     auto usertype = env.new_usertype<ShaderCreator>(
             "ShaderCreator",
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors,
             sol::base_classes, sol::bases<Scriptable, IOProvider, FileTransferable, Creator, ShaderDefinitionGenerator>());
 
-    Lua::new_property(usertype, "type", "getType", "setType", &ShaderCreator::getType, &ShaderCreator::setType);
-    Lua::new_property(usertype, "path", "getPath", "setPath", &ShaderCreator::getPath, &ShaderCreator::setPath);
-    Lua::new_property(usertype, "includePaths", "getIncludePaths", "setIncludePaths",
+    Lua::new_property(usertype, "type", &ShaderCreator::getType, &ShaderCreator::setType);
+    Lua::new_property(usertype, "path", &ShaderCreator::getPath, &ShaderCreator::setPath);
+    Lua::new_property(usertype, "includePaths",
         &ShaderCreator::getIncludePaths,
         [](ShaderCreator &self, vector<string> paths) { self.setIncludePaths(paths); });
-    Lua::new_property(usertype, "source", "getSource", "setSource", &ShaderCreator::getSource, &ShaderCreator::setSource);
+    Lua::new_property(usertype, "source", &ShaderCreator::getSource, &ShaderCreator::setSource);
 
     usertype["addIncludePaths"] = [](ShaderCreator &self, vector<string> paths) { self.addIncludePaths(paths); };
     usertype["addIncludePath"] = &ShaderCreator::addIncludePath;

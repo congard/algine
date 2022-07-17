@@ -16,18 +16,8 @@ public:
     void addShaderName(const std::string &name);
     const std::vector<std::string>& getShaderNames() const;
 
-    // TODO: deprecated, will be removed in the future
-    void setShaderPaths(const std::vector<std::string> &paths);
-    void addShaderPath(const std::string &path);
-    const std::vector<std::string>& getShaderPaths() const;
-
     ShaderProgramPtr get();
     ShaderProgramPtr create();
-
-    void import(const JsonHelper &jsonHelper) override;
-    JsonHelper dump() override;
-
-    void importFromFile(const std::string &path) override;
 
     static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
@@ -36,7 +26,7 @@ protected:
 
 private:
     std::vector<ShaderCreator> m_shaders;
-    std::vector<std::string> m_shaderNames, m_shaderPaths;
+    std::vector<std::string> m_shaderNames;
 };
 }
 
