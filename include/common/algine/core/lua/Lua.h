@@ -1,12 +1,13 @@
 #ifndef ALGINE_LUA_H
 #define ALGINE_LUA_H
 
+#include <algine/core/io/IOProvider.h>
 #include <sol/state.hpp>
 
 #include <memory>
 
 namespace algine {
-class Lua {
+class Lua: public IOProvider {
 public:
     template<typename... Types>
     struct TypeList {};

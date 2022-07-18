@@ -45,14 +45,34 @@ print = function(...)
     io.write('\n')
 end
 
-local lua_require = require
+local loadedScripts = {}
 
+-- Custom require that uses IOSystem to load files
 require = function(name)
+    local function loadModule(key, loader)
+        if loadedScripts[key] == nil then
+            -- loader can return nil, so we must be sure that loadedScripts[key] is not nil
+            loadedScripts[key] = {loader()}
+        end
+
+        return loadedScripts[key][1]
+    end
+
     local algineStrLen = string.len("algine")
 
     if string.sub(name, 1, algineStrLen) == "algine" then
-        return algine_require(string.sub(name, algineStrLen + 2))
+        return loadModule(name, function() algine_require(string.sub(name, algineStrLen + 2)) end)
     else
-        return lua_require(name)
+        for path in string.gmatch(package.path, "[^;]+") do
+            path = path:gsub("?", name)
+
+            if state:exists(path) then
+                return loadModule(path, function() load(state:readStr(path))() end)
+            end
+        end
+
+        state:printErr(("Module %s was not found in %s"):format(name, package.path))
     end
+
+    return nil
 end
