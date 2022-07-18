@@ -26,10 +26,11 @@ protected:
 
     template<typename T>
     void exec_t(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+        lua = lua ? lua : &Engine::getLua();
         auto &env = getEnv(lua, tenv);
         T::registerLuaUsertype(lua, tenv);
 
-        auto &state = lua ? *lua->state() : *Engine::getLua().state();
+        auto &state = *lua->state();
 
         auto printErr = [&](sol::error &error) {
             if (!path) {

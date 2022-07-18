@@ -65,7 +65,7 @@ void ShaderDefinitionGenerator::registerLuaUsertype(Lua *lua, sol::global_table 
     Scriptable::registerLuaUsertype(lua, tenv);
 
     auto usertype = env.new_usertype<ShaderDefinitionGenerator>(
-            "ShaderDefinitionGenerator", sol::base_classes, sol::bases<Scriptable>());
+            "ShaderDefinitionGenerator", sol::base_classes, sol::bases<IOProvider, Scriptable>());
 
     Lua::new_property(usertype, "definitions",
         &ShaderDefinitionGenerator::getDefinitions,

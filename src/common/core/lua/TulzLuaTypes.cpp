@@ -14,15 +14,14 @@ void registerArray(std::string_view name, sol::global_table &env) {
 
     using array = tulz::Array<T>;
 
-    auto to_string = [](const array &self, sol::this_environment tenv) -> std::string {
+    auto to_string = [env](const array &self) -> std::string {
         if (self.empty())
             return "[]";
 
-        auto env = *tenv.env;
         std::string result = "[";
 
         if constexpr(std::is_same_v<T, sol::object>) {
-            sol::function tostring = env["tostring"];
+            sol::function tostring = sol::environment(env)["tostring"];
 
             for (int i = 0; i < self.size(); ++i) {
                 const sol::object &obj = self[i];
