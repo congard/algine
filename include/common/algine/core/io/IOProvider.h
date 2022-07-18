@@ -2,11 +2,13 @@
 #define ALGINE_IOPROVIDER_H
 
 #include <algine/core/io/IOSystem.h>
-#include <algine/core/lua/Lua.h>
 
+#include <sol/forward.hpp>
 #include <memory>
 
 namespace algine {
+class Lua;
+
 class IOProvider {
 public:
     IOProvider();
@@ -18,6 +20,7 @@ public:
 
     void writeStr(const std::string &path, const std::string &str) const;
     std::string readStr(const std::string &path) const;
+    bool exists(const std::string &path) const;
 
     static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
