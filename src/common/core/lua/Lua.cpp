@@ -11,14 +11,46 @@
 #include "CoreLua.h"
 
 namespace algine {
+Lua::Locker::Locker(const std::unique_ptr<std::recursive_mutex> &mutex): m_mutex(mutex.get()) {
+    if (m_mutex) {
+        m_mutex->lock();
+    }
+}
+
+Lua::Locker::Locker(const Lua *lua): Locker(lua ? lua->getMutex() : Engine::getLua().getMutex()) {}
+
+Lua::Locker::~Locker() {
+    if (m_mutex) {
+        m_mutex->unlock();
+    }
+}
+
 void Lua::init() {
+    Locker locker(this);
     m_lua = std::make_unique<sol::state>();
     m_lua->open_libraries();
     initEnvironment(getGlobalEnvironment());
 }
 
 bool Lua::isInitialized() const {
+    Locker locker(this);
     return m_lua != nullptr;
+}
+
+void Lua::setThreadSafety(bool enabled) {
+    if (enabled && !m_mutex) {
+        m_mutex = std::make_unique<std::recursive_mutex>();
+    } else if (!enabled) {
+        m_mutex.reset();
+    }
+}
+
+bool Lua::isThreadSafety() const {
+    return m_mutex.get();
+}
+
+const std::unique_ptr<std::recursive_mutex>& Lua::getMutex() const {
+    return m_mutex;
 }
 
 const std::unique_ptr<sol::state>& Lua::state() const {
@@ -26,6 +58,7 @@ const std::unique_ptr<sol::state>& Lua::state() const {
 }
 
 sol::global_table Lua::createEnvironment() {
+    Locker locker(this);
     sol::environment env(*m_lua, sol::create);
     sol::global_table tenv = env;
     initEnvironment(tenv);
@@ -33,6 +66,7 @@ sol::global_table Lua::createEnvironment() {
 }
 
 sol::global_table Lua::createEnvironment(const sol::global_table &parent) {
+    Locker locker(this);
     return sol::environment(*m_lua, sol::create, sol::environment(parent));
 }
 

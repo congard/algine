@@ -5,6 +5,7 @@
 #include <sol/state.hpp>
 
 #include <memory>
+#include <mutex>
 
 namespace algine {
 class Lua: public IOProvider {
@@ -12,9 +13,28 @@ public:
     template<typename... Types>
     struct TypeList {};
 
+    class Locker {
+    public:
+        explicit Locker(const std::unique_ptr<std::recursive_mutex> &mutex);
+        explicit Locker(const Lua *lua);
+        ~Locker();
+
+        Locker(const Locker&) = delete;
+        Locker(Locker&&) = delete;
+        Locker& operator=(const Locker&) = delete;
+        Locker& operator=(Locker&&) = delete;
+
+    private:
+        std::recursive_mutex *m_mutex;
+    };
+
 public:
     void init();
     bool isInitialized() const;
+
+    void setThreadSafety(bool enabled);
+    bool isThreadSafety() const;
+    const std::unique_ptr<std::recursive_mutex>& getMutex() const;
 
     const std::unique_ptr<sol::state>& state() const;
 
@@ -44,6 +64,7 @@ private:
 
 private:
     std::unique_ptr<sol::state> m_lua {nullptr};
+    std::unique_ptr<std::recursive_mutex> m_mutex {nullptr};
 };
 
 template<typename T, typename G, typename S>

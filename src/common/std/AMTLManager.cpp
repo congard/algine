@@ -78,6 +78,8 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
 
     lua = lua ? lua : &Engine::getLua();
 
+    Lua::Locker locker(lua);
+
     auto &state = *lua->state();
     auto tenv = lua->createEnvironment(lua->getGlobalEnvironment());
     sol::environment env(tenv);
