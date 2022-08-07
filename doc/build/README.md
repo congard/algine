@@ -8,6 +8,21 @@ Some dependencies are already included into codebase, but some of them you need 
 
 `git submodule update --init --recursive`
 
+## Options
+
+| Option                    | Description                           | Required  |
+|---------------------------|---------------------------------------|-----------|
+| ALGINE_SECURE_OPERATIONS  | enables Algine SOP                    | No        |
+| ALGINE_SOP_LEVEL          | sets SOP level                        | No        |
+| ALGINE_LUA_PATH           | path to Lua interpreter executable    | No        |
+| ALGINE_SOLGEN_PATH        | path to solgen executable             | No        |
+| ALGINE_SOLGEN_ARGS        | additional solgen args                | No        |
+| ALGINE_SOLGEN_CLANG_ARGS  | additional solgen clang args          | No        |
+| ALGINE_SOLGEN_INPUT_CORE  | relative paths to core files          | No        |
+| ALGINE_SOLGEN_INPUT_STD   | relative paths to std files           | No        |
+| ALGINE_SOLGEN_CORE_CLASSES| list of core classes                  | No        |
+| ALGINE_SOLGEN_STD_CLASSES | list of std classes                   | No        |
+
 ## Platform-specific steps
 
 * [Linux](Linux.md)
