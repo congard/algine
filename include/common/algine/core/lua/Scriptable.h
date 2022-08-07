@@ -16,7 +16,8 @@ public:
     void setRootDir(std::string_view rootDir);
     const std::string& getRootDir() const;
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv = nullptr);
+protected:
+    Scriptable() = default;
 
 protected:
     static inline auto& getEnv(Lua *lua, sol::global_table *tenv) { return Lua::getEnv(lua, tenv); }

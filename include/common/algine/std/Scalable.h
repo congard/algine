@@ -26,8 +26,6 @@ public:
     const glm::vec3& getScale() const;
     const glm::mat4& getScalingMatrix() const;
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
-
 public: // TODO: make private
     glm::vec3 m_scale;
     glm::mat4 m_scaling;

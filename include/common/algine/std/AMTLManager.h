@@ -11,15 +11,13 @@ public:
     void setMaterials(const std::vector<AMTLMaterialManager> &materials);
     AMTLMaterialManager& addMaterial(const AMTLMaterialManager &material, const std::string &name = {});
 
-    std::vector<AMTLMaterialManager>& getMaterials();
+    const std::vector<AMTLMaterialManager>& getMaterials();
     AMTLMaterialManager& getMaterial(std::string_view name);
 
     bool isMaterialExists(std::string_view name) const;
 
     void loadFile(std::string_view path, Lua *lua = nullptr);
     void loadScript(std::string_view script, Lua *lua = nullptr);
-
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
 
 protected:
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;

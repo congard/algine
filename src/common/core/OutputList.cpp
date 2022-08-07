@@ -85,45 +85,6 @@ const Attachment* OutputList::data() const {
     return m_list.data();
 }
 
-void OutputList::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "OutputList"))
-        return;
-
-    lua->registerUsertype<Scriptable>(tenv);
-
-    auto ctors = sol::constructors<OutputList()>();
-    auto usertype = env.new_usertype<OutputList>(
-            "OutputList",
-            sol::meta_function::length, &OutputList::size,
-            sol::meta_function::construct, ctors,
-            sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable>());
-
-    usertype["set"] = sol::overload(
-        [](OutputList &self, std::vector<Attachment> list) { self.set(list); },
-        [](OutputList &self, const sol::table &list) {
-            self.removeAll();
-            for (const auto &p : list) self.add(p.first.as<Index>(), p.second.as<Attachment>());
-        }
-    );
-    usertype["add"] = &OutputList::add;
-    usertype["addColor"] = sol::overload(
-        static_cast<void (OutputList::*)(Index, Index)>(&OutputList::addColor),
-        static_cast<void (OutputList::*)(Index)>(&OutputList::addColor)
-    );
-    usertype["remove"] = sol::overload(
-        &OutputList::remove,
-        [](OutputList &self, Index index) { self.remove(index); }
-    );
-    usertype["removeAll"] = &OutputList::removeAll;
-    usertype["optimize"] = &OutputList::optimize;
-    usertype["size"] = &OutputList::size;
-    usertype["get"] = &OutputList::get;
-    usertype["data"] = &OutputList::data;
-}
-
 void OutputList::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
     exec_t<OutputList>(s, path, lua, tenv);
 }

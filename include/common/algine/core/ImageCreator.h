@@ -18,8 +18,6 @@ public:
     uint getWidth() const;
     uint getHeight() const;
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
-
 protected:
     uint m_format;
     uint m_width;

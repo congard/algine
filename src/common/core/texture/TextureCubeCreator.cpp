@@ -66,30 +66,6 @@ TextureCubePtr TextureCubeCreator::create() {
     return texture;
 }
 
-void TextureCubeCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "TextureCubeCreator"))
-        return;
-
-    lua->registerUsertype<TextureCreator, TextureCube>(tenv);
-
-    auto ctors = sol::constructors<TextureCubeCreator()>();
-    auto usertype = env.new_usertype<TextureCubeCreator>(
-            "TextureCubeCreator",
-            sol::meta_function::construct, ctors,
-            sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator, ImageCreator, TextureCreator>());
-
-    usertype["get"] = &TextureCubeCreator::get;
-    usertype["create"] = &TextureCubeCreator::create;
-    usertype["setPath"] = &TextureCubeCreator::setPath;
-    usertype["getPath"] = &TextureCubeCreator::getPath;
-
-    Lua::new_property(usertype, "paths", &TextureCubeCreator::getPaths,
-        [](TextureCubeCreator &self, std::map<TextureCube::Face, std::string> paths) { self.setPaths(paths); });
-}
-
 void TextureCubeCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
     exec_t<TextureCubeCreator>(s, path, lua, tenv);
 }

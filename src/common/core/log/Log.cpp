@@ -64,26 +64,4 @@ void Log::error(const std::string &tag, std::string_view str) {
     std::lock_guard lockGuard(m_mutex);
     LOG_ERROR(LOG_ERROR_TAG(tag), "%s", str.data());
 }
-
-void Log::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Lua::getEnv(lua, tenv);
-
-    if (Lua::isRegistered(env, "Log"))
-        return;
-
-    auto usertype = env.new_usertype<Log>(
-            "Log",
-            sol::call_constructor, sol::no_constructor,
-            sol::meta_function::construct, sol::no_constructor);
-
-    usertype["info"] = sol::overload(
-        static_cast<void (*)(const std::string&, std::string_view)>(&Log::info),
-        [](std::string_view str) { Log::info("AlgineLua", str); }
-    );
-
-    usertype["error"] = sol::overload(
-        static_cast<void (*)(const std::string&, std::string_view)>(&Log::error),
-        [](std::string_view str) { Log::error("AlgineLua", str); }
-    );
-}
 }

@@ -282,63 +282,6 @@ uint ShaderProgram::getId() const {
     return m_id;
 }
 
-void ShaderProgram::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "ShaderProgram"))
-        return;
-
-    lua->registerUsertype<Shader>(tenv);
-
-    auto factories = sol::factories([]() { return PtrMaker::make<ShaderProgram>(); });
-    auto usertype = env.new_usertype<ShaderProgram>(
-            "ShaderProgram",
-            sol::call_constructor, factories,
-            sol::meta_function::construct, factories,
-            sol::base_classes, sol::bases<Object>());
-
-    usertype["fromSource"] = [](ShaderProgram &self, const string &v, const string &f, const sol::object &g) {
-        self.fromSource(v, f, g.is<sol::nil_t>() ? "" : g.as<string>());
-    };
-
-    usertype["fromFile"] = [](ShaderProgram &self, const string &v, const string &f, const sol::object &g) {
-        self.fromFile(v, f, g.is<sol::nil_t>() ? "" : g.as<string>());
-    };
-
-    usertype["attachShader"] = &ShaderProgram::attachShader;
-    usertype["link"] = &ShaderProgram::link;
-    usertype["loadUniformLocation"] = &ShaderProgram::loadUniformLocation;
-    usertype["loadAttribLocation"] = &ShaderProgram::loadAttribLocation;
-    usertype["loadUniformLocations"] = [](ShaderProgram &self, vector<string> names) { self.loadUniformLocations(names); };
-    usertype["loadAttribLocations"] = [](ShaderProgram &self, vector<string> names) { self.loadAttribLocations(names); };
-    usertype["loadActiveLocations"] = &ShaderProgram::loadActiveLocations;
-    usertype["getLocation"] = &ShaderProgram::getLocation;
-    usertype["bind"] = &ShaderProgram::bind;
-    usertype["unbind"] = &ShaderProgram::unbind;
-    usertype["getId"] = &ShaderProgram::getId;
-
-#define usertype_bind_func(name, ...) \
-usertype[#name] = sol::overload( \
-    static_cast<void (ShaderProgram::*)(const std::string&, __VA_ARGS__)>(&ShaderProgram::name), \
-    static_cast<void (*)(int, __VA_ARGS__)>(&ShaderProgram::name))
-
-    usertype_bind_func(setBool, bool);
-    usertype_bind_func(setInt, int);
-    usertype_bind_func(setUint, uint);
-    usertype_bind_func(setFloat, float);
-    usertype_bind_func(setVec2, const glm::vec2&);
-    usertype_bind_func(setVec3, const glm::vec3&);
-    usertype_bind_func(setVec4, const glm::vec4&);
-    usertype_bind_func(setMat3, const glm::mat3&);
-    usertype_bind_func(setMat4, const glm::mat4&);
-
-#undef usertype_bind_func
-
-    // static
-    usertype["getByName"] = &ShaderProgram::getByName;
-    usertype["byName"] = &ShaderProgram::byName;
-}
-
 ShaderProgramPtr ShaderProgram::getByName(string_view name) {
     return PublicObjectTools::getByName<ShaderProgramPtr>(name);
 }

@@ -32,23 +32,4 @@ uint ImageCreator::getWidth() const {
 uint ImageCreator::getHeight() const {
     return m_height;
 }
-
-void ImageCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "ImageCreator"))
-        return;
-
-    lua->registerUsertype<Creator, Texture>(tenv);
-
-    auto usertype = env.new_usertype<ImageCreator>(
-            "ImageCreator",
-            sol::meta_function::construct, sol::no_constructor,
-            sol::call_constructor, sol::no_constructor,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator>());
-
-    Lua::new_property(usertype, "format", &ImageCreator::getFormat, &ImageCreator::setFormat);
-    Lua::new_property(usertype, "width", &ImageCreator::getWidth, &ImageCreator::setWidth);
-    Lua::new_property(usertype, "height", &ImageCreator::getHeight, &ImageCreator::setHeight);
-}
 }

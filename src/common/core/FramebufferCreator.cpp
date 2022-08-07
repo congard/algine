@@ -110,48 +110,6 @@ FramebufferPtr FramebufferCreator::create() {
     return framebuffer;
 }
 
-template<typename T>
-void registerAttachments(sol::table &table, std::string_view name) {
-    auto ctors = sol::constructors<T()>();
-    auto usertype = table.new_usertype<T>(
-            name,
-            sol::meta_function::construct, ctors,
-            sol::call_constructor, ctors);
-
-    usertype["addCreator"] = &T::addCreator;
-    usertype["addName"] = &T::addName;
-}
-
-void FramebufferCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "FramebufferCreator"))
-        return;
-
-    lua->registerUsertype<Creator, Framebuffer>(tenv);
-
-    auto ctors = sol::constructors<FramebufferCreator()>();
-    auto usertype = env.new_usertype<FramebufferCreator>(
-            "FramebufferCreator",
-            sol::meta_function::construct, ctors,
-            sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator>());
-
-    usertype["setOutputLists"] = [](FramebufferCreator &self, std::vector<OutputList> lists) { self.setOutputLists(lists); };
-    usertype["addOutputList"] = &FramebufferCreator::addOutputList;
-    usertype["getOutputLists"] = &FramebufferCreator::getOutputLists;
-    usertype["renderbufferAttachments"] = &FramebufferCreator::renderbufferAttachments;
-    usertype["texture2DAttachments"] = &FramebufferCreator::texture2DAttachments;
-    usertype["textureCubeAttachments"] = &FramebufferCreator::textureCubeAttachments;
-    usertype["get"] = &FramebufferCreator::get;
-    usertype["create"] = &FramebufferCreator::create;
-
-    sol::table usertypeTable = env["FramebufferCreator"].get<sol::table>();
-    registerAttachments<RenderbufferAttachments>(usertypeTable, "RenderbufferAttachments");
-    registerAttachments<Texture2DAttachments>(usertypeTable, "Texture2DAttachments");
-    registerAttachments<TextureCubeAttachments>(usertypeTable, "TextureCubeAttachments");
-}
-
 void FramebufferCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
     exec_t<FramebufferCreator>(s, path, lua, tenv);
 }

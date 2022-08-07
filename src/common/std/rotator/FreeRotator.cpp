@@ -25,17 +25,4 @@ void FreeRotator::changeRotation(const vec3 &dRotate) {
     setYaw(dRotate.y);
     setRoll(dRotate.z);
 }
-
-void FreeRotator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Lua::getEnv(lua, tenv);
-
-    if (Lua::isRegistered(env, "FreeRotator"))
-        return;
-
-    auto usertype = env.new_usertype<FreeRotator>(
-            "FreeRotator",
-            sol::meta_function::construct, sol::default_constructor,
-            sol::call_constructor, sol::default_constructor,
-            sol::base_classes, sol::bases<Rotator>());
-}
 }

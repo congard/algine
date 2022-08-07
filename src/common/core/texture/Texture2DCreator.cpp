@@ -58,27 +58,6 @@ Texture2DPtr Texture2DCreator::create() {
     return texture;
 }
 
-void Texture2DCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "Texture2DCreator"))
-        return;
-
-    lua->registerUsertype<TextureCreator, Texture2D>(tenv);
-
-    auto ctors = sol::constructors<Texture2DCreator()>();
-    auto usertype = env.new_usertype<Texture2DCreator>(
-            "Texture2DCreator",
-            sol::meta_function::construct, ctors,
-            sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator, ImageCreator, TextureCreator>());
-
-    usertype["get"] = &Texture2DCreator::get;
-    usertype["create"] = &Texture2DCreator::create;
-
-    Lua::new_property(usertype, "path", &Texture2DCreator::getPath, &Texture2DCreator::setPath);
-}
-
 void Texture2DCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
     exec_t<Texture2DCreator>(s, path, lua, tenv);
 }

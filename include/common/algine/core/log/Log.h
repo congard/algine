@@ -6,8 +6,6 @@
 #include <mutex>
 
 namespace algine {
-class Lua;
-
 class Log {
 public:
     static Logger info(const std::string &tag = "Algine");
@@ -16,7 +14,8 @@ public:
     static void info(const std::string &tag, std::string_view str);
     static void error(const std::string &tag, std::string_view str);
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
+private:
+    Log() = default;
 
 private:
     class InputEndListener: public Logger::InputEndListener {

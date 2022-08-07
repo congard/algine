@@ -21,24 +21,4 @@ const string& Creator::getName() const {
 Creator::Access Creator::getAccess() const {
     return m_access;
 }
-
-void Creator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "Creator"))
-        return;
-
-    lua->registerUsertype<Scriptable>(tenv);
-
-    auto usertype = env.new_usertype<Creator>(
-            "Creator", sol::base_classes, sol::bases<Scriptable, IOProvider>());
-
-    Lua::new_property(usertype, "name", &Creator::getName, &Creator::setName);
-    Lua::new_property(usertype, "access", &Creator::getAccess, &Creator::setAccess);
-
-    env["Creator"].get<sol::table>().new_enum(
-        "Access",
-        "Private", Access::Private,
-        "Public", Access::Public);
-}
 }

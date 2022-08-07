@@ -9,7 +9,6 @@
 #include "internal/SOP.h"
 #include "internal/SOPConstants.h"
 
-#include "texture/TexturePrivateTools.h"
 #include "internal/PublicObjectTools.h"
 
 using namespace std;
@@ -277,83 +276,5 @@ FramebufferPtr Framebuffer::getByName(const string &name) {
 
 Framebuffer* Framebuffer::byName(const string &name) {
     return PublicObjectTools::byName<Framebuffer>(name);
-}
-
-void Framebuffer::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "Framebuffer"))
-        return;
-
-    lua->registerUsertype<Object>(tenv);
-
-    auto factories = sol::factories([] { return PtrMaker::make<Framebuffer>(); });
-    auto usertype = env.new_usertype<Framebuffer>(
-            "Framebuffer",
-            sol::meta_function::construct, factories,
-            sol::call_constructor, factories,
-            sol::base_classes, sol::bases<Object>());
-
-    usertype["bind"] = &Framebuffer::bind;
-    usertype["unbind"] = &Framebuffer::unbind;
-    usertype["attachTexture"] = sol::overload(
-        static_cast<void (Framebuffer::*)(const Texture2DPtr&, Attachment)>(&Framebuffer::attachTexture),
-        static_cast<void (Framebuffer::*)(const TextureCubePtr&, Attachment)>(&Framebuffer::attachTexture)
-    );
-    usertype["attachRenderbuffer"] = &Framebuffer::attachRenderbuffer;
-    usertype["resizeAttachments"] = &Framebuffer::resizeAttachments;
-    usertype["setActiveOutputList"] = &Framebuffer::setActiveOutputList;
-    usertype["setOutputLists"] = [](Framebuffer &self, std::vector<OutputList> lists) { self.setOutputLists(lists); };
-    usertype["addOutputList"] = sol::overload(
-        &Framebuffer::addOutputList,
-        [](Framebuffer &self) { self.addOutputList(); }
-    );
-    usertype["removeOutputLists"] = &Framebuffer::removeOutputLists;
-    usertype["getActiveOutputListIndex"] = &Framebuffer::getActiveOutputListIndex;
-    usertype["getActiveOutputList"] = &Framebuffer::getActiveOutputList;
-    usertype["getLastOutputList"] = &Framebuffer::getLastOutputList;
-    usertype["getOutputList"] = &Framebuffer::getOutputList;
-    usertype["getOutputLists"] = &Framebuffer::getOutputLists;
-    usertype["update"] = &Framebuffer::update;
-    usertype["clear"] = &Framebuffer::clear;
-    usertype["clearColorBuffer"] = &Framebuffer::clearColorBuffer;
-    usertype["clearDepthBuffer"] = &Framebuffer::clearDepthBuffer;
-    usertype["clearStencilBuffer"] = &Framebuffer::clearStencilBuffer;
-    usertype["readPixels"] = sol::overload(
-        static_cast<void (Framebuffer::*)(uint, int, int, int, int, int, DataType, void*) const>(&Framebuffer::readPixels),
-        static_cast<void (Framebuffer::*)(uint, int, int, int, int, void*) const>(&Framebuffer::readPixels)
-    ); // TODO: getAllPixelsCube
-    usertype["getId"] = &Framebuffer::getId;
-    usertype["hasAttachment"] = &Framebuffer::hasAttachment;
-    usertype["getAttachedObjectType"] = &Framebuffer::getAttachedObjectType;
-    usertype["getAttachedRenderbuffer"] = &Framebuffer::getAttachedRenderbuffer;
-    usertype["getAttachedTexture2D"] = &Framebuffer::getAttachedTexture2D;
-    usertype["getAttachedTextureCube"] = &Framebuffer::getAttachedTextureCube;
-
-    usertype["setClearColor"] = &Framebuffer::setClearColor;
-    usertype["setClearDepth"] = &Framebuffer::setClearDepth;
-    usertype["setClearStencil"] = &Framebuffer::setClearStencil;
-    usertype["getByName"] = &Framebuffer::getByName;
-    usertype["byName"] = &Framebuffer::byName;
-
-    auto usertypeTable = env["Framebuffer"].get<sol::table>();
-
-    usertypeTable.new_enum("Attachment",
-        "ColorAttachmentZero", AttachmentType::ColorAttachmentZero,
-        "DepthAttachment", AttachmentType::DepthAttachment,
-        "StencilAttachment", AttachmentType::StencilAttachment,
-        "DepthStencilAttachment", AttachmentType::DepthStencilAttachment,
-        "EmptyAttachment", AttachmentType::EmptyAttachment);
-
-    usertypeTable.new_enum("BufferMask",
-        "ColorBuffer", BufferMask::ColorBuffer,
-        "DepthBuffer", BufferMask::DepthBuffer,
-        "StencilBuffer", BufferMask::StencilBuffer);
-
-    usertypeTable.new_enum("AttachedObjectType",
-        "None", AttachedObjectType::None,
-        "Renderbuffer", AttachedObjectType::Renderbuffer,
-        "Texture2D", AttachedObjectType::Texture2D,
-        "TextureCube", AttachedObjectType::TextureCube);
 }
 }

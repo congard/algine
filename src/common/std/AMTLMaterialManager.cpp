@@ -85,36 +85,6 @@ Texture2DPtr AMTLMaterialManager::loadTexture(const string &texName) {
     return nullptr;
 }
 
-void AMTLMaterialManager::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "AMTLMaterialManager"))
-        return;
-
-    lua->registerUsertype<IOProvider>(tenv);
-
-    auto ctors = sol::constructors<AMTLMaterialManager(), AMTLMaterialManager(std::string)>();
-    auto usertype = env.new_usertype<AMTLMaterialManager>(
-            "AMTLMaterialManager",
-            sol::meta_function::construct, ctors,
-            sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider>());
-
-    Lua::new_property(usertype, "name", &AMTLMaterialManager::getName, &AMTLMaterialManager::setName);
-
-    usertype["setFloat"] = &AMTLMaterialManager::setFloat;
-    usertype["setTexture"] = &AMTLMaterialManager::setTexture;
-    usertype["setTextureName"] = &AMTLMaterialManager::setTextureName;
-    usertype["getFloat"] = &AMTLMaterialManager::getFloat;
-    usertype["hasFloat"] = &AMTLMaterialManager::hasFloat;
-    usertype["hasTexture"] = &AMTLMaterialManager::hasTexture;
-    usertype["getFloats"] = &AMTLMaterialManager::getFloats;
-    usertype["getTextures"] = &AMTLMaterialManager::getTextures;
-    usertype["getTextureNames"] = &AMTLMaterialManager::getTextureNames;
-    usertype["collectTextureNames"] = &AMTLMaterialManager::collectTextureNames;
-    usertype["loadTexture"] = &AMTLMaterialManager::loadTexture;
-}
-
 void AMTLMaterialManager::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
     exec_t<AMTLMaterialManager>(s, path, lua, tenv);
 }

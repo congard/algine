@@ -26,25 +26,6 @@ RenderbufferPtr RenderbufferCreator::create() {
     return renderbuffer;
 }
 
-void RenderbufferCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "RenderbufferCreator"))
-        return;
-
-    lua->registerUsertype<ImageCreator, Renderbuffer>(tenv);
-
-    auto ctors = sol::constructors<RenderbufferCreator()>();
-    auto usertype = env.new_usertype<RenderbufferCreator>(
-            "RenderbufferCreator",
-            sol::meta_function::construct, ctors,
-            sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator, ImageCreator>());
-
-    usertype["get"] = &RenderbufferCreator::get;
-    usertype["create"] = &RenderbufferCreator::create;
-}
-
 void RenderbufferCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
     exec_t<RenderbufferCreator>(s, path, lua, tenv);
 }

@@ -22,8 +22,6 @@ public:
     std::string readStr(const std::string &path) const;
     bool exists(const std::string &path) const;
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
-
 protected:
     const std::shared_ptr<IOSystem>& io() const;
 

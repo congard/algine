@@ -11,7 +11,7 @@
 namespace algine {
 class ShaderDefinitionGenerator: public virtual Scriptable {
 public:
-    typedef Pair<std::string, std::string> Definition;
+    using Definition = Pair<std::string, std::string>;
 
 public:
     void define(const std::string &macro, const std::string &value = std::string());
@@ -23,8 +23,6 @@ public:
     void appendDefinitions(const std::vector<Definition> &definitions);
 
     const std::vector<Definition>& getDefinitions() const;
-
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv = nullptr);
 
 protected:
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;

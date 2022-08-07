@@ -37,8 +37,6 @@ public:
 
     static Rotator* create(Type type);
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
-
 protected:
     float m_pitch, m_yaw, m_roll;
     Type m_type;

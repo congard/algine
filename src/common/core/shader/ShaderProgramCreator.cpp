@@ -91,35 +91,6 @@ ShaderProgramPtr ShaderProgramCreator::create() {
     return program;
 }
 
-void ShaderProgramCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "ShaderProgramCreator"))
-        return;
-
-    lua->registerUsertype<ShaderProgram, ShaderCreator, ShaderDefinitionGenerator>(tenv);
-
-    auto ctors = sol::constructors<ShaderProgramCreator()>();
-    auto usertype = env.new_usertype<ShaderProgramCreator>(
-            "ShaderProgramCreator",
-            sol::meta_function::construct, ctors,
-            sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator, ShaderDefinitionGenerator>());
-
-    Lua::new_property(usertype, "creators",
-        &ShaderProgramCreator::getCreators,
-        [](const sol::object &self, vector<ShaderCreator> creators) { self.as<ShaderProgramCreator>().setCreators(creators); });
-
-    Lua::new_property(usertype, "names",
-        &ShaderProgramCreator::getShaderNames,
-        [](const sol::object &self, vector<string> names) { self.as<ShaderProgramCreator>().setShaderNames(names); });
-
-    usertype["addCreator"] = &ShaderProgramCreator::addCreator;
-    usertype["addName"] = &ShaderProgramCreator::addShaderName;
-    usertype["get"] = &ShaderProgramCreator::get;
-    usertype["create"] = &ShaderProgramCreator::create;
-}
-
 void ShaderProgramCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *env) {
     exec_t<ShaderProgramCreator>(s, path, lua, env);
 }

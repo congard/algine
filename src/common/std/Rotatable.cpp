@@ -127,35 +127,4 @@ vec3 Rotatable::getLeft() const {
 Rotator* Rotatable::getRotator() const {
     return m_rotator;
 }
-
-void Rotatable::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Lua::getEnv(lua, tenv);
-
-    if (Lua::isRegistered(env, "Rotatable"))
-        return;
-
-    lua->registerUsertype<Scriptable, Rotator>(tenv);
-
-    auto usertype = env.new_usertype<Rotatable>(
-            "Rotatable",
-            sol::meta_function::construct, sol::no_constructor,
-            sol::call_constructor, sol::no_constructor);
-
-    usertype["setRotatorType"] = &Rotatable::setRotatorType;
-    usertype["setRotate"] = &Rotatable::setRotate;
-    usertype["changeRotation"] = &Rotatable::changeRotation;
-    usertype["rotate"] = &Rotatable::rotate;
-
-    Lua::new_property(usertype, "pitch", &Rotatable::getPitch, &Rotatable::setPitch);
-    Lua::new_property(usertype, "yaw", &Rotatable::getYaw, &Rotatable::setYaw);
-    Lua::new_property(usertype, "roll", &Rotatable::getRoll, &Rotatable::setRoll);
-
-    usertype["getRotationMatrix"] = &Rotatable::getRotationMatrix;
-    usertype["getRotate"] = &Rotatable::getRotate;
-    usertype["getForward"] = &Rotatable::getForward;
-    usertype["getBack"] = &Rotatable::getBack;
-    usertype["getRight"] = &Rotatable::getRight;
-    usertype["getLeft"] = &Rotatable::getLeft;
-    usertype["getRotator"] = &Rotatable::getRotator;
-}
 }

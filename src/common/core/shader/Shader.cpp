@@ -61,38 +61,6 @@ uint Shader::getId() const {
     return m_id;
 }
 
-void Shader::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "Shader"))
-        return;
-
-    lua->registerUsertype<Object>(tenv);
-
-    auto factories = sol::factories(
-            []() { return PtrMaker::make<Shader>(); },
-            [](Type type) { return PtrMaker::make<Shader>(type); });
-
-    auto usertype = env.new_usertype<Shader>(
-            "Shader",
-            sol::call_constructor, factories,
-            sol::meta_function::construct, factories,
-            sol::base_classes, sol::bases<Object>());
-    usertype["create"] = &Shader::create;
-    usertype["fromSource"] = &Shader::fromSource;
-    usertype["fromFile"] = &Shader::fromFile;
-    usertype["getId"] = &Shader::getId;
-
-    // static
-    usertype["getByName"] = &Shader::getByName;
-    usertype["byName"] = &Shader::byName;
-
-    env["Shader"].get<sol::table>().new_enum("Type",
-        "Vertex", Type::Vertex,
-        "Fragment", Type::Fragment,
-        "Geometry", Type::Geometry);
-}
-
 ShaderPtr Shader::getByName(string_view name) {
     return PublicObjectTools::getByName<ShaderPtr>(name);
 }

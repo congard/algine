@@ -211,46 +211,6 @@ ShaderPtr ShaderCreator::create() {
     return shader;
 }
 
-void ShaderCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "ShaderCreator"))
-        return;
-
-    lua->registerUsertype<Shader, Creator, ShaderDefinitionGenerator>(tenv);
-
-    auto ctors = sol::constructors<ShaderCreator(), ShaderCreator(Shader::Type),
-        ShaderCreator(Shader::Type, const string&), ShaderCreator(const string&)>();
-    auto usertype = env.new_usertype<ShaderCreator>(
-            "ShaderCreator",
-            sol::meta_function::construct, ctors,
-            sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator, ShaderDefinitionGenerator>());
-
-    Lua::new_property(usertype, "type", &ShaderCreator::getType, &ShaderCreator::setType);
-    Lua::new_property(usertype, "path", &ShaderCreator::getPath, &ShaderCreator::setPath);
-    Lua::new_property(usertype, "includePaths",
-        &ShaderCreator::getIncludePaths,
-        [](ShaderCreator &self, vector<string> paths) { self.setIncludePaths(paths); });
-    Lua::new_property(usertype, "source", &ShaderCreator::getSource, &ShaderCreator::setSource);
-
-    usertype["addIncludePaths"] = [](ShaderCreator &self, vector<string> paths) { self.addIncludePaths(paths); };
-    usertype["addIncludePath"] = &ShaderCreator::addIncludePath;
-    usertype["removeIncludePath"] = &ShaderCreator::removeIncludePath;
-    usertype["resetGenerated"] = &ShaderCreator::resetGenerated;
-    usertype["generate"] = &ShaderCreator::generate;
-    usertype["getGenerated"] = &ShaderCreator::getGenerated;
-    usertype["makeGenerated"] = &ShaderCreator::makeGenerated;
-    usertype["get"] = &ShaderCreator::get;
-    usertype["create"] = &ShaderCreator::create;
-
-    // static methods
-    usertype["getGlobalIncludePaths"] = &ShaderCreator::getGlobalIncludePaths;
-    usertype["setGlobalIncludePaths"] = [](std::vector<std::string> paths) { setGlobalIncludePaths(paths); };
-    usertype["addGlobalIncludePath"] = &ShaderCreator::addGlobalIncludePath;
-    usertype["removeGlobalIncludePath"] = &ShaderCreator::removeGlobalIncludePath;
-}
-
 void ShaderCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
     exec_t<ShaderCreator>(s, path, lua, tenv);
 }

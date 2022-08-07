@@ -191,59 +191,6 @@ ModelPtr ModelCreator::create() {
     return model;
 }
 
-void ModelCreator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "ModelCreator"))
-        return;
-
-    lua->registerUsertype<Creator, Model>(tenv);
-
-    auto ctors = sol::constructors<ModelCreator()>();
-    auto usertype = env.new_usertype<ModelCreator>(
-            "ModelCreator",
-            sol::meta_function::construct, ctors,
-            sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider, Creator>());
-
-    usertype["activateAnimation"] = sol::overload(
-        static_cast<void (ModelCreator::*)(const std::string&)>(&ModelCreator::activateAnimation),
-        static_cast<void (ModelCreator::*)(Index)>(&ModelCreator::activateAnimation));
-    usertype["setActiveAnimationName"] = &ModelCreator::setActiveAnimationName;
-    usertype["setActiveAnimationIndex"] = &ModelCreator::setActiveAnimationIndex;
-    usertype["getActiveAnimation"] = &ModelCreator::getActiveAnimation;
-
-    Lua::new_property(usertype, "className", &ModelCreator::getClassName, &ModelCreator::setClassName);
-    Lua::new_property(usertype, "shapeName", &ModelCreator::getShapeName, &ModelCreator::setShapeName);
-    Lua::new_property(usertype, "shape", &ModelCreator::getShape, &ModelCreator::setShape);
-    Lua::new_property(usertype, "rotatorType", &ModelCreator::getRotatorType, &ModelCreator::setRotatorType);
-    Lua::new_property(usertype, "pos", &ModelCreator::getPos, &ModelCreator::setPos);
-    Lua::new_property(usertype, "rotate", &ModelCreator::getRotate, &ModelCreator::setRotate);
-    Lua::new_property(usertype, "scale", &ModelCreator::getScale, &ModelCreator::setScale);
-    Lua::new_property(usertype, "activatedAnimations",
-        [](const sol::object &self) {
-            auto table = sol::state_view(self.lua_state()).create_table();
-            auto animations = self.as<ModelCreator>().getActivatedAnimations();
-            for (auto &anim : animations) table[table.size() + 1] = anim;
-            return table;
-        }, [](ModelCreator &self, std::set<AnimationInfo> animations) { self.setActivatedAnimations(animations); });
-
-    usertype["get"] = &ModelCreator::get;
-    usertype["create"] = &ModelCreator::create;
-
-    auto animationInfoCtors = sol::constructors<AnimationInfo(), AnimationInfo(std::string), AnimationInfo(Index)>();
-    auto animationInfo = env["ModelCreator"].get<sol::table>().new_usertype<AnimationInfo>(
-            "AnimationInfo",
-            sol::meta_function::construct, animationInfoCtors,
-            sol::call_constructor, animationInfoCtors);
-    animationInfo["None"] = sol::readonly_property(sol::var(AnimationInfo::None));
-    animationInfo["All"] = sol::readonly_property(sol::var(AnimationInfo::All));
-    animationInfo["getName"] = &AnimationInfo::getName;
-    animationInfo["getIndex"] = &AnimationInfo::getIndex;
-    animationInfo["hasName"] = &AnimationInfo::hasName;
-    animationInfo["hasIndex"] = &AnimationInfo::hasIndex;
-}
-
 void ModelCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
     exec_t<ModelCreator>(s, path, lua, tenv);
 }

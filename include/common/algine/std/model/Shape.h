@@ -64,8 +64,6 @@ public:
 
     RawPtr<IndexBuffer> getIndicesBuffer() const;
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
-
 public:
     static ShapePtr getByName(const std::string &name);
     static Shape* byName(const std::string &name);

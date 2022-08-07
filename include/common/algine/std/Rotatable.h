@@ -40,8 +40,6 @@ public:
     glm::vec3 getLeft() const;
     Rotator* getRotator() const;
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
-
 protected:
     Rotator *m_rotator;
     glm::mat4 m_rotation;

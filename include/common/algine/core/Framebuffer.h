@@ -85,8 +85,6 @@ public:
     static void setClearDepth(float depth);
     static void setClearStencil(int s);
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
-
 public:
     static FramebufferPtr getByName(const std::string &name);
     static Framebuffer* byName(const std::string &name);

@@ -28,8 +28,6 @@ public:
     const std::vector<Attachment>& get() const;
     const Attachment* data() const;
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
-
 protected:
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
 

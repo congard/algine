@@ -17,17 +17,4 @@ void EulerRotator::rotate(mat4 &matrix) {
     quat orientation = normalize(qPitch * qYaw * qRoll);
     matrix = mat4_cast(orientation);
 }
-
-void EulerRotator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Lua::getEnv(lua, tenv);
-
-    if (Lua::isRegistered(env, "EulerRotator"))
-        return;
-
-    auto usertype = env.new_usertype<EulerRotator>(
-            "EulerRotator",
-            sol::meta_function::construct, sol::default_constructor,
-            sol::call_constructor, sol::default_constructor,
-            sol::base_classes, sol::bases<Rotator>());
-}
 }

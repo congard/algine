@@ -34,25 +34,6 @@ bool IOProvider::exists(const std::string &path) const {
     return io()->exists(path);
 }
 
-void IOProvider::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Lua::getEnv(lua, tenv);
-
-    if (Lua::isRegistered(env, "IOProvider"))
-        return;
-
-    auto usertype = env.new_usertype<IOProvider>(
-            "IOProvider",
-            sol::meta_function::construct, sol::no_constructor,
-            sol::call_constructor, sol::no_constructor);
-    usertype["setIOSystem_raw"] = static_cast<void (IOProvider::*)(IOSystem*)>(&IOProvider::setIOSystem);
-    usertype["writeStr"] = &IOProvider::writeStr;
-    usertype["readStr"] = &IOProvider::readStr;
-    usertype["exists"] = &IOProvider::exists;
-
-    Lua::new_property(usertype, "ioSystem", "getIOSystem", "setIOSystem",
-        &IOProvider::getIOSystem, static_cast<void (IOProvider::*)(const std::shared_ptr<IOSystem>&)>(&IOProvider::setIOSystem));
-}
-
 const std::shared_ptr<IOSystem>& IOProvider::io() const {
     if (m_ioSystem == nullptr) {
         return Engine::getDefaultIOSystem();

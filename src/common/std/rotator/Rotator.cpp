@@ -84,38 +84,4 @@ Rotator* Rotator::create(Type type) {
         }
     }
 }
-
-void Rotator::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Lua::getEnv(lua, tenv);
-
-    if (Lua::isRegistered(env, "Rotator"))
-        return;
-
-    lua->registerUsertype<EulerRotator, FreeRotator>(tenv);
-
-    auto usertype = env.new_usertype<Rotator>(
-            "Rotator",
-            sol::meta_function::construct, sol::default_constructor,
-            sol::call_constructor, sol::default_constructor);
-
-    usertype["rotate"] = &Rotator::rotate;
-    usertype["changeRotation"] = &Rotator::changeRotation;
-    usertype["changePitch"] = &Rotator::changePitch;
-    usertype["changeYaw"] = &Rotator::changeYaw;
-    usertype["changeRoll"] = &Rotator::changeRoll;
-
-    Lua::new_property(usertype, "pitch", &Rotator::getPitch, &Rotator::setPitch);
-    Lua::new_property(usertype, "yaw", &Rotator::getYaw, &Rotator::setYaw);
-    Lua::new_property(usertype, "roll", &Rotator::getRoll, &Rotator::setRoll);
-
-    usertype["getType"] = &Rotator::getType;
-
-    // static
-    usertype["create"] = &Rotator::create;
-
-    env["Rotator"].get<sol::table>().new_enum("Type",
-        "Simple", Type::Simple,
-        "Euler", Type::Euler,
-        "Free", Type::Free);
-}
 }

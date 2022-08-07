@@ -28,29 +28,4 @@ void Scriptable::setRootDir(std::string_view rootDir) {
 const std::string& Scriptable::getRootDir() const {
     return m_rootDir;
 }
-
-void Scriptable::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "Scriptable"))
-        return;
-
-    IOProvider::registerLuaUsertype(lua, tenv);
-
-    auto usertype = env.new_usertype<Scriptable>(
-            "Scriptable",
-            sol::meta_function::construct, sol::no_constructor,
-            sol::call_constructor, sol::no_constructor,
-            sol::base_classes, sol::bases<IOProvider>());
-
-    usertype["execute"] = [lua, tenv](const sol::object &self, const std::string &path) {
-        self.as<Scriptable>().execute(path, lua, tenv);
-    };
-
-    usertype["executeString"] = [lua, tenv](const sol::object &self, const std::string &str) {
-        self.as<Scriptable>().executeString(str, lua, tenv);
-    };
-
-    Lua::new_property(usertype, "rootDir", &Scriptable::getRootDir, &Scriptable::setRootDir);
-}
 } // algine

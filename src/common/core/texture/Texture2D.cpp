@@ -79,45 +79,4 @@ Texture2DPtr Texture2D::getByName(const string &name) {
 Texture2D* Texture2D::byName(const string &name) {
     return PublicObjectTools::byName<Texture2D>(name);
 }
-
-void Texture2D::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "Texture2D"))
-        return;
-
-    lua->registerUsertype<Texture>(tenv);
-
-    auto factories = sol::factories([]() { return PtrMaker::make<Texture2D>(); });
-    auto usertype = env.new_usertype<Texture2D>(
-            "Texture2D",
-            sol::meta_function::construct, factories,
-            sol::call_constructor, factories,
-            sol::base_classes, sol::bases<Object, Texture>());
-
-    usertype["fromFile"] = sol::overload(
-        static_cast<void (Texture2D::*)(const TextureFileInfo&)>(&Texture2D::fromFile),
-        static_cast<void (Texture2D::*)(const std::string&)>(&Texture2D::fromFile));
-    usertype["update"] = sol::overload(
-        static_cast<void (Texture2D::*)()>(&Texture2D::update),
-        [](Texture2D &self, uint dataFormat, DataType dataType, const sol::object &data) {
-            void *v = nullptr;
-
-            if (data.is<Array<uint>>())
-                v = data.as<Array<uint>>().array();
-            else if (data.is<Array<int>>())
-                v = data.as<Array<int>>().array();
-            else if (data.is<Array<float>>())
-                v = data.as<Array<float>>().array();
-            else if (data.is<Array<double>>())
-                v = data.as<Array<double>>().array();
-
-            self.update(dataFormat, dataType, v);
-        });
-
-    // static
-    usertype["defaultParams"] = &Texture2D::defaultParams;
-    usertype["getByName"] = &Texture2D::getByName;
-    usertype["byName"] = &Texture2D::byName;
-}
 }

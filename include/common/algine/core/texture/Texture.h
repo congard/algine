@@ -154,8 +154,6 @@ public:
     static void activateSlot(uint slot);
     static FormatInfo getFormatInfo(uint format);
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
-
 protected:
     uint m_target = 0; // texture 2d, texture cube etc
     uint m_id = 0;

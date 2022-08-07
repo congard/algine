@@ -58,27 +58,4 @@ const vec3& Translatable::getPos() const {
 const mat4& Translatable::getTranslationMatrix() const {
     return m_translation;
 }
-
-void Translatable::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Lua::getEnv(lua, tenv);
-
-    if (Lua::isRegistered(env, "Translatable"))
-        return;
-
-    lua->registerUsertype<Scriptable>(tenv);
-
-    auto usertype = env.new_usertype<Translatable>(
-            "Translatable",
-            sol::meta_function::construct, sol::no_constructor,
-            sol::call_constructor, sol::no_constructor);
-
-    Lua::new_property(usertype, "pos", &Translatable::getPos, static_cast<void (Translatable::*)(const glm::vec3&)>(&Translatable::setPos));
-    Lua::new_property(usertype, "x", &Translatable::getX, &Translatable::setX);
-    Lua::new_property(usertype, "y", &Translatable::getY, &Translatable::setY);
-    Lua::new_property(usertype, "z", &Translatable::getZ, &Translatable::setZ);
-
-    usertype["changePos"] = &Translatable::changePos;
-    usertype["translate"] = &Translatable::translate;
-    usertype["getTranslationMatrix"] = &Translatable::getTranslationMatrix;
-}
 }

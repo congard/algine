@@ -22,8 +22,6 @@ public:
     const std::string& getName() const;
     Access getAccess() const;
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
-
 protected:
     std::string m_name;
     Access m_access;

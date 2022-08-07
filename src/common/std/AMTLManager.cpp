@@ -21,7 +21,7 @@ AMTLMaterialManager& AMTLManager::addMaterial(const AMTLMaterialManager &materia
     }
 }
 
-vector<AMTLMaterialManager>& AMTLManager::getMaterials() {
+const vector<AMTLMaterialManager>& AMTLManager::getMaterials() {
     return m_materials;
 }
 
@@ -159,31 +159,6 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
     }
 
     env.abandon();
-}
-
-void AMTLManager::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = getEnv(lua, tenv);
-
-    if (isRegistered(env, "AMTLManager"))
-        return;
-
-    lua->registerUsertype<Scriptable, AMTLMaterialManager>(tenv);
-
-    auto ctors = sol::constructors<AMTLManager()>();
-    auto usertype = env.new_usertype<AMTLManager>(
-            "AMTLManager",
-            sol::meta_function::construct, ctors,
-            sol::call_constructor, ctors,
-            sol::base_classes, sol::bases<Scriptable, IOProvider>());
-
-    Lua::new_property(usertype, "materials", &AMTLManager::getMaterials,
-        [](AMTLManager &self, std::vector<AMTLMaterialManager> materials) { self.setMaterials(materials); });
-
-    usertype["addMaterial"] = sol::overload(
-        &AMTLManager::addMaterial,
-        [](AMTLManager &self, const AMTLMaterialManager &material) { self.addMaterial(material); });
-    usertype["getMaterial"] = &AMTLManager::getMaterial;
-    usertype["isMaterialExists"] = &AMTLManager::isMaterialExists;
 }
 
 void AMTLManager::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {

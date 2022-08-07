@@ -19,8 +19,6 @@ public:
     TextureCubePtr get();
     TextureCubePtr create();
 
-    static void registerLuaUsertype(Lua *lua, sol::global_table *tenv);
-
 protected:
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
 
