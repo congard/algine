@@ -29,3 +29,6 @@
 [submodule "libs/sol2"]
 	path = libs/sol2
 	url = https://github.com/ThePhD/sol2
+[submodule "libs/solgen"]
+	path = libs/solgen
+	url = https://github.com/congard/solgen.git
