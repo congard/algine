@@ -88,7 +88,7 @@ FramebufferPtr FramebufferCreator::create() {
             auto &v = p.second;
 
             if (auto name = std::get_if<Name>(&v); name) {
-                attachByName(name->str, p.first, type);
+                attachByName(*name, p.first, type);
             } else if (auto creator = std::get_if<T>(&v); creator) {
                 creator->setIOSystem(io());
                 attach(creator->get(), p.first);

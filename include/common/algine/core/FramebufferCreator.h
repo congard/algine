@@ -14,7 +14,7 @@
 namespace algine {
 class FramebufferCreator: public Creator {
 public:
-    struct Name { std::string str; };
+    using Name = std::string;
 
     template<typename T>
     struct Attachments {
