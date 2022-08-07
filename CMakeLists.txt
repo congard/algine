@@ -439,5 +439,5 @@ endif()
 
 # include some helpful scripts for Windows
 if (WIN32)
-    include(cmake/PostBuildWindows.cmake)
+    include(scripts/PostBuildWindows.cmake)
 endif()
