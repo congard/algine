@@ -93,6 +93,7 @@ void TulzLuaTypes::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
     auto &env = Lua::getEnv(lua, tenv);
 
     registerArray<sol::object>("Array", env);
+    registerArray<ubyte>("UnsignedByteArray", env);
     registerArray<uint>("UnsignedArray", env);
     registerArray<int>("IntArray", env);
     registerArray<float>("FloatArray", env);
