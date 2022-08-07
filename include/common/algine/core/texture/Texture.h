@@ -39,7 +39,8 @@ public:
         )
     };
 
-    enum BaseFormat {
+    enum Format {
+        // base formats
         DepthComponent = GL_DEPTH_COMPONENT,
         DepthStencil = GL_DEPTH_STENCIL,
         Red = GL_RED,
@@ -49,10 +50,9 @@ public:
         RedInteger = GL_RED_INTEGER,
         RGInteger = GL_RG_INTEGER,
         RGBInteger = GL_RGB_INTEGER,
-        RGBAInteger = GL_RGBA_INTEGER
-    };
+        RGBAInteger = GL_RGBA_INTEGER,
 
-    enum SizedFormat {
+        // sized formats
         DepthComponent16 = GL_DEPTH_COMPONENT16,
         DepthComponent24 = GL_DEPTH_COMPONENT24,
         DepthComponent32F = GL_DEPTH_COMPONENT32F,
@@ -165,6 +165,7 @@ protected:
 protected:
     explicit Texture(uint target);
     void texFromFile(uint target, const TextureFileInfo &info);
+    static uint getTexParam(uint target, uint name);
 };
 }
 

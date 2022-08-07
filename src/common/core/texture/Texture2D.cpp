@@ -14,8 +14,6 @@
 
 #include "internal/PublicObjectTools.h"
 
-#include "TexturePrivateTools.h"
-
 using namespace std;
 using namespace algine::internal;
 using namespace tulz;
@@ -38,7 +36,7 @@ void Texture2D::fromFile(const std::string &path) {
 void Texture2D::update() {
     checkBinding()
 
-    auto [dataFormat, dataType] = TexturePrivateTools::getDataInfo(m_format);
+    auto [dataFormat, dataType] = Texture::getFormatInfo(m_format);
 
     glTexImage2D(m_target, m_lod, m_format, m_width, m_height, 0, dataFormat, static_cast<GLenum>(dataType), nullptr);
 }
@@ -59,17 +57,17 @@ map<uint, uint> Texture2D::defaultParams() {
 
 uint Texture2D::getActualFormat() const {
     checkBinding()
-    return TexturePrivateTools::getTexParam(m_target, GL_TEXTURE_INTERNAL_FORMAT);
+    return getTexParam(m_target, GL_TEXTURE_INTERNAL_FORMAT);
 }
 
 uint Texture2D::getActualWidth() const {
     checkBinding()
-    return TexturePrivateTools::getTexParam(m_target, GL_TEXTURE_WIDTH);
+    return getTexParam(m_target, GL_TEXTURE_WIDTH);
 }
 
 uint Texture2D::getActualHeight() const {
     checkBinding()
-    return TexturePrivateTools::getTexParam(m_target, GL_TEXTURE_HEIGHT);
+    return getTexParam(m_target, GL_TEXTURE_HEIGHT);
 }
 
 Texture2DPtr Texture2D::getByName(const string &name) {

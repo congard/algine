@@ -12,8 +12,6 @@
 
 #include "internal/PublicObjectTools.h"
 
-#include "TexturePrivateTools.h"
-
 using namespace std;
 using namespace algine::internal;
 
@@ -35,7 +33,7 @@ void TextureCube::fromFile(Face face, const std::string &path) {
 void TextureCube::update() {
     checkBinding()
 
-    auto [dataFormat, dataType] = TexturePrivateTools::getDataInfo(m_format);
+    auto [dataFormat, dataType] = Texture::getFormatInfo(m_format);
 
     for (uint i = 0; i < 6; ++i) {
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_lod, m_format, m_width, m_height, 0, dataFormat,
@@ -58,15 +56,15 @@ map<uint, uint> TextureCube::defaultParams() {
 #define target static_cast<uint>(Face::Right)
 
 uint TextureCube::getActualFormat() const {
-    return TexturePrivateTools::getTexParam(target, GL_TEXTURE_INTERNAL_FORMAT);
+    return getTexParam(target, GL_TEXTURE_INTERNAL_FORMAT);
 }
 
 uint TextureCube::getActualWidth() const {
-    return TexturePrivateTools::getTexParam(target, GL_TEXTURE_WIDTH);
+    return getTexParam(target, GL_TEXTURE_WIDTH);
 }
 
 uint TextureCube::getActualHeight() const {
-    return TexturePrivateTools::getTexParam(target, GL_TEXTURE_HEIGHT);
+    return getTexParam(target, GL_TEXTURE_HEIGHT);
 }
 
 #undef target

@@ -168,6 +168,8 @@ void Texture::activateSlot(uint slot) {
 
 Texture::FormatInfo Texture::getFormatInfo(uint format) {
     switch (format) {
+        case Texture::DepthComponent:
+            return {Texture::DepthComponent, DataType::UnsignedByte};
         case Texture::DepthComponent16:
             return {Texture::DepthComponent, DataType::UnsignedShort};
         case Texture::DepthComponent24:
@@ -178,28 +180,28 @@ Texture::FormatInfo Texture::getFormatInfo(uint format) {
             return {Texture::DepthStencil, static_cast<DataType>(GL_UNSIGNED_INT_24_8)};
         case Texture::Depth32FStencil8:
             return {Texture::DepthStencil, static_cast<DataType>(GL_FLOAT_32_UNSIGNED_INT_24_8_REV)};
-        case Texture::RGB:
-            return {Texture::RGB, DataType::UnsignedByte};
-        case Texture::RGBA:
-            return {Texture::RGBA, DataType::UnsignedByte};
+        case Texture::Red:
         case Texture::Red8:
             return {Texture::Red, DataType::UnsignedByte};
         case Texture::Red16F:
             return {Texture::Red, DataType::HalfFloat};
         case Texture::Red32F:
             return {Texture::Red, DataType::Float};
+        case Texture::RG:
         case Texture::RG8:
             return {Texture::RG, DataType::UnsignedByte};
         case Texture::RG16F:
             return {Texture::RG, DataType::HalfFloat};
         case Texture::RG32F:
             return {Texture::RG, DataType::Float};
+        case Texture::RGB:
         case Texture::RGB8:
             return {Texture::RGB, DataType::UnsignedByte};
         case Texture::RGB16F:
             return {Texture::RGB, DataType::HalfFloat};
         case Texture::RGB32F:
             return {Texture::RGB, DataType::Float};
+        case Texture::RGBA:
         case Texture::RGBA8:
             return {Texture::RGBA, DataType::UnsignedByte};
         case Texture::RGBA16F:
@@ -283,5 +285,12 @@ void Texture::texFromFile(uint target, const TextureFileInfo &info) { // TODO: T
     }
 
     stbi_image_free(data);
+}
+
+uint Texture::getTexParam(uint target, uint name) {
+    constexpr uint mipLevel = 0;
+    int value;
+    glGetTexLevelParameteriv(target, mipLevel, name, &value);
+    return value;
 }
 }
