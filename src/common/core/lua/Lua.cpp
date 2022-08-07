@@ -125,6 +125,8 @@ void Lua::initEnvironment(sol::global_table &env) {
         }
     };
 
+    registerUsertype<IOProvider>(this, &env);
+
     m_lua->script(core_lua, sol::environment(env));
 }
 

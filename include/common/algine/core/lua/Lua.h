@@ -7,6 +7,10 @@
 #include <memory>
 #include <mutex>
 
+namespace algine_lua {
+template<typename T> void registerLuaUsertype(sol::table &table, void *userdata);
+}
+
 namespace algine {
 class Lua: public IOProvider {
 public:
@@ -59,6 +63,13 @@ public:
     template<typename... Args>
     void registerUsertype(sol::global_table *env, TypeList<Args...>) { registerUsertype<Args...>(env); }
 
+    template<typename T>
+    static void registerUsertype(Lua *lua = nullptr, sol::global_table *tenv = nullptr) {
+        auto &env = Lua::getEnv(lua, tenv);
+        sol::table table = env;
+        algine_lua::registerLuaUsertype<T>(table, lua);
+    }
+
 private:
     void initEnvironment(sol::global_table &env);
 
@@ -86,7 +97,7 @@ void Lua::new_property(sol::usertype<T> &usertype, std::string_view propName, G 
 
 template<typename T, typename... Args>
 void Lua::registerUsertype(sol::global_table *env) {
-    T::registerLuaUsertype(this, env);
+    registerUsertype<T>(this, env);
 
     if constexpr(sizeof...(Args) != 0) {
         registerUsertype<Args...>(env);

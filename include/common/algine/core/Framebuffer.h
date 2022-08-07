@@ -71,6 +71,8 @@ public:
 
     void readPixels(uint attachment, int x, int y, int width, int height, int format, DataType type, void *buffer) const;
     void readPixels(uint attachment, int x, int y, int width, int height, void *buffer) const;
+
+    /// #solgen #ignore
     PixelData getAllPixelsCube(TextureCube::Face face, uint attachment, int format = -1) const;
 
     uint getId() const;

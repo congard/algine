@@ -30,7 +30,7 @@ protected:
         lua = lua ? lua : &Engine::getLua();
         Lua::Locker locker(lua);
         auto &env = getEnv(lua, tenv);
-        T::registerLuaUsertype(lua, tenv);
+        Lua::registerUsertype<T>(lua, tenv);
 
         auto &state = *lua->state();
 
