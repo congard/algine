@@ -1,9 +1,14 @@
 #include <algine/core/io/IOProvider.h>
 #include <algine/core/Engine.h>
 
+#include <utility>
+
 namespace algine {
 IOProvider::IOProvider()
     : m_ioSystem(nullptr) {}
+
+IOProvider::IOProvider(std::shared_ptr<IOSystem> ioSystem)
+    : m_ioSystem(std::move(ioSystem)) {}
 
 void IOProvider::setIOSystem(IOSystem *ioSystem) {
     m_ioSystem.reset(ioSystem);

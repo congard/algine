@@ -12,6 +12,7 @@ class Lua;
 class IOProvider {
 public:
     IOProvider();
+    explicit IOProvider(std::shared_ptr<IOSystem> ioSystem);
     virtual ~IOProvider() = default;
 
     void setIOSystem(IOSystem *ioSystem);
