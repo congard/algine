@@ -13,7 +13,9 @@ C++, so in this case easy to learn language like Lua would be a great solution.
 
 And finally, we need Lua to create Editor, since it will be much easier to create it using language like Lua.
 
-## Classes
+## Status
+
+Lua support is provided by the [solgen](https://github.com/congard/solgen) library.
 
 **An approximate** list of classes that need lua support to be implemented:
 
@@ -60,12 +62,19 @@ Core:
 - [ ] InputLayout
 - [x] OutputList
 - [ ] Resources
+- [x] Point
+- [x] Rect
+- [x] Color
+- [x] Font
+- [x] FontLibrary
+- [x] FontMetrics
+- [x] FontRenderer
 
 Widgets:
 
-- [ ] Paint
-- [ ] Painter
-- [ ] RoundRect
+- [x] Paint
+- [x] Painter
+- [x] RoundRect
 - [ ] Alignment
 - [ ] Container
 - [ ] Dimen
