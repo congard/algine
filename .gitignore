@@ -1,14 +1,17 @@
-# Visual Studio Code dir
+# Visual Studio Code dirs
 .vscode
+.cache
 
 # CLion Dirs
-cmake-build-*
 .idea
 
 # QtCreator files
 CMakeLists.txt.user
 
 # KDevelop
-/build
 algine.kdev4
 .kdev4
+
+# build dirs
+cmake-build-*
+build
