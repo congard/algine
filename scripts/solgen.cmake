@@ -59,7 +59,7 @@ function(solgen output)
         endif()
     endfunction()
 
-    set_if_empty(SOLGEN_INPUT_CORE
+    set_if_empty(ALGINE_SOLGEN_INPUT_CORE
         include/common/algine/core/lua/Scriptable.h
 
         include/common/algine/core/font/Font.h
@@ -108,7 +108,7 @@ function(solgen output)
 
         include/common/algine/core/widgets/Widget.h)
 
-    set_if_empty(SOLGEN_INPUT_STD
+    set_if_empty(ALGINE_SOLGEN_INPUT_STD
         include/common/algine/std/model/ShapeCreator.h
         include/common/algine/std/model/Shape.h
         include/common/algine/std/model/ModelCreator.h
@@ -126,7 +126,7 @@ function(solgen output)
         include/common/algine/std/AMTLManager.h
         include/common/algine/std/AMTLMaterialManager.h)
 
-    set_if_empty(SOLGEN_CORE_CLASSES
+    set_if_empty(ALGINE_SOLGEN_CORE_CLASSES
         Scriptable
         Font FontLibrary FontMetrics FontRenderer
         IOProvider
@@ -144,7 +144,7 @@ function(solgen output)
         Paint Painter RoundRect
         Widget)
 
-    set_if_empty(SOLGEN_STD_CLASSES
+    set_if_empty(ALGINE_SOLGEN_STD_CLASSES
         ShapeCreator Shape
         ModelCreator Model
         InputLayoutShapeLocations
@@ -156,15 +156,15 @@ function(solgen output)
         RectI RectF PointI PointF)
 
     gen_type_list(AlgineCore "${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineCore.h"
-        "${SOLGEN_INPUT_CORE}"
-        "${SOLGEN_CORE_CLASSES};${CORE_EXTRA_CLASSES}")
+        "${ALGINE_SOLGEN_INPUT_CORE}"
+        "${ALGINE_SOLGEN_CORE_CLASSES};${CORE_EXTRA_CLASSES}")
     
     gen_type_list(AlgineStd "${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineStd.h"
-        "${SOLGEN_INPUT_STD}"
-        "${SOLGEN_STD_CLASSES}")
+        "${ALGINE_SOLGEN_INPUT_STD}"
+        "${ALGINE_SOLGEN_STD_CLASSES}")
     
-    string(REPLACE ";" "|" SOLGEN_CORE_CLASSES_REGEX "${SOLGEN_CORE_CLASSES}")
-    string(REPLACE ";" "|" SOLGEN_STD_CLASSES_REGEX "${SOLGEN_STD_CLASSES}")
+    string(REPLACE ";" "|" SOLGEN_CORE_CLASSES_REGEX "${ALGINE_SOLGEN_CORE_CLASSES}")
+    string(REPLACE ";" "|" SOLGEN_STD_CLASSES_REGEX "${ALGINE_SOLGEN_STD_CLASSES}")
 
     if (ANDROID)
         set(platform_str "android")
@@ -176,6 +176,7 @@ function(solgen output)
         message(FATAL_ERROR "Unsupported system")
     endif()
 
+    # get compiler's include paths
     execute_process(COMMAND
         ${ALGINE_LUA_PATH} ${CMAKE_CURRENT_LIST_DIR}/scripts/FindCompilerInclude.lua ${CMAKE_CXX_COMPILER} ${platform_str}
         RESULT_VARIABLE FindCompilerInclude_ret
@@ -187,6 +188,7 @@ function(solgen output)
 
     string(REPLACE "\n" ";" compilerIncludes ${compilerIncludes})
 
+    # if Android, get API version as a number
     if (ANDROID)
         string(REPLACE "-" ";" androidApiList ${ANDROID_PLATFORM})
         list(LENGTH androidApiList androidApiListLen)
@@ -200,23 +202,23 @@ function(solgen output)
         set(SOLGEN_ANDROID_DEFS -D __ANDROID__ -D __ANDROID_API__=${ANDROID_API_VER})
 
         if (UNIX)
-            set(SOLGEN_CLANG_ARGS ${SOLGEN_CLANG_ARGS} -U __linux__ ${SOLGEN_ANDROID_DEFS})
+            set(ALGINE_SOLGEN_CLANG_ARGS ${ALGINE_SOLGEN_CLANG_ARGS} -U __linux__ ${SOLGEN_ANDROID_DEFS})
         else()
-            set(SOLGEN_CLANG_ARGS ${SOLGEN_CLANG_ARGS} -U _WIN32 -U _WIN64 -U WIN32 -U WIN64 ${SOLGEN_ANDROID_DEFS})
+            set(ALGINE_SOLGEN_CLANG_ARGS ${ALGINE_SOLGEN_CLANG_ARGS} -U _WIN32 -U _WIN64 -U WIN32 -U WIN64 ${SOLGEN_ANDROID_DEFS})
         endif()
     endif()
 
     set(SOLGEN_COMMAND ${ALGINE_SOLGEN_PATH}
         ${ALGINE_SOLGEN_ARGS}
         --print-paths
-        --input ${SOLGEN_INPUT_CORE} ${SOLGEN_INPUT_STD}
+        --input ${ALGINE_SOLGEN_INPUT_CORE} ${ALGINE_SOLGEN_INPUT_STD}
         --output-dir ${SOLGEN_OUTPUT_PATH}
         --output-namespace "algine_lua"
         --includes ${PRIVATE_INCLUDES} ${PUBLIC_INCLUDES} ${compilerIncludes}
         --namespace-filter algine
         --type-filter "algine::(?:${SOLGEN_CORE_CLASSES_REGEX}|${SOLGEN_STD_CLASSES_REGEX})(?:::[_a-zA-Z0-9]+)?$"
         --conf scripts/solgen.conf
-        --clang-args -std=c++17 ${SOLGEN_CLANG_ARGS})
+        --clang-args -std=c++17 ${ALGINE_SOLGEN_CLANG_ARGS})
 
     execute_process(COMMAND ${SOLGEN_COMMAND}
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
