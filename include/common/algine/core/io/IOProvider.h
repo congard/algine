@@ -7,8 +7,6 @@
 #include <memory>
 
 namespace algine {
-class Lua;
-
 class IOProvider {
 public:
     IOProvider();
