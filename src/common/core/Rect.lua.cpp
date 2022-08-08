@@ -7,7 +7,7 @@ namespace algine_lua {
 template<typename T> void registerLuaUsertype(sol::table &table, void *userdata);
 
 template<typename T>
-void registerLuaUsertype(std::string_view name, sol::table &table) {
+void registerRect(std::string_view name, sol::table &table) {
     if (table[name].valid())
         return;
 
@@ -28,10 +28,10 @@ void registerLuaUsertype(std::string_view name, sol::table &table) {
 }
 
 template<> void registerLuaUsertype<Rect<int>>(sol::table &table, void *userdata) {
-    registerLuaUsertype<int>("RectI", table);
+    registerRect<int>("RectI", table);
 }
 
 template<> void registerLuaUsertype<Rect<float>>(sol::table &table, void *userdata) {
-    registerLuaUsertype<int>("RectF", table);
+    registerRect<float>("RectF", table);
 }
 }
