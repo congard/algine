@@ -4,6 +4,8 @@
 #include <algine/templates.h>
 
 #include <utility>
+#include <cxxabi.h>
+
 #include <sol/variadic_args.hpp>
 
 #include "AlgineCore.h"
@@ -74,6 +76,36 @@ sol::global_table& Lua::getGlobalEnvironment() const {
     return m_lua->globals();
 }
 
+std::string nameof(const char* tn) {
+    const auto dmg = abi::__cxa_demangle(tn, nullptr, nullptr, nullptr);
+    std::string name = dmg;
+    std::free(dmg);
+    return name;
+}
+
+template<typename T, typename... Args>
+bool registerType(std::string_view type, sol::table &table, Lua *lua) {
+    if (nameof(typeid(T).name()) == type) {
+        algine_lua::registerLuaUsertype<T>(table, lua);
+        return true;
+    }
+
+    if constexpr (sizeof...(Args) > 0)
+        return registerType<Args...>(type, table, lua);
+
+    return false;
+}
+
+template<typename... Args>
+bool registerType(std::string_view type, sol::table &table, Lua *lua, Lua::TypeList<Args...>) {
+    return registerType<Args...>(type, table, lua);
+}
+
+template<typename T>
+struct type_holder {
+    using type = T;
+};
+
 void Lua::initEnvironment(sol::global_table &env) {
     auto usertype = env.new_usertype<Lua>(
             "Lua",
@@ -111,17 +143,40 @@ void Lua::initEnvironment(sol::global_table &env) {
     env["isAndroid"] = sol::readonly_property(sol::var(is_android()));
     env["isWindows"] = sol::readonly_property(sol::var(is_windows()));
 
-    env["algine_require"] = [this](std::string_view lib, sol::this_environment tenv) {
+    env["algine_require_module"] = [this](std::string_view lib, sol::this_environment tenv) {
         sol::global_table env = *tenv.env;
 
         if (lib == "core") {
             registerUsertype(&env, AlgineCore());
-        } if (lib == "std") {
+        } else if (lib == "std") {
             registerUsertype(&env, AlgineStd());
         } else if (lib == "glm") {
             GLMLuaTypes::registerLuaUsertype(this, &env);
         } else if (lib == "tulz") {
             TulzLuaTypes::registerLuaUsertype(this, &env);
+        }
+    };
+
+    env["algine_require_type"] = [this](std::string_view type, sol::this_environment tenv) {
+        sol::global_table env = *tenv.env;
+        sol::table table = env;
+
+        auto typeReg = [&](auto typeHolder) {
+            using T = typename decltype(typeHolder)::type;
+            return [&]() { algine_lua::registerLuaUsertype<T>(table, this); };
+        };
+
+        std::map<std::string_view, std::function<void()>> customReg = {
+            {"algine::PointI", typeReg(type_holder<PointI>())},
+            {"algine::PointF", typeReg(type_holder<PointF>())},
+            {"algine::RectI", typeReg(type_holder<RectI>())},
+            {"algine::RectF", typeReg(type_holder<RectF>())}
+        };
+
+        if (auto it = customReg.find(type); it != customReg.end()) {
+            it->second();
+        } else {
+            registerType(type, table, this, AlgineCore()) || registerType(type, table, this, AlgineStd());
         }
     };
 

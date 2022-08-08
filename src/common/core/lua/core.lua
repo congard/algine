@@ -60,8 +60,12 @@ require = function(name)
 
     local algineStrLen = string.len("algine")
 
-    if string.sub(name, 1, algineStrLen) == "algine" then
-        return loadModule(name, function() algine_require(string.sub(name, algineStrLen + 2)) end)
+    if name:sub(1, algineStrLen) == "algine" then
+        if name:sub(algineStrLen + 2, algineStrLen + 2) ~= ":" then  -- algine:module
+            return loadModule(name, function() algine_require_module(name:sub(algineStrLen + 2)) end)
+        else  -- algine::type
+            return loadModule(name, function() algine_require_type(name) end)
+        end
     else
         for path in string.gmatch(package.path, "[^;]+") do
             path = path:gsub("?", name)
