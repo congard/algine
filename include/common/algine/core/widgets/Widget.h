@@ -9,6 +9,7 @@
 #include <algine/core/painter/Paint.h>
 #include <algine/core/Rect.h>
 #include <algine/core/Variant.h>
+#include <algine/core/lua/Lua.h>
 #include <algine/types.h>
 
 #include <string>
@@ -49,7 +50,9 @@ public:
     Widget();
     virtual ~Widget() = default;
 
+    /// #solgen #prop_name geometry
     virtual void setGeometry(RectI geometry);
+    /// #solgen #prop_name geometry
     const RectI& getGeometry() const;
 
     void setVisible(bool visible);
@@ -140,6 +143,9 @@ public:
     bool hasProperty(const char *name) const;
     bool removeProperty(const char *name);
 
+    void addScript(const std::string &path, Lua *lua = nullptr);
+    void addScriptSource(const std::string &source, Lua *lua = nullptr);
+
     virtual void fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io);
     bool fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io);
     bool fromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io);
@@ -219,6 +225,11 @@ protected:
     SizePolicy m_verticalPolicy;
 
     std::map<unsigned long, Property> m_properties;
+
+    sol::environment m_luaEnv;
+
+private:
+    void addLuaScript(const std::string &s, bool path, Lua *lua);
 };
 }
 

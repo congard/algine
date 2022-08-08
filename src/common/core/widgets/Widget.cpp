@@ -1,6 +1,5 @@
 #include <algine/core/widgets/Widget.h>
 #include <algine/core/widgets/Units.h>
-#include <algine/core/shader/ShaderCreator.h>
 #include <algine/core/painter/Painter.h>
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/Framebuffer.h>
@@ -51,7 +50,8 @@ Widget::Widget()
       m_scaleY(1.0f),
       m_opacity(1.0f),
       m_horizontalPolicy(SizePolicy::Fixed),
-      m_verticalPolicy(SizePolicy::Fixed)
+      m_verticalPolicy(SizePolicy::Fixed),
+      m_luaEnv()
 {
     m_texture = PtrMaker::make();
     m_texture->bind();
@@ -589,6 +589,44 @@ bool Widget::removeProperty(const char *name) {
     return false;
 }
 
+void Widget::addScript(const std::string &path, Lua *lua) {
+    addLuaScript(path, true, lua);
+}
+
+void Widget::addScriptSource(const std::string &source, Lua *lua) {
+    addLuaScript(source, false, lua);
+}
+
+void Widget::addLuaScript(const std::string &s, bool path, Lua *lua) {
+    lua = lua ? lua : &Engine::getLua();
+
+    Lua::Locker locker(lua);
+
+    if (m_luaEnv.lua_state() != lua->state()->lua_state()) {
+        m_luaEnv.abandon();
+        m_luaEnv = lua->createEnvironment(lua->getGlobalEnvironment());
+    }
+
+    auto &state = *lua->state();
+
+    auto printErr = [&](sol::error &error) {
+        if (!path) {
+            Log::error() << error.what();
+        } else {
+            Log::error() << "In " << s << ":\n" << error.what();
+        }
+    };
+
+    auto result = path ?
+        state.script(lua->readStr(s), m_luaEnv) :
+        state.script(s, m_luaEnv);
+
+    if (!result.valid()) {
+        sol::error error = result;
+        printErr(error);
+    }
+}
+
 template<typename T>
 inline uint asBitFlag(T flag) {
     uint fl = static_cast<uint>(flag);
@@ -688,8 +726,17 @@ void Widget::draw(Painter &painter) {
 }
 
 void Widget::onDrawBackground(Painter &painter) {
-    painter.setPaint(m_background);
-    painter.drawRect(0, 0, getWidth(), getHeight());
+    if (m_luaEnv.valid() && m_luaEnv["onDrawBackground"].valid()) {
+        auto result = m_luaEnv["onDrawBackground"].get<sol::function>()(this, painter);
+
+        if (!result.valid()) {
+            sol::error error = result;
+            Log::error() << error.what();
+        }
+    } else {
+        painter.setPaint(m_background);
+        painter.drawRect(0, 0, getWidth(), getHeight());
+    }
 }
 
 void Widget::onGeometryChanged(const RectI &geometry) {}
@@ -835,6 +882,8 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
             setVerticalSizePolicy(parseSizePolicy());
         } else if (isAttr("filtering")) {
             setFiltering(parseFiltering(attr.as_string()));
+        } else if (isAttr("script")) {
+            addScript(getString());
         } else if (auto name = attr.name(); strstr(name, "p_") == name) { // property
             name += strlen("p_");
 
