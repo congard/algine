@@ -1,4 +1,4 @@
-#include <algine/core/Point.h>
+#include <algine/core/math/Point.h>
 #include <algine/core/lua/Lua.h>
 
 using namespace algine;

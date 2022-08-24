@@ -1,4 +1,4 @@
-#include <algine/core/Rect.h>
+#include <algine/core/math/Rect.h>
 #include <algine/core/lua/Lua.h>
 
 using namespace algine;

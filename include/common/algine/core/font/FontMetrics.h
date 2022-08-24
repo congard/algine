@@ -2,7 +2,7 @@
 #define ALGINE_FONTMETRICS_H
 
 #include <algine/core/font/Font.h>
-#include <algine/core/Rect.h>
+#include <algine/core/math/Rect.h>
 #include <algine/types.h>
 
 #include <unordered_map>

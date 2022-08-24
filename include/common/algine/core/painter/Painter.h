@@ -7,7 +7,7 @@
 #include <algine/core/InputLayout.h>
 #include <algine/core/painter/RoundRect.h>
 #include <algine/core/painter/Paint.h>
-#include <algine/core/Rect.h>
+#include <algine/core/math/Rect.h>
 #include <algine/core/AutoRawPtr.h>
 #include <algine/core/MutableValue.h>
 #include <algine/types.h>

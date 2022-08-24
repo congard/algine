@@ -1,7 +1,7 @@
 #ifndef ALGINE_RECT_H
 #define ALGINE_RECT_H
 
-#include <algine/core/Point.h>
+#include "Point.h"
 
 namespace algine {
 template<typename T>

@@ -1,7 +1,7 @@
 #ifndef ALGINE_ROUNDRECT_H
 #define ALGINE_ROUNDRECT_H
 
-#include <algine/core/Rect.h>
+#include <algine/core/math/Rect.h>
 
 namespace algine {
 /**

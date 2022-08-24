@@ -7,7 +7,7 @@
 #include <algine/core/texture/Texture2DPtr.h>
 #include <algine/core/FramebufferPtr.h>
 #include <algine/core/painter/Paint.h>
-#include <algine/core/Rect.h>
+#include <algine/core/math/Rect.h>
 #include <algine/core/Variant.h>
 #include <algine/core/lua/Lua.h>
 #include <algine/types.h>
