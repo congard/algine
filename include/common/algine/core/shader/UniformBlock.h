@@ -14,8 +14,6 @@ public:
     void init(const ShaderProgram *shaderProgram) override;
 
     void setBlockInfo(uint size, const tulz::Array<uint>& varOffsets);
-    void setBlockInfo(uint size, const std::vector<uint>& varOffsets);
-    void setVarNames(const std::vector<std::string> &names);
     void setVarNames(const tulz::Array<std::string> &names);
 
     uint getVarPosition(const std::string &name) const;

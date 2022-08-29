@@ -14,28 +14,14 @@ void UniformBlock::init(const ShaderProgram *shaderProgram) {
 
     m_varOffsets = Array<uint>(m_varNames.size());
 
-    for (uint i = 0; i < m_varNames.size(); i++)
+    for (uint i = 0; i < m_varNames.size(); i++) {
         m_varOffsets[i] = BaseUniformBlock::getVarOffset(m_varNames[i], shaderProgram);
+    }
 }
 
 void UniformBlock::setBlockInfo(const uint size, const Array<uint> &varOffsets) {
     m_blockSize = size;
     m_varOffsets = varOffsets;
-}
-
-void UniformBlock::setBlockInfo(const uint size, const vector<uint> &varOffsets) {
-    m_blockSize = size;
-    m_varOffsets = Array<uint>(varOffsets.size());
-
-    for (uint i = 0; i < varOffsets.size(); i++)
-        m_varOffsets[i] = varOffsets[i];
-}
-
-void UniformBlock::setVarNames(const vector<string> &names) {
-    m_varNames = Array<string>(names.size());
-
-    for (uint i = 0; i < names.size(); i++)
-        m_varNames[i] = names[i];
 }
 
 void UniformBlock::setVarNames(const Array<string> &names) {
