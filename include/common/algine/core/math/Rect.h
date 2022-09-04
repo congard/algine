@@ -1,7 +1,7 @@
 #ifndef ALGINE_RECT_H
 #define ALGINE_RECT_H
 
-#include "Point.h"
+#include <algine/core/math/Point.h>
 
 namespace algine {
 template<typename T>
@@ -54,6 +54,16 @@ public:
         m_height = height;
     }
 
+    void translate(T dx, T dy) {
+        m_x += dx;
+        m_y += dy;
+    }
+
+    void translate(const Point<T> &offset) {
+        m_x += offset.getX();
+        m_y += offset.getY();
+    }
+
     T getX() const {
         return m_x;
     }
@@ -68,6 +78,10 @@ public:
 
     T getHeight() const {
         return m_height;
+    }
+
+    bool isValid() const {
+        return m_width > T(0) && m_height > T(0);
     }
 
 private:

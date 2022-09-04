@@ -20,6 +20,10 @@ void registerRect(std::string_view name, sol::table &table) {
 
     usertype["setPos"] = &Rect<T>::setPos;
     usertype["setCoords"] = &Rect<T>::setCoords;
+    usertype["translate"] = sol::overload(
+        static_cast<void (Rect<T>::*)(T, T)>(&Rect<T>::translate),
+        static_cast<void (Rect<T>::*)(const Point<T>&)>(&Rect<T>::translate));
+    usertype["isValid"] = &Rect<T>::isValid;
 
     Lua::new_property(usertype, "x", &Rect<T>::getX, &Rect<T>::setX);
     Lua::new_property(usertype, "y", &Rect<T>::getY, &Rect<T>::setY);
