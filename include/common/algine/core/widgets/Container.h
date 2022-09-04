@@ -30,6 +30,8 @@ public:
     WidgetPtr notContainerAt(const PointI &point);
     ContainerPtr containerAt(const PointI &point);
 
+    RectI geometry(const WidgetPtr &widget) const;
+
     void fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) override;
 
 protected:
