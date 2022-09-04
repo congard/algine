@@ -55,8 +55,8 @@ inline std::string getStringProperty(Layout::WidgetAutoRawPtr widget, const char
     if (widget->hasProperty(name)) {
         auto &property = widget->property(name);
 
-        if (property.is<std::string>()) {
-            return property.as<std::string>();
+        if (property.type() == typeid(std::string)) {
+            return std::any_cast<std::string&>(property);
         } else {
             throw std::invalid_argument("Invalid type: only std::string is acceptable");
         }
@@ -184,7 +184,7 @@ RelativeLayout::WidgetInfo& RelativeLayout::layout_for(Widget *widget, std::list
     auto &widgetInfo = widgetsInfo.emplace_back(widget);
 
     auto getBase = [&](const char *prop) -> WidgetInfo& {
-        auto base = findChild(widget->property(prop).as<std::string>()).get();
+        auto base = findChild(std::any_cast<const std::string&>(widget->property(prop))).get();
 
         if (base == nullptr) {
             throw std::runtime_error("Base widget couldn't be found");

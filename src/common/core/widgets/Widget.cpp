@@ -887,6 +887,7 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
         } else if (auto name = attr.name(); strstr(name, "p_") == name) { // property
             name += strlen("p_");
 
+            // parse value
             auto value = attr.value();
 
             char* end;
@@ -916,8 +917,8 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
                     setProperty(name, true);
                 } else if (strcmp(value, "false") == 0) {
                     setProperty(name, false);
-                } else { // std::string
-                    setProperty(name, value);
+                } else {
+                    setProperty(name, std::string(value));
                 }
             }
         }

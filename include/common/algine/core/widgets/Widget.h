@@ -13,7 +13,7 @@
 #include <algine/types.h>
 
 #include <string>
-#include <variant>
+#include <any>
 #include <map>
 
 #include <glm/mat4x4.hpp>
@@ -44,7 +44,7 @@ public:
         Painter *painter;
     };
 
-    using Property = Variant<bool, int, float, std::string, char*, void*, Ptr<void>>;
+    using Property = std::any;
 
 public:
     Widget();

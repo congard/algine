@@ -53,10 +53,10 @@ inline int getMarginProperty(const Layout::WidgetAutoRawPtr &widget, const char 
     if (widget->hasProperty(name)) {
         auto &property = widget->property(name);
 
-        if (property.is<int>()) {
-            return property.as<int>();
-        } else if (property.is<float>()) {
-            return static_cast<int>(property.as<float>());
+        if (property.type() == typeid(int)) {
+            return std::any_cast<int>(property);
+        } else if (property.type() == typeid(float)) {
+            return static_cast<int>(std::any_cast<float>(property));
         } else {
             throw std::invalid_argument("Invalid margin type");
         }
@@ -93,10 +93,10 @@ void Layout::setAlignment(WidgetAutoRawPtr widget, uint alignment) {
 
 uint Layout::getAlignment(WidgetAutoRawPtr widget) {
     if (widget->hasProperty(Property_Alignment)) {
-        if (auto &property = widget->property(Property_Alignment); property.is<int>()) {
-            return property.as<int>();
-        } else if (property.is<std::string>()) {
-            auto alignment = Alignment::parse(property.as<std::string>().c_str());
+        if (auto &property = widget->property(Property_Alignment); property.type() == typeid(int)) {
+            return std::any_cast<int>(property);
+        } else if (property.type() == typeid(std::string)) {
+            auto alignment = Alignment::parse(std::any_cast<std::string&>(property).c_str());
             property = (int) alignment;
             return alignment;
         } else {
