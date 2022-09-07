@@ -10,9 +10,9 @@ namespace algine {
 class FontLibrary {
 public:
     static void add(const Font &font);
-    static Font get(const std::string &name, Font::Style style);
-    static bool exists(const std::string &name, Font::Style style);
-    static void remove(const std::string &name, Font::Style style);
+    static Font get(std::string_view name, Font::Style style);
+    static bool exists(std::string_view name, Font::Style style);
+    static void remove(std::string_view name, Font::Style style);
     static void remove(const Font &font);
 
     static void optimize();

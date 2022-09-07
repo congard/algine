@@ -5,9 +5,12 @@
 namespace algine {
 std::map<unsigned long, Font> FontLibrary::m_library;
 
-inline auto getHash(const std::string &name, Font::Style style) {
-    std::string styleStr = std::to_string(static_cast<int>(style));
-    return hash_djb2((unsigned char *) (name + " " + styleStr).c_str());
+inline auto getHash(std::string_view name, Font::Style style) {
+    std::string fontStr;
+    fontStr += name;
+    fontStr += ' ';
+    fontStr += static_cast<char>('0' + static_cast<int>(style));
+    return hash_djb2((unsigned char *) fontStr.c_str());
 }
 
 void FontLibrary::add(const Font &font) {
@@ -15,17 +18,17 @@ void FontLibrary::add(const Font &font) {
     m_library[hash] = font;
 }
 
-Font FontLibrary::get(const std::string &name, Font::Style style) {
+Font FontLibrary::get(std::string_view name, Font::Style style) {
     auto hash = getHash(name, style);
     return m_library[hash];
 }
 
-bool FontLibrary::exists(const std::string &name, Font::Style style) {
+bool FontLibrary::exists(std::string_view name, Font::Style style) {
     auto hash = getHash(name, style);
     return m_library.find(hash) != m_library.end();
 }
 
-void FontLibrary::remove(const std::string &name, Font::Style style) {
+void FontLibrary::remove(std::string_view name, Font::Style style) {
     auto hash = getHash(name, style);
     m_library.erase(hash);
 }
