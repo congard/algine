@@ -106,7 +106,9 @@ function(solgen output)
         include/common/algine/core/painter/Painter.h
         include/common/algine/core/painter/RoundRect.h
 
-        include/common/algine/core/widgets/Widget.h)
+        include/common/algine/core/widgets/Widget.h
+        include/common/algine/core/widgets/Dimen.h
+        include/common/algine/core/widgets/Unit.h)
 
     set_if_empty(ALGINE_SOLGEN_INPUT_STD
         include/common/algine/std/model/ShapeCreator.h
@@ -142,7 +144,7 @@ function(solgen output)
         DataType
         OutputList
         Paint Painter RoundRect
-        Widget)
+        Widget Dimen Unit)
 
     set_if_empty(ALGINE_SOLGEN_STD_CLASSES
         ShapeCreator Shape

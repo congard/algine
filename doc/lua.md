@@ -77,16 +77,16 @@ Widgets:
 - [x] RoundRect
 - [ ] Alignment
 - [ ] Container
-- [ ] Dimen
+- [x] Dimen
 - [ ] ImageWidget
 - [ ] Label
 - [ ] Layout
 - [ ] LinearLayout
 - [ ] RelativeLayout
 - [ ] SizePolicy
-- [ ] Unit
+- [x] Unit
 - [ ] Units
-- [ ] Widget
+- [x] Widget
 
 Std:
 
