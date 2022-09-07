@@ -144,7 +144,7 @@ void FontMetrics::swap(FontMetrics &src) {
 }
 
 void FontMetrics::updateMetricsHash() {
-    if (!m_font.isLoaded()) {
+    if (!m_font.isValid()) {
         return;
     }
 

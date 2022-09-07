@@ -44,7 +44,7 @@ public:
     std::string getTypographicFamily() const;
     std::string getTypographicSubFamily() const;
 
-    bool isLoaded() const;
+    bool isValid() const;
 
     void* native_handle() const;
     long use_count() const;

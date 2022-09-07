@@ -37,9 +37,9 @@ FontSearchInfo findFont(const std::forward_list<Path> &children, const string &n
         } else {
             Font font(child.toString());
 
-            if (font.isLoaded() && (font.getName() == name) && (font.getStyle() == style || style == Font::Style::Any)) {
+            if (font.isValid() && (font.getName() == name) && (font.getStyle() == style || style == Font::Style::Any)) {
                 return {true, font};
-            } else if (font.isLoaded() && font.use_count() == 2) {
+            } else if (font.isValid() && font.use_count() == 2) {
                 // removes font from FontLibrary if it has not been previously added
                 // 2 because font owned by this and by FontLibrary; this check is
                 // performed just in case, findFont shouldn't be called if font with
@@ -237,7 +237,7 @@ string Font::getTypographicSubFamily() const {
     return getProperty(TT_NAME_ID_TYPOGRAPHIC_SUBFAMILY, m_face);
 }
 
-bool Font::isLoaded() const {
+bool Font::isValid() const {
     return m_face != nullptr;
 }
 
