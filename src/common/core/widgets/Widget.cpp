@@ -49,8 +49,8 @@ Widget::Widget()
       m_scaleX(1.0f),
       m_scaleY(1.0f),
       m_opacity(1.0f),
-      m_horizontalPolicy(SizePolicy::Fixed),
-      m_verticalPolicy(SizePolicy::Fixed),
+      m_horizontalPolicy(SizePolicy::Preferred),
+      m_verticalPolicy(SizePolicy::Preferred),
       m_luaEnv()
 {
     m_texture = PtrMaker::make();
@@ -132,10 +132,14 @@ void Widget::setY(int y) {
 }
 
 void Widget::setWidth(int width) {
+    if (width != getWidth())
+        setHorizontalSizePolicy(SizePolicy::Fixed);
     setGeometry({m_geometry.getX(), m_geometry.getY(), width, m_geometry.getHeight()});
 }
 
 void Widget::setHeight(int height) {
+    if (height != getHeight())
+        setVerticalSizePolicy(SizePolicy::Fixed);
     setGeometry({m_geometry.getX(), m_geometry.getY(), m_geometry.getWidth(), height});
 }
 
