@@ -18,7 +18,7 @@ public:
     };
 
 public:
-    Font();
+    Font() noexcept;
     Font(const std::string &name, Style style);
     explicit Font(const std::string &path);
 

@@ -11,7 +11,6 @@
 #include <Windows.h>
 #endif
 
-using namespace std;
 using namespace tulz;
 
 namespace algine {
@@ -20,7 +19,7 @@ struct FontSearchInfo {
     Font font;
 };
 
-FontSearchInfo findFont(const std::forward_list<Path> &children, const string &name, Font::Style style) {
+FontSearchInfo findFont(const std::forward_list<Path> &children, const std::string &name, Font::Style style) {
     for (const auto &child : children) {
         if (child.isDirectory()) {
             auto dirChildren = child.listChildren();
@@ -52,7 +51,7 @@ FontSearchInfo findFont(const std::forward_list<Path> &children, const string &n
     return {false};
 }
 
-inline FontSearchInfo findFont(const string &name, Font::Style style) {
+inline FontSearchInfo findFont(const std::string &name, Font::Style style) {
 #ifdef __ANDROID__
     return findFont({"/system/fonts"_p}, name, style);
 #elif defined(__linux__)
@@ -64,17 +63,17 @@ inline FontSearchInfo findFont(const string &name, Font::Style style) {
 #endif
 }
 
-Font::Font() = default;
+Font::Font() noexcept = default;
 
-Font::Font(const string &name, Style style) {
+Font::Font(const std::string &name, Style style) {
     load(name, style);
 }
 
-Font::Font(const string &path) {
+Font::Font(const std::string &path) {
     loadPath(path);
 }
 
-void Font::load(const string &name, Style style) {
+void Font::load(const std::string &name, Style style) {
     auto fromLibrary = [&](Style style) {
         if (FontLibrary::exists(name, style)) {
             *this = FontLibrary::get(name, style);
@@ -109,8 +108,8 @@ struct LoadedFont {
     FT_Face face {};
 };
 
-void Font::loadPath(const string &path, const shared_ptr<IOSystem> &inIo) {
-    shared_ptr<IOSystem> io = inIo ? inIo : Engine::getDefaultIOSystem();
+void Font::loadPath(const std::string &path, const std::shared_ptr<IOSystem> &inIo) {
+    std::shared_ptr<IOSystem> io = inIo ? inIo : Engine::getDefaultIOSystem();
 
     auto stream = io->open(path, IOStream::Mode::Read);
     long size = static_cast<long>(stream->size());
@@ -143,7 +142,7 @@ void Font::loadPath(const string &path, const shared_ptr<IOSystem> &inIo) {
     }
 }
 
-inline string getProperty(FT_UShort property, const shared_ptr<void> &ftFace) {
+inline std::string getProperty(FT_UShort property, const std::shared_ptr<void> &ftFace) {
     auto face = static_cast<LoadedFont*>(ftFace.get())->face;
 
     for (int i = 0; i < FT_Get_Sfnt_Name_Count(face); i++) {
@@ -152,15 +151,15 @@ inline string getProperty(FT_UShort property, const shared_ptr<void> &ftFace) {
         FT_Get_Sfnt_Name(face, i, &properties);
 
         if (properties.name_id == property) {
-            return string(reinterpret_cast<const char *>(properties.string), properties.string_len);
+            return {reinterpret_cast<const char *>(properties.string), properties.string_len};
         }
     }
 
-    return string();
+    return {};
 }
 
 Font::Style Font::getStyle() const {
-    string prop = getProperty(TT_NAME_ID_FONT_SUBFAMILY, m_face);
+    std::string prop = getProperty(TT_NAME_ID_FONT_SUBFAMILY, m_face);
 
     if (prop == "Regular") {
         return Style::Regular;
@@ -173,67 +172,67 @@ Font::Style Font::getStyle() const {
     }
 }
 
-string Font::getCopyright() const {
+std::string Font::getCopyright() const {
     return getProperty(TT_NAME_ID_COPYRIGHT, m_face);
 }
 
-string Font::getFontFamily() const {
+std::string Font::getFontFamily() const {
     return getProperty(TT_NAME_ID_FONT_FAMILY, m_face);
 }
 
-string Font::getUniqueId() const {
+std::string Font::getUniqueId() const {
     return getProperty(TT_NAME_ID_UNIQUE_ID, m_face);
 }
 
-string Font::getName() const {
+std::string Font::getName() const {
     return getProperty(TT_NAME_ID_FULL_NAME, m_face);
 }
 
-string Font::getPSName() const {
+std::string Font::getPSName() const {
     return getProperty(TT_NAME_ID_PS_NAME, m_face);
 }
 
-string Font::getVersion() const {
+std::string Font::getVersion() const {
     return getProperty(TT_NAME_ID_VERSION_STRING, m_face);
 }
 
-string Font::getTrademark() const {
+std::string Font::getTrademark() const {
     return getProperty(TT_NAME_ID_TRADEMARK, m_face);
 }
 
-string Font::getManufacturer() const {
+std::string Font::getManufacturer() const {
     return getProperty(TT_NAME_ID_MANUFACTURER, m_face);
 }
 
-string Font::getDesigner() const {
+std::string Font::getDesigner() const {
     return getProperty(TT_NAME_ID_DESIGNER, m_face);
 }
 
-string Font::getDescription() const {
+std::string Font::getDescription() const {
     return getProperty(TT_NAME_ID_DESCRIPTION, m_face);
 }
 
-string Font::getVendorUrl() const {
+std::string Font::getVendorUrl() const {
     return getProperty(TT_NAME_ID_VENDOR_URL, m_face);
 }
 
-string Font::getDesignerUrl() const {
+std::string Font::getDesignerUrl() const {
     return getProperty(TT_NAME_ID_DESIGNER_URL, m_face);
 }
 
-string Font::getLicense() const {
+std::string Font::getLicense() const {
     return getProperty(TT_NAME_ID_LICENSE, m_face);
 }
 
-string Font::getLicenseUrl() const {
+std::string Font::getLicenseUrl() const {
     return getProperty(TT_NAME_ID_LICENSE_URL, m_face);
 }
 
-string Font::getTypographicFamily() const {
+std::string Font::getTypographicFamily() const {
     return getProperty(TT_NAME_ID_TYPOGRAPHIC_FAMILY, m_face);
 }
 
-string Font::getTypographicSubFamily() const {
+std::string Font::getTypographicSubFamily() const {
     return getProperty(TT_NAME_ID_TYPOGRAPHIC_SUBFAMILY, m_face);
 }
 
