@@ -405,6 +405,9 @@ void Widget::display(const DisplayOptions &options) {
     measure();
     layout();
 
+    if (getWidth() == 0 || getHeight() == 0)
+        return;
+
     if (isFlagEnabled(Flag::RedrawRequired)) {
         setFlag(Flag::RedrawRequired, false);
 
