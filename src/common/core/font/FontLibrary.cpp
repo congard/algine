@@ -4,6 +4,7 @@
 
 namespace algine {
 std::map<unsigned long, Font> FontLibrary::m_library;
+Font FontLibrary::m_default;
 
 inline auto getHash(std::string_view name, Font::Style style) {
     std::string fontStr;
@@ -20,7 +21,9 @@ void FontLibrary::add(const Font &font) {
 
 Font FontLibrary::get(std::string_view name, Font::Style style) {
     auto hash = getHash(name, style);
-    return m_library[hash];
+    if (auto it = m_library.find(hash); it != m_library.end())
+        return it->second;
+    return {};
 }
 
 bool FontLibrary::exists(std::string_view name, Font::Style style) {
@@ -49,5 +52,13 @@ void FontLibrary::optimize() {
 
 uint FontLibrary::size() {
     return m_library.size();
+}
+
+void FontLibrary::setDefault(const Font &font) {
+    m_default = font;
+}
+
+const Font& FontLibrary::getDefault() {
+    return m_default;
 }
 }

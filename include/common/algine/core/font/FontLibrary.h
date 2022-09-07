@@ -18,8 +18,12 @@ public:
     static void optimize();
     static uint size();
 
+    static void setDefault(const Font &font);
+    static const Font& getDefault();
+
 private:
     static std::map<unsigned long, Font> m_library;
+    static Font m_default;
 };
 }
 
