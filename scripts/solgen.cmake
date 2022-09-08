@@ -50,8 +50,9 @@ function(solgen output)
     if (NOT ALGINE_SOLGEN_PATH)
         message(STATUS "ALGINE_SOLGEN_PATH is not specified, building solgen")
         build_solgen(ALGINE_SOLGEN_PATH)
-        message(STATUS "ALGINE_SOLGEN_PATH=${ALGINE_SOLGEN_PATH}")
     endif()
+
+    message(STATUS "ALGINE_SOLGEN_PATH=${ALGINE_SOLGEN_PATH}")
 
     function(set_if_empty var)
         if (NOT ${var})
