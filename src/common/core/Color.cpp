@@ -59,6 +59,10 @@ uint Color::value() const {
     return (m_alpha & 0xff) << 24 | (m_red & 0xff) << 16 | (m_green & 0xff) << 8 | (m_blue & 0xff);
 }
 
+bool Color::isValid() const {
+    return m_red >= 0 && m_green >= 0 && m_blue >= 0 && m_alpha >= 0;
+}
+
 void Color::setValue(uint color) {
     m_red = (color >> 16) & 0xff;
     m_green = (color >> 8) & 0xff;
@@ -78,6 +82,38 @@ void Color::setRgbF(float r, float g, float b, float a) {
     m_green = static_cast<int>(g * 255);
     m_blue = static_cast<int>(b * 255);
     m_alpha = static_cast<int>(a * 255);
+}
+
+void Color::setRed(int red) {
+    m_red = red;
+}
+
+void Color::setGreen(int green) {
+    m_green = green;
+}
+
+void Color::setBlue(int blue) {
+    m_blue = blue;
+}
+
+void Color::setAlpha(int alpha) {
+    m_alpha = alpha;
+}
+
+void Color::setRedF(float red) {
+    m_red = static_cast<int>(red * 255.0f);
+}
+
+void Color::setGreenF(float green) {
+    m_green = static_cast<int>(green * 255.0f);
+}
+
+void Color::setBlueF(float blue) {
+    m_blue = static_cast<int>(blue * 255.0f);
+}
+
+void Color::setAlphaF(float alpha) {
+    m_alpha = static_cast<int>(alpha * 255.0f);
 }
 
 std::string Color::toString() const {

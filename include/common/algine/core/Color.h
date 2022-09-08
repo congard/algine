@@ -32,9 +32,21 @@ public:
 
     uint value() const;
 
+    bool isValid() const;
+
     void setValue(uint color);
     void setRgb(int r, int g, int b, int a = 255);
     void setRgbF(float r, float g, float b, float a = 1.0f);
+
+    void setRed(int red);
+    void setGreen(int green);
+    void setBlue(int blue);
+    void setAlpha(int alpha);
+
+    void setRedF(float red);
+    void setGreenF(float green);
+    void setBlueF(float blue);
+    void setAlphaF(float alpha);
 
     std::string toString() const;
 
