@@ -55,7 +55,7 @@ Widget::Widget()
 {
     m_texture = PtrMaker::make();
     m_texture->bind();
-    m_texture->setFormat(Texture::RGBA16F);
+    m_texture->setFormat(Texture::RGBA8);
     m_texture->setDimensions(getWidth(), getHeight());
     m_texture->setParams(std::map<uint, uint> {
         {Texture::MinFilter, Texture::Nearest},
@@ -565,28 +565,46 @@ RectI Widget::boundingRect() const {
     };
 }
 
-void Widget::setProperty(const char *name, const Property &property) {
-    auto hash = hash_djb2((unsigned char *) name);
+void Widget::setProperty(std::string_view name, const Property &property) {
+    auto hash = hash_djb2((unsigned char *) name.data());
     m_properties[hash] = property;
 }
 
-const Widget::Property& Widget::getProperty(const char *name) const {
-    auto hash = hash_djb2((unsigned char *) name);
+const Widget::Property& Widget::getProperty(std::string_view name) const {
+    auto hash = hash_djb2((unsigned char *) name.data());
     return m_properties.at(hash);
 }
 
-Widget::Property& Widget::property(const char *name) {
-    auto hash = hash_djb2((unsigned char *) name);
+Widget::Property& Widget::property(std::string_view name) {
+    auto hash = hash_djb2((unsigned char *) name.data());
     return m_properties[hash];
 }
 
-bool Widget::hasProperty(const char *name) const {
-    auto hash = hash_djb2((unsigned char *) name);
+Widget::Properties::const_iterator Widget::findProperty(std::string_view name) const {
+    auto hash = hash_djb2((unsigned char *) name.data());
+    return m_properties.find(hash);
+}
+
+Widget::Properties::iterator Widget::findProperty(std::string_view name) {
+    auto hash = hash_djb2((unsigned char *) name.data());
+    return m_properties.find(hash);
+}
+
+Widget::Properties::const_iterator Widget::propertiesEnd() const {
+    return m_properties.end();
+}
+
+Widget::Properties::iterator Widget::propertiesEnd() {
+    return m_properties.end();
+}
+
+bool Widget::hasProperty(std::string_view name) const {
+    auto hash = hash_djb2((unsigned char *) name.data());
     return m_properties.find(hash) != m_properties.end();
 }
 
-bool Widget::removeProperty(const char *name) {
-    auto hash = hash_djb2((unsigned char *) name);
+bool Widget::removeProperty(std::string_view name) {
+    auto hash = hash_djb2((unsigned char *) name.data());
 
     if (auto it = m_properties.find(hash); it != m_properties.end()) {
         m_properties.erase(it);

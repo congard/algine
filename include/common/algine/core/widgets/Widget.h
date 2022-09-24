@@ -45,6 +45,7 @@ public:
     };
 
     using Property = std::any;
+    using Properties = std::map<unsigned long, Property>;
 
 public:
     Widget();
@@ -137,11 +138,25 @@ public:
     PointI toLocalPoint(const PointI &globalPoint) const;
     RectI boundingRect() const;
 
-    void setProperty(const char *name, const Property &property);
-    const Property& getProperty(const char *name) const;
-    Property& property(const char *name);
-    bool hasProperty(const char *name) const;
-    bool removeProperty(const char *name);
+    void setProperty(std::string_view name, const Property &property);
+    const Property& getProperty(std::string_view name) const;
+    Property& property(std::string_view name);
+    Properties::const_iterator findProperty(std::string_view name) const;
+    Properties::iterator findProperty(std::string_view name);
+    Properties::const_iterator propertiesEnd() const;
+    Properties::iterator propertiesEnd();
+    bool hasProperty(std::string_view name) const;
+    bool removeProperty(std::string_view name);
+
+    template<typename T>
+    T getProperty(std::string_view name) const {
+        return std::any_cast<T>(getProperty(name));
+    }
+
+    template<typename T>
+    T property(std::string_view name) {
+        return std::any_cast<T>(property(name));
+    }
 
     void addScript(const std::string &path, Lua *lua = nullptr);
     void addScriptSource(const std::string &source, Lua *lua = nullptr);
@@ -224,7 +239,7 @@ protected:
     SizePolicy m_horizontalPolicy;
     SizePolicy m_verticalPolicy;
 
-    std::map<unsigned long, Property> m_properties;
+    Properties m_properties;
 
     sol::environment m_luaEnv;
 
