@@ -80,7 +80,7 @@ Painter::Painter()
     }
 
     m_colorTex->bind();
-    m_colorTex->setFormat(Texture::RGBA32F);
+    m_colorTex->setFormat(Texture::RGBA16F);
     m_colorTex->setWidth(1);
     m_colorTex->setHeight(1);
     m_colorTex->setParams(std::map<uint, uint> {
@@ -392,8 +392,7 @@ void Painter::drawRoundRect(const RoundRect &roundRect) {
         constexpr bool forcibly = isForcibly(forcibly_t);
 
         writeFloat<forcibly>("opacity", m_opacity, m_roundRectFill);
-        writeProjection<forcibly>(m_roundRectFill);
-        writeTransform<forcibly>(m_roundRectFill);
+        writeTPMatrix<forcibly>(m_roundRectFill);
         writePaintTransform<forcibly>(m_roundRectFill);
 
         m_roundRectFill->setVec4("p1p2",
@@ -428,8 +427,7 @@ void Painter::drawCircle(const PointF &origin, float radius) {
         constexpr bool forcibly = isForcibly(forcibly_t);
 
         writeFloat<forcibly>("opacity", m_opacity, m_circleFill);
-        writeProjection<forcibly>(m_circleFill);
-        writeTransform<forcibly>(m_circleFill);
+        writeTPMatrix<forcibly>(m_circleFill);
         writePaintTransform<forcibly>(m_circleFill);
 
         m_circleFill->setVec2("origin", origin.getX(), origin.getY());
@@ -448,8 +446,7 @@ void Painter::drawText(std::u16string_view text, const PointF &p) {
     bindProgram(m_textFill, [this](auto forcibly_t) {
         constexpr bool forcibly = isForcibly(forcibly_t);
         writeFloat<forcibly>("opacity", m_opacity, m_textFill);
-        writeProjection<forcibly>(m_textFill);
-        writeTransform<forcibly>(m_textFill);
+        writeTPMatrix<forcibly>(m_textFill);
         writePaintTransform<forcibly>(m_textFill);
     });
 
@@ -581,8 +578,7 @@ void Painter::bindFillProgram() {
     bindProgram(m_fill, [this](auto forcibly_t) {
         constexpr bool forcibly = isForcibly(forcibly_t);
         writeFloat<forcibly>("opacity", m_opacity, m_fill);
-        writeProjection<forcibly>(m_fill);
-        writeTransform<forcibly>(m_fill);
+        writeTPMatrix<forcibly>(m_fill);
         writePaintTransform<forcibly>(m_fill);
     });
 }
@@ -592,8 +588,7 @@ void Painter::bindFillTexProgram() {
         constexpr bool forcibly = isForcibly(forcibly_t);
 
         writeFloat<forcibly>("opacity", m_opacity, m_fill);
-        writeProjection<forcibly>(m_fill);
-        writeTransform<forcibly>(m_fill);
+        writeTPMatrix<forcibly>(m_fill);
 
         if (forcibly) {
             m_fill->setMat4("paintTransformation", glm::mat4(1.0f));

@@ -117,18 +117,15 @@ private:
     }
 
     template<bool forcibly>
-    inline void writeTransform(AutoRawPtr<ShaderProgram> program) {
-        writeMat4<forcibly>("transformation", m_transform, program);
+    inline void writeTPMatrix(AutoRawPtr<ShaderProgram> program) {
+        if (forcibly || m_projection.hasChanged() || m_transform.hasChanged()) {
+            program->setMat4("tpMatrix", m_projection.get() * m_transform.get());
+        }
     }
 
     template<bool forcibly>
     inline void writePaintTransform(AutoRawPtr<ShaderProgram> program) {
         writeMat4<forcibly>("paintTransformation", m_paint.m_transform, program);
-    }
-
-    template<bool forcibly>
-    inline void writeProjection(AutoRawPtr<ShaderProgram> program) {
-        writeMat4<forcibly>("projection", m_projection, program);
     }
 
 private:
