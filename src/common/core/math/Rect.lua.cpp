@@ -15,6 +15,8 @@ void registerRect(std::string_view name, sol::table &table) {
     auto usertype = table.new_usertype<Rect<T>>(
             name,
             sol::meta_function::equal_to, &Rect<T>::operator==,
+            sol::meta_function::bitwise_or, &Rect<T>::operator|,
+            sol::meta_function::bitwise_and, &Rect<T>::operator&,
             sol::meta_function::construct, ctors,
             sol::call_constructor, ctors);
 
@@ -23,6 +25,22 @@ void registerRect(std::string_view name, sol::table &table) {
     usertype["translate"] = sol::overload(
         static_cast<void (Rect<T>::*)(T, T)>(&Rect<T>::translate),
         static_cast<void (Rect<T>::*)(const Point<T>&)>(&Rect<T>::translate));
+    usertype["unite"] = &Rect<T>::unite;
+    usertype["united"] = &Rect<T>::united;
+    usertype["intersect"] = &Rect<T>::intersect;
+    usertype["intersected"] = &Rect<T>::intersected;
+    usertype["intersects"] = &Rect<T>::intersects;
+    usertype["top"] = &Rect<T>::top;
+    usertype["left"] = &Rect<T>::left;
+    usertype["bottom"] = &Rect<T>::bottom;
+    usertype["right"] = &Rect<T>::right;
+    usertype["topLeft"] = &Rect<T>::topLeft;
+    usertype["topRight"] = &Rect<T>::topRight;
+    usertype["bottomLeft"] = &Rect<T>::bottomLeft;
+    usertype["bottomRight"] = &Rect<T>::bottomRight;
+    usertype["contains"] = sol::overload(
+        static_cast<bool (Rect<T>::*)(const Point<T>&) const>(&Rect<T>::contains),
+        static_cast<bool (Rect<T>::*)(const Rect<T>&) const>(&Rect<T>::contains));
     usertype["isValid"] = &Rect<T>::isValid;
 
     Lua::new_property(usertype, "x", &Rect<T>::getX, &Rect<T>::setX);
