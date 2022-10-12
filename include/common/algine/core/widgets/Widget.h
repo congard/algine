@@ -3,6 +3,7 @@
 
 #include <algine/core/widgets/SizePolicy.h>
 #include <algine/core/widgets/WidgetPtr.h>
+#include <algine/core/widgets/WidgetDisplayOptions.h>
 #include <algine/core/shader/ShaderProgramPtr.h>
 #include <algine/core/texture/Texture2DPtr.h>
 #include <algine/core/FramebufferPtr.h>
@@ -23,7 +24,6 @@ class xml_node;
 }
 
 namespace algine {
-class Painter;
 class IOSystem;
 
 class Widget {
@@ -31,17 +31,6 @@ public:
     enum class Filtering {
         Nearest = 0x2600,
         Linear = 0x2601
-    };
-
-    struct DisplayOptions {
-        int parentWidth;
-        int parentHeight;
-        int parentPaddingLeft {0};
-        int parentPaddingTop {0};
-        int parentPaddingRight {0};
-        int parentPaddingBottom {0};
-        Framebuffer *parentFramebuffer {nullptr};
-        Painter *painter;
     };
 
     using Property = std::any;
@@ -127,7 +116,7 @@ public:
     void requestLayout();
     void invalidate();
 
-    void display(const DisplayOptions &options);
+    void display(const WidgetDisplayOptions &options);
 
     void measure();
     void layout();

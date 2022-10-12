@@ -395,10 +395,9 @@ void Widget::invalidate() {
     requireParentRedraw();
 }
 
-void Widget::display(const DisplayOptions &options) {
-    if (!isVisible() || m_opacity == 0.0f) {
+void Widget::display(const WidgetDisplayOptions &options) {
+    if (!isVisible() || m_opacity == 0.0f)
         return;
-    }
 
     auto painter = options.painter;
 
@@ -415,16 +414,16 @@ void Widget::display(const DisplayOptions &options) {
         onDraw(*painter);
     }
 
-    if (options.parentFramebuffer) {
-        options.parentFramebuffer->bind();
+    if (options.framebuffer) {
+        options.framebuffer->bind();
     } else {
         Engine::defaultFramebuffer()->bind();
     }
 
-    int parentContentWidth = options.parentWidth - options.parentPaddingLeft - options.parentPaddingRight;
-    int parentContentHeight = options.parentHeight - options.parentPaddingTop - options.parentPaddingBottom;
+    int parentContentWidth = options.width - options.paddingLeft - options.paddingRight;
+    int parentContentHeight = options.height - options.paddingTop - options.paddingBottom;
 
-    Engine::setViewport(options.parentPaddingLeft, options.parentPaddingBottom,
+    Engine::setViewport(options.paddingLeft, options.paddingBottom,
                         parentContentWidth, parentContentHeight);
     painter->setViewport(parentContentWidth, parentContentHeight);
 

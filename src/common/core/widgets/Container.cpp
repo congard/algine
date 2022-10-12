@@ -233,14 +233,14 @@ void Container::onMeasure(int &width, int &height) {
 }
 
 void Container::onDraw(Painter &painter) {
-    DisplayOptions options;
-    options.parentWidth = getWidth();
-    options.parentHeight = getHeight();
-    options.parentPaddingLeft = getPaddingLeft();
-    options.parentPaddingTop = getPaddingTop();
-    options.parentPaddingRight = getPaddingRight();
-    options.parentPaddingBottom = getPaddingBottom();
-    options.parentFramebuffer = m_framebuffer.get();
+    WidgetDisplayOptions options;
+    options.width = getWidth();
+    options.height = getHeight();
+    options.paddingLeft = getPaddingLeft();
+    options.paddingTop = getPaddingTop();
+    options.paddingRight = getPaddingRight();
+    options.paddingBottom = getPaddingBottom();
+    options.framebuffer = m_framebuffer.get();
     options.painter = &painter;
 
     for (auto &child : m_children) {
