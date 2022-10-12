@@ -168,30 +168,6 @@ ContainerPtr Container::containerAt(const PointI &point) {
     return std::dynamic_pointer_cast<Container>(child);
 }
 
-RectI Container::geometry(const WidgetPtr &widget) const {
-    // step 1: check if the widget is a child of the current Container
-    for (auto &child : m_children) {
-        if (child == widget) {
-            return widget->getGeometry();
-        }
-    }
-
-    // step 2: check children of child Containers
-    for (auto &child : m_children) {
-        if (auto container = std::dynamic_pointer_cast<Container>(child); container) {
-            auto geometry = container->geometry(widget);
-
-            if (geometry.isValid()) {
-                geometry.translate(container->getX(), container->getY());
-                geometry.translate(container->getPaddingLeft(), container->getPaddingTop());
-                return geometry;
-            }
-        }
-    }
-
-    return {-1, -1, -1, -1};
-}
-
 void Container::onMeasure(int &width, int &height) {
     Widget::onMeasure(width, height);
 
