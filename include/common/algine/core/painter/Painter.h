@@ -79,6 +79,8 @@ public:
     void drawTexture(PtrView<Texture2D> texture, const PointF &p);
     void drawTexture(PtrView<Texture2D> texture, float x, float y);
 
+    bool isActive() const;
+
     static void optimizeFontCache();
     static void clearFontCache();
 
@@ -151,6 +153,9 @@ private:
     bool m_wasDepthTestEnabled;
     bool m_wasBlendingEnabled;
     int m_prevSrcAlphaBlendMode;
+
+private:
+    bool m_isActive;
 
 private:
     static ShaderProgramPtr m_fill;

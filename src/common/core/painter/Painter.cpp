@@ -33,7 +33,8 @@ Painter::Painter()
       m_transform(glm::mat4(1.0f)),
       m_opacity(1.0f),
       m_fontHash(0),
-      m_activeProgram(nullptr)
+      m_activeProgram(nullptr),
+      m_isActive(false)
 {
     // TODO: implement in the engine
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -104,6 +105,7 @@ void Painter::begin() {
     m_buffer->bind();
 
     m_activeProgram = nullptr;
+    m_isActive = true;
 
     // TODO: implement MSAA
 
@@ -138,6 +140,8 @@ void Painter::end() {
             glBlendFunc(GL_SRC_ALPHA, m_prevSrcAlphaBlendMode);
         }
     }
+
+    m_isActive = false;
 
     m_buffer->unbind();
     m_layout->unbind();
@@ -558,6 +562,10 @@ void Painter::drawTexture(PtrView<Texture2D> texture, const PointF &p) {
 
 void Painter::drawTexture(PtrView<Texture2D> texture, float x, float y) {
     drawTexture(texture, {x, y});
+}
+
+bool Painter::isActive() const {
+    return m_isActive;
 }
 
 void Painter::optimizeFontCache() {
