@@ -44,9 +44,16 @@ public:
     Widget();
     virtual ~Widget() = default;
 
-    /// #solgen #prop_name geometry
+    /**
+     * Sets widget's geometry
+     * @note this function will not change widget's size policy,
+     * unlike setWidth / setHeight
+     * @see setX, setY, setWidth, setHeight
+     * <!-- #solgen #prop_name geometry -->
+     */
     virtual void setGeometry(RectI geometry);
-    /// #solgen #prop_name geometry
+
+    /// <!-- #solgen #prop_name geometry -->
     const RectI& getGeometry() const;
 
     void setVisible(bool visible);
