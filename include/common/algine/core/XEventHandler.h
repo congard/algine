@@ -70,7 +70,8 @@ public:
 
 class XEventHandler::PointerInfo {
 public:
-    using Pointer = std::variant<MouseKey, int>;
+    using Finger = int;
+    using Pointer = std::variant<MouseKey, Finger>;
 
 public:
 #ifdef __ANDROID__
@@ -100,11 +101,12 @@ public:
     float getY() const;
 
     void setMouseKey(MouseKey key);
-    void setFinger(int id);
+    void setFinger(Finger id);
     bool isMouseKey() const;
     bool isFinger() const;
     MouseKey getMouseKey() const;
-    int getFinger() const;
+    Finger getFinger() const;
+    const Pointer& getPointer() const;
 
     bool isPointerActive(Pointer pointer) const;
     glm::vec2 getPointerPos(Pointer pointer) const;
@@ -146,7 +148,7 @@ inline void XEventHandler::PointerInfo::setMouseKey(MouseKey key) {
     m_pointer = key;
 }
 
-inline void XEventHandler::PointerInfo::setFinger(int id) {
+inline void XEventHandler::PointerInfo::setFinger(Finger id) {
     m_pointer = id;
 }
 
@@ -155,15 +157,19 @@ inline bool XEventHandler::PointerInfo::isMouseKey() const {
 }
 
 inline bool XEventHandler::PointerInfo::isFinger() const {
-    return std::get_if<int>(&m_pointer);
+    return std::get_if<Finger>(&m_pointer);
 }
 
 inline MouseKey XEventHandler::PointerInfo::getMouseKey() const {
     return std::get<MouseKey>(m_pointer);
 }
 
-inline int XEventHandler::PointerInfo::getFinger() const {
-    return std::get<int>(m_pointer);
+inline XEventHandler::PointerInfo::Finger XEventHandler::PointerInfo::getFinger() const {
+    return std::get<Finger>(m_pointer);
+}
+
+inline const XEventHandler::PointerInfo::Pointer& XEventHandler::PointerInfo::getPointer() const {
+    return m_pointer;
 }
 
 class XEventHandler::FocusInfo {
