@@ -23,6 +23,9 @@ public:
     inline PtrView(U *ptr)
         : m_ptr(ptr) {}
 
+    inline PtrView(std::nullptr_t)
+        : m_ptr(nullptr) {}
+
     template<typename U>
     inline PtrView& operator=(const Ptr<U> &ptr) {
         m_ptr = ptr.get();
@@ -35,11 +38,27 @@ public:
         return *this;
     }
 
-    T* operator->() const {
+    template<typename U> inline bool operator==(PtrView<U> ptr) { return m_ptr == ptr.get(); }
+    template<typename U> inline bool operator==(const std::shared_ptr<U> &ptr) { return m_ptr == ptr.get(); }
+    template<typename U> inline bool operator==(const std::unique_ptr<U> &ptr) { return m_ptr == ptr.get(); }
+    template<typename U> inline bool operator==(U *ptr) { return m_ptr == ptr; }
+    inline bool operator==(std::nullptr_t) { return m_ptr == nullptr; }
+
+    template<typename U> inline bool operator!=(PtrView<U> ptr) { return !(*this == ptr); }
+    template<typename U> inline bool operator!=(const std::shared_ptr<U> &ptr) { return !(*this == ptr); }
+    template<typename U> inline bool operator!=(const std::unique_ptr<U> &ptr) { return !(*this == ptr); }
+    template<typename U> inline bool operator!=(U *ptr) { return !(*this == ptr); }
+    inline bool operator!=(std::nullptr_t) { return m_ptr != nullptr; }
+
+    inline T& operator*() {
+        return *m_ptr;
+    }
+
+    inline T* operator->() const {
         return m_ptr;
     }
 
-    T* get() const {
+    inline T* get() const {
         return m_ptr;
     }
 
