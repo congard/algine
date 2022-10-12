@@ -9,6 +9,7 @@
 #include <algine/core/FramebufferPtr.h>
 #include <algine/core/painter/Paint.h>
 #include <algine/core/math/Rect.h>
+#include <algine/core/PtrView.h>
 #include <algine/core/Variant.h>
 #include <algine/core/lua/Lua.h>
 #include <algine/types.h>
@@ -25,6 +26,9 @@ class xml_node;
 
 namespace algine {
 class IOSystem;
+class Widget;
+
+using WidgetPtrView = PtrView<Widget>;
 
 class Widget {
 public:

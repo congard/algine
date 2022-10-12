@@ -6,14 +6,14 @@
 #include "LayoutProperties.h"
 
 namespace algine {
-inline void requestParentUpdate(Layout::WidgetPtrView widget) {
+inline void requestParentUpdate(WidgetPtrView widget) {
     if (auto parent = widget->getParent(); parent != nullptr) {
         parent->requestLayout();
         parent->invalidate();
     }
 }
 
-inline void setMarginProperty(const Layout::WidgetPtrView &widget, const char *name, int value) {
+inline void setMarginProperty(const WidgetPtrView &widget, const char *name, int value) {
     if (value == 0) {
         widget->removeProperty(name);
     } else {
@@ -49,7 +49,7 @@ void Layout::setMarginBottom(WidgetPtrView widget, int margin) {
     setMarginProperty(widget, Property_MarginBottom, margin);
 }
 
-inline int getMarginProperty(const Layout::WidgetPtrView &widget, const char *name) {
+inline int getMarginProperty(const WidgetPtrView &widget, const char *name) {
     if (widget->hasProperty(name)) {
         auto &property = widget->property(name);
 

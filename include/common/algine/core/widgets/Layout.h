@@ -6,9 +6,6 @@
 namespace algine {
 class Layout: public Container {
 public:
-    using WidgetPtrView = PtrView<Widget>;
-
-public:
     static void setMargin(WidgetPtrView widget, int left, int top, int right, int bottom);
     static void setMarginLeft(WidgetPtrView widget, int margin);
     static void setMarginTop(WidgetPtrView widget, int margin);
