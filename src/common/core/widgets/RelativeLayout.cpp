@@ -16,14 +16,14 @@
 #define Property_AlignBottom "alignBottom"
 
 namespace algine {
-inline void requestParentUpdate(Layout::WidgetAutoRawPtr widget) {
+inline void requestParentUpdate(Layout::WidgetPtrView widget) {
     if (auto parent = widget->getParent(); parent != nullptr) {
         parent->requestLayout();
         parent->invalidate();
     }
 }
 
-inline void setPosProperty(Layout::WidgetAutoRawPtr widget, const char *name, std::string_view value) {
+inline void setPosProperty(Layout::WidgetPtrView widget, const char *name, std::string_view value) {
     if (value.empty()) {
         widget->removeProperty(name);
     } else {
@@ -31,27 +31,27 @@ inline void setPosProperty(Layout::WidgetAutoRawPtr widget, const char *name, st
     }
 }
 
-void RelativeLayout::setAbove(WidgetAutoRawPtr widget, std::string_view name) {
+void RelativeLayout::setAbove(WidgetPtrView widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_Above, name);
 }
 
-void RelativeLayout::setBelow(WidgetAutoRawPtr widget, std::string_view name) {
+void RelativeLayout::setBelow(WidgetPtrView widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_Below, name);
 }
 
-void RelativeLayout::setToRightOf(WidgetAutoRawPtr widget, std::string_view name) {
+void RelativeLayout::setToRightOf(WidgetPtrView widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_ToRightOf, name);
 }
 
-void RelativeLayout::setToLeftOf(WidgetAutoRawPtr widget, std::string_view name) {
+void RelativeLayout::setToLeftOf(WidgetPtrView widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_ToLeftOf, name);
 }
 
-inline std::string getStringProperty(Layout::WidgetAutoRawPtr widget, const char *name) {
+inline std::string getStringProperty(Layout::WidgetPtrView widget, const char *name) {
     if (widget->hasProperty(name)) {
         auto &property = widget->property(name);
 
@@ -65,55 +65,55 @@ inline std::string getStringProperty(Layout::WidgetAutoRawPtr widget, const char
     }
 }
 
-std::string RelativeLayout::getAbove(WidgetAutoRawPtr widget) {
+std::string RelativeLayout::getAbove(WidgetPtrView widget) {
     return getStringProperty(widget, Property_Above);
 }
 
-std::string RelativeLayout::getBelow(WidgetAutoRawPtr widget) {
+std::string RelativeLayout::getBelow(WidgetPtrView widget) {
     return getStringProperty(widget, Property_Below);
 }
 
-std::string RelativeLayout::getToRightOf(WidgetAutoRawPtr widget) {
+std::string RelativeLayout::getToRightOf(WidgetPtrView widget) {
     return getStringProperty(widget, Property_ToRightOf);
 }
 
-std::string RelativeLayout::getToLeftOf(WidgetAutoRawPtr widget) {
+std::string RelativeLayout::getToLeftOf(WidgetPtrView widget) {
     return getStringProperty(widget, Property_ToLeftOf);
 }
 
-void RelativeLayout::setAlignLeft(Layout::WidgetAutoRawPtr widget, std::string_view name) {
+void RelativeLayout::setAlignLeft(Layout::WidgetPtrView widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_AlignLeft, name);
 }
 
-void RelativeLayout::setAlignRight(Layout::WidgetAutoRawPtr widget, std::string_view name) {
+void RelativeLayout::setAlignRight(Layout::WidgetPtrView widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_AlignRight, name);
 }
 
-void RelativeLayout::setAlignTop(Layout::WidgetAutoRawPtr widget, std::string_view name) {
+void RelativeLayout::setAlignTop(Layout::WidgetPtrView widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_AlignTop, name);
 }
 
-void RelativeLayout::setAlignBottom(Layout::WidgetAutoRawPtr widget, std::string_view name) {
+void RelativeLayout::setAlignBottom(Layout::WidgetPtrView widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_AlignBottom, name);
 }
 
-std::string RelativeLayout::getAlignLeft(Layout::WidgetAutoRawPtr widget) {
+std::string RelativeLayout::getAlignLeft(Layout::WidgetPtrView widget) {
     return getStringProperty(widget, Property_AlignLeft);
 }
 
-std::string RelativeLayout::getAlignRight(Layout::WidgetAutoRawPtr widget) {
+std::string RelativeLayout::getAlignRight(Layout::WidgetPtrView widget) {
     return getStringProperty(widget, Property_AlignRight);
 }
 
-std::string RelativeLayout::getAlignTop(Layout::WidgetAutoRawPtr widget) {
+std::string RelativeLayout::getAlignTop(Layout::WidgetPtrView widget) {
     return getStringProperty(widget, Property_AlignTop);
 }
 
-std::string RelativeLayout::getAlignBottom(Layout::WidgetAutoRawPtr widget) {
+std::string RelativeLayout::getAlignBottom(Layout::WidgetPtrView widget) {
     return getStringProperty(widget, Property_AlignBottom);
 }
 
@@ -127,7 +127,7 @@ public:
     inline WidgetInfo(Widget *widget)
         : m_widget(widget) {}
 
-    inline operator WidgetAutoRawPtr() const { return m_widget; }
+    inline operator WidgetPtrView() const { return m_widget; }
 
     inline void setX(int x) { m_x = x; }
     inline void setY(int y) { m_y = y; }

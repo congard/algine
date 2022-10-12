@@ -2,32 +2,31 @@
 #define ALGINE_LAYOUT_H
 
 #include <algine/core/widgets/Container.h>
-#include <algine/core/AutoRawPtr.h>
 
 namespace algine {
 class Layout: public Container {
 public:
-    using WidgetAutoRawPtr = AutoRawPtr<Widget>;
+    using WidgetPtrView = PtrView<Widget>;
 
 public:
-    static void setMargin(WidgetAutoRawPtr widget, int left, int top, int right, int bottom);
-    static void setMarginLeft(WidgetAutoRawPtr widget, int margin);
-    static void setMarginTop(WidgetAutoRawPtr widget, int margin);
-    static void setMarginRight(WidgetAutoRawPtr widget, int margin);
-    static void setMarginBottom(WidgetAutoRawPtr widget, int margin);
+    static void setMargin(WidgetPtrView widget, int left, int top, int right, int bottom);
+    static void setMarginLeft(WidgetPtrView widget, int margin);
+    static void setMarginTop(WidgetPtrView widget, int margin);
+    static void setMarginRight(WidgetPtrView widget, int margin);
+    static void setMarginBottom(WidgetPtrView widget, int margin);
 
-    static int getMarginLeft(WidgetAutoRawPtr widget);
-    static int getMarginTop(WidgetAutoRawPtr widget);
-    static int getMarginRight(WidgetAutoRawPtr widget);
-    static int getMarginBottom(WidgetAutoRawPtr widget);
+    static int getMarginLeft(WidgetPtrView widget);
+    static int getMarginTop(WidgetPtrView widget);
+    static int getMarginRight(WidgetPtrView widget);
+    static int getMarginBottom(WidgetPtrView widget);
 
-    static void setAlignment(WidgetAutoRawPtr widget, uint alignment);
-    static uint getAlignment(WidgetAutoRawPtr widget);
+    static void setAlignment(WidgetPtrView widget, uint alignment);
+    static uint getAlignment(WidgetPtrView widget);
 
 protected:
-    static void setChildXDirectly(WidgetAutoRawPtr child, int x);
-    static void setChildYDirectly(WidgetAutoRawPtr child, int y);
-    static void childGeometryChanged(WidgetAutoRawPtr child, const RectI &geometry);
+    static void setChildXDirectly(WidgetPtrView child, int x);
+    static void setChildYDirectly(WidgetPtrView child, int y);
+    static void childGeometryChanged(WidgetPtrView child, const RectI &geometry);
 };
 }
 

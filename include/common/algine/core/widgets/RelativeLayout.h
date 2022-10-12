@@ -8,25 +8,25 @@
 namespace algine {
 class RelativeLayout: public Layout {
 public:
-    static void setAbove(WidgetAutoRawPtr widget, std::string_view name);
-    static void setBelow(WidgetAutoRawPtr widget, std::string_view name);
-    static void setToRightOf(WidgetAutoRawPtr widget, std::string_view name);
-    static void setToLeftOf(WidgetAutoRawPtr widget, std::string_view name);
+    static void setAbove(WidgetPtrView widget, std::string_view name);
+    static void setBelow(WidgetPtrView widget, std::string_view name);
+    static void setToRightOf(WidgetPtrView widget, std::string_view name);
+    static void setToLeftOf(WidgetPtrView widget, std::string_view name);
 
-    static std::string getAbove(WidgetAutoRawPtr widget);
-    static std::string getBelow(WidgetAutoRawPtr widget);
-    static std::string getToRightOf(WidgetAutoRawPtr widget);
-    static std::string getToLeftOf(WidgetAutoRawPtr widget);
+    static std::string getAbove(WidgetPtrView widget);
+    static std::string getBelow(WidgetPtrView widget);
+    static std::string getToRightOf(WidgetPtrView widget);
+    static std::string getToLeftOf(WidgetPtrView widget);
 
-    static void setAlignLeft(WidgetAutoRawPtr widget, std::string_view name);
-    static void setAlignRight(WidgetAutoRawPtr widget, std::string_view name);
-    static void setAlignTop(WidgetAutoRawPtr widget, std::string_view name);
-    static void setAlignBottom(WidgetAutoRawPtr widget, std::string_view name);
+    static void setAlignLeft(WidgetPtrView widget, std::string_view name);
+    static void setAlignRight(WidgetPtrView widget, std::string_view name);
+    static void setAlignTop(WidgetPtrView widget, std::string_view name);
+    static void setAlignBottom(WidgetPtrView widget, std::string_view name);
 
-    static std::string getAlignLeft(WidgetAutoRawPtr widget);
-    static std::string getAlignRight(WidgetAutoRawPtr widget);
-    static std::string getAlignTop(WidgetAutoRawPtr widget);
-    static std::string getAlignBottom(WidgetAutoRawPtr widget);
+    static std::string getAlignLeft(WidgetPtrView widget);
+    static std::string getAlignRight(WidgetPtrView widget);
+    static std::string getAlignTop(WidgetPtrView widget);
+    static std::string getAlignBottom(WidgetPtrView widget);
 
 protected:
     void onMeasure(int &width, int &height) override;

@@ -532,7 +532,7 @@ void Painter::drawText(std::string_view text, float x, float y) {
     drawText(text, {x, y});
 }
 
-void Painter::drawTexture(AutoRawPtr<Texture2D> texture, const RectF &rect) {
+void Painter::drawTexture(PtrView<Texture2D> texture, const RectF &rect) {
     writeRectToBuffer(rect);
     texture->use(0);
 
@@ -541,7 +541,7 @@ void Painter::drawTexture(AutoRawPtr<Texture2D> texture, const RectF &rect) {
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
 
-void Painter::drawTexture(AutoRawPtr<Texture2D> texture, const PointF &p) {
+void Painter::drawTexture(PtrView<Texture2D> texture, const PointF &p) {
     texture->use(0);
 
     writeRectToBuffer({
@@ -556,7 +556,7 @@ void Painter::drawTexture(AutoRawPtr<Texture2D> texture, const PointF &p) {
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
 
-void Painter::drawTexture(AutoRawPtr<Texture2D> texture, float x, float y) {
+void Painter::drawTexture(PtrView<Texture2D> texture, float x, float y) {
     drawTexture(texture, {x, y});
 }
 

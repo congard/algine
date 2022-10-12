@@ -6,14 +6,14 @@
 #include "LayoutProperties.h"
 
 namespace algine {
-inline void requestParentUpdate(Layout::WidgetAutoRawPtr widget) {
+inline void requestParentUpdate(Layout::WidgetPtrView widget) {
     if (auto parent = widget->getParent(); parent != nullptr) {
         parent->requestLayout();
         parent->invalidate();
     }
 }
 
-inline void setMarginProperty(const Layout::WidgetAutoRawPtr &widget, const char *name, int value) {
+inline void setMarginProperty(const Layout::WidgetPtrView &widget, const char *name, int value) {
     if (value == 0) {
         widget->removeProperty(name);
     } else {
@@ -21,7 +21,7 @@ inline void setMarginProperty(const Layout::WidgetAutoRawPtr &widget, const char
     }
 }
 
-void Layout::setMargin(WidgetAutoRawPtr widget, int left, int top, int right, int bottom) {
+void Layout::setMargin(WidgetPtrView widget, int left, int top, int right, int bottom) {
     requestParentUpdate(widget);
     setMarginProperty(widget, Property_MarginLeft, left);
     setMarginProperty(widget, Property_MarginTop, top);
@@ -29,27 +29,27 @@ void Layout::setMargin(WidgetAutoRawPtr widget, int left, int top, int right, in
     setMarginProperty(widget, Property_MarginBottom, bottom);
 }
 
-void Layout::setMarginLeft(WidgetAutoRawPtr widget, int margin) {
+void Layout::setMarginLeft(WidgetPtrView widget, int margin) {
     requestParentUpdate(widget);
     setMarginProperty(widget, Property_MarginLeft, margin);
 }
 
-void Layout::setMarginTop(WidgetAutoRawPtr widget, int margin) {
+void Layout::setMarginTop(WidgetPtrView widget, int margin) {
     requestParentUpdate(widget);
     setMarginProperty(widget, Property_MarginTop, margin);
 }
 
-void Layout::setMarginRight(WidgetAutoRawPtr widget, int margin) {
+void Layout::setMarginRight(WidgetPtrView widget, int margin) {
     requestParentUpdate(widget);
     setMarginProperty(widget, Property_MarginRight, margin);
 }
 
-void Layout::setMarginBottom(WidgetAutoRawPtr widget, int margin) {
+void Layout::setMarginBottom(WidgetPtrView widget, int margin) {
     requestParentUpdate(widget);
     setMarginProperty(widget, Property_MarginBottom, margin);
 }
 
-inline int getMarginProperty(const Layout::WidgetAutoRawPtr &widget, const char *name) {
+inline int getMarginProperty(const Layout::WidgetPtrView &widget, const char *name) {
     if (widget->hasProperty(name)) {
         auto &property = widget->property(name);
 
@@ -65,23 +65,23 @@ inline int getMarginProperty(const Layout::WidgetAutoRawPtr &widget, const char 
     }
 }
 
-int Layout::getMarginLeft(WidgetAutoRawPtr widget) {
+int Layout::getMarginLeft(WidgetPtrView widget) {
     return getMarginProperty(widget, Property_MarginLeft);
 }
 
-int Layout::getMarginTop(WidgetAutoRawPtr widget) {
+int Layout::getMarginTop(WidgetPtrView widget) {
     return getMarginProperty(widget, Property_MarginTop);
 }
 
-int Layout::getMarginRight(WidgetAutoRawPtr widget) {
+int Layout::getMarginRight(WidgetPtrView widget) {
     return getMarginProperty(widget, Property_MarginRight);
 }
 
-int Layout::getMarginBottom(WidgetAutoRawPtr widget) {
+int Layout::getMarginBottom(WidgetPtrView widget) {
     return getMarginProperty(widget, Property_MarginBottom);
 }
 
-void Layout::setAlignment(WidgetAutoRawPtr widget, uint alignment) {
+void Layout::setAlignment(WidgetPtrView widget, uint alignment) {
     requestParentUpdate(widget);
 
     if (alignment == (Alignment::Top | Alignment::Left)) {
@@ -91,7 +91,7 @@ void Layout::setAlignment(WidgetAutoRawPtr widget, uint alignment) {
     }
 }
 
-uint Layout::getAlignment(WidgetAutoRawPtr widget) {
+uint Layout::getAlignment(WidgetPtrView widget) {
     if (widget->hasProperty(Property_Alignment)) {
         if (auto &property = widget->property(Property_Alignment); property.type() == typeid(int)) {
             return std::any_cast<int>(property);
@@ -117,15 +117,15 @@ uint Layout::getAlignment(WidgetAutoRawPtr widget) {
  * has changed.
  */
 
-void Layout::setChildXDirectly(WidgetAutoRawPtr child, int x) {
+void Layout::setChildXDirectly(WidgetPtrView child, int x) {
     reinterpret_cast<Layout*>(child.get())->m_geometry.setX(x);
 }
 
-void Layout::setChildYDirectly(WidgetAutoRawPtr child, int y) {
+void Layout::setChildYDirectly(WidgetPtrView child, int y) {
     reinterpret_cast<Layout*>(child.get())->m_geometry.setY(y);
 }
 
-void Layout::childGeometryChanged(WidgetAutoRawPtr child, const RectI &geometry) {
+void Layout::childGeometryChanged(WidgetPtrView child, const RectI &geometry) {
     reinterpret_cast<Layout *>(child.get())->onGeometryChanged(geometry);
 }
 }

@@ -8,7 +8,7 @@
 #include <algine/core/painter/RoundRect.h>
 #include <algine/core/painter/Paint.h>
 #include <algine/core/math/Rect.h>
-#include <algine/core/AutoRawPtr.h>
+#include <algine/core/PtrView.h>
 #include <algine/core/MutableValue.h>
 #include <algine/types.h>
 
@@ -75,9 +75,9 @@ public:
     void drawText(std::string_view text, const PointF &p);
     void drawText(std::string_view text, float x, float y);
 
-    void drawTexture(AutoRawPtr<Texture2D> texture, const RectF &rect);
-    void drawTexture(AutoRawPtr<Texture2D> texture, const PointF &p);
-    void drawTexture(AutoRawPtr<Texture2D> texture, float x, float y);
+    void drawTexture(PtrView<Texture2D> texture, const RectF &rect);
+    void drawTexture(PtrView<Texture2D> texture, const PointF &p);
+    void drawTexture(PtrView<Texture2D> texture, float x, float y);
 
     static void optimizeFontCache();
     static void clearFontCache();
@@ -107,24 +107,24 @@ private:
     }
 
     template<bool forcibly>
-    inline void writeMat4(const char *name, MutableValue<glm::mat4> &value, AutoRawPtr<ShaderProgram> program) {
+    inline void writeMat4(const char *name, MutableValue<glm::mat4> &value, PtrView<ShaderProgram> program) {
         write_mv<forcibly>([&]() { program->setMat4(name, value); }, value);
     }
 
     template<bool forcibly>
-    inline void writeFloat(const char *name, MutableValue<float> &value, AutoRawPtr<ShaderProgram> program) {
+    inline void writeFloat(const char *name, MutableValue<float> &value, PtrView<ShaderProgram> program) {
         write_mv<forcibly>([&]() { program->setFloat(name, value); }, value);
     }
 
     template<bool forcibly>
-    inline void writeTPMatrix(AutoRawPtr<ShaderProgram> program) {
+    inline void writeTPMatrix(PtrView<ShaderProgram> program) {
         if (forcibly || m_projection.hasChanged() || m_transform.hasChanged()) {
             program->setMat4("tpMatrix", m_projection.get() * m_transform.get());
         }
     }
 
     template<bool forcibly>
-    inline void writePaintTransform(AutoRawPtr<ShaderProgram> program) {
+    inline void writePaintTransform(PtrView<ShaderProgram> program) {
         writeMat4<forcibly>("paintTransformation", m_paint.m_transform, program);
     }
 
