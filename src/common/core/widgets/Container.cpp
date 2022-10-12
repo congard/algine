@@ -140,7 +140,7 @@ WidgetPtr Container::widgetAt(const PointI &point) {
             continue;
         }
 
-        auto localPoint = child->toLocalPoint(point);
+        auto localPoint = child->mapFromParent(point);
 
         auto lx = localPoint.getX();
         auto ly = localPoint.getY();
@@ -157,7 +157,7 @@ WidgetPtr Container::notContainerAt(const PointI &point) {
     auto child = widgetAt(point);
 
     if (auto container = std::dynamic_pointer_cast<Container>(child); container != nullptr) {
-        return container->notContainerAt(container->toLocalPoint(point));
+        return container->notContainerAt(container->mapFromParent(point));
     } else {
         return child;
     }

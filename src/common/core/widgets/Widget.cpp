@@ -496,15 +496,19 @@ void Widget::setBoundingRectPos(int x, int y) {
     setBoundingRectPos(x, y, boundingRect());
 }
 
-PointI Widget::toLocalPoint(const PointI &globalPoint) const {
-    PointI localPoint {
-        globalPoint.getX() - getX(),
-        globalPoint.getY() - getY()
-    };
+PointI Widget::mapFrom(WidgetPtrView parent, const PointI &point) const {
+    if (parent == this)
+        return point;
 
-    if (m_parent) {
-        localPoint -= {m_parent->getPaddingLeft(), m_parent->getPaddingTop()};
-    }
+    if (m_parent == nullptr && parent != nullptr)
+        throw std::runtime_error("The parent must be a parent of the calling widget");
+
+    PointI localPoint = point;
+
+    if (m_parent && parent != m_parent)
+        localPoint = m_parent->mapFrom(parent, localPoint);
+
+    localPoint -= {getX(), getY()};
 
     if (m_rotate != 0.0f || m_scaleX != 1.0f || m_scaleY != 1.0f) {
         auto width = getWidth();
@@ -513,13 +517,62 @@ PointI Widget::toLocalPoint(const PointI &globalPoint) const {
         glm::mat4 scaling = glm::scale(glm::mat4(1.0f), {m_scaleX, m_scaleY, 1.0f});
         glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(m_rotate), {0.0f, 0.0f, 1.0f});
 
-        glm::vec4 lp_centered {localPoint.getX() - width / 2, localPoint.getY() - height / 2, 0.0f, 1.0f};
-        glm::vec4 lp = glm::inverse(rotation * scaling) * lp_centered + glm::vec4(width / 2, height / 2, 0.0f, 0.0f);
+        glm::vec4 p_centered {localPoint.getX() - width / 2, localPoint.getY() - height / 2, 0.0f, 1.0f};
+        glm::vec4 p = glm::inverse(rotation * scaling) * p_centered + glm::vec4(width / 2, height / 2, 0.0f, 0.0f);
 
-        return {(int) lp.x, (int) lp.y};
+        return {(int) p.x, (int) p.y};
     }
 
     return localPoint;
+}
+
+PointI Widget::mapFromParent(const PointI &point) const {
+    return mapFrom(m_parent, point);
+}
+
+PointI Widget::mapFromGlobal(const PointI &globalPoint) const {
+    return mapFrom(nullptr, globalPoint);
+}
+
+PointI Widget::mapTo(WidgetPtrView parent, const PointI &point) const {
+    if (parent == this)
+        return point;
+
+    if (m_parent == nullptr && parent != nullptr)
+        throw std::runtime_error("The parent must be a parent of the calling widget");
+
+    // this -> this without transformations coordinate system
+
+    PointI mappedPoint = point;
+
+    if (m_rotate != 0.0f || m_scaleX != 1.0f || m_scaleY != 1.0f) {
+        auto width = getWidth();
+        auto height = getHeight();
+
+        glm::mat4 scaling = glm::scale(glm::mat4(1.0f), {m_scaleX, m_scaleY, 1.0f});
+        glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(m_rotate), {0.0f, 0.0f, 1.0f});
+
+        glm::vec4 p_centered {mappedPoint.getX() - width / 2, mappedPoint.getY() - height / 2, 0.0f, 1.0f};
+        glm::vec4 p = rotation * scaling * p_centered + glm::vec4(width / 2, height / 2, 0.0f, 0.0f);
+
+        mappedPoint = {(int) p.x, (int) p.y};
+    }
+
+    // this without transformations -> m_parent coordinate system
+    mappedPoint += {getX(), getY()};
+
+    if (m_parent)
+        mappedPoint = m_parent->mapTo(parent, mappedPoint);
+
+    return mappedPoint;
+}
+
+PointI Widget::mapToParent(const PointI &point) const {
+    return mapTo(m_parent, point);
+}
+
+PointI Widget::mapToGlobal(const PointI &globalPoint) const {
+    return mapTo(nullptr, globalPoint);
 }
 
 RectI Widget::boundingRect() const {

@@ -128,7 +128,63 @@ public:
     void setBoundingRectPos(int x, int y, const RectI &rect);
     void setBoundingRectPos(int x, int y);
 
-    PointI toLocalPoint(const PointI &globalPoint) const;
+    /**
+     * Translates the widget coordinate <code>point</code> from the coordinate system
+     * of <code>parent</code> to this widget's coordinate system.
+     * <br>The <code>parent</code> must be a parent of the calling widget.
+     * @param point
+     * @param parent
+     * @return point in this widget's coordinate system
+     * @note if <code>parent</code> is <code>nullptr</code>,
+     * <code>point</code> will be treated as global
+     * @see mapFromParent, mapFromGlobal
+     */
+    PointI mapFrom(WidgetPtrView parent, const PointI &point) const;
+
+    /**
+     * The same as <code>mapFrom(getParent(), point)</code>
+     * @param point
+     * @return point in this widget's coordinate system
+     * @see mapFrom
+     */
+    PointI mapFromParent(const PointI &point) const;
+
+    /**
+     * The same as <code>mapFrom(nullptr, globalPoint)</code>
+     * @param globalPoint
+     * @return point in this widget's coordinate system
+     * @see mapFrom
+     */
+    PointI mapFromGlobal(const PointI &globalPoint) const;
+
+    /**
+     * Translates the widget coordinate <code>pos</code> to the coordinate system of <code>parent<code>.
+     * <br>The <code>parent</code> must be a parent of the calling widget.
+     * @param parent
+     * @param point
+     * @return point transformed from <code>this</code> to <code>parent</code> coordinate system
+     * @note if <code>parent</code> is <code>nullptr</code>,
+     * <code>point</code> will be treated as global
+     * @see mapToParent, mapToGlobal
+     */
+    PointI mapTo(WidgetPtrView parent, const PointI &point) const;
+
+    /**
+     * The same as <code>mapTo(getParent(), point)</code>
+     * @param point
+     * @return point transformed from <code>this</code> to the parent coordinate system
+     * @see mapTo
+     */
+    PointI mapToParent(const PointI &point) const;
+
+    /**
+     * The same as <code>mapTo(nullptr, globalPoint)</code>
+     * @param globalPoint
+     * @return point transformed from <code>this</code> to global coordinate system
+     * @see mapTo
+     */
+    PointI mapToGlobal(const PointI &globalPoint) const;
+
     RectI boundingRect() const;
 
     void setProperty(std::string_view name, const Property &property);
