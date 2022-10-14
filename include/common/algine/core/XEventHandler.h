@@ -13,9 +13,13 @@
 
 #include <glm/vec2.hpp>
 
+#include <forward_list>
+#include <functional>
 #include <variant>
 
 namespace algine {
+class Event;
+
 /**
  * Platform independent EventHandler
  */
@@ -25,6 +29,8 @@ class XEventHandler: public
 public:
     class PointerInfo;
     class FocusInfo;
+
+    using EventListener = std::function<void(const Event&)>;
 
 public:
     virtual void onPointerMove(PointerInfo info);
@@ -40,6 +46,48 @@ public:
 
     virtual void onFocusChanged(FocusInfo info);
 
+public:
+    /**
+     * Handles such events as
+     * <ul>
+     *   <li><code>Event::Press</code></li>
+     *   <li><code>Event::Release</code></li>
+     *   <li><code>Event::Click</code></li>
+     *   <li><code>Event::Move</code></li>
+     * </ul>
+     * @param listener
+     * @see onPointerMove, onPointerClick, onPointerPress, onPointerRelease
+     */
+    void addPointerEventListener(const EventListener &listener);
+
+    /**
+     * Handles such events as
+     * <ul>
+     *   <li><code>Event::KeyPress</code></li>
+     *   <li><code>Event::KeyRelease</code></li>
+     *   <li><code>Event::KeyRepeat</code></li>
+     * </ul>
+     * @param listener
+     * @see onKeyboardKeyPress, onKeyboardKeyRelease, onKeyboardKeyRepeat
+     */
+    void addKeyboardEventListener(const EventListener &listener);
+
+    /**
+     * Handles such events as
+     * <ul>
+     *   <li><code>Event::SurfaceSizeChange</code></li>
+     *   <li><code>Event::SurfaceFocusChange</code></li>
+     * </ul>
+     * @param listener
+     * @see onSizeChanged, onFocusChanged
+     */
+    void addSurfaceEventListener(const EventListener &listener);
+
+    void clearPointerEventListeners();
+    void clearKeyboardEventListeners();
+    void clearSurfaceEventListeners();
+
+protected:
 #ifdef __ANDROID__
     void pointerDown(float x, float y, int pointerId) override;
     void pointerMove(float x, float y, int pointerId) override;
@@ -66,6 +114,11 @@ public:
     void windowFocusLost(Window &window) override;
     void windowFocus(Window &window) override;
 #endif
+
+private:
+    std::forward_list<EventListener> m_pointerListeners;
+    std::forward_list<EventListener> m_keyboardListeners;
+    std::forward_list<EventListener> m_surfaceListeners;
 };
 
 class XEventHandler::PointerInfo {
