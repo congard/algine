@@ -4,6 +4,7 @@
 #include <algine/core/widgets/SizePolicy.h>
 #include <algine/core/widgets/WidgetPtr.h>
 #include <algine/core/widgets/WidgetDisplayOptions.h>
+#include <algine/core/Event.h>
 #include <algine/core/shader/ShaderProgramPtr.h>
 #include <algine/core/texture/Texture2DPtr.h>
 #include <algine/core/FramebufferPtr.h>
@@ -39,6 +40,8 @@ public:
 
     using Property = std::any;
     using Properties = std::map<unsigned long, Property>;
+
+    using EventListener = std::function<void(Widget*, const Event&)>;
 
 public:
     Widget();
@@ -214,6 +217,10 @@ public:
         return std::any_cast<T>(property(name));
     }
 
+    void setEventListener(Event::Id event, const EventListener &listener);
+
+    void event(const Event &event);
+
     void addScript(const std::string &path, Lua *lua = nullptr);
     void addScriptSource(const std::string &source, Lua *lua = nullptr);
 
@@ -297,6 +304,7 @@ protected:
 
     Properties m_properties;
 
+    std::unordered_map<Event::Id, EventListener> m_eventListeners;
     sol::environment m_luaEnv;
 
 private:

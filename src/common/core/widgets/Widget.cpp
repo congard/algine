@@ -666,6 +666,19 @@ bool Widget::removeProperty(std::string_view name) {
     return false;
 }
 
+void Widget::setEventListener(Event::Id event, const EventListener &listener) {
+    m_eventListeners[event] = listener;
+}
+
+
+void Widget::event(const Event &event) {
+    auto id = event.getId();
+
+    if (auto it = m_eventListeners.find(id); it != m_eventListeners.end()) {
+        it->second(this, event);
+    }
+}
+
 void Widget::addScript(const std::string &path, Lua *lua) {
     addLuaScript(path, true, lua);
 }
