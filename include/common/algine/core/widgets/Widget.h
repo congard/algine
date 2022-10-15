@@ -248,6 +248,16 @@ public:
     static WidgetPtr constructFromXML(const std::string &xml);
     static WidgetPtr constructFromXMLFile(const std::string &file);
 
+    template<typename T>
+    static Ptr<T> constructFromXML(const std::string &xml) {
+        return std::dynamic_pointer_cast<T>(constructFromXML(xml));
+    }
+
+    template<typename T>
+    static Ptr<T> constructFromXMLFile(const std::string &file) {
+        return std::dynamic_pointer_cast<T>(constructFromXMLFile(file));
+    }
+
 protected:
     enum class Flag {
         RedrawRequired,
