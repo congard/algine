@@ -28,8 +28,17 @@ public:
     }
 
     template<typename T>
+    constexpr const T& as() const {
+        return std::get<T>(m_var);
+    }
+
+    template<typename T>
     constexpr bool is() const {
         return std::get_if<T>(&m_var);
+    }
+
+    constexpr void reset() {
+        m_var = variant();
     }
 
     const variant& get_std() const {
