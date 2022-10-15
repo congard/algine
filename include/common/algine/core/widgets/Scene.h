@@ -4,6 +4,7 @@
 #include <algine/core/widgets/WidgetDisplayOptions.h>
 #include <algine/core/widgets/WidgetPtr.h>
 #include <algine/core/painter/Painter.h>
+#include <algine/core/math/Size.h>
 #include <algine/core/PtrView.h>
 #include <algine/core/XEventHandler.h>
 
@@ -50,6 +51,12 @@ public:
 
     void setFramebuffer(PtrView<Framebuffer> framebuffer);
     void setSize(int width, int height);
+    void setSize(const SizeI &size);
+
+    int getWidth() const;
+    int getHeight() const;
+
+    SizeI getSize() const;
 
     bool event(const Event &event);
 

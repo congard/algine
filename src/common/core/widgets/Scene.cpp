@@ -187,6 +187,22 @@ void Scene::setSize(int width, int height) {
     }
 }
 
+void Scene::setSize(const SizeI &size) {
+    setSize(size.getWidth(), size.getHeight());
+}
+
+int Scene::getWidth() const {
+    return m_options.width;
+}
+
+int Scene::getHeight() const {
+    return m_options.height;
+}
+
+SizeI Scene::getSize() const {
+    return {getWidth(), getHeight()};
+}
+
 bool Scene::event(const Event &event) {
     if (event.isPointer()) {
         return handlePointerEvent(event);
@@ -216,11 +232,9 @@ XEventHandler::EventListener Scene::getKeyboardEventListener() {
 XEventHandler::EventListener Scene::getSurfaceEventListener() {
     return [this](const Event &event) {
         switch (event.getId()) {
-            case Event::SurfaceSizeChange: {
-                auto &size = event.getSize();
-                setSize(size.getWidth(), size.getHeight());
+            case Event::SurfaceSizeChange:
+                setSize(event.getSize());
                 break;
-            }
             default: break;
         }
     };
