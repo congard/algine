@@ -58,8 +58,10 @@ void LinearLayout::onLayout() {
 
     if (m_orientation == Orientation::Vertical) {
         placeChild = &LinearLayout::place_vertically;
+        pos = getPaddingTop();
     } else {
         placeChild = &LinearLayout::place_horizontally;
+        pos = getPaddingLeft();
     }
 
     for (auto &child : m_children) {
@@ -91,13 +93,13 @@ void LinearLayout::place_vertically(const WidgetPtr &child, int &y) {
 
     switch (alignment_x) {
         case Alignment::Center:
-            setChildXDirectly(child, (getContentWidth() - child->getWidth()) / 2);
+            setChildXDirectly(child, getPaddingLeft() + (getContentWidth() - child->getWidth()) / 2);
             break;
         case Alignment::Left:
-            setChildXDirectly(child, Layout::getMarginLeft(child));
+            setChildXDirectly(child, getPaddingLeft() + Layout::getMarginLeft(child));
             break;
         case Alignment::Right:
-            setChildXDirectly(child, getContentWidth() - Layout::getMarginRight(child) - child->getWidth());
+            setChildXDirectly(child, getPaddingLeft() + getContentWidth() - Layout::getMarginRight(child) - child->getWidth());
             break;
         default: throw std::invalid_argument("Invalid horizontal alignment value");
     }
@@ -114,13 +116,13 @@ void LinearLayout::place_horizontally(const WidgetPtr &child, int &x) {
 
     switch (alignment_y) {
         case Alignment::Center:
-            setChildYDirectly(child, (getContentHeight() - child->getHeight()) / 2);
+            setChildYDirectly(child, getPaddingTop() + (getContentHeight() - child->getHeight()) / 2);
             break;
         case Alignment::Top:
-            setChildYDirectly(child, Layout::getMarginTop(child));
+            setChildYDirectly(child, getPaddingTop() + Layout::getMarginTop(child));
             break;
         case Alignment::Bottom:
-            setChildYDirectly(child, getContentHeight() - Layout::getMarginBottom(child) - child->getHeight());
+            setChildYDirectly(child, getPaddingTop() + getContentHeight() - Layout::getMarginBottom(child) - child->getHeight());
             break;
         default: throw std::invalid_argument("Invalid vertical alignment value");
     }

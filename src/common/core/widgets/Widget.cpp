@@ -435,8 +435,8 @@ void Widget::display(const WidgetDisplayOptions &options) {
 
     auto width = static_cast<float>(getWidth());
     auto height = static_cast<float>(getHeight());
-    auto x = static_cast<float>(getX());
-    auto y = static_cast<float>(getY());
+    auto x = static_cast<float>(getX() - options.paddingLeft);
+    auto y = static_cast<float>(getY() - options.paddingTop);
 
     painter->setOpacity(m_opacity);
 

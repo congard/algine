@@ -202,26 +202,26 @@ RelativeLayout::WidgetInfo& RelativeLayout::layout_for(Widget *widget, std::list
 
         switch (alignment_x) {
             case Alignment::Left:
-                widgetInfo.setX(getMarginLeft(widget));
+                widgetInfo.setX(getPaddingLeft() + getMarginLeft(widget));
                 break;
             case Alignment::Right:
-                widgetInfo.setX(getContentWidth() - getMarginRight(widget) - widget->getWidth());
+                widgetInfo.setX(getPaddingLeft() + getContentWidth() - getMarginRight(widget) - widget->getWidth());
                 break;
             case Alignment::Center:
-                widgetInfo.setX((getContentWidth() - widget->getWidth()) / 2);
+                widgetInfo.setX(getPaddingLeft() + (getContentWidth() - widget->getWidth()) / 2);
                 break;
             default: throw std::invalid_argument("Invalid horizontal alignment value");
         }
 
         switch (alignment_y) {
             case Alignment::Top:
-                widgetInfo.setY(getMarginTop(widget));
+                widgetInfo.setY(getPaddingTop() + getMarginTop(widget));
                 break;
             case Alignment::Bottom:
-                widgetInfo.setY(getContentHeight() - getMarginBottom(widget) - widget->getHeight());
+                widgetInfo.setY(getPaddingTop() + getContentHeight() - getMarginBottom(widget) - widget->getHeight());
                 break;
             case Alignment::Center:
-                widgetInfo.setY((getContentHeight() - widget->getHeight()) / 2);
+                widgetInfo.setY(getPaddingTop() + (getContentHeight() - widget->getHeight()) / 2);
                 break;
             default: throw std::invalid_argument("Invalid vertical alignment value");
         }
