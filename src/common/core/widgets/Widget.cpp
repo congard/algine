@@ -396,6 +396,8 @@ void Widget::invalidate() {
 }
 
 void Widget::display(const WidgetDisplayOptions &options) {
+    animate();
+
     if (!isVisible() || m_opacity == 0.0f)
         return;
 
@@ -448,6 +450,27 @@ void Widget::display(const WidgetDisplayOptions &options) {
         painter->setTransform(translation * rotation * scaling);
         painter->drawTexture(m_texture, {-width / 2, -height / 2, width, height});
     }
+}
+
+void Widget::animate() {
+    for (auto &p : m_eventAnimations)
+        p.second->animate();
+
+    auto prevIt = m_animations.before_begin();
+
+    for (auto it = m_animations.begin(); it != m_animations.end();) {
+        auto &animation = *it;
+        animation->animate();
+
+        if (!animation->isActive()) {
+            it = m_animations.erase_after(prevIt);
+        } else {
+            ++it;
+            ++prevIt;
+        }
+    }
+
+    onAnimate();
 }
 
 void Widget::measure() {
@@ -670,9 +693,35 @@ void Widget::setEventListener(Event::Id event, const EventListener &listener) {
     m_eventListeners[event] = listener;
 }
 
+void Widget::setEventAnimation(Event::Id event, Widgets::AnimationPtr animation) {
+    animation->setWidget(this);
+    m_eventAnimations[event] = std::move(animation);
+}
+
+bool Widget::hasAnimation(Event::Id event) const {
+    return m_eventAnimations.find(event) != m_eventAnimations.end();
+}
+
+const Widgets::AnimationPtr& Widget::getAnimation(Event::Id event) const {
+    return m_eventAnimations.at(event);
+}
+
+void Widget::addAnimation(Widgets::AnimationPtr animation) {
+    animation->setWidget(this);
+    if (!animation->isActive())
+        animation->start();
+    m_animations.emplace_front(std::move(animation));
+}
+
+const Widget::Animations& Widget::getAnimations() const {
+    return m_animations;
+}
 
 void Widget::event(const Event &event) {
     auto id = event.getId();
+
+    if (auto it = m_eventAnimations.find(id); it != m_eventAnimations.end())
+        it->second->start();
 
     if (auto it = m_eventListeners.find(id); it != m_eventListeners.end()) {
         it->second(this, event);
@@ -749,6 +798,8 @@ void Widget::setMeasuredDimension(int width, int height) {
         height + getPaddingTop() + getPaddingBottom()
     });
 }
+
+void Widget::onAnimate() {}
 
 void Widget::onMeasure(int &width, int &height) {
     auto contentWidth = [&](int width) {

@@ -4,6 +4,7 @@
 #include <algine/core/widgets/SizePolicy.h>
 #include <algine/core/widgets/WidgetPtr.h>
 #include <algine/core/widgets/WidgetDisplayOptions.h>
+#include <algine/core/widgets/animation/Animation.h>
 #include <algine/core/Event.h>
 #include <algine/core/shader/ShaderProgramPtr.h>
 #include <algine/core/texture/Texture2DPtr.h>
@@ -42,6 +43,8 @@ public:
     using Properties = std::map<unsigned long, Property>;
 
     using EventListener = std::function<void(Widget*, const Event&)>;
+
+    using Animations = std::forward_list<Widgets::AnimationPtr>;
 
 public:
     Widget();
@@ -132,6 +135,8 @@ public:
 
     void display(const WidgetDisplayOptions &options);
 
+    void animate();
+
     void measure();
     void layout();
 
@@ -219,6 +224,13 @@ public:
 
     void setEventListener(Event::Id event, const EventListener &listener);
 
+    void setEventAnimation(Event::Id event, Widgets::AnimationPtr animation);
+    bool hasAnimation(Event::Id event) const;
+    const Widgets::AnimationPtr& getAnimation(Event::Id event) const;
+
+    void addAnimation(Widgets::AnimationPtr animation);
+    const Animations& getAnimations() const;
+
     void event(const Event &event);
 
     void addScript(const std::string &path, Lua *lua = nullptr);
@@ -256,6 +268,7 @@ protected:
 
     virtual void setMeasuredDimension(int width, int height);
 
+    virtual void onAnimate();
     virtual void onMeasure(int &width, int &height);
     virtual void onLayout();
     virtual void draw(Painter &painter);
@@ -305,6 +318,10 @@ protected:
     Properties m_properties;
 
     std::unordered_map<Event::Id, EventListener> m_eventListeners;
+    std::unordered_map<Event::Id, Widgets::AnimationPtr> m_eventAnimations;
+
+    Animations m_animations;
+
     sol::environment m_luaEnv;
 
 private:

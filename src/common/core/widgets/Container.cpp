@@ -168,6 +168,12 @@ ContainerPtr Container::containerAt(const PointI &point) {
     return std::dynamic_pointer_cast<Container>(child);
 }
 
+void Container::onAnimate() {
+    for (auto &child : m_children) {
+        child->animate();
+    }
+}
+
 void Container::onMeasure(int &width, int &height) {
     Widget::onMeasure(width, height);
 
