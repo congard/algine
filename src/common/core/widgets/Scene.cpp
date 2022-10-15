@@ -121,8 +121,7 @@ void Scene::showLayer(PtrView<Layer> layer, int level) {
         m_layers.insert(m_layers.begin() + level, layer.get());
     }
 
-    applySizePolicy(layer.get());
-
+    layer->getContainer()->requestLayout();
     layer->setScene(this);
     layer->onShow();
 }
@@ -135,9 +134,9 @@ void Scene::showLayerInsteadOf(PtrView<Layer> replacement, PtrView<Layer> src) {
 
     m_layers[level] = replacement.get();
 
-    applySizePolicy(replacement.get());
-
     src->onHide();
+
+    replacement->getContainer()->requestLayout();
     replacement->setScene(this);
     replacement->onShow();
 }
@@ -183,7 +182,7 @@ void Scene::setSize(int width, int height) {
     m_options.height = height;
 
     for (auto layer : m_layers) {
-        applySizePolicy(layer);
+        layer->getContainer()->requestLayout();
     }
 }
 
@@ -312,20 +311,5 @@ bool Scene::handlePointerEvent(const Event &event) {
 
 bool Scene::handleKeyboardEvent(const Event &event) {
     return false; // TODO
-}
-
-void Scene::applySizePolicy(Layer *layer) const {
-    auto &container = layer->getContainer();
-    auto geometry = container->getGeometry();
-
-    if (container->getHorizontalSizePolicy() == SizePolicy::MatchParent)
-        geometry.setWidth(m_options.width);
-
-    if (container->getVerticalSizePolicy() == SizePolicy::MatchParent)
-        geometry.setHeight(m_options.height);
-
-    if (geometry != container->getGeometry()) {
-        container->setGeometry(geometry);
-    }
 }
 }

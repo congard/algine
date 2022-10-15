@@ -1,5 +1,6 @@
 #include <algine/core/widgets/Widget.h>
 #include <algine/core/widgets/Units.h>
+#include <algine/core/widgets/Scene.h>
 #include <algine/core/painter/Painter.h>
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/Framebuffer.h>
@@ -826,15 +827,14 @@ void Widget::onMeasure(int &width, int &height) {
         return height - getPaddingTop() - getPaddingBottom();
     };
 
-    Widget* thisParent = m_parent;
-
     switch (m_horizontalPolicy) {
         case SizePolicy::Minimum: width = contentWidth(getMinWidth()); break;
         case SizePolicy::Maximum: width = contentWidth(getMaxWidth()); break;
         case SizePolicy::MatchParent:
-            if (thisParent) {
-                width = contentWidth(thisParent->matchParentWidth(this));
-            }
+            if (auto widgetParent = m_parent.getWidget(); widgetParent)
+                width = contentWidth(widgetParent->matchParentWidth(this));
+            else if (auto layerParent = m_parent.getLayer(); layerParent)
+                width = contentWidth(layerParent->getScene()->getWidth());
             break;
         default: break;
     }
@@ -843,9 +843,10 @@ void Widget::onMeasure(int &width, int &height) {
         case SizePolicy::Minimum: height = contentHeight(getMinHeight()); break;
         case SizePolicy::Maximum: height = contentHeight(getMaxHeight()); break;
         case SizePolicy::MatchParent:
-            if (thisParent) {
-                height = contentHeight(thisParent->matchParentHeight(this));
-            }
+            if (auto widgetParent = m_parent.getWidget(); widgetParent)
+                height = contentHeight(widgetParent->matchParentHeight(this));
+            else if (auto layerParent = m_parent.getLayer(); layerParent)
+                height = contentHeight(layerParent->getScene()->getHeight());
             break;
         default: break;
     }

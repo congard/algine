@@ -76,8 +76,6 @@ private:
     bool handlePointerEvent(const Event &event);
     bool handleKeyboardEvent(const Event &event);
 
-    void applySizePolicy(Layer *layer) const;
-
 private:
     std::vector<Layer*> m_layers;
     std::unique_ptr<Painter> m_painter;

@@ -84,6 +84,7 @@ const RectI& Layer::getGeometry() const {
 
 void Layer::setContainer(ContainerPtr container) {
     m_container = std::move(container);
+    m_container->setParent(this);
 }
 
 const ContainerPtr& Layer::getContainer() const {
