@@ -17,7 +17,7 @@
 
 namespace algine {
 inline void requestParentUpdate(WidgetPtrView widget) {
-    if (auto parent = widget->getParent(); parent != nullptr) {
+    if (auto parent = widget->getParent().getWidget(); parent != nullptr) {
         parent->requestLayout();
         parent->invalidate();
     }

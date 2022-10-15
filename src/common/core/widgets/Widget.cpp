@@ -19,8 +19,8 @@
 #include "core/djb2.h"
 #include "TexturePathLoader.h"
 
-#define requireParentRedraw() if (m_parent) m_parent->invalidate()
-#define requireParentLayout() if (m_parent) m_parent->requestLayout()
+#define requireParentRedraw() if (auto parent = m_parent.getWidget(); parent) parent->invalidate()
+#define requireParentLayout() if (auto parent = m_parent.getWidget(); parent) parent->requestLayout()
 
 #define continue_if(condition) if (!(condition)) return
 
@@ -33,10 +33,22 @@
 #endif
 
 namespace algine {
+Widget* Widget::Parent::getWidget() const {
+    return is<Widget*>() ? as<Widget*>() : nullptr;
+}
+
+Widgets::Layer* Widget::Parent::getLayer() const {
+    return is<Widgets::Layer*>() ? as<Widgets::Layer*>() : nullptr;
+}
+
+bool Widget::Parent::isNull() const {
+    return getWidget() && getLayer();
+}
+
 Widget::Widget()
     : m_flags(),
       m_geometry(0, 0, 128, 128),
-      m_parent(nullptr),
+      m_parent(),
       m_minWidth(),
       m_minHeight(),
       m_maxWidth(),
@@ -322,11 +334,11 @@ float Widget::getOpacity() const {
     return m_opacity;
 }
 
-void Widget::setParent(Widget *parent) {
-    m_parent = parent;
+void Widget::setParent(Parent parent) {
+    std::swap(m_parent, parent);
 }
 
-Widget* Widget::getParent() const {
+Widget::Parent Widget::getParent() const {
     return m_parent;
 }
 
@@ -523,13 +535,15 @@ PointI Widget::mapFrom(WidgetPtrView parent, const PointI &point) const {
     if (parent == this)
         return point;
 
-    if (m_parent == nullptr && parent != nullptr)
+    Widget* thisParent = m_parent;
+
+    if (thisParent == nullptr && parent != nullptr)
         throw std::runtime_error("The parent must be a parent of the calling widget");
 
     PointI localPoint = point;
 
-    if (m_parent && parent != m_parent)
-        localPoint = m_parent->mapFrom(parent, localPoint);
+    if (thisParent && parent != thisParent)
+        localPoint = thisParent->mapFrom(parent, localPoint);
 
     localPoint -= {getX(), getY()};
 
@@ -561,7 +575,9 @@ PointI Widget::mapTo(WidgetPtrView parent, const PointI &point) const {
     if (parent == this)
         return point;
 
-    if (m_parent == nullptr && parent != nullptr)
+    Widget* thisParent = m_parent;
+
+    if (thisParent == nullptr && parent != nullptr)
         throw std::runtime_error("The parent must be a parent of the calling widget");
 
     // this -> this without transformations coordinate system
@@ -584,8 +600,8 @@ PointI Widget::mapTo(WidgetPtrView parent, const PointI &point) const {
     // this without transformations -> m_parent coordinate system
     mappedPoint += {getX(), getY()};
 
-    if (m_parent)
-        mappedPoint = m_parent->mapTo(parent, mappedPoint);
+    if (thisParent)
+        mappedPoint = thisParent->mapTo(parent, mappedPoint);
 
     return mappedPoint;
 }
@@ -810,12 +826,14 @@ void Widget::onMeasure(int &width, int &height) {
         return height - getPaddingTop() - getPaddingBottom();
     };
 
+    Widget* thisParent = m_parent;
+
     switch (m_horizontalPolicy) {
         case SizePolicy::Minimum: width = contentWidth(getMinWidth()); break;
         case SizePolicy::Maximum: width = contentWidth(getMaxWidth()); break;
         case SizePolicy::MatchParent:
-            if (m_parent) {
-                width = contentWidth(m_parent->matchParentWidth(this));
+            if (thisParent) {
+                width = contentWidth(thisParent->matchParentWidth(this));
             }
             break;
         default: break;
@@ -825,8 +843,8 @@ void Widget::onMeasure(int &width, int &height) {
         case SizePolicy::Minimum: height = contentHeight(getMinHeight()); break;
         case SizePolicy::Maximum: height = contentHeight(getMaxHeight()); break;
         case SizePolicy::MatchParent:
-            if (m_parent) {
-                height = contentHeight(m_parent->matchParentHeight(this));
+            if (thisParent) {
+                height = contentHeight(thisParent->matchParentHeight(this));
             }
             break;
         default: break;

@@ -4,6 +4,7 @@
 #include <algine/core/widgets/SizePolicy.h>
 #include <algine/core/widgets/WidgetPtr.h>
 #include <algine/core/widgets/WidgetDisplayOptions.h>
+#include <algine/core/widgets/Layer.h>
 #include <algine/core/widgets/animation/Animation.h>
 #include <algine/core/Event.h>
 #include <algine/core/shader/ShaderProgramPtr.h>
@@ -37,6 +38,45 @@ public:
     enum class Filtering {
         Nearest = 0x2600,
         Linear = 0x2601
+    };
+
+    /// #solgen #ignore
+    class Parent: public Variant<Widget*, Widgets::Layer*> {
+        template<typename T>
+        struct ptr_type { using type = std::remove_pointer_t<T>; };
+
+        template<typename T>
+        struct ptr_type<PtrView<T>> { using type = T; };
+
+        template<typename T>
+        using ptr_type_t = typename ptr_type<T>::type;
+
+    public:
+        using Variant<Widget*, Widgets::Layer*>::Variant;
+        using Variant<Widget*, Widgets::Layer*>::operator=;
+
+        inline Parent(std::nullptr_t) { reset(); }
+
+        Widget* getWidget() const;
+        Widgets::Layer* getLayer() const;
+
+        bool isNull() const;
+
+        template<typename T>
+        operator T() const {
+            using U = ptr_type_t<T>;
+
+            constexpr bool baseOfWidget = std::is_base_of_v<U, Widget>;
+            constexpr bool baseOfLayer = std::is_base_of_v<U, Widgets::Layer>;
+
+            if constexpr (baseOfWidget)
+                return static_cast<T>(getWidget());
+
+            if constexpr (baseOfLayer)
+                return static_cast<T>(getLayer());
+
+            static_assert(baseOfWidget || baseOfLayer, "Only Widget* or Widgets::Layer* can be a parent");
+        }
     };
 
     using Property = std::any;
@@ -116,8 +156,8 @@ public:
     void setOpacity(float opacity);
     float getOpacity() const;
 
-    void setParent(Widget *parent);
-    Widget* getParent() const;
+    void setParent(Parent parent);
+    Parent getParent() const;
 
     void setSizePolicy(SizePolicy horizontal, SizePolicy vertical);
     void setHorizontalSizePolicy(SizePolicy policy);
@@ -301,7 +341,7 @@ protected:
 protected:
     Flags m_flags;
     RectI m_geometry;
-    Widget *m_parent;
+    Parent m_parent;
     std::string m_name;
     Paint m_background;
 
