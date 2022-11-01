@@ -1,14 +1,5 @@
 # Linux Build Instructions
 
-## GLEW: make OpenGL extensions
-
-Before compiling, you must make GLEW OpenGL extensions:
-
-```bash
-cd algine_root_folder/libs/glew
-make extensions
-```
-
 ## Fedora
 
 ```bash
