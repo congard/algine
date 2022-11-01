@@ -1,7 +1,7 @@
 #include <algine/core/texture/TextureTools.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb/stb_image_write.h>
+#include <stb_image_write.h>
 
 namespace algine::TextureTools {
 void save(const std::string &path, const PixelData &pixelData, uint outComponents, bool flip) {

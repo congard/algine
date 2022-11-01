@@ -1,7 +1,7 @@
 #include <algine/core/window/Icon.h>
 
 // STB_IMAGE_IMPLEMENTATION defined in Texture.cpp
-#include <stb/stb_image.h>
+#include <stb_image.h>
 
 #include "core/IOStreamUtils.h"
 

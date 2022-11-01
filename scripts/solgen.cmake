@@ -1,6 +1,6 @@
 function(build_solgen out_binary)
     set(output_dir "${CMAKE_CURRENT_BINARY_DIR}/tools/solgen")
-    set(solgen_dir "${CMAKE_CURRENT_LIST_DIR}/libs/solgen")
+    set(solgen_dir "${CMAKE_CURRENT_LIST_DIR}/deps/solgen-src")
 
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E make_directory ${output_dir})

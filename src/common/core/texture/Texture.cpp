@@ -6,7 +6,7 @@
 #include "core/IOStreamUtils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
+#include <stb_image.h>
 
 #include "internal/SOP.h"
 

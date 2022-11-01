@@ -1,7 +1,7 @@
 #ifndef ALGINE_JSONHELPER_H
 #define ALGINE_JSONHELPER_H
 
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 
 namespace algine {
 class JsonHelper {
