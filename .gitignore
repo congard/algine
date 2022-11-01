@@ -15,3 +15,4 @@ algine.kdev4
 # build dirs
 cmake-build-*
 /build
+/deps

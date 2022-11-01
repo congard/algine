@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 project(algine)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -47,6 +47,8 @@ if (ALGINE_SECURE_OPERATIONS)
 
     message(STATUS "Algine SOP level is ${ALGINE_SOP_LEVEL}")
 endif()
+
+include(scripts/deps.cmake)
 
 # built-in glsl modules
 file(READ src/common/core/glsl-modules/BoneSystem.glsl GLSLModules_BoneSystem)
@@ -171,36 +173,38 @@ set(PRIVATE_INCLUDES
     ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter
     ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua
 
-    libs/assimp/include
-    libs/freetype/include
-    libs/pugixml/src
-    libs/lua/lua-5.4.4/include
+    ${assimp_SOURCE_DIR}/include
+    ${freetype_SOURCE_DIR}/include
+    ${pugixml_SOURCE_DIR}/src
+    ${lua_SOURCE_DIR}/lua-5.4.4/include
+    ${stb_image_SOURCE_DIR}
+    ${stb_image_write_SOURCE_DIR}
 
     ${SOLGEN_OUTPUT_PATH})
 
 set(PUBLIC_INCLUDES
-    libs/tulz/include
-    libs/glm
-    libs/sol2/include
-    include/common
-    libs)
+    ${tulz_SOURCE_DIR}/include
+    ${glm_SOURCE_DIR}
+    ${sol2_SOURCE_DIR}/include
+    ${nlohmann_json_SOURCE_DIR}
+    include/common)
 
 if (NOT ANDROID)
     set(PRIVATE_INCLUDES ${PRIVATE_INCLUDES}
         src/desktop
-        libs/glfw/include)
+        ${glfw_SOURCE_DIR}/include)
 
     set(PUBLIC_INCLUDES ${PUBLIC_INCLUDES}
-        libs/glew/include # TODO: mark PRIVATE in the future (see Texture.h)
+        ${glew_SOURCE_DIR}/include # TODO: mark PRIVATE in the future (see Texture.h)
         include/desktop)
 else()
     set(PUBLIC_INCLUDES ${PUBLIC_INCLUDES}
-        libs/tulz/android/include
+        ${tulz_SOURCE_DIR}/android/include
         include/android)
 endif()
 
 if (MSVC OR ANDROID)
-    set(PRIVATE_INCLUDES ${PRIVATE_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR}/libs/assimp/include)
+    set(PRIVATE_INCLUDES ${PRIVATE_INCLUDES} ${assimp_BINARY_DIR}/include)
 endif()
 
 # solgen
@@ -221,7 +225,7 @@ collectSources(ALGINE_STD_SOURCES "include/common/algine/std" "src/common/std")
 collectSources(ALGINE_EXT_SOURCES "include/common/algine/ext" "src/common/ext")
 
 set(ALGINE_CORE_SOURCES ${ALGINE_CORE_SOURCES}
-    libs/pugixml/src/pugixml.cpp
+    ${pugixml_SOURCE_DIR}/src/pugixml.cpp
 
     src/common/core/glsl-modules/GLSLModules.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules/GLSLModules.h
     src/common/core/glsl-shaders/GLSLShaders.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders/GLSLShaders.h
@@ -247,40 +251,9 @@ set(ALGINE_STD_SOURCES ${ALGINE_STD_SOURCES}
 
 if (NOT ANDROID)
     collectSources(ALGINE_DESKTOP_SOURCES "include/desktop/algine" "src/desktop")
-
-    set(BUILD_UTILS OFF) # glew flag
-
-    if (BUILD_SHARED_LIBS)
-        set(GLEW_LIBRARY glew)
-    else()
-        set(GLEW_LIBRARY glew_s)
-
-        add_definitions(-DGLEW_STATIC)
-    endif()
-
-    add_subdirectory(libs/glew/build/cmake)
-
-    set(GLFW_BUILD_DOCS OFF)
-    set(GLFW_BUILD_EXAMPLES OFF)
-    set(GLFW_BUILD_TESTS OFF)
-
-    add_subdirectory(libs/glfw)
 else()
-    collectSources(ALGINE_DESKTOP_SOURCES "include/android/algine" "src/android")
+    collectSources(ALGINE_ANDROID_SOURCES "include/android/algine" "src/android")
 endif()
-
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-set(ASSIMP_BUILD_TESTS OFF)
-set(ASSIMP_INSTALL OFF)
-set(ASSIMP_BUILD_ASSIMP_VIEW OFF)
-set(ASSIMP_NO_EXPORT ON)
-
-add_subdirectory(libs/tulz)
-add_subdirectory(libs/assimp)
-add_subdirectory(libs/freetype)
-add_subdirectory(libs/pugixml)
-add_subdirectory(libs/lua)
-add_subdirectory(libs/sol2)
 
 add_library(algine
     ${ALGINE_CORE_SOURCES}
