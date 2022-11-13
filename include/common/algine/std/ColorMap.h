@@ -38,6 +38,17 @@ public:
     glm::vec2 normalizeUV(const glm::ivec2 &uv) const;
     glm::ivec2 denormalizeUV(const glm::vec2 &uv) const;
 
+    /**
+     * This function can be useful on some platforms,
+     * where due to rounding you may get unexpected
+     * or even "blinking" color
+     * <br>
+     * <br><b>Usage:</b>
+     * <br><code>auto uv = map.getNormalizedUV(color) + map.getCenterOffset();</code>
+     * @return offset to the cell's center
+     */
+    glm::vec2 getCenterOffset() const;
+
     void setWidth(uint width);
     void setHeight(uint height);
     void setFormat(uint format);

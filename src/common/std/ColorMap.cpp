@@ -158,6 +158,13 @@ glm::ivec2 ColorMap::denormalizeUV(const glm::vec2 &uv) const {
     };
 }
 
+glm::vec2 ColorMap::getCenterOffset() const {
+    return {
+        (1.0f / (float) getWidth()) / 2,
+        (1.0f / (float) getHeight()) / 2
+    };
+}
+
 void ColorMap::setWidth(uint width) {
     m_texture->setWidth(width);
 }
