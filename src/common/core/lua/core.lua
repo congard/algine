@@ -71,7 +71,7 @@ require = function(name)
             path = path:gsub("?", name)
 
             if state:exists(path) then
-                return loadModule(path, function() load(state:readStr(path))() end)
+                return loadModule(path, load(state:readStr(path)))
             end
         end
 
