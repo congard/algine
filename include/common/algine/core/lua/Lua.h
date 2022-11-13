@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <mutex>
+#include <map>
 
 namespace algine_lua {
 template<typename T> void registerLuaUsertype(sol::table &table, void *userdata);
@@ -32,6 +33,14 @@ public:
         std::recursive_mutex *m_mutex;
     };
 
+    using ModuleArgs = std::forward_list<std::string>;
+
+    /**
+     * @param args module arguments, i.e. module-name:arg1:arg2:...:argn
+     * @param env environment
+     */
+    using ModuleLoader = std::function<void(const ModuleArgs &args, const sol::environment &env)>;
+
 public:
     void init();
     bool isInitialized() const;
@@ -45,6 +54,21 @@ public:
     sol::global_table createEnvironment();
     sol::global_table createEnvironment(const sol::global_table &parent);
     sol::global_table& getGlobalEnvironment() const;
+
+    /**
+     * Adds module loader
+     * <br>Module can be loaded from Lua with
+     * <br><code>require("algine:module-name")</code>
+     * @param name module-name
+     * @param loader
+     */
+    void addModuleLoader(std::string_view name, const ModuleLoader &loader);
+
+    /**
+     * Removes module loader
+     * @param name module-name
+     */
+    void removeModuleLoader(std::string_view name);
 
     static sol::global_table& getEnv(Lua *lua, sol::global_table *env = nullptr);
     static bool isRegistered(sol::global_table &env, std::string_view type);
@@ -72,10 +96,12 @@ public:
 
 private:
     void initEnvironment(sol::global_table &env);
+    void loadModule(const ModuleArgs &args, const sol::environment &env);
 
 private:
     std::unique_ptr<sol::state> m_lua {nullptr};
     std::unique_ptr<std::recursive_mutex> m_mutex {nullptr};
+    std::map<std::string, ModuleLoader> m_moduleLoaders;
 };
 
 template<typename T, typename G, typename S>

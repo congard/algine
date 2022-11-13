@@ -31,6 +31,12 @@ void Lua::init() {
     Locker locker(this);
     m_lua = std::make_unique<sol::state>();
     m_lua->open_libraries();
+
+    addModuleLoader("core", [this](auto&, sol::global_table env) { registerUsertype(&env, AlgineCore()); });
+    addModuleLoader("std", [this](auto&, sol::global_table env) { registerUsertype(&env, AlgineStd()); });
+    addModuleLoader("glm", [this](auto&, sol::global_table env) { GLMLuaTypes::registerLuaUsertype(this, &env); });
+    addModuleLoader("tulz", [this](auto&, sol::global_table env) { TulzLuaTypes::registerLuaUsertype(this, &env); });
+
     initEnvironment(getGlobalEnvironment());
 }
 
@@ -74,6 +80,24 @@ sol::global_table Lua::createEnvironment(const sol::global_table &parent) {
 
 sol::global_table& Lua::getGlobalEnvironment() const {
     return m_lua->globals();
+}
+
+void Lua::addModuleLoader(std::string_view name, const ModuleLoader &loader) {
+    m_moduleLoaders[name.data()] = loader;
+}
+
+void Lua::removeModuleLoader(std::string_view name) {
+    m_moduleLoaders.erase(name.data());
+}
+
+void Lua::loadModule(const ModuleArgs &args, const sol::environment &env) {
+    auto &name = args.front();
+
+    if (auto it = m_moduleLoaders.find(name); it != m_moduleLoaders.end()) {
+        it->second(args, env);
+    } else {
+        throw std::runtime_error("Module " + name + " cannot be loaded: loader not found");
+    }
 }
 
 std::string nameof(const char* tn) {
@@ -143,18 +167,22 @@ void Lua::initEnvironment(sol::global_table &env) {
     env["isAndroid"] = sol::readonly_property(sol::var(is_android()));
     env["isWindows"] = sol::readonly_property(sol::var(is_windows()));
 
-    env["algine_require_module"] = [this](std::string_view lib, sol::this_environment tenv) {
-        sol::global_table env = *tenv.env;
+    env["algine_require_module"] = [this](std::string_view moduleInfo, sol::this_environment tenv) {
+        ModuleArgs args;
+        auto last = args.before_begin();
 
-        if (lib == "core") {
-            registerUsertype(&env, AlgineCore());
-        } else if (lib == "std") {
-            registerUsertype(&env, AlgineStd());
-        } else if (lib == "glm") {
-            GLMLuaTypes::registerLuaUsertype(this, &env);
-        } else if (lib == "tulz") {
-            TulzLuaTypes::registerLuaUsertype(this, &env);
+        size_t startPos = 0;
+        size_t pos;
+
+        while ((pos = moduleInfo.find(':', startPos + 1)) != std::string_view::npos) {
+            last = args.insert_after(last, std::string(moduleInfo.data() + startPos, pos - startPos));
+            startPos = pos + 1;
         }
+
+        // insert last
+        args.insert_after(last, std::string(moduleInfo.data() + startPos));
+
+        loadModule(args, *tenv.env);
     };
 
     env["algine_require_type"] = [this](std::string_view type, sol::this_environment tenv) {
