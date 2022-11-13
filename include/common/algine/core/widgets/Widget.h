@@ -276,6 +276,17 @@ public:
     void addScript(const std::string &path, Lua *lua = nullptr);
     void addScriptSource(const std::string &source, Lua *lua = nullptr);
 
+    /**
+     * @return Lua environment associated with this widget; if it isn't valid,
+     * a valid one will be created
+     */
+    sol::environment env(Lua *lua = nullptr);
+
+    /**
+     * @return Lua environment associated with this widget
+     */
+    sol::environment getEnv() const;
+
     virtual void fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io);
     bool fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io);
     bool fromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io);

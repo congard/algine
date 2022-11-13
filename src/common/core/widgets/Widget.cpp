@@ -753,7 +753,7 @@ void Widget::addScriptSource(const std::string &source, Lua *lua) {
     addLuaScript(source, false, lua);
 }
 
-void Widget::addLuaScript(const std::string &s, bool path, Lua *lua) {
+sol::environment Widget::env(Lua *lua) {
     lua = lua ? lua : &Engine::getLua();
 
     Lua::Locker locker(lua);
@@ -762,6 +762,20 @@ void Widget::addLuaScript(const std::string &s, bool path, Lua *lua) {
         m_luaEnv.abandon();
         m_luaEnv = lua->createEnvironment(lua->getGlobalEnvironment());
     }
+
+    return m_luaEnv;
+}
+
+sol::environment Widget::getEnv() const {
+    return m_luaEnv;
+}
+
+void Widget::addLuaScript(const std::string &s, bool path, Lua *lua) {
+    lua = lua ? lua : &Engine::getLua();
+
+    env(lua);
+
+    Lua::Locker locker(lua);
 
     auto &state = *lua->state();
 
