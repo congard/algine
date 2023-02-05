@@ -3,10 +3,17 @@
 
 #include <algine/types.h>
 
+#include <glm/vec3.hpp>
+
 #include <string>
 
 namespace algine {
 class Color {
+public:
+    enum class Space {
+        Invalid, Rgb, Hsv, Luv, Lch, Hsluv
+    };
+
 public:
     Color();
     explicit Color(uint color);
@@ -48,16 +55,134 @@ public:
     void setBlueF(float blue);
     void setAlphaF(float alpha);
 
+    glm::ivec3 getRgb() const;
+    glm::vec3 getRgbF() const;
+
+    glm::ivec3 getHsv() const;
+    glm::vec3 getHsvF() const;
+
+    glm::ivec3 getLuv() const;
+    glm::vec3 getLuvF() const;
+
+    glm::ivec3 getLch() const;
+    glm::vec3 getLchF() const;
+
+    glm::ivec3 getHsluv() const;
+    glm::vec3 getHsluvF() const;
+
+    /**
+     * @param h hue, range [0, 360]
+     * @param s saturation, range [0, 255]
+     * @param v value, range [0, 255]
+     * @param a alpha, range [0, 255]
+     * @see toHsv, setHsvF, getHsv, getHsvF
+     */
+    void setHsv(int h, int s, int v, int a = 255);
+
+    /**
+     * @param h hue, range [0.0, 1.0]
+     * @param s saturation, range [0.0, 1.0]
+     * @param v value, range [0.0, 1.0]
+     * @param a alpha, range [0.0, 1.0]
+     * @see toHsv, setHsv, getHsv, getHsvF
+     */
+    void setHsvF(float h, float s, float v, float a = 1.0f);
+
+    /**
+     * @param l range [0, 255]
+     * @param u range [0, 255]
+     * @param v range [0, 255]
+     * @param a range [0, 255]
+     * @see toLuv, setLuvF, getLuv, getLuvF
+     */
+    void setLuv(int l, int u, int v, int a = 255);
+
+    /**
+     * @param l range [0.0, 1.0]
+     * @param u range [0.0, 1.0]
+     * @param v range [0.0, 1.0]
+     * @param a range [0.0, 1.0]
+     * @see toLuv, setLuv, getLuv, getLuvF
+     */
+    void setLuvF(float l, float u, float v, float a = 1.0f);
+
+    /**
+     * @param l lightness, range [0, 255]
+     * @param c chroma, range [0, 255]
+     * @param h hue, range [0, 360]
+     * @param a alpha, range [0, 255]
+     * @see toLch, setLchF, getLch, getLchF
+     */
+    void setLch(int l, int c, int h, int a = 255);
+
+    /**
+     * @param l lightness, range [0.0, 1.0]
+     * @param c chroma, range [0.0, 1.0]
+     * @param h hue, range [0.0, 1.0]
+     * @param a alpha, range [0.0, 1.0]
+     * @see toLch, setLch, getLch, getLchF
+     */
+    void setLchF(float l, float c, float h, float a = 1.0f);
+
+    /**
+     * Human-friendly alternative to HSL. More info: https://www.hsluv.org/
+     * @param h hue, range [0, 360]
+     * @param s saturation, range [0, 255]
+     * @param l lightness, range [0, 255]
+     * @param a alpha, range [0, 255]
+     * @see toHsluv, setHsluvF, getHsluv, getHsluvF
+     */
+    void setHsluv(int h, int s, int l, int a = 255);
+
+    /**
+     * Human-friendly alternative to HSL. More info: https://www.hsluv.org/
+     * @param h hue, range [0.0, 1.0]
+     * @param s saturation, range [0.0, 1.0]
+     * @param l lightness, range [0.0, 1.0]
+     * @param a alpha, range [0.0, 1.0]
+     * @see toHsluv, setHsluv, getHsluv, getHsluvF
+     */
+    void setHsluvF(float h, float s, float l, float a = 1.0f);
+
     std::string toString() const;
 
+    Space getSpace() const;
+
+    Color toRgb() const;
+    Color toHsv() const;
+    Color toLuv() const;
+    Color toLch() const;
+    Color toHsluv() const;
+
     static Color fromRgbF(float r, float g, float b, float a = 1.0f);
+
+    static Color fromHsv(int h, int s, int v, int a = 255);
+    static Color fromHsvF(float h, float s, float v, float a = 1.0f);
+
+    static Color fromLuv(int l, int u, int v, int a = 255);
+    static Color fromLuvF(float l, float u, float v, float a = 1.0f);
+
+    static Color fromLch(int l, int c, int h, int a = 255);
+    static Color fromLchF(float l, float c, float h, float a = 1.0f);
+
+    static Color fromHsluv(int h, int s, int l, int a = 255);
+    static Color fromHsluvF(float h, float s, float l, float a = 1.0f);
+
     static Color parseColor(std::string color);
 
 private:
-    int m_red;
-    int m_green;
-    int m_blue;
-    int m_alpha;
+    union sp {
+        inline explicit sp(ushort p1, ushort p2, ushort p3, ushort p4)
+            : rgb({p1, p2, p3, p4}) {}
+
+        struct { ushort r, g, b, a; } rgb;
+        struct { ushort h, s, v, a; } hsv;
+        struct { ushort l, u, v, a; } luv;
+        struct { ushort l, c, h, a; } lch;
+        struct { ushort h, s, l, a; } hsluv;
+    } m_sp;
+
+    Space m_space {Space::Invalid};
 };
 
 template<typename T>

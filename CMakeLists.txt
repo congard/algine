@@ -216,7 +216,8 @@ function(collectSources output headersPath sourcesPath)
     file(GLOB_RECURSE files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
         "${headersPath}/*.h"
         "${sourcesPath}/*.h"
-        "${sourcesPath}/*.cpp")
+        "${sourcesPath}/*.cpp"
+        "${sourcesPath}/*.c")
     set(${output} ${${output}} ${files} PARENT_SCOPE)
 endfunction()
 
