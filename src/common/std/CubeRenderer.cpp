@@ -22,7 +22,7 @@ CubeRenderer::CubeRenderer(const uint inPosLocation) {
              1.0f,  1.0f, -1.0f     // Back-top-right
     };
 
-    m_arrayBuffer = new ArrayBuffer();
+    m_arrayBuffer = std::make_unique<ArrayBuffer>();
     m_arrayBuffer->bind();
     m_arrayBuffer->setData(sizeof(vertices), vertices, ArrayBuffer::StaticDraw);
     m_arrayBuffer->unbind();
@@ -31,27 +31,22 @@ CubeRenderer::CubeRenderer(const uint inPosLocation) {
     attribDescription.setLocation(inPosLocation);
     attribDescription.setCount(3);
 
-    m_inputLayout = new InputLayout();
+    m_inputLayout = std::make_unique<InputLayout>();
     m_inputLayout->bind();
-    m_inputLayout->addAttribute(attribDescription, m_arrayBuffer);
+    m_inputLayout->addAttribute(attribDescription, m_arrayBuffer.get());
     m_inputLayout->unbind();
 }
 
-CubeRenderer::~CubeRenderer() {
-    delete m_inputLayout;
-    delete m_arrayBuffer;
-}
-
 void CubeRenderer::draw() {
-    // NOTE: add check for current CR binded
+    // NOTE: add check if current CR bound
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 14);
 }
 
-InputLayout* CubeRenderer::getInputLayout() const {
+const std::unique_ptr<InputLayout>& CubeRenderer::getInputLayout() const {
     return m_inputLayout;
 }
 
-ArrayBuffer* CubeRenderer::getArrayBuffer() const {
+const std::unique_ptr<ArrayBuffer>& CubeRenderer::getArrayBuffer() const {
     return m_arrayBuffer;
 }
 }

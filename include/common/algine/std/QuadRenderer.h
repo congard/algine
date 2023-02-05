@@ -9,18 +9,17 @@ namespace algine {
 class QuadRenderer {
 public:
     explicit QuadRenderer(uint inPosLocation = 0);
-    ~QuadRenderer();
 
     void draw();
 
-    InputLayout *getInputLayout() const;
-    ArrayBuffer *getArrayBuffer() const;
+    const std::unique_ptr<InputLayout>& getInputLayout() const;
+    const std::unique_ptr<ArrayBuffer>& getArrayBuffer() const;
 
     static ShaderPtr getVertexShader();
 
 public:
-    InputLayout *m_inputLayout;
-    ArrayBuffer *m_arrayBuffer;
+    std::unique_ptr<InputLayout> m_inputLayout;
+    std::unique_ptr<ArrayBuffer> m_arrayBuffer;
 };
 }
 

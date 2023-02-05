@@ -4,21 +4,21 @@
 #include <algine/core/InputLayout.h>
 #include <algine/core/buffers/ArrayBuffer.h>
 #include <tulz/macros.h>
+#include <memory>
 
 namespace algine {
 class CubeRenderer {
 public:
     explicit CubeRenderer(uint inPosLocation = 0);
-    ~CubeRenderer();
 
     void draw();
 
-    InputLayout *getInputLayout() const;
-    ArrayBuffer *getArrayBuffer() const;
+    const std::unique_ptr<InputLayout>& getInputLayout() const;
+    const std::unique_ptr<ArrayBuffer>& getArrayBuffer() const;
 
 public:
-    InputLayout *m_inputLayout;
-    ArrayBuffer *m_arrayBuffer;
+    std::unique_ptr<InputLayout> m_inputLayout;
+    std::unique_ptr<ArrayBuffer> m_arrayBuffer;
 };
 }
 

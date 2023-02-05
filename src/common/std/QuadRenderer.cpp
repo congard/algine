@@ -13,7 +13,7 @@ QuadRenderer::QuadRenderer(const uint inPosLocation) {
              1.0f, -1.0f, 0.0f
     };
 
-    m_arrayBuffer = new ArrayBuffer();
+    m_arrayBuffer = std::make_unique<ArrayBuffer>();
     m_arrayBuffer->bind();
     m_arrayBuffer->setData(sizeof(vertices), vertices, ArrayBuffer::StaticDraw);
     m_arrayBuffer->unbind();
@@ -22,26 +22,21 @@ QuadRenderer::QuadRenderer(const uint inPosLocation) {
     attribDescription.setLocation(inPosLocation);
     attribDescription.setCount(3);
 
-    m_inputLayout = new InputLayout();
+    m_inputLayout = std::make_unique<InputLayout>();
     m_inputLayout->bind();
-    m_inputLayout->addAttribute(attribDescription, m_arrayBuffer);
+    m_inputLayout->addAttribute(attribDescription, m_arrayBuffer.get());
     m_inputLayout->unbind();
-}
-
-QuadRenderer::~QuadRenderer() {
-    delete m_inputLayout;
-    delete m_arrayBuffer;
 }
 
 void QuadRenderer::draw() {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-InputLayout* QuadRenderer::getInputLayout() const {
+const std::unique_ptr<InputLayout>& QuadRenderer::getInputLayout() const {
     return m_inputLayout;
 }
 
-ArrayBuffer* QuadRenderer::getArrayBuffer() const {
+const std::unique_ptr<ArrayBuffer>& QuadRenderer::getArrayBuffer() const {
     return m_arrayBuffer;
 }
 
