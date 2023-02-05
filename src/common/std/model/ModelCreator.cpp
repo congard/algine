@@ -16,7 +16,7 @@ constexpr auto ClassName = "Model";
 }
 
 ModelCreator::AnimationInfo::AnimationInfo(std::string name)
-    : m_name(move(name)),
+    : m_name(std::move(name)),
       m_index(None) {}
 
 ModelCreator::AnimationInfo::AnimationInfo(Index index)

@@ -6,7 +6,7 @@ using namespace std;
 
 namespace algine {
 JsonHelper::JsonHelper(nlohmann::json inJson)
-    : json(move(inJson))
+    : json(std::move(inJson))
 {
     // see initializer list above
 }
