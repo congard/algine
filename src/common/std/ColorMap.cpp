@@ -11,13 +11,17 @@ namespace algine {
 ColorMap::ColorMap() = default;
 
 ColorMap::ColorMap(uint width, uint height, uint format) {
-    create(width, height, format);
+    create({width, height}, format);
 }
 
-void ColorMap::create(uint width, uint height, uint format) {
+ColorMap::ColorMap(glm::ivec2 size, uint format) {
+    create(size, format);
+}
+
+void ColorMap::create(glm::ivec2 size, uint format) {
     m_texture = PtrMaker::make();
     m_texture->bind();
-    m_texture->setDimensions(width, height);
+    m_texture->setDimensions(size.x, size.y);
     m_texture->setFormat(format);
     m_texture->setParams(std::map<uint, uint> {
         {Texture::MinFilter, Texture::Nearest},
@@ -145,24 +149,15 @@ glm::vec2 ColorMap::getNormalizedUV(const Color &color) const {
 }
 
 glm::vec2 ColorMap::normalizeUV(const glm::ivec2 &uv) const {
-    return {
-        (float) uv.x / (float) getWidth(),
-        (float) uv.y / (float) getHeight()
-    };
+    return normalizeUV(uv, {getWidth(), getHeight()});
 }
 
 glm::ivec2 ColorMap::denormalizeUV(const glm::vec2 &uv) const {
-    return {
-        static_cast<int>(uv.x * (float) getWidth()),
-        static_cast<int>(uv.y * (float) getHeight())
-    };
+    return denormalizeUV(uv, {getWidth(), getHeight()});
 }
 
 glm::vec2 ColorMap::getCenterOffset() const {
-    return {
-        (1.0f / (float) getWidth()) / 2,
-        (1.0f / (float) getHeight()) / 2
-    };
+    return getCenterOffset({getWidth(), getHeight()});
 }
 
 void ColorMap::setWidth(uint width) {
@@ -199,5 +194,26 @@ bool ColorMap::exists(const glm::ivec2 &uv) const {
 
 const Texture2DPtr& ColorMap::get() const {
     return m_texture;
+}
+
+glm::vec2 ColorMap::normalizeUV(glm::ivec2 uv, glm::ivec2 size) {
+    return {
+        (float) uv.x / (float) size.x,
+        (float) uv.y / (float) size.y
+    };
+}
+
+glm::ivec2 ColorMap::denormalizeUV(glm::vec2 uv, glm::ivec2 size) {
+    return {
+        static_cast<int>(uv.x * (float) size.x),
+        static_cast<int>(uv.y * (float) size.y)
+    };
+}
+
+glm::vec2 ColorMap::getCenterOffset(glm::ivec2 size) {
+    return {
+        (1.0f / (float) size.x) / 2,
+        (1.0f / (float) size.y) / 2
+    };
 }
 }

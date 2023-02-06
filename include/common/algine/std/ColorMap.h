@@ -23,8 +23,9 @@ public:
 public:
     ColorMap();
     ColorMap(uint width, uint height, uint format = Texture::RGBA8UI);
+    explicit ColorMap(glm::ivec2 size, uint format = Texture::RGBA8UI);
 
-    void create(uint width, uint height, uint format = Texture::RGBA8UI);
+    void create(glm::ivec2 size, uint format = Texture::RGBA8UI);
     void update();
 
     void setColors(const Colors &colors);
@@ -61,6 +62,29 @@ public:
     bool exists(const glm::ivec2 &uv) const;
 
     const Texture2DPtr& get() const;
+
+    /**
+     * Static version of <code>normalizeUV</code>
+     * @param uv
+     * @param size
+     * @return normalized UV, i.e UV in range [0, 1]
+     */
+    static glm::vec2 normalizeUV(glm::ivec2 uv, glm::ivec2 size);
+
+    /**
+     * Static version of <code>denormalizeUV</code>
+     * @param uv
+     * @param size
+     * @return denormalized UV, i.e UV in range {[0, width], [0, height]}
+     */
+    static glm::ivec2 denormalizeUV(glm::vec2 uv, glm::ivec2 size);
+
+    /**
+     * Static version of <code>getCenterOffset</code>
+     * @param size
+     * @return offset to the cell's center
+     */
+    static glm::vec2 getCenterOffset(glm::ivec2 size);
 
 private:
     Texture2DPtr m_texture;
