@@ -5,7 +5,10 @@
 #include <algine/gl.h>
 
 namespace algine {
-QuadRenderer::QuadRenderer(const uint inPosLocation) {
+QuadRenderer::QuadRenderer(uint inPosLocation)
+    : m_arrayBuffer(std::make_unique<ArrayBuffer>()),
+      m_inputLayout(std::make_unique<InputLayout>())
+{
     const float vertices[] = {
             -1.0f,  1.0f, 0.0f,
             -1.0f, -1.0f, 0.0f,
@@ -13,7 +16,6 @@ QuadRenderer::QuadRenderer(const uint inPosLocation) {
              1.0f, -1.0f, 0.0f
     };
 
-    m_arrayBuffer = std::make_unique<ArrayBuffer>();
     m_arrayBuffer->bind();
     m_arrayBuffer->setData(sizeof(vertices), vertices, ArrayBuffer::StaticDraw);
     m_arrayBuffer->unbind();
@@ -22,7 +24,6 @@ QuadRenderer::QuadRenderer(const uint inPosLocation) {
     attribDescription.setLocation(inPosLocation);
     attribDescription.setCount(3);
 
-    m_inputLayout = std::make_unique<InputLayout>();
     m_inputLayout->bind();
     m_inputLayout->addAttribute(attribDescription, m_arrayBuffer.get());
     m_inputLayout->unbind();

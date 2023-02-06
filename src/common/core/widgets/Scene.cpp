@@ -7,8 +7,9 @@
 using namespace tulz;
 
 namespace algine::Widgets {
-Scene::Scene() {
-    m_painter = std::make_unique<Painter>();
+Scene::Scene()
+    : m_painter(std::make_unique<Painter>())
+{
     m_options.painter = m_painter.get();
 }
 

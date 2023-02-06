@@ -3,7 +3,10 @@
 #include <algine/gl.h>
 
 namespace algine {
-CubeRenderer::CubeRenderer(const uint inPosLocation) {
+CubeRenderer::CubeRenderer(uint inPosLocation)
+    : m_arrayBuffer(std::make_unique<ArrayBuffer>()),
+      m_inputLayout(std::make_unique<InputLayout>())
+{
     // source: https://stackoverflow.com/questions/28375338/cube-using-single-gl-triangle-strip
     const float vertices[] = {
             -1.0f,  1.0f,  1.0f,    // Front-top-left
@@ -22,7 +25,6 @@ CubeRenderer::CubeRenderer(const uint inPosLocation) {
              1.0f,  1.0f, -1.0f     // Back-top-right
     };
 
-    m_arrayBuffer = std::make_unique<ArrayBuffer>();
     m_arrayBuffer->bind();
     m_arrayBuffer->setData(sizeof(vertices), vertices, ArrayBuffer::StaticDraw);
     m_arrayBuffer->unbind();
@@ -31,7 +33,6 @@ CubeRenderer::CubeRenderer(const uint inPosLocation) {
     attribDescription.setLocation(inPosLocation);
     attribDescription.setCount(3);
 
-    m_inputLayout = std::make_unique<InputLayout>();
     m_inputLayout->bind();
     m_inputLayout->addAttribute(attribDescription, m_arrayBuffer.get());
     m_inputLayout->unbind();
