@@ -306,6 +306,36 @@ void Color::setAlphaF(float alpha) {
     m_sp.rgb.a = usrange(alpha);
 }
 
+Color Color::hsvHueRotate(int degrees) const {
+    return hsvHueRotateF(static_cast<float>(degrees) / 360.0f);
+}
+
+Color Color::hsvHueRotateF(float val) const {
+    auto hsv = getHsvF();
+    hsv[0] = fmodf(hsv[0] + val, 1.0f);
+    return Color::fromHsvF(hsv[0], hsv[1], hsv[2], alphaF());
+}
+
+Color Color::lchHueRotate(int degrees) const {
+    return lchHueRotateF(static_cast<float>(degrees) / 360.0f);
+}
+
+Color Color::lchHueRotateF(float val) const {
+    auto lch = getLchF();
+    lch[2] = fmodf(lch[2] + val, 1.0f);
+    return Color::fromLchF(lch[0], lch[1], lch[2], alphaF());
+}
+
+Color Color::hsluvHueRotate(int degrees) const {
+    return hsluvHueRotateF(static_cast<float>(degrees) / 360.0f);
+}
+
+Color Color::hsluvHueRotateF(float val) const {
+    auto hsluv = getHsluvF();
+    hsluv[0] = fmodf(hsluv[0] + val, 1.0f);
+    return Color::fromHsluvF(hsluv[0], hsluv[1], hsluv[2], alphaF());
+}
+
 glm::ivec3 Color::getRgb() const {
     if (m_space != Space::Rgb)
         return toRgb().getRgb();

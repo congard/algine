@@ -55,6 +55,48 @@ public:
     void setBlueF(float blue);
     void setAlphaF(float alpha);
 
+    /**
+     * Rotates HSV hue component
+     * @param degrees in range [0, 360]
+     * @return new color
+     */
+    Color hsvHueRotate(int degrees) const;
+
+    /**
+     * Rotates HSV hue component
+     * @param val in range [0, 1]
+     * @return new color
+     */
+    Color hsvHueRotateF(float val) const;
+
+    /**
+     * Rotates LCH hue component
+     * @param degrees in range [0, 360]
+     * @return new color
+     */
+    Color lchHueRotate(int degrees) const;
+
+    /**
+     * Rotates LCH hue component
+     * @param val in range [0, 1]
+     * @return new color
+     */
+    Color lchHueRotateF(float val) const;
+
+    /**
+     * Rotates HSLuv hue component
+     * @param degrees in range [0, 360]
+     * @return new color
+     */
+    Color hsluvHueRotate(int degrees) const;
+
+    /**
+     * Rotates HSLuv hue component
+     * @param val in range [0, 1]
+     * @return new color
+     */
+    Color hsluvHueRotateF(float val) const;
+
     glm::ivec3 getRgb() const;
     glm::vec3 getRgbF() const;
 
