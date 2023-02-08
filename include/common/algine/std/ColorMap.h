@@ -11,14 +11,12 @@
 namespace algine {
 class ColorMap {
 private:
-    struct _ColorComparator {
-        bool operator()(const Color &lhs, const Color &rhs) const {
-            return lhs.value() < rhs.value();
-        }
+    struct ColorComparator {
+        bool operator()(glm::ivec2 lhs, glm::ivec2 rhs) const;
     };
 
 public:
-    using Colors = std::map<Color, glm::ivec2, _ColorComparator>;
+    using Colors = std::map<glm::ivec2, Color, ColorComparator>;
 
 public:
     ColorMap();
@@ -29,15 +27,15 @@ public:
     void update();
 
     void setColors(const Colors &colors);
-    void setColor(const Color &color, const glm::ivec2 &uv);
+    void setColor(glm::ivec2 uv, const Color &color);
 
     const Colors& getColors() const;
     const glm::ivec2& getUV(const Color &color) const;
-    const Color& getColor(const glm::ivec2 &uv) const;
+    const Color& getColor(glm::ivec2 uv) const;
 
     glm::vec2 getNormalizedUV(const Color &color) const;
-    glm::vec2 normalizeUV(const glm::ivec2 &uv) const;
-    glm::ivec2 denormalizeUV(const glm::vec2 &uv) const;
+    glm::vec2 normalizeUV(glm::ivec2 uv) const;
+    glm::ivec2 denormalizeUV(glm::vec2 uv) const;
 
     /**
      * This function can be useful on some platforms,
@@ -59,7 +57,7 @@ public:
     uint getFormat() const;
 
     bool exists(const Color &color) const;
-    bool exists(const glm::ivec2 &uv) const;
+    bool exists(glm::ivec2 uv) const;
 
     const Texture2DPtr& get() const;
 

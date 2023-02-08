@@ -2,12 +2,15 @@
 #include <algine/core/PtrMaker.h>
 
 #include <glm/gtx/string_cast.hpp>
-
+#include <glm/gtx/hash.hpp>
 #include <tulz/Array.h>
-
 #include <stdexcept>
 
 namespace algine {
+bool ColorMap::ColorComparator::operator()(glm::ivec2 lhs, glm::ivec2 rhs) const {
+    return std::hash<glm::ivec2>()(lhs) < std::hash<glm::ivec2>()(rhs);
+}
+
 ColorMap::ColorMap() = default;
 
 ColorMap::ColorMap(uint width, uint height, uint format) {
@@ -54,15 +57,15 @@ inline void fillData(T *data, const ColorMap::Colors &colors, uint components, u
     switch (components) {
         case 1:
             for (const auto &p : colors) {
-                auto &color = p.first;
-                auto &uv = p.second;
+                auto &uv = p.first;
+                auto &color = p.second;
                 data[uv.y * width + uv.x] = color.red<T>();
             }
             break;
         case 2:
             for (const auto &p : colors) {
-                auto &color = p.first;
-                auto &uv = p.second;
+                auto &uv = p.first;
+                auto &color = p.second;
                 auto index = (uv.y * width + uv.x) * 2;
                 data[index + 0] = color.red<T>();
                 data[index + 1] = color.green<T>();
@@ -70,8 +73,8 @@ inline void fillData(T *data, const ColorMap::Colors &colors, uint components, u
             break;
         case 3:
             for (const auto &p : colors) {
-                auto &color = p.first;
-                auto &uv = p.second;
+                auto &uv = p.first;
+                auto &color = p.second;
                 auto index = (uv.y * width + uv.x) * 3;
                 data[index + 0] = color.red<T>();
                 data[index + 1] = color.green<T>();
@@ -81,8 +84,8 @@ inline void fillData(T *data, const ColorMap::Colors &colors, uint components, u
             break;
         case 4:
             for (const auto &p : colors) {
-                auto &color = p.first;
-                auto &uv = p.second;
+                auto &uv = p.first;
+                auto &color = p.second;
                 auto index = (uv.y * width + uv.x) * 4;
                 data[index + 0] = color.red<T>();
                 data[index + 1] = color.green<T>();
@@ -122,8 +125,8 @@ void ColorMap::setColors(const Colors &colors) {
     m_colors = colors;
 }
 
-void ColorMap::setColor(const Color &color, const glm::ivec2 &uv) {
-    m_colors[color] = uv;
+void ColorMap::setColor(glm::ivec2 uv, const Color &color) {
+    m_colors[uv] = color;
 }
 
 const ColorMap::Colors& ColorMap::getColors() const {
@@ -131,28 +134,28 @@ const ColorMap::Colors& ColorMap::getColors() const {
 }
 
 const glm::ivec2& ColorMap::getUV(const Color &color) const {
-    return m_colors.at(color);
-}
-
-const Color& ColorMap::getColor(const glm::ivec2 &uv) const {
-    for (const auto &p : m_colors) {
-        if (p.second == uv) {
-            return p.first;
+    for (const auto & [key, value] : m_colors) {
+        if (value == color) {
+            return key;
         }
     }
 
-    throw std::runtime_error("Color at " + glm::to_string(uv) + " not found");
+    throw std::runtime_error("ColorMap doesn't contain provided color");
+}
+
+const Color& ColorMap::getColor(glm::ivec2 uv) const {
+    return m_colors.at(uv);
 }
 
 glm::vec2 ColorMap::getNormalizedUV(const Color &color) const {
     return normalizeUV(getUV(color));
 }
 
-glm::vec2 ColorMap::normalizeUV(const glm::ivec2 &uv) const {
+glm::vec2 ColorMap::normalizeUV(glm::ivec2 uv) const {
     return normalizeUV(uv, {getWidth(), getHeight()});
 }
 
-glm::ivec2 ColorMap::denormalizeUV(const glm::vec2 &uv) const {
+glm::ivec2 ColorMap::denormalizeUV(glm::vec2 uv) const {
     return denormalizeUV(uv, {getWidth(), getHeight()});
 }
 
@@ -185,11 +188,11 @@ uint ColorMap::getFormat() const {
 }
 
 bool ColorMap::exists(const Color &color) const {
-    return m_colors.find(color) != m_colors.end();
+    return std::any_of(m_colors.begin(), m_colors.end(), [&](const auto &p) { return p.second == color; });
 }
 
-bool ColorMap::exists(const glm::ivec2 &uv) const {
-    return std::any_of(m_colors.begin(), m_colors.end(), [&](const auto &p) { return p.second == uv; });
+bool ColorMap::exists(glm::ivec2 uv) const {
+    return m_colors.find(uv) != m_colors.end();
 }
 
 const Texture2DPtr& ColorMap::get() const {
