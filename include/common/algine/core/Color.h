@@ -196,19 +196,25 @@ public:
     Color toLch() const;
     Color toHsluv() const;
 
+    static Color fromRgb(int r, int g, int b, int a = 255);
     static Color fromRgbF(float r, float g, float b, float a = 1.0f);
+    static Color fromRgbF(const glm::vec4 &rgba);
 
     static Color fromHsv(int h, int s, int v, int a = 255);
     static Color fromHsvF(float h, float s, float v, float a = 1.0f);
+    static Color fromHsvF(const glm::vec4 &hsva);
 
     static Color fromLuv(int l, int u, int v, int a = 255);
     static Color fromLuvF(float l, float u, float v, float a = 1.0f);
+    static Color fromLuvF(const glm::vec4 &luva);
 
     static Color fromLch(int l, int c, int h, int a = 255);
     static Color fromLchF(float l, float c, float h, float a = 1.0f);
+    static Color fromLchF(const glm::vec4 &lcha);
 
     static Color fromHsluv(int h, int s, int l, int a = 255);
     static Color fromHsluvF(float h, float s, float l, float a = 1.0f);
+    static Color fromHsluvF(const glm::vec4 &hsla);
 
     static Color parseColor(std::string color);
 

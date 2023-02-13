@@ -730,10 +730,20 @@ Color Color::toHsluv() const {
     );
 }
 
+Color Color::fromRgb(int r, int g, int b, int a) {
+    Color color;
+    color.setRgb(r, g, b, a);
+    return color;
+}
+
 Color Color::fromRgbF(float r, float g, float b, float a) {
     Color color;
     color.setRgbF(r, g, b, a);
     return color;
+}
+
+Color Color::fromRgbF(const glm::vec4 &rgba) {
+    return fromRgbF(rgba[0], rgba[1], rgba[2], rgba[3]);
 }
 
 Color Color::fromHsv(int h, int s, int v, int a) {
@@ -748,6 +758,10 @@ Color Color::fromHsvF(float h, float s, float v, float a) {
     return color;
 }
 
+Color Color::fromHsvF(const glm::vec4 &hsva) {
+    return fromHsvF(hsva[0], hsva[1], hsva[2], hsva[3]);
+}
+
 Color Color::fromLuv(int l, int u, int v, int a) {
     Color color;
     color.setLuv(l, u, v, a);
@@ -758,6 +772,10 @@ Color Color::fromLuvF(float l, float u, float v, float a) {
     Color color;
     color.setLuvF(l, u, v, a);
     return color;
+}
+
+Color Color::fromLuvF(const glm::vec4 &luva) {
+    return fromLuvF(luva[0], luva[1], luva[2], luva[3]);
 }
 
 Color Color::fromLch(int l, int c, int h, int a) {
@@ -772,6 +790,10 @@ Color Color::fromLchF(float l, float c, float h, float a) {
     return color;
 }
 
+Color Color::fromLchF(const glm::vec4 &lcha) {
+    return fromLchF(lcha[0], lcha[1], lcha[2], lcha[3]);
+}
+
 Color Color::fromHsluv(int h, int s, int l, int a) {
     Color color;
     color.setHsluv(h, s, l, a);
@@ -782,6 +804,10 @@ Color Color::fromHsluvF(float h, float s, float l, float a) {
     Color color;
     color.setHsluvF(h, s, l, a);
     return color;
+}
+
+Color Color::fromHsluvF(const glm::vec4 &hsla) {
+    return fromHsluvF(hsla[0], hsla[1], hsla[2], hsla[3]);
 }
 
 Color Color::parseColor(std::string color) {
