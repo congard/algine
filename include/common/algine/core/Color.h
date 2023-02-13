@@ -4,6 +4,7 @@
 #include <algine/types.h>
 
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 #include <string>
 
@@ -217,6 +218,51 @@ public:
     static Color fromHsluvF(const glm::vec4 &hsla);
 
     static Color parseColor(std::string color);
+
+    /**
+     * Mixes x and y colors in RGB space using position a
+     * @param x color x
+     * @param y color y
+     * @param a position in range [0, 1]
+     * @return interpolated color
+     */
+    static Color rgbMix(const Color &x, const Color &y, float a);
+
+    /**
+     * Mixes x and y colors in HSV space using position a
+     * @param x color x
+     * @param y color y
+     * @param a position in range [0, 1]
+     * @return interpolated color
+     */
+    static Color hsvMix(const Color &x, const Color &y, float a);
+
+    /**
+     * Mixes x and y colors in LUV space using position a
+     * @param x color x
+     * @param y color y
+     * @param a position in range [0, 1]
+     * @return interpolated color
+     */
+    static Color luvMix(const Color &x, const Color &y, float a);
+
+    /**
+     * Mixes x and y colors in LCH space using position a
+     * @param x color x
+     * @param y color y
+     * @param a position in range [0, 1]
+     * @return interpolated color
+     */
+    static Color lchMix(const Color &x, const Color &y, float a);
+
+    /**
+     * Mixes x and y colors in HSLuv space using position a
+     * @param x color x
+     * @param y color y
+     * @param a position in range [0, 1]
+     * @return interpolated color
+     */
+    static Color hsluvMix(const Color &x, const Color &y, float a);
 
 private:
     union sp {

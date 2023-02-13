@@ -823,4 +823,66 @@ Color Color::parseColor(std::string color) {
 
     return Color(colorValue);
 }
+
+using GetFunc = glm::vec3 (Color::*)() const;
+using FromFunc = Color (*)(const glm::vec4&);
+
+/**
+ * Mixes colors using linear interpolation
+ */
+inline Color xMix(const Color &x, const Color &y, float a, GetFunc get, FromFunc from) {
+    // v means value
+    glm::vec4 xv((x.*get)(), x.alphaF());
+    glm::vec4 yv((y.*get)(), y.alphaF());
+    glm::vec4 zv = glm::mix(xv, yv, a);
+    return from(zv);
+}
+
+/**
+ * Mixes colors using linear interpolation
+ * Hue will be mixed with the shortest distance
+ */
+inline Color hueMix(const Color &x, const Color &y, float a, int hueIndex, GetFunc get, FromFunc from) {
+    glm::vec4 xv((x.*get)(), x.alphaF());
+    glm::vec4 yv((y.*get)(), y.alphaF());
+
+    float &xHue = xv[hueIndex];
+    float &yHue = yv[hueIndex];
+    float dist = glm::abs(xHue - yHue);
+
+    if (dist > 0.5f) {
+        if (xHue < yHue) {
+            xHue += 1.0f;
+        } else {
+            yHue += 1.0f;
+        }
+    }
+
+    glm::vec4 zv = glm::mix(xv, yv, a);
+
+    float &zHue = zv[hueIndex];
+    zHue = fmodf(zHue, 1.0f);
+
+    return from(zv);
+}
+
+Color Color::rgbMix(const Color &x, const Color &y, float a) {
+    return xMix(x, y, a, &Color::getRgbF, &Color::fromRgbF);
+}
+
+Color Color::hsvMix(const Color &x, const Color &y, float a) {
+    return hueMix(x, y, a, 0, &Color::getHsvF, &Color::fromHsvF);
+}
+
+Color Color::luvMix(const Color &x, const Color &y, float a) {
+    return xMix(x, y, a, &Color::getLuvF, &Color::fromLuvF);
+}
+
+Color Color::lchMix(const Color &x, const Color &y, float a) {
+    return hueMix(x, y, a, 2, &Color::getLchF, &Color::fromLchF);
+}
+
+Color Color::hsluvMix(const Color &x, const Color &y, float a) {
+    return hueMix(x, y, a, 0, &Color::getHsluvF, &Color::fromHsluvF);
+}
 }
