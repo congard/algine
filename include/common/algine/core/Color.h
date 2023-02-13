@@ -40,6 +40,10 @@ public:
 
     uint value() const;
 
+    /**
+     * @return <code>false</code> if either <code>getSpace() == Space::Invalid</code>
+     * or converting to RGB gives values out-of-range, otherwise <code>true</code>
+     */
     bool isValid() const;
 
     void setValue(uint color);
@@ -191,7 +195,13 @@ public:
 
     Space getSpace() const;
 
+    /**
+     * @return <code>Color</code> in RGB space; if converting to RGB results in
+     * out-of-range values, they will be clamped to the correct range
+     * @see isValid
+     */
     Color toRgb() const;
+
     Color toHsv() const;
     Color toLuv() const;
     Color toLch() const;

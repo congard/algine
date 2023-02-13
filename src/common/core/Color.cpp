@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <cmath>
+#include <tuple>
 #include <glm/common.hpp>
 
 #include "hsluv/hsluv.h"
@@ -69,6 +70,8 @@ inline float posBetweenF(T a, T lower, T upper) {
     return posBetween(a, lower, upper);
 }
 
+// LUV & LCH internal details
+
 constexpr struct {
     double l_min = 0.0, l_max = 100.0;
     double u_min = -83.067120, u_max = 175.009822;
@@ -81,9 +84,40 @@ constexpr struct {
     double h_min = 0.0, h_max = 360.0;
 } lchInfo;
 
+using Triplet = std::tuple<double, double, double>;
+
+/**
+ * @return LUV in the original range
+ */
+Triplet luvRangeToInternal(ushort l, ushort u, ushort v) {
+    return {
+        glm::mix(luvInfo.l_min, luvInfo.l_max, frange(l)),
+        glm::mix(luvInfo.u_min, luvInfo.u_max, frange(u)),
+        glm::mix(luvInfo.v_min, luvInfo.v_max, frange(v))
+    };
+}
+
+/**
+ * @return LCH in the original range
+ */
+Triplet lchRangeToInternal(ushort l, ushort c, ushort h) {
+    return {
+        glm::mix(lchInfo.l_min, lchInfo.l_max, frange(l)),
+        glm::mix(lchInfo.c_min, lchInfo.c_max, frange(c)),
+        glm::mix(lchInfo.h_min, lchInfo.h_max, frange(h))
+    };
+}
+
+// details end
+
+template<typename T>
+inline bool isInRangeIncl(T a, T lower, T upper) {
+    return lower <= a && a <= upper;
+}
+
 template<typename T, typename ...Args>
 void assert_values(T from, T to, T val, Args... values) {
-    if (!(from <= val && val <= to)) {
+    if (!isInRangeIncl(val, from, to)) {
         throw std::invalid_argument(
             "Color value out of range:\n"
             "\texpected: " + std::to_string(from) + " <= x <= " + std::to_string(to) +
@@ -198,7 +232,25 @@ uint Color::value() const {
 }
 
 bool Color::isValid() const {
-    return m_space != Space::Invalid;
+    using RgbGetter = void (*)(double, double, double, double*, double*, double*);
+
+    auto isRgbValid = [](const Triplet &tri, RgbGetter getRgb) {
+        auto [p1, p2, p3] = tri;
+        double r, g, b;
+        getRgb(p1, p2, p3, &r, &g, &b);
+        return isInRangeIncl(r, 0.0, 1.0) && isInRangeIncl(g, 0.0, 1.0) && isInRangeIncl(b, 0.0, 1.0);
+    };
+
+    switch (m_space) {
+        case Space::Luv:
+            return isRgbValid(luvRangeToInternal(m_sp.luv.l, m_sp.luv.u, m_sp.luv.v), &luv2rgb);
+        case Space::Lch:
+            return isRgbValid(lchRangeToInternal(m_sp.lch.l, m_sp.lch.c, m_sp.lch.h), &lch2rgb);
+        case Space::Invalid:
+            return false;
+        default:
+            return true;
+    }
 }
 
 void Color::setValue(uint color) {
@@ -636,6 +688,12 @@ void hsv2rgb(float &r, float &g, float &b, float h, float s, float v) {
 }
 
 Color Color::toRgb() const {
+    auto clampRgb = [](double &r, double &g, double &b) {
+        r = glm::clamp(r, 0.0, 1.0);
+        g = glm::clamp(g, 0.0, 1.0);
+        b = glm::clamp(b, 0.0, 1.0);
+    };
+
     switch (m_space) {
         case Space::Invalid: throw std::runtime_error("Invalid color");
         case Space::Rgb: return *this;
@@ -645,19 +703,17 @@ Color Color::toRgb() const {
             return Color::fromRgbF(r, g, b, alphaF());
         }
         case Space::Luv: {
-            double l = glm::mix(luvInfo.l_min, luvInfo.l_max, frange(m_sp.luv.l));
-            double u = glm::mix(luvInfo.u_min, luvInfo.u_max, frange(m_sp.luv.u));
-            double v = glm::mix(luvInfo.v_min, luvInfo.v_max, frange(m_sp.luv.v));
+            auto [l, u, v] = luvRangeToInternal(m_sp.luv.l, m_sp.luv.u, m_sp.luv.v);
             double r, g, b;
             luv2rgb(l, u, v, &r, &g, &b);
+            clampRgb(r, g, b);
             return Color::fromRgbF((float) r, (float) g, (float) b, alphaF());
         }
         case Space::Lch: {
-            double l = glm::mix(lchInfo.l_min, lchInfo.l_max, frange(m_sp.lch.l));
-            double c = glm::mix(lchInfo.c_min, lchInfo.c_max, frange(m_sp.lch.c));
-            double h = glm::mix(lchInfo.h_min, lchInfo.h_max, frange(m_sp.lch.h));
+            auto [l, c, h] = lchRangeToInternal(m_sp.lch.l, m_sp.lch.c, m_sp.lch.h);
             double r, g, b;
             lch2rgb(l, c, h, &r, &g, &b);
+            clampRgb(r, g, b);
             return Color::fromRgbF((float) r, (float) g, (float) b, alphaF());
         }
         case Space::Hsluv: {
