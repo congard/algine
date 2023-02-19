@@ -55,6 +55,9 @@ public:
     void *m_display {nullptr};
     void *m_surface {nullptr};
 #endif
+
+private:
+    bool createImpl(int major, int minor, const ContextConfig &config);
 };
 }
 
