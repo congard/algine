@@ -12,6 +12,10 @@
 #include <memory>
 #include <mutex>
 
+#ifdef ALGINE_QT_PLATFORM
+    #include <QApplication>
+#endif
+
 namespace algine {
 class Framebuffer;
 class Renderbuffer;
@@ -34,6 +38,7 @@ class Engine {
     friend class InputLayout;
     friend class Font;
     friend class Window;
+    friend class QtWindow;
     friend class Context;
 
 public:
@@ -43,8 +48,21 @@ public:
     };
 
 public:
+    static void init(int argc, char *const *argv);
     static void init();
+    static void wait();
     static void destroy();
+
+    /**
+     * Calls <code>Engine::init</code> -> <code>func</code> ->
+     * <code>Engine::wait</code> -> <code>Engine::destroy</code>
+     * @param argc
+     * @param argv
+     * @param func
+     */
+    static void exec(int argc, char *const *argv, const std::function<void()> &func);
+
+    static void exec(const std::function<void()> &func);
 
     static void setDebugWriter(DebugWriter *debugWriter);
     static std::unique_ptr<DebugWriter>& getDebugWriter();
@@ -174,6 +192,13 @@ private:
     static Context m_appContext;
 
     static Lua m_lua;
+
+    static int m_argc;
+    static char **m_argv;
+
+#ifdef ALGINE_QT_PLATFORM
+    static QApplication *m_qApp;
+#endif
 
 private:
     static long m_startTime;

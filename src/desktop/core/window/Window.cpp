@@ -507,9 +507,8 @@ const ivec2& Window::getFullscreenDimensions() const {
     return m_fullscreenDimensions;
 }
 
-const ivec2& Window::getViewport() {
+ivec2 Window::getViewport() {
     requestViewport();
-
     return Surface::getViewport();
 }
 

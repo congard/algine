@@ -3,8 +3,13 @@
 
 #ifdef __ANDROID__
     #include <algine/core/ScreenEventHandler.h>
+    #define PlatformEventHandler ScreenEventHandler
+#elif defined(ALGINE_QT_PLATFORM)
+    #include <algine/core/window/QtWindowEventHandler.h>
+    #define PlatformEventHandler QtWindowEventHandler
 #else
     #include <algine/core/window/WindowEventHandler.h>
+    #define PlatformEventHandler WindowEventHandler
 #endif
 
 #include <algine/core/input/MouseKey.h>
@@ -23,9 +28,7 @@ class Event;
 /**
  * Platform independent EventHandler
  */
-class XEventHandler: public
-        enable_if_desktop(WindowEventHandler)
-        enable_if_android(ScreenEventHandler) {
+class XEventHandler: public PlatformEventHandler {
 public:
     class PointerInfo;
     class FocusInfo;
@@ -98,6 +101,21 @@ protected:
 
     void onPause() override;
     void onResume() override;
+#elif defined(ALGINE_QT_PLATFORM)
+    void mouseMove(float x, float y, QtWindow &window) override;
+    void mouseClick(MouseKey key, QtWindow &window) override;
+    void mouseKeyPress(MouseKey key, QtWindow &window) override;
+    void mouseKeyRelease(MouseKey key, QtWindow &window) override;
+
+    void keyboardKeyPress(KeyboardKey key, QtWindow &window) override;
+    void keyboardKeyRelease(KeyboardKey key, QtWindow &window) override;
+    void keyboardKeyRepeat(KeyboardKey key, QtWindow &window) override;
+
+    void windowSizeChange(int width, int height, QtWindow &window) override;
+    void windowIconify(QtWindow &window) override;
+    void windowRestore(QtWindow &window) override;
+    void windowFocusLost(QtWindow &window) override;
+    void windowFocus(QtWindow &window) override;
 #else
     void mouseMove(double x, double y, Window &window) override;
     void mouseClick(MouseKey key, Window &window) override;
@@ -134,6 +152,15 @@ public:
     template<typename T>
     PointerInfo(float x, float y, T pointer)
         : m_pos(x, y), m_pointer(pointer) {}
+#elif defined(ALGINE_QT_PLATFORM)
+    inline PointerInfo(glm::vec2 pos, QtWindow &window)
+        : m_pos(pos), m_window(window) {}
+
+    template<typename T>
+    PointerInfo(glm::vec2 pos, T pointer, QtWindow &window)
+        : m_pos(pos), m_pointer(pointer), m_window(window) {}
+
+    inline QtWindow& getWindow() { return m_window; }
 #else
     inline PointerInfo(const glm::vec2 &pos, Window &window)
         : m_pos(pos), m_window(window) {}
@@ -168,7 +195,9 @@ private:
     glm::vec2 m_pos;
     Pointer m_pointer;
 
-#ifndef __ANDROID__
+#ifdef ALGINE_QT_PLATFORM
+    QtWindow &m_window;
+#elif !defined(__ANDROID__)
     Window &m_window;
 #endif
 };
@@ -241,6 +270,11 @@ public:
 #ifdef __ANDROID__
     inline FocusInfo(Reason reason)
         : m_reason(reason) {}
+#elif defined(ALGINE_QT_PLATFORM)
+    inline FocusInfo(Reason reason, QtWindow &window)
+        : m_reason(reason), m_window(window) {}
+
+    inline QtWindow& getWindow() { return m_window; }
 #else
     inline FocusInfo(Reason reason, Window &window)
         : m_reason(reason), m_window(window) {}
@@ -254,7 +288,9 @@ public:
 private:
     Reason m_reason {Reason::Unknown};
 
-#ifndef __ANDROID__
+#ifdef ALGINE_QT_PLATFORM
+    QtWindow &m_window;
+#elif !defined(__ANDROID__)
     Window &m_window;
 #endif
 };
@@ -267,5 +303,7 @@ inline XEventHandler::FocusInfo::Reason XEventHandler::FocusInfo::getReason() co
     return m_reason;
 }
 }
+
+#undef PlatformEventHandler
 
 #endif //ALGINE_XEVENTHANDLER_H

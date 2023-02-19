@@ -4,6 +4,8 @@
 
 #ifdef __ANDROID__
     #include <algine/core/Screen.h>
+#elif defined(ALGINE_QT_PLATFORM)
+    #include <algine/core/window/QtWindow.h>
 #else
     #include <algine/core/window/Window.h>
 #endif
@@ -123,6 +125,70 @@ void XEventHandler::onPause() {
 
 void XEventHandler::onResume() {
     onFocusChanged({FocusInfo::Reason::AppResumed});
+}
+#elif defined(ALGINE_QT_PLATFORM)
+bool XEventHandler::PointerInfo::isPointerActive(Pointer pointer) const {
+    if (std::get_if<Finger>(&pointer) != nullptr) { // not available on Qt as for now
+        return false;
+    } else {
+        return m_window.isMouseKeyPressed(std::get<MouseKey>(pointer));
+    }
+}
+
+glm::vec2 XEventHandler::PointerInfo::getPointerPos(Pointer pointer) const {
+    if (std::get_if<Finger>(&pointer) != nullptr) { // not available on Qt as for now
+        return {-1.0f, -1.0f};
+    } else {
+        return m_pos;
+    }
+}
+
+void XEventHandler::mouseMove(float x, float y, QtWindow &window) {
+    onPointerMove({{x, y}, window});
+}
+
+void XEventHandler::mouseClick(MouseKey key, QtWindow &window) {
+    onPointerClick({window.getCursorPos(), key, window});
+}
+
+void XEventHandler::mouseKeyPress(MouseKey key, QtWindow &window) {
+    onPointerPress({window.getCursorPos(), key, window});
+}
+
+void XEventHandler::mouseKeyRelease(MouseKey key, QtWindow &window) {
+    onPointerRelease({window.getCursorPos(), key, window});
+}
+
+void XEventHandler::keyboardKeyPress(KeyboardKey key, QtWindow &window) {
+    onKeyboardKeyPress(key);
+}
+
+void XEventHandler::keyboardKeyRelease(KeyboardKey key, QtWindow &window) {
+    onKeyboardKeyRelease(key);
+}
+
+void XEventHandler::keyboardKeyRepeat(KeyboardKey key, QtWindow &window) {
+    onKeyboardKeyRepeat(key);
+}
+
+void XEventHandler::windowSizeChange(int width, int height, QtWindow &window) {
+    onSizeChanged(width, height);
+}
+
+void XEventHandler::windowIconify(QtWindow &window) {
+    onFocusChanged({FocusInfo::WindowIconified, window});
+}
+
+void XEventHandler::windowRestore(QtWindow &window) {
+    onFocusChanged({FocusInfo::WindowRestored, window});
+}
+
+void XEventHandler::windowFocusLost(QtWindow &window) {
+    onFocusChanged({FocusInfo::FocusLost, window});
+}
+
+void XEventHandler::windowFocus(QtWindow &window) {
+    onFocusChanged({FocusInfo::Focused, window});
 }
 #else
 bool XEventHandler::PointerInfo::isPointerActive(Pointer pointer) const {

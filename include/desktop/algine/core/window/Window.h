@@ -79,7 +79,7 @@ public:
     const glm::ivec2& getPos();
     const glm::ivec2& getDimensions();
     const glm::ivec2& getFullscreenDimensions() const;
-    const glm::ivec2& getViewport() override;
+    glm::ivec2 getViewport() override;
     CursorMode getCursorMode() const;
     Context getContext() const;
     Context getParentContext() const;

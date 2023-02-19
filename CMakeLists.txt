@@ -48,6 +48,15 @@ if (ALGINE_SECURE_OPERATIONS)
     message(STATUS "Algine SOP level is ${ALGINE_SOP_LEVEL}")
 endif()
 
+# Qt
+if (ALGINE_QT_PLATFORM)
+    find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
+    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+
+    set(CMAKE_AUTOMOC ON)
+    set(ALGINE_QT_LIBS Qt${QT_VERSION_MAJOR}::Widgets)
+endif()
+
 include(scripts/deps.cmake)
 
 # built-in glsl modules
@@ -189,7 +198,14 @@ set(PUBLIC_INCLUDES
     ${nlohmann_json_SOURCE_DIR}
     include/common)
 
-if (NOT ANDROID)
+if (ALGINE_QT_PLATFORM)
+    set(PRIVATE_INCLUDES ${PRIVATE_INCLUDES}
+        src/qt)
+
+    set(PUBLIC_INCLUDES ${PUBLIC_INCLUDES}
+        ${glew_SOURCE_DIR}/include # TODO: mark PRIVATE in the future (see Texture.h)
+        include/qt)
+elseif (NOT ANDROID)
     set(PRIVATE_INCLUDES ${PRIVATE_INCLUDES}
         src/desktop
         ${glfw_SOURCE_DIR}/include)
@@ -250,7 +266,9 @@ set(ALGINE_STD_SOURCES ${ALGINE_STD_SOURCES}
     include/common/algine/constants/QuadShader.h
     include/common/algine/constants/CubemapShader.h)
 
-if (NOT ANDROID)
+if (ALGINE_QT_PLATFORM)
+    collectSources(ALGINE_QT_SOURCES "include/qt/algine" "src/qt")
+elseif (NOT ANDROID)
     collectSources(ALGINE_DESKTOP_SOURCES "include/desktop/algine" "src/desktop")
 else()
     collectSources(ALGINE_ANDROID_SOURCES "include/android/algine" "src/android")
@@ -260,6 +278,7 @@ add_library(algine
     ${ALGINE_CORE_SOURCES}
     ${ALGINE_STD_SOURCES}
     ${ALGINE_EXT_SOURCES}
+    ${ALGINE_QT_SOURCES}
     ${ALGINE_DESKTOP_SOURCES}
     ${ALGINE_ANDROID_SOURCES}
     ${ALGINE_SOLGEN_SOURCES})
@@ -269,13 +288,18 @@ set_target_properties(algine PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(algine PRIVATE ${PRIVATE_INCLUDES})
 target_include_directories(algine PUBLIC ${PUBLIC_INCLUDES})
 
+# Qt definitions
+if (ALGINE_QT_PLATFORM)
+    target_compile_definitions(algine PUBLIC ALGINE_QT_PLATFORM)
+endif()
+
 # linking
 if (ANDROID)
     target_link_libraries(algine assimp android log GLESv3 EGL tulz freetype lua_static)
 elseif (WIN32)
-    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 tulz freetype lua_static)
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 tulz freetype lua_static ${ALGINE_QT_LIBS})
 elseif (UNIX)
-    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw GL tulz freetype lua_static)
+    target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw GL tulz freetype lua_static ${ALGINE_QT_LIBS})
 endif()
 
 # include some helpful scripts for Windows

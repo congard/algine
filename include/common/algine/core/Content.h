@@ -7,14 +7,19 @@
 namespace algine {
 class Surface;
 
-enable_if_desktop(class Window);
-enable_if_android(class Screen);
+#ifdef ALGINE_QT_PLATFORM
+    #define PlatformFriend QtWindow
+#elif defined(__ANDROID__)
+    #define PlatformFriend Screen
+#else
+    #define PlatformFriend Window
+#endif
+
+class PlatformFriend;
 
 class Content {
     friend class Surface;
-
-    enable_if_desktop(friend class Window);
-    enable_if_android(friend class Screen);
+    friend class PlatformFriend;
 
 public:
     Content();
@@ -35,13 +40,13 @@ public:
 
     enable_if_desktop(
         inline auto getWindow() const {
-            return reinterpret_cast<Window *>(m_surface);
+            return reinterpret_cast<PlatformFriend*>(m_surface);
         }
     )
 
     enable_if_android(
         inline auto getScreen() const {
-            return reinterpret_cast<Screen *>(m_surface);
+            return reinterpret_cast<Screen*>(m_surface);
         }
     )
 

@@ -7,7 +7,13 @@
 
 #include <thread>
 
-#ifndef __ANDROID__
+#include <algine/gl.h>
+
+#ifdef ALGINE_QT_PLATFORM
+    #include <QSurfaceFormat>
+    #include <QOffscreenSurface>
+    #include <QOpenGLContext>
+#elif !defined(__ANDROID__)
     #include <GLFW/glfw3.h>
 #else
     #include <EGL/egl.h>
@@ -41,7 +47,30 @@ bool Context::create(const ContextConfig &config) {
 
     auto &debugWriter = Engine::getDebugWriter();
 
-#ifndef __ANDROID__
+#ifdef ALGINE_QT_PLATFORM
+    QSurfaceFormat format;
+    format.setVersion(majorVersion, minorVersion);
+    format.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
+    format.setOption(QSurfaceFormat::FormatOption::DebugContext, debugWriter != nullptr);
+
+    auto surface = new QOffscreenSurface();
+    surface->setFormat(format);
+    surface->create();
+
+    auto context = new QOpenGLContext();
+    context->setFormat(format);
+
+    if (config.parent.isInitialized())
+        context->setShareContext(static_cast<QOpenGLContext*>(config.parent.m_context));
+
+    if (!context->create()) {
+        printContextCreationErrorMessage();
+        return false;
+    }
+
+    m_context = context;
+    m_surface = surface;
+#elif !defined(__ANDROID__)
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVersion);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVersion);
@@ -134,7 +163,61 @@ inline void enableDebugOutputIfPossible() {
     }
 }
 
-#ifndef __ANDROID__
+#ifdef ALGINE_QT_PLATFORM
+#define qContext static_cast<QOpenGLContext*>(m_context)
+#define qSurface static_cast<QOffscreenSurface*>(m_surface)
+
+bool Context::destroy() {
+    if (isInitialized()) {
+        delete qContext;
+        delete qSurface;
+
+        sop_context_destroyed(m_context);
+
+        m_context = nullptr;
+        m_surface = nullptr;
+
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool Context::makeCurrent() const {
+    if (!isInitialized()) {
+        printContextNotInitializedError();
+        return false;
+    } else {
+        bool result = qContext->makeCurrent(qSurface);
+        if (result)
+            enableDebugOutputIfPossible();
+        return result;
+    }
+}
+
+bool Context::detach() const {
+    return qContext->makeCurrent(nullptr);
+}
+
+bool Context::isCurrent() const {
+    return getCurrentNative() == m_context;
+}
+
+bool Context::isInitialized() const {
+    return m_context;
+}
+
+Context Context::getCurrent() {
+    return {
+        .m_context = getCurrentNative(),
+        .m_surface = QOpenGLContext::currentContext()->surface()
+    };
+}
+
+void* Context::getCurrentNative() {
+    return QOpenGLContext::currentContext();
+}
+#elif !defined(__ANDROID__)
 bool Context::destroy() {
     if (isInitialized()) {
         glfwDestroyWindow(static_cast<GLFWwindow*>(m_context));

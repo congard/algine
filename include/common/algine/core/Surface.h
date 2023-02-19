@@ -16,7 +16,7 @@ public:
     virtual void renderLoop() = 0;
     virtual void stopRenderLoop() = 0;
 
-    virtual const glm::ivec2& getViewport();
+    virtual glm::ivec2 getViewport();
 
     virtual void setContent(const Ptr<Content> &content);
     void setContent(Content *content);

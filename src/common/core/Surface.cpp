@@ -5,7 +5,7 @@
 namespace algine {
 Surface::~Surface() = default;
 
-const glm::ivec2& Surface::getViewport() {
+glm::ivec2 Surface::getViewport() {
     return m_viewport;
 }
 
@@ -18,9 +18,11 @@ void Surface::setContent(const Ptr<Content> &content) {
     if (!m_content) {
         stopRenderLoop();
     } else {
+        glm::ivec2 viewport = getViewport();
+
         m_content->m_surface = this;
-        m_content->m_width = m_viewport.x;
-        m_content->m_height = m_viewport.y;
+        m_content->m_width = viewport.x;
+        m_content->m_height = viewport.y;
 
         if (!m_content->isInitialized()) {
             m_content->init();

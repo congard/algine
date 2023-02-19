@@ -74,6 +74,13 @@ Context Engine::m_appContext;
 
 Lua Engine::m_lua;
 
+int Engine::m_argc;
+char **Engine::m_argv;
+
+#ifdef ALGINE_QT_PLATFORM
+QApplication *Engine::m_qApp;
+#endif
+
 long Engine::m_startTime;
 
 Framebuffer* Engine::m_defaultFramebuffer;
@@ -122,7 +129,19 @@ void linux_detect_dpi() {
     }
 }
 
-void Engine::init() {
+void Engine::init(int argc, char *const *argv) {
+    m_argc = argc;
+    m_argv = new char*[argc];
+
+    for (int i = 0; i < argc; ++i)
+        m_argv[i] = strdup(argv[i]);
+
+#ifdef ALGINE_QT_PLATFORM
+    // https://doc.qt.io/qt-5/qapplication.html#QApplication
+    m_qApp = new QApplication(m_argc, m_argv);
+    QApplication::setAttribute(Qt::AA_DontCheckOpenGLContextThreadAffinity);
+#endif
+
     enable_if_desktop(
         m_apiVersion = 400;
         m_graphicsAPI = GraphicsAPI::Core;
@@ -206,6 +225,19 @@ void Engine::init() {
     initExtra();
 }
 
+void Engine::init() {
+    std::string workingDir = tulz::Path::getWorkingDirectory().toString();
+    int argc = 1;
+    char *argv[] = {const_cast<char*>(workingDir.c_str())};
+    init(argc, argv);
+}
+
+void Engine::wait() {
+#ifdef ALGINE_QT_PLATFORM
+    QApplication::exec();
+#endif
+}
+
 void Engine::destroy() {
     // destructor is not called since we do not need to delete
     // default OpenGL objects (with id 0)
@@ -224,7 +256,32 @@ void Engine::destroy() {
     FT_Done_FreeType(static_cast<FT_Library>(m_fontLibrary));
     m_fontLibrary = nullptr;
 
-    enable_if_desktop(glfwTerminate()); // Terminate GLFW, clearing any resources allocated by GLFW
+#ifndef ALGINE_QT_PLATFORM
+    // Terminate GLFW, clearing any resources allocated by GLFW
+    enable_if_desktop(glfwTerminate());
+#else
+    // QApplication must be destroyed before arguments become invalid
+    // https://doc.qt.io/qt-5/qapplication.html#QApplication
+    delete m_qApp;
+#endif
+
+    for (int i = 0; i < m_argc; ++i)
+        free(m_argv[i]); // string was allocated using malloc by strdup
+    delete[] m_argv;
+}
+
+void Engine::exec(int argc, char *const *argv, const std::function<void()> &func) {
+    init(argc, argv);
+    func();
+    wait();
+    destroy();
+}
+
+void Engine::exec(const std::function<void()> &func) {
+    std::string workingDir = tulz::Path::getWorkingDirectory().toString();
+    int argc = 1;
+    char *argv[] = {const_cast<char*>(workingDir.c_str())};
+    exec(argc, argv, func);
 }
 
 void Engine::setDebugWriter(DebugWriter *debugWriter) {

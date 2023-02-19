@@ -7,7 +7,7 @@ Algine - OpenGL 3.3+ engine written in C++
 **Supported platforms:** Linux, Android, Windows
 <br>**Target platforms:** Linux (clang), Android
 
-**Recommended toolchain:** clang + mold 
+**Recommended toolchain:** clang + mold
 
 [![Algine v1.6 alpha](pictures/1.png)](https://youtu.be/pYUXtRl-LTs)
 
@@ -41,6 +41,8 @@ Short overview:
   * Shadow mapping
 
 The engine has a modular design.
+
+Algine can be embedded in your [Qt application](doc/build/README.md)
 
 ## Roadmap
 
