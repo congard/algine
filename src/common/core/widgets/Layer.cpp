@@ -1,7 +1,7 @@
 #include <algine/core/widgets/Layer.h>
 #include <algine/core/widgets/Scene.h>
 #include <algine/core/widgets/Container.h>
-#include <algine/core/XEventHandler.h>
+#include <algine/core/x/XEventHandler.h>
 
 namespace algine::Widgets {
 Layer::Layer(Scene *scene) {

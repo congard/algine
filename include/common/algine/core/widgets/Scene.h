@@ -6,7 +6,7 @@
 #include <algine/core/painter/Painter.h>
 #include <algine/core/math/Size.h>
 #include <algine/core/PtrView.h>
-#include <algine/core/XEventHandler.h>
+#include <algine/core/x/XEventHandler.h>
 
 namespace algine::Widgets {
 class Layer;
@@ -80,7 +80,7 @@ private:
     std::vector<Layer*> m_layers;
     std::unique_ptr<Painter> m_painter;
     WidgetDisplayOptions m_options;
-    std::unordered_map<XEventHandler::PointerInfo::Pointer, WidgetPtr> m_touchedWidgets;
+    std::unordered_map<PointerInfo::Pointer, WidgetPtr> m_touchedWidgets;
 };
 }
 

@@ -1,4 +1,4 @@
-#include <algine/core/Event.h>
+#include <algine/core/x/Event.h>
 
 #include <utility>
 
@@ -28,8 +28,8 @@ Event::Data& Event::data() {
     return m_data;
 }
 
-const XEventHandler::PointerInfo& Event::getPointerInfo() const {
-    return getData<const XEventHandler::PointerInfo&>();
+const PointerInfo& Event::getPointerInfo() const {
+    return getData<const PointerInfo&>();
 }
 
 KeyboardKey Event::getKeyboardKey() const {
@@ -40,8 +40,8 @@ const SizeI& Event::getSize() const {
     return getData<const SizeI&>();
 }
 
-const XEventHandler::FocusInfo& Event::getFocusInfo() const {
-    return getData<const XEventHandler::FocusInfo&>();
+const FocusInfo& Event::getFocusInfo() const {
+    return getData<const FocusInfo&>();
 }
 
 bool Event::isPointer() const {

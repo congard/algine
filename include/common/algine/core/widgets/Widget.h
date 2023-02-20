@@ -6,7 +6,7 @@
 #include <algine/core/widgets/WidgetDisplayOptions.h>
 #include <algine/core/widgets/Layer.h>
 #include <algine/core/widgets/animation/Animation.h>
-#include <algine/core/Event.h>
+#include <algine/core/x/Event.h>
 #include <algine/core/shader/ShaderProgramPtr.h>
 #include <algine/core/texture/Texture2DPtr.h>
 #include <algine/core/FramebufferPtr.h>

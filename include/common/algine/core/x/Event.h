@@ -2,7 +2,7 @@
 #define ALGINE_EVENT_H
 
 #include <algine/core/math/Size.h>
-#include <algine/core/XEventHandler.h>
+#include <algine/core/x/XEventHandler.h>
 
 #include <any>
 
@@ -49,10 +49,10 @@ public:
         return std::any_cast<T>(data());
     }
 
-    const XEventHandler::PointerInfo& getPointerInfo() const;
+    const PointerInfo& getPointerInfo() const;
     KeyboardKey getKeyboardKey() const;
     const SizeI& getSize() const;
-    const XEventHandler::FocusInfo& getFocusInfo() const;
+    const FocusInfo& getFocusInfo() const;
 
     bool isPointer() const;
     bool isKeyboard() const;

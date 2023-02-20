@@ -273,7 +273,7 @@ bool Scene::handlePointerEvent(const Event &event) {
 
     auto pushEvent = [&](const WidgetPtr &widget) {
         PointI widget_lp = widget->mapFromGlobal(globalPoint);
-        XEventHandler::PointerInfo widgetInfo = info;
+        PointerInfo widgetInfo = info;
         widgetInfo.setPos({widget_lp.getX(), widget_lp.getY()});
         widget->event(Event(event.getId(), widgetInfo));
     };
