@@ -74,6 +74,8 @@ Context Engine::m_appContext;
 
 Lua Engine::m_lua;
 
+tulz::Subject Engine::m_onDestroy;
+
 int Engine::m_argc;
 char **Engine::m_argv;
 
@@ -239,6 +241,8 @@ void Engine::wait() {
 }
 
 void Engine::destroy() {
+    m_onDestroy.notify();
+
     // destructor is not called since we do not need to delete
     // default OpenGL objects (with id 0)
     free(m_defaultFramebuffer);
@@ -282,6 +286,10 @@ void Engine::exec(const std::function<void()> &func) {
     int argc = 1;
     char *argv[] = {const_cast<char*>(workingDir.c_str())};
     exec(argc, argv, func);
+}
+
+tulz::Subscription Engine::addOnDestroyListener(const tulz::Observer &observer) {
+    return m_onDestroy.subscribe(observer);
 }
 
 void Engine::setDebugWriter(DebugWriter *debugWriter) {

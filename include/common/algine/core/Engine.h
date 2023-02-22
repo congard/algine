@@ -4,8 +4,10 @@
 #include <algine/core/debug/DebugWriter.h>
 #include <algine/core/io/IOSystem.h>
 #include <algine/core/ContextConfig.h>
-#include "algine/core/lua/Lua.h"
+#include <algine/core/lua/Lua.h>
 #include <algine/types.h>
+
+#include <tulz/observer/Subject.h>
 
 #include <unordered_map>
 #include <string>
@@ -63,6 +65,8 @@ public:
     static void exec(int argc, char *const *argv, const std::function<void()> &func);
 
     static void exec(const std::function<void()> &func);
+
+    static tulz::Subscription addOnDestroyListener(const tulz::Observer &observer);
 
     static void setDebugWriter(DebugWriter *debugWriter);
     static std::unique_ptr<DebugWriter>& getDebugWriter();
@@ -192,6 +196,8 @@ private:
     static Context m_appContext;
 
     static Lua m_lua;
+
+    static tulz::Subject m_onDestroy;
 
     static int m_argc;
     static char **m_argv;
