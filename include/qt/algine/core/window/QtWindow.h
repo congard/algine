@@ -17,6 +17,7 @@ namespace algine {
 class QtWindow: public Surface, public QOpenGLWindow {
 public:
     explicit QtWindow(Context shareContext = {}, QWindow *parent = nullptr);
+    ~QtWindow() override;
 
     void renderLoop(int delayMs);
     void renderLoop() override;
@@ -66,6 +67,8 @@ private:
     tulz::Subject m_onInitialized;
 
     QTimer m_renderLoopTimer;
+
+    tulz::Subscription m_selfDestroy;
 
 private:
     struct MouseKeyInfo {

@@ -22,6 +22,14 @@ QtWindow::QtWindow(Context shareContext, QWindow *parent)
           NoPartialUpdate, parent)
 {
     initSurfaceFields();
+
+    m_selfDestroy = Engine::addOnDestroyListener([this]() {
+        delete this;
+    });
+}
+
+QtWindow::~QtWindow() {
+    m_selfDestroy.unsubscribe();
 }
 
 void QtWindow::renderLoop(int delayMs) {
