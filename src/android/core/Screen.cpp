@@ -21,7 +21,7 @@ Screen::Screen() {
 
     m_screen = this;
 
-    initSurfaceFields();
+    initBaseWindowFields();
 }
 
 void Screen::renderFrame() {

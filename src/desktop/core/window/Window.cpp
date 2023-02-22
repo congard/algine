@@ -20,7 +20,7 @@ using namespace std;
 using namespace glm;
 
 namespace algine {
-constexpr static auto maxClickDistance = 16.0; // TODO: replace 'constexpr static auto' with 'constant'
+constexpr static auto maxClickDistance = 16.0;
 constexpr static auto maxClickDeltaTime = 250L; // in ms
 
 #define initList \
@@ -39,7 +39,7 @@ Window::Window(Context context)
       m_dimensions(512),
       m_parentContext(context)
 {
-    initSurfaceFields();
+    initBaseWindowFields();
     create();
 }
 
@@ -49,7 +49,7 @@ Window::Window(string title, uint width, uint height, Context context)
       m_dimensions(width, height),
       m_parentContext(context)
 {
-    initSurfaceFields();
+    initBaseWindowFields();
     create();
 }
 
@@ -244,7 +244,7 @@ void Window::setContent(const Ptr<Content> &content) {
         requestViewport();
     }
 
-    Surface::setContent(content);
+    BaseWindow::setContent(content);
 }
 
 void Window::setEventHandler(WindowEventHandler *eventHandler) {
@@ -509,7 +509,7 @@ const ivec2& Window::getFullscreenDimensions() const {
 
 ivec2 Window::getViewport() {
     requestViewport();
-    return Surface::getViewport();
+    return BaseWindow::getViewport();
 }
 
 Window::CursorMode Window::getCursorMode() const {

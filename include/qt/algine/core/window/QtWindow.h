@@ -1,7 +1,7 @@
 #ifndef ALGINE_QTWINDOW_H
 #define ALGINE_QTWINDOW_H
 
-#include <algine/core/Surface.h>
+#include <algine/core/BaseWindow.h>
 #include <algine/core/Context.h>
 #include <algine/core/window/QtWindowEventHandler.h>
 
@@ -14,7 +14,7 @@
 #include <QTimer>
 
 namespace algine {
-class QtWindow: public Surface, public QOpenGLWindow {
+class QtWindow: public BaseWindow, public QOpenGLWindow {
 public:
     explicit QtWindow(Context shareContext = {}, QWindow *parent = nullptr);
     ~QtWindow() override;

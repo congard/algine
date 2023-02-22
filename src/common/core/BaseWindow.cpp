@@ -1,15 +1,15 @@
-#include <algine/core/Surface.h>
+#include <algine/core/BaseWindow.h>
 
 #include <algine/core/Content.h>
 
 namespace algine {
-Surface::~Surface() = default;
+BaseWindow::~BaseWindow() = default;
 
-glm::ivec2 Surface::getViewport() {
+glm::ivec2 BaseWindow::getViewport() {
     return m_viewport;
 }
 
-void Surface::setContent(const Ptr<Content> &content) {
+void BaseWindow::setContent(const Ptr<Content> &content) {
     if (m_content)
         m_content->m_surface = nullptr;
 
@@ -31,23 +31,23 @@ void Surface::setContent(const Ptr<Content> &content) {
     }
 }
 
-void Surface::setContent(Content *content) {
+void BaseWindow::setContent(Content *content) {
     setContent(Ptr<Content>(content));
 }
 
-const Ptr<Content>& Surface::getContent() const {
+const Ptr<Content>& BaseWindow::getContent() const {
     return m_content;
 }
 
-void Surface::setEventHandler(EventHandler *eventHandler) {
+void BaseWindow::setEventHandler(EventHandler *eventHandler) {
     m_eventHandler = eventHandler;
 }
 
-EventHandler* Surface::getEventHandler() const {
+EventHandler* BaseWindow::getEventHandler() const {
     return m_eventHandler;
 }
 
-void Surface::initSurfaceFields() {
+void BaseWindow::initBaseWindowFields() {
     m_content = nullptr;
     m_eventHandler = nullptr;
     m_viewport = {0, 0};

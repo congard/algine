@@ -9,9 +9,9 @@
 namespace algine {
 class Content;
 
-class Surface {
+class BaseWindow {
 public:
-    virtual ~Surface();
+    virtual ~BaseWindow();
 
     virtual void renderLoop() = 0;
     virtual void stopRenderLoop() = 0;
@@ -26,7 +26,7 @@ public:
     EventHandler* getEventHandler() const;
 
 protected:
-    void initSurfaceFields();
+    void initBaseWindowFields();
 
 protected:
     Ptr<Content> m_content;

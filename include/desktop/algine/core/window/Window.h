@@ -5,7 +5,7 @@
 #include <algine/core/window/Cursor.h>
 #include <algine/core/input/KeyboardKey.h>
 #include <algine/core/input/MouseKey.h>
-#include <algine/core/Surface.h>
+#include <algine/core/BaseWindow.h>
 #include <algine/core/Context.h>
 #include <algine/core/Ptr.h>
 #include <algine/types.h>
@@ -21,7 +21,7 @@ class GLFWwindow;
 namespace algine {
 class Content;
 
-class Window: public Surface {
+class Window: public BaseWindow {
 public:
     enum class CursorMode {
         Disabled,
@@ -101,7 +101,7 @@ public:
     bool isIconified() const;
     bool isMaximized() const;
 
-    using Surface::setContent;
+    using BaseWindow::setContent;
 
 private:
     void create();

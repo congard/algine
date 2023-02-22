@@ -1,12 +1,12 @@
 #ifndef ALGINE_SCREEN_H
 #define ALGINE_SCREEN_H
 
-#include <algine/core/Surface.h>
+#include <algine/core/BaseWindow.h>
 
 #include <string_view>
 
 namespace algine {
-class Screen: public Surface {
+class Screen: public BaseWindow {
 public:
     enum class ToastLength {
         Short = 0,

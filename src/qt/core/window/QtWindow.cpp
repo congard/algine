@@ -21,7 +21,7 @@ QtWindow::QtWindow(Context shareContext, QWindow *parent)
           shareContext.isInitialized() ? static_cast<QOpenGLContext*>(shareContext.m_context) : QOpenGLContext::globalShareContext(),
           NoPartialUpdate, parent)
 {
-    initSurfaceFields();
+    initBaseWindowFields();
 
     m_selfDestroy = Engine::addOnDestroyListener([this]() {
         delete this;
@@ -71,7 +71,7 @@ inline auto qEventHandler(EventHandler *eventHandler) {
 #define qEventHandlerCall(...) if (auto handler = qEventHandler(getEventHandler()); handler) handler->__VA_ARGS__
 
 void QtWindow::setEventHandler(QtWindowEventHandler *eventHandler) {
-    Surface::setEventHandler(eventHandler);
+    BaseWindow::setEventHandler(eventHandler);
 }
 
 Context QtWindow::getContext() {

@@ -1,6 +1,6 @@
 #include <algine/core/Content.h>
 
-#include <algine/core/Surface.h>
+#include <algine/core/BaseWindow.h>
 
 namespace algine {
 Content::Content()
@@ -9,7 +9,7 @@ Content::Content()
       m_width(),
       m_height() {}
 
-Content::Content(Surface *surface)
+Content::Content(BaseWindow *surface)
     : m_isInitialized(false),
       m_width(),
       m_height()
@@ -19,11 +19,11 @@ Content::Content(Surface *surface)
 
 Content::~Content() = default;
 
-void Content::setSurface(Surface *surface) {
+void Content::setSurface(BaseWindow *surface) {
     surface->setContent(this);
 }
 
-Surface* Content::getSurface() const {
+BaseWindow* Content::getSurface() const {
     return m_surface;
 }
 

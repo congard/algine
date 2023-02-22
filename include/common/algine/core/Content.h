@@ -5,7 +5,7 @@
 #include <algine/types.h>
 
 namespace algine {
-class Surface;
+class BaseWindow;
 
 #ifdef ALGINE_QT_PLATFORM
     #define PlatformFriend QtWindow
@@ -18,20 +18,20 @@ class Surface;
 class PlatformFriend;
 
 class Content {
-    friend class Surface;
+    friend class BaseWindow;
     friend class PlatformFriend;
 
 public:
     Content();
-    explicit Content(Surface *surface);
+    explicit Content(BaseWindow *surface);
     virtual ~Content();
 
     virtual void init() = 0;
 
     virtual void render() = 0;
 
-    void setSurface(Surface *surface);
-    Surface* getSurface() const;
+    void setSurface(BaseWindow *surface);
+    BaseWindow* getSurface() const;
 
     int width() const;
     int height() const;
@@ -51,7 +51,7 @@ public:
     )
 
 private:
-    Surface *m_surface;
+    BaseWindow *m_surface;
     int m_width, m_height;
     bool m_isInitialized;
 };
