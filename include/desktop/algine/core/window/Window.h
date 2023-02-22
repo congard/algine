@@ -122,6 +122,7 @@ private:
 
 private:
     bool m_renderLoopRunning;
+    glm::ivec2 m_viewport;
 
 private:
     struct MouseKeyInfo {

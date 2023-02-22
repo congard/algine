@@ -16,7 +16,7 @@ public:
     virtual void renderLoop() = 0;
     virtual void stopRenderLoop() = 0;
 
-    virtual glm::ivec2 getViewport();
+    virtual glm::ivec2 getViewport() = 0;
 
     virtual void setContent(const Ptr<Content> &content);
     void setContent(Content *content);
@@ -26,12 +26,8 @@ public:
     EventHandler* getEventHandler() const;
 
 protected:
-    void initBaseWindowFields();
-
-protected:
-    Ptr<Content> m_content;
-    EventHandler *m_eventHandler;
-    glm::ivec2 m_viewport;
+    Ptr<Content> m_content {nullptr};
+    EventHandler *m_eventHandler {nullptr};
 };
 }
 

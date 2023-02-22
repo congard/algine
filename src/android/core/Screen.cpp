@@ -20,8 +20,6 @@ Screen::Screen() {
     }
 
     m_screen = this;
-
-    initBaseWindowFields();
 }
 
 void Screen::renderFrame() {
@@ -58,6 +56,10 @@ float Screen::getPointerY(int pointerId) const {
 
 glm::vec2 Screen::getPointerPos(int pointerId) const {
     return AndroidBridge::getPointerPos(pointerId);
+}
+
+glm::ivec2 Screen::getViewport() {
+    return m_viewport;
 }
 
 void Screen::destroyInstance() {

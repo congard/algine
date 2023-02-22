@@ -39,7 +39,6 @@ Window::Window(Context context)
       m_dimensions(512),
       m_parentContext(context)
 {
-    initBaseWindowFields();
     create();
 }
 
@@ -49,7 +48,6 @@ Window::Window(string title, uint width, uint height, Context context)
       m_dimensions(width, height),
       m_parentContext(context)
 {
-    initBaseWindowFields();
     create();
 }
 
@@ -489,7 +487,6 @@ const Cursor& Window::getCursor() const {
 
 const ivec2& Window::getPos() {
     requestPos();
-
     return m_pos;
 }
 
@@ -509,7 +506,7 @@ const ivec2& Window::getFullscreenDimensions() const {
 
 ivec2 Window::getViewport() {
     requestViewport();
-    return BaseWindow::getViewport();
+    return m_viewport;
 }
 
 Window::CursorMode Window::getCursorMode() const {

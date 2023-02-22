@@ -21,8 +21,6 @@ QtWindow::QtWindow(Context shareContext, QWindow *parent)
           shareContext.isInitialized() ? static_cast<QOpenGLContext*>(shareContext.m_context) : QOpenGLContext::globalShareContext(),
           NoPartialUpdate, parent)
 {
-    initBaseWindowFields();
-
     m_selfDestroy = Engine::addOnDestroyListener([this]() {
         delete this;
     });

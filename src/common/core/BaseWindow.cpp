@@ -5,10 +5,6 @@
 namespace algine {
 BaseWindow::~BaseWindow() = default;
 
-glm::ivec2 BaseWindow::getViewport() {
-    return m_viewport;
-}
-
 void BaseWindow::setContent(const Ptr<Content> &content) {
     if (m_content)
         m_content->m_surface = nullptr;
@@ -45,11 +41,5 @@ void BaseWindow::setEventHandler(EventHandler *eventHandler) {
 
 EventHandler* BaseWindow::getEventHandler() const {
     return m_eventHandler;
-}
-
-void BaseWindow::initBaseWindowFields() {
-    m_content = nullptr;
-    m_eventHandler = nullptr;
-    m_viewport = {0, 0};
 }
 }

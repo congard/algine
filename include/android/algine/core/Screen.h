@@ -30,6 +30,8 @@ public:
 
     glm::vec2 getPointerPos(int pointerId) const;
 
+    glm::ivec2 getViewport() override;
+
     static inline auto instance() {
         return m_screen;
     }
@@ -44,6 +46,7 @@ public:
 
 private:
     static Screen *m_screen;
+    glm::ivec2 m_viewport;
 };
 }
 
