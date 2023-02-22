@@ -14,8 +14,8 @@
 
 #include <algine/core/input/MouseKey.h>
 #include <algine/core/input/KeyboardKey.h>
-#include <algine/core/x/PointerInfo.h>
-#include <algine/core/x/FocusInfo.h>
+#include <algine/core/unified/PointerInfo.h>
+#include <algine/core/unified/FocusInfo.h>
 
 #include <glm/vec2.hpp>
 
@@ -28,7 +28,7 @@ class Event;
 /**
  * Platform independent EventHandler
  */
-class XEventHandler: public PlatformEventHandler {
+class UnifiedEventHandler: public PlatformEventHandler {
 public:
     using EventListener = std::function<void(const Event&)>;
 

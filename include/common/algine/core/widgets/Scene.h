@@ -6,7 +6,7 @@
 #include <algine/core/painter/Painter.h>
 #include <algine/core/math/Size.h>
 #include <algine/core/PtrView.h>
-#include <algine/core/x/XEventHandler.h>
+#include <algine/core/unified/UnifiedEventHandler.h>
 
 namespace algine::Widgets {
 class Layer;
@@ -64,11 +64,11 @@ public:
      * Adds listeners to <code>eventHandler</code>
      * @param eventHandler
      */
-    void listen(XEventHandler *eventHandler);
+    void listen(UnifiedEventHandler *eventHandler);
 
-    virtual XEventHandler::EventListener getPointerEventListener();
-    virtual XEventHandler::EventListener getKeyboardEventListener();
-    virtual XEventHandler::EventListener getSurfaceEventListener();
+    virtual UnifiedEventHandler::EventListener getPointerEventListener();
+    virtual UnifiedEventHandler::EventListener getKeyboardEventListener();
+    virtual UnifiedEventHandler::EventListener getSurfaceEventListener();
 
     const std::unique_ptr<Painter>& getPainter() const;
 

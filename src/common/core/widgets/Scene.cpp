@@ -213,23 +213,23 @@ bool Scene::event(const Event &event) {
     }
 }
 
-void Scene::listen(XEventHandler *eventHandler) {
+void Scene::listen(UnifiedEventHandler *eventHandler) {
     eventHandler->addPointerEventListener(getPointerEventListener());
     eventHandler->addKeyboardEventListener(getKeyboardEventListener());
     eventHandler->addSurfaceEventListener(getSurfaceEventListener());
 }
 
-XEventHandler::EventListener Scene::getPointerEventListener() {
+UnifiedEventHandler::EventListener Scene::getPointerEventListener() {
     return [this](const Event &event) {
         this->event(event);
     };
 }
 
-XEventHandler::EventListener Scene::getKeyboardEventListener() {
+UnifiedEventHandler::EventListener Scene::getKeyboardEventListener() {
     return getPointerEventListener();
 }
 
-XEventHandler::EventListener Scene::getSurfaceEventListener() {
+UnifiedEventHandler::EventListener Scene::getSurfaceEventListener() {
     return [this](const Event &event) {
         switch (event.getId()) {
             case Event::SurfaceSizeChange:

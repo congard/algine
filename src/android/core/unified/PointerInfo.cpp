@@ -1,4 +1,4 @@
-#include <algine/core/x/PointerInfo.h>
+#include <algine/core/unified/PointerInfo.h>
 #include <algine/core/Screen.h>
 
 namespace algine {
