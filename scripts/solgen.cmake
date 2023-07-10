@@ -191,6 +191,10 @@ function(solgen output)
 
     string(REPLACE "\n" ";" compilerIncludes ${compilerIncludes})
 
+    function(append_clang_flags flags)
+        set(ALGINE_SOLGEN_CLANG_ARGS ${ALGINE_SOLGEN_CLANG_ARGS} ${flags} PARENT_SCOPE)
+    endfunction()
+
     # if Android, get API version as a number
     if (ANDROID)
         string(REPLACE "-" ";" androidApiList ${ANDROID_PLATFORM})
@@ -205,10 +209,12 @@ function(solgen output)
         set(SOLGEN_ANDROID_DEFS -D __ANDROID__ -D __ANDROID_API__=${ANDROID_API_VER})
 
         if (UNIX)
-            set(ALGINE_SOLGEN_CLANG_ARGS ${ALGINE_SOLGEN_CLANG_ARGS} -U __linux__ ${SOLGEN_ANDROID_DEFS})
+            append_clang_flags(-U __linux__ ${SOLGEN_ANDROID_DEFS})
         else()
-            set(ALGINE_SOLGEN_CLANG_ARGS ${ALGINE_SOLGEN_CLANG_ARGS} -U _WIN32 -U _WIN64 -U WIN32 -U WIN64 ${SOLGEN_ANDROID_DEFS})
+            append_clang_flags(-U _WIN32 -U _WIN64 -U WIN32 -U WIN64 ${SOLGEN_ANDROID_DEFS})
         endif()
+    elseif (ALGINE_QT_PLATFORM)
+        append_clang_flags(-DALGINE_QT_PLATFORM)
     endif()
 
     set(SOLGEN_COMMAND ${ALGINE_SOLGEN_PATH}
