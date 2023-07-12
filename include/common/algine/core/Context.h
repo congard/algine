@@ -42,6 +42,8 @@ public:
     bool isCurrent() const;
     bool isInitialized() const;
 
+    void* getNative() const;
+
     static Context getCurrent();
     static void* getCurrentNative();
 

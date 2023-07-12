@@ -129,6 +129,10 @@ bool Context::isInitialized() const {
     return m_context && m_display && m_surface;
 }
 
+void* Context::getNative() const {
+    return m_context;
+}
+
 Context Context::getCurrent() {
     return {
         eglGetCurrentContext(),

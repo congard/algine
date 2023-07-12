@@ -79,6 +79,10 @@ bool Context::isInitialized() const {
     return m_context;
 }
 
+void* Context::getNative() const {
+    return m_context;
+}
+
 Context Context::getCurrent() {
     return {
         .m_context = getCurrentNative(),
