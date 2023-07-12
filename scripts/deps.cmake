@@ -83,7 +83,7 @@ set(ASSIMP_NO_EXPORT ON)
 add_dep(
     tulz
     GIT_REPOSITORY  https://github.com/congard/tulz.git
-    GIT_TAG         5c821acff8468e27ff233336645ab21138b5866a
+    GIT_TAG         d7ccbd1e13448e5f8f8d671273ab212596c2ed76
 )
 
 add_dep(
