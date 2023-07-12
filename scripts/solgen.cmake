@@ -191,9 +191,9 @@ function(solgen output)
 
     string(REPLACE "\n" ";" compilerIncludes ${compilerIncludes})
 
-    function(append_clang_flags flags)
-        set(ALGINE_SOLGEN_CLANG_ARGS ${ALGINE_SOLGEN_CLANG_ARGS} ${flags} PARENT_SCOPE)
-    endfunction()
+    macro(append_clang_flags)
+        list(APPEND ALGINE_SOLGEN_CLANG_ARGS ${ARGV})
+    endmacro()
 
     # if Android, get API version as a number
     if (ANDROID)
@@ -217,17 +217,25 @@ function(solgen output)
         append_clang_flags(-DALGINE_QT_PLATFORM)
     endif()
 
+    if (ALGINE_SECURE_OPERATIONS)
+        append_clang_flags(-DALGINE_SECURE_OPERATIONS -DALGINE_SOP_LEVEL=${ALGINE_SOP_LEVEL})
+    endif()
+
+    message(DEBUG "solgen clang args: ${ALGINE_SOLGEN_CLANG_ARGS}")
+
     set(SOLGEN_COMMAND ${ALGINE_SOLGEN_PATH}
         ${ALGINE_SOLGEN_ARGS}
         --print-paths
         --input ${ALGINE_SOLGEN_INPUT_CORE} ${ALGINE_SOLGEN_INPUT_STD}
         --output-dir ${SOLGEN_OUTPUT_PATH}
         --output-namespace "algine_lua"
-        --includes ${PRIVATE_INCLUDES} ${PUBLIC_INCLUDES} ${compilerIncludes}
+        --includes ${PRIVATE_INCLUDES} ${PUBLIC_INCLUDES} ${compilerIncludes} ${Qt${QT_VERSION_MAJOR}Widgets_INCLUDE_DIRS}
         --namespace-filter algine
         --type-filter "algine::(?:${SOLGEN_CORE_CLASSES_REGEX}|${SOLGEN_STD_CLASSES_REGEX})(?:::[_a-zA-Z0-9]+)?$"
         --conf scripts/solgen.conf
         --clang-args -std=c++17 ${ALGINE_SOLGEN_CLANG_ARGS})
+
+    message(DEBUG "Executing: ${SOLGEN_COMMAND}")
 
     execute_process(COMMAND ${SOLGEN_COMMAND}
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
