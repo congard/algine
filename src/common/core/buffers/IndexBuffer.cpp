@@ -1,6 +1,13 @@
 #include <algine/core/buffers/IndexBuffer.h>
 
-#include <algine/gl.h>
+AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(algine::IndexBuffer) {
+    .obj = []() {
+        auto buff = new algine::IndexBuffer(std::false_type {});
+        buff->m_id = 0;
+        buff->m_target = Buffer::Index;
+        return buff;
+    }()
+};
 
 algine::IndexBuffer::IndexBuffer()
-    : Buffer(GL_ELEMENT_ARRAY_BUFFER) {}
+    : Buffer(Buffer::Index) {}

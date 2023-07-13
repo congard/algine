@@ -1,20 +1,19 @@
 #ifndef ALGINE_RENDERBUFFER_H
 #define ALGINE_RENDERBUFFER_H
 
+#include <algine/core/ContextObject.h>
 #include <algine/core/RenderbufferPtr.h>
-#include <algine/core/Object.h>
-#include <algine/templates.h>
 #include <algine/types.h>
 
 #include <vector>
 
 namespace algine {
-class Renderbuffer: public Object {
-    friend class Engine;
+AL_CONTEXT_OBJECT(Renderbuffer) {
+    AL_CONTEXT_OBJECT_IMPL(Renderbuffer)
 
 public:
     Renderbuffer();
-    ~Renderbuffer();
+    ~Renderbuffer() override;
 
     void bind();
 
@@ -34,7 +33,6 @@ public:
     uint getFormat() const;
     uint getWidth() const;
     uint getHeight() const;
-    uint getId() const;
 
 public:
     static RenderbufferPtr getByName(const std::string &name);
@@ -44,9 +42,8 @@ public:
     static std::vector<RenderbufferPtr> publicObjects;
 
 protected:
-    uint m_id;
-    uint m_format;
-    uint m_width, m_height;
+    uint m_format {};
+    uint m_width {}, m_height {};
 };
 }
 

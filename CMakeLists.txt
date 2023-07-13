@@ -60,6 +60,7 @@ endif()
 include(scripts/deps.cmake)
 
 # built-in glsl modules
+# TODO: move to another file
 file(READ src/common/core/glsl-modules/BoneSystem.glsl GLSLModules_BoneSystem)
 file(READ src/common/core/glsl-modules/NormalMapping.vs.glsl GLSLModules_NormalMapping_vs)
 file(READ src/common/core/glsl-modules/NormalMapping.fs.glsl GLSLModules_NormalMapping_fs)
@@ -252,10 +253,7 @@ set(ALGINE_CORE_SOURCES ${ALGINE_CORE_SOURCES}
     ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineStd.h
 
     src/common/internal/PublicObjectTools.h
-    src/common/internal/SOP.h
-    src/common/internal/SOPError.h
-    src/common/internal/SOPConstants.h
-    src/common/internal/ConfigStrings.h
+        src/common/internal/ConfigStrings.h
 
     include/common/algine/templates.h
     include/common/algine/types.h

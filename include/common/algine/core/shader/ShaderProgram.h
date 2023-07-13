@@ -1,6 +1,7 @@
 #ifndef ALGINE_SHADERPROGRAM_H
 #define ALGINE_SHADERPROGRAM_H
 
+#include <algine/core/ContextObject.h>
 #include <algine/core/shader/ShaderProgramPtr.h>
 #include <algine/core/shader/ShadersInfo.h>
 #include <algine/core/shader/Shader.h>
@@ -15,12 +16,12 @@
 #include <vector>
 
 namespace algine {
-class ShaderProgram: public Object {
-    friend class Engine;
+AL_CONTEXT_OBJECT(ShaderProgram) {
+    AL_CONTEXT_OBJECT_IMPL(ShaderProgram)
 
 public:
     ShaderProgram();
-    ~ShaderProgram();
+    ~ShaderProgram() override;
 
     void fromSource(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string());
     void fromSource(const ShadersInfo &shaders); // calls fromSource(v, f, g)
@@ -65,10 +66,7 @@ public:
     void setMat3(const std::string &location, const glm::mat3 &p);
     void setMat4(const std::string &location, const glm::mat4 &p);
 
-    uint getId() const;
-
 private:
-    uint m_id;
     std::unordered_map<std::string, int> m_locations;
 
 public:

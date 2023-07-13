@@ -432,7 +432,7 @@ void Widget::display(const WidgetDisplayOptions &options) {
     if (options.framebuffer) {
         options.framebuffer->bind();
     } else {
-        Engine::defaultFramebuffer()->bind();
+        Framebuffer::getDefault()->bind();
     }
 
     int parentContentWidth = options.width - options.paddingLeft - options.paddingRight;

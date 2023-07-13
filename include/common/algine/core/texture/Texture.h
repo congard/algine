@@ -1,6 +1,7 @@
 #ifndef ALGINE_TEXTURE_H
 #define ALGINE_TEXTURE_H
 
+#include <algine/core/ContextObject.h>
 #include <algine/core/texture/TextureCreateInfo.h>
 #include <algine/core/texture/TextureFileInfo.h>
 #include <algine/core/DataType.h>
@@ -14,9 +15,7 @@
 #include <string>
 
 namespace algine {
-class Texture: public Object {
-    friend class Engine;
-
+AL_CONTEXT_OBJECT(Texture) {
 public:
     enum Param {
         MinFilter = GL_TEXTURE_MIN_FILTER,
@@ -111,7 +110,7 @@ public:
 
 public:
     Texture();
-    virtual ~Texture();
+    ~Texture() override;
 
     void bind() const;
     void unbind() const;
@@ -143,7 +142,6 @@ public:
     uint getFormat() const;
     uint getWidth() const;
     uint getHeight() const;
-    uint getId() const;
 
     uint getParam(uint param) const;
 
@@ -156,7 +154,6 @@ public:
 
 protected:
     uint m_target = 0; // texture 2d, texture cube etc
-    uint m_id = 0;
     uint m_lod = 0;
     uint m_format = RGB16F;
     uint m_width = 512;

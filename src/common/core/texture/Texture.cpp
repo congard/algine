@@ -8,51 +8,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include "internal/SOP.h"
-
 using namespace algine;
 using namespace std;
-
-#ifdef ALGINE_SECURE_OPERATIONS
-#include "internal/SOPConstants.h"
-#define SOP_BOUND_PTR getBoundTexture(m_target)
-#define SOP_OBJECT_TYPE getTextureObject(m_target)
-#define SOP_OBJECT_ID m_id
-#define SOP_OBJECT_NAME getTextureObjectName(m_target)
-
-inline void* getBoundTexture(const uint target) {
-    switch (target) {
-        case GL_TEXTURE_2D:
-            return Engine::getBoundTexture2D();
-        case GL_TEXTURE_CUBE_MAP:
-            return Engine::getBoundTextureCube();
-        default:
-            assert(0);
-    }
-}
-
-inline uint getTextureObject(const uint target) {
-    switch (target) {
-        case GL_TEXTURE_2D:
-            return SOPConstants::Texture2DObject;
-        case GL_TEXTURE_CUBE_MAP:
-            return SOPConstants::TextureCubeObject;
-        default:
-            assert(0);
-    }
-}
-
-inline string getTextureObjectName(const uint target) {
-    switch (target) {
-        case GL_TEXTURE_2D:
-            return SOPConstants::Texture2DStr;
-        case GL_TEXTURE_CUBE_MAP:
-            return SOPConstants::TextureCubeStr;
-        default:
-            assert(0);
-    }
-}
-#endif
 
 namespace algine {
 Texture::Texture() {
@@ -68,24 +25,24 @@ Texture::~Texture() {
 }
 
 void Texture::bind() const {
-    commitBinding()
+    commitBinding();
     glBindTexture(m_target, m_id);
 }
 
 void Texture::unbind() const {
-    checkBinding()
-    commitUnbinding()
+    checkBinding();
+    commitUnbinding();
     glBindTexture(m_target, 0);
 }
 
 void Texture::use(uint slot) const {
-    commitBinding()
+    commitBinding();
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(m_target, m_id);
 }
 
 void Texture::setParams(const map<uint, uint> &params) {
-    checkBinding()
+    checkBinding();
 
     for (const auto & key : params) {
         glTexParameteri(m_target, key.first, key.second);
@@ -93,7 +50,7 @@ void Texture::setParams(const map<uint, uint> &params) {
 }
 
 void Texture::setParams(const map<uint, float> &params) {
-    checkBinding()
+    checkBinding();
 
     for (const auto & key : params) {
         glTexParameterf(m_target, key.first, key.second);
@@ -149,12 +106,8 @@ uint Texture::getHeight() const {
     return m_height;
 }
 
-uint Texture::getId() const {
-    return m_id;
-}
-
 uint Texture::getParam(uint param) const {
-    checkBinding()
+    checkBinding();
 
     int p = 0;
     glGetTexParameteriv(m_target, param, &p);

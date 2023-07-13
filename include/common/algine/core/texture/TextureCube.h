@@ -11,6 +11,8 @@
 
 namespace algine {
 class TextureCube: public Texture {
+    AL_CONTEXT_OBJECT_IMPL(TextureCube)
+
 public:
     enum class Face {
         Right = 0x8515,

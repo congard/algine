@@ -1,6 +1,7 @@
 #ifndef ALGINE_FRAMEBUFFER_H
 #define ALGINE_FRAMEBUFFER_H
 
+#include <algine/core/ContextObject.h>
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/texture/TextureCube.h>
 #include <algine/core/texture/PixelData.h>
@@ -14,8 +15,8 @@
 #include <vector>
 
 namespace algine {
-class Framebuffer: public Object {
-    friend class Engine;
+AL_CONTEXT_OBJECT(Framebuffer) {
+    AL_CONTEXT_OBJECT_IMPL(Framebuffer)
 
 public:
     enum AttachmentType {
@@ -41,7 +42,7 @@ public:
 
 public:
     Framebuffer();
-    ~Framebuffer();
+    ~Framebuffer() override;
 
     void bind() const;
     void unbind() const;
@@ -75,8 +76,6 @@ public:
     /// #solgen #ignore
     PixelData getAllPixelsCube(TextureCube::Face face, uint attachment, int format = -1) const;
 
-    uint getId() const;
-
     bool hasAttachment(Attachment attachment);
     AttachedObjectType getAttachedObjectType(Attachment attachment);
     RenderbufferPtr& getAttachedRenderbuffer(Attachment attachment);
@@ -95,9 +94,8 @@ public:
     static std::vector<FramebufferPtr> publicObjects;
 
 private:
-    uint m_id;
-    uint m_activeList;
-    std::vector<OutputList> m_outputLists;
+    uint m_activeList {0};
+    std::vector<OutputList> m_outputLists {{}};
     std::map<Attachment, RenderbufferPtr> m_renderbufferAttachments;
     std::map<Attachment, Texture2DPtr> m_texture2DAttachments;
     std::map<Attachment, TextureCubePtr> m_textureCubeAttachments;

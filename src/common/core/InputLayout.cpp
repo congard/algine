@@ -1,22 +1,20 @@
 #include <algine/core/InputLayout.h>
-
-#include <algine/core/Engine.h>
-
 #include <algine/gl.h>
 
 #include <iostream>
 
-#define SOP_BOUND_PTR Engine::getBoundInputLayout()
-#define SOP_OBJECT_TYPE SOPConstants::InputLayoutObject
-#define SOP_OBJECT_ID m_id
-#define SOP_OBJECT_NAME SOPConstants::InputLayoutStr
-#include "internal/SOP.h"
-#include "internal/SOPConstants.h"
-
 using namespace std;
 
 namespace algine {
-InputLayout::InputLayout(): m_id() {
+AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(InputLayout) {
+    .obj = []() {
+        auto layout = new InputLayout(std::false_type {});
+        layout->m_id = 0;
+        return layout;
+    }()
+};
+
+InputLayout::InputLayout() {
     glGenVertexArrays(1, &m_id);
 }
 
@@ -25,13 +23,13 @@ InputLayout::~InputLayout() {
 }
 
 void InputLayout::bind() const {
-    commitBinding()
+    commitBinding();
     glBindVertexArray(m_id);
 }
 
 void InputLayout::unbind() const {
-    checkBinding()
-    commitUnbinding()
+    checkBinding();
+    commitUnbinding();
     glBindVertexArray(0);
 }
 
@@ -39,7 +37,7 @@ void InputLayout::addAttribute(
         const InputAttributeDescription &inputAttribDescription,
         const ArrayBuffer *arrayBuffer) const
 {
-    checkBinding()
+    checkBinding();
 
     glEnableVertexAttribArray(inputAttribDescription.m_location);
     arrayBuffer->bind();
@@ -80,7 +78,7 @@ void InputLayout::addAttribute(
 }
 
 void InputLayout::setIndexBuffer(const IndexBuffer *indexBuffer) const {
-    checkBinding()
+    checkBinding();
     indexBuffer->bind();
 }
 }

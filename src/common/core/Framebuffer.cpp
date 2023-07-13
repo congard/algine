@@ -1,13 +1,5 @@
 #include <algine/core/Framebuffer.h>
-#include <algine/core/Engine.h>
 #include <algine/gl.h>
-
-#define SOP_BOUND_PTR Engine::getBoundFramebuffer()
-#define SOP_OBJECT_TYPE SOPConstants::FramebufferObject
-#define SOP_OBJECT_ID m_id
-#define SOP_OBJECT_NAME SOPConstants::FramebufferStr
-#include "internal/SOP.h"
-#include "internal/SOPConstants.h"
 
 #include "internal/PublicObjectTools.h"
 
@@ -18,31 +10,37 @@ using namespace algine::internal;
 namespace algine {
 vector<FramebufferPtr> Framebuffer::publicObjects;
 
-Framebuffer::Framebuffer()
-    : m_id(0),
-      m_activeList(0),
-      m_outputLists({{}})
-{
+AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(Framebuffer) {
+    .obj = []() {
+        auto framebuffer = new Framebuffer(std::false_type {});
+        framebuffer->m_id = 0;
+        return framebuffer;
+    }()
+};
+
+Framebuffer::Framebuffer() {
     glGenFramebuffers(1, &m_id);
 }
 
 Framebuffer::~Framebuffer() {
-    glDeleteFramebuffers(1, &m_id);
+    if (this != getDefault()) {
+        glDeleteFramebuffers(1, &m_id);
+    }
 }
 
 void Framebuffer::bind() const {
-    commitBinding()
+    commitBinding();
     glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 }
 
 void Framebuffer::unbind() const {
-    checkBinding()
-    commitUnbinding()
+    checkBinding();
+    commitUnbinding();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Framebuffer::attachTexture(const Texture2DPtr &texture, Attachment attachment) {
-    checkBinding()
+    checkBinding();
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->getId(), 0);
 
@@ -50,7 +48,7 @@ void Framebuffer::attachTexture(const Texture2DPtr &texture, Attachment attachme
 }
 
 void Framebuffer::attachTexture(const TextureCubePtr &texture, Attachment attachment) {
-    checkBinding()
+    checkBinding();
 
     glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->getId(), 0);
 
@@ -58,7 +56,7 @@ void Framebuffer::attachTexture(const TextureCubePtr &texture, Attachment attach
 }
 
 void Framebuffer::attachRenderbuffer(const RenderbufferPtr &renderbuffer, Attachment attachment) {
-    checkBinding()
+    checkBinding();
 
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderbuffer->getId());
 
@@ -116,7 +114,7 @@ vector<OutputList>& Framebuffer::getOutputLists() {
 }
 
 void Framebuffer::update() {
-    checkBinding()
+    checkBinding();
 
     const auto &list = m_outputLists[m_activeList];
 
@@ -124,7 +122,7 @@ void Framebuffer::update() {
 }
 
 void Framebuffer::clear(const uint buffersMask) {
-    checkBinding()
+    checkBinding();
     glClear(buffersMask);
 }
 
@@ -179,7 +177,7 @@ void Framebuffer::readPixels(uint attachment,
     int x, int y, int width, int height,
     int format, DataType type, void *buffer) const
 {
-    checkBinding()
+    checkBinding();
     glReadBuffer(attachment);
     glReadPixels(x, y, width, height, format, static_cast<GLenum>(type), buffer);
 }
@@ -194,7 +192,7 @@ void Framebuffer::readPixels(uint attachment, int x, int y, int width, int heigh
 }
 
 PixelData Framebuffer::getAllPixelsCube(TextureCube::Face face, uint attachment, int format) const {
-    checkBinding()
+    checkBinding();
 
     auto &texture = m_textureCubeAttachments.at(attachment);
 
@@ -219,10 +217,6 @@ PixelData Framebuffer::getAllPixelsCube(TextureCube::Face face, uint attachment,
     texture->unbind();
 
     return pixelData;
-}
-
-uint Framebuffer::getId() const {
-    return m_id;
 }
 
 bool Framebuffer::hasAttachment(Attachment attachment) {

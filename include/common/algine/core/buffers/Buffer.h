@@ -1,13 +1,14 @@
 #ifndef ALGINE_BUFFER_H
 #define ALGINE_BUFFER_H
 
+#include <algine/core/ContextObject.h>
 #include <algine/types.h>
 
 #include <tulz/Array.h>
 #include <tulz/macros.h>
 
 namespace algine {
-class Buffer {
+AL_CONTEXT_OBJECT(Buffer) {
 public:
     enum Usage {
         StreamDraw = 0x88E0,
@@ -32,7 +33,7 @@ public:
 
 public:
     Buffer();
-    ~Buffer();
+    ~Buffer() override;
 
     void bind() const;
     void unbind() const;
@@ -44,15 +45,13 @@ public:
     bool unmapData();
 
     uint size() const;
-    uint getId() const;
     uint getType() const;
 
 protected:
     explicit Buffer(uint target);
 
 public:
-    uint m_target = 0;
-    uint m_id = 0;
+    uint m_target {0};
 };
 }
 

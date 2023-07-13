@@ -24,13 +24,13 @@ void BaseUniformBlock::allocateSuitableBufferSize() {
 // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glBindBufferBase.xhtml
 
 void BaseUniformBlock::linkBuffer() const {
-    glBindBufferBase(GL_UNIFORM_BUFFER, m_bindingPoint, m_uniformBuffer->m_id);
-    Engine::defaultUniformBuffer()->bind();
+    glBindBufferBase(GL_UNIFORM_BUFFER, m_bindingPoint, m_uniformBuffer->getId());
+    UniformBuffer::getDefault()->bind();
 }
 
 void BaseUniformBlock::linkBuffer(const uint offset, const uint size) const {
-    glBindBufferRange(GL_UNIFORM_BUFFER, m_bindingPoint, m_uniformBuffer->m_id, offset, size);
-    Engine::defaultUniformBuffer()->bind();
+    glBindBufferRange(GL_UNIFORM_BUFFER, m_bindingPoint, m_uniformBuffer->getId(), offset, size);
+    UniformBuffer::getDefault()->bind();
 }
 
 void BaseUniformBlock::bindBuffer() const {

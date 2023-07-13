@@ -108,12 +108,12 @@ void LightingManager::configureShadowMapping() {
 
     for (int i = 0; i < m_dirLightsLimit; i++) {
         ShaderProgram::setInt(m_dirShadowMapLoc + i, static_cast<int>(m_dirLightsInitialSlot + i));
-        Engine::defaultTexture2D()->use(m_dirLightsInitialSlot + i);
+        Texture2D::getDefault()->use(m_dirLightsInitialSlot + i);
     }
 
     for (int i = 0; i < m_pointLightsLimit; i++) {
         ShaderProgram::setInt(m_pointShadowMapLoc + i, static_cast<int>(m_pointLightsInitialSlot + i));
-        Engine::defaultTextureCube()->use(m_pointLightsInitialSlot + i);
+        TextureCube::getDefault()->use(m_pointLightsInitialSlot + i);
     }
 }
 

@@ -1,13 +1,6 @@
 #include <algine/core/Engine.h>
 
-#include <algine/core/Framebuffer.h>
-#include <algine/core/texture/Texture2D.h>
-#include <algine/core/texture/TextureCube.h>
-#include <algine/core/buffers/ArrayBuffer.h>
-#include <algine/core/buffers/IndexBuffer.h>
-#include <algine/core/buffers/UniformBuffer.h>
-#include <algine/core/shader/ShaderProgram.h>
-#include <algine/core/InputLayout.h>
+#include <algine/templates.h>
 #include <algine/core/TypeRegistry.h>
 #include <algine/core/log/Log.h>
 
@@ -36,10 +29,7 @@
     #include "../../src/android/core/Bridge.h"
 #endif
 
-#ifdef ALGINE_SECURE_OPERATIONS
-    #include "internal/SOPConstants.h"
-#endif
-
+// TODO: move to static initializers
 #ifndef ALGINE_CORE_ONLY
 #include <algine/std/model/Shape.h>
 #include <algine/std/model/Model.h>
@@ -72,6 +62,7 @@ std::string Engine::m_countryCode;
 
 Context Engine::m_appContext;
 
+// TODO: move to Lua
 Lua Engine::m_lua;
 
 tulz::Subject<> Engine::m_onDestroy;
@@ -84,16 +75,6 @@ QApplication *Engine::m_qApp;
 #endif
 
 long Engine::m_startTime;
-
-Framebuffer* Engine::m_defaultFramebuffer;
-Renderbuffer* Engine::m_defaultRenderbuffer;
-Texture2D* Engine::m_defaultTexture2D;
-TextureCube* Engine::m_defaultTextureCube;
-ArrayBuffer* Engine::m_defaultArrayBuffer;
-IndexBuffer* Engine::m_defaultIndexBuffer;
-UniformBuffer* Engine::m_defaultUniformBuffer;
-ShaderProgram* Engine::m_defaultShaderProgram;
-InputLayout* Engine::m_defaultInputLayout;
 
 string exec(const char *cmd) {
     string result;
@@ -156,42 +137,6 @@ void Engine::init(int argc, char *const *argv) {
 
     m_startTime = Engine::time();
 
-    // We use malloc instead of new since we don't want the ctor to be
-    // called because ctor generates new texture id. We don't need it.
-    // In the case of increasing the number of operations performed by
-    // the ctor, create something like init() in the following classes
-    m_defaultTexture2D = (Texture2D*) malloc(sizeof(Texture2D));
-    m_defaultTexture2D->m_id = 0;
-    m_defaultTexture2D->m_target = GL_TEXTURE_2D;
-
-    m_defaultTextureCube = (TextureCube*) malloc(sizeof(TextureCube));
-    m_defaultTextureCube->m_id = 0;
-    m_defaultTextureCube->m_target = GL_TEXTURE_CUBE_MAP;
-
-    m_defaultFramebuffer = (Framebuffer*) malloc(sizeof(Framebuffer));
-    m_defaultFramebuffer->m_id = 0;
-
-    m_defaultRenderbuffer = (Renderbuffer*) malloc(sizeof(Renderbuffer));
-    m_defaultRenderbuffer->m_id = 0;
-
-    m_defaultArrayBuffer = (ArrayBuffer*) malloc(sizeof(ArrayBuffer));
-    m_defaultArrayBuffer->m_id = 0;
-    m_defaultArrayBuffer->m_target = GL_ARRAY_BUFFER;
-
-    m_defaultIndexBuffer = (IndexBuffer*) malloc(sizeof(IndexBuffer));
-    m_defaultIndexBuffer->m_id = 0;
-    m_defaultIndexBuffer->m_target = GL_ELEMENT_ARRAY_BUFFER;
-
-    m_defaultUniformBuffer = (UniformBuffer*) malloc(sizeof(UniformBuffer));
-    m_defaultUniformBuffer->m_id = 0;
-    m_defaultUniformBuffer->m_target = GL_UNIFORM_BUFFER;
-
-    m_defaultShaderProgram = (ShaderProgram*) malloc(sizeof(ShaderProgram));
-    m_defaultShaderProgram->m_id = 0;
-
-    m_defaultInputLayout = (InputLayout*) malloc(sizeof(InputLayout));
-    m_defaultInputLayout->m_id = 0;
-
 #ifndef __ANDROID__
     m_defaultIOSystem = make_shared<StandardIOSystem>();
 
@@ -212,8 +157,10 @@ void Engine::init(int argc, char *const *argv) {
     m_appContext = Context::getCurrent();
 #endif
 
+    // TODO: move to Font
     FT_Init_FreeType(reinterpret_cast<FT_Library *>(&m_fontLibrary));
 
+    // TODO: move to static initializers
     alRegisterType(Container);
     alRegisterType(LinearLayout);
     alRegisterType(RelativeLayout);
@@ -243,18 +190,7 @@ void Engine::wait() {
 void Engine::destroy() {
     m_onDestroy.notify();
 
-    // destructor is not called since we do not need to delete
-    // default OpenGL objects (with id 0)
-    free(m_defaultFramebuffer);
-    free(m_defaultRenderbuffer);
-    free(m_defaultTexture2D);
-    free(m_defaultTextureCube);
-    free(m_defaultArrayBuffer);
-    free(m_defaultIndexBuffer);
-    free(m_defaultUniformBuffer);
-    free(m_defaultShaderProgram);
-    free(m_defaultInputLayout);
-
+    // TODO: move to TypeRegistry's static initializer
     TypeRegistry::clear();
 
     FT_Done_FreeType(static_cast<FT_Library>(m_fontLibrary));
@@ -361,46 +297,6 @@ Lua& Engine::getLua() {
     return m_lua;
 }
 
-#ifdef ALGINE_SECURE_OPERATIONS
-Engine::ContextObjectMap<Framebuffer> Engine::m_boundFramebuffer;
-Engine::ContextObjectMap<Renderbuffer> Engine::m_boundRenderbuffer;
-Engine::ContextObjectMap<Texture2D> Engine::m_boundTexture2D;
-Engine::ContextObjectMap<TextureCube> Engine::m_boundTextureCube;
-Engine::ContextObjectMap<ArrayBuffer> Engine::m_boundArrayBuffer;
-Engine::ContextObjectMap<IndexBuffer> Engine::m_boundIndexBuffer;
-Engine::ContextObjectMap<UniformBuffer> Engine::m_boundUniformBuffer;
-Engine::ContextObjectMap<ShaderProgram> Engine::m_boundShaderProgram;
-Engine::ContextObjectMap<InputLayout> Engine::m_boundInputLayout;
-
-#define returnBound(type, name, boundObj, defaultObj) \
-    type* Engine::name() {                            \
-        if (auto obj = boundObj.read(Context::getCurrentNative()); obj) return obj; \
-        else return defaultObj; \
-    }
-
-returnBound(Framebuffer, getBoundFramebuffer, m_boundFramebuffer, m_defaultFramebuffer)
-returnBound(Renderbuffer, getBoundRenderbuffer, m_boundRenderbuffer, m_defaultRenderbuffer)
-returnBound(Texture2D, getBoundTexture2D, m_boundTexture2D, m_defaultTexture2D)
-returnBound(TextureCube, getBoundTextureCube, m_boundTextureCube, m_defaultTextureCube)
-returnBound(ArrayBuffer, getBoundArrayBuffer, m_boundArrayBuffer, m_defaultArrayBuffer)
-returnBound(IndexBuffer, getBoundIndexBuffer, m_boundIndexBuffer, m_defaultIndexBuffer)
-returnBound(UniformBuffer, getBoundUniformBuffer, m_boundUniformBuffer, m_defaultUniformBuffer)
-returnBound(ShaderProgram, getBoundShaderProgram, m_boundShaderProgram, m_defaultShaderProgram)
-returnBound(InputLayout, getBoundInputLayout, m_boundInputLayout, m_defaultInputLayout)
-#else
-#define returnNull(type, name) type* Engine::name() { return nullptr; }
-
-returnNull(Framebuffer, getBoundFramebuffer)
-returnNull(Renderbuffer, getBoundRenderbuffer)
-returnNull(Texture2D, getBoundTexture2D)
-returnNull(TextureCube, getBoundTextureCube)
-returnNull(ArrayBuffer, getBoundArrayBuffer)
-returnNull(IndexBuffer, getBoundIndexBuffer)
-returnNull(UniformBuffer, getBoundUniformBuffer)
-returnNull(ShaderProgram, getBoundShaderProgram)
-returnNull(InputLayout, getBoundInputLayout)
-#endif
-
 string Engine::getGPUVendor() {
     return reinterpret_cast<char const*>(glGetString(GL_VENDOR));
 }
@@ -412,18 +308,6 @@ string Engine::getGPURenderer() {
 uint Engine::getError() {
     return glGetError();
 }
-
-#define returnDefault(type, name, obj) type* Engine::name() { return obj; }
-
-returnDefault(Framebuffer, defaultFramebuffer, m_defaultFramebuffer)
-returnDefault(Renderbuffer, defaultRenderbuffer, m_defaultRenderbuffer)
-returnDefault(Texture2D, defaultTexture2D, m_defaultTexture2D)
-returnDefault(TextureCube, defaultTextureCube, m_defaultTextureCube)
-returnDefault(ArrayBuffer, defaultArrayBuffer, m_defaultArrayBuffer)
-returnDefault(IndexBuffer, defaultIndexBuffer, m_defaultIndexBuffer)
-returnDefault(UniformBuffer, defaultUniformBuffer, m_defaultUniformBuffer)
-returnDefault(ShaderProgram, defaultShaderProgram, m_defaultShaderProgram)
-returnDefault(InputLayout, defaultInputLayout, m_defaultInputLayout)
 
 void Engine::enableDepthTest() {
     glEnable(GL_DEPTH_TEST);
@@ -508,56 +392,6 @@ long Engine::timeFromStart() {
 #ifdef __ANDROID__
 std::string Engine::Android::getAppDataDirectory() {
     return AndroidBridge::getAppDataDirectory();
-}
-#endif
-
-#ifdef ALGINE_SECURE_OPERATIONS
-void Engine::setBoundObject(uint type, const void *obj) {
-    auto ctx = Context::getCurrentNative();
-
-    switch (type) {
-        case SOPConstants::FramebufferObject:
-            m_boundFramebuffer.write(ctx, (Framebuffer*) obj);
-            break;
-        case SOPConstants::RenderbufferObject:
-            m_boundRenderbuffer.write(ctx, (Renderbuffer*) obj);
-            break;
-        case SOPConstants::Texture2DObject:
-            m_boundTexture2D.write(ctx, (Texture2D*) obj);
-            break;
-        case SOPConstants::TextureCubeObject:
-            m_boundTextureCube.write(ctx, (TextureCube*) obj);
-            break;
-        case SOPConstants::ArrayBufferObject:
-            m_boundArrayBuffer.write(ctx, (ArrayBuffer*) obj);
-            break;
-        case SOPConstants::IndexBufferObject:
-            m_boundIndexBuffer.write(ctx, (IndexBuffer*) obj);
-            break;
-        case SOPConstants::UniformBufferObject:
-            m_boundUniformBuffer.write(ctx, (UniformBuffer*) obj);
-            break;
-        case SOPConstants::ShaderProgramObject:
-            m_boundShaderProgram.write(ctx, (ShaderProgram*) obj);
-            break;
-        case SOPConstants::InputLayoutObject:
-            m_boundInputLayout.write(ctx, (InputLayout*) obj);
-            break;
-        default:
-            break;
-    }
-}
-
-void Engine::contextDestroyed(void *context) {
-    m_boundFramebuffer.erase(context);
-    m_boundRenderbuffer.erase(context);
-    m_boundTexture2D.erase(context);
-    m_boundTextureCube.erase(context);
-    m_boundArrayBuffer.erase(context);
-    m_boundIndexBuffer.erase(context);
-    m_boundUniformBuffer.erase(context);
-    m_boundShaderProgram.erase(context);
-    m_boundInputLayout.erase(context);
 }
 #endif
 }

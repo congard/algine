@@ -1,4 +1,7 @@
 #include <algine/core/buffers/BlockBufferStorage.h>
+#include <algine/core/buffers/ArrayBuffer.h>
+#include <algine/core/buffers/IndexBuffer.h>
+#include <algine/core/buffers/UniformBuffer.h>
 
 #include <tulz/macros.h>
 
@@ -26,8 +29,15 @@ void BlockBufferStorage::unbind() const {
 #define storageSize m_blockSize * m_blocksCount
 
 void BlockBufferStorage::allocateStorage() {
-    m_buffer = new Buffer();
-    m_buffer->m_target = m_type; // NOTE: set the type directly
+    m_buffer = [this]() -> Buffer* {
+        switch (m_type) {
+            case Buffer::Array: return new ArrayBuffer();
+            case Buffer::Index: return new IndexBuffer();
+            case Buffer::Uniform: return new UniformBuffer();
+            default:
+                throw std::runtime_error("Unsupported buffer type '" + std::to_string(m_type) + "'");
+        }
+    }();
     m_buffer->bind(); // do not do unbind() after reallocateStorage()
     reallocateStorage();
 }

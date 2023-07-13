@@ -2,10 +2,11 @@
 #define ALGINE_UNIFORMBUFFER_H
 
 #include <algine/core/buffers/Buffer.h>
-#include <algine/templates.h>
 
 namespace algine {
 class UniformBuffer: public Buffer {
+    AL_CONTEXT_OBJECT_IMPL(UniformBuffer)
+
 public:
     UniformBuffer();
 

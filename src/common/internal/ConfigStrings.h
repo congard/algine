@@ -3,6 +3,7 @@
 
 #include <algine/core/DataType.h>
 
+#include <stdexcept>
 #include <string>
 
 using namespace std;

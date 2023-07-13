@@ -104,7 +104,7 @@ void Blur::configureKernel(int radius, float sigma, bool linearSampling) {
         }
     }
 
-    Engine::defaultShaderProgram()->bind();
+    ShaderProgram::getDefault()->bind();
 }
 
 void Blur::makeBlur(const Texture2D *image) {

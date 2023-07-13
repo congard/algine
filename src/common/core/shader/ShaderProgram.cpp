@@ -10,13 +10,6 @@
 
 #include <iostream>
 
-#define SOP_BOUND_PTR Engine::getBoundShaderProgram()
-#define SOP_OBJECT_TYPE SOPConstants::ShaderProgramObject
-#define SOP_OBJECT_ID m_id
-#define SOP_OBJECT_NAME SOPConstants::ShaderProgramStr
-#include "internal/SOP.h"
-#include "internal/SOPConstants.h"
-
 #include "internal/PublicObjectTools.h"
 
 using namespace std;
@@ -26,8 +19,17 @@ using namespace algine::internal;
 namespace algine {
 vector<ShaderProgramPtr> ShaderProgram::publicObjects;
 
-ShaderProgram::ShaderProgram()
-    : m_id(glCreateProgram()) {}
+AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(ShaderProgram) {
+    .obj = []() {
+        auto program = new ShaderProgram(std::false_type {});
+        program->m_id = 0;
+        return program;
+    }()
+};
+
+ShaderProgram::ShaderProgram() {
+    m_id = glCreateProgram();
+}
 
 ShaderProgram::~ShaderProgram() {
     glDeleteProgram(m_id);
@@ -145,7 +147,7 @@ int ShaderProgram::getLocation(const string &name) {
     auto it = m_locations.find(name);
 
     if (it == m_locations.end()) {
-        ALGINE_SOP_ERROR(
+        ContextObjectImpl<ShaderProgram>::throwError(
             "Variable " + name + " does not exist in program with id " + to_string(m_id) + "\n"
             "Maybe you have forgotten to call loadActiveLocations() first?"
         );
@@ -160,13 +162,13 @@ int ShaderProgram::getLocation(const string &name) {
 }
 
 void ShaderProgram::bind() {
-    commitBinding()
+    commitBinding();
     glUseProgram(m_id);
 }
 
 void ShaderProgram::unbind() {
-    checkBinding()
-    commitUnbinding()
+    checkBinding();
+    commitUnbinding();
     glUseProgram(0);
 }
 
@@ -219,67 +221,63 @@ void ShaderProgram::setMat4(int location, const glm::mat4 &p) {
 }
 
 void ShaderProgram::setBool(const string &location, bool p) {
-    checkBinding()
+    checkBinding();
     setBool(getLocation(location), p);
 }
 
 void ShaderProgram::setInt(const string &location, int p) {
-    checkBinding()
+    checkBinding();
     setInt(getLocation(location), p);
 }
 
 void ShaderProgram::setUint(const string &location, uint p) {
-    checkBinding()
+    checkBinding();
     setUint(getLocation(location), p);
 }
 
 void ShaderProgram::setFloat(const string &location, float p) {
-    checkBinding()
+    checkBinding();
     setFloat(getLocation(location), p);
 }
 
 void ShaderProgram::setVec2(const string &location, const glm::vec2 &p) {
-    checkBinding()
+    checkBinding();
     setVec2(getLocation(location), p);
 }
 
 void ShaderProgram::setVec2(const std::string &location, float p0, float p1) {
-    checkBinding()
+    checkBinding();
     setVec2(getLocation(location), p0, p1);
 }
 
 void ShaderProgram::setVec3(const string &location, const glm::vec3 &p) {
-    checkBinding()
+    checkBinding();
     setVec3(getLocation(location), p);
 }
 
 void ShaderProgram::setVec3(const std::string &location, float p0, float p1, float p2) {
-    checkBinding()
+    checkBinding();
     setVec3(getLocation(location), p0, p1, p2);
 }
 
 void ShaderProgram::setVec4(const string &location, const glm::vec4 &p) {
-    checkBinding()
+    checkBinding();
     setVec4(getLocation(location), p);
 }
 
 void ShaderProgram::setVec4(const std::string &location, float p0, float p1, float p2, float p3) {
-    checkBinding()
+    checkBinding();
     setVec4(getLocation(location), p0, p1, p2, p3);
 }
 
 void ShaderProgram::setMat3(const string &location, const glm::mat3 &p) {
-    checkBinding()
+    checkBinding();
     setMat3(getLocation(location), p);
 }
 
 void ShaderProgram::setMat4(const string &location, const glm::mat4 &p) {
-    checkBinding()
+    checkBinding();
     setMat4(getLocation(location), p);
-}
-
-uint ShaderProgram::getId() const {
-    return m_id;
 }
 
 ShaderProgramPtr ShaderProgram::getByName(string_view name) {

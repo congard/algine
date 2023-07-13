@@ -1,14 +1,6 @@
 #include <algine/core/texture/TextureCube.h>
-#include <algine/core/Engine.h>
 
 #include <map>
-
-#define SOP_BOUND_PTR Engine::getBoundTextureCube()
-#define SOP_OBJECT_TYPE SOPConstants::TextureCubeObject
-#define SOP_OBJECT_ID m_id
-#define SOP_OBJECT_NAME SOPConstants::TextureCubeStr
-#include "internal/SOP.h"
-#include "internal/SOPConstants.h"
 
 #include "internal/PublicObjectTools.h"
 
@@ -18,11 +10,20 @@ using namespace algine::internal;
 namespace algine {
 vector<TextureCubePtr> TextureCube::publicObjects;
 
+AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(TextureCube) {
+    .obj = []() {
+        auto tex = new TextureCube(std::false_type {});
+        tex->m_id = 0;
+        tex->m_target = GL_TEXTURE_CUBE_MAP;
+        return tex;
+    }()
+};
+
 TextureCube::TextureCube()
     : Texture(GL_TEXTURE_CUBE_MAP) {}
 
 void TextureCube::fromFile(Face face, const TextureFileInfo &fileInfo) {
-    checkBinding()
+    checkBinding();
     texFromFile(static_cast<uint>(face), fileInfo);
 }
 
@@ -31,7 +32,7 @@ void TextureCube::fromFile(Face face, const std::string &path) {
 }
 
 void TextureCube::update() {
-    checkBinding()
+    checkBinding();
 
     auto [dataFormat, dataType] = Texture::getFormatInfo(m_format);
 

@@ -4,24 +4,20 @@
 #include <algine/core/buffers/ArrayBuffer.h>
 #include <algine/core/buffers/IndexBuffer.h>
 #include <algine/core/InputAttributeDescription.h>
-#include <algine/templates.h>
-#include <tulz/macros.h>
+#include <algine/core/ContextObject.h>
 
 namespace algine {
-class InputLayout {
-    friend class Engine;
+AL_CONTEXT_OBJECT(InputLayout) {
+    AL_CONTEXT_OBJECT_IMPL(InputLayout)
 
 public:
     InputLayout();
-    ~InputLayout();
+    ~InputLayout() override;
 
     void bind() const;
     void unbind() const;
     void addAttribute(const InputAttributeDescription &inputAttribDescription, const ArrayBuffer *arrayBuffer) const;
     void setIndexBuffer(const IndexBuffer *indexBuffer) const;
-
-private:
-    uint m_id;
 };
 }
 

@@ -5,13 +5,6 @@
 
 #include <map>
 
-#define SOP_BOUND_PTR Engine::getBoundTexture2D()
-#define SOP_OBJECT_TYPE SOPConstants::Texture2DObject
-#define SOP_OBJECT_ID m_id
-#define SOP_OBJECT_NAME SOPConstants::Texture2DStr
-#include "internal/SOP.h"
-#include "internal/SOPConstants.h"
-
 #include "internal/PublicObjectTools.h"
 
 using namespace std;
@@ -21,11 +14,20 @@ using namespace tulz;
 namespace algine {
 vector<Texture2DPtr> Texture2D::publicObjects;
 
+AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(Texture2D) {
+    .obj = []() {
+        auto tex = new Texture2D(std::false_type {});
+        tex->m_id = 0;
+        tex->m_target = GL_TEXTURE_2D;
+        return tex;
+    }()
+};
+
 Texture2D::Texture2D()
     : Texture(GL_TEXTURE_2D) {}
 
 void Texture2D::fromFile(const TextureFileInfo &fileInfo) {
-    checkBinding()
+    checkBinding();
     texFromFile(GL_TEXTURE_2D, fileInfo);
 }
 
@@ -34,7 +36,7 @@ void Texture2D::fromFile(const std::string &path) {
 }
 
 void Texture2D::update() {
-    checkBinding()
+    checkBinding();
 
     auto [dataFormat, dataType] = Texture::getFormatInfo(m_format);
 
@@ -42,7 +44,7 @@ void Texture2D::update() {
 }
 
 void Texture2D::update(uint dataFormat, DataType dataType, const void *data) {
-    checkBinding()
+    checkBinding();
     glTexImage2D(m_target, m_lod, m_format, m_width, m_height, 0, dataFormat, static_cast<GLenum>(dataType), data);
 }
 
@@ -56,17 +58,17 @@ map<uint, uint> Texture2D::defaultParams() {
 }
 
 uint Texture2D::getActualFormat() const {
-    checkBinding()
+    checkBinding();
     return getTexParam(m_target, GL_TEXTURE_INTERNAL_FORMAT);
 }
 
 uint Texture2D::getActualWidth() const {
-    checkBinding()
+    checkBinding();
     return getTexParam(m_target, GL_TEXTURE_WIDTH);
 }
 
 uint Texture2D::getActualHeight() const {
-    checkBinding()
+    checkBinding();
     return getTexParam(m_target, GL_TEXTURE_HEIGHT);
 }
 
