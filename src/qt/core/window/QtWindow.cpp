@@ -91,7 +91,7 @@ glm::ivec2 QtWindow::getViewport() {
     };
 }
 
-void QtWindow::addOnInitializedListener(const tulz::Observer &observer) {
+void QtWindow::addOnInitializedListener(const tulz::Observer<> &observer) {
     m_onInitialized.subscribe(observer);
 }
 

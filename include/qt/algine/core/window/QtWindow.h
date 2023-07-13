@@ -37,7 +37,7 @@ public:
 
     glm::ivec2 getViewport() override;
 
-    void addOnInitializedListener(const tulz::Observer &observer);
+    void addOnInitializedListener(const tulz::Observer<> &observer);
 
 protected:
     void initializeGL() override;
@@ -64,11 +64,11 @@ private:
 
 private:
     Context m_parentContext;
-    tulz::Subject m_onInitialized;
+    tulz::Subject<> m_onInitialized;
 
     QTimer m_renderLoopTimer;
 
-    tulz::Subscription m_selfDestroy;
+    tulz::Subscription<> m_selfDestroy;
 
 private:
     struct MouseKeyInfo {
