@@ -1,7 +1,7 @@
 #ifndef ALGINE_SCRIPTABLE_H
 #define ALGINE_SCRIPTABLE_H
 
-#include <algine/core/Engine.h>
+#include <algine/core/lua/Lua.h>
 #include <algine/core/io/IOProvider.h>
 #include <algine/core/log/Log.h>
 
@@ -27,7 +27,7 @@ protected:
 
     template<typename T>
     void exec_t(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
-        lua = lua ? lua : &Engine::getLua();
+        lua = lua ? lua : &Lua::getDefault();
         Lua::Locker locker(lua);
         auto &env = getEnv(lua, tenv);
         Lua::registerUsertype<T>(lua, tenv);

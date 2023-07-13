@@ -76,7 +76,7 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
         }
     };
 
-    lua = lua ? lua : &Engine::getLua();
+    lua = lua ? lua : &Lua::getDefault();
 
     Lua::Locker locker(lua);
 

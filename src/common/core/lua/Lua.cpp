@@ -13,13 +13,15 @@
 #include "CoreLua.h"
 
 namespace algine {
+Lua Lua::m_default;
+
 Lua::Locker::Locker(const std::unique_ptr<std::recursive_mutex> &mutex): m_mutex(mutex.get()) {
     if (m_mutex) {
         m_mutex->lock();
     }
 }
 
-Lua::Locker::Locker(const Lua *lua): Locker(lua ? lua->getMutex() : Engine::getLua().getMutex()) {}
+Lua::Locker::Locker(const Lua *lua): Locker(lua ? lua->getMutex() : Lua::getDefault().getMutex()) {}
 
 Lua::Locker::~Locker() {
     if (m_mutex) {
@@ -125,6 +127,12 @@ bool registerType(std::string_view type, sol::table &table, Lua *lua, Lua::TypeL
     return registerType<Args...>(type, table, lua);
 }
 
+Lua& Lua::getDefault() {
+    if (!m_default.isInitialized())
+        m_default.init();
+    return m_default;
+}
+
 template<typename T>
 struct type_holder {
     using type = T;
@@ -218,7 +226,7 @@ sol::global_table& Lua::getEnv(Lua *lua, sol::global_table *env) {
         return *env;
 
     if (!lua)
-        return Engine::getLua().state()->globals();
+        return getDefault().state()->globals();
 
     if (!lua->isInitialized())
         lua->init();

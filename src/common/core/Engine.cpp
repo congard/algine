@@ -58,9 +58,6 @@ std::string Engine::m_countryCode;
 
 Context Engine::m_appContext;
 
-// TODO: move to Lua
-Lua Engine::m_lua;
-
 tulz::Subject<> Engine::m_onDestroy;
 
 int Engine::m_argc;
@@ -279,12 +276,6 @@ const std::string& Engine::getCountry() {
 
 const Context& Engine::getApplicationContext() {
     return m_appContext;
-}
-
-Lua& Engine::getLua() {
-    if (!m_lua.isInitialized())
-        m_lua.init();
-    return m_lua;
 }
 
 string Engine::getGPUVendor() {

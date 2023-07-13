@@ -754,7 +754,7 @@ void Widget::addScriptSource(const std::string &source, Lua *lua) {
 }
 
 sol::environment Widget::env(Lua *lua) {
-    lua = lua ? lua : &Engine::getLua();
+    lua = lua ? lua : &Lua::getDefault();
 
     Lua::Locker locker(lua);
 
@@ -771,7 +771,7 @@ sol::environment Widget::getEnv() const {
 }
 
 void Widget::addLuaScript(const std::string &s, bool path, Lua *lua) {
-    lua = lua ? lua : &Engine::getLua();
+    lua = lua ? lua : &Lua::getDefault();
 
     env(lua);
 

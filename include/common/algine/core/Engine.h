@@ -3,16 +3,13 @@
 
 #include <algine/core/debug/DebugWriter.h>
 #include <algine/core/io/IOSystem.h>
-#include <algine/core/ContextConfig.h>
-#include <algine/core/lua/Lua.h>
+#include <algine/core/Context.h>
 #include <algine/types.h>
 
 #include <tulz/observer/Subject.h>
 
-#include <unordered_map>
 #include <string>
 #include <memory>
-#include <mutex>
 
 #ifdef ALGINE_QT_PLATFORM
     #include <QApplication>
@@ -70,8 +67,6 @@ public:
     static const std::string& getCountry();
 
     static const Context& getApplicationContext();
-
-    static Lua& getLua();
 
     static std::string getGPUVendor();
     static std::string getGPURenderer();
@@ -152,8 +147,6 @@ private:
     static std::string m_countryCode;
 
     static Context m_appContext;
-
-    static Lua m_lua;
 
     static tulz::Subject<> m_onDestroy;
 

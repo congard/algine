@@ -2,6 +2,7 @@
 #define ALGINE_OUTPUTLIST_H
 
 #include <algine/core/lua/Scriptable.h>
+#include <algine/types.h>
 
 #include <vector>
 #include <map>

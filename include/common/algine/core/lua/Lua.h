@@ -94,6 +94,8 @@ public:
         algine_lua::registerLuaUsertype<T>(table, lua);
     }
 
+    static Lua& getDefault();
+
 private:
     void initEnvironment(sol::global_table &env);
     void loadModule(const ModuleArgs &args, const sol::environment &env);
@@ -102,6 +104,9 @@ private:
     std::unique_ptr<sol::state> m_lua {nullptr};
     std::unique_ptr<std::recursive_mutex> m_mutex {nullptr};
     std::map<std::string, ModuleLoader> m_moduleLoaders;
+
+private:
+    static Lua m_default;
 };
 
 template<typename T, typename G, typename S>
