@@ -74,7 +74,7 @@ Context Engine::m_appContext;
 
 Lua Engine::m_lua;
 
-tulz::Subject Engine::m_onDestroy;
+tulz::Subject<> Engine::m_onDestroy;
 
 int Engine::m_argc;
 char **Engine::m_argv;
@@ -288,7 +288,7 @@ void Engine::exec(const std::function<void()> &func) {
     exec(argc, argv, func);
 }
 
-tulz::Subscription Engine::addOnDestroyListener(const tulz::Observer &observer) {
+tulz::Subscription<> Engine::addOnDestroyListener(const tulz::Observer<> &observer) {
     return m_onDestroy.subscribe(observer);
 }
 

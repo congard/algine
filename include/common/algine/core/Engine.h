@@ -66,7 +66,7 @@ public:
 
     static void exec(const std::function<void()> &func);
 
-    static tulz::Subscription addOnDestroyListener(const tulz::Observer &observer);
+    static tulz::Subscription<> addOnDestroyListener(const tulz::Observer<> &observer);
 
     static void setDebugWriter(DebugWriter *debugWriter);
     static std::unique_ptr<DebugWriter>& getDebugWriter();
@@ -197,7 +197,7 @@ private:
 
     static Lua m_lua;
 
-    static tulz::Subject m_onDestroy;
+    static tulz::Subject<> m_onDestroy;
 
     static int m_argc;
     static char **m_argv;
