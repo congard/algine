@@ -2,12 +2,15 @@
 #define ALGINE_FONT_H
 
 #include <algine/core/io/IOSystem.h>
+#include <tulz/static_initializer.h>
 
 #include <string>
 #include <memory>
 
 namespace algine {
 class Font {
+    STATIC_INITIALIZER_DECL
+
 public:
     enum class Style {
         Regular,
@@ -51,6 +54,9 @@ public:
 
 private:
     std::shared_ptr<void> m_face;
+
+private:
+    static void* m_library;
 };
 }
 

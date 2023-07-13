@@ -14,9 +14,6 @@
 
 #include <chrono>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 #include "core/debug/Debug.h"
 
 #ifndef __ANDROID__
@@ -50,7 +47,6 @@ using namespace std;
 namespace algine {
 unique_ptr<DebugWriter> Engine::m_debugWriter;
 shared_ptr<IOSystem> Engine::m_defaultIOSystem;
-void* Engine::m_fontLibrary;
 
 int Engine::m_apiVersion;
 Engine::GraphicsAPI Engine::m_graphicsAPI;
@@ -157,9 +153,6 @@ void Engine::init(int argc, char *const *argv) {
     m_appContext = Context::getCurrent();
 #endif
 
-    // TODO: move to Font
-    FT_Init_FreeType(reinterpret_cast<FT_Library *>(&m_fontLibrary));
-
     // TODO: move to static initializers
     alRegisterType(Container);
     alRegisterType(LinearLayout);
@@ -192,9 +185,6 @@ void Engine::destroy() {
 
     // TODO: move to TypeRegistry's static initializer
     TypeRegistry::clear();
-
-    FT_Done_FreeType(static_cast<FT_Library>(m_fontLibrary));
-    m_fontLibrary = nullptr;
 
 #ifndef ALGINE_QT_PLATFORM
     // Terminate GLFW, clearing any resources allocated by GLFW

@@ -20,7 +20,6 @@
 
 namespace algine {
 class Engine {
-    friend class Font;
     friend class Window;
     friend class QtWindow;
 
@@ -143,7 +142,6 @@ public:
 private:
     static std::unique_ptr<DebugWriter> m_debugWriter;
     static std::shared_ptr<IOSystem> m_defaultIOSystem;
-    static void *m_fontLibrary;
 
     static int m_apiVersion;
     static GraphicsAPI m_graphicsAPI;

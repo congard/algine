@@ -14,6 +14,17 @@
 using namespace tulz;
 
 namespace algine {
+STATIC_INITIALIZER_IMPL(Font) {
+    FT_Init_FreeType(reinterpret_cast<FT_Library*>(&m_library));
+
+    Engine::addOnDestroyListener([]() {
+        FT_Done_FreeType(static_cast<FT_Library>(m_library));
+        m_library = nullptr;
+    });
+}
+
+void* Font::m_library {nullptr};
+
 struct FontSearchInfo {
     bool found = false;
     Font font;
@@ -120,12 +131,12 @@ void Font::loadPath(const std::string &path, const std::shared_ptr<IOSystem> &in
     FT_Face face;
 
     auto error = FT_New_Memory_Face(
-            reinterpret_cast<FT_Library>(Engine::m_fontLibrary),
+            reinterpret_cast<FT_Library>(m_library),
             buffer, size, 0, &face);
 
     if (!error) {
         m_face.reset(new LoadedFont {buffer, size, face}, [](LoadedFont *font) {
-            if (Engine::m_fontLibrary != nullptr && font != nullptr && font->face != nullptr) {
+            if (m_library != nullptr && font != nullptr && font->face != nullptr) {
                 FT_Done_Face(font->face);
             }
 
