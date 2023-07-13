@@ -8,12 +8,6 @@
 
 #include <thread>
 
-#ifdef ALGINE_SECURE_OPERATIONS
-    #define sop_context_destroyed(context) Engine::contextDestroyed(context)
-#else
-    #define sop_context_destroyed(context)
-#endif
-
 namespace algine {
 inline void printContextCreationErrorMessage() {
     Log::error("Context::create", "Context creation failed");

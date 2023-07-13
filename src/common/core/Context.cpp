@@ -4,6 +4,8 @@
 #include <algine/core/log/Log.h>
 
 namespace algine {
+tulz::Subject<Context*> Context::m_onDestroy;
+
 bool Context::create(const ContextConfig &config) {
     if (!Engine::getApplicationContext().m_context) {
         Log::error("Context::create", "Application context hasn't been initialized yet");
@@ -24,5 +26,9 @@ bool Context::create(const Context &parent) {
 
 bool Context::create() {
     return create(ContextConfig {});
+}
+
+tulz::Subscription<Context*> Context::addOnDestroyListener(const tulz::Observer<Context*> &observer) {
+    return m_onDestroy.subscribe(observer);
 }
 }

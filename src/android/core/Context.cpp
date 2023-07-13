@@ -87,7 +87,7 @@ bool Context::destroy() {
     bool r_terminate   = eglTerminate(dpy);
 
     if (r_destroyCtx) {
-        sop_context_destroyed(ctx);
+        m_onDestroy.notify(this);
     }
 
     if (!r_destroySurf || !r_destroyCtx || !r_terminate) {

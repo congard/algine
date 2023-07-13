@@ -37,7 +37,7 @@ bool Context::destroy() {
         auto error = glfwGetError(nullptr);
 
         if (!error) {
-            sop_context_destroyed(m_context);
+            m_onDestroy.notify(this);
             m_context = nullptr;
         }
 

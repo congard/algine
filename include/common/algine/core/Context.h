@@ -1,6 +1,8 @@
 #ifndef ALGINE_CONTEXT_H
 #define ALGINE_CONTEXT_H
 
+#include <tulz/observer/Subject.h>
+
 namespace algine {
 class ContextConfig;
 
@@ -47,6 +49,8 @@ public:
     static Context getCurrent();
     static void* getCurrentNative();
 
+    static tulz::Subscription<Context*> addOnDestroyListener(const tulz::Observer<Context*> &observer);
+
 #ifdef ALGINE_QT_PLATFORM
     void *m_context {nullptr};
     void *m_surface {nullptr};
@@ -60,6 +64,9 @@ public:
 
 private:
     bool createImpl(int major, int minor, const ContextConfig &config);
+
+private:
+    static tulz::Subject<Context*> m_onDestroy;
 };
 }
 
