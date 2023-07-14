@@ -1,5 +1,6 @@
 #include <algine/std/model/Model.h>
 #include <algine/std/model/Shape.h>
+#include <algine/core/TypeRegistry.h>
 
 #include "internal/PublicObjectTools.h"
 
@@ -8,6 +9,10 @@ using namespace glm;
 using namespace algine::internal;
 
 namespace algine {
+STATIC_INITIALIZER_IMPL(Model) {
+    alRegisterType(Model);
+}
+
 vector<ModelPtr> Model::publicObjects;
 
 Model::Model(const ShapePtr &shape, Rotator::Type rotatorType)

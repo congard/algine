@@ -1,5 +1,6 @@
 #include <algine/core/widgets/RelativeLayout.h>
 #include <algine/core/widgets/Alignment.h>
+#include <algine/core/TypeRegistry.h>
 
 #include <stdexcept>
 
@@ -16,6 +17,10 @@
 #define Property_AlignBottom "alignBottom"
 
 namespace algine {
+STATIC_INITIALIZER_IMPL(RelativeLayout) {
+    alRegisterType(RelativeLayout);
+}
+
 inline void requestParentUpdate(WidgetPtrView widget) {
     if (auto parent = widget->getParent().getWidget(); parent != nullptr) {
         parent->requestLayout();

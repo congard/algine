@@ -3,11 +3,14 @@
 
 #include <algine/core/widgets/Widget.h>
 #include <algine/core/widgets/ContainerPtr.h>
+#include <tulz/static_initializer.h>
 
 #include <list>
 
 namespace algine {
 class Container: public Widget {
+    STATIC_INITIALIZER_DECL
+
 public:
     Container();
 

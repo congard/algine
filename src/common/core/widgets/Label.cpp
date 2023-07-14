@@ -3,12 +3,17 @@
 #include <algine/core/widgets/Units.h>
 #include <algine/core/painter/Painter.h>
 #include <algine/core/font/FontLibrary.h>
+#include <algine/core/TypeRegistry.h>
 
 #include <pugixml.hpp>
 
 #include <cstring>
 
 namespace algine {
+STATIC_INITIALIZER_IMPL(Label) {
+    alRegisterType(Label);
+}
+
 Label::Label()
     : m_textAlignment(Alignment::Center),
       m_fontColor(0xff000000),

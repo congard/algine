@@ -1,16 +1,9 @@
 #include <algine/core/Engine.h>
-
-#include <algine/templates.h>
-#include <algine/core/TypeRegistry.h>
 #include <algine/core/log/Log.h>
-
-#include <algine/core/widgets/Container.h>
-#include <algine/core/widgets/LinearLayout.h>
-#include <algine/core/widgets/RelativeLayout.h>
-#include <algine/core/widgets/Label.h>
-#include <algine/core/widgets/ImageWidget.h>
-
+#include <algine/templates.h>
 #include <algine/gl.h>
+
+#include <tulz/Path.h>
 
 #include <chrono>
 
@@ -24,22 +17,6 @@
 #else
     #include <algine/core/io/AssetsIOSystem.h>
     #include "../../src/android/core/Bridge.h"
-#endif
-
-// TODO: move to static initializers
-#ifndef ALGINE_CORE_ONLY
-#include <algine/std/model/Shape.h>
-#include <algine/std/model/Model.h>
-
-inline void initExtra() {
-    using namespace algine;
-
-    alRegisterType(Shape);
-    alRegisterType(Model);
-}
-
-#else
-    #define initExtra()
 #endif
 
 using namespace std;
@@ -150,18 +127,9 @@ void Engine::init(int argc, char *const *argv) {
     m_appContext = Context::getCurrent();
 #endif
 
-    // TODO: move to static initializers
-    alRegisterType(Container);
-    alRegisterType(LinearLayout);
-    alRegisterType(RelativeLayout);
-    alRegisterType(Label);
-    alRegisterType(ImageWidget);
-
 #if defined(__linux__) && !defined(__ANDROID__)
     linux_detect_dpi();
 #endif
-
-    initExtra();
 }
 
 void Engine::init() {
@@ -179,9 +147,6 @@ void Engine::wait() {
 
 void Engine::destroy() {
     m_onDestroy.notify();
-
-    // TODO: move to TypeRegistry's static initializer
-    TypeRegistry::clear();
 
 #ifndef ALGINE_QT_PLATFORM
     // Terminate GLFW, clearing any resources allocated by GLFW
@@ -217,7 +182,6 @@ tulz::Subscription<> Engine::addOnDestroyListener(const tulz::Observer<> &observ
 
 void Engine::setDebugWriter(DebugWriter *debugWriter) {
     m_debugWriter.reset(debugWriter);
-
     enable_if_android(enableDebugOutput());
 }
 
@@ -362,7 +326,6 @@ void Engine::flushCommandBuffer() {
 
 long Engine::time() {
     using namespace chrono;
-
     return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 

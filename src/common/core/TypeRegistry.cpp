@@ -1,10 +1,17 @@
 #include <algine/core/TypeRegistry.h>
+#include <algine/core/Engine.h>
 
 #include <stdexcept>
 
 using namespace std;
 
 namespace algine {
+STATIC_INITIALIZER_IMPL(TypeRegistry) {
+    Engine::addOnDestroyListener([]() {
+        TypeRegistry::clear();
+    });
+}
+
 map<string, void*> TypeRegistry::m_registry;
 
 void TypeRegistry::registerType(const string &name, void *creator) {

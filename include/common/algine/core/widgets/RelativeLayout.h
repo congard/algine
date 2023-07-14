@@ -2,11 +2,14 @@
 #define ALGINE_RELATIVELAYOUT_H
 
 #include <algine/core/widgets/Layout.h>
+#include <tulz/static_initializer.h>
 
 #include <list>
 
 namespace algine {
 class RelativeLayout: public Layout {
+    STATIC_INITIALIZER_DECL
+
 public:
     static void setAbove(WidgetPtrView widget, std::string_view name);
     static void setBelow(WidgetPtrView widget, std::string_view name);

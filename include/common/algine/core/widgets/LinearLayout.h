@@ -2,9 +2,12 @@
 #define ALGINE_LINEARLAYOUT_H
 
 #include <algine/core/widgets/Layout.h>
+#include <tulz/static_initializer.h>
 
 namespace algine {
 class LinearLayout: public Layout {
+    STATIC_INITIALIZER_DECL
+
 public:
     enum class Orientation {
         Vertical,

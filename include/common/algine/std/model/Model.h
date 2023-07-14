@@ -11,10 +11,14 @@
 
 #include <algine/core/Object.h>
 
+#include <tulz/static_initializer.h>
+
 namespace algine {
 class Model: public Object, public Rotatable, public Translatable, public Scalable {
     friend class Animator;
     friend class AnimationBlender;
+
+    STATIC_INITIALIZER_DECL
 
 public:
     Model(const ShapePtr &shape, Rotator::Type rotatorType);

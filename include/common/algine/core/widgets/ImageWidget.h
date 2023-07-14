@@ -2,9 +2,12 @@
 #define ALGINE_IMAGEWIDGET_H
 
 #include <algine/core/widgets/Widget.h>
+#include <tulz/static_initializer.h>
 
 namespace algine {
 class ImageWidget: public Widget {
+    STATIC_INITIALIZER_DECL
+
 public:
     void setImage(const Texture2DPtr &image);
     const Texture2DPtr& getImage() const;

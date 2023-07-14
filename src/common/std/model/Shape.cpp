@@ -1,6 +1,6 @@
 #include <algine/std/model/Shape.h>
-
 #include <algine/core/DataType.h>
+#include <algine/core/TypeRegistry.h>
 
 #include "internal/PublicObjectTools.h"
 
@@ -8,6 +8,10 @@ using namespace std;
 using namespace algine::internal;
 
 namespace algine {
+STATIC_INITIALIZER_IMPL(Shape) {
+    alRegisterType(Shape);
+}
+
 vector<ShapePtr> Shape::publicObjects;
 
 Shape::~Shape() {

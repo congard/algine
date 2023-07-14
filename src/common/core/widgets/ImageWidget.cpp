@@ -3,6 +3,7 @@
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/painter/Painter.h>
 #include <algine/core/PtrMaker.h>
+#include <algine/core/TypeRegistry.h>
 
 #include <pugixml.hpp>
 
@@ -11,6 +12,10 @@
 #include "TexturePathLoader.h"
 
 namespace algine {
+STATIC_INITIALIZER_IMPL(ImageWidget) {
+    alRegisterType(ImageWidget);
+}
+
 void ImageWidget::setImage(const Texture2DPtr &image) {
     requestLayout();
     invalidate();

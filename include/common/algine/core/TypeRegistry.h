@@ -2,12 +2,15 @@
 #define ALGINE_TYPEREGISTRY_H
 
 #include <algine/core/RawPtr.h>
+#include <tulz/static_initializer.h>
 
 #include <string>
 #include <map>
 
 namespace algine {
 class TypeRegistry {
+    STATIC_INITIALIZER_DECL
+
 public:
     using Deleter = void(*)(void*);
 
@@ -45,9 +48,7 @@ public:
     template<typename T, typename ...Args>
     static RawPtr<T> create(const std::string &name, Args&&...args) {
         using Type = Creator<T, Args...>;
-
         auto implType = (Type*) m_registry[name];
-
         return implType->create(std::forward<Args>(args)...);
     }
 

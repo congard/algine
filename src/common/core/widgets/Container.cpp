@@ -1,5 +1,4 @@
 #include <algine/core/widgets/Container.h>
-
 #include <algine/core/painter/Painter.h>
 #include <algine/core/Framebuffer.h>
 #include <algine/core/TypeRegistry.h>
@@ -11,6 +10,10 @@
 #include <algorithm>
 
 namespace algine {
+STATIC_INITIALIZER_IMPL(Container) {
+    alRegisterType(Container);
+}
+
 Container::Container()
     : Widget() {}
 

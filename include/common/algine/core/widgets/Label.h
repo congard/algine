@@ -7,6 +7,8 @@
 
 namespace algine {
 class Label: public Widget {
+    STATIC_INITIALIZER_DECL
+
 public:
     Label();
     explicit Label(const std::string &text);

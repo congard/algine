@@ -1,12 +1,16 @@
 #include <algine/core/widgets/LinearLayout.h>
 #include <algine/core/widgets/Alignment.h>
-#include <algine/core/log/Log.h>
+#include <algine/core/TypeRegistry.h>
 
 #include <pugixml.hpp>
 
 #include <cstring>
 
 namespace algine {
+STATIC_INITIALIZER_IMPL(LinearLayout) {
+    alRegisterType(LinearLayout);
+}
+
 void LinearLayout::setOrientation(Orientation orientation) {
     if (orientation != m_orientation) {
         requestLayout();

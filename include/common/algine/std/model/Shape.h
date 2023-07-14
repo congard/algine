@@ -20,6 +20,8 @@ class Shape: public Object {
     friend class Animator;
     friend class AnimationBlender;
 
+    STATIC_INITIALIZER_DECL
+
 public:
     constexpr static Index AnimationNotFound = -1;
 
