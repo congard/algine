@@ -1,7 +1,7 @@
-#ifndef ALGINE_MODELCREATOR_H
-#define ALGINE_MODELCREATOR_H
+#ifndef ALGINE_MODELBUILDER_H
+#define ALGINE_MODELBUILDER_H
 
-#include <algine/std/model/ShapeCreator.h>
+#include <algine/std/model/ShapeBuilder.h>
 #include <algine/std/model/ModelPtr.h>
 #include <algine/std/model/Model.h>
 #include <algine/std/rotator/Rotator.h>
@@ -9,7 +9,7 @@
 #include <set>
 
 namespace algine {
-class ModelCreator: public Creator {
+class ModelBuilder: public Builder {
 public:
     class AnimationInfo {
     public:
@@ -35,18 +35,18 @@ public:
     };
 
 public:
-    ModelCreator();
+    ModelBuilder();
 
     void activateAnimation(const std::string &name);
     void activateAnimation(Index index);
 
     void setClassName(const std::string &name);
     void setShapeName(const std::string &name);
-    void setShape(const ShapeCreator &creator);
+    void setShape(const ShapeBuilder &builder);
 
     const std::string& getClassName() const;
     const std::string& getShapeName() const;
-    const ShapeCreator& getShape() const;
+    const ShapeBuilder& getShape() const;
 
     void setActiveAnimationName(const std::string &name);
     void setActiveAnimationIndex(Index index);
@@ -75,7 +75,7 @@ private:
     std::string m_className;
 
     std::string m_shapeName;
-    ShapeCreator m_shape;
+    ShapeBuilder m_shape;
 
     AnimationInfo m_activeAnimation;
 
@@ -86,4 +86,4 @@ private:
 };
 }
 
-#endif //ALGINE_MODELCREATOR_H
+#endif //ALGINE_MODELBUILDER_H

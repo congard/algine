@@ -1,4 +1,4 @@
-#include <algine/core/shader/ShaderCreator.h>
+#include <algine/core/shader/ShaderBuilder.h>
 #include <algine/core/Engine.h>
 #include <algine/core/log/Log.h>
 
@@ -22,7 +22,7 @@ constexpr auto Include = "include";
 constexpr auto Link = "link";
 }
 
-constexpr auto TAG = "Algine ShaderCreator";
+constexpr auto TAG = "Algine ShaderBuilder";
 
 namespace algine {
 template<typename T>
@@ -39,11 +39,11 @@ inline void removeElement(vector<T> &v, const T &e) {
     }
 }
 
-vector<string> ShaderCreator::m_globalIncludePaths;
+vector<string> ShaderBuilder::m_globalIncludePaths;
 
-ShaderCreator::ShaderCreator(): m_type() {}
+ShaderBuilder::ShaderBuilder(): m_type() {}
 
-ShaderCreator::ShaderCreator(Shader::Type type, const std::string &path)
+ShaderBuilder::ShaderBuilder(Shader::Type type, const std::string &path)
     : m_type(type)
 {
     if (string_view(path.c_str() + path.size() - 3) == "lua") {
@@ -53,63 +53,63 @@ ShaderCreator::ShaderCreator(Shader::Type type, const std::string &path)
     }
 }
 
-ShaderCreator::ShaderCreator(Shader::Type type): m_type(type) {}
+ShaderBuilder::ShaderBuilder(Shader::Type type): m_type(type) {}
 
-ShaderCreator::ShaderCreator(const std::string &path): ShaderCreator({}, path) {}
+ShaderBuilder::ShaderBuilder(const std::string &path): ShaderBuilder({}, path) {}
 
-void ShaderCreator::setType(Shader::Type type) {
+void ShaderBuilder::setType(Shader::Type type) {
     m_type = type;
 }
 
-Shader::Type ShaderCreator::getType() const {
+Shader::Type ShaderBuilder::getType() const {
     return m_type;
 }
 
-void ShaderCreator::setPath(const string &path) {
+void ShaderBuilder::setPath(const string &path) {
     m_path = path;
 }
 
-void ShaderCreator::setIncludePaths(const vector<string> &includePaths) {
+void ShaderBuilder::setIncludePaths(const vector<string> &includePaths) {
     m_includePaths = includePaths;
 }
 
-void ShaderCreator::addIncludePaths(const vector<string> &includePaths) {
+void ShaderBuilder::addIncludePaths(const vector<string> &includePaths) {
     for (const auto & i : includePaths) {
         addIncludePath(i);
     }
 }
 
-void ShaderCreator::addIncludePath(const string &includePath) {
+void ShaderBuilder::addIncludePath(const string &includePath) {
     if (!isElementExist(m_includePaths, includePath)) {
         m_includePaths.emplace_back(includePath);
     }
 }
 
-void ShaderCreator::removeIncludePath(const std::string &includePath) {
+void ShaderBuilder::removeIncludePath(const std::string &includePath) {
     removeElement(m_includePaths, includePath);
 }
 
-const string& ShaderCreator::getPath() const {
+const string& ShaderBuilder::getPath() const {
     return m_path;
 }
 
-const vector<string>& ShaderCreator::getIncludePaths() const {
+const vector<string>& ShaderBuilder::getIncludePaths() const {
     return m_includePaths;
 }
 
-void ShaderCreator::setSource(const string &source) {
+void ShaderBuilder::setSource(const string &source) {
     m_source = source;
 }
 
-const string& ShaderCreator::getSource() const {
+const string& ShaderBuilder::getSource() const {
     return m_source;
 }
 
-void ShaderCreator::resetGenerated() {
+void ShaderBuilder::resetGenerated() {
     m_gen = "";
 }
 
-inline void cfgSourceImpl(ShaderCreator *self) {
+inline void cfgSourceImpl(ShaderBuilder *self) {
     const string &source = self->getSource();
     const string &path = self->getPath();
     const string &rootDir = self->getRootDir();
@@ -140,7 +140,7 @@ inline void cfgSourceImpl(ShaderCreator *self) {
 
 #define cfgSource() cfgSourceImpl(this)
 
-void ShaderCreator::generate() {
+void ShaderBuilder::generate() {
     constexpr char versionRegex[] = R"~([ \t]*#[ \t]*version[ \t]+[0-9]+(?:[ \t]+[a-z]+|[ \t]*)(?:\r\n|\n|$))~";
 
     cfgSource();
@@ -186,20 +186,20 @@ void ShaderCreator::generate() {
     m_gen = processDirectives(m_gen, !m_path.empty() ? Path(m_path).getParentDirectory() : Path(getRootDir()));
 }
 
-const string& ShaderCreator::getGenerated() const {
+const string& ShaderBuilder::getGenerated() const {
     return m_gen;
 }
 
-const string& ShaderCreator::makeGenerated() {
+const string& ShaderBuilder::makeGenerated() {
     generate();
     return getGenerated();
 }
 
-ShaderPtr ShaderCreator::get() {
+ShaderPtr ShaderBuilder::get() {
     return PublicObjectTools::getPtr<ShaderPtr>(this);
 }
 
-ShaderPtr ShaderCreator::create() {
+ShaderPtr ShaderBuilder::create() {
     generate();
 
     ShaderPtr shader = make_shared<Shader>(m_type);
@@ -211,31 +211,31 @@ ShaderPtr ShaderCreator::create() {
     return shader;
 }
 
-void ShaderCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
-    exec_t<ShaderCreator>(s, path, lua, tenv);
+void ShaderBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<ShaderBuilder>(s, path, lua, tenv);
 }
 
-void ShaderCreator::setGlobalIncludePaths(const vector<string> &includePaths) {
+void ShaderBuilder::setGlobalIncludePaths(const vector<string> &includePaths) {
     m_globalIncludePaths = includePaths;
 }
 
-void ShaderCreator::addGlobalIncludePaths(const vector<string> &includePaths) {
+void ShaderBuilder::addGlobalIncludePaths(const vector<string> &includePaths) {
     for (const auto & i : includePaths) {
         addGlobalIncludePath(i);
     }
 }
 
-void ShaderCreator::addGlobalIncludePath(const string &includePath) {
+void ShaderBuilder::addGlobalIncludePath(const string &includePath) {
     if (!isElementExist(m_globalIncludePaths, includePath)) {
         m_globalIncludePaths.emplace_back(includePath);
     }
 }
 
-void ShaderCreator::removeGlobalIncludePath(const string &includePath) {
+void ShaderBuilder::removeGlobalIncludePath(const string &includePath) {
     removeElement(m_globalIncludePaths, includePath);
 }
 
-vector<string>& ShaderCreator::getGlobalIncludePaths() {
+vector<string>& ShaderBuilder::getGlobalIncludePaths() {
     return m_globalIncludePaths;
 }
 
@@ -280,7 +280,7 @@ inline vector<pair<uint, uint>> findComments(const string &src) {
     return result;
 }
 
-string ShaderCreator::processDirectives(const string &src, const Path &baseIncludePath) {
+string ShaderBuilder::processDirectives(const string &src, const Path &baseIncludePath) {
     string result = src;
     constexpr char regex[] = R"~((\w+)[ \t]+(.+))~";
 
@@ -323,7 +323,7 @@ string ShaderCreator::processDirectives(const string &src, const Path &baseInclu
             Path filePath(fileMatches[0].matches[1]);
 
             auto fileNotFoundError = [&]() {
-                Log::error(TAG) << "ShaderCreator: Error: file " << filePath.toString() << " not found\n" << matches.matches[0];
+                Log::error(TAG) << "ShaderBuilder: Error: file " << filePath.toString() << " not found\n" << matches.matches[0];
             };
 
             auto exists = [&](const Path &p) {

@@ -1,7 +1,7 @@
 #ifndef ALGINE_TEXTUREPATHLOADER_H
 #define ALGINE_TEXTUREPATHLOADER_H
 
-#include <algine/core/texture/Texture2DCreator.h>
+#include <algine/core/texture/Texture2DBuilder.h>
 
 #include <cstring>
 
@@ -15,13 +15,13 @@ inline Data load(std::string_view str_v, const std::shared_ptr<IOSystem> &io) {
     auto str = str_v.data();
 
     if (str_v.size() >= 4 && std::string_view(str + str_v.size() - 4) == ".lua") {
-        Texture2DCreator creator;
-        creator.setIOSystem(io);
-        creator.execute(str);
+        Texture2DBuilder builder;
+        builder.setIOSystem(io);
+        builder.execute(str);
 
         return {
-            creator.get(),
-            creator.getAccess() == Creator::Access::Private
+            builder.get(),
+            builder.getAccess() == Builder::Access::Private
         };
     } else {
         TextureFileInfo info;

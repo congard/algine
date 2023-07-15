@@ -1,20 +1,21 @@
-#ifndef ALGINE_CREATOR_H
-#define ALGINE_CREATOR_H
+#ifndef ALGINE_BUILDER_H
+#define ALGINE_BUILDER_H
 
 #include <algine/core/lua/Scriptable.h>
 
 #include <string>
 
 namespace algine {
-class Creator: public virtual Scriptable {
+class Builder: public virtual Scriptable {
 public:
+    // TODO: remove after Scene class creation
     enum class Access {
         Private,
         Public
     };
 
 public:
-    Creator();
+    Builder();
 
     void setName(const std::string &name);
     void setAccess(Access access);
@@ -28,4 +29,4 @@ protected:
 };
 }
 
-#endif //ALGINE_CREATOR_H
+#endif //ALGINE_BUILDER_H

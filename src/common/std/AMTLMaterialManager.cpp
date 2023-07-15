@@ -17,7 +17,7 @@ void AMTLMaterialManager::setFloat(const string &name, float value) {
     m_floats[name] = value;
 }
 
-void AMTLMaterialManager::setTexture(const string &name, const Texture2DCreator &texture) {
+void AMTLMaterialManager::setTexture(const string &name, const Texture2DBuilder &texture) {
     m_textures[name] = texture;
 }
 
@@ -49,7 +49,7 @@ const unordered_map<string, float>& AMTLMaterialManager::getFloats() const {
     return m_floats;
 }
 
-const unordered_map<string, Texture2DCreator>& AMTLMaterialManager::getTextures() const {
+const unordered_map<string, Texture2DBuilder>& AMTLMaterialManager::getTextures() const {
     return m_textures;
 }
 

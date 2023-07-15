@@ -84,7 +84,7 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
     auto tenv = lua->createEnvironment(lua->getGlobalEnvironment());
     sol::environment env(tenv);
 
-    lua->registerUsertype<Texture, Texture2DCreator>(&tenv);
+    lua->registerUsertype<Texture, Texture2DBuilder>(&tenv);
 
     class Name {
     public:
@@ -111,14 +111,14 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
         [&](const string &prop, const string &path, sol::optional<std::string> name) {
             checkMaterial();
 
-            Texture2DCreator manager;
+            Texture2DBuilder manager;
             manager.setIOSystem(io());
             manager.setRootDir(getRootDir());
             manager.setDefaultParams(params);
 
             if (name.has_value()) {
                 manager.setName(name.value());
-                manager.setAccess(Creator::Access::Public);
+                manager.setAccess(Builder::Access::Public);
             }
 
             if (path.size() >= 4 && string_view(path.c_str() + path.size() - 4) == ".lua") {
@@ -133,10 +133,10 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
             checkMaterial();
             material->setTextureName(prop, name.m_name);
         },
-        [&](const string &prop, Texture2DCreator &creator) {
+        [&](const string &prop, Texture2DBuilder &builder) {
             checkMaterial();
-            creator.setDefaultParams(params);
-            material->setTexture(prop, creator);
+            builder.setDefaultParams(params);
+            material->setTexture(prop, builder);
         },
         [&](const string &prop, float n) {
             checkMaterial();

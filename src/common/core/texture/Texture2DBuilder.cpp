@@ -1,4 +1,4 @@
-#include <algine/core/texture/Texture2DCreator.h>
+#include <algine/core/texture/Texture2DBuilder.h>
 #include <algine/core/texture/Texture2D.h>
 
 #include <tulz/Path.h>
@@ -10,26 +10,26 @@ using namespace tulz;
 using namespace algine::internal;
 
 namespace algine {
-Texture2DCreator::Texture2DCreator() {
-    m_type = TextureCreator::Type::Texture2D;
+Texture2DBuilder::Texture2DBuilder() {
+    m_type = TextureBuilder::Type::Texture2D;
     m_defaultParams = Texture2D::defaultParams();
 }
 
-void Texture2DCreator::setPath(std::string_view path) {
+void Texture2DBuilder::setPath(std::string_view path) {
     m_path = path;
 }
 
-const std::string& Texture2DCreator::getPath() const {
+const std::string& Texture2DBuilder::getPath() const {
     return m_path;
 }
 
-Texture2DPtr Texture2DCreator::get() {
+Texture2DPtr Texture2DBuilder::get() {
     return PublicObjectTools::getPtr<Texture2DPtr>(this);
 }
 
-Texture2DPtr Texture2DCreator::create() {
-    if (m_type != TextureCreator::Type::Texture2D)
-        throw runtime_error("Invalid texture type. Use a different creator");
+Texture2DPtr Texture2DBuilder::create() {
+    if (m_type != TextureBuilder::Type::Texture2D)
+        throw runtime_error("Invalid texture type. Use a different builder");
 
     Texture2DPtr texture = make_shared<Texture2D>();
     texture->setName(m_name);
@@ -58,7 +58,7 @@ Texture2DPtr Texture2DCreator::create() {
     return texture;
 }
 
-void Texture2DCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
-    exec_t<Texture2DCreator>(s, path, lua, tenv);
+void Texture2DBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<Texture2DBuilder>(s, path, lua, tenv);
 }
 }

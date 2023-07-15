@@ -1,7 +1,7 @@
 #ifndef ALGINE_AMTLMATERIALMANAGER_H
 #define ALGINE_AMTLMATERIALMANAGER_H
 
-#include <algine/core/texture/Texture2DCreator.h>
+#include <algine/core/texture/Texture2DBuilder.h>
 
 #include <unordered_map>
 #include <set>
@@ -16,7 +16,7 @@ public:
 
     void setName(const std::string &name);
     void setFloat(const std::string &name, float value);
-    void setTexture(const std::string &name, const Texture2DCreator &texture);
+    void setTexture(const std::string &name, const Texture2DBuilder &texture);
     void setTextureName(const std::string &name, const std::string &texName);
 
     const std::string& getName() const;
@@ -25,7 +25,7 @@ public:
     bool hasTexture(const std::string &name) const;
 
     const std::unordered_map<std::string, float>& getFloats() const;
-    const std::unordered_map<std::string, Texture2DCreator>& getTextures() const;
+    const std::unordered_map<std::string, Texture2DBuilder>& getTextures() const;
     const std::unordered_map<std::string, std::string>& getTextureNames() const;
 
     std::set<std::string> collectTextureNames() const;
@@ -40,7 +40,7 @@ private:
     std::string m_name;
 
     std::unordered_map<std::string, float> m_floats;
-    std::unordered_map<std::string, Texture2DCreator> m_textures;
+    std::unordered_map<std::string, Texture2DBuilder> m_textures;
     std::unordered_map<std::string, std::string> m_texNames;
 };
 }

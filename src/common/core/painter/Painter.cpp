@@ -1,7 +1,7 @@
 #include <algine/core/painter/Painter.h>
 #include <algine/core/PtrMaker.h>
 #include <algine/core/Engine.h>
-#include <algine/core/shader/ShaderCreator.h>
+#include <algine/core/shader/ShaderBuilder.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -54,22 +54,22 @@ Painter::Painter()
     m_layout->unbind();
 
     auto initProgram = [](ShaderProgramPtr &program, const ShaderPtr &vs, const char* fsSource) {
-        ShaderCreator fsCreator(Shader::Type::Fragment);
-        fsCreator.setSource(fsSource);
+        ShaderBuilder fsBuilder(Shader::Type::Fragment);
+        fsBuilder.setSource(fsSource);
 
         program = PtrMaker::make();
         program->attachShader(*vs);
-        program->attachShader(*fsCreator.create());
+        program->attachShader(*fsBuilder.create());
         program->link();
         program->loadActiveLocations();
     };
 
     // init shaders if haven't been inited yet
     if (m_fill == nullptr) {
-        ShaderCreator vsCreator(Shader::Type::Vertex);
-        vsCreator.setSource(PainterShaders::painter_vs);
+        ShaderBuilder vsBuilder(Shader::Type::Vertex);
+        vsBuilder.setSource(PainterShaders::painter_vs);
 
-        auto vs = vsCreator.create();
+        auto vs = vsBuilder.create();
 
         initProgram(m_fill, vs, PainterShaders::fill_fs);
         initProgram(m_circleFill, vs, PainterShaders::circle_fill_fs);

@@ -73,31 +73,31 @@ function(solgen output)
         include/common/algine/core/log/Log.h
 
         include/common/algine/core/shader/Shader.h
-        include/common/algine/core/shader/ShaderCreator.h
+        include/common/algine/core/shader/ShaderBuilder.h
         include/common/algine/core/shader/ShaderDefinitionGenerator.h
         include/common/algine/core/shader/ShaderProgram.h
-        include/common/algine/core/shader/ShaderProgramCreator.h
+        include/common/algine/core/shader/ShaderProgramBuilder.h
 
         include/common/algine/core/Color.h
 
-        include/common/algine/core/ImageCreator.h
+        include/common/algine/core/ImageBuilder.h
 
         include/common/algine/core/texture/Texture.h
         include/common/algine/core/texture/Texture2D.h
-        include/common/algine/core/texture/Texture2DCreator.h
+        include/common/algine/core/texture/Texture2DBuilder.h
         include/common/algine/core/texture/TextureCreateInfo.h
-        include/common/algine/core/texture/TextureCreator.h
+        include/common/algine/core/texture/TextureBuilder.h
         include/common/algine/core/texture/TextureCube.h
-        include/common/algine/core/texture/TextureCubeCreator.h
+        include/common/algine/core/texture/TextureCubeBuilder.h
         include/common/algine/core/texture/TextureFileInfo.h
 
         include/common/algine/core/Framebuffer.h
-        include/common/algine/core/FramebufferCreator.h
+        include/common/algine/core/FramebufferBuilder.h
 
         include/common/algine/core/Renderbuffer.h
-        include/common/algine/core/RenderbufferCreator.h
+        include/common/algine/core/RenderbufferBuilder.h
 
-        include/common/algine/core/Creator.h
+        include/common/algine/core/Builder.h
         include/common/algine/core/Object.h
         include/common/algine/core/DataType.h
 
@@ -112,9 +112,9 @@ function(solgen output)
         include/common/algine/core/widgets/Unit.h)
 
     set_if_empty(ALGINE_SOLGEN_INPUT_STD
-        include/common/algine/std/model/ShapeCreator.h
+        include/common/algine/std/model/ShapeBuilder.h
         include/common/algine/std/model/Shape.h
-        include/common/algine/std/model/ModelCreator.h
+        include/common/algine/std/model/ModelBuilder.h
         include/common/algine/std/model/Model.h
         include/common/algine/std/model/InputLayoutShapeLocations.h
 
@@ -134,22 +134,22 @@ function(solgen output)
         Font FontLibrary FontMetrics FontRenderer
         IOProvider
         Log
-        Shader ShaderCreator ShaderDefinitionGenerator ShaderProgram ShaderProgramCreator
+        Shader ShaderBuilder ShaderDefinitionGenerator ShaderProgram ShaderProgramBuilder
         Color
-        ImageCreator
+        ImageBuilder
         Texture Texture2D TextureCreateInfo TextureCube TextureFileInfo
-        TextureCreator Texture2DCreator TextureCubeCreator
-        Framebuffer FramebufferCreator
-        Renderbuffer RenderbufferCreator
-        Creator Object
+        TextureBuilder Texture2DBuilder TextureCubeBuilder
+        Framebuffer FramebufferBuilder
+        Renderbuffer RenderbufferBuilder
+        Builder Object
         DataType
         OutputList
         Paint Painter RoundRect
         Widget Dimen Unit)
 
     set_if_empty(ALGINE_SOLGEN_STD_CLASSES
-        ShapeCreator Shape
-        ModelCreator Model
+        ShapeBuilder Shape
+        ModelBuilder Model
         InputLayoutShapeLocations
         Rotator EulerRotator FreeRotator
         Rotatable Scalable Translatable

@@ -1,10 +1,10 @@
-#ifndef ALGINE_SHADERCREATOR_H
-#define ALGINE_SHADERCREATOR_H
+#ifndef ALGINE_SHADERBUILDER_H
+#define ALGINE_SHADERBUILDER_H
 
 #include <algine/core/shader/ShaderDefinitionGenerator.h>
 #include <algine/core/shader/ShaderPtr.h>
 #include <algine/core/shader/Shader.h>
-#include <algine/core/Creator.h>
+#include <algine/core/Builder.h>
 #include <algine/types.h>
 
 #include <memory>
@@ -15,12 +15,12 @@ class Path;
 }
 
 namespace algine {
-class ShaderCreator: public ShaderDefinitionGenerator, public Creator {
+class ShaderBuilder: public ShaderDefinitionGenerator, public Builder {
 public:
-    ShaderCreator();
-    ShaderCreator(Shader::Type type, const std::string &path);
-    explicit ShaderCreator(Shader::Type type);
-    explicit ShaderCreator(const std::string &path);
+    ShaderBuilder();
+    ShaderBuilder(Shader::Type type, const std::string &path);
+    explicit ShaderBuilder(Shader::Type type);
+    explicit ShaderBuilder(const std::string &path);
 
     void setType(Shader::Type type);
     Shader::Type getType() const;
@@ -72,4 +72,4 @@ private:
 };
 }
 
-#endif //ALGINE_SHADERCREATOR_H
+#endif //ALGINE_SHADERBUILDER_H

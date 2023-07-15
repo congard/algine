@@ -1,6 +1,6 @@
 #include <algine/std/QuadRenderer.h>
 
-#include <algine/core/shader/ShaderCreator.h>
+#include <algine/core/shader/ShaderBuilder.h>
 
 #include <algine/gl.h>
 
@@ -47,11 +47,11 @@ ShaderPtr QuadRenderer::getVertexShader() {
     if (const ShaderPtr &ptr = Shader::getByName(name); ptr != nullptr) {
         return ptr;
     } else {
-        ShaderCreator creator(Shader::Type::Vertex);
-        creator.setAccess(Creator::Access::Public);
-        creator.setName(name);
-        creator.setPath("@algine/Quad.vs.glsl");
-        return creator.create();
+        ShaderBuilder builder(Shader::Type::Vertex);
+        builder.setAccess(Builder::Access::Public);
+        builder.setName(name);
+        builder.setPath("@algine/Quad.vs.glsl");
+        return builder.create();
     }
 }
 }

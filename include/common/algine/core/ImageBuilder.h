@@ -1,14 +1,14 @@
-#ifndef ALGINE_IMAGECREATOR_H
-#define ALGINE_IMAGECREATOR_H
+#ifndef ALGINE_IMAGEBUILDER_H
+#define ALGINE_IMAGEBUILDER_H
 
-#include <algine/core/Creator.h>
+#include <algine/core/Builder.h>
 
 #include <algine/types.h>
 
 namespace algine {
-class ImageCreator: public Creator {
+class ImageBuilder: public Builder {
 public:
-    ImageCreator();
+    ImageBuilder();
 
     void setFormat(uint format);
     void setWidth(uint width);
@@ -25,4 +25,4 @@ protected:
 };
 }
 
-#endif //ALGINE_IMAGECREATOR_H
+#endif //ALGINE_IMAGEBUILDER_H

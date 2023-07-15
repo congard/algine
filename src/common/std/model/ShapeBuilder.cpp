@@ -1,4 +1,4 @@
-#include <algine/std/model/ShapeCreator.h>
+#include <algine/std/model/ShapeBuilder.h>
 #include <algine/std/animation/BoneInfo.h>
 
 #include <algine/core/texture/Texture2D.h>
@@ -31,143 +31,143 @@ constexpr uint BonesPerVertex = 4;
 constexpr auto ClassName = "Shape";
 }
 
-constexpr auto TAG = "Algine ShapeCreator";
+constexpr auto TAG = "Algine ShapeBuilder";
 
-ShapeCreator::ShapeCreator()
+ShapeBuilder::ShapeBuilder()
     : m_className(Default::ClassName),
       m_bonesPerVertex(Default::BonesPerVertex) {}
 
-void ShapeCreator::addParam(Param param) {
+void ShapeBuilder::addParam(Param param) {
     m_params.emplace_back(param);
 }
 
-void ShapeCreator::addParams(const vector<Param> &params) {
+void ShapeBuilder::addParams(const vector<Param> &params) {
     for (auto param : params) {
         m_params.emplace_back(param);
     }
 }
 
-void ShapeCreator::setParams(const vector<Param> &params) {
+void ShapeBuilder::setParams(const vector<Param> &params) {
     m_params = params;
 }
 
-void ShapeCreator::addInputLayoutLocations(const InputLayoutShapeLocations &locations) {
+void ShapeBuilder::addInputLayoutLocations(const InputLayoutShapeLocations &locations) {
     m_locations.emplace_back(locations);
 }
 
-void ShapeCreator::setInputLayoutLocations(const vector<InputLayoutShapeLocations> &locations) {
+void ShapeBuilder::setInputLayoutLocations(const vector<InputLayoutShapeLocations> &locations) {
     m_locations = locations;
 }
 
-void ShapeCreator::setModelPath(const string &path) {
+void ShapeBuilder::setModelPath(const string &path) {
     m_modelPath = path;
 }
 
-void ShapeCreator::setAMTL(const AMTLManager &amtlManager) {
+void ShapeBuilder::setAMTL(const AMTLManager &amtlManager) {
     m_amtlManager = amtlManager;
 }
 
-void ShapeCreator::setBonesPerVertex(uint bonesPerVertex) {
+void ShapeBuilder::setBonesPerVertex(uint bonesPerVertex) {
     m_bonesPerVertex = bonesPerVertex;
 }
 
-void ShapeCreator::setClassName(const string &name) {
+void ShapeBuilder::setClassName(const string &name) {
     m_className = name;
 }
 
-const vector<ShapeCreator::Param>& ShapeCreator::getParams() const {
+const vector<ShapeBuilder::Param>& ShapeBuilder::getParams() const {
     return m_params;
 }
 
-const vector<InputLayoutShapeLocations>& ShapeCreator::getInputLayoutLocations() const {
+const vector<InputLayoutShapeLocations>& ShapeBuilder::getInputLayoutLocations() const {
     return m_locations;
 }
 
-const string& ShapeCreator::getModelPath() const {
+const string& ShapeBuilder::getModelPath() const {
     return m_modelPath;
 }
 
-const AMTLManager& ShapeCreator::getAMTL() const {
+const AMTLManager& ShapeBuilder::getAMTL() const {
     return m_amtlManager;
 }
 
-uint ShapeCreator::getBonesPerVertex() const {
+uint ShapeBuilder::getBonesPerVertex() const {
     return m_bonesPerVertex;
 }
 
-const string& ShapeCreator::getClassName() const {
+const string& ShapeBuilder::getClassName() const {
     return m_className;
 }
 
-const ShapeCreator::BufferData<float>& ShapeCreator::getVertices() const {
+const ShapeBuilder::BufferData<float>& ShapeBuilder::getVertices() const {
     return m_vertices;
 }
 
-void ShapeCreator::setVertices(const BufferData<float> &vertices) {
+void ShapeBuilder::setVertices(const BufferData<float> &vertices) {
     m_vertices = vertices;
 }
 
-const ShapeCreator::BufferData<float>& ShapeCreator::getNormals() const {
+const ShapeBuilder::BufferData<float>& ShapeBuilder::getNormals() const {
     return m_normals;
 }
 
-void ShapeCreator::setNormals(const BufferData<float> &normals) {
+void ShapeBuilder::setNormals(const BufferData<float> &normals) {
     m_normals = normals;
 }
 
-const ShapeCreator::BufferData<float>& ShapeCreator::getTexCoords() const {
+const ShapeBuilder::BufferData<float>& ShapeBuilder::getTexCoords() const {
     return m_texCoords;
 }
 
-void ShapeCreator::setTexCoords(const BufferData<float> &texCoords) {
+void ShapeBuilder::setTexCoords(const BufferData<float> &texCoords) {
     m_texCoords = texCoords;
 }
 
-const ShapeCreator::BufferData<float>& ShapeCreator::getTangents() const {
+const ShapeBuilder::BufferData<float>& ShapeBuilder::getTangents() const {
     return m_tangents;
 }
 
-void ShapeCreator::setTangents(const BufferData<float> &tangents) {
+void ShapeBuilder::setTangents(const BufferData<float> &tangents) {
     m_tangents = tangents;
 }
 
-const ShapeCreator::BufferData<float>& ShapeCreator::getBitangents() const {
+const ShapeBuilder::BufferData<float>& ShapeBuilder::getBitangents() const {
     return m_bitangents;
 }
 
-void ShapeCreator::setBitangents(const BufferData<float> &bitangents) {
+void ShapeBuilder::setBitangents(const BufferData<float> &bitangents) {
     m_bitangents = bitangents;
 }
 
-const ShapeCreator::BufferData<float>& ShapeCreator::getBoneWeights() const {
+const ShapeBuilder::BufferData<float>& ShapeBuilder::getBoneWeights() const {
     return m_boneWeights;
 }
 
-void ShapeCreator::setBoneWeights(const BufferData<float> &boneWeights) {
+void ShapeBuilder::setBoneWeights(const BufferData<float> &boneWeights) {
     m_boneWeights = boneWeights;
 }
 
-const ShapeCreator::BufferData<uint>& ShapeCreator::getBoneIds() const {
+const ShapeBuilder::BufferData<uint>& ShapeBuilder::getBoneIds() const {
     return m_boneIds;
 }
 
-void ShapeCreator::setBoneIds(const BufferData<uint> &boneIds) {
+void ShapeBuilder::setBoneIds(const BufferData<uint> &boneIds) {
     m_boneIds = boneIds;
 }
 
-const ShapeCreator::BufferData<uint>& ShapeCreator::getIndices() const {
+const ShapeBuilder::BufferData<uint>& ShapeBuilder::getIndices() const {
     return m_indices;
 }
 
-void ShapeCreator::setIndices(const BufferData<uint> &indices) {
+void ShapeBuilder::setIndices(const BufferData<uint> &indices) {
     m_indices = indices;
 }
 
-ShapePtr ShapeCreator::get() {
+ShapePtr ShapeBuilder::get() {
     return internal::PublicObjectTools::getPtr<ShapePtr>(this);
 }
 
-ShapePtr ShapeCreator::create() {
+ShapePtr ShapeBuilder::create() {
     m_shape.reset(TypeRegistry::create<Shape>(m_className));
 
     if (!m_modelPath.empty()) {
@@ -210,8 +210,8 @@ constexpr int PARAMS_TYPE_ASSIMP = 0;
 constexpr int PARAMS_TYPE_ALGINE = 1;
 
 template<int type>
-inline auto getParams(const vector<ShapeCreator::Param> &params) {
-    using Param = ShapeCreator::Param;
+inline auto getParams(const vector<ShapeBuilder::Param> &params) {
+    using Param = ShapeBuilder::Param;
 
     map<Param, uint> assimpParams = {
         {Param::Triangulate, aiProcess_Triangulate},
@@ -317,7 +317,7 @@ private:
     shared_ptr<algine::IOSystem> m_ioSystem;
 };
 
-void ShapeCreator::loadFile() {
+void ShapeBuilder::loadFile() {
     if (m_shape == nullptr)
         m_shape.reset(TypeRegistry::create<Shape>(m_className));
 
@@ -359,13 +359,13 @@ void ShapeCreator::loadFile() {
     }
 }
 
-void ShapeCreator::loadShape() {
+void ShapeBuilder::loadShape() {
     applyParams();
     genBuffers();
     createInputLayouts();
 }
 
-void ShapeCreator::applyParams() {
+void ShapeBuilder::applyParams() {
     if (m_shape == nullptr)
         m_shape.reset(TypeRegistry::create<Shape>(m_className));
 
@@ -393,7 +393,7 @@ void ShapeCreator::applyParams() {
     m_shape->m_bonesPerVertex = m_bonesPerVertex;
 }
 
-void ShapeCreator::createInputLayouts() {
+void ShapeBuilder::createInputLayouts() {
     if (m_shape == nullptr)
         m_shape.reset(TypeRegistry::create<Shape>(m_className));
 
@@ -402,11 +402,11 @@ void ShapeCreator::createInputLayouts() {
     }
 }
 
-ShapePtr& ShapeCreator::getCurrentShape() {
+ShapePtr& ShapeBuilder::getCurrentShape() {
     return m_shape;
 }
 
-void ShapeCreator::loadBones(const aiMesh *aimesh) {
+void ShapeBuilder::loadBones(const aiMesh *aimesh) {
     vector<BoneInfo> binfos; // bone infos
     binfos.reserve(aimesh->mNumVertices); // allocating space
 
@@ -462,7 +462,7 @@ void ShapeCreator::loadBones(const aiMesh *aimesh) {
     }
 }
 
-void ShapeCreator::processNode(const aiNode *node, const aiScene *scene) {
+void ShapeBuilder::processNode(const aiNode *node, const aiScene *scene) {
     // обработать все полигональные сетки в узле (если есть)
     for (size_t i = 0; i < node->mNumMeshes; i++) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -480,7 +480,7 @@ void ShapeCreator::processNode(const aiNode *node, const aiScene *scene) {
     }
 }
 
-void ShapeCreator::processMesh(const aiMesh *aimesh, const aiScene *scene) {
+void ShapeBuilder::processMesh(const aiMesh *aimesh, const aiScene *scene) {
     Mesh mesh;
     mesh.start = m_indices->size();
     uint verticesAtBeginning = m_vertices->size() / 3;
@@ -596,18 +596,18 @@ void ShapeCreator::processMesh(const aiMesh *aimesh, const aiScene *scene) {
             }
         };
 
-        Texture2DCreator creator;
-        creator.setIOSystem(io());
-        creator.setRootDir(Path(Path::join(getRootDir(), m_modelPath)).getParentDirectory().toString());
-        creator.setPath(path.C_Str());
-        creator.setParams({
+        Texture2DBuilder builder;
+        builder.setIOSystem(io());
+        builder.setRootDir(Path(Path::join(getRootDir(), m_modelPath)).getParentDirectory().toString());
+        builder.setPath(path.C_Str());
+        builder.setParams({
             {Texture::WrapU, getMapMode(mapModeU)},
             {Texture::WrapV, getMapMode(mapModeV)},
             {Texture::MinFilter, Texture::Linear},
             {Texture::MagFilter, Texture::Linear}
         });
 
-        material.setTexture2D(texName, creator.create());
+        material.setTexture2D(texName, builder.create());
     }
 
     // III. Set values
@@ -629,7 +629,7 @@ void ShapeCreator::processMesh(const aiMesh *aimesh, const aiScene *scene) {
 }
 
 template<typename BufferType, typename DataType>
-inline BufferType* createBuffer(ShapeCreator::BufferData<DataType> &data) {
+inline BufferType* createBuffer(ShapeBuilder::BufferData<DataType> &data) {
     if (!data->empty()) {
         auto bufferType = new BufferType();
         bufferType->bind();
@@ -641,7 +641,7 @@ inline BufferType* createBuffer(ShapeCreator::BufferData<DataType> &data) {
     return nullptr;
 }
 
-void ShapeCreator::genBuffers() {
+void ShapeBuilder::genBuffers() {
     if (m_shape == nullptr)
         m_shape.reset(TypeRegistry::create<Shape>(m_className));
 
@@ -655,7 +655,7 @@ void ShapeCreator::genBuffers() {
     m_shape->m_indices = createBuffer<IndexBuffer>(m_indices);
 }
 
-void ShapeCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
-    exec_t<ShapeCreator>(s, path, lua, tenv);
+void ShapeBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<ShapeBuilder>(s, path, lua, tenv);
 }
 }

@@ -1,9 +1,9 @@
-#ifndef ALGINE_FRAMEBUFFERCREATOR_H
-#define ALGINE_FRAMEBUFFERCREATOR_H
+#ifndef ALGINE_FRAMEBUFFERBUILDER_H
+#define ALGINE_FRAMEBUFFERBUILDER_H
 
-#include <algine/core/texture/Texture2DCreator.h>
-#include <algine/core/texture/TextureCubeCreator.h>
-#include <algine/core/RenderbufferCreator.h>
+#include <algine/core/texture/Texture2DBuilder.h>
+#include <algine/core/texture/TextureCubeBuilder.h>
+#include <algine/core/RenderbufferBuilder.h>
 #include <algine/core/OutputList.h>
 #include <algine/core/FramebufferPtr.h>
 
@@ -12,7 +12,7 @@
 #include <map>
 
 namespace algine {
-class FramebufferCreator: public Creator {
+class FramebufferBuilder: public Builder {
 public:
     using Name = std::string;
 
@@ -21,13 +21,13 @@ public:
         using type = T;
         std::map<Attachment, std::variant<T, Name>> value;
 
-        inline void addCreator(const T &p1, Attachment attachment) { value[attachment] = p1; }
+        inline void addBuilder(const T &p1, Attachment attachment) { value[attachment] = p1; }
         inline void addName(const std::string &p1, Attachment attachment) { value[attachment] = Name {p1}; }
     };
 
-    using RenderbufferAttachments = Attachments<RenderbufferCreator>;
-    using Texture2DAttachments = Attachments<Texture2DCreator>;
-    using TextureCubeAttachments = Attachments<TextureCubeCreator>;
+    using RenderbufferAttachments = Attachments<RenderbufferBuilder>;
+    using Texture2DAttachments = Attachments<Texture2DBuilder>;
+    using TextureCubeAttachments = Attachments<TextureCubeBuilder>;
 
 public:
     void setOutputLists(const std::vector<OutputList> &lists);
@@ -52,4 +52,4 @@ private:
 };
 }
 
-#endif //ALGINE_FRAMEBUFFERCREATOR_H
+#endif //ALGINE_FRAMEBUFFERBUILDER_H

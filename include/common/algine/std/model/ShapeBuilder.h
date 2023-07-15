@@ -1,17 +1,17 @@
-#ifndef ALGINE_SHAPECREATOR_H
-#define ALGINE_SHAPECREATOR_H
+#ifndef ALGINE_SHAPEBUILDER_H
+#define ALGINE_SHAPEBUILDER_H
 
 #include <algine/std/model/ShapePtr.h>
 #include <algine/std/model/Shape.h>
 #include <algine/std/AMTLManager.h>
 
-#include <algine/core/Creator.h>
+#include <algine/core/Builder.h>
 
 struct aiMesh;
 struct aiScene;
 
 namespace algine {
-class ShapeCreator: public Creator {
+class ShapeBuilder: public Builder {
 public:
     enum class Param {
         Triangulate,
@@ -31,7 +31,7 @@ public:
     };
 
 public:
-    ShapeCreator();
+    ShapeBuilder();
 
     void addParam(Param param);
     void addParams(const std::vector<Param> &params);
@@ -113,4 +113,4 @@ private:
 };
 }
 
-#endif //ALGINE_SHAPECREATOR_H
+#endif //ALGINE_SHAPEBUILDER_H

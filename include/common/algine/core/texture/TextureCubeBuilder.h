@@ -1,14 +1,14 @@
 #ifndef ALGINE_TEXTURECUBECREATOR_H
 #define ALGINE_TEXTURECUBECREATOR_H
 
-#include <algine/core/texture/TextureCreator.h>
+#include <algine/core/texture/TextureBuilder.h>
 #include <algine/core/texture/TextureCubePtr.h>
 #include <algine/core/texture/TextureCube.h>
 
 namespace algine {
-class TextureCubeCreator: public TextureCreator {
+class TextureCubeBuilder: public TextureBuilder {
 public:
-    TextureCubeCreator();
+    TextureCubeBuilder();
 
     void setPath(std::string_view path, TextureCube::Face face);
     const std::string& getPath(TextureCube::Face face) const;

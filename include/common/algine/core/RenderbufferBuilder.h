@@ -1,11 +1,11 @@
-#ifndef ALGINE_RENDERBUFFERCREATOR_H
-#define ALGINE_RENDERBUFFERCREATOR_H
+#ifndef ALGINE_RENDERBUFFERBUILDER_H
+#define ALGINE_RENDERBUFFERBUILDER_H
 
-#include <algine/core/ImageCreator.h>
+#include <algine/core/ImageBuilder.h>
 #include <algine/core/RenderbufferPtr.h>
 
 namespace algine {
-class RenderbufferCreator: public ImageCreator {
+class RenderbufferBuilder: public ImageBuilder {
 public:
     RenderbufferPtr get();
     RenderbufferPtr create();
@@ -15,4 +15,4 @@ protected:
 };
 }
 
-#endif //ALGINE_RENDERBUFFERCREATOR_H
+#endif //ALGINE_RENDERBUFFERBUILDER_H

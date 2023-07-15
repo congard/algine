@@ -1,6 +1,5 @@
-#include <algine/std/model/ModelCreator.h>
+#include <algine/std/model/ModelBuilder.h>
 #include <algine/std/model/Model.h>
-#include <algine/core/PtrMaker.h>
 #include <algine/core/TypeRegistry.h>
 
 #include <tuple>
@@ -15,136 +14,136 @@ namespace Default {
 constexpr auto ClassName = "Model";
 }
 
-ModelCreator::AnimationInfo::AnimationInfo(std::string name)
+ModelBuilder::AnimationInfo::AnimationInfo(std::string name)
     : m_name(std::move(name)),
       m_index(None) {}
 
-ModelCreator::AnimationInfo::AnimationInfo(Index index)
+ModelBuilder::AnimationInfo::AnimationInfo(Index index)
     : m_index(index) {}
 
-ModelCreator::AnimationInfo::AnimationInfo()
+ModelBuilder::AnimationInfo::AnimationInfo()
     : m_index(None) {}
 
-const std::string &ModelCreator::AnimationInfo::getName() const {
+const std::string& ModelBuilder::AnimationInfo::getName() const {
     return m_name;
 }
 
-Index ModelCreator::AnimationInfo::getIndex() const {
+Index ModelBuilder::AnimationInfo::getIndex() const {
     return m_index;
 }
 
-bool ModelCreator::AnimationInfo::hasName() const {
+bool ModelBuilder::AnimationInfo::hasName() const {
     return !m_name.empty();
 }
 
-bool ModelCreator::AnimationInfo::hasIndex() const {
+bool ModelBuilder::AnimationInfo::hasIndex() const {
     return m_index != None;
 }
 
-bool ModelCreator::AnimationInfo::operator<(const AnimationInfo &rhs) const {
+bool ModelBuilder::AnimationInfo::operator<(const AnimationInfo &rhs) const {
     return tie(m_name, m_index) < tie(rhs.m_name, rhs.m_index);
 }
 
-ModelCreator::ModelCreator()
+ModelBuilder::ModelBuilder()
     : m_className(Default::ClassName),
       m_rotatorType(Rotator::Type::Euler),
       m_pos(),
       m_rotate(),
       m_scale(1.0f) {}
 
-void ModelCreator::activateAnimation(const string &name) {
+void ModelBuilder::activateAnimation(const string &name) {
     if (m_activatedAnimations.find(AnimationInfo(AnimationInfo::All)) != m_activatedAnimations.end())
         m_activatedAnimations.clear();
     m_activatedAnimations.insert(AnimationInfo(name));
 }
 
-void ModelCreator::activateAnimation(Index index) {
+void ModelBuilder::activateAnimation(Index index) {
     if (index == AnimationInfo::All || m_activatedAnimations.find(AnimationInfo(AnimationInfo::All)) != m_activatedAnimations.end())
         m_activatedAnimations.clear();
     m_activatedAnimations.insert(AnimationInfo(index));
 }
 
-void ModelCreator::setClassName(const string &name) {
+void ModelBuilder::setClassName(const string &name) {
     m_className = name;
 }
 
-void ModelCreator::setShapeName(const string &name) {
+void ModelBuilder::setShapeName(const string &name) {
     m_shapeName = name;
 }
 
-void ModelCreator::setShape(const ShapeCreator &creator) {
-    m_shape = creator;
+void ModelBuilder::setShape(const ShapeBuilder &builder) {
+    m_shape = builder;
 }
 
-void ModelCreator::setActiveAnimationName(const string &name) {
+void ModelBuilder::setActiveAnimationName(const string &name) {
     m_activeAnimation = AnimationInfo(name);
 }
 
-void ModelCreator::setActiveAnimationIndex(Index index) {
+void ModelBuilder::setActiveAnimationIndex(Index index) {
     m_activeAnimation = AnimationInfo(index);
 }
 
-void ModelCreator::setActivatedAnimations(const set<AnimationInfo> &animations) {
+void ModelBuilder::setActivatedAnimations(const set<AnimationInfo> &animations) {
     m_activatedAnimations = animations;
 }
 
-void ModelCreator::setRotatorType(Rotator::Type type) {
+void ModelBuilder::setRotatorType(Rotator::Type type) {
     m_rotatorType = type;
 }
 
-void ModelCreator::setPos(const vec3 &pos) {
+void ModelBuilder::setPos(const vec3 &pos) {
     m_pos = pos;
 }
 
-void ModelCreator::setRotate(const vec3 &rotate) {
+void ModelBuilder::setRotate(const vec3 &rotate) {
     m_rotate = rotate;
 }
 
-void ModelCreator::setScale(const vec3 &scale) {
+void ModelBuilder::setScale(const vec3 &scale) {
     m_scale = scale;
 }
 
-const string& ModelCreator::getClassName() const {
+const string& ModelBuilder::getClassName() const {
     return m_className;
 }
 
-const string &ModelCreator::getShapeName() const {
+const string &ModelBuilder::getShapeName() const {
     return m_shapeName;
 }
 
-const ShapeCreator& ModelCreator::getShape() const {
+const ShapeBuilder& ModelBuilder::getShape() const {
     return m_shape;
 }
 
-const ModelCreator::AnimationInfo& ModelCreator::getActiveAnimation() const {
+const ModelBuilder::AnimationInfo& ModelBuilder::getActiveAnimation() const {
     return m_activeAnimation;
 }
 
-const set<ModelCreator::AnimationInfo>& ModelCreator::getActivatedAnimations() const {
+const set<ModelBuilder::AnimationInfo>& ModelBuilder::getActivatedAnimations() const {
     return m_activatedAnimations;
 }
 
-Rotator::Type ModelCreator::getRotatorType() const {
+Rotator::Type ModelBuilder::getRotatorType() const {
     return m_rotatorType;
 }
 
-const vec3& ModelCreator::getPos() const {
+const vec3& ModelBuilder::getPos() const {
     return m_pos;
 }
 
-const vec3& ModelCreator::getRotate() const {
+const vec3& ModelBuilder::getRotate() const {
     return m_rotate;
 }
 
-const vec3& ModelCreator::getScale() const {
+const vec3& ModelBuilder::getScale() const {
     return m_scale;
 }
 
-ModelPtr ModelCreator::get() {
+ModelPtr ModelBuilder::get() {
     return internal::PublicObjectTools::getPtr<ModelPtr>(this);
 }
 
-ModelPtr ModelCreator::create() {
+ModelPtr ModelBuilder::create() {
     ModelPtr model(TypeRegistry::create<Model>(m_className));
     model->setRotatorType(m_rotatorType);
 
@@ -191,7 +190,7 @@ ModelPtr ModelCreator::create() {
     return model;
 }
 
-void ModelCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
-    exec_t<ModelCreator>(s, path, lua, tenv);
+void ModelBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<ModelBuilder>(s, path, lua, tenv);
 }
 }

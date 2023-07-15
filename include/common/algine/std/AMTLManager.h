@@ -23,7 +23,7 @@ protected:
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
 
 private:
-    void load(std::string_view s, bool path, Lua *lua = nullptr);
+    void load(std::string_view s, bool builder, Lua *lua = nullptr);
 
 private:
     std::vector<AMTLMaterialManager> m_materials;

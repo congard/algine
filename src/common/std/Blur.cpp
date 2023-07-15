@@ -1,6 +1,6 @@
 #include <algine/std/Blur.h>
 
-#include <algine/core/shader/ShaderCreator.h>
+#include <algine/core/shader/ShaderBuilder.h>
 #include <algine/core/PtrMaker.h>
 #include <algine/core/Engine.h>
 
@@ -200,10 +200,10 @@ pair<ShaderProgramPtr, ShaderProgramPtr> Blur::getPingPongShaders(uint kernelRad
     ShaderPtr fragmentPing;
     ShaderPtr fragmentPong;
 
-    ShaderCreator fragmentCreator(Shader::Type::Fragment);
-    fragmentCreator.setPath("@algine/Blur.fs.glsl");
-    fragmentCreator.define(Settings::KernelRadius, linearSampling ? (kernelRadius / 2 + 1) : kernelRadius);
-    fragmentCreator.define(Settings::OutputType, [&]() {
+    ShaderBuilder fragmentBuilder(Shader::Type::Fragment);
+    fragmentBuilder.setPath("@algine/Blur.fs.glsl");
+    fragmentBuilder.define(Settings::KernelRadius, linearSampling ? (kernelRadius / 2 + 1) : kernelRadius);
+    fragmentBuilder.define(Settings::OutputType, [&]() {
         switch (blurComponent.size()) {
             case 1: return "float";
             case 2: return "vec2";
@@ -212,14 +212,14 @@ pair<ShaderProgramPtr, ShaderProgramPtr> Blur::getPingPongShaders(uint kernelRad
             default: throw invalid_argument("Must be: 1 <= blurComponent.size() <= 4");
         }
     }());
-    fragmentCreator.define(Settings::TexComponent, blurComponent);
+    fragmentBuilder.define(Settings::TexComponent, blurComponent);
 
-    fragmentCreator.define(Settings::Horizontal);
-    fragmentPing = fragmentCreator.create();
+    fragmentBuilder.define(Settings::Horizontal);
+    fragmentPing = fragmentBuilder.create();
 
-    fragmentCreator.removeDefinition(Settings::Horizontal);
-    fragmentCreator.define(Settings::Vertical);
-    fragmentPong = fragmentCreator.create();
+    fragmentBuilder.removeDefinition(Settings::Horizontal);
+    fragmentBuilder.define(Settings::Vertical);
+    fragmentPong = fragmentBuilder.create();
 
     ShaderProgramPtr ping = PtrMaker::make();
     ping->attachShader(*vertex);

@@ -1,4 +1,4 @@
-#include <algine/core/FramebufferCreator.h>
+#include <algine/core/FramebufferBuilder.h>
 #include <algine/core/Framebuffer.h>
 #include <algine/core/PtrMaker.h>
 
@@ -8,31 +8,31 @@ using namespace std;
 using namespace algine::internal;
 
 namespace algine {
-void FramebufferCreator::setOutputLists(const vector<OutputList> &lists) {
+void FramebufferBuilder::setOutputLists(const vector<OutputList> &lists) {
     m_outputLists = lists;
 }
 
-void FramebufferCreator::addOutputList(const OutputList &list) {
+void FramebufferBuilder::addOutputList(const OutputList &list) {
     m_outputLists.emplace_back(list);
 }
 
-const vector<OutputList>& FramebufferCreator::getOutputLists() const {
+const vector<OutputList>& FramebufferBuilder::getOutputLists() const {
     return m_outputLists;
 }
 
-FramebufferCreator::RenderbufferAttachments& FramebufferCreator::renderbufferAttachments() {
+FramebufferBuilder::RenderbufferAttachments& FramebufferBuilder::renderbufferAttachments() {
     return m_renderbufferAttachments;
 }
 
-FramebufferCreator::Texture2DAttachments& FramebufferCreator::texture2DAttachments() {
+FramebufferBuilder::Texture2DAttachments& FramebufferBuilder::texture2DAttachments() {
     return m_texture2DAttachments;
 }
 
-FramebufferCreator::TextureCubeAttachments& FramebufferCreator::textureCubeAttachments() {
+FramebufferBuilder::TextureCubeAttachments& FramebufferBuilder::textureCubeAttachments() {
     return m_textureCubeAttachments;
 }
 
-FramebufferPtr FramebufferCreator::get() {
+FramebufferPtr FramebufferBuilder::get() {
     return PublicObjectTools::getPtr<FramebufferPtr>(this);
 }
 
@@ -43,7 +43,7 @@ struct type_holder {
 
 #define type_holder_get(holder) typename decltype(holder)::type
 
-FramebufferPtr FramebufferCreator::create() {
+FramebufferPtr FramebufferBuilder::create() {
     FramebufferPtr framebuffer = PtrMaker::make();
     framebuffer->setName(m_name);
 
@@ -80,7 +80,7 @@ FramebufferPtr FramebufferCreator::create() {
             attach(ptr, attachment);
         };
 
-        // attach using creators, paths and names
+        // attach using builders, paths and names
 
         using T = typename std::remove_reference_t<decltype(attachments)>::type;
 
@@ -89,9 +89,9 @@ FramebufferPtr FramebufferCreator::create() {
 
             if (auto name = std::get_if<Name>(&v); name) {
                 attachByName(*name, p.first, type);
-            } else if (auto creator = std::get_if<T>(&v); creator) {
-                creator->setIOSystem(io());
-                attach(creator->get(), p.first);
+            } else if (auto builder = std::get_if<T>(&v); builder) {
+                builder->setIOSystem(io());
+                attach(builder->get(), p.first);
             }
         }
     };
@@ -110,7 +110,7 @@ FramebufferPtr FramebufferCreator::create() {
     return framebuffer;
 }
 
-void FramebufferCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
-    exec_t<FramebufferCreator>(s, path, lua, tenv);
+void FramebufferBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<FramebufferBuilder>(s, path, lua, tenv);
 }
 }

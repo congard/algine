@@ -1,13 +1,13 @@
-#ifndef ALGINE_TEXTURE2DCREATOR_H
-#define ALGINE_TEXTURE2DCREATOR_H
+#ifndef ALGINE_TEXTURE2DBUILDER_H
+#define ALGINE_TEXTURE2DBUILDER_H
 
-#include <algine/core/texture/TextureCreator.h>
+#include <algine/core/texture/TextureBuilder.h>
 #include <algine/core/texture/Texture2DPtr.h>
 
 namespace algine {
-class Texture2DCreator: public TextureCreator {
+class Texture2DBuilder: public TextureBuilder {
 public:
-    Texture2DCreator();
+    Texture2DBuilder();
 
     void setPath(std::string_view path);
     const std::string& getPath() const;
@@ -23,4 +23,4 @@ private:
 };
 }
 
-#endif //ALGINE_TEXTURE2DCREATOR_H
+#endif //ALGINE_TEXTURE2DBUILDER_H

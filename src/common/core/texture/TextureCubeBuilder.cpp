@@ -1,4 +1,4 @@
-#include <algine/core/texture/TextureCubeCreator.h>
+#include <algine/core/texture/TextureCubeBuilder.h>
 
 #include <tulz/Path.h>
 
@@ -9,34 +9,34 @@ using namespace tulz;
 using namespace algine::internal;
 
 namespace algine {
-TextureCubeCreator::TextureCubeCreator() {
-    m_type = TextureCreator::Type::TextureCube;
+TextureCubeBuilder::TextureCubeBuilder() {
+    m_type = TextureBuilder::Type::TextureCube;
     m_defaultParams = TextureCube::defaultParams();
 }
 
-void TextureCubeCreator::setPath(std::string_view path, TextureCube::Face face) {
+void TextureCubeBuilder::setPath(std::string_view path, TextureCube::Face face) {
     m_paths[face] = path;
 }
 
-const std::string& TextureCubeCreator::getPath(TextureCube::Face face) const {
+const std::string& TextureCubeBuilder::getPath(TextureCube::Face face) const {
     return m_paths.at(face);
 }
 
-void TextureCubeCreator::setPaths(const map<TextureCube::Face, string> &paths) {
+void TextureCubeBuilder::setPaths(const map<TextureCube::Face, string> &paths) {
     m_paths = paths;
 }
 
-const map<TextureCube::Face, string>& TextureCubeCreator::getPaths() const {
+const map<TextureCube::Face, string>& TextureCubeBuilder::getPaths() const {
     return m_paths;
 }
 
-TextureCubePtr TextureCubeCreator::get() {
+TextureCubePtr TextureCubeBuilder::get() {
     return PublicObjectTools::getPtr<TextureCubePtr>(this);
 }
 
-TextureCubePtr TextureCubeCreator::create() {
-    if (m_type != TextureCreator::Type::TextureCube)
-        throw runtime_error("Invalid texture type. Use a different creator");
+TextureCubePtr TextureCubeBuilder::create() {
+    if (m_type != TextureBuilder::Type::TextureCube)
+        throw runtime_error("Invalid texture type. Use a different builder");
 
     TextureCubePtr texture = make_shared<TextureCube>();
     texture->setName(m_name);
@@ -66,7 +66,7 @@ TextureCubePtr TextureCubeCreator::create() {
     return texture;
 }
 
-void TextureCubeCreator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
-    exec_t<TextureCubeCreator>(s, path, lua, tenv);
+void TextureCubeBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    exec_t<TextureCubeBuilder>(s, path, lua, tenv);
 }
 }
