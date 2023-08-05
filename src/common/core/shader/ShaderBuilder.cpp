@@ -7,14 +7,12 @@
 
 #include <stdexcept>
 
-#include "internal/PublicObjectTools.h"
 #include "GLSLModules.h"
 #include "GLSLShaders.h"
 
 using namespace std;
 using namespace tulz;
 using namespace tulz::StringUtils;
-using namespace algine::internal;
 
 // Algine Preprocessor
 namespace ALPKeywords {
@@ -195,18 +193,12 @@ const string& ShaderBuilder::makeGenerated() {
     return getGenerated();
 }
 
-ShaderPtr ShaderBuilder::get() {
-    return PublicObjectTools::getPtr<ShaderPtr>(this);
-}
-
-ShaderPtr ShaderBuilder::create() {
+Object* ShaderBuilder::createImpl() {
     generate();
 
-    ShaderPtr shader = make_shared<Shader>(m_type);
+    auto shader = new Shader(m_type, m_parent);
     shader->fromSource(m_gen);
     shader->setName(m_name);
-
-    PublicObjectTools::postCreateAccessOp("Shader", this, shader);
 
     return shader;
 }

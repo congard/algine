@@ -2,10 +2,7 @@
 
 #include <iostream>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
-using namespace algine::internal;
 
 namespace algine {
 void ShaderProgramBuilder::setBuilders(const std::vector<ShaderBuilder> &shaders) {
@@ -32,42 +29,28 @@ const vector<string>& ShaderProgramBuilder::getShaderNames() const {
     return m_shaderNames;
 }
 
-ShaderProgramPtr ShaderProgramBuilder::get() {
-    return PublicObjectTools::getPtr<ShaderProgramPtr>(this);
-}
-
-ShaderProgramPtr ShaderProgramBuilder::create() {
-    ShaderProgramPtr program = make_shared<ShaderProgram>();
+Object* ShaderProgramBuilder::createImpl() {
+    auto program = new ShaderProgram(getActualParent());
     program->setName(m_name);
 
     auto processMixedShader = [&](ShaderBuilder &builder) {
-        if (builder.getAccess() == ShaderBuilder::Access::Public) {
-            // note that if Shader public, then ShaderProgram
-            // level definitions will not be applied
+        // Since ShaderProgram has its own definitions and Shader has its own,
+        // simply using the name is not sufficient to find a shader. Therefore,
+        // a new shader will be created as a child of the current shader program.
 
-            auto publicShader = Shader::byName(builder.getName());
+        // backup Shader definitions
+        auto shaderDefs = builder.getDefinitions();
 
-            if (publicShader != nullptr) {
-                // if Shader already loaded, just use it
-                program->attachShader(*publicShader);
-            } else {
-                // otherwise create it
-                auto shader = builder.create();
-                program->attachShader(*shader);
-            }
-        } else {
-            // backup Shader level definitions
-            auto shaderDefs = builder.getDefinitions();
+        // append ShaderProgram definitions
+        builder.appendDefinitions(m_definitions);
 
-            // append ShaderProgram level definitions
-            builder.appendDefinitions(m_definitions);
+        builder.setParent(program);
 
-            auto shader = builder.create();
-            program->attachShader(*shader);
+        auto shader = builder.create();
+        program->attachShader(*shader);
 
-            // restore Shader level definitions
-            builder.setDefinitions(shaderDefs);
-        }
+        // restore Shader definitions
+        builder.setDefinitions(shaderDefs);
     };
 
     for (auto &builder : m_shaders) {
@@ -76,7 +59,7 @@ ShaderProgramPtr ShaderProgramBuilder::create() {
     }
 
     for (auto &name : m_shaderNames) {
-        auto shader = Shader::byName(name);
+        auto shader = getActualParent()->findChild<Shader*>(name, Object::FindOption::DirectThisAndScene);
 
         if (shader == nullptr)
             throw runtime_error("Public Shader '" + name + "' does not exist");
@@ -85,8 +68,6 @@ ShaderProgramPtr ShaderProgramBuilder::create() {
     }
 
     program->link();
-
-    PublicObjectTools::postCreateAccessOp("ShaderProgram", this, program);
 
     return program;
 }

@@ -2,7 +2,6 @@
 #define ALGINE_SHADERBUILDER_H
 
 #include <algine/core/shader/ShaderDefinitionGenerator.h>
-#include <algine/core/shader/ShaderPtr.h>
 #include <algine/core/shader/Shader.h>
 #include <algine/core/Builder.h>
 #include <algine/types.h>
@@ -16,6 +15,8 @@ class Path;
 
 namespace algine {
 class ShaderBuilder: public ShaderDefinitionGenerator, public Builder {
+    AL_BUILDER(Shader)
+
 public:
     ShaderBuilder();
     ShaderBuilder(Shader::Type type, const std::string &path);
@@ -43,10 +44,8 @@ public:
     const std::string& getGenerated() const;
     const std::string& makeGenerated();
 
-    ShaderPtr get();
-    ShaderPtr create();
-
 protected:
+    Object* createImpl() override;
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
 
 public:

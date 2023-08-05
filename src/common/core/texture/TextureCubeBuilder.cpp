@@ -2,11 +2,8 @@
 
 #include <tulz/Path.h>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
 using namespace tulz;
-using namespace algine::internal;
 
 namespace algine {
 TextureCubeBuilder::TextureCubeBuilder() {
@@ -30,15 +27,11 @@ const map<TextureCube::Face, string>& TextureCubeBuilder::getPaths() const {
     return m_paths;
 }
 
-TextureCubePtr TextureCubeBuilder::get() {
-    return PublicObjectTools::getPtr<TextureCubePtr>(this);
-}
-
-TextureCubePtr TextureCubeBuilder::create() {
+Object* TextureCubeBuilder::createImpl() {
     if (m_type != TextureBuilder::Type::TextureCube)
         throw runtime_error("Invalid texture type. Use a different builder");
 
-    TextureCubePtr texture = make_shared<TextureCube>();
+    auto texture = new TextureCube(getActualParent());
     texture->setName(m_name);
     texture->setFormat(m_format);
 
@@ -60,8 +53,6 @@ TextureCubePtr TextureCubeBuilder::create() {
     texture->setParams(m_params.empty() ? m_defaultParams : m_params);
 
     texture->unbind();
-
-    PublicObjectTools::postCreateAccessOp("TextureCube", this, texture);
 
     return texture;
 }

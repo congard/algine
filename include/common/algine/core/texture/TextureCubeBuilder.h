@@ -2,11 +2,12 @@
 #define ALGINE_TEXTURECUBECREATOR_H
 
 #include <algine/core/texture/TextureBuilder.h>
-#include <algine/core/texture/TextureCubePtr.h>
 #include <algine/core/texture/TextureCube.h>
 
 namespace algine {
 class TextureCubeBuilder: public TextureBuilder {
+    AL_BUILDER(TextureCube)
+
 public:
     TextureCubeBuilder();
 
@@ -16,10 +17,8 @@ public:
     void setPaths(const std::map<TextureCube::Face, std::string> &paths);
     const std::map<TextureCube::Face, std::string>& getPaths() const;
 
-    TextureCubePtr get();
-    TextureCubePtr create();
-
 protected:
+    Object* createImpl() override;
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
 
 private:

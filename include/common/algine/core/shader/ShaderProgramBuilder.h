@@ -7,6 +7,8 @@
 
 namespace algine {
 class ShaderProgramBuilder: public ShaderDefinitionGenerator, public Builder {
+    AL_BUILDER(ShaderProgram)
+
 public:
     void setBuilders(const std::vector<ShaderBuilder> &shaders);
     void addBuilder(const ShaderBuilder &builder);
@@ -16,10 +18,8 @@ public:
     void addShaderName(const std::string &name);
     const std::vector<std::string>& getShaderNames() const;
 
-    ShaderProgramPtr get();
-    ShaderProgramPtr create();
-
 protected:
+    Object* createImpl() override;
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *env) override;
 
 private:

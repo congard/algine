@@ -3,11 +3,8 @@
 
 #include <tulz/Path.h>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
 using namespace tulz;
-using namespace algine::internal;
 
 namespace algine {
 Texture2DBuilder::Texture2DBuilder() {
@@ -23,15 +20,11 @@ const std::string& Texture2DBuilder::getPath() const {
     return m_path;
 }
 
-Texture2DPtr Texture2DBuilder::get() {
-    return PublicObjectTools::getPtr<Texture2DPtr>(this);
-}
-
-Texture2DPtr Texture2DBuilder::create() {
+Object* Texture2DBuilder::createImpl() {
     if (m_type != TextureBuilder::Type::Texture2D)
         throw runtime_error("Invalid texture type. Use a different builder");
 
-    Texture2DPtr texture = make_shared<Texture2D>();
+    auto texture = new Texture2D(getActualParent());
     texture->setName(m_name);
     texture->setFormat(m_format);
 
@@ -52,8 +45,6 @@ Texture2DPtr Texture2DBuilder::create() {
     texture->setParams(m_params.empty() ? m_defaultParams : m_params);
 
     texture->unbind();
-
-    PublicObjectTools::postCreateAccessOp("Texture2D", this, texture);
 
     return texture;
 }

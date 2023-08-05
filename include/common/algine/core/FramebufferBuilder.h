@@ -5,7 +5,7 @@
 #include <algine/core/texture/TextureCubeBuilder.h>
 #include <algine/core/RenderbufferBuilder.h>
 #include <algine/core/OutputList.h>
-#include <algine/core/FramebufferPtr.h>
+#include <algine/core/Framebuffer.h>
 
 #include <variant>
 #include <string>
@@ -13,6 +13,8 @@
 
 namespace algine {
 class FramebufferBuilder: public Builder {
+    AL_BUILDER(Framebuffer)
+
 public:
     using Name = std::string;
 
@@ -38,10 +40,8 @@ public:
     Texture2DAttachments& texture2DAttachments();
     TextureCubeAttachments& textureCubeAttachments();
 
-    FramebufferPtr get();
-    FramebufferPtr create();
-
 protected:
+    Object* createImpl() override;
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
 
 private:

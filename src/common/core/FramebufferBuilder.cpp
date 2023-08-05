@@ -2,10 +2,7 @@
 #include <algine/core/Framebuffer.h>
 #include <algine/core/PtrMaker.h>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
-using namespace algine::internal;
 
 namespace algine {
 void FramebufferBuilder::setOutputLists(const vector<OutputList> &lists) {
@@ -32,10 +29,6 @@ FramebufferBuilder::TextureCubeAttachments& FramebufferBuilder::textureCubeAttac
     return m_textureCubeAttachments;
 }
 
-FramebufferPtr FramebufferBuilder::get() {
-    return PublicObjectTools::getPtr<FramebufferPtr>(this);
-}
-
 template<typename T>
 struct type_holder {
     using type = T;
@@ -43,8 +36,8 @@ struct type_holder {
 
 #define type_holder_get(holder) typename decltype(holder)::type
 
-FramebufferPtr FramebufferBuilder::create() {
-    FramebufferPtr framebuffer = PtrMaker::make();
+Object* FramebufferBuilder::createImpl() {
+    auto framebuffer = new Framebuffer(getActualParent());
     framebuffer->setName(m_name);
 
     // init output lists
@@ -53,10 +46,10 @@ FramebufferPtr FramebufferBuilder::create() {
     for (const auto & list : m_outputLists)
         framebuffer->addOutputList(list);
 
-    // attach objects
+    // attach objects; C++20 lambda template
     auto attachAll = [&](auto &attachments, auto type) {
-        auto attach = [&](const auto &ptr, Attachment attachment) {
-            using Type = PtrMaker::PtrType<remove_reference_t<decltype(ptr)>>;
+        auto attach = [&](auto ptr, Attachment attachment) {
+            using Type = remove_pointer_t<decltype(ptr)>;
 
             if constexpr (is_same_v<Type, Renderbuffer>) {
                 framebuffer->attachRenderbuffer(ptr, attachment);
@@ -70,11 +63,11 @@ FramebufferPtr FramebufferBuilder::create() {
         auto attachByName = [&](const string &name, Attachment attachment, auto objType) {
             using Type = type_holder_get(objType);
 
-            // try to find object by name
-            auto ptr = Type::getByName(name);
+            // try to find an object by name
+            auto ptr = getByName<Type*>(name);
 
             if (ptr == nullptr)
-                throw runtime_error("Public Object '" + name + "' does not exist");
+                throw runtime_error(Object::getTypeName<Type>() + " '" + name + "' does not exist");
 
             // attach object
             attach(ptr, attachment);
@@ -104,8 +97,6 @@ FramebufferPtr FramebufferBuilder::create() {
 
     framebuffer->update();
     framebuffer->unbind();
-
-    PublicObjectTools::postCreateAccessOp("Framebuffer", this, framebuffer);
 
     return framebuffer;
 }
