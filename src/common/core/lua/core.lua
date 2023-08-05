@@ -45,33 +45,40 @@ print = function(...)
     io.write('\n')
 end
 
+--- Module / type can be loaded in 2 ways:
+---   require("algine:ModuleName")  for modules
+---   require("algine::TypeName")   for types
+--- or
+---   loadModule("ModuleName")      for modules
+---   loadType("TypeName")          for types
+
 local loadedScripts = {}
+
+local function load_module(key, loader)
+    if loadedScripts[key] == nil then
+        -- loader can return nil, so we must be sure that loadedScripts[key] is not nil
+        loadedScripts[key] = {loader()}
+    end
+
+    return loadedScripts[key][1]
+end
 
 -- Custom require that uses IOSystem to load files
 require = function(name)
-    local function loadModule(key, loader)
-        if loadedScripts[key] == nil then
-            -- loader can return nil, so we must be sure that loadedScripts[key] is not nil
-            loadedScripts[key] = {loader()}
-        end
-
-        return loadedScripts[key][1]
-    end
-
     local algineStrLen = string.len("algine")
 
     if name:sub(1, algineStrLen) == "algine" then
         if name:sub(algineStrLen + 2, algineStrLen + 2) ~= ":" then  -- algine:module
-            return loadModule(name, function() algine_require_module(name:sub(algineStrLen + 2)) end)
+            return load_module(name, function() algine_require_module(name:sub(algineStrLen + 2)) end)
         else  -- algine::type
-            return loadModule(name, function() algine_require_type(name) end)
+            return load_module(name, function() algine_require_type(name:sub(algineStrLen + 3)) end)
         end
     else
         for path in string.gmatch(package.path, "[^;]+") do
             path = path:gsub("?", name)
 
             if state:exists(path) then
-                return loadModule(path, load(state:readStr(path)))
+                return load_module(path, load(state:readStr(path)))
             end
         end
 
@@ -79,4 +86,12 @@ require = function(name)
     end
 
     return nil
+end
+
+loadModule = function(name)
+    return load_module("algine:" .. name, function() algine_require_module(name) end)
+end
+
+loadType = function(name)
+    return load_module("algine::" .. name, function() algine_require_type(name) end)
 end

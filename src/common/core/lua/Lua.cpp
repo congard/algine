@@ -15,13 +15,18 @@
 namespace algine {
 Lua Lua::m_default;
 
-Lua::Locker::Locker(const std::unique_ptr<std::recursive_mutex> &mutex): m_mutex(mutex.get()) {
+decltype(Lua::m_typeLoaders) Lua::m_typeLoaders;
+
+Lua::Locker::Locker(const std::unique_ptr<std::recursive_mutex> &mutex)
+    : m_mutex(mutex.get())
+{
     if (m_mutex) {
         m_mutex->lock();
     }
 }
 
-Lua::Locker::Locker(const Lua *lua): Locker(lua ? lua->getMutex() : Lua::getDefault().getMutex()) {}
+Lua::Locker::Locker(const Lua *lua)
+    : Locker(lua ? lua->getMutex() : Lua::getDefault().getMutex()) {}
 
 Lua::Locker::~Locker() {
     if (m_mutex) {
@@ -34,10 +39,11 @@ void Lua::init() {
     m_lua = std::make_unique<sol::state>();
     m_lua->open_libraries();
 
-    addModuleLoader("core", [this](auto&, sol::global_table env) { registerUsertype(&env, AlgineCore()); });
-    addModuleLoader("std", [this](auto&, sol::global_table env) { registerUsertype(&env, AlgineStd()); });
-    addModuleLoader("glm", [this](auto&, sol::global_table env) { GLMLuaTypes::registerLuaUsertype(this, &env); });
-    addModuleLoader("tulz", [this](auto&, sol::global_table env) { TulzLuaTypes::registerLuaUsertype(this, &env); });
+    // TODO: move to static initializer lists
+    addModule("core", Module([this](auto &, sol::global_table env) { registerUsertype(&env, AlgineCore()); }));
+    addModule("std", Module([this](auto &, sol::global_table env) { registerUsertype(&env, AlgineStd()); }));
+    addModule("glm", Module([this](auto &, sol::global_table env) { GLMLuaTypes::registerLuaUsertype(this, &env); }));
+    addModule("tulz", Module([this](auto &, sol::global_table env) { TulzLuaTypes::registerLuaUsertype(this, &env); }));
 
     initEnvironment(getGlobalEnvironment());
 }
@@ -84,19 +90,31 @@ sol::global_table& Lua::getGlobalEnvironment() const {
     return m_lua->globals();
 }
 
-void Lua::addModuleLoader(std::string_view name, const ModuleLoader &loader) {
-    m_moduleLoaders[name.data()] = loader;
+void Lua::addModule(std::string_view name, const Module &module) {
+    m_modules[name.data()] = module;
 }
 
-void Lua::removeModuleLoader(std::string_view name) {
-    m_moduleLoaders.erase(name.data());
+Module& Lua::getModule(std::string_view name) {
+    if (auto it = m_modules.find(name.data()); it != m_modules.end()) {
+        return it->second;
+    } else {
+        return (m_modules[name.data()] = Module());
+    }
 }
 
-void Lua::loadModule(const ModuleArgs &args, const sol::environment &env) {
+bool Lua::hasModule(std::string_view name) {
+    return m_modules.find(name.data()) != m_modules.end();
+}
+
+void Lua::removeModule(std::string_view name) {
+    m_modules.erase(name.data());
+}
+
+void Lua::loadModule(const Module::Args &args, sol::environment &env) {
     auto &name = args.front();
 
-    if (auto it = m_moduleLoaders.find(name); it != m_moduleLoaders.end()) {
-        it->second(args, env);
+    if (auto it = m_modules.find(name); it != m_modules.end()) {
+        it->second.load(args, env);
     } else {
         throw std::runtime_error("Module " + name + " cannot be loaded: loader not found");
     }
@@ -176,7 +194,7 @@ void Lua::initEnvironment(sol::global_table &env) {
     env["isWindows"] = sol::readonly_property(sol::var(is_windows()));
 
     env["algine_require_module"] = [this](std::string_view moduleInfo, sol::this_environment tenv) {
-        ModuleArgs args;
+        Module::Args args;
         auto last = args.before_begin();
 
         size_t startPos = 0;
@@ -202,6 +220,7 @@ void Lua::initEnvironment(sol::global_table &env) {
             return [&]() { algine_lua::registerLuaUsertype<T>(table, this); };
         };
 
+        // TODO: move to static initializers
         std::map<std::string_view, std::function<void()>> customReg = {
             {"algine::PointI", typeReg(type_holder<PointI>())},
             {"algine::PointF", typeReg(type_holder<PointF>())},
@@ -211,8 +230,8 @@ void Lua::initEnvironment(sol::global_table &env) {
 
         if (auto it = customReg.find(type); it != customReg.end()) {
             it->second();
-        } else {
-            registerType(type, table, this, AlgineCore()) || registerType(type, table, this, AlgineStd());
+        } else if (!(registerType(type, table, this, AlgineCore()) || registerType(type, table, this, AlgineStd()))) {
+            m_typeLoaders[type.data()](*tenv.env);
         }
     };
 
@@ -236,5 +255,13 @@ sol::global_table& Lua::getEnv(Lua *lua, sol::global_table *env) {
 
 bool Lua::isRegistered(sol::global_table &env, std::string_view type) {
     return env[type].valid();
+}
+
+void Lua::addTypeLoader(std::string_view name, TypeLoader loader) {
+    m_typeLoaders[name.data()] = std::move(loader);
+}
+
+bool Lua::hasTypeLoader(std::string_view name) {
+    return m_typeLoaders.find(name.data()) != m_typeLoaders.end();
 }
 } // algine

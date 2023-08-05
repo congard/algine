@@ -2,6 +2,8 @@
 #define ALGINE_LUA_H
 
 #include <algine/core/io/IOProvider.h>
+#include <algine/core/lua/Module.h>
+
 #include <sol/state.hpp>
 
 #include <memory>
@@ -18,28 +20,9 @@ public:
     template<typename... Types>
     struct TypeList {};
 
-    class Locker {
-    public:
-        explicit Locker(const std::unique_ptr<std::recursive_mutex> &mutex);
-        explicit Locker(const Lua *lua);
-        ~Locker();
+    class Locker;
 
-        Locker(const Locker&) = delete;
-        Locker(Locker&&) = delete;
-        Locker& operator=(const Locker&) = delete;
-        Locker& operator=(Locker&&) = delete;
-
-    private:
-        std::recursive_mutex *m_mutex;
-    };
-
-    using ModuleArgs = std::forward_list<std::string>;
-
-    /**
-     * @param args module arguments, i.e. module-name:arg1:arg2:...:argn
-     * @param env environment
-     */
-    using ModuleLoader = std::function<void(const ModuleArgs &args, const sol::environment &env)>;
+    using TypeLoader = std::function<void(sol::environment &env)>;
 
 public:
     void init();
@@ -56,19 +39,38 @@ public:
     sol::global_table& getGlobalEnvironment() const;
 
     /**
-     * Adds module loader
+     * Adds module
      * <br>Module can be loaded from Lua with
      * <br><code>require("algine:module-name")</code>
      * @param name module-name
-     * @param loader
+     * @param module
+     * @throws std::runtime_error if a module with
+     * the same name already exists
      */
-    void addModuleLoader(std::string_view name, const ModuleLoader &loader);
+    void addModule(std::string_view name, const Module &module);
 
     /**
-     * Removes module loader
+     * Returns a module by the provided name
+     * @note if such a module doesn't exist, it will be created
+     * @param name
+     * @return
+     */
+    Module& getModule(std::string_view name);
+
+    /**
+     * @param name Module name
+     * @return true, if such a module exists, false otherwise
+     */
+    bool hasModule(std::string_view name);
+
+    /**
+     * Removes module
      * @param name module-name
      */
-    void removeModuleLoader(std::string_view name);
+    void removeModule(std::string_view name);
+
+    static void addTypeLoader(std::string_view name, TypeLoader loader);
+    static bool hasTypeLoader(std::string_view name);
 
     static sol::global_table& getEnv(Lua *lua, sol::global_table *env = nullptr);
     static bool isRegistered(sol::global_table &env, std::string_view type);
@@ -98,15 +100,16 @@ public:
 
 private:
     void initEnvironment(sol::global_table &env);
-    void loadModule(const ModuleArgs &args, const sol::environment &env);
+    void loadModule(const Module::Args &args, sol::environment &env);
 
 private:
     std::unique_ptr<sol::state> m_lua {nullptr};
     std::unique_ptr<std::recursive_mutex> m_mutex {nullptr};
-    std::map<std::string, ModuleLoader> m_moduleLoaders;
+    std::map<std::string, Module> m_modules;
 
 private:
     static Lua m_default;
+    static std::map<std::string, TypeLoader> m_typeLoaders;
 };
 
 template<typename T, typename G, typename S>
@@ -134,6 +137,21 @@ void Lua::registerUsertype(sol::global_table *env) {
         registerUsertype<Args...>(env);
     }
 }
+
+class Lua::Locker {
+public:
+    explicit Locker(const std::unique_ptr<std::recursive_mutex> &mutex);
+    explicit Locker(const Lua *lua);
+    ~Locker();
+
+    Locker(const Locker&) = delete;
+    Locker(Locker&&) = delete;
+    Locker& operator=(const Locker&) = delete;
+    Locker& operator=(Locker&&) = delete;
+
+private:
+    std::recursive_mutex *m_mutex;
+};
 } // algine
 
 #endif //ALGINE_LUA_H
