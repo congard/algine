@@ -61,6 +61,8 @@ function(solgen output)
     endfunction()
 
     set_if_empty(ALGINE_SOLGEN_INPUT_CORE
+        include/common/algine/core/Object.h
+
         include/common/algine/core/lua/Scriptable.h
 
         include/common/algine/core/font/Font.h
@@ -130,6 +132,7 @@ function(solgen output)
         include/common/algine/std/AMTLMaterialManager.h)
 
     set_if_empty(ALGINE_SOLGEN_CORE_CLASSES
+        Object
         Scriptable
         Font FontLibrary FontMetrics FontRenderer
         IOProvider
