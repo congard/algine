@@ -11,7 +11,7 @@ AL_CONTEXT_OBJECT(InputLayout) {
     AL_CONTEXT_OBJECT_IMPL(InputLayout)
 
 public:
-    InputLayout();
+    explicit InputLayout(Object *parent = defaultParent());
     ~InputLayout() override;
 
     void bind() const;

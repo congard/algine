@@ -1,14 +1,7 @@
 #include <algine/core/Renderbuffer.h>
-#include <algine/core/texture/Texture.h>
 #include <algine/gl.h>
 
-#include "internal/PublicObjectTools.h"
-
-using namespace algine::internal;
-
 namespace algine {
-vector<RenderbufferPtr> Renderbuffer::publicObjects;
-
 AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(Renderbuffer) {
     .obj = []() {
         auto renderbuffer = new Renderbuffer(std::false_type {});
@@ -17,7 +10,9 @@ AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(Renderbuffer) {
     }()
 };
 
-Renderbuffer::Renderbuffer() {
+Renderbuffer::Renderbuffer(Object *parent)
+    : ContextObject(parent)
+{
     glGenRenderbuffers(1, &m_id);
 }
 
@@ -68,13 +63,5 @@ uint Renderbuffer::getWidth() const {
 
 uint Renderbuffer::getHeight() const {
     return m_height;
-}
-
-RenderbufferPtr Renderbuffer::getByName(const string &name) {
-    return PublicObjectTools::getByName<RenderbufferPtr>(name);
-}
-
-Renderbuffer* Renderbuffer::byName(const string &name) {
-    return PublicObjectTools::byName<Renderbuffer>(name);
 }
 }

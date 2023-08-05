@@ -82,8 +82,8 @@ uint Buffer::getType() const {
     return m_target;
 }
 
-Buffer::Buffer(uint target)
-    : m_target(target)
+Buffer::Buffer(Object *parent, uint target)
+    : ContextObject(parent), m_target(target)
 {
     glGenBuffers(1, &m_id);
 }

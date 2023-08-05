@@ -8,7 +8,7 @@ class ArrayBuffer: public Buffer {
     AL_CONTEXT_OBJECT_IMPL(ArrayBuffer)
 
 public:
-    ArrayBuffer();
+    explicit ArrayBuffer(Object *parent = defaultParent());
 };
 }
 

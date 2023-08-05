@@ -1,7 +1,6 @@
 #ifndef ALGINE_SHADER_H
 #define ALGINE_SHADER_H
 
-#include <algine/core/shader/ShaderPtr.h>
 #include <algine/core/Object.h>
 #include <algine/templates.h>
 #include <algine/types.h>
@@ -20,22 +19,15 @@ public:
     };
 
 public:
-    explicit Shader(Type type); // calls create(type)
-    Shader();
-    ~Shader();
+    explicit Shader(Type type, Object *parent = defaultParent()); // calls create(type)
+    explicit Shader(Object *parent = defaultParent());
+    ~Shader() override;
 
     void create(Type type);
     void fromSource(const std::string &source);
     void fromFile(const std::string &path);
 
     uint getId() const;
-
-public:
-    static ShaderPtr getByName(std::string_view name);
-    static Shader* byName(std::string_view name);
-
-public:
-    static std::vector<ShaderPtr> publicObjects;
 
 private:
     uint m_id = 0;

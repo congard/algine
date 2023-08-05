@@ -2,14 +2,9 @@
 
 #include <map>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
-using namespace algine::internal;
 
 namespace algine {
-vector<TextureCubePtr> TextureCube::publicObjects;
-
 AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(TextureCube) {
     .obj = []() {
         auto tex = new TextureCube(std::false_type {});
@@ -19,8 +14,8 @@ AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(TextureCube) {
     }()
 };
 
-TextureCube::TextureCube()
-    : Texture(GL_TEXTURE_CUBE_MAP) {}
+TextureCube::TextureCube(Object *parent)
+    : Texture(GL_TEXTURE_CUBE_MAP, parent) {}
 
 void TextureCube::fromFile(Face face, const TextureFileInfo &fileInfo) {
     checkBinding();
@@ -69,12 +64,4 @@ uint TextureCube::getActualHeight() const {
 }
 
 #undef target
-
-TextureCubePtr TextureCube::getByName(const string &name) {
-    return PublicObjectTools::getByName<TextureCubePtr>(name);
-}
-
-TextureCube* TextureCube::byName(const string &name) {
-    return PublicObjectTools::byName<TextureCube>(name);
-}
 }

@@ -5,20 +5,18 @@
 #include <tulz/File.h>
 #include <iostream>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
 using namespace tulz;
-using namespace algine::internal;
 
 namespace algine {
-vector<ShaderPtr> Shader::publicObjects;
-
-Shader::Shader(Type type) {
+Shader::Shader(Type type, Object *parent)
+    : Object(parent)
+{
     create(type);
 }
 
-Shader::Shader() = default;
+Shader::Shader(Object *parent)
+    : Object(parent) {}
 
 Shader::~Shader() {
     glDeleteShader(m_id);
@@ -59,13 +57,5 @@ void Shader::fromFile(const string &path) {
 
 uint Shader::getId() const {
     return m_id;
-}
-
-ShaderPtr Shader::getByName(string_view name) {
-    return PublicObjectTools::getByName<ShaderPtr>(name);
-}
-
-Shader* Shader::byName(string_view name) {
-    return PublicObjectTools::byName<Shader>(name);
 }
 }

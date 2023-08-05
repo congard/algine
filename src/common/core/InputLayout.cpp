@@ -14,7 +14,9 @@ AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(InputLayout) {
     }()
 };
 
-InputLayout::InputLayout() {
+InputLayout::InputLayout(Object *parent)
+    : ContextObject(parent)
+{
     glGenVertexArrays(1, &m_id);
 }
 

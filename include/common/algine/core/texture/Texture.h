@@ -109,7 +109,7 @@ public:
     };
 
 public:
-    Texture();
+    explicit Texture(Object *parent = defaultParent());
     ~Texture() override;
 
     void bind() const;
@@ -160,7 +160,7 @@ protected:
     uint m_height = 512;
 
 protected:
-    explicit Texture(uint target);
+    explicit Texture(uint target, Object *parent);
     void texFromFile(uint target, const TextureFileInfo &info);
     static uint getTexParam(uint target, uint name);
 };

@@ -9,5 +9,5 @@ AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(algine::ArrayBuffer) {
     }()
 };
 
-algine::ArrayBuffer::ArrayBuffer()
-    : Buffer(Buffer::Array) {}
+algine::ArrayBuffer::ArrayBuffer(Object *parent)
+    : Buffer(parent, Buffer::Array) {}

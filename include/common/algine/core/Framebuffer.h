@@ -5,7 +5,6 @@
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/texture/TextureCube.h>
 #include <algine/core/texture/PixelData.h>
-#include <algine/core/FramebufferPtr.h>
 #include <algine/core/Renderbuffer.h>
 #include <algine/core/OutputList.h>
 
@@ -41,15 +40,15 @@ public:
     };
 
 public:
-    Framebuffer();
+    explicit Framebuffer(Object *parent = defaultParent());
     ~Framebuffer() override;
 
     void bind() const;
     void unbind() const;
 
-    void attachTexture(const Texture2DPtr &texture, Attachment attachment);
-    void attachTexture(const TextureCubePtr &texture, Attachment attachment);
-    void attachRenderbuffer(const RenderbufferPtr &renderbuffer, Attachment attachment);
+    void attachTexture(Texture2D *texture, Attachment attachment, bool takeOwnership = true);
+    void attachTexture(TextureCube *texture, Attachment attachment, bool takeOwnership = true);
+    void attachRenderbuffer(Renderbuffer *renderbuffer, Attachment attachment, bool takeOwnership = true);
 
     void resizeAttachments(uint width, uint height);
 
@@ -78,27 +77,20 @@ public:
 
     bool hasAttachment(Attachment attachment);
     AttachedObjectType getAttachedObjectType(Attachment attachment);
-    RenderbufferPtr& getAttachedRenderbuffer(Attachment attachment);
-    Texture2DPtr& getAttachedTexture2D(Attachment attachment);
-    TextureCubePtr& getAttachedTextureCube(Attachment attachment);
+    Renderbuffer* getAttachedRenderbuffer(Attachment attachment);
+    Texture2D* getAttachedTexture2D(Attachment attachment);
+    TextureCube* getAttachedTextureCube(Attachment attachment);
 
     static void setClearColor(float red, float green, float blue, float alpha = 1.0f);
     static void setClearDepth(float depth);
     static void setClearStencil(int s);
 
-public:
-    static FramebufferPtr getByName(const std::string &name);
-    static Framebuffer* byName(const std::string &name);
-
-public:
-    static std::vector<FramebufferPtr> publicObjects;
-
 private:
     uint m_activeList {0};
     std::vector<OutputList> m_outputLists {{}};
-    std::map<Attachment, RenderbufferPtr> m_renderbufferAttachments;
-    std::map<Attachment, Texture2DPtr> m_texture2DAttachments;
-    std::map<Attachment, TextureCubePtr> m_textureCubeAttachments;
+    std::map<Attachment, Renderbuffer*> m_renderbufferAttachments;
+    std::map<Attachment, Texture2D*> m_texture2DAttachments;
+    std::map<Attachment, TextureCube*> m_textureCubeAttachments;
 };
 }
 

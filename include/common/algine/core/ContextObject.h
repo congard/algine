@@ -9,7 +9,6 @@
     #include <algine/core/Context.h>
     #include <unordered_map>
     #include <mutex>
-    #include <cxxabi.h>
 
     #if ALGINE_SOP_LEVEL == 0
         #include <algine/core/log/Log.h>
@@ -38,8 +37,8 @@ public:
     }
 
 protected:
-    ContextObject() = default;
-    virtual ~ContextObject() = default;
+    explicit ContextObject(Object *parent = defaultParent()): Object(parent) {}
+    ~ContextObject() override = default;
 
 protected:
     uint m_id {0};
@@ -72,20 +71,7 @@ public:
 private:
     inline static struct {
         T *obj;
-        std::function<void(T*)> deleter = [](T *ptr) { delete ptr; };
     } m_default;
-
-    INLINE_STATIC_INITIALIZER({
-#ifdef ALGINE_SECURE_OPERATIONS
-        Context::addOnDestroyListener([](Context *context) {
-            m_bound.erase(context);
-        });
-#endif
-
-        Engine::addOnDestroyListener([]() {
-            m_default.deleter(m_default.obj);
-        });
-    })
 
 #ifdef ALGINE_SECURE_OPERATIONS
 public:
@@ -103,12 +89,8 @@ public:
         if (getBound() == self)
             return;
 
-        const auto dmg = abi::__cxa_demangle(typeid(T).name(), nullptr, nullptr, nullptr);
-        std::string name = dmg;
-        std::free(dmg);
-
         std::string message = "Non-bonded ";
-        message.append(name);
+        message.append(Object::getTypeName<T>());
         message.append(" (id " + std::to_string(self->getId()) + ") state change\n");
 
         throwError(message);
@@ -153,6 +135,12 @@ private:
         std::unordered_map<void*, const T*> value; // pair<native context, object>
         std::mutex mutex;
     } m_bound {};
+
+    INLINE_STATIC_INITIALIZER({
+        Context::addOnDestroyListener([](Context *context) {
+            m_bound.erase(context);
+        });
+    })
 #endif
 };
 } // algine
@@ -191,13 +179,21 @@ private: \
 public: \
     inline static __name* getDefault() { return algine::ContextObjectImpl<__name>::getDefault(); }
 
+// for listening context destruction
+#ifdef ALGINE_SECURE_OPERATIONS
+#define _AL_CONTEXT_OBJECT_SOP_INITIALIZER(__name) \
+template<> STATIC_INITIALIZER_DEF(algine::ContextObjectImpl<__name>)
+#else
+#define _AL_CONTEXT_OBJECT_SOP_INITIALIZER(__name)
+#endif
+
 /**
  * Every non-abstract context object must use this macro in
  * the source file, e.g.:
  * <pre>AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(MyContextObject) { .obj = new MyContextObject() }</pre>
  */
 #define AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(__name) \
-template<> STATIC_INITIALIZER_DEF(algine::ContextObjectImpl<__name>) \
+_AL_CONTEXT_OBJECT_SOP_INITIALIZER(__name) \
 template<> decltype(algine::ContextObjectImpl<__name>::m_default) algine::ContextObjectImpl<__name>::m_default
 
 #endif //ALGINE_CONTEXTOBJECT_H

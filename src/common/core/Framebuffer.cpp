@@ -1,15 +1,10 @@
 #include <algine/core/Framebuffer.h>
 #include <algine/gl.h>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
 using namespace tulz;
-using namespace algine::internal;
 
 namespace algine {
-vector<FramebufferPtr> Framebuffer::publicObjects;
-
 AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(Framebuffer) {
     .obj = []() {
         auto framebuffer = new Framebuffer(std::false_type {});
@@ -18,7 +13,9 @@ AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(Framebuffer) {
     }()
 };
 
-Framebuffer::Framebuffer() {
+Framebuffer::Framebuffer(Object *parent)
+    : ContextObject(parent)
+{
     glGenFramebuffers(1, &m_id);
 }
 
@@ -39,26 +36,35 @@ void Framebuffer::unbind() const {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::attachTexture(const Texture2DPtr &texture, Attachment attachment) {
+void Framebuffer::attachTexture(Texture2D *texture, Attachment attachment, bool takeOwnership) {
     checkBinding();
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->getId(), 0);
 
+    if (takeOwnership)
+        texture->setParent(this);
+
     m_texture2DAttachments[attachment] = texture;
 }
 
-void Framebuffer::attachTexture(const TextureCubePtr &texture, Attachment attachment) {
+void Framebuffer::attachTexture(TextureCube *texture, Attachment attachment, bool takeOwnership) {
     checkBinding();
 
     glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->getId(), 0);
 
+    if (takeOwnership)
+        texture->setParent(this);
+
     m_textureCubeAttachments[attachment] = texture;
 }
 
-void Framebuffer::attachRenderbuffer(const RenderbufferPtr &renderbuffer, Attachment attachment) {
+void Framebuffer::attachRenderbuffer(Renderbuffer *renderbuffer, Attachment attachment, bool takeOwnership) {
     checkBinding();
 
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderbuffer->getId());
+
+    if (takeOwnership)
+        renderbuffer->setParent(this);
 
     m_renderbufferAttachments[attachment] = renderbuffer;
 }
@@ -240,15 +246,15 @@ Framebuffer::AttachedObjectType Framebuffer::getAttachedObjectType(Attachment at
     return AttachedObjectType::None;
 }
 
-RenderbufferPtr& Framebuffer::getAttachedRenderbuffer(Attachment attachment) {
+Renderbuffer* Framebuffer::getAttachedRenderbuffer(Attachment attachment) {
     return m_renderbufferAttachments[attachment];
 }
 
-Texture2DPtr& Framebuffer::getAttachedTexture2D(Attachment attachment) {
+Texture2D* Framebuffer::getAttachedTexture2D(Attachment attachment) {
     return m_texture2DAttachments[attachment];
 }
 
-TextureCubePtr& Framebuffer::getAttachedTextureCube(Attachment attachment) {
+TextureCube* Framebuffer::getAttachedTextureCube(Attachment attachment) {
     return m_textureCubeAttachments[attachment];
 }
 
@@ -262,13 +268,5 @@ void Framebuffer::setClearDepth(const float depth) {
 
 void Framebuffer::setClearStencil(const int s) {
     glClearStencil(s);
-}
-
-FramebufferPtr Framebuffer::getByName(const string &name) {
-    return PublicObjectTools::getByName<FramebufferPtr>(name);
-}
-
-Framebuffer* Framebuffer::byName(const string &name) {
-    return PublicObjectTools::byName<Framebuffer>(name);
 }
 }

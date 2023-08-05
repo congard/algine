@@ -8,7 +8,7 @@ class IndexBuffer: public Buffer {
     AL_CONTEXT_OBJECT_IMPL(IndexBuffer)
 
 public:
-    IndexBuffer();
+    explicit IndexBuffer(Object *parent = defaultParent());
 };
 }
 

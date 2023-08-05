@@ -8,7 +8,7 @@ class UniformBuffer: public Buffer {
     AL_CONTEXT_OBJECT_IMPL(UniformBuffer)
 
 public:
-    UniformBuffer();
+    explicit UniformBuffer(Object *parent = defaultParent());
 
     static uint getOffsetAlignment();
 };

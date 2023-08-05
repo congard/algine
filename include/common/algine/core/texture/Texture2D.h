@@ -2,7 +2,6 @@
 #define ALGINE_TEXTURE2D_H
 
 #include <algine/core/texture/Texture.h>
-#include <algine/core/texture/Texture2DPtr.h>
 #include <algine/core/DataType.h>
 #include <algine/templates.h>
 #include <algine/types.h>
@@ -14,7 +13,7 @@ class Texture2D: public Texture {
     AL_CONTEXT_OBJECT_IMPL(Texture2D)
 
 public:
-    Texture2D();
+    explicit Texture2D(Object *parent = defaultParent());
 
     void fromFile(const TextureFileInfo &fileInfo);
     void fromFile(const std::string &path);
@@ -43,13 +42,6 @@ public:
     uint getActualFormat() const override;
     uint getActualWidth() const override;
     uint getActualHeight() const override;
-
-public:
-    static Texture2DPtr getByName(const std::string &name);
-    static Texture2D* byName(const std::string &name);
-
-public:
-    static std::vector<Texture2DPtr> publicObjects;
 };
 }
 

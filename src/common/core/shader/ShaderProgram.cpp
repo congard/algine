@@ -10,15 +10,10 @@
 
 #include <iostream>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
 using namespace tulz;
-using namespace algine::internal;
 
 namespace algine {
-vector<ShaderProgramPtr> ShaderProgram::publicObjects;
-
 AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(ShaderProgram) {
     .obj = []() {
         auto program = new ShaderProgram(std::false_type {});
@@ -27,7 +22,9 @@ AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(ShaderProgram) {
     }()
 };
 
-ShaderProgram::ShaderProgram() {
+ShaderProgram::ShaderProgram(Object *parent)
+    : ContextObject(parent)
+{
     m_id = glCreateProgram();
 }
 
@@ -36,20 +33,23 @@ ShaderProgram::~ShaderProgram() {
 }
 
 void ShaderProgram::fromSource(const string &vertex, const string &fragment, const string &geometry) {
+    // TODO: maybe these shaders should have `this` as parent?
+    //  then allocate them in a heap
+
     if (!vertex.empty()) {
-        Shader s_vertex(Shader::Type::Vertex);
+        Shader s_vertex(Shader::Type::Vertex, nullptr);
         s_vertex.fromSource(vertex);
         attachShader(s_vertex);
     }
 
     if (!fragment.empty()) {
-        Shader s_fragment(Shader::Type::Fragment);
+        Shader s_fragment(Shader::Type::Fragment, nullptr);
         s_fragment.fromSource(fragment);
         attachShader(s_fragment);
     }
 
     if (!geometry.empty()) {
-        Shader s_geometry(Shader::Type::Geometry);
+        Shader s_geometry(Shader::Type::Geometry, nullptr);
         s_geometry.fromSource(geometry);
         attachShader(s_geometry);
     }
@@ -278,13 +278,5 @@ void ShaderProgram::setMat3(const string &location, const glm::mat3 &p) {
 void ShaderProgram::setMat4(const string &location, const glm::mat4 &p) {
     checkBinding();
     setMat4(getLocation(location), p);
-}
-
-ShaderProgramPtr ShaderProgram::getByName(string_view name) {
-    return PublicObjectTools::getByName<ShaderProgramPtr>(name);
-}
-
-ShaderProgram* ShaderProgram::byName(string_view name) {
-    return PublicObjectTools::byName<ShaderProgram>(name);
 }
 }

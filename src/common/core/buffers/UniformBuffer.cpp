@@ -12,8 +12,8 @@ AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(UniformBuffer) {
     }()
 };
 
-UniformBuffer::UniformBuffer()
-    : Buffer(Buffer::Uniform) {}
+UniformBuffer::UniformBuffer(Object *parent)
+    : Buffer(parent, Buffer::Uniform) {}
 
 uint UniformBuffer::getOffsetAlignment() {
     int alignment;

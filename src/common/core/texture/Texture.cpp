@@ -12,11 +12,15 @@ using namespace algine;
 using namespace std;
 
 namespace algine {
-Texture::Texture() {
+Texture::Texture(Object *parent) // TODO: protected or even private
+    : ContextObject(parent)
+{
     glGenTextures(1, &m_id);
 }
 
-Texture::Texture(uint target): Texture() {
+Texture::Texture(uint target, Object *parent)
+    : Texture(parent)
+{
     m_target = target;
 }
 

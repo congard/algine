@@ -32,7 +32,6 @@ public:
     );
 
 public:
-    Buffer();
     ~Buffer() override;
 
     void bind() const;
@@ -48,7 +47,8 @@ public:
     uint getType() const;
 
 protected:
-    explicit Buffer(uint target);
+    Buffer();
+    Buffer(Object *parent, uint target);
 
 public:
     uint m_target {0};

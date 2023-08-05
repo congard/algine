@@ -1,19 +1,12 @@
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/Engine.h>
 
-#include <tulz/Array.h>
-
 #include <map>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
-using namespace algine::internal;
 using namespace tulz;
 
 namespace algine {
-vector<Texture2DPtr> Texture2D::publicObjects;
-
 AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(Texture2D) {
     .obj = []() {
         auto tex = new Texture2D(std::false_type {});
@@ -23,8 +16,8 @@ AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(Texture2D) {
     }()
 };
 
-Texture2D::Texture2D()
-    : Texture(GL_TEXTURE_2D) {}
+Texture2D::Texture2D(Object *parent)
+    : Texture(GL_TEXTURE_2D, parent) {}
 
 void Texture2D::fromFile(const TextureFileInfo &fileInfo) {
     checkBinding();
@@ -70,13 +63,5 @@ uint Texture2D::getActualWidth() const {
 uint Texture2D::getActualHeight() const {
     checkBinding();
     return getTexParam(m_target, GL_TEXTURE_HEIGHT);
-}
-
-Texture2DPtr Texture2D::getByName(const string &name) {
-    return PublicObjectTools::getByName<Texture2DPtr>(name);
-}
-
-Texture2D* Texture2D::byName(const string &name) {
-    return PublicObjectTools::byName<Texture2D>(name);
 }
 }

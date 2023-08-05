@@ -28,12 +28,12 @@ void BlockBufferStorage::unbind() const {
 
 #define storageSize m_blockSize * m_blocksCount
 
-void BlockBufferStorage::allocateStorage() {
-    m_buffer = [this]() -> Buffer* {
+void BlockBufferStorage::allocateStorage(Object *bufferParent) {
+    m_buffer = [this, bufferParent]() -> Buffer* {
         switch (m_type) {
-            case Buffer::Array: return new ArrayBuffer();
-            case Buffer::Index: return new IndexBuffer();
-            case Buffer::Uniform: return new UniformBuffer();
+            case Buffer::Array: return new ArrayBuffer(bufferParent);
+            case Buffer::Index: return new IndexBuffer(bufferParent);
+            case Buffer::Uniform: return new UniformBuffer(bufferParent);
             default:
                 throw std::runtime_error("Unsupported buffer type '" + std::to_string(m_type) + "'");
         }

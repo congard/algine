@@ -12,22 +12,23 @@
 #include "../djb2.h"
 
 namespace algine {
-ShaderProgramPtr Painter::m_fill;
-ShaderProgramPtr Painter::m_circleFill;
-ShaderProgramPtr Painter::m_roundRectFill;
-ShaderProgramPtr Painter::m_textFill;
+ShaderProgram *Painter::m_fill {nullptr};
+ShaderProgram *Painter::m_circleFill {nullptr};
+ShaderProgram *Painter::m_roundRectFill {nullptr};
+ShaderProgram *Painter::m_textFill {nullptr};
 
 // <hash, loaded characters + counter>
 // hash is generated using font name, width, height and style
 std::unordered_map<unsigned long, Painter::Characters> Painter::m_characters;
 
-Painter::Painter()
-    : m_projection(),
+Painter::Painter(Object *parent)
+    : Object(parent),
+      m_projection(),
       m_paint(),
       m_wasDepthTestEnabled(),
       m_wasBlendingEnabled(),
       m_prevSrcAlphaBlendMode(),
-      m_colorTex(PtrMaker::make<Texture2D>()),
+      m_colorTex(),
       m_activeColor(Color(0xff000000)),
       m_renderHints(0),
       m_transform(glm::mat4(1.0f)),
@@ -39,8 +40,9 @@ Painter::Painter()
     // TODO: implement in the engine
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    m_layout = std::make_unique<InputLayout>();
-    m_buffer = std::make_unique<ArrayBuffer>();
+    m_layout = new InputLayout(this);
+    m_buffer = new ArrayBuffer(this);
+    m_colorTex = new Texture2D(this);
 
     InputAttributeDescription attribDescription;
     attribDescription.setLocation(0);
@@ -50,14 +52,14 @@ Painter::Painter()
     attribDescription.setOffset(0);
 
     m_layout->bind();
-    m_layout->addAttribute(attribDescription, m_buffer.get());
+    m_layout->addAttribute(attribDescription, m_buffer);
     m_layout->unbind();
 
-    auto initProgram = [](ShaderProgramPtr &program, const ShaderPtr &vs, const char* fsSource) {
+    auto initProgram = [](ShaderProgram *&program, Shader *vs, const char* fsSource) {
         ShaderBuilder fsBuilder(Shader::Type::Fragment);
         fsBuilder.setSource(fsSource);
 
-        program = PtrMaker::make();
+        program = new ShaderProgram(); // TODO: set parent to PainterStorage instance
         program->attachShader(*vs);
         program->attachShader(*fsBuilder.create());
         program->link();
@@ -369,7 +371,7 @@ inline void bindProgramImpl(Painter *painter, ShaderProgram *program, ShaderProg
     write(std::true_type{});
 }
 
-#define bindProgram(program, ...) bindProgramImpl(this, program.get(), m_activeProgram, __VA_ARGS__)
+#define bindProgram(program, ...) bindProgramImpl(this, program, m_activeProgram, __VA_ARGS__)
 
 template<typename T>
 inline constexpr bool isForcibly(T&&) {
@@ -466,7 +468,7 @@ void Painter::drawText(std::u16string_view text, const PointF &p) {
         if (characters.find(symbol) == characters.end()) {
             auto character = m_fontRenderer.getCharacter(symbol);
 
-            Texture2DPtr tex = PtrMaker::make();
+            auto tex = new Texture2D(); // TODO: set parent to PainterStorage instance
             tex->bind();
             tex->setFormat(Texture::Red8);
             tex->setWidth(character.width);
@@ -536,7 +538,7 @@ void Painter::drawText(std::string_view text, float x, float y) {
     drawText(text, {x, y});
 }
 
-void Painter::drawTexture(PtrView<Texture2D> texture, const RectF &rect) {
+void Painter::drawTexture(Texture2D *texture, const RectF &rect) {
     writeRectToBuffer(rect);
     texture->use(0);
 
@@ -545,7 +547,7 @@ void Painter::drawTexture(PtrView<Texture2D> texture, const RectF &rect) {
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
 
-void Painter::drawTexture(PtrView<Texture2D> texture, const PointF &p) {
+void Painter::drawTexture(Texture2D *texture, const PointF &p) {
     texture->use(0);
 
     writeRectToBuffer({
@@ -560,7 +562,7 @@ void Painter::drawTexture(PtrView<Texture2D> texture, const PointF &p) {
     Engine::drawArrays(0, 4, Engine::PolyType::TriangleStrip);
 }
 
-void Painter::drawTexture(PtrView<Texture2D> texture, float x, float y) {
+void Painter::drawTexture(Texture2D *texture, float x, float y) {
     drawTexture(texture, {x, y});
 }
 

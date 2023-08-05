@@ -9,5 +9,5 @@ AL_CONTEXT_OBJECT_DEFAULT_INITIALIZER(algine::IndexBuffer) {
     }()
 };
 
-algine::IndexBuffer::IndexBuffer()
-    : Buffer(Buffer::Index) {}
+algine::IndexBuffer::IndexBuffer(Object *parent)
+    : Buffer(parent, Buffer::Index) {}

@@ -24,7 +24,7 @@ public:
     void bind() const;
     void unbind() const;
 
-    void allocateStorage();
+    void allocateStorage(Object *bufferParent);
     void reallocateStorage();
     void allocateBlock(uint blockIndex);
     void freeBlock(uint blockIndex);

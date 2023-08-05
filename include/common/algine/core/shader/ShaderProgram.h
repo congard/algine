@@ -2,7 +2,6 @@
 #define ALGINE_SHADERPROGRAM_H
 
 #include <algine/core/ContextObject.h>
-#include <algine/core/shader/ShaderProgramPtr.h>
 #include <algine/core/shader/ShadersInfo.h>
 #include <algine/core/shader/Shader.h>
 
@@ -20,7 +19,7 @@ AL_CONTEXT_OBJECT(ShaderProgram) {
     AL_CONTEXT_OBJECT_IMPL(ShaderProgram)
 
 public:
-    ShaderProgram();
+    explicit ShaderProgram(Object *parent = defaultParent());
     ~ShaderProgram() override;
 
     void fromSource(const std::string &vertex, const std::string &fragment, const std::string &geometry = std::string());
@@ -68,13 +67,6 @@ public:
 
 private:
     std::unordered_map<std::string, int> m_locations;
-
-public:
-    static ShaderProgramPtr getByName(std::string_view name);
-    static ShaderProgram* byName(std::string_view name);
-
-public:
-    static std::vector<ShaderProgramPtr> publicObjects;
 };
 }
 

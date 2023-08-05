@@ -13,7 +13,7 @@
 #include <algine/types.h>
 
 namespace algine {
-class Painter {
+class Painter: public Object {
 public:
     enum class RenderHint {
         Antialiasing,
@@ -26,8 +26,8 @@ public:
     using RenderHints = uint;
 
 public:
-    Painter();
-    ~Painter();
+    explicit Painter(Object *parent = defaultParent());
+    ~Painter() override;
 
     void begin();
     void end();
@@ -75,9 +75,9 @@ public:
     void drawText(std::string_view text, const PointF &p);
     void drawText(std::string_view text, float x, float y);
 
-    void drawTexture(PtrView<Texture2D> texture, const RectF &rect);
-    void drawTexture(PtrView<Texture2D> texture, const PointF &p);
-    void drawTexture(PtrView<Texture2D> texture, float x, float y);
+    void drawTexture(Texture2D *texture, const RectF &rect);
+    void drawTexture(Texture2D *texture, const PointF &p);
+    void drawTexture(Texture2D *texture, float x, float y);
 
     bool isActive() const;
 
@@ -109,24 +109,24 @@ private:
     }
 
     template<bool forcibly>
-    inline void writeMat4(const char *name, MutableValue<glm::mat4> &value, PtrView<ShaderProgram> program) {
+    inline void writeMat4(const char *name, MutableValue<glm::mat4> &value, ShaderProgram *program) {
         write_mv<forcibly>([&]() { program->setMat4(name, value); }, value);
     }
 
     template<bool forcibly>
-    inline void writeFloat(const char *name, MutableValue<float> &value, PtrView<ShaderProgram> program) {
+    inline void writeFloat(const char *name, MutableValue<float> &value, ShaderProgram *program) {
         write_mv<forcibly>([&]() { program->setFloat(name, value); }, value);
     }
 
     template<bool forcibly>
-    inline void writeTPMatrix(PtrView<ShaderProgram> program) {
+    inline void writeTPMatrix(ShaderProgram *program) {
         if (forcibly || m_projection.hasChanged() || m_transform.hasChanged()) {
             program->setMat4("tpMatrix", m_projection.get() * m_transform.get());
         }
     }
 
     template<bool forcibly>
-    inline void writePaintTransform(PtrView<ShaderProgram> program) {
+    inline void writePaintTransform(ShaderProgram *program) {
         writeMat4<forcibly>("paintTransformation", m_paint.m_transform, program);
     }
 
@@ -135,13 +135,13 @@ private:
     MutableValue<glm::mat4> m_transform;
     MutableValue<float> m_opacity;
     Paint m_paint;
-    std::unique_ptr<ArrayBuffer> m_buffer;
-    std::unique_ptr<InputLayout> m_layout;
+    ArrayBuffer *m_buffer;
+    InputLayout *m_layout;
 
     ShaderProgram *m_activeProgram;
 
 private:
-    Texture2DPtr m_colorTex;
+    Texture2D *m_colorTex;
     Color m_activeColor;
     RenderHints m_renderHints;
 
@@ -158,14 +158,15 @@ private:
     bool m_isActive;
 
 private:
-    static ShaderProgramPtr m_fill;
-    static ShaderProgramPtr m_circleFill;
-    static ShaderProgramPtr m_roundRectFill;
-    static ShaderProgramPtr m_textFill;
+    // TODO: class PainterStorage?
+    static ShaderProgram *m_fill;
+    static ShaderProgram *m_circleFill;
+    static ShaderProgram *m_roundRectFill;
+    static ShaderProgram *m_textFill;
 
 private:
     struct Character {
-        Texture2DPtr texture;
+        Texture2D *texture;
         float bearingLeft;
         float bearingTop;
         float advance;

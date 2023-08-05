@@ -2,7 +2,6 @@
 #define ALGINE_TEXTURECUBE_H
 
 #include <algine/core/texture/Texture.h>
-#include <algine/core/texture/TextureCubePtr.h>
 #include <algine/core/DataType.h>
 #include <algine/templates.h>
 #include <algine/types.h>
@@ -24,7 +23,7 @@ public:
     };
 
 public:
-    TextureCube();
+    explicit TextureCube(Object *parent = defaultParent());
 
     void fromFile(Face face, const TextureFileInfo &fileInfo);
     void fromFile(Face face, const std::string &path);
@@ -45,13 +44,6 @@ public:
     uint getActualFormat() const override;
     uint getActualWidth() const override;
     uint getActualHeight() const override;
-
-public:
-    static TextureCubePtr getByName(const std::string &name);
-    static TextureCube* byName(const std::string &name);
-
-public:
-    static std::vector<TextureCubePtr> publicObjects;
 };
 }
 
