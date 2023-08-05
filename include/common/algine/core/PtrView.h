@@ -27,7 +27,7 @@ public:
         : m_ptr(nullptr) {}
 
     template<typename U>
-    inline PtrView& operator=(const Ptr<U> &ptr) {
+    inline PtrView& operator=(const std::shared_ptr<U> &ptr) {
         m_ptr = ptr.get();
         return *this;
     }
