@@ -252,8 +252,7 @@ set(ALGINE_CORE_SOURCES ${ALGINE_CORE_SOURCES}
     ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineCore.h
     ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineStd.h
 
-    src/common/internal/PublicObjectTools.h
-        src/common/internal/ConfigStrings.h
+    src/common/internal/ConfigStrings.h
 
     include/common/algine/templates.h
     include/common/algine/types.h
