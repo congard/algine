@@ -8,6 +8,11 @@
 namespace algine {
 class AMTLManager: public Scriptable {
 public:
+    AMTLManager();
+
+    void setParent(Object *parent);
+    Object* getParent() const;
+
     void setMaterials(const std::vector<AMTLMaterialManager> &materials);
     AMTLMaterialManager& addMaterial(const AMTLMaterialManager &material, const std::string &name = {});
 
@@ -27,6 +32,7 @@ private:
 
 private:
     std::vector<AMTLMaterialManager> m_materials;
+    Object *m_parent;
 };
 }
 

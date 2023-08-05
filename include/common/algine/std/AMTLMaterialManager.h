@@ -2,6 +2,7 @@
 #define ALGINE_AMTLMATERIALMANAGER_H
 
 #include <algine/core/texture/Texture2DBuilder.h>
+#include <algine/core/scene/GlobalScene.h>
 
 #include <unordered_map>
 #include <set>
@@ -30,7 +31,14 @@ public:
 
     std::set<std::string> collectTextureNames() const;
 
-    Texture2DPtr loadTexture(const std::string &texName);
+    /**
+     * Creates & returns texture of the specified name
+     * @param texName
+     * @param parent
+     * @return pointer to a newly created texture if such name exists,
+     * nullptr otherwise
+     */
+    Texture2D* loadTexture(const std::string &texName, Object *parent = GlobalScene::getInstance());
 
 protected:
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;

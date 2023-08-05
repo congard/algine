@@ -2,7 +2,7 @@
 #include <algine/core/shader/ShaderProgram.h>
 
 namespace algine {
-InputLayoutShapeLocations::InputLayoutShapeLocations(const ShaderProgramPtr &program,
+InputLayoutShapeLocations::InputLayoutShapeLocations(ShaderProgram *program,
     const std::map<std::string, std::string> &locations)
 {
     load(program, locations);
@@ -19,7 +19,7 @@ int& InputLayoutShapeLocations::operator[](const std::string &name) {
 }
 
 void
-InputLayoutShapeLocations::load(const ShaderProgramPtr &program, const std::map<std::string, std::string> &locations) {
+InputLayoutShapeLocations::load(ShaderProgram *program, const std::map<std::string, std::string> &locations) {
     for (const auto &p : locations) {
         program->loadUniformLocation(p.second);
         data[p.first] = program->getLocation(p.second);

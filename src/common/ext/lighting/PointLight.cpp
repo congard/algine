@@ -20,15 +20,16 @@ const glm::mat4 PointLight::m_lightViews[] = {
     lightView( 0,  0, -1,   0, -1,  0 )
 };
 
-PointLight::PointLight()
-    : m_lightSpaceMatrices()
+PointLight::PointLight(Object *parent)
+    : Light(parent),
+      m_lightSpaceMatrices()
 {
     m_type = Type::Point;
 }
 
 void PointLight::initShadows(const uint shadowMapWidth, const uint shadowMapHeight) {
-    TextureCubePtr shadowMap = PtrMaker::make();
-    m_shadowFb = new Framebuffer();
+    m_shadowFb = new Framebuffer(this);
+    auto shadowMap = new TextureCube(m_shadowFb);
 
     shadowMap->bind();
     shadowMap->setDimensions(shadowMapWidth, shadowMapHeight);
@@ -92,7 +93,7 @@ float PointLight::getBias() const {
     return m_bias;
 }
 
-TextureCubePtr& PointLight::getShadowMap() const {
+TextureCube* PointLight::getShadowMap() const {
     return m_shadowFb->getAttachedTextureCube(Framebuffer::DepthAttachment);
 }
 

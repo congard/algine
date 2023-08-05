@@ -1,12 +1,12 @@
 #ifndef ALGINE_MATERIAL_H
 #define ALGINE_MATERIAL_H
 
-#include <algine/core/texture/Texture2DPtr.h>
-
 #include <unordered_map>
 #include <string>
 
 namespace algine {
+class Texture2D;
+
 class Material {
 public:
     constexpr static auto AmbientTexture = "ambient";
@@ -28,18 +28,18 @@ public:
     const std::string& getName() const;
 
     void setFloat(const std::string &name, float value);
-    void setTexture2D(const std::string &name, const Texture2DPtr &value);
+    void setTexture2D(const std::string &name, Texture2D *value);
 
     float getFloat(const std::string &name) const;
     float getFloat(const std::string &name, float defaultValue) const;
-    const Texture2DPtr& getTexture2D(const std::string &name) const;
-    const Texture2DPtr& getTexture2D(const std::string &name, const Texture2DPtr &defaultValue) const;
+    Texture2D* getTexture2D(const std::string &name) const;
+    Texture2D* getTexture2D(const std::string &name, Texture2D *defaultValue) const;
 
     void setFloats(const std::unordered_map<std::string, float> &floats);
-    void setTextures2D(const std::unordered_map<std::string, Texture2DPtr> &textures);
+    void setTextures2D(const std::unordered_map<std::string, Texture2D*> &textures);
 
     const std::unordered_map<std::string, float>& getFloats() const;
-    const std::unordered_map<std::string, Texture2DPtr>& getTextures2D() const;
+    const std::unordered_map<std::string, Texture2D*>& getTextures2D() const;
 
     bool hasFloat(const std::string &name) const;
     bool hasTexture2D(const std::string &name) const;
@@ -47,7 +47,7 @@ public:
 private:
     std::string m_materialName;
     std::unordered_map<std::string, float> m_floats;
-    std::unordered_map<std::string, Texture2DPtr> m_textures2D;
+    std::unordered_map<std::string, Texture2D*> m_textures2D;
 };
 }
 

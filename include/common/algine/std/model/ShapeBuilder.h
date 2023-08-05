@@ -1,7 +1,6 @@
 #ifndef ALGINE_SHAPEBUILDER_H
 #define ALGINE_SHAPEBUILDER_H
 
-#include <algine/std/model/ShapePtr.h>
 #include <algine/std/model/Shape.h>
 #include <algine/std/AMTLManager.h>
 
@@ -12,6 +11,8 @@ struct aiScene;
 
 namespace algine {
 class ShapeBuilder: public Builder {
+    AL_BUILDER(Shape)
+
 public:
     enum class Param {
         Triangulate,
@@ -80,12 +81,10 @@ public:
     void genBuffers();
     void createInputLayouts();
 
-    ShapePtr& getCurrentShape();
-
-    ShapePtr get();
-    ShapePtr create();
+    Shape* getCurrentShape();
 
 protected:
+    Object* createImpl() override;
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
 
 private:
@@ -94,7 +93,7 @@ private:
     void processMesh(const aiMesh *aimesh, const aiScene *scene);
 
 private:
-    ShapePtr m_shape;
+    Shape *m_shape;
 
 private:
     BufferData<float> m_vertices, m_normals, m_texCoords, m_tangents, m_bitangents, m_boneWeights;

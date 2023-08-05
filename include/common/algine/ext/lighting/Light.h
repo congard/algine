@@ -6,7 +6,7 @@
 #include <algine/std/Translatable.h>
 
 namespace algine {
-class Light: public Translatable {
+class Light: public Object, public Translatable {
     friend class LightingManager;
 
 public:
@@ -16,7 +16,7 @@ public:
     };
 
 public:
-    ~Light();
+    explicit Light(Object *parent = defaultParent());
 
     void translate() override;
 

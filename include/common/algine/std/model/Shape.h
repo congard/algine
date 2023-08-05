@@ -3,7 +3,6 @@
 
 #include <algine/std/model/InputLayoutShapeLocations.h>
 #include <algine/std/model/Mesh.h>
-#include <algine/std/model/ShapePtr.h>
 
 #include <algine/std/animation/Animation.h>
 #include <algine/std/animation/BonesStorage.h>
@@ -26,7 +25,8 @@ public:
     constexpr static Index AnimationNotFound = -1;
 
 public:
-    virtual ~Shape();
+    explicit Shape(Object *parent = defaultParent());
+    ~Shape() override;
 
     /// creates InputLayout and adds it into inputLayouts data
     /// <br>note: this function will limit max bones per vertex to 4
@@ -56,22 +56,15 @@ public:
     uint getInputLayoutsAmount() const;
     InputLayout* getInputLayout(Index index);
 
-    RawPtr<ArrayBuffer> getVerticesBuffer() const;
-    RawPtr<ArrayBuffer> getNormalsBuffer() const;
-    RawPtr<ArrayBuffer> getTexCoordsBuffer() const;
-    RawPtr<ArrayBuffer> getTangentsBuffer() const;
-    RawPtr<ArrayBuffer> getBitangentsBuffer() const;
-    RawPtr<ArrayBuffer> getBoneWeightsBuffer() const;
-    RawPtr<ArrayBuffer> getBoneIdsBuffer() const;
+    ArrayBuffer* getVerticesBuffer() const;
+    ArrayBuffer* getNormalsBuffer() const;
+    ArrayBuffer* getTexCoordsBuffer() const;
+    ArrayBuffer* getTangentsBuffer() const;
+    ArrayBuffer* getBitangentsBuffer() const;
+    ArrayBuffer* getBoneWeightsBuffer() const;
+    ArrayBuffer* getBoneIdsBuffer() const;
 
-    RawPtr<IndexBuffer> getIndicesBuffer() const;
-
-public:
-    static ShapePtr getByName(const std::string &name);
-    static Shape* byName(const std::string &name);
-
-public:
-    static std::vector<ShapePtr> publicObjects;
+    IndexBuffer* getIndicesBuffer() const;
 
 protected:
     std::vector<Mesh> m_meshes;

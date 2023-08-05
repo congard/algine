@@ -19,7 +19,6 @@
 
 #include <cfloat>
 
-#include "internal/PublicObjectTools.h"
 #include "../assimp2glm.h"
 
 using namespace tulz;
@@ -35,7 +34,8 @@ constexpr auto TAG = "Algine ShapeBuilder";
 
 ShapeBuilder::ShapeBuilder()
     : m_className(Default::ClassName),
-      m_bonesPerVertex(Default::BonesPerVertex) {}
+      m_bonesPerVertex(Default::BonesPerVertex),
+      m_shape(nullptr) {}
 
 void ShapeBuilder::addParam(Param param) {
     m_params.emplace_back(param);
@@ -163,20 +163,15 @@ void ShapeBuilder::setIndices(const BufferData<uint> &indices) {
     m_indices = indices;
 }
 
-ShapePtr ShapeBuilder::get() {
-    return internal::PublicObjectTools::getPtr<ShapePtr>(this);
-}
-
-ShapePtr ShapeBuilder::create() {
-    m_shape.reset(TypeRegistry::create<Shape>(m_className));
+Object* ShapeBuilder::createImpl() {
+    m_shape = TypeRegistry::create<Shape>(m_className);
+    m_shape->setParent(getActualParent());
 
     if (!m_modelPath.empty()) {
         loadFile();
     }
 
     loadShape();
-
-    internal::PublicObjectTools::postCreateAccessOp("Shape", this, m_shape);
 
     return m_shape;
 }
@@ -319,7 +314,7 @@ private:
 
 void ShapeBuilder::loadFile() {
     if (m_shape == nullptr)
-        m_shape.reset(TypeRegistry::create<Shape>(m_className));
+        m_shape = TypeRegistry::create<Shape>(m_className);
 
     // Create an instance of the Importer class
     Assimp::Importer importer;
@@ -335,6 +330,8 @@ void ShapeBuilder::loadFile() {
     }
 
     m_shape->m_globalInverseTransform = glm::inverse(getMat4(scene->mRootNode->mTransformation));
+
+    m_amtlManager.setParent(m_shape);
 
     // try to load AMTL from file if current material is empty
     if (m_amtlManager.getMaterials().empty()) {
@@ -367,7 +364,7 @@ void ShapeBuilder::loadShape() {
 
 void ShapeBuilder::applyParams() {
     if (m_shape == nullptr)
-        m_shape.reset(TypeRegistry::create<Shape>(m_className));
+        m_shape = TypeRegistry::create<Shape>(m_className);
 
     // apply algine params
     for (const auto p : algine::getParams<PARAMS_TYPE_ALGINE>(m_params)) {
@@ -395,14 +392,14 @@ void ShapeBuilder::applyParams() {
 
 void ShapeBuilder::createInputLayouts() {
     if (m_shape == nullptr)
-        m_shape.reset(TypeRegistry::create<Shape>(m_className));
+        m_shape = TypeRegistry::create<Shape>(m_className);
 
     for (auto &item : m_locations) {
         m_shape->createInputLayout(item);
     }
 }
 
-ShapePtr& ShapeBuilder::getCurrentShape() {
+Shape* ShapeBuilder::getCurrentShape() {
     return m_shape;
 }
 
@@ -550,7 +547,7 @@ void ShapeBuilder::processMesh(const aiMesh *aimesh, const aiScene *scene) {
 
     // I. Load textures from Algine Material
     for (const string &type : amtlMaterialManager.collectTextureNames()) {
-        auto texture = amtlMaterialManager.loadTexture(type);
+        auto texture = amtlMaterialManager.loadTexture(type, m_shape);
         material.setTexture2D(type, texture);
     }
 
@@ -600,6 +597,7 @@ void ShapeBuilder::processMesh(const aiMesh *aimesh, const aiScene *scene) {
         builder.setIOSystem(io());
         builder.setRootDir(Path(Path::join(getRootDir(), m_modelPath)).getParentDirectory().toString());
         builder.setPath(path.C_Str());
+        builder.setParent(m_shape);
         builder.setParams({
             {Texture::WrapU, getMapMode(mapModeU)},
             {Texture::WrapV, getMapMode(mapModeV)},
@@ -628,10 +626,11 @@ void ShapeBuilder::processMesh(const aiMesh *aimesh, const aiScene *scene) {
     m_shape->m_meshes.push_back(mesh);
 }
 
+// C++20 template lambda
 template<typename BufferType, typename DataType>
-inline BufferType* createBuffer(ShapeBuilder::BufferData<DataType> &data) {
+inline BufferType* createBuffer(Object *parent, ShapeBuilder::BufferData<DataType> &data) {
     if (!data->empty()) {
-        auto bufferType = new BufferType();
+        auto bufferType = new BufferType(parent);
         bufferType->bind();
         bufferType->setData(sizeof(DataType) * data->size(), data->data(), data.usage);
         bufferType->unbind();
@@ -643,16 +642,16 @@ inline BufferType* createBuffer(ShapeBuilder::BufferData<DataType> &data) {
 
 void ShapeBuilder::genBuffers() {
     if (m_shape == nullptr)
-        m_shape.reset(TypeRegistry::create<Shape>(m_className));
+        m_shape = TypeRegistry::create<Shape>(m_className);
 
-    m_shape->m_vertices = createBuffer<ArrayBuffer>(m_vertices);
-    m_shape->m_normals = createBuffer<ArrayBuffer>(m_normals);
-    m_shape->m_texCoords = createBuffer<ArrayBuffer>(m_texCoords);
-    m_shape->m_tangents = createBuffer<ArrayBuffer>(m_tangents);
-    m_shape->m_bitangents = createBuffer<ArrayBuffer>(m_bitangents);
-    m_shape->m_boneWeights = createBuffer<ArrayBuffer>(m_boneWeights);
-    m_shape->m_boneIds = createBuffer<ArrayBuffer>(m_boneIds);
-    m_shape->m_indices = createBuffer<IndexBuffer>(m_indices);
+    m_shape->m_vertices = createBuffer<ArrayBuffer>(m_shape, m_vertices);
+    m_shape->m_normals = createBuffer<ArrayBuffer>(m_shape, m_normals);
+    m_shape->m_texCoords = createBuffer<ArrayBuffer>(m_shape, m_texCoords);
+    m_shape->m_tangents = createBuffer<ArrayBuffer>(m_shape, m_tangents);
+    m_shape->m_bitangents = createBuffer<ArrayBuffer>(m_shape, m_bitangents);
+    m_shape->m_boneWeights = createBuffer<ArrayBuffer>(m_shape, m_boneWeights);
+    m_shape->m_boneIds = createBuffer<ArrayBuffer>(m_shape, m_boneIds);
+    m_shape->m_indices = createBuffer<IndexBuffer>(m_shape, m_indices);
 }
 
 void ShapeBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {

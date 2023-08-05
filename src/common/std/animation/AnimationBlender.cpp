@@ -9,7 +9,7 @@ using namespace std;
 using namespace glm;
 
 namespace algine {
-AnimationBlender::AnimationBlender(const ModelPtr &model)
+AnimationBlender::AnimationBlender(Model *model)
     : m_inverseGlobalInverseTransform(1.0f)
 {
     setModel(model);
@@ -128,7 +128,7 @@ void AnimationBlender::changeFactor(float step) {
     m_factor = checkFactorBounds(m_factor + step);
 }
 
-void AnimationBlender::setModel(const ModelPtr &model) {
+void AnimationBlender::setModel(Model *model) {
     const auto &shape = model->getShape();
 
     m_model = model;
@@ -166,7 +166,7 @@ float AnimationBlender::getFactor() const {
     return m_factor;
 }
 
-const ModelPtr& AnimationBlender::getModel() const {
+Model* AnimationBlender::getModel() const {
     return m_model;
 }
 

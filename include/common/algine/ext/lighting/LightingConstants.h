@@ -3,7 +3,7 @@
 
 #define constant(name, val) constexpr char name[] = val;
 
-namespace algine::Module::Lighting {
+namespace algine::ext::Lighting {
     namespace Settings {
         constant(PointLightsLimit, "MAX_POINT_LIGHTS_COUNT")
         constant(DirLightsLimit, "MAX_DIR_LIGHTS_COUNT")

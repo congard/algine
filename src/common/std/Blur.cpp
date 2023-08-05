@@ -25,19 +25,20 @@ constant Offsets = "offsets[0]";
 constant Weights = "weights[0]";
 }
 
-Blur::Blur(const TextureCreateInfo &textureCreateInfo)
-    : m_pingpongShaders(),
+Blur::Blur(const TextureCreateInfo &textureCreateInfo, Object *parent)
+    : Object(parent),
+      m_pingpongShaders(),
       m_quadRenderer(),
       m_amount(2),
       m_horizontal(true),
-      m_firstIteration(true)
+      m_firstIteration(true),
+      m_pingpongFb(),
+      m_pingpongTex()
 {
-    PtrMaker::create(
-        m_pingpongFb[0], m_pingpongFb[1],
-        m_pingpongTex[0], m_pingpongTex[1]
-    );
-
     for (uint i = 0; i < 2; ++i) {
+        m_pingpongFb[i] = new Framebuffer(this);
+        m_pingpongTex[i] = new Texture2D(m_pingpongFb[i]);
+
         m_pingpongTex[i]->applyTextureCreateInfo(textureCreateInfo);
 
         m_pingpongFb[i]->bind();
@@ -46,13 +47,59 @@ Blur::Blur(const TextureCreateInfo &textureCreateInfo)
     }
 }
 
+void Blur::configureShaders(uint kernelRadius, const std::string &blurComponent, bool linearSampling) {
+    auto vertex = QuadRenderer::getVertexShader();
+
+    auto programPing = new ShaderProgram(this);
+    auto programPong = new ShaderProgram(this);
+
+    Shader* fragmentPing;
+    Shader* fragmentPong;
+
+    ShaderBuilder fragmentBuilder(Shader::Type::Fragment);
+    fragmentBuilder.setPath("@algine/Blur.fs.glsl");
+    fragmentBuilder.define(Settings::KernelRadius, linearSampling ? (kernelRadius / 2 + 1) : kernelRadius);
+    fragmentBuilder.define(Settings::OutputType, [&]() {
+        switch (blurComponent.size()) {
+            case 1: return "float";
+            case 2: return "vec2";
+            case 3: return "vec3";
+            case 4: return "vec4";
+            default: throw invalid_argument("Must be: 1 <= blurComponent.size() <= 4");
+        }
+    }());
+    fragmentBuilder.define(Settings::TexComponent, blurComponent);
+
+    fragmentBuilder.define(Settings::Horizontal);
+    fragmentBuilder.setParent(programPing);
+    fragmentPing = fragmentBuilder.create();
+
+    fragmentBuilder.removeDefinition(Settings::Horizontal);
+    fragmentBuilder.define(Settings::Vertical);
+    fragmentBuilder.setParent(programPong);
+    fragmentPong = fragmentBuilder.create();
+
+    programPing->attachShader(*vertex);
+    programPing->attachShader(*fragmentPing);
+    programPing->link();
+    programPing->loadActiveLocations();
+
+    programPong->attachShader(*vertex);
+    programPong->attachShader(*fragmentPong);
+    programPong->link();
+    programPong->loadActiveLocations();
+
+    m_pingpongShaders[0] = programPing;
+    m_pingpongShaders[1] = programPong;
+}
+
 void Blur::configureKernel(int radius, float sigma, bool linearSampling) {
     int kernelSize = radius * 2 - 1;
     auto kernel = getKernel(kernelSize, sigma);
 
     if (!linearSampling) {
         // sending to shader center of kernel and right part
-        for (auto & pingpongShader : m_pingpongShaders) {
+        for (auto pingpongShader : m_pingpongShaders) {
             pingpongShader->bind();
 
             for (int j = 0; j < radius; ++j) {
@@ -94,7 +141,7 @@ void Blur::configureKernel(int radius, float sigma, bool linearSampling) {
             offsets[i] = offset_l_1_2;
         }
 
-        for (auto &pingpongShader : m_pingpongShaders) {
+        for (auto pingpongShader : m_pingpongShaders) {
             pingpongShader->bind();
 
             for (int i = 0; i < size; ++i) {
@@ -139,42 +186,20 @@ void Blur::setAmount(uint amount) {
     m_amount = amount;
 }
 
-void Blur::setQuadRenderer(const QuadRendererPtr &quadRenderer) {
+void Blur::setQuadRenderer(QuadRenderer *quadRenderer) {
     m_quadRenderer = quadRenderer;
-}
-
-void Blur::setPingPongShaders(const ShaderProgramPtr &hor, const ShaderProgramPtr &vert) {
-    m_pingpongShaders[0] = hor;
-    m_pingpongShaders[1] = vert;
-}
-
-void Blur::setPingPongShaders(const pair<ShaderProgramPtr, ShaderProgramPtr> &pingPong) {
-    m_pingpongShaders[0] = pingPong.first;
-    m_pingpongShaders[1] = pingPong.second;
 }
 
 uint Blur::getAmount() const {
     return m_amount;
 }
 
-QuadRendererPtr& Blur::getQuadRenderer() {
+QuadRenderer* Blur::getQuadRenderer() const {
     return m_quadRenderer;
 }
 
-ShaderProgramPtr* Blur::getPingPongShaders() {
-    return m_pingpongShaders;
-}
-
-Texture2DPtr& Blur::get() {
+Texture2D* Blur::get() const {
     return m_pingpongTex[!m_horizontal];
-}
-
-Texture2DPtr* Blur::getPingPongTextures() {
-    return m_pingpongTex;
-}
-
-FramebufferPtr* Blur::getPingPongFramebuffers() {
-    return m_pingpongFb;
 }
 
 Array<float> Blur::getKernel(int size, float sigma) {
@@ -193,46 +218,5 @@ Array<float> Blur::getKernel(int size, float sigma) {
         kernel[x] /= sum;
 
     return kernel;
-}
-
-pair<ShaderProgramPtr, ShaderProgramPtr> Blur::getPingPongShaders(uint kernelRadius, const string &blurComponent, bool linearSampling) {
-    ShaderPtr vertex = QuadRenderer::getVertexShader();
-    ShaderPtr fragmentPing;
-    ShaderPtr fragmentPong;
-
-    ShaderBuilder fragmentBuilder(Shader::Type::Fragment);
-    fragmentBuilder.setPath("@algine/Blur.fs.glsl");
-    fragmentBuilder.define(Settings::KernelRadius, linearSampling ? (kernelRadius / 2 + 1) : kernelRadius);
-    fragmentBuilder.define(Settings::OutputType, [&]() {
-        switch (blurComponent.size()) {
-            case 1: return "float";
-            case 2: return "vec2";
-            case 3: return "vec3";
-            case 4: return "vec4";
-            default: throw invalid_argument("Must be: 1 <= blurComponent.size() <= 4");
-        }
-    }());
-    fragmentBuilder.define(Settings::TexComponent, blurComponent);
-
-    fragmentBuilder.define(Settings::Horizontal);
-    fragmentPing = fragmentBuilder.create();
-
-    fragmentBuilder.removeDefinition(Settings::Horizontal);
-    fragmentBuilder.define(Settings::Vertical);
-    fragmentPong = fragmentBuilder.create();
-
-    ShaderProgramPtr ping = PtrMaker::make();
-    ping->attachShader(*vertex);
-    ping->attachShader(*fragmentPing);
-    ping->link();
-    ping->loadActiveLocations();
-
-    ShaderProgramPtr pong = PtrMaker::make();
-    pong->attachShader(*vertex);
-    pong->attachShader(*fragmentPong);
-    pong->link();
-    pong->loadActiveLocations();
-
-    return {ping, pong};
 }
 }

@@ -3,9 +3,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace algine {
-Light::~Light() {
-    delete m_shadowFb;
-}
+Light::Light(Object *parent)
+    : Object(parent) {}
 
 void Light::translate() { // TODO: check rotate
     m_translation = glm::translate(glm::mat4(1.0f), -m_pos);

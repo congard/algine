@@ -13,16 +13,16 @@ using namespace glm;
 namespace algine {
 constexpr uint empty_block = 0;
 
-void BoneSystemManager::init() {
+void BoneSystemManager::init(Object *bufferParent) {
     using namespace BoneSystemModuleConstants::Vars::Block;
 
     m_uniformBlock.setName(Name);
     m_uniformBlock.setVarNames({Bones, BoneAttribsPerVertex});
 
     for (const auto &program : m_programs)
-        m_uniformBlock.assignBindingPoint(program.get());
+        m_uniformBlock.assignBindingPoint(program);
 
-    m_uniformBlock.init(m_programs[0].get());
+    m_uniformBlock.init(m_programs[0]);
 
     m_bonesPos = m_uniformBlock.getVarPosition(Bones);
     m_boneAttribsCountPos = m_uniformBlock.getVarPosition(BoneAttribsPerVertex);
@@ -30,7 +30,7 @@ void BoneSystemManager::init() {
     m_bufferStorage.setBufferType(Buffer::Uniform);
     m_bufferStorage.setBufferUsage(Buffer::DynamicDraw);
     m_bufferStorage.setBlockSize(m_uniformBlock.getSize(), UniformBuffer::getOffsetAlignment());
-    m_bufferStorage.allocateStorage();
+    m_bufferStorage.allocateStorage(bufferParent);
 
     int zero = 0;
 
@@ -47,13 +47,13 @@ void BoneSystemManager::writeBonesForAll() {
     }
 }
 
-void BoneSystemManager::writeBones(const ModelPtr &model) {
+void BoneSystemManager::writeBones(Model *model) {
     if (model->getShape()->isBonesPresent()) {
         writeBones(model, m_ids[model]);
     }
 }
 
-void BoneSystemManager::linkBuffer(const ModelPtr &model) {
+void BoneSystemManager::linkBuffer(Model *model) {
     if (model->getShape()->isBonesPresent()) {
         linkUniformBuffer(m_ids[model]);
     } else {
@@ -61,7 +61,7 @@ void BoneSystemManager::linkBuffer(const ModelPtr &model) {
     }
 }
 
-void BoneSystemManager::setupBones(const ModelPtr &model) {
+void BoneSystemManager::setupBones(Model *model) {
     if (model->getShape()->isBonesPresent()) {
         uint index = m_ids[model];
         writeBones(model, index);
@@ -79,15 +79,15 @@ void BoneSystemManager::setBindingPoint(uint bindingPoint) {
     m_uniformBlock.setBindingPoint(bindingPoint);
 }
 
-void BoneSystemManager::setShaderPrograms(const vector<ShaderProgramPtr> &shaderPrograms) {
+void BoneSystemManager::setShaderPrograms(const vector<ShaderProgram*> &shaderPrograms) {
     m_programs = shaderPrograms;
 }
 
-void BoneSystemManager::addShaderProgram(const ShaderProgramPtr &shaderProgram) {
+void BoneSystemManager::addShaderProgram(ShaderProgram *shaderProgram) {
     m_programs.emplace_back(shaderProgram);
 }
 
-void BoneSystemManager::addModel(const ModelPtr &model) {
+void BoneSystemManager::addModel(Model *model) {
     uint index = m_bufferStorage.allocateBlock();
     m_ids[model] = index;
 
@@ -95,18 +95,18 @@ void BoneSystemManager::addModel(const ModelPtr &model) {
     m_bufferStorage.write(index, m_uniformBlock.getVarOffset(m_boneAttribsCountPos), sizeof(int), &attribsCount);
 }
 
-void BoneSystemManager::addModels(const std::vector<ModelPtr> &models) {
+void BoneSystemManager::addModels(const std::vector<Model*> &models) {
     for (const auto &model : models) {
         addModel(model);
     }
 }
 
-void BoneSystemManager::removeModel(const ModelPtr &model) {
+void BoneSystemManager::removeModel(Model *model) {
     m_bufferStorage.freeBlock(m_ids[model]);
     m_ids.erase(model);
 }
 
-void BoneSystemManager::removeModels(const std::vector<ModelPtr> &models) {
+void BoneSystemManager::removeModels(const std::vector<Model*> &models) {
     for (const auto &model : models) {
         removeModel(model);
     }
@@ -116,7 +116,7 @@ uint BoneSystemManager::getBindingPoint() const {
     return m_uniformBlock.getBindingPoint();
 }
 
-const vector<ShaderProgramPtr>& BoneSystemManager::getShaderPrograms() const {
+const vector<ShaderProgram*>& BoneSystemManager::getShaderPrograms() const {
     return m_programs;
 }
 
@@ -132,7 +132,7 @@ uint BoneSystemManager::getAttribsCount(const uint bonesPerVertex) {
     return bonesPerVertex / 4 + (bonesPerVertex % 4 == 0 ? 0 : 1);
 }
 
-void BoneSystemManager::writeBones(const ModelPtr &model, Index index) {
+void BoneSystemManager::writeBones(Model *model, Index index) {
     const auto &bones = *(model->getBones());
 
     m_bufferStorage.write(

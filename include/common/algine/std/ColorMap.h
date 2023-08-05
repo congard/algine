@@ -2,6 +2,7 @@
 #define ALGINE_COLORMAP_H
 
 #include <algine/core/texture/Texture2D.h>
+#include <algine/core/Object.h>
 #include <algine/core/Color.h>
 
 #include <glm/vec2.hpp>
@@ -9,7 +10,7 @@
 #include <map>
 
 namespace algine {
-class ColorMap {
+class ColorMap: public Object {
 private:
     struct ColorComparator {
         bool operator()(glm::ivec2 lhs, glm::ivec2 rhs) const;
@@ -19,9 +20,9 @@ public:
     using Colors = std::map<glm::ivec2, Color, ColorComparator>;
 
 public:
-    ColorMap();
-    ColorMap(uint width, uint height, uint format = Texture::RGBA8UI);
-    explicit ColorMap(glm::ivec2 size, uint format = Texture::RGBA8UI);
+    explicit ColorMap(Object *parent = defaultParent());
+    ColorMap(uint width, uint height, uint format = Texture::RGBA8UI, Object *parent = defaultParent());
+    explicit ColorMap(glm::ivec2 size, uint format = Texture::RGBA8UI, Object *parent = defaultParent());
 
     void create(glm::ivec2 size, uint format = Texture::RGBA8UI);
     void update();
@@ -59,7 +60,7 @@ public:
     bool exists(const Color &color) const;
     bool exists(glm::ivec2 uv) const;
 
-    const Texture2DPtr& get() const;
+    Texture2D* get() const;
 
     /**
      * Static version of <code>normalizeUV</code>
@@ -85,7 +86,7 @@ public:
     static glm::vec2 getCenterOffset(glm::ivec2 size);
 
 private:
-    Texture2DPtr m_texture;
+    Texture2D *m_texture;
     Colors m_colors;
 };
 }

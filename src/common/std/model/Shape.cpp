@@ -2,31 +2,19 @@
 #include <algine/core/DataType.h>
 #include <algine/core/TypeRegistry.h>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
-using namespace algine::internal;
 
 namespace algine {
 STATIC_INITIALIZER_IMPL(Shape) {
     alRegisterType(Shape);
 }
 
-vector<ShapePtr> Shape::publicObjects;
+Shape::Shape(Object *parent): Object(parent) {}
 
-Shape::~Shape() {
-    for (auto &inputLayout : m_inputLayouts)
-        delete inputLayout;
-
-    for (auto &p : {m_vertices, m_normals, m_texCoords, m_tangents, m_bitangents, m_boneWeights, m_boneIds}) {
-        delete p;
-    }
-
-    delete m_indices;
-}
+Shape::~Shape() = default;
 
 void Shape::createInputLayout(const InputLayoutShapeLocations &locations) {
-    auto inputLayout = new InputLayout();
+    auto inputLayout = new InputLayout(this);
     inputLayout->bind();
     m_inputLayouts.push_back(inputLayout);
 
@@ -184,13 +172,5 @@ RawPtr<ArrayBuffer> Shape::getBoneIdsBuffer() const {
 
 RawPtr<IndexBuffer> Shape::getIndicesBuffer() const {
     return m_indices;
-}
-
-ShapePtr Shape::getByName(const string &name) {
-    return PublicObjectTools::getByName<ShapePtr>(name);
-}
-
-Shape* Shape::byName(const string &name) {
-    return PublicObjectTools::byName<Shape>(name);
 }
 }

@@ -3,23 +3,23 @@
 
 #include <algine/core/InputLayout.h>
 #include <algine/core/buffers/ArrayBuffer.h>
-#include <algine/core/shader/ShaderPtr.h>
+#include <algine/core/shader/Shader.h>
 
 namespace algine {
-class QuadRenderer {
+class QuadRenderer: public Object {
 public:
-    explicit QuadRenderer(uint inPosLocation = 0);
+    explicit QuadRenderer(uint inPosLocation = 0, Object *parent = defaultParent());
 
     void draw();
 
-    const std::unique_ptr<InputLayout>& getInputLayout() const;
-    const std::unique_ptr<ArrayBuffer>& getArrayBuffer() const;
+    InputLayout* getInputLayout() const;
+    ArrayBuffer* getArrayBuffer() const;
 
-    static ShaderPtr getVertexShader();
+    static Shader* getVertexShader();
 
-public:
-    std::unique_ptr<InputLayout> m_inputLayout;
-    std::unique_ptr<ArrayBuffer> m_arrayBuffer;
+private:
+    InputLayout *m_inputLayout;
+    ArrayBuffer *m_arrayBuffer;
 };
 }
 

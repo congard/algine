@@ -9,7 +9,7 @@ class DirLight: public Light, public Rotatable {
     friend class LightingManager;
 
 public:
-    explicit DirLight(Rotator::Type rotatorType = Rotator::Type::Simple);
+    explicit DirLight(Rotator::Type rotatorType = Rotator::Type::Simple, Object *parent = defaultParent());
 
     void orthoShadows(float left, float right, float bottom, float top, float near = 1.0f, float far = 32.0f);
     void perspectiveShadows(float fovy, float aspect, float near = 1.0f, float far = 32.0f);
@@ -26,7 +26,7 @@ public:
     float getMinBias() const;
     float getMaxBias() const;
 
-    Texture2DPtr& getShadowMap() const;
+    Texture2D* getShadowMap() const;
     const glm::mat4& getLightSpaceMatrix() const;
 
 private:

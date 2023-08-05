@@ -72,14 +72,18 @@ set<string> AMTLMaterialManager::collectTextureNames() const {
     return names;
 }
 
-Texture2DPtr AMTLMaterialManager::loadTexture(const string &texName) {
+Texture2D* AMTLMaterialManager::loadTexture(const string &texName, Object *parent) {
     if (auto it = m_textures.find(texName); it != m_textures.end()) {
-        it->second.setIOSystem(io());
-        return it->second.get();
+        auto &builder = it->second;
+        builder.setIOSystem(io());
+        builder.setParent(parent);
+        return builder.get();
     }
 
-    if (auto it = m_texNames.find(texName); it != m_texNames.end()) {
-        return Texture2D::getByName(it->second);
+    if (parent != nullptr) {
+        if (auto it = m_texNames.find(texName); it != m_texNames.end()) {
+            return parent->findChild<Texture2D*>(it->second, Object::FindOption::DirectThisAndScene);
+        }
     }
 
     return nullptr;

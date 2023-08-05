@@ -15,7 +15,7 @@ void Material::setFloat(const std::string &name, float value) {
     m_floats[name] = value;
 }
 
-void Material::setTexture2D(const std::string &name, const Texture2DPtr &value) {
+void Material::setTexture2D(const std::string &name, Texture2D *value) {
     m_textures2D[name] = value;
 }
 
@@ -31,11 +31,11 @@ float Material::getFloat(const std::string &name, float defaultValue) const {
     }
 }
 
-const Texture2DPtr& Material::getTexture2D(const std::string &name) const {
+Texture2D* Material::getTexture2D(const std::string &name) const {
     return m_textures2D.at(name);
 }
 
-const Texture2DPtr& Material::getTexture2D(const std::string &name, const Texture2DPtr &defaultValue) const {
+Texture2D* Material::getTexture2D(const std::string &name, Texture2D *defaultValue) const {
     if (auto it = m_textures2D.find(name); it != m_textures2D.end()) {
         return it->second;
     } else {
@@ -47,7 +47,7 @@ void Material::setFloats(const std::unordered_map<std::string, float> &floats) {
     m_floats = floats;
 }
 
-void Material::setTextures2D(const std::unordered_map<std::string, Texture2DPtr> &textures) {
+void Material::setTextures2D(const std::unordered_map<std::string, Texture2D*> &textures) {
     m_textures2D = textures;
 }
 
@@ -55,7 +55,7 @@ const std::unordered_map<std::string, float>& Material::getFloats() const {
     return m_floats;
 }
 
-const std::unordered_map<std::string, Texture2DPtr>& Material::getTextures2D() const {
+const std::unordered_map<std::string, Texture2D*>& Material::getTextures2D() const {
     return m_textures2D;
 }
 

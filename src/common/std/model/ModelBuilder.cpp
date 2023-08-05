@@ -4,8 +4,6 @@
 
 #include <tuple>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
 using namespace glm;
 
@@ -139,17 +137,16 @@ const vec3& ModelBuilder::getScale() const {
     return m_scale;
 }
 
-ModelPtr ModelBuilder::get() {
-    return internal::PublicObjectTools::getPtr<ModelPtr>(this);
-}
-
-ModelPtr ModelBuilder::create() {
-    ModelPtr model(TypeRegistry::create<Model>(m_className));
+Object* ModelBuilder::createImpl() {
+    auto model = TypeRegistry::create<Model>(m_className);
+    model->setParent(getActualParent());
     model->setRotatorType(m_rotatorType);
 
     // create model & add Shape
     if (!m_shapeName.empty()) {
-        model->setShape(Shape::getByName(m_shapeName));
+        if (auto parent = getActualParent(); parent != nullptr) {
+            model->setShape(parent->findChild<Shape*>(m_shapeName, Object::FindOption::Direct));
+        }
     } else if (!m_shape.getModelPath().empty()) {
         m_shape.setIOSystem(io());
         model->setShape(m_shape.get());
@@ -184,8 +181,6 @@ ModelPtr ModelBuilder::create() {
     model->rotate();
     model->scale();
     model->transform();
-
-    internal::PublicObjectTools::postCreateAccessOp("Model", this, model);
 
     return model;
 }

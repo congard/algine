@@ -18,7 +18,7 @@ public:
     };
 
 public:
-    explicit AnimationBlender(const ModelPtr &model);
+    explicit AnimationBlender(Model *model);
     AnimationBlender();
 
     void blend();
@@ -29,7 +29,7 @@ public:
     void setBlendList(const std::vector<uint> &blendList);
     void setFactor(float factor);
     void changeFactor(float step);
-    void setModel(const ModelPtr &model);
+    void setModel(Model *model);
     void setLhsAnim(uint index);
     void setRhsAnim(uint index);
 
@@ -38,7 +38,7 @@ public:
     uint getLhsAnim() const;
     uint getRhsAnim() const;
     float getFactor() const;
-    const ModelPtr& getModel() const;
+    Model* getModel() const;
     const std::vector<glm::mat4>& bones();
 
 private:
@@ -51,7 +51,7 @@ private:
     glm::mat4 m_inverseGlobalInverseTransform;
     BlendListMode m_blendListMode = BlendListMode::Disable;
     uint m_lhsAnim = 0, m_rhsAnim = 0;
-    ModelPtr m_model = nullptr;
+    Model *m_model {nullptr};
     float m_factor = 0.0f;
 };
 }

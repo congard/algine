@@ -2,12 +2,13 @@
 #define ALGINE_INPUTLAYOUTSHAPELOCATIONS_H
 
 #include <algine/core/lua/Scriptable.h>
-#include <algine/core/shader/ShaderProgramPtr.h>
 
 #include <string>
 #include <map>
 
 namespace algine {
+class ShaderProgram;
+
 class InputLayoutShapeLocations: public Scriptable {
 public:
     constexpr static int None = -1;
@@ -21,12 +22,12 @@ public:
 
 public:
     InputLayoutShapeLocations() = default;
-    InputLayoutShapeLocations(const ShaderProgramPtr &program, const std::map<std::string, std::string> &locations);
+    InputLayoutShapeLocations(ShaderProgram *program, const std::map<std::string, std::string> &locations);
 
     int operator[](const std::string &name) const;
     int& operator[](const std::string &name);
 
-    void load(const ShaderProgramPtr &program, const std::map<std::string, std::string> &locations);
+    void load(ShaderProgram *program, const std::map<std::string, std::string> &locations);
 
     int get(const std::string &name) const;
     void set(const std::string &name, int value);

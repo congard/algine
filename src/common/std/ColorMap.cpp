@@ -11,18 +11,24 @@ bool ColorMap::ColorComparator::operator()(glm::ivec2 lhs, glm::ivec2 rhs) const
     return std::hash<glm::ivec2>()(lhs) < std::hash<glm::ivec2>()(rhs);
 }
 
-ColorMap::ColorMap() = default;
+ColorMap::ColorMap(Object *parent)
+    : Object(parent),
+      m_texture(nullptr) {}
 
-ColorMap::ColorMap(uint width, uint height, uint format) {
+ColorMap::ColorMap(uint width, uint height, uint format, Object *parent)
+    : ColorMap(parent)
+{
     create({width, height}, format);
 }
 
-ColorMap::ColorMap(glm::ivec2 size, uint format) {
+ColorMap::ColorMap(glm::ivec2 size, uint format, Object *parent)
+    : ColorMap(parent)
+{
     create(size, format);
 }
 
 void ColorMap::create(glm::ivec2 size, uint format) {
-    m_texture = PtrMaker::make();
+    m_texture = new Texture2D(this);
     m_texture->bind();
     m_texture->setDimensions(size.x, size.y);
     m_texture->setFormat(format);
@@ -195,7 +201,7 @@ bool ColorMap::exists(glm::ivec2 uv) const {
     return m_colors.find(uv) != m_colors.end();
 }
 
-const Texture2DPtr& ColorMap::get() const {
+Texture2D* ColorMap::get() const {
     return m_texture;
 }
 

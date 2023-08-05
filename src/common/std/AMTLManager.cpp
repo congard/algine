@@ -1,5 +1,6 @@
 #include <algine/std/AMTLManager.h>
 #include <algine/core/texture/Texture2D.h>
+#include <algine/core/scene/GlobalScene.h>
 
 #include <tulz/Path.h>
 
@@ -7,6 +8,17 @@ using namespace std;
 using namespace tulz;
 
 namespace algine {
+AMTLManager::AMTLManager()
+    : m_parent(GlobalScene::getInstance()) {}
+
+void AMTLManager::setParent(Object *parent) {
+    m_parent = parent;
+}
+
+Object* AMTLManager::getParent() const {
+    return m_parent;
+}
+
 void AMTLManager::setMaterials(const vector<AMTLMaterialManager> &materials) {
     m_materials = materials;
 }
@@ -111,23 +123,22 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
         [&](const string &prop, const string &path, sol::optional<std::string> name) {
             checkMaterial();
 
-            Texture2DBuilder manager;
-            manager.setIOSystem(io());
-            manager.setRootDir(getRootDir());
-            manager.setDefaultParams(params);
+            Texture2DBuilder builder;
+            builder.setIOSystem(io());
+            builder.setRootDir(getRootDir());
+            builder.setDefaultParams(params);
+            builder.setParent(m_parent);
 
-            if (name.has_value()) {
-                manager.setName(name.value());
-                manager.setAccess(Builder::Access::Public);
-            }
+            if (name.has_value())
+                builder.setName(name.value());
 
             if (path.size() >= 4 && string_view(path.c_str() + path.size() - 4) == ".lua") {
-                manager.execute(path, lua, &tenv);
+                builder.execute(path, lua, &tenv);
             } else {
-                manager.setPath(path);
+                builder.setPath(path);
             }
 
-            material->setTexture(prop, manager);
+            material->setTexture(prop, builder);
         },
         [&](const string &prop, const Name &name) {
             checkMaterial();

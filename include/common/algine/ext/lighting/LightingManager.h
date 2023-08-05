@@ -13,10 +13,10 @@
 #include <tulz/Array.h>
 
 namespace algine {
-class LightingManager {
+class LightingManager: public Object {
 public:
-    LightingManager();
-    ~LightingManager();
+    explicit LightingManager(Object *parent = defaultParent());
+    ~LightingManager() override;
 
     void init();
     void configureShadowMapping();
@@ -26,15 +26,15 @@ public:
     void setPointLightsLimit(uint limit);
     void setDirMapInitialSlot(uint slot);
     void setPointMapInitialSlot(uint slot);
-    void setLightShader(const ShaderProgramPtr &lightShader);
-    void setPointLightShadowShader(const ShaderProgramPtr &shadowShader);
+    void setLightShader(ShaderProgram *lightShader);
+    void setPointLightShadowShader(ShaderProgram *shadowShader);
 
     uint getDirLightsLimit() const;
     uint getPointLightsLimit() const;
     uint getDirMapInitialSlot() const;
     uint getPointMapInitialSlot() const;
-    const ShaderProgramPtr& getLightShader() const;
-    const ShaderProgramPtr& getPointLightShadowShader() const;
+    ShaderProgram* getLightShader() const;
+    ShaderProgram* getPointLightShadowShader() const;
     const BaseUniformBlock& getUniformBlock() const;
 
     void bindBuffer() const;
@@ -92,8 +92,8 @@ private:
 private:
     uint m_dirLightsLimit, m_pointLightsLimit;
     uint m_dirLightsInitialSlot, m_pointLightsInitialSlot;
-    ShaderProgramPtr m_lightShader;
-    ShaderProgramPtr m_pointShadowShader;
+    ShaderProgram *m_lightShader;
+    ShaderProgram *m_pointShadowShader;
 
 private:
     BufferWriter m_bufferWriter;

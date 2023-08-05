@@ -5,15 +5,22 @@
 #include <algine/core/Framebuffer.h>
 #include <algine/core/shader/ShaderProgram.h>
 
-#include <algine/std/QuadRendererPtr.h>
 #include <algine/std/QuadRenderer.h>
 
 #include <tulz/Array.h>
 
 namespace algine {
-class Blur {
+class Blur: public Object {
 public:
-    explicit Blur(const TextureCreateInfo &textureCreateInfo);
+    explicit Blur(const TextureCreateInfo &textureCreateInfo, Object *parent = defaultParent());
+
+    /**
+     * TODO
+     * @param kernelRadius
+     * @param blurComponent
+     * @param linearSampling
+     */
+    void configureShaders(uint kernelRadius, const std::string &blurComponent, bool linearSampling = true);
 
     /**
      * Must be called <b>after</b> setPingPongShaders(h, v)
@@ -31,27 +38,19 @@ public:
     void resizeOutput(uint width, uint height);
 
     void setAmount(uint amount);
-    void setQuadRenderer(const QuadRendererPtr &quadRenderer);
-    void setPingPongShaders(const ShaderProgramPtr &hor, const ShaderProgramPtr &vert);
-    void setPingPongShaders(const std::pair<ShaderProgramPtr, ShaderProgramPtr> &pingPong);
+    void setQuadRenderer(QuadRenderer *quadRenderer);
 
     uint getAmount() const;
-    QuadRendererPtr& getQuadRenderer();
-    ShaderProgramPtr* getPingPongShaders();
-    Texture2DPtr& get();
-    Texture2DPtr* getPingPongTextures();
-    FramebufferPtr* getPingPongFramebuffers();
+    QuadRenderer* getQuadRenderer() const;
+    Texture2D* get() const;
 
     static tulz::Array<float> getKernel(int size, float sigma);
 
-    static std::pair<ShaderProgramPtr, ShaderProgramPtr>
-    getPingPongShaders(uint kernelRadius, const std::string &blurComponent, bool linearSampling = true);
-
 private:
-    Texture2DPtr m_pingpongTex[2];
-    FramebufferPtr m_pingpongFb[2];
-    ShaderProgramPtr m_pingpongShaders[2];
-    QuadRendererPtr m_quadRenderer;
+    Texture2D *m_pingpongTex[2];
+    Framebuffer *m_pingpongFb[2];
+    ShaderProgram *m_pingpongShaders[2];
+    QuadRenderer *m_quadRenderer;
     uint m_amount;
     bool m_horizontal, m_firstIteration;
 };

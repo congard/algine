@@ -2,32 +2,29 @@
 #include <algine/std/model/Shape.h>
 #include <algine/core/TypeRegistry.h>
 
-#include "internal/PublicObjectTools.h"
-
 using namespace std;
 using namespace glm;
-using namespace algine::internal;
 
 namespace algine {
 STATIC_INITIALIZER_IMPL(Model) {
     alRegisterType(Model);
 }
 
-vector<ModelPtr> Model::publicObjects;
-
-Model::Model(const ShapePtr &shape, Rotator::Type rotatorType)
-    : Rotatable(rotatorType), m_transform(1.0f)
+Model::Model(Shape *shape, Rotator::Type rotatorType, Object *parent)
+    : Model(rotatorType, parent)
 {
     if (shape) {
         setShape(shape);
     }
 }
 
-Model::Model(Rotator::Type rotatorType)
-    : Rotatable(rotatorType), m_transform(1.0f) {}
+Model::Model(Rotator::Type rotatorType, Object *parent)
+    : Object(parent),
+      Rotatable(rotatorType),
+      m_transform(1.0f) {}
 
-Model::Model()
-    : m_transform(1.0f) {}
+Model::Model(Object *parent)
+    : Object(parent), m_transform(1.0f) {}
 
 Model::~Model() {
     deletePtr(m_animator)
@@ -89,7 +86,7 @@ void Model::setBoneTransform(Index index, const BoneMatrix &transformation) {
     }
 }
 
-void Model::setShape(const ShapePtr &shape) {
+void Model::setShape(Shape *shape) {
     m_shape = shape;
 
     configureAnimationList();
@@ -125,7 +122,7 @@ void Model::setBoneTransformations(const BoneMatrices &transformations) {
     m_boneTransformations = transformations;
 }
 
-const ShapePtr& Model::getShape() const {
+Shape* Model::getShape() const {
     return m_shape;
 }
 
@@ -147,13 +144,5 @@ const BoneMatrix& Model::getBone(Index index) const {
 
 const BoneMatrices& Model::getBoneTransformations() const {
     return m_boneTransformations;
-}
-
-ModelPtr Model::getByName(const string &name) {
-    return PublicObjectTools::getByName<ModelPtr>(name);
-}
-
-Model* Model::byName(const string &name) {
-    return PublicObjectTools::byName<Model>(name);
 }
 }

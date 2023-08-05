@@ -8,7 +8,7 @@ class PointLight: public Light {
     friend class LightingManager;
 
 public:
-    PointLight();
+    explicit PointLight(Object *parent = defaultParent());
 
     void initShadows(uint shadowMapWidth, uint shadowMapHeight) override;
     void updateMatrix() override;
@@ -24,7 +24,7 @@ public:
     float getNear() const;
     float getBias() const;
 
-    TextureCubePtr& getShadowMap() const;
+    TextureCube* getShadowMap() const;
     const glm::mat4& getLightSpaceMatrix(TextureCube::Face face) const;
 
 private:

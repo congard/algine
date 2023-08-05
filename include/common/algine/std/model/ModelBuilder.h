@@ -10,6 +10,8 @@
 
 namespace algine {
 class ModelBuilder: public Builder {
+    AL_BUILDER(Model)
+
 public:
     class AnimationInfo {
     public:
@@ -65,10 +67,8 @@ public:
     const glm::vec3& getRotate() const;
     const glm::vec3& getScale() const;
 
-    ModelPtr get();
-    ModelPtr create();
-
 protected:
+    Object* createImpl() override;
     void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
 
 private:

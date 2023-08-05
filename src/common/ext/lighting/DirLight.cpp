@@ -8,8 +8,10 @@
 using namespace std;
 
 namespace algine {
-DirLight::DirLight(Rotator::Type rotatorType)
-    : Rotatable(rotatorType), m_lightSpace(1.0f)
+DirLight::DirLight(Rotator::Type rotatorType, Object *parent)
+    : Light(parent),
+      Rotatable(rotatorType),
+      m_lightSpace(1.0f)
 {
     m_type = Type::Dir;
 }
@@ -23,8 +25,8 @@ void DirLight::perspectiveShadows(const float fovy, const float aspect, const fl
 }
 
 void DirLight::initShadows(const uint shadowMapWidth, const uint shadowMapHeight) {
-    Texture2DPtr shadowMap = PtrMaker::make();
-    m_shadowFb = new Framebuffer();
+    m_shadowFb = new Framebuffer(this);
+    auto shadowMap = new Texture2D(m_shadowFb);
 
     shadowMap->bind();
     shadowMap->setDimensions(shadowMapWidth, shadowMapHeight);
@@ -73,7 +75,7 @@ float DirLight::getMaxBias() const {
     return m_maxBias;
 }
 
-Texture2DPtr& DirLight::getShadowMap() const {
+Texture2D* DirLight::getShadowMap() const {
     return m_shadowFb->getAttachedTexture2D(Framebuffer::DepthAttachment);
 }
 
