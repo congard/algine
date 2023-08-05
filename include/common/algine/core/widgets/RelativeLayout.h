@@ -11,25 +11,25 @@ class RelativeLayout: public Layout {
     STATIC_INITIALIZER_DECL
 
 public:
-    static void setAbove(WidgetPtrView widget, std::string_view name);
-    static void setBelow(WidgetPtrView widget, std::string_view name);
-    static void setToRightOf(WidgetPtrView widget, std::string_view name);
-    static void setToLeftOf(WidgetPtrView widget, std::string_view name);
+    static void setAbove(Widget *widget, std::string_view name);
+    static void setBelow(Widget *widget, std::string_view name);
+    static void setToRightOf(Widget *widget, std::string_view name);
+    static void setToLeftOf(Widget *widget, std::string_view name);
 
-    static std::string getAbove(WidgetPtrView widget);
-    static std::string getBelow(WidgetPtrView widget);
-    static std::string getToRightOf(WidgetPtrView widget);
-    static std::string getToLeftOf(WidgetPtrView widget);
+    static std::string getAbove(Widget *widget);
+    static std::string getBelow(Widget *widget);
+    static std::string getToRightOf(Widget *widget);
+    static std::string getToLeftOf(Widget *widget);
 
-    static void setAlignLeft(WidgetPtrView widget, std::string_view name);
-    static void setAlignRight(WidgetPtrView widget, std::string_view name);
-    static void setAlignTop(WidgetPtrView widget, std::string_view name);
-    static void setAlignBottom(WidgetPtrView widget, std::string_view name);
+    static void setAlignLeft(Widget *widget, std::string_view name);
+    static void setAlignRight(Widget *widget, std::string_view name);
+    static void setAlignTop(Widget *widget, std::string_view name);
+    static void setAlignBottom(Widget *widget, std::string_view name);
 
-    static std::string getAlignLeft(WidgetPtrView widget);
-    static std::string getAlignRight(WidgetPtrView widget);
-    static std::string getAlignTop(WidgetPtrView widget);
-    static std::string getAlignBottom(WidgetPtrView widget);
+    static std::string getAlignLeft(Widget *widget);
+    static std::string getAlignRight(Widget *widget);
+    static std::string getAlignTop(Widget *widget);
+    static std::string getAlignBottom(Widget *widget);
 
 protected:
     void onMeasure(int &width, int &height) override;

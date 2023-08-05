@@ -7,13 +7,16 @@
 using namespace tulz;
 
 namespace algine::Widgets {
-Scene::Scene()
-    : m_painter(std::make_unique<Painter>())
+Scene::Scene(Object *parent)
+    : Object(parent),
+      m_painter(new Painter(this))
 {
-    m_options.painter = m_painter.get();
+    m_options.painter = m_painter;
 }
 
-Scene::Scene(int width, int height): Scene() {
+Scene::Scene(int width, int height, Object *parent)
+    : Scene(parent)
+{
     setSize(width, height);
 }
 
@@ -115,34 +118,37 @@ void Scene::draw(int begin, int end) {
     }
 }
 
-void Scene::showLayer(PtrView<Layer> layer, int level) {
+void Scene::showLayer(Layer *layer, int level) {
+    assert(layer->getParent() == this);
+
     if (level == -1) {
-        m_layers.emplace_back(layer.get());
+        m_layers.emplace_back(layer);
     } else {
-        m_layers.insert(m_layers.begin() + level, layer.get());
+        m_layers.insert(m_layers.begin() + level, layer);
     }
 
     layer->getContainer()->requestLayout();
-    layer->setScene(this);
     layer->onShow();
 }
 
-void Scene::showLayerInsteadOf(PtrView<Layer> replacement, PtrView<Layer> src) {
+void Scene::showLayerInsteadOf(Layer *replacement, Layer *src) {
+    assert(src->getParent() == this);
+    assert(replacement->getParent() == this);
+
     int level = getLevel(src);
 
     if (level == -1)
-        throw std::runtime_error("Source Layer was not found at this Scene");
+        throw std::runtime_error("Source Layer is not visible");
 
-    m_layers[level] = replacement.get();
+    m_layers[level] = replacement;
 
     src->onHide();
 
     replacement->getContainer()->requestLayout();
-    replacement->setScene(this);
     replacement->onShow();
 }
 
-void Scene::hideLayer(PtrView<Layer> layer) {
+void Scene::hideLayer(Layer *layer) {
     int level = getLevel(layer);
 
     if (level == -1)
@@ -164,8 +170,8 @@ Layer* Scene::getTopLayer() const {
     return m_layers.back();
 }
 
-int Scene::getLevel(PtrView<const Layer> layer) const {
-    auto it = std::find(m_layers.begin(), m_layers.end(), layer.get());
+int Scene::getLevel(const Layer *layer) const {
+    auto it = std::find(m_layers.begin(), m_layers.end(), layer);
     return it == m_layers.end() ? -1 : static_cast<int>(std::distance(m_layers.begin(), it));
 }
 
@@ -173,8 +179,8 @@ int Scene::getLayersCount() const {
     return static_cast<int>(m_layers.size());
 }
 
-void Scene::setFramebuffer(PtrView<Framebuffer> framebuffer) {
-    m_options.framebuffer = framebuffer.get();
+void Scene::setFramebuffer(Framebuffer *framebuffer) {
+    m_options.framebuffer = framebuffer;
 }
 
 void Scene::setSize(int width, int height) {
@@ -240,7 +246,7 @@ UnifiedEventHandler::EventListener Scene::getSurfaceEventListener() {
     };
 }
 
-const std::unique_ptr<Painter>& Scene::getPainter() const {
+Painter* Scene::getPainter() const {
     return m_painter;
 }
 
@@ -249,15 +255,15 @@ bool Scene::handlePointerEvent(const Event &event) {
     PointI globalPoint {(int) info.getX(), (int) info.getY()};
 
     // returns a widget on the scene at globalPoint
-    auto findWidget = [this, &globalPoint]() -> WidgetPtr {
+    auto findWidget = [this, &globalPoint]() -> Widget* {
         for (int i = getLayersCount() - 1; i >= 0; --i) {
-            auto &container = layerAt(i)->getContainer();
+            auto container = layerAt(i)->getContainer();
             PointI container_lp = container->mapFromGlobal(globalPoint);
 
             if (!container->getGeometry().contains(container_lp))
                 continue;
 
-            WidgetPtr widget = container->notContainerAt(container_lp);
+            Widget* widget = container->notContainerAt(container_lp);
 
             if (!widget)
                 widget = container->widgetAt(container_lp);
@@ -271,7 +277,7 @@ bool Scene::handlePointerEvent(const Event &event) {
         return nullptr;
     };
 
-    auto pushEvent = [&](const WidgetPtr &widget) {
+    auto pushEvent = [&](Widget *widget) {
         PointI widget_lp = widget->mapFromGlobal(globalPoint);
         PointerInfo widgetInfo = info;
         widgetInfo.setPos({widget_lp.getX(), widget_lp.getY()});

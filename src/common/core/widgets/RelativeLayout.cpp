@@ -21,14 +21,14 @@ STATIC_INITIALIZER_IMPL(RelativeLayout) {
     alRegisterType(RelativeLayout);
 }
 
-inline void requestParentUpdate(WidgetPtrView widget) {
-    if (auto parent = widget->getParent().getWidget(); parent != nullptr) {
+inline static void requestParentUpdate(Widget *widget) {
+    if (auto parent = widget->getParentWidget(); parent != nullptr) {
         parent->requestLayout();
         parent->invalidate();
     }
 }
 
-inline void setPosProperty(WidgetPtrView widget, const char *name, std::string_view value) {
+inline static void setPosProperty(Widget *widget, const char *name, std::string_view value) {
     if (value.empty()) {
         widget->removeProperty(name);
     } else {
@@ -36,27 +36,27 @@ inline void setPosProperty(WidgetPtrView widget, const char *name, std::string_v
     }
 }
 
-void RelativeLayout::setAbove(WidgetPtrView widget, std::string_view name) {
+void RelativeLayout::setAbove(Widget *widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_Above, name);
 }
 
-void RelativeLayout::setBelow(WidgetPtrView widget, std::string_view name) {
+void RelativeLayout::setBelow(Widget *widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_Below, name);
 }
 
-void RelativeLayout::setToRightOf(WidgetPtrView widget, std::string_view name) {
+void RelativeLayout::setToRightOf(Widget *widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_ToRightOf, name);
 }
 
-void RelativeLayout::setToLeftOf(WidgetPtrView widget, std::string_view name) {
+void RelativeLayout::setToLeftOf(Widget *widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_ToLeftOf, name);
 }
 
-inline std::string getStringProperty(WidgetPtrView widget, const char *name) {
+inline static std::string getStringProperty(Widget *widget, const char *name) {
     if (widget->hasProperty(name)) {
         auto &property = widget->property(name);
 
@@ -70,55 +70,55 @@ inline std::string getStringProperty(WidgetPtrView widget, const char *name) {
     }
 }
 
-std::string RelativeLayout::getAbove(WidgetPtrView widget) {
+std::string RelativeLayout::getAbove(Widget *widget) {
     return getStringProperty(widget, Property_Above);
 }
 
-std::string RelativeLayout::getBelow(WidgetPtrView widget) {
+std::string RelativeLayout::getBelow(Widget *widget) {
     return getStringProperty(widget, Property_Below);
 }
 
-std::string RelativeLayout::getToRightOf(WidgetPtrView widget) {
+std::string RelativeLayout::getToRightOf(Widget *widget) {
     return getStringProperty(widget, Property_ToRightOf);
 }
 
-std::string RelativeLayout::getToLeftOf(WidgetPtrView widget) {
+std::string RelativeLayout::getToLeftOf(Widget *widget) {
     return getStringProperty(widget, Property_ToLeftOf);
 }
 
-void RelativeLayout::setAlignLeft(WidgetPtrView widget, std::string_view name) {
+void RelativeLayout::setAlignLeft(Widget *widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_AlignLeft, name);
 }
 
-void RelativeLayout::setAlignRight(WidgetPtrView widget, std::string_view name) {
+void RelativeLayout::setAlignRight(Widget *widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_AlignRight, name);
 }
 
-void RelativeLayout::setAlignTop(WidgetPtrView widget, std::string_view name) {
+void RelativeLayout::setAlignTop(Widget *widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_AlignTop, name);
 }
 
-void RelativeLayout::setAlignBottom(WidgetPtrView widget, std::string_view name) {
+void RelativeLayout::setAlignBottom(Widget *widget, std::string_view name) {
     requestParentUpdate(widget);
     setPosProperty(widget, Property_AlignBottom, name);
 }
 
-std::string RelativeLayout::getAlignLeft(WidgetPtrView widget) {
+std::string RelativeLayout::getAlignLeft(Widget *widget) {
     return getStringProperty(widget, Property_AlignLeft);
 }
 
-std::string RelativeLayout::getAlignRight(WidgetPtrView widget) {
+std::string RelativeLayout::getAlignRight(Widget *widget) {
     return getStringProperty(widget, Property_AlignRight);
 }
 
-std::string RelativeLayout::getAlignTop(WidgetPtrView widget) {
+std::string RelativeLayout::getAlignTop(Widget *widget) {
     return getStringProperty(widget, Property_AlignTop);
 }
 
-std::string RelativeLayout::getAlignBottom(WidgetPtrView widget) {
+std::string RelativeLayout::getAlignBottom(Widget *widget) {
     return getStringProperty(widget, Property_AlignBottom);
 }
 
@@ -132,7 +132,7 @@ public:
     inline WidgetInfo(Widget *widget)
         : m_widget(widget) {}
 
-    inline operator WidgetPtrView() const { return m_widget; }
+    inline operator Widget*() const { return m_widget; }
 
     inline void setX(int x) { m_x = x; }
     inline void setY(int y) { m_y = y; }
@@ -189,7 +189,7 @@ RelativeLayout::WidgetInfo& RelativeLayout::layout_for(Widget *widget, std::list
     auto &widgetInfo = widgetsInfo.emplace_back(widget);
 
     auto getBase = [&](const char *prop) -> WidgetInfo& {
-        auto base = findChild(std::any_cast<const std::string&>(widget->property(prop))).get();
+        auto base = findChild<Widget*>(std::any_cast<const std::string&>(widget->property(prop))); // TODO: direct or not?
 
         if (base == nullptr) {
             throw std::runtime_error("Base widget couldn't be found");
@@ -302,10 +302,12 @@ void RelativeLayout::onMeasure(int &width, int &height) {
     int maxX = INT32_MIN;
     int maxY = INT32_MIN;
 
-    for (auto &child : m_children) {
+    auto children = getWidgets();
+
+    for (auto child : children) {
         child->measure();
 
-        auto &childInfo = layout_for(child.get(), widgetsInfo);
+        auto &childInfo = layout_for(child, widgetsInfo);
 
         keepMax(maxX, childInfo.getX() + childInfo.getWidth() + getMarginRight(child));
         keepMax(maxY, childInfo.getY() + childInfo.getHeight() + getMarginBottom(child));
@@ -321,7 +323,7 @@ void RelativeLayout::onMeasure(int &width, int &height) {
 
     setMeasuredDimension(width, height);
 
-    for (auto &child : m_children) {
+    for (auto child : children) {
         auto policy_v = child->getVerticalSizePolicy();
         auto policy_h = child->getHorizontalSizePolicy();
 
@@ -334,11 +336,11 @@ void RelativeLayout::onMeasure(int &width, int &height) {
 void RelativeLayout::onLayout() {
     std::list<WidgetInfo> widgetsInfo;
 
-    for (auto &child : m_children) {
+    for (auto child : getWidgets()) {
         child->measure();
         child->layout();
 
-        auto &childInfo = layout_for(child.get(), widgetsInfo);
+        auto &childInfo = layout_for(child, widgetsInfo);
 
         if (childInfo.isGeometryChanged()) {
             setChildXDirectly(child, childInfo.getX());

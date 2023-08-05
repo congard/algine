@@ -9,8 +9,8 @@ class ImageWidget: public Widget {
     STATIC_INITIALIZER_DECL
 
 public:
-    void setImage(const Texture2DPtr &image);
-    const Texture2DPtr& getImage() const;
+    void setImage(Texture2D *image, bool takeOwnership = true);
+    Texture2D* getImage() const;
 
     void fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) override;
 
@@ -19,7 +19,7 @@ protected:
     void onDraw(Painter &painter) override;
 
 protected:
-    Texture2DPtr m_image;
+    Texture2D *m_image;
 };
 }
 

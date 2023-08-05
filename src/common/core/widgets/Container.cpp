@@ -17,115 +17,27 @@ STATIC_INITIALIZER_IMPL(Container) {
 Container::Container()
     : Widget() {}
 
-void Container::addChild(const WidgetPtr &child) {
+void Container::addWidget(Widget *child) {
     requestLayout();
     invalidate();
-    child->setParent(this);
-    m_children.emplace_back(child);
+    addChild(child);
 }
 
-// remove child of child from #children array by #value
-template<typename T>
-inline bool removeChildOfBy(std::list<WidgetPtr> &children, const T &value) {
-    return std::any_of(children.begin(), children.end(), [&](WidgetPtr &child) {
-        if (auto group = std::dynamic_pointer_cast<Container>(child); group != nullptr) {
-            return group->removeChild(value);
-        } else {
-            return false;
-        }
-    });
+bool Container::removeWidget(Widget *child, FindOption option) {
+    return removeChild(child, option);
 }
 
-bool Container::removeChild(const WidgetPtr &child) {
-    if (auto it = std::find(m_children.begin(), m_children.end(), child); it != m_children.end()) {
-        requestLayout();
-        invalidate();
-        child->setParent(nullptr);
-        m_children.erase(it);
-        return true;
-    } else {
-        return removeChildOfBy(m_children, child);
-    }
-}
-
-bool Container::removeChild(const std::string &name) {
-    for (auto it = m_children.begin(); it != m_children.end(); ++it) {
-        if (auto &child = *it; child->getName() == name) {
-            requestLayout();
-            invalidate();
-            child->setParent(nullptr);
-            m_children.erase(it);
-            return true;
-        }
-    }
-
-    return removeChildOfBy(m_children, name);
-}
-
-void Container::removeAllChildren() {
-    requestLayout();
-    invalidate();
-
-    for (auto &child : m_children) {
-        child->setParent(nullptr);
-    }
-
-    m_children = {};
-}
-
-WidgetPtr Container::findChildImpl(const std::string &name) const {
-    for (auto &child : m_children) {
-        if (child->getName() == name) {
-            return child;
-        }
-    }
-
-    for (auto &child : m_children) {
-        if (auto group = std::dynamic_pointer_cast<Container>(child); group != nullptr) {
-            if (auto p = group->findChild(name); p != nullptr) {
-                return p;
-            }
-        }
-    }
-
+Widget* Container::removeWidget(std::string_view name, FindOption option) {
+    if (auto widget = findChild<Widget*>(name); widget != nullptr && removeChild(widget, option))
+        return widget;
     return nullptr;
 }
 
-std::list<WidgetPtr> Container::findChildren(const std::string &regex) const {
-    std::list<WidgetPtr> children;
-
-    for (auto &child : m_children) {
-        if (!tulz::StringUtils::findRegex(child->getName(), regex).empty()) {
-            children.emplace_back(child);
-        }
-
-        if (auto group = std::dynamic_pointer_cast<Container>(child); group != nullptr) {
-            children.merge(group->findChildren(regex));
-        }
-    }
-
-    return children;
+std::forward_list<Widget*> Container::getWidgets() {
+    return findChildren<Widget*>([](Widget*) { return true; }, Object::FindOption::Direct); // reverse reversed
 }
 
-const WidgetPtr& Container::getChildAt(Index index) const {
-    auto it = m_children.begin();
-
-    for (int i = 0; i < index; ++i) {
-        ++it;
-    }
-
-    return *it;
-}
-
-const std::list<WidgetPtr>& Container::getChildren() const {
-    return m_children;
-}
-
-uint Container::getChildCount() const {
-    return m_children.size();
-}
-    
-WidgetPtr Container::widgetAt(const PointI &point) {
+Widget* Container::widgetAt(const PointI &point) {
     // check if the point belongs to content
     // if not, there is nothing to look for
     if (!(point.getX() >= getPaddingLeft() && point.getX() <= getWidth() - getPaddingRight() &&
@@ -134,46 +46,58 @@ WidgetPtr Container::widgetAt(const PointI &point) {
         return nullptr;
     }
 
-    for (auto it = m_children.end(); it != m_children.begin();) {
-        --it;
+    // already reversed list
+    auto &children = getChildren();
 
-        auto &child = *it;
+    // from last to first
+    for (auto child : children) {
+        auto widget = dynamic_cast<Widget*>(child);
 
-        if (!child->isVisible()) {
+        if (!widget)
+            continue;
+
+        if (!widget->isVisible()) {
             continue;
         }
 
-        auto localPoint = child->mapFromParent(point);
+        auto localPoint = widget->mapFromParent(point);
 
         auto lx = localPoint.getX();
         auto ly = localPoint.getY();
 
-        if (lx >= 0 && lx <= child->getWidth() && ly >= 0 && ly <= child->getHeight()) {
-            return child;
+        if (lx >= 0 && lx <= widget->getWidth() && ly >= 0 && ly <= widget->getHeight()) {
+            return widget;
         }
     }
 
     return nullptr;
 }
 
-WidgetPtr Container::notContainerAt(const PointI &point) {
+Widget* Container::notContainerAt(const PointI &point) {
     auto child = widgetAt(point);
 
-    if (auto container = std::dynamic_pointer_cast<Container>(child); container != nullptr) {
+    if (auto container = dynamic_cast<Container*>(child); container != nullptr) {
         return container->notContainerAt(container->mapFromParent(point));
     } else {
         return child;
     }
 }
 
-ContainerPtr Container::containerAt(const PointI &point) {
+Container* Container::containerAt(const PointI &point) {
     auto child = widgetAt(point);
-    return std::dynamic_pointer_cast<Container>(child);
+    return dynamic_cast<Container*>(child);
+}
+
+void Container::onChildRemoved(Object *child) {
+    requestLayout();
+    invalidate();
 }
 
 void Container::onAnimate() {
-    for (auto &child : m_children) {
-        child->animate();
+    for (auto child : getChildren()) {
+        if (auto widget = dynamic_cast<Widget*>(child)) {
+            widget->animate();
+        }
     }
 }
 
@@ -192,7 +116,9 @@ void Container::onMeasure(int &width, int &height) {
     int maxX = -1;
     int maxY = -1;
 
-    for (auto &child : m_children) {
+    auto children = getWidgets();
+
+    for (auto child : children) {
         child->measure();
         auto boundingRect = child->boundingRect();
         keepMax(maxX, boundingRect.getX() + boundingRect.getWidth());
@@ -207,7 +133,7 @@ void Container::onMeasure(int &width, int &height) {
 
     setMeasuredDimension(width, height);
 
-    for (auto &child : m_children) {
+    for (auto child : children) {
         auto policy_v = child->getVerticalSizePolicy();
         auto policy_h = child->getHorizontalSizePolicy();
 
@@ -225,10 +151,10 @@ void Container::onDraw(Painter &painter) {
     options.paddingTop = getPaddingTop();
     options.paddingRight = getPaddingRight();
     options.paddingBottom = getPaddingBottom();
-    options.framebuffer = m_framebuffer.get();
+    options.framebuffer = m_framebuffer;
     options.painter = &painter;
 
-    for (auto &child : m_children) {
+    for (auto child : getWidgets()) {
         child->display(options);
     }
 }
@@ -237,9 +163,10 @@ void Container::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSyst
     Widget::fromXML(node, io);
 
     for (auto child : node.children()) {
-        WidgetPtr childPtr(TypeRegistry::create<Widget>(child.name()));
+        auto childPtr = TypeRegistry::create<Widget>(child.name());
+        childPtr->setParent(this);
         childPtr->fromXML(child, io);
-        addChild(childPtr);
+        addWidget(childPtr);
     }
 }
 }

@@ -2,19 +2,22 @@
 #define ALGINE_WIDGETS_LAYER_H
 
 #include <algine/core/widgets/WidgetDisplayOptions.h>
-#include <algine/core/widgets/ContainerPtr.h>
 #include <algine/core/math/Rect.h>
+#include <algine/core/Object.h>
+
+namespace algine {
+class Container;
+}
 
 namespace algine::Widgets {
 class Scene;
 
-class Layer {
+class Layer: public Object {
     friend class Scene;
 
 public:
-    Layer() = default;
     explicit Layer(Scene *scene);
-    virtual ~Layer() = default;
+    ~Layer() override = default;
 
     virtual void draw(const WidgetDisplayOptions &options);
 
@@ -23,8 +26,8 @@ public:
 
     bool isVisible() const;
 
-    void setScene(Scene *scene);
-    Scene* getScene() const;
+    void setParent(Object *parent) override;
+    Scene* getParentWidgetsScene() const;
 
     void setX(int x);
     void setY(int y);
@@ -39,8 +42,8 @@ public:
     float getOpacity() const;
     const RectI& getGeometry() const;
 
-    void setContainer(ContainerPtr container);
-    const ContainerPtr& getContainer() const;
+    void setContainer(Container *container);
+    Container* getContainer() const;
 
 protected:
     virtual void onGeometryChanged(const RectI &old, const RectI &current);
@@ -48,11 +51,8 @@ protected:
     virtual void onHide();
 
 private:
-    ContainerPtr m_container;
-    Scene *m_scene {nullptr};
+    Container *m_container {nullptr};
 };
-
-using LayerPtr = std::shared_ptr<Layer>;
 }
 
 #endif //ALGINE_WIDGETS_LAYER_H

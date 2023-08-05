@@ -2,19 +2,17 @@
 #define ALGINE_WIDGET_H
 
 #include <algine/core/widgets/SizePolicy.h>
-#include <algine/core/widgets/WidgetPtr.h>
 #include <algine/core/widgets/WidgetDisplayOptions.h>
 #include <algine/core/widgets/Layer.h>
 #include <algine/core/widgets/animation/Animation.h>
 #include <algine/core/unified/Event.h>
-#include <algine/core/shader/ShaderProgramPtr.h>
-#include <algine/core/texture/Texture2DPtr.h>
-#include <algine/core/FramebufferPtr.h>
 #include <algine/core/painter/Paint.h>
 #include <algine/core/math/Rect.h>
 #include <algine/core/PtrView.h>
 #include <algine/core/Variant.h>
 #include <algine/core/lua/Lua.h>
+#include <algine/core/io/IOSystemPtr.h>
+#include <algine/core/Object.h>
 #include <algine/types.h>
 
 #include <string>
@@ -31,52 +29,11 @@ namespace algine {
 class IOSystem;
 class Widget;
 
-using WidgetPtrView = PtrView<Widget>;
-
-class Widget {
+class Widget: public Object {
 public:
     enum class Filtering {
         Nearest = 0x2600,
         Linear = 0x2601
-    };
-
-    /// #solgen #ignore
-    class Parent: public Variant<Widget*, Widgets::Layer*> {
-        template<typename T>
-        struct ptr_type { using type = std::remove_pointer_t<T>; };
-
-        template<typename T>
-        struct ptr_type<PtrView<T>> { using type = T; };
-
-        template<typename T>
-        using ptr_type_t = typename ptr_type<T>::type;
-
-    public:
-        using Variant<Widget*, Widgets::Layer*>::Variant;
-        using Variant<Widget*, Widgets::Layer*>::operator=;
-
-        inline Parent(std::nullptr_t) { reset(); }
-
-        Widget* getWidget() const;
-        Widgets::Layer* getLayer() const;
-
-        bool isNull() const;
-
-        template<typename T>
-        operator T() const {
-            using U = ptr_type_t<T>;
-
-            constexpr bool baseOfWidget = std::is_base_of_v<U, Widget>;
-            constexpr bool baseOfLayer = std::is_base_of_v<U, Widgets::Layer>;
-
-            if constexpr (baseOfWidget)
-                return static_cast<T>(getWidget());
-
-            if constexpr (baseOfLayer)
-                return static_cast<T>(getLayer());
-
-            static_assert(baseOfWidget || baseOfLayer, "Only Widget* or Widgets::Layer* can be a parent");
-        }
     };
 
     using Property = std::any;
@@ -88,7 +45,7 @@ public:
 
 public:
     Widget();
-    virtual ~Widget() = default;
+    ~Widget() override = default;
 
     /**
      * Sets widget's geometry
@@ -123,9 +80,6 @@ public:
     int getMaxWidth() const;
     int getMaxHeight() const;
 
-    void setName(const std::string &name);
-    const std::string& getName() const;
-
     void setBackground(const Paint &paint);
     const Paint& getBackground() const;
 
@@ -156,8 +110,7 @@ public:
     void setOpacity(float opacity);
     float getOpacity() const;
 
-    void setParent(Parent parent);
-    Parent getParent() const;
+    Widget* getParentWidget() const;
 
     void setSizePolicy(SizePolicy horizontal, SizePolicy vertical);
     void setHorizontalSizePolicy(SizePolicy policy);
@@ -194,7 +147,7 @@ public:
      * <code>point</code> will be treated as global
      * @see mapFromParent, mapFromGlobal
      */
-    PointI mapFrom(WidgetPtrView parent, const PointI &point) const;
+    PointI mapFrom(Widget *parent, const PointI &point) const;
 
     /**
      * The same as <code>mapFrom(getParent(), point)</code>
@@ -222,7 +175,7 @@ public:
      * <code>point</code> will be treated as global
      * @see mapToParent, mapToGlobal
      */
-    PointI mapTo(WidgetPtrView parent, const PointI &point) const;
+    PointI mapTo(Widget *parent, const PointI &point) const;
 
     /**
      * The same as <code>mapTo(getParent(), point)</code>
@@ -287,26 +240,26 @@ public:
      */
     sol::environment getEnv() const;
 
-    virtual void fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io);
-    bool fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io);
-    bool fromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io);
+    virtual void fromXML(const pugi::xml_node &node, const IOSystemPtr &io);
+    bool fromXML(const std::string &xml, const IOSystemPtr &io);
+    bool fromXMLFile(const std::string &file, const IOSystemPtr &io);
     bool fromXML(const std::string &xml);
     bool fromXMLFile(const std::string &file);
 
-    static WidgetPtr constructFromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io);
-    static WidgetPtr constructFromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io);
-    static WidgetPtr constructFromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io);
-    static WidgetPtr constructFromXML(const std::string &xml);
-    static WidgetPtr constructFromXMLFile(const std::string &file);
+    static Widget* constructFromXML(const pugi::xml_node &node, const IOSystemPtr &io, Object *parent = defaultParent());
+    static Widget* constructFromXML(const std::string &xml, const IOSystemPtr &io, Object *parent = defaultParent());
+    static Widget* constructFromXMLFile(const std::string &file, const IOSystemPtr &io, Object *parent = defaultParent());
+    static Widget* constructFromXML(const std::string &xml, Object *parent = defaultParent());
+    static Widget* constructFromXMLFile(const std::string &file, Object *parent = defaultParent());
 
     template<typename T>
-    static Ptr<T> constructFromXML(const std::string &xml) {
-        return std::dynamic_pointer_cast<T>(constructFromXML(xml));
+    static T constructFromXML(const std::string &xml, Object *parent = defaultParent()) {
+        return dynamic_cast<T>(constructFromXML(xml, parent));
     }
 
     template<typename T>
-    static Ptr<T> constructFromXMLFile(const std::string &file) {
-        return std::dynamic_pointer_cast<T>(constructFromXMLFile(file));
+    static T constructFromXMLFile(const std::string &file, Object *parent = defaultParent()) {
+        return dynamic_cast<T>(constructFromXMLFile(file, parent));
     }
 
 protected:
@@ -346,13 +299,12 @@ protected:
     static Color getColor(const char *str);
 
 protected:
-    Texture2DPtr m_texture;
-    FramebufferPtr m_framebuffer;
+    Texture2D *m_texture;
+    Framebuffer *m_framebuffer;
 
 protected:
     Flags m_flags;
     RectI m_geometry;
-    Parent m_parent;
     std::string m_name;
     Paint m_background;
 

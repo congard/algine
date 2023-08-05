@@ -16,13 +16,13 @@ STATIC_INITIALIZER_IMPL(ImageWidget) {
     alRegisterType(ImageWidget);
 }
 
-void ImageWidget::setImage(const Texture2DPtr &image) {
+void ImageWidget::setImage(Texture2D *image, bool takeOwnership) {
     requestLayout();
     invalidate();
     m_image = image;
 }
 
-const Texture2DPtr& ImageWidget::getImage() const {
+Texture2D* ImageWidget::getImage() const {
     return m_image;
 }
 
@@ -56,7 +56,6 @@ void ImageWidget::onDraw(Painter &painter) {
 void ImageWidget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) {
     Widget::fromXML(node, io);
 
-    bool isImageUnique = false;
     uint imageFiltering = 0;
 
     for (pugi::xml_attribute attr : node.attributes()) {
@@ -67,11 +66,10 @@ void ImageWidget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSy
         auto attr_str = attr.as_string();
 
         if (isAttr("image")) {
-            setImage(Texture2D::getByName(getString(attr_str)));
+            setImage(findChild<Texture2D*>(getString(attr_str), Object::FindOption::DirectThisAndScene));
         } else if (isAttr("imageSrc")) {
-            auto data = TexturePathLoader::load(getString(attr_str), io);
-            isImageUnique = data.unique;
-            setImage(data.texture);
+            auto texture = TexturePathLoader::load(getString(attr_str), io, this);
+            setImage(texture);
         } else if (isAttr("imageWidth")) {
             setWidth(getDimenPx(attr_str) + getPaddingLeft() + getPaddingRight());
         } else if (isAttr("imageHeight")) {
@@ -81,7 +79,7 @@ void ImageWidget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSy
         }
     }
 
-    if (isImageUnique && imageFiltering != 0) {
+    if (m_image != nullptr && m_image->getParent() == this && imageFiltering != 0) {
         m_image->bind();
         m_image->setParams(std::map<uint, uint> {
             {Texture::MinFilter, imageFiltering},

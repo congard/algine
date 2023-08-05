@@ -20,8 +20,8 @@
 #include "core/djb2.h"
 #include "TexturePathLoader.h"
 
-#define requireParentRedraw() if (auto parent = m_parent.getWidget(); parent) parent->invalidate()
-#define requireParentLayout() if (auto parent = m_parent.getWidget(); parent) parent->requestLayout()
+#define requireParentRedraw() if (auto parent = getParentWidget(); parent) parent->invalidate()
+#define requireParentLayout() if (auto parent = getParentWidget(); parent) parent->requestLayout()
 
 #define continue_if(condition) if (!(condition)) return
 
@@ -34,22 +34,9 @@
 #endif
 
 namespace algine {
-Widget* Widget::Parent::getWidget() const {
-    return is<Widget*>() ? as<Widget*>() : nullptr;
-}
-
-Widgets::Layer* Widget::Parent::getLayer() const {
-    return is<Widgets::Layer*>() ? as<Widgets::Layer*>() : nullptr;
-}
-
-bool Widget::Parent::isNull() const {
-    return getWidget() && getLayer();
-}
-
 Widget::Widget()
     : m_flags(),
       m_geometry(0, 0, 128, 128),
-      m_parent(),
       m_minWidth(),
       m_minHeight(),
       m_maxWidth(),
@@ -66,7 +53,7 @@ Widget::Widget()
       m_verticalPolicy(SizePolicy::Preferred),
       m_luaEnv()
 {
-    m_texture = PtrMaker::make();
+    m_texture = new Texture2D(this);
     m_texture->bind();
     m_texture->setFormat(Texture::RGBA8);
     m_texture->setDimensions(getWidth(), getHeight());
@@ -78,7 +65,7 @@ Widget::Widget()
     });
     m_texture->update();
 
-    m_framebuffer = PtrMaker::make();
+    m_framebuffer = new Framebuffer(this);
     m_framebuffer->bind();
     m_framebuffer->attachTexture(m_texture, Framebuffer::ColorAttachmentZero);
 
@@ -208,16 +195,10 @@ int Widget::getMaxHeight() const {
     return m_maxHeight;
 }
 
-void Widget::setName(const std::string &name) {
-    m_name = name;
-}
-
-const std::string& Widget::getName() const {
-    return m_name;
-}
-
 void Widget::setBackground(const Paint &paint) {
     invalidate();
+    if (auto tex = m_background.getTexture(); tex != nullptr && tex->getParent() == this)
+        delete m_background.getTexture();
     m_background = paint;
 }
 
@@ -335,12 +316,8 @@ float Widget::getOpacity() const {
     return m_opacity;
 }
 
-void Widget::setParent(Parent parent) {
-    std::swap(m_parent, parent);
-}
-
-Widget::Parent Widget::getParent() const {
-    return m_parent;
+Widget* Widget::getParentWidget() const {
+    return dynamic_cast<Widget*>(getParent());
 }
 
 void Widget::setSizePolicy(SizePolicy horizontal, SizePolicy vertical) {
@@ -532,11 +509,11 @@ void Widget::setBoundingRectPos(int x, int y) {
     setBoundingRectPos(x, y, boundingRect());
 }
 
-PointI Widget::mapFrom(WidgetPtrView parent, const PointI &point) const {
+PointI Widget::mapFrom(Widget *parent, const PointI &point) const {
     if (parent == this)
         return point;
 
-    Widget* thisParent = m_parent;
+    auto thisParent = getParentWidget();
 
     if (thisParent == nullptr && parent != nullptr)
         throw std::runtime_error("The parent must be a parent of the calling widget");
@@ -565,18 +542,18 @@ PointI Widget::mapFrom(WidgetPtrView parent, const PointI &point) const {
 }
 
 PointI Widget::mapFromParent(const PointI &point) const {
-    return mapFrom(m_parent, point);
+    return mapFrom(getParentWidget(), point);
 }
 
 PointI Widget::mapFromGlobal(const PointI &globalPoint) const {
     return mapFrom(nullptr, globalPoint);
 }
 
-PointI Widget::mapTo(WidgetPtrView parent, const PointI &point) const {
+PointI Widget::mapTo(Widget *parent, const PointI &point) const {
     if (parent == this)
         return point;
 
-    Widget* thisParent = m_parent;
+    auto thisParent = getParentWidget();
 
     if (thisParent == nullptr && parent != nullptr)
         throw std::runtime_error("The parent must be a parent of the calling widget");
@@ -608,7 +585,7 @@ PointI Widget::mapTo(WidgetPtrView parent, const PointI &point) const {
 }
 
 PointI Widget::mapToParent(const PointI &point) const {
-    return mapTo(m_parent, point);
+    return mapTo(getParentWidget(), point);
 }
 
 PointI Widget::mapToGlobal(const PointI &globalPoint) const {
@@ -845,10 +822,10 @@ void Widget::onMeasure(int &width, int &height) {
         case SizePolicy::Minimum: width = contentWidth(getMinWidth()); break;
         case SizePolicy::Maximum: width = contentWidth(getMaxWidth()); break;
         case SizePolicy::MatchParent:
-            if (auto widgetParent = m_parent.getWidget(); widgetParent)
+            if (auto widgetParent = getParentWidget(); widgetParent)
                 width = contentWidth(widgetParent->matchParentWidth(this));
-            else if (auto layerParent = m_parent.getLayer(); layerParent)
-                width = contentWidth(layerParent->getScene()->getWidth());
+            else if (auto layerParent = dynamic_cast<Widgets::Layer*>(getParent()); layerParent)
+                width = contentWidth(layerParent->getParentWidgetsScene()->getWidth());
             break;
         default: break;
     }
@@ -857,10 +834,10 @@ void Widget::onMeasure(int &width, int &height) {
         case SizePolicy::Minimum: height = contentHeight(getMinHeight()); break;
         case SizePolicy::Maximum: height = contentHeight(getMaxHeight()); break;
         case SizePolicy::MatchParent:
-            if (auto widgetParent = m_parent.getWidget(); widgetParent)
+            if (auto widgetParent = getParentWidget(); widgetParent)
                 height = contentHeight(widgetParent->matchParentHeight(this));
-            else if (auto layerParent = m_parent.getLayer(); layerParent)
-                height = contentHeight(layerParent->getScene()->getHeight());
+            else if (auto layerParent = dynamic_cast<Widgets::Layer*>(getParent()); layerParent)
+                height = contentHeight(layerParent->getParentWidgetsScene()->getHeight());
             break;
         default: break;
     }
@@ -960,7 +937,7 @@ Color Widget::getColor(const char *str) {
 // visible, name, horizontalSizePolicy, verticalSizePolicy, filtering
 // these attributes must be specified explicitly (further - explicit attributes)
 
-void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) {
+void Widget::fromXML(const pugi::xml_node &node, const IOSystemPtr &io) {
     for (pugi::xml_attribute attr : node.attributes()) {
         auto isAttr = [&](const char *name) {
             return strcmp(attr.name(), name) == 0;
@@ -1022,7 +999,7 @@ void Widget::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem>
         } else if (isAttr("name")) {
             setName(attr.as_string());
         } else if (isAttr("background")) {
-            m_background.setTexture(TexturePathLoader::load(getString(), io).texture);
+            m_background.setTexture(TexturePathLoader::load(getString(), io, this));
         } else if (isAttr("backgroundColor")) {
             m_background.setColor(getColor(attr.as_string()));
         } else if (isAttr("padding")) {
@@ -1110,7 +1087,7 @@ inline auto parseXML(const std::string &xml) {
     return doc;
 }
 
-bool Widget::fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io) {
+bool Widget::fromXML(const std::string &xml, const IOSystemPtr &io) {
     if (auto doc = parseXML(xml); !doc.document_element().empty()) {
         fromXML(doc.document_element(), io);
         return true;
@@ -1119,7 +1096,7 @@ bool Widget::fromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io
     return false;
 }
 
-bool Widget::fromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io) {
+bool Widget::fromXMLFile(const std::string &file, const IOSystemPtr &io) {
     auto stream = io->open(file, IOStream::Mode::ReadText);
     auto xml = stream->readStr();
     stream->close();
@@ -1134,32 +1111,33 @@ bool Widget::fromXMLFile(const std::string &file) {
     return fromXMLFile(file, Engine::getDefaultIOSystem());
 }
 
-WidgetPtr Widget::constructFromXML(const pugi::xml_node &node, const std::shared_ptr<IOSystem> &io) {
-    WidgetPtr rootWidget(TypeRegistry::create<Widget>(node.name()));
+Widget* Widget::constructFromXML(const pugi::xml_node &node, const IOSystemPtr &io, Object *parent) {
+    auto rootWidget = TypeRegistry::create<Widget>(node.name());
+    rootWidget->setParent(parent);
     rootWidget->fromXML(node, io);
     return rootWidget;
 }
 
-WidgetPtr Widget::constructFromXML(const std::string &xml, const std::shared_ptr<IOSystem> &io) {
+Widget* Widget::constructFromXML(const std::string &xml, const IOSystemPtr &io, Object *parent) {
     if (auto doc = parseXML(xml); !doc.document_element().empty()) {
-        return constructFromXML(doc.document_element(), io);
+        return constructFromXML(doc.document_element(), io, parent);
     }
 
     return nullptr;
 }
 
-WidgetPtr Widget::constructFromXMLFile(const std::string &file, const std::shared_ptr<IOSystem> &io) {
+Widget* Widget::constructFromXMLFile(const std::string &file, const IOSystemPtr &io, Object *parent) {
     auto stream = io->open(file, IOStream::Mode::ReadText);
     auto xml = stream->readStr();
     stream->close();
-    return constructFromXML(xml, io);
+    return constructFromXML(xml, io, parent);
 }
 
-WidgetPtr Widget::constructFromXML(const std::string &xml) {
-    return constructFromXML(xml, Engine::getDefaultIOSystem());
+Widget* Widget::constructFromXML(const std::string &xml, Object *parent) {
+    return constructFromXML(xml, Engine::getDefaultIOSystem(), parent);
 }
 
-WidgetPtr Widget::constructFromXMLFile(const std::string &file) {
-    return constructFromXMLFile(file, Engine::getDefaultIOSystem());
+Widget* Widget::constructFromXMLFile(const std::string &file, Object *parent) {
+    return constructFromXMLFile(file, Engine::getDefaultIOSystem(), parent);
 }
 }

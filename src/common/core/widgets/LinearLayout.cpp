@@ -45,7 +45,7 @@ void LinearLayout::onMeasure(int &width, int &height) {
 
     setMeasuredDimension(width, height);
 
-    for (auto &child : m_children) {
+    for (auto child : getWidgets()) {
         auto policy_v = child->getVerticalSizePolicy();
         auto policy_h = child->getHorizontalSizePolicy();
 
@@ -58,7 +58,7 @@ void LinearLayout::onMeasure(int &width, int &height) {
 void LinearLayout::onLayout() {
     int pos = 0;
 
-    void (LinearLayout::*placeChild)(const WidgetPtr&, int&);
+    void (LinearLayout::*placeChild)(Widget*, int&);
 
     if (m_orientation == Orientation::Vertical) {
         placeChild = &LinearLayout::place_vertically;
@@ -68,7 +68,7 @@ void LinearLayout::onLayout() {
         pos = getPaddingLeft();
     }
 
-    for (auto &child : m_children) {
+    for (auto child : getWidgets()) {
         if (!child->isVisible())
             continue;
 
@@ -86,7 +86,7 @@ void LinearLayout::onLayout() {
     }
 }
 
-void LinearLayout::place_vertically(const WidgetPtr &child, int &y) {
+void LinearLayout::place_vertically(Widget *child, int &y) {
     y += Layout::getMarginTop(child);
     setChildYDirectly(child, y);
     y += child->getHeight();
@@ -109,7 +109,7 @@ void LinearLayout::place_vertically(const WidgetPtr &child, int &y) {
     }
 }
 
-void LinearLayout::place_horizontally(const WidgetPtr &child, int &x) {
+void LinearLayout::place_horizontally(Widget *child, int &x) {
     x += Layout::getMarginLeft(child);
     setChildXDirectly(child, x);
     x += child->getWidth();
@@ -136,7 +136,7 @@ void LinearLayout::measure_vertical_preferred(int &width, int &height) {
     int y = 0;
     int maxWidth = 0;
 
-    for (auto &child : m_children) {
+    for (auto child : getWidgets()) {
         if (!child->isVisible())
             continue;
 
@@ -164,7 +164,7 @@ void LinearLayout::measure_horizontal_preferred(int &width, int &height) {
     int x = 0;
     int maxHeight = 0;
 
-    for (auto &child : m_children) {
+    for (auto child : getWidgets()) {
         if (!child->isVisible())
             continue;
 

@@ -28,8 +28,8 @@ protected:
     void onLayout() override;
 
 private:
-    void place_vertically(const WidgetPtr &child, int &y);
-    void place_horizontally(const WidgetPtr &child, int &x);
+    void place_vertically(Widget *child, int &y);
+    void place_horizontally(Widget *child, int &x);
 
     void measure_vertical_preferred(int &width, int &height);
     void measure_horizontal_preferred(int &width, int &height);

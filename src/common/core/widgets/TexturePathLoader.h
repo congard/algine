@@ -6,34 +6,26 @@
 #include <cstring>
 
 namespace algine::TexturePathLoader {
-struct Data {
-    Texture2DPtr texture;
-    bool unique;
-};
-
-inline Data load(std::string_view str_v, const std::shared_ptr<IOSystem> &io) {
+inline Texture2D* load(std::string_view str_v, const std::shared_ptr<IOSystem> &io, Object *parent) {
     auto str = str_v.data();
 
     if (str_v.size() >= 4 && std::string_view(str + str_v.size() - 4) == ".lua") {
         Texture2DBuilder builder;
         builder.setIOSystem(io);
+        builder.setParent(parent);
         builder.execute(str);
-
-        return {
-            builder.get(),
-            builder.getAccess() == Builder::Access::Private
-        };
+        return builder.get();
     } else {
         TextureFileInfo info;
         info.flip = true;
         info.path = str;
         info.ioSystem = io;
 
-        Texture2DPtr texture = PtrMaker::make();
+        auto texture = new Texture2D(parent);
         texture->bind();
         texture->fromFile(info);
 
-        return {texture, true};
+        return texture;
     }
 }
 }

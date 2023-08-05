@@ -1,38 +1,35 @@
 #include <algine/core/widgets/Layer.h>
 #include <algine/core/widgets/Scene.h>
 #include <algine/core/widgets/Container.h>
-#include <algine/core/unified/UnifiedEventHandler.h>
 
 namespace algine::Widgets {
-Layer::Layer(Scene *scene) {
-    setScene(scene);
-}
+Layer::Layer(Scene *scene)
+    : Object(scene) {}
 
 void Layer::draw(const WidgetDisplayOptions &options) {
     m_container->display(options);
 }
 
 void Layer::show(int level) {
-    assert(m_scene != nullptr);
-    m_scene->showLayer(this, level);
+    getParentWidgetsScene()->showLayer(this, level);
 }
 
 void Layer::hide() {
-    assert(m_scene != nullptr);
-    m_scene->hideLayer(this);
+    getParentWidgetsScene()->hideLayer(this);
 }
 
 bool Layer::isVisible() const {
-    assert(m_scene != nullptr);
-    return m_scene->getLevel(this) != -1;
+    return getParentWidgetsScene()->getLevel(this) != -1;
 }
 
-void Layer::setScene(Scene *scene) {
-    m_scene = scene;
+void Layer::setParent(Object *parent) {
+    if (dynamic_cast<Widgets::Scene*>(parent) == nullptr)
+        throw std::runtime_error("Invalid parent type: only Widgets::Scene is acceptable");
+    Object::setParent(parent);
 }
 
-Scene* Layer::getScene() const {
-    return m_scene;
+Scene* Layer::getParentWidgetsScene() const {
+    return dynamic_cast<Widgets::Scene*>(getParent());
 }
 
 #define geometryCallback(...) \
@@ -82,12 +79,12 @@ const RectI& Layer::getGeometry() const {
     return m_container->getGeometry();
 }
 
-void Layer::setContainer(ContainerPtr container) {
-    m_container = std::move(container);
+void Layer::setContainer(Container *container) {
+    m_container = container;
     m_container->setParent(this);
 }
 
-const ContainerPtr& Layer::getContainer() const {
+Container* Layer::getContainer() const {
     return m_container;
 }
 

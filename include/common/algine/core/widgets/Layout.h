@@ -6,24 +6,24 @@
 namespace algine {
 class Layout: public Container {
 public:
-    static void setMargin(WidgetPtrView widget, int left, int top, int right, int bottom);
-    static void setMarginLeft(WidgetPtrView widget, int margin);
-    static void setMarginTop(WidgetPtrView widget, int margin);
-    static void setMarginRight(WidgetPtrView widget, int margin);
-    static void setMarginBottom(WidgetPtrView widget, int margin);
+    static void setMargin(Widget *widget, int left, int top, int right, int bottom);
+    static void setMarginLeft(Widget *widget, int margin);
+    static void setMarginTop(Widget *widget, int margin);
+    static void setMarginRight(Widget *widget, int margin);
+    static void setMarginBottom(Widget *widget, int margin);
 
-    static int getMarginLeft(WidgetPtrView widget);
-    static int getMarginTop(WidgetPtrView widget);
-    static int getMarginRight(WidgetPtrView widget);
-    static int getMarginBottom(WidgetPtrView widget);
+    static int getMarginLeft(Widget *widget);
+    static int getMarginTop(Widget *widget);
+    static int getMarginRight(Widget *widget);
+    static int getMarginBottom(Widget *widget);
 
-    static void setAlignment(WidgetPtrView widget, uint alignment);
-    static uint getAlignment(WidgetPtrView widget);
+    static void setAlignment(Widget *widget, uint alignment);
+    static uint getAlignment(Widget *widget);
 
 protected:
-    static void setChildXDirectly(WidgetPtrView child, int x);
-    static void setChildYDirectly(WidgetPtrView child, int y);
-    static void childGeometryChanged(WidgetPtrView child, const RectI &geometry);
+    static void setChildXDirectly(Widget *child, int x);
+    static void setChildYDirectly(Widget *child, int y);
+    static void childGeometryChanged(Widget *child, const RectI &geometry);
 };
 }
 
