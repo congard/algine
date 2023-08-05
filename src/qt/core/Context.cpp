@@ -1,4 +1,5 @@
 #include <algine/core/Context.h>
+#include <algine/core/ContextConfig.h>
 
 #include "core/ContextCommon.h"
 

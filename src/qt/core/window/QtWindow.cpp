@@ -7,6 +7,8 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 
+#include <cmath>
+
 #include "core/input/MouseKeyConverter.h"
 #include "core/input/KeyboardKeyConverter.h"
 
@@ -57,8 +59,8 @@ bool QtWindow::isMouseKeyPressed(MouseKey key) const {
 
 void QtWindow::setDimensions(int width, int height) {
     setMinimumSize({
-        static_cast<int>(round(width / devicePixelRatio())),
-        static_cast<int>(round(height / devicePixelRatio()))
+        static_cast<int>(qRound(width / devicePixelRatio())),
+        static_cast<int>(qRound(height / devicePixelRatio()))
     });
 }
 
