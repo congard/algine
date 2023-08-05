@@ -1,5 +1,6 @@
 #include <algine/core/Engine.h>
 #include <algine/core/log/Log.h>
+#include <algine/core/Object.h>
 #include <algine/templates.h>
 #include <algine/gl.h>
 
@@ -147,6 +148,18 @@ void Engine::wait() {
 
 void Engine::destroy() {
     m_onDestroy.notify();
+
+#ifdef ALGINE_SECURE_OPERATIONS
+    if (m_debugWriter) {
+        auto &summary = Object::_getSOPAllocSummary();
+        auto logger = m_debugWriter->logger();
+        logger << "\n====== Object allocations summary ======\n";
+        logger << "Allocations:\t" << summary.alloc << "\n";
+        logger << "Deallocations:\t" << summary.dealloc << "\n";
+        logger << (summary.alloc == summary.dealloc ? "No memory leak detected" : "MEMORY LEAK DETECTED");
+        logger << "\n========================================";
+    }
+#endif
 
 #ifndef ALGINE_QT_PLATFORM
     // Terminate GLFW, clearing any resources allocated by GLFW
