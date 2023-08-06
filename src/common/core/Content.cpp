@@ -3,28 +3,23 @@
 #include <algine/core/BaseWindow.h>
 
 namespace algine {
-Content::Content()
-    : m_surface(nullptr),
-      m_isInitialized(false),
+Content::Content(Object *parent)
+    : Object(parent),
       m_width(),
       m_height() {}
 
-Content::Content(BaseWindow *surface)
-    : m_isInitialized(false),
-      m_width(),
-      m_height()
-{
-    setSurface(surface);
-}
-
 Content::~Content() = default;
 
-void Content::setSurface(BaseWindow *surface) {
-    surface->setContent(this);
+void Content::onShow() {}
+
+void Content::onHide() {}
+
+void Content::setWindow(BaseWindow *window) {
+    window->setContent(this);
 }
 
-BaseWindow* Content::getSurface() const {
-    return m_surface;
+BaseWindow* Content::getWindow() const {
+    return dynamic_cast<BaseWindow*>(getParent());
 }
 
 int Content::width() const {
@@ -33,9 +28,5 @@ int Content::width() const {
 
 int Content::height() const {
     return m_height;
-}
-
-bool Content::isInitialized() const {
-    return m_isInitialized;
 }
 }

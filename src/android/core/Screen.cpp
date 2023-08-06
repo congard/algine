@@ -23,7 +23,9 @@ Screen::Screen() {
 }
 
 void Screen::renderFrame() {
-    m_content->render();
+    if (m_content)
+        m_content->render();
+    processTasks();
 }
 
 void Screen::renderLoop() {
@@ -75,7 +77,7 @@ void Screen::__resized(int width, int height) {
         m_screen->m_viewport.x = width;
         m_screen->m_viewport.y = height;
 
-        if (auto &content = m_screen->m_content; content != nullptr) {
+        if (auto content = m_screen->m_content; content != nullptr) {
             content->m_width = width;
             content->m_height = height;
         }

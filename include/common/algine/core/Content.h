@@ -1,6 +1,7 @@
 #ifndef ALGINE_CONTENT_H
 #define ALGINE_CONTENT_H
 
+#include <algine/core/Object.h>
 #include <algine/templates.h>
 #include <algine/types.h>
 
@@ -17,43 +18,33 @@ class BaseWindow;
 
 class PlatformFriend;
 
-class Content {
+class Content: public Object {
     friend class BaseWindow;
     friend class PlatformFriend;
 
 public:
-    Content();
-    explicit Content(BaseWindow *surface);
-    virtual ~Content();
+    /**
+     * @note constructor must be called from the rendering thread.
+     * @see `BaseWindow::setContentLater`
+     */
+    explicit Content(Object *parent = defaultParent());
 
-    virtual void init() = 0;
+    ~Content() override;
 
     virtual void render() = 0;
 
-    void setSurface(BaseWindow *surface);
-    BaseWindow* getSurface() const;
+    virtual void onShow();
+    virtual void onHide();
+
+    void setWindow(BaseWindow *window);
+    BaseWindow* getWindow() const;
 
     int width() const;
     int height() const;
 
-    bool isInitialized() const;
-
-    enable_if_desktop(
-        inline auto getWindow() const {
-            return reinterpret_cast<PlatformFriend*>(m_surface);
-        }
-    )
-
-    enable_if_android(
-        inline auto getScreen() const {
-            return reinterpret_cast<Screen*>(m_surface);
-        }
-    )
-
 private:
-    BaseWindow *m_surface;
-    int m_width, m_height;
-    bool m_isInitialized;
+    int m_width;
+    int m_height;
 };
 }
 

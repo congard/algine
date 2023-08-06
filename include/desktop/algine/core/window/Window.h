@@ -16,7 +16,7 @@
 #include <vector>
 #include <unordered_map>
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace algine {
 class Content;
@@ -54,12 +54,12 @@ public:
     void setCursor(const Cursor &cursor);
     void setDefaultCursor();
     void setPos(int x, int y);
-    void setDimensions(uint width, uint height);
-    void setFullscreenDimensions(uint width, uint height);
+    void setDimensions(int width, int height);
+    void setFullscreenDimensions(int width, int height);
     void setCursorMode(CursorMode mode);
     void setOpacity(float opacity);
 
-    void setContent(const Ptr<Content> &content) override;
+    void setContent(Content *content, bool deleteOld) override;
 
     void setEventHandler(WindowEventHandler *eventHandler);
 

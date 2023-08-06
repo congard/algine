@@ -128,10 +128,13 @@ void Window::maximize() {
 }
 
 void Window::renderFrame() {
-    m_content->render();
+    if (m_content)
+        m_content->render();
 
     glfwSwapBuffers(m_window);
     glfwPollEvents();
+
+    processTasks();
 }
 
 void Window::renderLoop() {
@@ -205,11 +208,11 @@ void Window::setPos(int x, int y) {
     glfwSetWindowPos(m_window, x, y);
 }
 
-void Window::setDimensions(uint width, uint height) {
+void Window::setDimensions(int width, int height) {
     glfwSetWindowSize(m_window, width, height);
 }
 
-void Window::setFullscreenDimensions(uint width, uint height) {
+void Window::setFullscreenDimensions(int width, int height) {
     m_fullscreenDimensions.x = width;
     m_fullscreenDimensions.y = height;
 }
@@ -237,12 +240,12 @@ void Window::setOpacity(float opacity) {
     glfwSetWindowOpacity(m_window, opacity);
 }
 
-void Window::setContent(const Ptr<Content> &content) {
+void Window::setContent(Content *content, bool deleteOld) {
     if (content) {
         requestViewport();
     }
 
-    BaseWindow::setContent(content);
+    BaseWindow::setContent(content, deleteOld);
 }
 
 void Window::setEventHandler(WindowEventHandler *eventHandler) {
@@ -370,7 +373,7 @@ void Window::setWindowStateTracking(bool tracking) {
             if (window == nullptr)
                 return;
 
-            if (auto &content = window->getContent(); content != nullptr) {
+            if (auto content = window->getContent(); content != nullptr) {
                 window->requestViewport();
 
                 content->m_width = window->m_viewport.x;

@@ -37,7 +37,11 @@ public:
 
     glm::ivec2 getViewport() override;
 
-    void addOnInitializedListener(const tulz::Observer<> &observer);
+    /**
+     * @note The observer will be called from the rendering thread.
+     * @param observer
+     */
+    tulz::Subscription<> addOnInitializedListener(const tulz::Observer<> &observer);
 
 protected:
     void initializeGL() override;
@@ -67,8 +71,6 @@ private:
     tulz::Subject<> m_onInitialized;
 
     QTimer m_renderLoopTimer;
-
-    tulz::Subscription<> m_selfDestroy;
 
 private:
     struct MouseKeyInfo {

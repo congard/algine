@@ -21,16 +21,9 @@ QtWindow::QtWindow(Context shareContext, QWindow *parent)
       m_cursorPos(-1.0f, -1.0f),
       QOpenGLWindow(
           shareContext.isInitialized() ? static_cast<QOpenGLContext*>(shareContext.m_context) : QOpenGLContext::globalShareContext(),
-          NoPartialUpdate, parent)
-{
-    m_selfDestroy = Engine::addOnDestroyListener([this]() {
-        delete this;
-    });
-}
+          NoPartialUpdate, parent) {}
 
-QtWindow::~QtWindow() {
-    m_selfDestroy.unsubscribe();
-}
+QtWindow::~QtWindow() = default;
 
 void QtWindow::renderLoop(int delayMs) {
     QObject::connect(&m_renderLoopTimer, SIGNAL(timeout()), this, SLOT(update()));
@@ -93,8 +86,8 @@ glm::ivec2 QtWindow::getViewport() {
     };
 }
 
-void QtWindow::addOnInitializedListener(const tulz::Observer<> &observer) {
-    m_onInitialized.subscribe(observer);
+tulz::Subscription<> QtWindow::addOnInitializedListener(const tulz::Observer<> &observer) {
+    return m_onInitialized.subscribe(observer);
 }
 
 void QtWindow::initializeGL() {
@@ -112,7 +105,9 @@ void QtWindow::resizeGL(int w, int h) {
 }
 
 void QtWindow::paintGL() {
-    m_content->render();
+    if (m_content)
+        m_content->render();
+    processTasks();
 }
 
 void QtWindow::mousePressEvent(QMouseEvent *event) {
@@ -214,7 +209,7 @@ void QtWindow::setCursorPos(QMouseEvent *event) {
 void QtWindow::sizeChanged() {
     auto viewport = getViewport();
 
-    if (auto &content = getContent(); content != nullptr) {
+    if (auto content = getContent(); content != nullptr) {
         content->m_width = viewport.x;
         content->m_height = viewport.y;
     }
