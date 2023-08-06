@@ -1,12 +1,15 @@
 #ifndef ALGINE_SCREEN_H
 #define ALGINE_SCREEN_H
 
-#include <algine/core/BaseWindow.h>
+#include <algine/core/Window.h>
 
 #include <string_view>
 
 namespace algine {
-class Screen: public BaseWindow {
+/**
+ * Window implementation for the Android platform.
+ */
+class Screen: public Window {
 public:
     enum class ToastLength {
         Short = 0,

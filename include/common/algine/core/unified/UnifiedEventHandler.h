@@ -114,20 +114,20 @@ protected:
     void windowFocusLost(QtWindow &window) override;
     void windowFocus(QtWindow &window) override;
 #else
-    void mouseMove(double x, double y, Window &window) override;
-    void mouseClick(MouseKey key, Window &window) override;
-    void mouseKeyPress(MouseKey key, Window &window) override;
-    void mouseKeyRelease(MouseKey key, Window &window) override;
+    void mouseMove(double x, double y, GLFWWindow &window) override;
+    void mouseClick(MouseKey key, GLFWWindow &window) override;
+    void mouseKeyPress(MouseKey key, GLFWWindow &window) override;
+    void mouseKeyRelease(MouseKey key, GLFWWindow &window) override;
 
-    void keyboardKeyPress(KeyboardKey key, Window &window) override;
-    void keyboardKeyRelease(KeyboardKey key, Window &window) override;
-    void keyboardKeyRepeat(KeyboardKey key, Window &window) override;
+    void keyboardKeyPress(KeyboardKey key, GLFWWindow &window) override;
+    void keyboardKeyRelease(KeyboardKey key, GLFWWindow &window) override;
+    void keyboardKeyRepeat(KeyboardKey key, GLFWWindow &window) override;
 
-    void windowSizeChange(int width, int height, Window &window) override;
-    void windowIconify(Window &window) override;
-    void windowRestore(Window &window) override;
-    void windowFocusLost(Window &window) override;
-    void windowFocus(Window &window) override;
+    void windowSizeChange(int width, int height, GLFWWindow &window) override;
+    void windowIconify(GLFWWindow &window) override;
+    void windowRestore(GLFWWindow &window) override;
+    void windowFocusLost(GLFWWindow &window) override;
+    void windowFocus(GLFWWindow &window) override;
 #endif
 
 private:

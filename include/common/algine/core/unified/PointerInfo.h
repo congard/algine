@@ -10,7 +10,7 @@ namespace algine {
 #ifdef ALGINE_QT_PLATFORM
 class QtWindow;
 #elif !defined(__ANDROID__)
-class Window;
+class GLFWWindow;
 #endif
 
 class PointerInfo {
@@ -36,14 +36,14 @@ public:
 
     inline QtWindow& getWindow() { return m_window; }
 #else
-    inline PointerInfo(const glm::vec2 &pos, Window &window)
+    inline PointerInfo(const glm::vec2 &pos, GLFWWindow &window)
         : m_pos(pos), m_window(window) {}
 
     template<typename T>
-    PointerInfo(const glm::vec2 &pos, T pointer, Window &window)
+    PointerInfo(const glm::vec2 &pos, T pointer, GLFWWindow &window)
         : m_pos(pos), m_pointer(pointer), m_window(window) {}
 
-    inline Window& getWindow() { return m_window; }
+    inline GLFWWindow& getWindow() { return m_window; }
 #endif
 
     void setPos(const glm::vec2 &pos);
@@ -72,7 +72,7 @@ private:
 #ifdef ALGINE_QT_PLATFORM
     QtWindow &m_window;
 #elif !defined(__ANDROID__)
-    Window &m_window;
+    GLFWWindow &m_window;
 #endif
 };
 

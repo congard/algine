@@ -17,7 +17,7 @@
 
 namespace algine {
 class Engine {
-    friend class Window;
+    friend class GLFWWindow;
     friend class QtWindow;
 
 public:

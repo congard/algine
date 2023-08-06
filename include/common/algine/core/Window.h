@@ -12,13 +12,13 @@
 namespace algine {
 class Content;
 
-class BaseWindow: public Object {
+class Window: public Object {
 public:
     using Task = std::function<void()>;
 
 public:
-    explicit BaseWindow(Object *parent = defaultParent());
-    ~BaseWindow() override;
+    explicit Window(Object *parent = defaultParent());
+    ~Window() override;
 
     /**
      * Executes task `task` on the rendering thread.

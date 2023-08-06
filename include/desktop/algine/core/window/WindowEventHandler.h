@@ -7,25 +7,25 @@
 #include <algine/core/input/KeyboardKey.h>
 
 namespace algine {
-class Window;
+class GLFWWindow;
 
 class WindowEventHandler: public EventHandler {
 public:
-    virtual void mouseMove(double x, double y, Window &window);
-    virtual void mouseClick(MouseKey key, Window &window);
-    virtual void mouseKeyPress(MouseKey key, Window &window);
-    virtual void mouseKeyRelease(MouseKey key, Window &window);
+    virtual void mouseMove(double x, double y, GLFWWindow &window);
+    virtual void mouseClick(MouseKey key, GLFWWindow &window);
+    virtual void mouseKeyPress(MouseKey key, GLFWWindow &window);
+    virtual void mouseKeyRelease(MouseKey key, GLFWWindow &window);
 
-    virtual void keyboardKeyPress(KeyboardKey key, Window &window);
-    virtual void keyboardKeyRelease(KeyboardKey key, Window &window);
-    virtual void keyboardKeyRepeat(KeyboardKey key, Window &window);
+    virtual void keyboardKeyPress(KeyboardKey key, GLFWWindow &window);
+    virtual void keyboardKeyRelease(KeyboardKey key, GLFWWindow &window);
+    virtual void keyboardKeyRepeat(KeyboardKey key, GLFWWindow &window);
 
-    virtual void windowSizeChange(int width, int height, Window &window);
-    virtual void windowPosChange(int x, int y, Window &window);
-    virtual void windowIconify(Window &window);
-    virtual void windowRestore(Window &window);
-    virtual void windowFocusLost(Window &window);
-    virtual void windowFocus(Window &window);
+    virtual void windowSizeChange(int width, int height, GLFWWindow &window);
+    virtual void windowPosChange(int x, int y, GLFWWindow &window);
+    virtual void windowIconify(GLFWWindow &window);
+    virtual void windowRestore(GLFWWindow &window);
+    virtual void windowFocusLost(GLFWWindow &window);
+    virtual void windowFocus(GLFWWindow &window);
 };
 }
 

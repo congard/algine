@@ -6,20 +6,20 @@
 #include <algine/types.h>
 
 namespace algine {
-class BaseWindow;
+class Window;
 
 #ifdef ALGINE_QT_PLATFORM
     #define PlatformFriend QtWindow
 #elif defined(__ANDROID__)
     #define PlatformFriend Screen
 #else
-    #define PlatformFriend Window
+    #define PlatformFriend GLFWWindow
 #endif
 
 class PlatformFriend;
 
 class Content: public Object {
-    friend class BaseWindow;
+    friend class Window;
     friend class PlatformFriend;
 
 public:
@@ -36,8 +36,8 @@ public:
     virtual void onShow();
     virtual void onHide();
 
-    void setWindow(BaseWindow *window);
-    BaseWindow* getWindow() const;
+    void setWindow(Window *window);
+    Window* getWindow() const;
 
     int width() const;
     int height() const;

@@ -1,5 +1,5 @@
 #include <algine/core/unified/PointerInfo.h>
-#include <algine/core/window/Window.h>
+#include <algine/core/window/GLFWWindow.h>
 
 namespace algine {
 bool PointerInfo::isPointerActive(Pointer pointer) const {

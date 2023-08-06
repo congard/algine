@@ -64,7 +64,7 @@ inline auto qEventHandler(EventHandler *eventHandler) {
 #define qEventHandlerCall(...) if (auto handler = qEventHandler(getEventHandler()); handler) handler->__VA_ARGS__
 
 void QtWindow::setEventHandler(QtWindowEventHandler *eventHandler) {
-    BaseWindow::setEventHandler(eventHandler);
+    Window::setEventHandler(eventHandler);
 }
 
 Context QtWindow::getContext() {

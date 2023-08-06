@@ -5,7 +5,7 @@
 #include <algine/core/window/Cursor.h>
 #include <algine/core/input/KeyboardKey.h>
 #include <algine/core/input/MouseKey.h>
-#include <algine/core/BaseWindow.h>
+#include <algine/core/Window.h>
 #include <algine/core/Context.h>
 #include <algine/core/Ptr.h>
 #include <algine/types.h>
@@ -21,7 +21,10 @@ struct GLFWwindow;
 namespace algine {
 class Content;
 
-class Window: public BaseWindow {
+/**
+ * Window implementation that uses GLFW as the backend.
+ */
+class GLFWWindow: public Window {
 public:
     enum class CursorMode {
         Disabled,
@@ -30,8 +33,8 @@ public:
     };
 
 public:
-    explicit Window(Context context = {});
-    Window(std::string title, uint width, uint height, Context context = {});
+    explicit GLFWWindow(Context context = {});
+    GLFWWindow(std::string title, uint width, uint height, Context context = {});
 
     void close();
     void iconify();
@@ -101,7 +104,7 @@ public:
     bool isIconified() const;
     bool isMaximized() const;
 
-    using BaseWindow::setContent;
+    using Window::setContent;
 
 private:
     void create();

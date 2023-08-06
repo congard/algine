@@ -1,7 +1,7 @@
 #ifndef ALGINE_QTWINDOW_H
 #define ALGINE_QTWINDOW_H
 
-#include <algine/core/BaseWindow.h>
+#include <algine/core/Window.h>
 #include <algine/core/Context.h>
 #include <algine/core/window/QtWindowEventHandler.h>
 
@@ -14,7 +14,12 @@
 #include <QTimer>
 
 namespace algine {
-class QtWindow: public BaseWindow, public QOpenGLWindow {
+/**
+ * Window implementation that uses QOpenGLWindow as the backend.
+ * @note to use this class Qt must be installed (Qt5+) and
+ * the Qt backend should be selected.
+ */
+class QtWindow: public Window, public QOpenGLWindow {
 public:
     explicit QtWindow(Context shareContext = {}, QWindow *parent = nullptr);
     ~QtWindow() override;

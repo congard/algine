@@ -7,7 +7,7 @@ class GLFWcursor;
 
 namespace algine {
 class Cursor {
-    friend class Window;
+    friend class GLFWWindow;
 
 public:
     enum class Default {

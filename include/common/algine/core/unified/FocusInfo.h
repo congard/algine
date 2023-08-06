@@ -5,7 +5,7 @@ namespace algine {
 #ifdef ALGINE_QT_PLATFORM
 class QtWindow;
 #elif !defined(__ANDROID__)
-class Window;
+class GLFWWindow;
 #endif
 
 class FocusInfo {
@@ -30,10 +30,10 @@ public:
 
     inline QtWindow& getWindow() { return m_window; }
 #else
-    inline FocusInfo(Reason reason, Window &window)
+    inline FocusInfo(Reason reason, GLFWWindow &window)
         : m_reason(reason), m_window(window) {}
 
-    inline Window& getWindow() { return m_window; }
+    inline GLFWWindow& getWindow() { return m_window; }
 #endif
 
     void setReason(Reason reason);
@@ -45,7 +45,7 @@ private:
 #ifdef ALGINE_QT_PLATFORM
     QtWindow &m_window;
 #elif !defined(__ANDROID__)
-    Window &m_window;
+    GLFWWindow &m_window;
 #endif
 };
 

@@ -3,19 +3,19 @@
 namespace algine {
 // so that you don't need to implement handling of each event
 
-void WindowEventHandler::mouseMove(double x, double y, Window &window) {}
-void WindowEventHandler::mouseClick(MouseKey key, Window &window) {}
-void WindowEventHandler::mouseKeyPress(MouseKey key, Window &window) {}
-void WindowEventHandler::mouseKeyRelease(MouseKey key, Window &window) {}
+void WindowEventHandler::mouseMove(double x, double y, GLFWWindow &window) {}
+void WindowEventHandler::mouseClick(MouseKey key, GLFWWindow &window) {}
+void WindowEventHandler::mouseKeyPress(MouseKey key, GLFWWindow &window) {}
+void WindowEventHandler::mouseKeyRelease(MouseKey key, GLFWWindow &window) {}
 
-void WindowEventHandler::keyboardKeyPress(KeyboardKey key, Window &window) {}
-void WindowEventHandler::keyboardKeyRelease(KeyboardKey key, Window &window) {}
-void WindowEventHandler::keyboardKeyRepeat(KeyboardKey key, Window &window) {}
+void WindowEventHandler::keyboardKeyPress(KeyboardKey key, GLFWWindow &window) {}
+void WindowEventHandler::keyboardKeyRelease(KeyboardKey key, GLFWWindow &window) {}
+void WindowEventHandler::keyboardKeyRepeat(KeyboardKey key, GLFWWindow &window) {}
 
-void WindowEventHandler::windowSizeChange(int width, int height, Window &window) {}
-void WindowEventHandler::windowPosChange(int x, int y, Window &window) {}
-void WindowEventHandler::windowIconify(Window &window) {}
-void WindowEventHandler::windowRestore(Window &window) {}
-void WindowEventHandler::windowFocusLost(Window &window) {}
-void WindowEventHandler::windowFocus(Window &window) {}
+void WindowEventHandler::windowSizeChange(int width, int height, GLFWWindow &window) {}
+void WindowEventHandler::windowPosChange(int x, int y, GLFWWindow &window) {}
+void WindowEventHandler::windowIconify(GLFWWindow &window) {}
+void WindowEventHandler::windowRestore(GLFWWindow &window) {}
+void WindowEventHandler::windowFocusLost(GLFWWindow &window) {}
+void WindowEventHandler::windowFocus(GLFWWindow &window) {}
 }

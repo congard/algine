@@ -1,6 +1,6 @@
 #include <algine/core/Content.h>
 
-#include <algine/core/BaseWindow.h>
+#include <algine/core/Window.h>
 
 namespace algine {
 Content::Content(Object *parent)
@@ -14,12 +14,12 @@ void Content::onShow() {}
 
 void Content::onHide() {}
 
-void Content::setWindow(BaseWindow *window) {
+void Content::setWindow(Window *window) {
     window->setContent(this);
 }
 
-BaseWindow* Content::getWindow() const {
-    return dynamic_cast<BaseWindow*>(getParent());
+Window* Content::getWindow() const {
+    return dynamic_cast<Window*>(getParent());
 }
 
 int Content::width() const {

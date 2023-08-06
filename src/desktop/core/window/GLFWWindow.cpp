@@ -1,4 +1,4 @@
-#include <algine/core/window/Window.h>
+#include <algine/core/window/GLFWWindow.h>
 
 #include <algine/core/Content.h>
 #include <algine/core/Engine.h>
@@ -33,7 +33,7 @@ constexpr static auto maxClickDeltaTime = 250L; // in ms
     m_windowStateTracking(false), \
     m_renderLoopRunning(false)
 
-Window::Window(Context context)
+GLFWWindow::GLFWWindow(Context context)
     : initList,
       m_title("Algine Window"),
       m_dimensions(512),
@@ -42,7 +42,7 @@ Window::Window(Context context)
     create();
 }
 
-Window::Window(string title, uint width, uint height, Context context)
+GLFWWindow::GLFWWindow(string title, uint width, uint height, Context context)
     : initList,
       m_title(std::move(title)),
       m_dimensions(width, height),
@@ -51,7 +51,7 @@ Window::Window(string title, uint width, uint height, Context context)
     create();
 }
 
-void Window::create() {
+void GLFWWindow::create() {
     // additional calls to an already initialized library will return GLFW_TRUE immediately
     // https://www.glfw.org/docs/3.3/intro_guide.html#intro_init_init
     if (!glfwInit())
@@ -110,24 +110,24 @@ void Window::create() {
     }
 }
 
-void Window::close() {
+void GLFWWindow::close() {
     glfwSetWindowShouldClose(m_window, GLFW_TRUE);
     stopRenderLoop();
 }
 
-void Window::iconify() {
+void GLFWWindow::iconify() {
     glfwIconifyWindow(m_window);
 }
 
-void Window::restore() {
+void GLFWWindow::restore() {
     glfwRestoreWindow(m_window);
 }
 
-void Window::maximize() {
+void GLFWWindow::maximize() {
     glfwMaximizeWindow(m_window);
 }
 
-void Window::renderFrame() {
+void GLFWWindow::renderFrame() {
     if (m_content)
         m_content->render();
 
@@ -137,7 +137,7 @@ void Window::renderFrame() {
     processTasks();
 }
 
-void Window::renderLoop() {
+void GLFWWindow::renderLoop() {
     if (m_renderLoopRunning) {
         return;
     } else {
@@ -149,11 +149,11 @@ void Window::renderLoop() {
     }
 }
 
-void Window::stopRenderLoop() {
+void GLFWWindow::stopRenderLoop() {
     m_renderLoopRunning = false;
 }
 
-dvec2 Window::getCursorPos() const {
+dvec2 GLFWWindow::getCursorPos() const {
     dvec2 pos;
 
     glfwGetCursorPos(m_window, &pos.x, &pos.y);
@@ -161,27 +161,27 @@ dvec2 Window::getCursorPos() const {
     return pos;
 }
 
-bool Window::isKeyPressed(KeyboardKey key) const {
+bool GLFWWindow::isKeyPressed(KeyboardKey key) const {
     return glfwGetKey(m_window, getGLFWKeyValue(key)) == GLFW_PRESS;
 }
 
-bool Window::isMouseKeyPressed(MouseKey key) const {
+bool GLFWWindow::isMouseKeyPressed(MouseKey key) const {
     return glfwGetMouseButton(m_window, getGLFWMouseKeyValue(key)) == GLFW_PRESS;
 }
 
-void Window::setTitle(const string &title) {
+void GLFWWindow::setTitle(const string &title) {
     m_title = title;
 
     glfwSetWindowTitle(m_window, title.c_str());
 }
 
-void Window::setIcon(const Icon &icon) {
+void GLFWWindow::setIcon(const Icon &icon) {
     auto image = getGLFWimageFromIcon(icon);
 
     glfwSetWindowIcon(m_window, 1, &image);
 }
 
-void Window::setIcon(const vector<Icon> &icons) {
+void GLFWWindow::setIcon(const vector<Icon> &icons) {
     auto images = new GLFWimage[icons.size()];
 
     for (int i = 0; i < icons.size(); i++)
@@ -192,32 +192,32 @@ void Window::setIcon(const vector<Icon> &icons) {
     delete[] images;
 }
 
-void Window::setCursor(const Cursor &cursor) {
+void GLFWWindow::setCursor(const Cursor &cursor) {
     m_cursor = cursor;
 
     glfwSetCursor(m_window, cursor.m_cursor.get());
 }
 
-void Window::setDefaultCursor() {
+void GLFWWindow::setDefaultCursor() {
     m_cursor.m_cursor = nullptr;
 
     glfwSetCursor(m_window, nullptr);
 }
 
-void Window::setPos(int x, int y) {
+void GLFWWindow::setPos(int x, int y) {
     glfwSetWindowPos(m_window, x, y);
 }
 
-void Window::setDimensions(int width, int height) {
+void GLFWWindow::setDimensions(int width, int height) {
     glfwSetWindowSize(m_window, width, height);
 }
 
-void Window::setFullscreenDimensions(int width, int height) {
+void GLFWWindow::setFullscreenDimensions(int width, int height) {
     m_fullscreenDimensions.x = width;
     m_fullscreenDimensions.y = height;
 }
 
-void Window::setCursorMode(CursorMode mode) {
+void GLFWWindow::setCursorMode(CursorMode mode) {
     m_cursorMode = mode;
 
     switch (mode) {
@@ -236,19 +236,19 @@ void Window::setCursorMode(CursorMode mode) {
     }
 }
 
-void Window::setOpacity(float opacity) {
+void GLFWWindow::setOpacity(float opacity) {
     glfwSetWindowOpacity(m_window, opacity);
 }
 
-void Window::setContent(Content *content, bool deleteOld) {
+void GLFWWindow::setContent(Content *content, bool deleteOld) {
     if (content) {
         requestViewport();
     }
 
-    BaseWindow::setContent(content, deleteOld);
+    Window::setContent(content, deleteOld);
 }
 
-void Window::setEventHandler(WindowEventHandler *eventHandler) {
+void GLFWWindow::setEventHandler(WindowEventHandler *eventHandler) {
     m_eventHandler = eventHandler;
 }
 
@@ -256,13 +256,13 @@ inline auto WEH(EventHandler *eventHandler) {
     return static_cast<WindowEventHandler*>(eventHandler);
 }
 
-void Window::setMouseTracking(bool tracking) {
+void GLFWWindow::setMouseTracking(bool tracking) {
     m_mouseTracking = tracking;
 
     if (tracking) {
         // mouse press/release/click tracking
         glfwSetMouseButtonCallback(m_window, [](GLFWwindow *glfwWindow, int button, int action, int mods) {
-            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+            auto window = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(glfwWindow));
 
             if (window == nullptr)
                 return;
@@ -272,7 +272,7 @@ void Window::setMouseTracking(bool tracking) {
             auto mouseKey = getMouseKey(button);
 
             if (action == GLFW_PRESS) {
-                mouseKeysInfo[button] = Window::MouseKeyInfo {Engine::time(), 0, window->getCursorPos()};
+                mouseKeysInfo[button] = GLFWWindow::MouseKeyInfo {Engine::time(), 0, window->getCursorPos()};
 
                 // send press event
                 if (eventHandler != nullptr) {
@@ -300,7 +300,7 @@ void Window::setMouseTracking(bool tracking) {
 
         // mouse move tracking
         glfwSetCursorPosCallback(m_window, [](GLFWwindow *glfwWindow, double x, double y) {
-            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+            auto window = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(glfwWindow));
 
             if (window == nullptr)
                 return;
@@ -328,12 +328,12 @@ void Window::setMouseTracking(bool tracking) {
     }
 }
 
-void Window::setKeyboardTracking(bool tracking) {
+void GLFWWindow::setKeyboardTracking(bool tracking) {
     m_keyboardTracking = tracking;
 
     if (tracking) {
         glfwSetKeyCallback(m_window, [](GLFWwindow *glfwWindow, int key, int scancode, int action, int mode) {
-            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+            auto window = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(glfwWindow));
 
             if (window == nullptr)
                 return;
@@ -363,12 +363,12 @@ void Window::setKeyboardTracking(bool tracking) {
     }
 }
 
-void Window::setWindowStateTracking(bool tracking) {
+void GLFWWindow::setWindowStateTracking(bool tracking) {
     m_windowStateTracking = tracking;
 
     if (tracking) {
         glfwSetWindowSizeCallback(m_window, [](GLFWwindow *glfwWindow, int width, int height) {
-            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+            auto window = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(glfwWindow));
 
             if (window == nullptr)
                 return;
@@ -386,7 +386,7 @@ void Window::setWindowStateTracking(bool tracking) {
         });
 
         glfwSetWindowPosCallback(m_window, [](GLFWwindow *glfwWindow, int x, int y) {
-            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+            auto window = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(glfwWindow));
 
             if (window == nullptr)
                 return;
@@ -397,7 +397,7 @@ void Window::setWindowStateTracking(bool tracking) {
         });
 
         glfwSetWindowIconifyCallback(m_window, [](GLFWwindow* glfwWindow, int iconified) {
-            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+            auto window = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(glfwWindow));
 
             if (window == nullptr)
                 return;
@@ -412,7 +412,7 @@ void Window::setWindowStateTracking(bool tracking) {
         });
 
         glfwSetWindowFocusCallback(m_window, [](GLFWwindow* glfwWindow, int focused) {
-            auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+            auto window = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(glfwWindow));
 
             if (window == nullptr)
                 return;
@@ -433,7 +433,7 @@ void Window::setWindowStateTracking(bool tracking) {
     }
 }
 
-void Window::setFullscreen(bool fullscreen) {
+void GLFWWindow::setFullscreen(bool fullscreen) {
     if (isFullscreen() == fullscreen)
         return;
 
@@ -460,40 +460,40 @@ void Window::setFullscreen(bool fullscreen) {
     }
 }
 
-void Window::setResizable(bool resizable) {
+void GLFWWindow::setResizable(bool resizable) {
     glfwSetWindowAttrib(m_window, GLFW_RESIZABLE, resizable);
 }
 
-void Window::setDecorated(bool decorated) {
+void GLFWWindow::setDecorated(bool decorated) {
     glfwSetWindowAttrib(m_window, GLFW_DECORATED, decorated);
 }
 
-void Window::setFloating(bool floating) {
+void GLFWWindow::setFloating(bool floating) {
     glfwSetWindowAttrib(m_window, GLFW_FLOATING, floating);
 }
 
-void Window::setAutoIconify(bool autoIconify) {
+void GLFWWindow::setAutoIconify(bool autoIconify) {
     glfwSetWindowAttrib(m_window, GLFW_AUTO_ICONIFY, autoIconify);
 }
 
-void Window::setFocusOnShow(bool focusOnShow) {
+void GLFWWindow::setFocusOnShow(bool focusOnShow) {
     glfwSetWindowAttrib(m_window, GLFW_FOCUS_ON_SHOW, focusOnShow);
 }
 
-const string& Window::getTitle() const {
+const string& GLFWWindow::getTitle() const {
     return m_title;
 }
 
-const Cursor& Window::getCursor() const {
+const Cursor& GLFWWindow::getCursor() const {
     return m_cursor;
 }
 
-const ivec2& Window::getPos() {
+const ivec2& GLFWWindow::getPos() {
     requestPos();
     return m_pos;
 }
 
-const ivec2& Window::getDimensions() {
+const ivec2& GLFWWindow::getDimensions() {
     if (!isFullscreen()) {
         requestDimensions();
 
@@ -503,88 +503,88 @@ const ivec2& Window::getDimensions() {
     }
 }
 
-const ivec2& Window::getFullscreenDimensions() const {
+const ivec2& GLFWWindow::getFullscreenDimensions() const {
     return m_fullscreenDimensions;
 }
 
-ivec2 Window::getViewport() {
+ivec2 GLFWWindow::getViewport() {
     requestViewport();
     return m_viewport;
 }
 
-Window::CursorMode Window::getCursorMode() const {
+GLFWWindow::CursorMode GLFWWindow::getCursorMode() const {
     return m_cursorMode;
 }
 
-Context Window::getContext() const {
+Context GLFWWindow::getContext() const {
     return {m_window};
 }
 
-Context Window::getParentContext() const {
+Context GLFWWindow::getParentContext() const {
     return m_parentContext;
 }
 
-float Window::getOpacity() const {
+float GLFWWindow::getOpacity() const {
     return glfwGetWindowOpacity(m_window);
 }
 
-bool Window::isRenderLoopRunning() const {
+bool GLFWWindow::isRenderLoopRunning() const {
     return m_renderLoopRunning && !glfwWindowShouldClose(m_window);
 }
 
-bool Window::isMouseTracking() const {
+bool GLFWWindow::isMouseTracking() const {
     return m_mouseTracking;
 }
 
-bool Window::isKeyboardTracking() const {
+bool GLFWWindow::isKeyboardTracking() const {
     return m_keyboardTracking;
 }
 
-bool Window::isWindowStateTracking() const {
+bool GLFWWindow::isWindowStateTracking() const {
     return m_windowStateTracking;
 }
 
-bool Window::isFullscreen() const {
+bool GLFWWindow::isFullscreen() const {
     return glfwGetWindowMonitor(m_window) != nullptr;
 }
 
-bool Window::isResizable() const {
+bool GLFWWindow::isResizable() const {
     return glfwGetWindowAttrib(m_window, GLFW_RESIZABLE);
 }
 
-bool Window::isDecorated() const {
+bool GLFWWindow::isDecorated() const {
     return glfwGetWindowAttrib(m_window, GLFW_DECORATED);
 }
 
-bool Window::isFloating() const {
+bool GLFWWindow::isFloating() const {
     return glfwGetWindowAttrib(m_window, GLFW_FLOATING);
 }
 
-bool Window::isAutoIconify() const {
+bool GLFWWindow::isAutoIconify() const {
     return glfwGetWindowAttrib(m_window, GLFW_AUTO_ICONIFY);
 }
 
-bool Window::isFocusOnShow() const {
+bool GLFWWindow::isFocusOnShow() const {
     return glfwGetWindowAttrib(m_window, GLFW_FOCUS_ON_SHOW);
 }
 
-bool Window::isIconified() const {
+bool GLFWWindow::isIconified() const {
     return glfwGetWindowAttrib(m_window, GLFW_ICONIFIED);
 }
 
-bool Window::isMaximized() const {
+bool GLFWWindow::isMaximized() const {
     return glfwGetWindowAttrib(m_window, GLFW_MAXIMIZED);
 }
 
-void Window::requestPos() {
+void GLFWWindow::requestPos() {
     glfwGetWindowPos(m_window, &m_pos.x, &m_pos.y);
 }
 
-void Window::requestDimensions() {
+void GLFWWindow::requestDimensions() {
     glfwGetWindowSize(m_window, &m_dimensions.x, &m_dimensions.y);
 }
 
-void Window::requestViewport() {
+void GLFWWindow::requestViewport() {
     glfwGetFramebufferSize(m_window, &m_viewport.x, &m_viewport.y);
 }
 }

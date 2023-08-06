@@ -1,21 +1,21 @@
-#include <algine/core/BaseWindow.h>
+#include <algine/core/Window.h>
 
 #include <algine/core/Content.h>
 
 namespace algine {
-BaseWindow::BaseWindow(Object *parent)
+Window::Window(Object *parent)
     : Object(parent),
       m_taskQueue(),
       m_taskQueueTail(m_taskQueue.before_begin()) {}
 
-BaseWindow::~BaseWindow() = default;
+Window::~Window() = default;
 
-void BaseWindow::invokeLater(Task task) {
+void Window::invokeLater(Task task) {
     std::lock_guard locker(m_taskQueueMutex);
     m_taskQueueTail = m_taskQueue.emplace_after(m_taskQueueTail, std::move(task));
 }
 
-void BaseWindow::setContent(Content *content, bool deleteOld) {
+void Window::setContent(Content *content, bool deleteOld) {
     if (m_content) {
         m_content->onHide();
 
@@ -38,23 +38,23 @@ void BaseWindow::setContent(Content *content, bool deleteOld) {
     m_content->onShow();
 }
 
-void BaseWindow::setContent(Content *content) {
+void Window::setContent(Content *content) {
     setContent(content, true);
 }
 
-Content* BaseWindow::getContent() const {
+Content* Window::getContent() const {
     return m_content;
 }
 
-void BaseWindow::setEventHandler(EventHandler *eventHandler) {
+void Window::setEventHandler(EventHandler *eventHandler) {
     m_eventHandler = eventHandler;
 }
 
-EventHandler* BaseWindow::getEventHandler() const {
+EventHandler* Window::getEventHandler() const {
     return m_eventHandler;
 }
 
-void BaseWindow::processTasks() {
+void Window::processTasks() {
     std::lock_guard locker(m_taskQueueMutex);
 
     if (m_taskQueue.empty())
