@@ -66,7 +66,7 @@ private:
     bool createImpl(int major, int minor, const ContextConfig &config);
 
 private:
-    static tulz::Subject<Context*> m_onDestroy;
+    static tulz::Subject<Context*>& getOnDestroy();
 };
 }
 

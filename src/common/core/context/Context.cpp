@@ -4,8 +4,6 @@
 #include <algine/core/log/Log.h>
 
 namespace algine {
-tulz::Subject<Context*> Context::m_onDestroy;
-
 bool Context::create(const ContextConfig &config) {
     if (!Engine::getApplicationContext().m_context) {
         Log::error("Context::create", "Application context hasn't been initialized yet");
@@ -29,6 +27,12 @@ bool Context::create() {
 }
 
 tulz::Subscription<Context*> Context::addOnDestroyListener(const tulz::Observer<Context*> &observer) {
-    return m_onDestroy.subscribe(observer);
+    return getOnDestroy().subscribe(observer);
+}
+
+tulz::Subject<Context*>& Context::getOnDestroy() {
+    // https://isocpp.org/wiki/faq/ctors#static-init-order
+    static tulz::Subject<Context*> onDestroy;
+    return onDestroy;
 }
 }

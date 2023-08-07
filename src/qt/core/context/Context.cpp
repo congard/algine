@@ -45,7 +45,7 @@ bool Context::destroy() {
         delete qContext;
         delete qSurface;
 
-        m_onDestroy.notify(this);
+        getOnDestroy().notify(this);
 
         m_context = nullptr;
         m_surface = nullptr;
