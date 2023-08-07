@@ -1,6 +1,7 @@
 #include <algine/core/Object.h>
 #include <algine/core/scene/GlobalScene.h>
 #include <algine/core/widgets/Widget.h>
+#include <algine/core/Window.h>
 
 #include <cxxabi.h>
 
@@ -65,6 +66,14 @@ Scene* Object::getParentScene() const {
         return scene;
     else if (m_parent != nullptr)
         return m_parent->getParentScene();
+    return nullptr;
+}
+
+Window* Object::getParentWindow() const {
+    if (auto window = m_parent->as<Window*>(); window != nullptr)
+        return window;
+    else if (m_parent != nullptr)
+        return m_parent->getParentWindow();
     return nullptr;
 }
 

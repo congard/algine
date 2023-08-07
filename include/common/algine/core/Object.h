@@ -10,6 +10,7 @@
 
 namespace algine {
 class Scene;
+class Window;
 
 class Object {
     using ObjectList = std::forward_list<Object*>;
@@ -64,6 +65,14 @@ public:
      * @return A pointer to the parent Scene object.
      */
     Scene* getParentScene() const;
+
+    /**
+     * Returns the parent window of this object.
+     * @note This function may be expensive, since it will iterate
+     * over parents until the window is found (or nullptr is reached)
+     * @return A pointer to the parent Window object.
+     */
+    Window* getParentWindow() const;
 
     bool isScene() const;
     bool isWidget() const;
