@@ -74,7 +74,7 @@ void Log::error(const std::string &tag, std::string_view str) {
 void Log::verbose(const std::string &tag, std::string_view str) {
     if (isEnabled(Logger::Type::Verbose)) {
         std::lock_guard lockGuard(m_mutex);
-        LOG_VERBOSE(LOG_VERBOSE_TAG(tag), "%s", str.data());
+        LOG_VERBOSE(LOG_VERBOSE_TAG(tag), "\033[0;36m%s\033[0m", str.data());
     }
 }
 
