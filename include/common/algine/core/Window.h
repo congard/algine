@@ -33,6 +33,7 @@ public:
 
     /**
      * Sets the content and takes ownership of it.
+     * Must be called from the rendering thread.
      * @param content The content to set.
      * @param deleteOld If `true`, the old content will be deleted.
      * @note If `deleteOld` is set to `false`, then the old content
@@ -42,10 +43,21 @@ public:
 
     /**
      * Sets the content, takes ownership and deletes the old content.
+     * Must be called from the rendering thread.
      * The same as `setContent(content, true)`.
      * @param content The content to set.
      */
     void setContent(Content *content);
+
+    /**
+     * Performs the same action as `setContent(Content*, bool)`, but
+     * executes it from the rendering thread.
+     * This function is equivalent to calling `invokeLater` + `setContent`.
+     * @param content The content to set.
+     * @param deleteOld If `true`, the old content will be deleted.
+     * @see `setContent(Content*, bool)`
+     */
+    void setContentLater(Content *content, bool deleteOld = true);
 
     /**
      * Constructs content of type `T` on the rendering thread.

@@ -42,6 +42,12 @@ void Window::setContent(Content *content) {
     setContent(content, true);
 }
 
+void Window::setContentLater(Content *content, bool deleteOld) {
+    invokeLater([=] {
+        setContent(content, deleteOld);
+    });
+}
+
 Content* Window::getContent() const {
     return m_content;
 }
