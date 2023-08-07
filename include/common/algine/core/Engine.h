@@ -3,7 +3,7 @@
 
 #include <algine/core/debug/DebugWriter.h>
 #include <algine/core/io/IOSystem.h>
-#include <algine/core/Context.h>
+#include <algine/core/context/Context.h>
 #include <algine/types.h>
 
 #include <tulz/observer/Subject.h>

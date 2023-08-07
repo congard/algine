@@ -1,7 +1,7 @@
-#include <algine/core/Context.h>
-#include <algine/core/ContextConfig.h>
+#include <algine/core/context/Context.h>
+#include <algine/core/context/ContextConfig.h>
 
-#include "core/ContextCommon.h"
+#include "core/context/ContextCommon.h"
 
 #include <EGL/egl.h>
 
@@ -47,8 +47,8 @@ bool Context::createImpl(int major, int minor, const ContextConfig &config) {
     // create context
 
     int ctxAttrib[] = {
-            EGL_CONTEXT_MAJOR_VERSION, majorVersion,
-            EGL_CONTEXT_MINOR_VERSION, minorVersion,
+            EGL_CONTEXT_MAJOR_VERSION, major,
+            EGL_CONTEXT_MINOR_VERSION, minor,
             EGL_NONE
     };
 

@@ -1,8 +1,8 @@
 #ifndef ALGINE_CONTEXTPOOL_H
 #define ALGINE_CONTEXTPOOL_H
 
-#include <algine/core/Context.h>
-#include <algine/core/ContextConfig.h>
+#include <algine/core/context/Context.h>
+#include <algine/core/context/ContextConfig.h>
 #include <algine/types.h>
 
 #include <mutex>

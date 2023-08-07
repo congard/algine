@@ -6,7 +6,7 @@
 #include <tulz/static_initializer.h>
 
 #ifdef ALGINE_SECURE_OPERATIONS
-    #include <algine/core/Context.h>
+    #include <algine/core/context/Context.h>
     #include <unordered_map>
     #include <mutex>
 

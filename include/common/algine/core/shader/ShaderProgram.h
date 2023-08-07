@@ -1,7 +1,7 @@
 #ifndef ALGINE_SHADERPROGRAM_H
 #define ALGINE_SHADERPROGRAM_H
 
-#include <algine/core/ContextObject.h>
+#include <algine/core/context/ContextObject.h>
 #include <algine/core/shader/ShadersInfo.h>
 #include <algine/core/shader/Shader.h>
 

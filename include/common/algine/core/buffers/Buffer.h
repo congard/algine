@@ -1,7 +1,7 @@
 #ifndef ALGINE_BUFFER_H
 #define ALGINE_BUFFER_H
 
-#include <algine/core/ContextObject.h>
+#include <algine/core/context/ContextObject.h>
 #include <algine/types.h>
 
 #include <tulz/Array.h>

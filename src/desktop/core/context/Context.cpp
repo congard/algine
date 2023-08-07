@@ -1,7 +1,7 @@
-#include <algine/core/Context.h>
-#include <algine/core/ContextConfig.h>
+#include <algine/core/context/Context.h>
+#include <algine/core/context/ContextConfig.h>
 
-#include "core/ContextCommon.h"
+#include "core/context/ContextCommon.h"
 
 #include <GLFW/glfw3.h>
 

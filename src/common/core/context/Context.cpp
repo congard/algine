@@ -1,5 +1,5 @@
-#include <algine/core/Context.h>
-#include <algine/core/ContextConfig.h>
+#include <algine/core/context/Context.h>
+#include <algine/core/context/ContextConfig.h>
 #include <algine/core/Engine.h>
 #include <algine/core/log/Log.h>
 

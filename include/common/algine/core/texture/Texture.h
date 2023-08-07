@@ -1,7 +1,7 @@
 #ifndef ALGINE_TEXTURE_H
 #define ALGINE_TEXTURE_H
 
-#include <algine/core/ContextObject.h>
+#include <algine/core/context/ContextObject.h>
 #include <algine/core/texture/TextureCreateInfo.h>
 #include <algine/core/texture/TextureFileInfo.h>
 #include <algine/core/DataType.h>

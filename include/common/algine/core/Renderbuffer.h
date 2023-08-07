@@ -1,7 +1,7 @@
 #ifndef ALGINE_RENDERBUFFER_H
 #define ALGINE_RENDERBUFFER_H
 
-#include <algine/core/ContextObject.h>
+#include <algine/core/context/ContextObject.h>
 #include <algine/types.h>
 
 #include <vector>

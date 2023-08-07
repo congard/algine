@@ -1,7 +1,7 @@
 #ifndef ALGINE_CONTEXTCONFIG_H
 #define ALGINE_CONTEXTCONFIG_H
 
-#include <algine/core/Context.h>
+#include <algine/core/context/Context.h>
 
 namespace algine {
 struct ContextConfig {

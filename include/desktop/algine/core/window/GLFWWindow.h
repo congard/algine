@@ -6,7 +6,7 @@
 #include <algine/core/input/KeyboardKey.h>
 #include <algine/core/input/MouseKey.h>
 #include <algine/core/Window.h>
-#include <algine/core/Context.h>
+#include <algine/core/context/Context.h>
 #include <algine/core/Ptr.h>
 #include <algine/types.h>
 

@@ -2,7 +2,7 @@
 #define ALGINE_QTWINDOW_H
 
 #include <algine/core/Window.h>
-#include <algine/core/Context.h>
+#include <algine/core/context/Context.h>
 #include <algine/core/window/QtWindowEventHandler.h>
 
 #include <tulz/observer/Subject.h>

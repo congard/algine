@@ -1,7 +1,7 @@
 #ifndef ALGINE_FRAMEBUFFER_H
 #define ALGINE_FRAMEBUFFER_H
 
-#include <algine/core/ContextObject.h>
+#include <algine/core/context/ContextObject.h>
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/texture/TextureCube.h>
 #include <algine/core/texture/PixelData.h>

@@ -4,7 +4,7 @@
 #include <algine/core/buffers/ArrayBuffer.h>
 #include <algine/core/buffers/IndexBuffer.h>
 #include <algine/core/InputAttributeDescription.h>
-#include <algine/core/ContextObject.h>
+#include <algine/core/context/ContextObject.h>
 
 namespace algine {
 AL_CONTEXT_OBJECT(InputLayout) {
