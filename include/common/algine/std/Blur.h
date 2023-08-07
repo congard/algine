@@ -12,22 +12,31 @@
 namespace algine {
 class Blur: public Object {
 public:
-    explicit Blur(const TextureCreateInfo &textureCreateInfo, Object *parent = defaultParent());
+    struct Params {
+        /**
+         * Blur texture params
+         */
+        TextureCreateInfo textureCreateInfo;
 
-    /**
-     * TODO
-     * @param kernelRadius
-     * @param blurComponent
-     * @param linearSampling
-     */
-    void configureShaders(uint kernelRadius, const std::string &blurComponent, bool linearSampling = true);
+        int kernelRadius {8};
+        float kernelSigma {6};
 
-    /**
-     * Must be called <b>after</b> setPingPongShaders(h, v)
-     * @param radius blur kernel radius
-     * @param sigma blur kernel sigma
-     */
-    void configureKernel(int radius, float sigma, bool linearSampling = true);
+        /**
+         * Components to be blurred.
+         * @note Components must be compatible with
+         * the texture format.
+         */
+        std::string blurComponents {"rgb"};
+
+        /**
+         * Whether use linear sampling or not
+         * @see https://www.rastergrid.com/blog/2010/09/efficient-gaussian-blur-with-linear-sampling/
+         */
+        bool linearSampling {true};
+    };
+
+public:
+    explicit Blur(const Params &params, Object *parent = defaultParent());
 
     /**
      * <b>quadRenderer must be bound</b>, call blur->getQuadRenderer()->bind() if you need
@@ -43,6 +52,10 @@ public:
     uint getAmount() const;
     QuadRenderer* getQuadRenderer() const;
     Texture2D* get() const;
+
+private:
+    void createShaders(const Params &params);
+    void configureShaders(const Params &params);
 
     static tulz::Array<float> getKernel(int size, float sigma);
 
