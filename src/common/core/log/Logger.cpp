@@ -1,8 +1,15 @@
 #include <algine/core/log/Logger.h>
 
+#include <utility>
+
 namespace algine {
+Logger::Logger(Type type, std::string tag, InputEndListener *listener)
+    : m_type(type),
+      m_tag(std::move(tag)),
+      m_endListener(listener) {}
+
 Logger::Logger(Logger &&other) noexcept {
-    std::swap(m_id, other.m_id);
+    std::swap(m_type, other.m_type);
     std::swap(m_tag, other.m_tag);
     std::swap(m_stream, other.m_stream);
     std::swap(m_endListener, other.m_endListener);
@@ -81,8 +88,8 @@ void Logger::setTag(const std::string &tag) {
     m_tag = tag;
 }
 
-void Logger::setId(int id) {
-    m_id = id;
+void Logger::setType(Type type) {
+    m_type = type;
 }
 
 void Logger::setInputEndListener(InputEndListener *listener) {
@@ -93,8 +100,8 @@ const std::string& Logger::getTag() const {
     return m_tag;
 }
 
-int Logger::getId() const {
-    return m_id;
+Logger::Type Logger::getType() const {
+    return m_type;
 }
 
 std::string Logger::str() const {

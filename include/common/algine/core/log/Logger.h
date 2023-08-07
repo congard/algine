@@ -12,8 +12,15 @@ public:
         virtual void onInputEnd(Logger &logger) = 0;
     };
 
+    enum class Type {
+        Info,
+        Error,
+        Verbose
+    };
+
 public:
     Logger() = default;
+    Logger(Type type, std::string tag, InputEndListener *listener);
     Logger(Logger &&other) noexcept;
     Logger& operator=(Logger &&other) noexcept;
     ~Logger();
@@ -33,16 +40,16 @@ public:
     Logger& operator<<(const std::string &val);
 
     void setTag(const std::string &tag);
-    void setId(int id);
+    void setType(Type type);
     void setInputEndListener(InputEndListener *listener);
 
     const std::string& getTag() const;
-    int getId() const;
+    Type getType() const;
 
     std::string str() const;
 
 private:
-    int m_id {0};
+    Type m_type {};
     std::string m_tag;
     std::ostringstream m_stream;
     InputEndListener *m_endListener {};
