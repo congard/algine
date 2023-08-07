@@ -43,6 +43,13 @@ public:
 
     static void exec(const std::function<void()> &func);
 
+    /**
+     * Adds an onDestroy listener `observer`.
+     * @param observer The listener.
+     * @return Subscription.
+     * @note This function can be safely called during
+     * static initialization.
+     */
     static tulz::Subscription<> addOnDestroyListener(const tulz::Observer<> &observer);
 
     static void setDebugWriter(DebugWriter *debugWriter);
@@ -135,6 +142,9 @@ public:
 #endif
 
 private:
+    static tulz::Subject<>& get_onDestroy();
+
+private:
     static std::unique_ptr<DebugWriter> m_debugWriter;
     static std::shared_ptr<IOSystem> m_defaultIOSystem;
 
@@ -147,8 +157,6 @@ private:
     static std::string m_countryCode;
 
     static Context m_appContext;
-
-    static tulz::Subject<> m_onDestroy;
 
     static int m_argc;
     static char **m_argv;

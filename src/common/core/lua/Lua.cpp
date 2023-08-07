@@ -13,10 +13,6 @@
 #include "CoreLua.h"
 
 namespace algine {
-Lua Lua::m_default;
-
-decltype(Lua::m_typeLoaders) Lua::m_typeLoaders;
-
 Lua::Locker::Locker(const std::unique_ptr<std::recursive_mutex> &mutex)
     : m_mutex(mutex.get())
 {
@@ -146,9 +142,10 @@ bool registerType(std::string_view type, sol::table &table, Lua *lua, Lua::TypeL
 }
 
 Lua& Lua::getDefault() {
-    if (!m_default.isInitialized())
-        m_default.init();
-    return m_default;
+    auto &def = get_default();
+    if (!def.isInitialized())
+        def.init();
+    return def;
 }
 
 template<typename T>
@@ -231,7 +228,7 @@ void Lua::initEnvironment(sol::global_table &env) {
         if (auto it = customReg.find(type); it != customReg.end()) {
             it->second();
         } else if (!(registerType(type, table, this, AlgineCore()) || registerType(type, table, this, AlgineStd()))) {
-            m_typeLoaders[type.data()](*tenv.env);
+            get_typeLoaders()[type.data()](*tenv.env);
         }
     };
 
@@ -258,10 +255,21 @@ bool Lua::isRegistered(sol::global_table &env, std::string_view type) {
 }
 
 void Lua::addTypeLoader(std::string_view name, TypeLoader loader) {
-    m_typeLoaders[name.data()] = std::move(loader);
+    get_typeLoaders()[name.data()] = std::move(loader);
 }
 
 bool Lua::hasTypeLoader(std::string_view name) {
-    return m_typeLoaders.find(name.data()) != m_typeLoaders.end();
+    auto &loaders = get_typeLoaders();
+    return loaders.find(name.data()) != loaders.end();
+}
+
+Lua& Lua::get_default() {
+    static Lua defaultLua;
+    return defaultLua;
+}
+
+std::map<std::string, Lua::TypeLoader>& Lua::get_typeLoaders() {
+    static std::map<std::string, TypeLoader> typeLoaders;
+    return typeLoaders;
 }
 } // algine

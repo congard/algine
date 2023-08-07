@@ -36,8 +36,6 @@ std::string Engine::m_countryCode;
 
 Context Engine::m_appContext;
 
-tulz::Subject<> Engine::m_onDestroy;
-
 int Engine::m_argc;
 char **Engine::m_argv;
 
@@ -147,7 +145,7 @@ void Engine::wait() {
 }
 
 void Engine::destroy() {
-    m_onDestroy.notify();
+    get_onDestroy().notify();
 
 #ifdef ALGINE_SECURE_OPERATIONS
     if (m_debugWriter) {
@@ -190,7 +188,7 @@ void Engine::exec(const std::function<void()> &func) {
 }
 
 tulz::Subscription<> Engine::addOnDestroyListener(const tulz::Observer<> &observer) {
-    return m_onDestroy.subscribe(observer);
+    return get_onDestroy().subscribe(observer);
 }
 
 void Engine::setDebugWriter(DebugWriter *debugWriter) {
@@ -351,4 +349,10 @@ std::string Engine::Android::getAppDataDirectory() {
     return AndroidBridge::getAppDataDirectory();
 }
 #endif
+
+tulz::Subject<>& Engine::get_onDestroy() {
+    // https://isocpp.org/wiki/faq/ctors#static-init-order
+    static tulz::Subject<> onDestroy;
+    return onDestroy;
+}
 }

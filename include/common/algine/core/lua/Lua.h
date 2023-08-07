@@ -69,7 +69,23 @@ public:
      */
     void removeModule(std::string_view name);
 
+    /**
+     * Adds a custom type loader.
+     * @param name The name of the type.
+     * @param loader The loader.
+     * @note This function can be safely called during
+     * static initialization.
+     */
     static void addTypeLoader(std::string_view name, TypeLoader loader);
+
+    /**
+     * Checks whether a type loader with the specified
+     * name exists.
+     * @param name The type name.
+     * @return `true` if it exists, `false` otherwise.
+     * @note This function can be safely called during
+     * static initialization.
+     */
     static bool hasTypeLoader(std::string_view name);
 
     static sol::global_table& getEnv(Lua *lua, sol::global_table *env = nullptr);
@@ -96,6 +112,11 @@ public:
         algine_lua::registerLuaUsertype<T>(table, lua);
     }
 
+    /**
+     * @return The default instance.
+     * @note This function can be safely called during
+     * static initialization.
+     */
     static Lua& getDefault();
 
 private:
@@ -108,8 +129,8 @@ private:
     std::map<std::string, Module> m_modules;
 
 private:
-    static Lua m_default;
-    static std::map<std::string, TypeLoader> m_typeLoaders;
+    static Lua& get_default();
+    static std::map<std::string, TypeLoader>& get_typeLoaders();
 };
 
 template<typename T, typename G, typename S>
