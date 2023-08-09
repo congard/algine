@@ -1,81 +1,54 @@
 #include <algine/core/log/Log.h>
+#include <algine/core/log/DefaultLogWriter.h>
 
 namespace algine {
-// Android inserts prefixes (I/, E/ etc) automatically
-
-#ifdef __ANDROID__
-    #include <android/log.h>
-    #define LOG(tag, priority, format, ...) __android_log_print(priority, tag.c_str(), format, __VA_ARGS__)
-    #define LOG_INFO(tag, format, ...) LOG(tag, ANDROID_LOG_INFO, format, __VA_ARGS__)
-    #define LOG_ERROR(tag, format, ...) LOG(tag, ANDROID_LOG_ERROR, format, __VA_ARGS__)
-    #define LOG_VERBOSE(tag, format, ...) LOG(tag, ANDROID_LOG_VERBOSE, format, __VA_ARGS__)
-    #define LOG_INFO_TAG(tag) tag
-    #define LOG_ERROR_TAG(tag) tag
-    #define LOG_VERBOSE_TAG(tag) tag
-#else
-    #include <cstdio>
-    #define LOG(tag, stream, format, ...) fprintf(stream, (tag + ": " format "\n").c_str(), __VA_ARGS__)
-    #define LOG_INFO(tag, format, ...) LOG(tag, stdout, format, __VA_ARGS__)
-    #define LOG_ERROR(tag, format, ...) LOG(tag, stderr, format, __VA_ARGS__)
-    #define LOG_VERBOSE(tag, format, ...) LOG(tag, stdout, format, __VA_ARGS__)
-    #define LOG_INFO_TAG(tag) ("I/" + (tag))
-    #define LOG_ERROR_TAG(tag) ("E/" + (tag))
-    #define LOG_VERBOSE_TAG(tag) ("V/" + (tag))
-#endif
-
 void Log::InputEndListener::onInputEnd(Logger &logger) {
-    auto &tag = logger.getTag();
-    auto log = logger.str();
-
-    switch (logger.getType()) {
-        case Logger::Type::Info:
-            Log::info(tag, log);
-            break;
-        case Logger::Type::Error:
-            Log::error(tag, log);
-            break;
-        case Logger::Type::Verbose:
-            Log::verbose(tag, log);
-            break;
-    }
+    printLog(logger.getType(), logger.getTag(), logger.str());
 }
 
-std::mutex Log::m_mutex;
+std::unique_ptr<LogWriter> Log::m_writer {new DefaultLogWriter()};
 Log::InputEndListener Log::m_endListener;
 
 decltype(Log::m_disabledLoggers) Log::m_disabledLoggers {0};
 
+Logger Log::verbose(const std::string &tag) {
+    return {Logger::Type::Verbose, tag, &m_endListener};
+}
+
+Logger Log::debug(const std::string &tag) {
+    return {Logger::Type::Debug, tag, &m_endListener};
+}
+
 Logger Log::info(const std::string &tag) {
     return {Logger::Type::Info, tag, &m_endListener};
+}
+
+Logger Log::warn(const std::string &tag) {
+    return {Logger::Type::Warn, tag, &m_endListener};
 }
 
 Logger Log::error(const std::string &tag) {
     return {Logger::Type::Error, tag, &m_endListener};
 }
 
-Logger Log::verbose(const std::string &tag) {
-    return {Logger::Type::Verbose, tag, &m_endListener};
+void Log::verbose(const std::string &tag, std::string_view str) {
+    printLog(Logger::Type::Verbose, tag, str);
+}
+
+void Log::debug(const std::string &tag, std::string_view str) {
+    printLog(Logger::Type::Debug, tag, str);
 }
 
 void Log::info(const std::string &tag, std::string_view str) {
-    if (isEnabled(Logger::Type::Info)) {
-        std::lock_guard lockGuard(m_mutex);
-        LOG_INFO(LOG_INFO_TAG(tag), "%s", str.data());
-    }
+    printLog(Logger::Type::Info, tag, str);
+}
+
+void Log::warn(const std::string &tag, std::string_view str) {
+    printLog(Logger::Type::Warn, tag, str);
 }
 
 void Log::error(const std::string &tag, std::string_view str) {
-    if (isEnabled(Logger::Type::Error)) {
-        std::lock_guard lockGuard(m_mutex);
-        LOG_ERROR(LOG_ERROR_TAG(tag), "%s", str.data());
-    }
-}
-
-void Log::verbose(const std::string &tag, std::string_view str) {
-    if (isEnabled(Logger::Type::Verbose)) {
-        std::lock_guard lockGuard(m_mutex);
-        LOG_VERBOSE(LOG_VERBOSE_TAG(tag), "\033[0;36m%s\033[0m", str.data());
-    }
+    printLog(Logger::Type::Error, tag, str);
 }
 
 void Log::setEnabled(Logger::Type type, bool enabled) {
@@ -84,5 +57,36 @@ void Log::setEnabled(Logger::Type type, bool enabled) {
 
 bool Log::isEnabled(Logger::Type type) {
     return !m_disabledLoggers[static_cast<std::size_t>(type)];
+}
+
+void Log::printLog(Logger::Type type, const std::string &tag, std::string_view str) {
+    if (!isEnabled(type) || m_writer == nullptr)
+        return;
+
+    switch (type) {
+        case Logger::Type::Verbose:
+            m_writer->verbose(tag, str);
+            break;
+        case Logger::Type::Debug:
+            m_writer->debug(tag, str);
+            break;
+        case Logger::Type::Info:
+            m_writer->info(tag, str);
+            break;
+        case Logger::Type::Warn:
+            m_writer->warn(tag, str);
+            break;
+        case Logger::Type::Error:
+            m_writer->error(tag, str);
+            break;
+    }
+}
+
+void Log::setWriter(std::unique_ptr<LogWriter> writer) {
+    m_writer = std::move(writer);
+}
+
+const std::unique_ptr<LogWriter>& Log::getWriter() {
+    return m_writer;
 }
 }

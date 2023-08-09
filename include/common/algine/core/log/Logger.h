@@ -13,9 +13,11 @@ public:
     };
 
     enum class Type {
+        Verbose,
+        Debug,
         Info,
-        Error,
-        Verbose
+        Warn,
+        Error
     };
 
 public:
