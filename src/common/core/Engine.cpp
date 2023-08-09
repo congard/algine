@@ -8,8 +8,6 @@
 
 #include <chrono>
 
-#include "core/debug/Debug.h"
-
 #ifndef __ANDROID__
     #include <algine/core/io/StandardIOSystem.h>
     #include <GLFW/glfw3.h>
@@ -20,10 +18,11 @@
     #include "../../src/android/core/Bridge.h"
 #endif
 
+#define LOG_TAG "Engine"
+
 using namespace std;
 
 namespace algine {
-unique_ptr<DebugWriter> Engine::m_debugWriter;
 shared_ptr<IOSystem> Engine::m_defaultIOSystem;
 
 int Engine::m_apiVersion;
@@ -114,7 +113,7 @@ void Engine::init(int argc, char *const *argv) {
     // if LC_ALL is not defined, std::locale("") will throw an exception
     if (is_linux() && !getenv("LC_ALL")) {
         localeInfo = tulz::LocaleInfo::get("en_GB.UTF-8");
-        Log::error("Algine", "LC_ALL is not defined, locale was set to en_GB.UTF-8");
+        Log::warn(LOG_TAG, "LC_ALL is not defined, locale was set to en_GB.UTF-8");
     } else {
         localeInfo = tulz::LocaleInfo::get(locale("").name().c_str());
     }
@@ -148,14 +147,14 @@ void Engine::destroy() {
     get_onDestroy().notify();
 
 #ifdef ALGINE_SECURE_OPERATIONS
-    if (m_debugWriter) {
+    {
         auto &summary = Object::_getSOPAllocSummary();
-        auto logger = m_debugWriter->logger();
+        auto logger = Log::debug(LOG_TAG);
         logger << "\n====== Object allocations summary ======\n";
         logger << "Allocations:\t" << summary.alloc << "\n";
         logger << "Deallocations:\t" << summary.dealloc << "\n";
-        logger << (summary.alloc == summary.dealloc ? "No memory leak detected" : "MEMORY LEAK DETECTED");
-        logger << "\n========================================";
+        logger << (summary.alloc == summary.dealloc ? "\033[0;32mNo memory leak detected\033[0m"
+                                                    : "\033[1;31mMEMORY LEAK DETECTED\033[0m");
     }
 #endif
 
@@ -189,15 +188,6 @@ void Engine::exec(const std::function<void()> &func) {
 
 tulz::Subscription<> Engine::addOnDestroyListener(const tulz::Observer<> &observer) {
     return get_onDestroy().subscribe(observer);
-}
-
-void Engine::setDebugWriter(DebugWriter *debugWriter) {
-    m_debugWriter.reset(debugWriter);
-    enable_if_android(enableDebugOutput());
-}
-
-unique_ptr<DebugWriter>& Engine::getDebugWriter() {
-    return m_debugWriter;
 }
 
 void Engine::setDefaultIOSystem(IOSystem *ioSystem) {

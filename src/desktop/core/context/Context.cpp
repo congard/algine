@@ -1,5 +1,6 @@
 #include <algine/core/context/Context.h>
 #include <algine/core/context/ContextConfig.h>
+#include <algine/core/log/Log.h>
 
 #include "core/context/ContextCommon.h"
 
@@ -7,13 +8,11 @@
 
 namespace algine {
 bool Context::createImpl(int major, int minor, const ContextConfig &config) {
-    auto &debugWriter = Engine::getDebugWriter();
-
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, debugWriter != nullptr);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, Log::isEnabled(Logger::Type::Debug));
 
     // nContext - native context
     GLFWwindow* nContext = glfwCreateWindow(

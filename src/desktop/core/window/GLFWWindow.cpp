@@ -1,5 +1,5 @@
 #include <algine/core/window/GLFWWindow.h>
-
+#include <algine/core/log/Log.h>
 #include <algine/core/Content.h>
 #include <algine/core/Engine.h>
 #include <algine/gl.h>
@@ -68,13 +68,11 @@ void GLFWWindow::create() {
     int majorVersion = apiVersion / 100;
     int minorVersion = (apiVersion - majorVersion * 100) / 10;
 
-    auto &debugWriter = Engine::getDebugWriter();
-
     // Set all the required options for GLFW
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majorVersion);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVersion);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, debugWriter != nullptr);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, Log::isEnabled(Logger::Type::Debug));
 
     m_window = glfwCreateWindow(m_dimensions.x, m_dimensions.y, m_title.c_str(),
             nullptr, static_cast<GLFWwindow*>(m_parentContext.m_context));
@@ -96,8 +94,8 @@ void GLFWWindow::create() {
         throw std::runtime_error("GLEW init failed, error code " + std::to_string(code));
     }
 
-    if (debugWriter != nullptr) {
-        auto logger = debugWriter->logger();
+    if (Log::isEnabled(Logger::Type::Debug)) {
+        auto logger = Log::debug("GLFWWindow");
         logger << "Time: " << Engine::time() << "\n";
         logger << "GPU Vendor: " << Engine::getGPUVendor() << "\n";
         logger << "GPU Renderer: " << Engine::getGPURenderer() << "\n";

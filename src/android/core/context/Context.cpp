@@ -7,8 +7,6 @@
 
 namespace algine {
 bool Context::createImpl(int major, int minor, const ContextConfig &config) {
-    auto &debugWriter = Engine::getDebugWriter();
-
     EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
     int vers[2];

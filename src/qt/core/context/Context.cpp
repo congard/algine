@@ -12,12 +12,10 @@ namespace algine {
 #define qSurface static_cast<QOffscreenSurface*>(m_surface)
 
 bool Context::createImpl(int major, int minor, const ContextConfig &config) {
-    auto &debugWriter = Engine::getDebugWriter();
-
     QSurfaceFormat format;
     format.setVersion(major, minor);
     format.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
-    format.setOption(QSurfaceFormat::FormatOption::DebugContext, debugWriter != nullptr);
+    format.setOption(QSurfaceFormat::FormatOption::DebugContext, Log::isEnabled(Logger::Type::Debug));
 
     auto surface = new QOffscreenSurface();
     surface->setFormat(format);

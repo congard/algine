@@ -1,7 +1,6 @@
-#ifndef ALGINE_TESTS_CONTEXTCOMMON_H
-#define ALGINE_TESTS_CONTEXTCOMMON_H
+#ifndef ALGINE_CONTEXTCOMMON_H
+#define ALGINE_CONTEXTCOMMON_H
 
-#include <algine/core/Engine.h>
 #include <algine/core/log/Log.h>
 
 #include "core/debug/Debug.h"
@@ -18,8 +17,8 @@ inline void printContextNotInitializedError() {
 }
 
 inline void enableDebugOutputIfPossible() {
-    if (auto &debugWriter = Engine::getDebugWriter(); debugWriter != nullptr) {
-        debugWriter->logger() << "Context " << Context::getCurrentNative() << " now is current for thread "
+    if (Log::isEnabled(Logger::Type::Debug)) {
+        Log::debug("Context") << "Context " << Context::getCurrentNative() << " now is current for thread "
             << std::hash<std::thread::id>{}(std::this_thread::get_id());
 
         enableDebugOutput();
@@ -27,4 +26,4 @@ inline void enableDebugOutputIfPossible() {
 }
 }
 
-#endif //ALGINE_TESTS_CONTEXTCOMMON_H
+#endif //ALGINE_CONTEXTCOMMON_H

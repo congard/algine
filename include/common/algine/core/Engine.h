@@ -1,7 +1,6 @@
 #ifndef ALGINE_ENGINE_H
 #define ALGINE_ENGINE_H
 
-#include <algine/core/debug/DebugWriter.h>
 #include <algine/core/io/IOSystem.h>
 #include <algine/core/context/Context.h>
 #include <algine/types.h>
@@ -51,9 +50,6 @@ public:
      * static initialization.
      */
     static tulz::Subscription<> addOnDestroyListener(const tulz::Observer<> &observer);
-
-    static void setDebugWriter(DebugWriter *debugWriter);
-    static std::unique_ptr<DebugWriter>& getDebugWriter();
 
     static void setDefaultIOSystem(IOSystem *ioSystem);
     static void setDefaultIOSystem(const std::shared_ptr<IOSystem> &ioSystem);
@@ -145,7 +141,6 @@ private:
     static tulz::Subject<>& get_onDestroy();
 
 private:
-    static std::unique_ptr<DebugWriter> m_debugWriter;
     static std::shared_ptr<IOSystem> m_defaultIOSystem;
 
     static int m_apiVersion;
