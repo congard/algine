@@ -3,7 +3,6 @@
 
 #include <algine/core/lua/Lua.h>
 #include <algine/core/io/IOProvider.h>
-#include <algine/core/log/Log.h>
 
 #include <tulz/Path.h>
 
@@ -35,11 +34,7 @@ protected:
         auto &state = *lua->state();
 
         auto printErr = [&](sol::error &error) {
-            if (!path) {
-                Log::error() << error.what();
-            } else {
-                Log::error() << "In " << tulz::Path::join(m_rootDir, s) << ":\n" << error.what();
-            }
+            printExecErr(error, s, path);
         };
 
         try {
@@ -62,6 +57,9 @@ protected:
             printErr(error);
         }
     }
+
+private:
+    void printExecErr(sol::error &error, const std::string &s, bool path);
 
 private:
     std::string m_rootDir;

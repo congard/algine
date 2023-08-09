@@ -1,4 +1,5 @@
 #include <algine/core/lua/Scriptable.h>
+#include <algine/core/log/Log.h>
 
 #include <tulz/Path.h>
 
@@ -27,5 +28,13 @@ void Scriptable::setRootDir(std::string_view rootDir) {
 
 const std::string& Scriptable::getRootDir() const {
     return m_rootDir;
+}
+
+void Scriptable::printExecErr(sol::error &error, const std::string &s, bool path) {
+    if (!path) {
+        Log::error() << error.what();
+    } else {
+        Log::error() << "In " << tulz::Path::join(m_rootDir, s) << ":\n" << error.what();
+    }
 }
 } // algine
