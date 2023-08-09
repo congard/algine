@@ -26,7 +26,10 @@ public:
     static void setEnabled(Logger::Type type, bool enabled);
     static bool isEnabled(Logger::Type type);
 
+    /// #solgen #ignore
     static void setWriter(std::unique_ptr<LogWriter> writer);
+
+    /// #solgen #ignore
     static const std::unique_ptr<LogWriter>& getWriter();
 
 private:
