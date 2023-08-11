@@ -1,6 +1,7 @@
 #include <algine/core/lua/Lua.h>
 #include <algine/core/lua/GLMLuaTypes.h>
 #include <algine/core/lua/TulzLuaTypes.h>
+#include <algine/core/log/Log.h>
 #include <algine/templates.h>
 
 #include <utility>
