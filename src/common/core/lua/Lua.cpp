@@ -4,13 +4,15 @@
 #include <algine/core/log/Log.h>
 #include <algine/templates.h>
 
+#include <algine/core/math/Rect.h>
+#include <algine/core/math/Point.h>
+
 #include <utility>
 #include <cxxabi.h>
 
 #include <sol/variadic_args.hpp>
 
-#include "AlgineCore.h"
-#include "AlgineStd.h"
+#include "AlgineBindings.h"
 #include "CoreLua.h"
 
 namespace algine {
@@ -37,8 +39,6 @@ void Lua::init() {
     m_lua->open_libraries();
 
     // TODO: move to static initializer lists
-    addModule("core", Module([this](auto &, sol::global_table env) { registerUsertype(&env, AlgineCore()); }));
-    addModule("std", Module([this](auto &, sol::global_table env) { registerUsertype(&env, AlgineStd()); }));
     addModule("glm", Module([this](auto &, sol::global_table env) { GLMLuaTypes::registerLuaUsertype(this, &env); }));
     addModule("tulz", Module([this](auto &, sol::global_table env) { TulzLuaTypes::registerLuaUsertype(this, &env); }));
 
@@ -228,7 +228,7 @@ void Lua::initEnvironment(sol::global_table &env) {
 
         if (auto it = customReg.find(type); it != customReg.end()) {
             it->second();
-        } else if (!(registerType(type, table, this, AlgineCore()) || registerType(type, table, this, AlgineStd()))) {
+        } else if (!registerType(type, table, this, AlgineBindings())) {
             get_typeLoaders()[type.data()](*tenv.env);
         }
     };

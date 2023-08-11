@@ -54,124 +54,6 @@ function(solgen output)
 
     message(STATUS "ALGINE_SOLGEN_PATH=${ALGINE_SOLGEN_PATH}")
 
-    function(set_if_empty var)
-        if (NOT ${var})
-            set(${var} ${ARGN} PARENT_SCOPE)
-        endif()
-    endfunction()
-
-    set_if_empty(ALGINE_SOLGEN_INPUT_CORE
-        include/common/algine/core/Object.h
-
-        include/common/algine/core/lua/Scriptable.h
-
-        include/common/algine/core/font/Font.h
-        include/common/algine/core/font/FontLibrary.h
-        include/common/algine/core/font/FontMetrics.h
-        include/common/algine/core/font/FontRenderer.h
-
-        include/common/algine/core/io/IOProvider.h
-
-        include/common/algine/core/log/Log.h
-
-        include/common/algine/core/shader/Shader.h
-        include/common/algine/core/shader/ShaderBuilder.h
-        include/common/algine/core/shader/ShaderDefinitionGenerator.h
-        include/common/algine/core/shader/ShaderProgram.h
-        include/common/algine/core/shader/ShaderProgramBuilder.h
-
-        include/common/algine/core/Color.h
-
-        include/common/algine/core/ImageBuilder.h
-
-        include/common/algine/core/texture/Texture.h
-        include/common/algine/core/texture/Texture2D.h
-        include/common/algine/core/texture/Texture2DBuilder.h
-        include/common/algine/core/texture/TextureCreateInfo.h
-        include/common/algine/core/texture/TextureBuilder.h
-        include/common/algine/core/texture/TextureCube.h
-        include/common/algine/core/texture/TextureCubeBuilder.h
-        include/common/algine/core/texture/TextureFileInfo.h
-
-        include/common/algine/core/Framebuffer.h
-        include/common/algine/core/FramebufferBuilder.h
-
-        include/common/algine/core/Renderbuffer.h
-        include/common/algine/core/RenderbufferBuilder.h
-
-        include/common/algine/core/Builder.h
-        include/common/algine/core/Object.h
-        include/common/algine/core/DataType.h
-
-        include/common/algine/core/OutputList.h
-
-        include/common/algine/core/painter/Paint.h
-        include/common/algine/core/painter/Painter.h
-        include/common/algine/core/painter/RoundRect.h
-
-        include/common/algine/core/widgets/Widget.h
-        include/common/algine/core/widgets/Dimen.h
-        include/common/algine/core/widgets/Unit.h)
-
-    set_if_empty(ALGINE_SOLGEN_INPUT_STD
-        include/common/algine/std/model/ShapeBuilder.h
-        include/common/algine/std/model/Shape.h
-        include/common/algine/std/model/ModelBuilder.h
-        include/common/algine/std/model/Model.h
-        include/common/algine/std/model/InputLayoutShapeLocations.h
-
-        include/common/algine/std/rotator/Rotator.h
-        include/common/algine/std/rotator/EulerRotator.h
-        include/common/algine/std/rotator/FreeRotator.h
-
-        include/common/algine/std/Rotatable.h
-        include/common/algine/std/Scalable.h
-        include/common/algine/std/Translatable.h
-
-        include/common/algine/std/AMTLManager.h
-        include/common/algine/std/AMTLMaterialManager.h)
-
-    set_if_empty(ALGINE_SOLGEN_CORE_CLASSES
-        Object
-        Scriptable
-        Font FontLibrary FontMetrics FontRenderer
-        IOProvider
-        Log
-        Shader ShaderBuilder ShaderDefinitionGenerator ShaderProgram ShaderProgramBuilder
-        Color
-        ImageBuilder
-        Texture Texture2D TextureCreateInfo TextureCube TextureFileInfo
-        TextureBuilder Texture2DBuilder TextureCubeBuilder
-        Framebuffer FramebufferBuilder
-        Renderbuffer RenderbufferBuilder
-        Builder Object
-        DataType
-        OutputList
-        Paint Painter RoundRect
-        Widget Dimen Unit)
-
-    set_if_empty(ALGINE_SOLGEN_STD_CLASSES
-        ShapeBuilder Shape
-        ModelBuilder Model
-        InputLayoutShapeLocations
-        Rotator EulerRotator FreeRotator
-        Rotatable Scalable Translatable
-        AMTLManager AMTLMaterialManager)
-
-    set(CORE_EXTRA_CLASSES
-        RectI RectF PointI PointF)
-
-    gen_type_list(AlgineCore "${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineCore.h"
-        "${ALGINE_SOLGEN_INPUT_CORE}"
-        "${ALGINE_SOLGEN_CORE_CLASSES};${CORE_EXTRA_CLASSES}")
-    
-    gen_type_list(AlgineStd "${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineStd.h"
-        "${ALGINE_SOLGEN_INPUT_STD}"
-        "${ALGINE_SOLGEN_STD_CLASSES}")
-    
-    string(REPLACE ";" "|" SOLGEN_CORE_CLASSES_REGEX "${ALGINE_SOLGEN_CORE_CLASSES}")
-    string(REPLACE ";" "|" SOLGEN_STD_CLASSES_REGEX "${ALGINE_SOLGEN_STD_CLASSES}")
-
     if (ANDROID)
         set(platform_str "android")
     elseif (UNIX)
@@ -182,15 +64,80 @@ function(solgen output)
         message(FATAL_ERROR "Unsupported system")
     endif()
 
-    # get compiler's include paths
-    execute_process(COMMAND
-        ${ALGINE_LUA_PATH} ${CMAKE_CURRENT_LIST_DIR}/scripts/FindCompilerInclude.lua ${CMAKE_CXX_COMPILER} ${platform_str}
-        RESULT_VARIABLE FindCompilerInclude_ret
-        OUTPUT_VARIABLE compilerIncludes)
+    function(run_lua)
+        cmake_parse_arguments(
+            PARSED_ARGS # prefix of output variables
+            "" # list of names of the boolean arguments (only defined ones will be true)
+            "OUTPUT_VAR;SCRIPT_FILE;WORKING_DIR" # list of names of mono-valued arguments
+            "ARGS" # list of names of multi-valued arguments (output variables are lists)
+            ${ARGN} # arguments of the function to parse, here we take the all original ones
+        )
 
-    if (FindCompilerInclude_ret AND NOT FindCompilerInclude_ret EQUAL 0)
-        message(FATAL_ERROR "FindCompilerInclude.lua fatal error: ${compilerIncludes}")
+        if (NOT PARSED_ARGS_OUTPUT_VAR)
+            message(FATAL_ERROR "You must provide an output variable")
+        endif()
+
+        if (NOT PARSED_ARGS_SCRIPT_FILE)
+            message(FATAL_ERROR "You must provide a script file")
+        endif()
+
+        if (NOT PARSED_ARGS_WORKING_DIR)
+            set(PARSED_ARGS_WORKING_DIR ".")
+        endif()
+
+        execute_process(COMMAND
+            ${ALGINE_LUA_PATH} ${PARSED_ARGS_SCRIPT_FILE} ${PARSED_ARGS_ARGS}
+            RESULT_VARIABLE run_lua_exit_code
+            OUTPUT_VARIABLE ${PARSED_ARGS_OUTPUT_VAR}
+            WORKING_DIRECTORY ${PARSED_ARGS_WORKING_DIR})
+
+        if (run_lua_exit_code AND NOT run_lua_exit_code EQUAL 0)
+            message(FATAL_ERROR "FindCompilerInclude.lua fatal error: ${${output_var}}")
+        endif()
+
+        set(${PARSED_ARGS_OUTPUT_VAR} ${${PARSED_ARGS_OUTPUT_VAR}} PARENT_SCOPE)
+    endfunction()
+
+    # get the list of enabled classes and its paths
+    set(lists_file "${CMAKE_SOURCE_DIR}/SolgenLists.lua")
+
+    if (NOT EXISTS "${lists_file}")
+        message(VERBOSE "Solgen: file ${lists_file} does not exist, default lists will be used")
+        set(lists_file "${CMAKE_CURRENT_LIST_DIR}/tools/solgen_lists/SolgenLists.default.lua")
+    endif ()
+
+    message(VERBOSE "Solgen lists: ${lists_file}")
+
+    run_lua(SCRIPT_FILE
+        "${CMAKE_CURRENT_LIST_DIR}/tools/solgen_lists/main.lua"
+        WORKING_DIR "${CMAKE_CURRENT_LIST_DIR}/tools/solgen_lists"
+        OUTPUT_VAR allowList
+        ARGS "${lists_file}")
+
+    if (allowList)
+        list(GET allowList 0 enabledClasses)
+        string(REPLACE "," ";" enabledClasses ${enabledClasses})
+
+        list(GET allowList 1 enabledClassPaths)
+        string(REPLACE "," ";" enabledClassPaths ${enabledClassPaths})
+
+        message(VERBOSE "Solgen: enabled classes: ${enabledClasses}")
+    else()
+        message(VERBOSE "Solgen: allow list is empty, skipping generation")
+        return()
     endif()
+
+    gen_type_list(AlgineBindings "${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineBindings.h"
+        "${enabledClassPaths}"
+        "${enabledClasses}")
+
+    string(REPLACE ";" "|" SOLGEN_CLASSES_REGEX "${enabledClasses}")
+
+    # get compiler's include paths
+    run_lua(SCRIPT_FILE
+        "${CMAKE_CURRENT_LIST_DIR}/scripts/FindCompilerInclude.lua"
+        OUTPUT_VAR compilerIncludes
+        ARGS ${CMAKE_CXX_COMPILER} ${platform_str})
 
     string(REPLACE "\n" ";" compilerIncludes ${compilerIncludes})
 
@@ -229,12 +176,12 @@ function(solgen output)
     set(SOLGEN_COMMAND ${ALGINE_SOLGEN_PATH}
         ${ALGINE_SOLGEN_ARGS}
         --print-paths
-        --input ${ALGINE_SOLGEN_INPUT_CORE} ${ALGINE_SOLGEN_INPUT_STD}
+        --input ${enabledClassPaths}
         --output-dir ${SOLGEN_OUTPUT_PATH}
         --output-namespace "algine_lua"
         --includes ${PRIVATE_INCLUDES} ${PUBLIC_INCLUDES} ${compilerIncludes} ${Qt${QT_VERSION_MAJOR}Widgets_INCLUDE_DIRS}
         --namespace-filter algine
-        --type-filter "algine::(?:${SOLGEN_CORE_CLASSES_REGEX}|${SOLGEN_STD_CLASSES_REGEX})(?:::[_a-zA-Z0-9]+)?$"
+        --type-filter "algine::(?:${SOLGEN_CLASSES_REGEX})(?:::[_a-zA-Z0-9]+)?$"
         --conf scripts/solgen.conf
         --clang-args -std=c++17 ${ALGINE_SOLGEN_CLANG_ARGS})
 

@@ -1,0 +1,2 @@
+setListMode(ListMode.Allow)
+clear()
