@@ -125,7 +125,7 @@ add_dep(
 add_dep(
     solgen
     GIT_REPOSITORY  https://github.com/congard/solgen.git
-    GIT_TAG         14e77628eb3035228b8da228b18e8b0801a2ac7f
+    GIT_TAG         f55d2411b147a38027384d7113d7b55933893a1c
 )
 
 add_dep(
