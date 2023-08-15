@@ -108,6 +108,7 @@ protected:
 
 #define AL_BUILDER(__object_name) \
 public: \
+    using result_t = __object_name; \
     __object_name* get() { return getImpl<__object_name*>(); } \
     __object_name* create() { return createNew<__object_name*>(); }
 
