@@ -2,10 +2,8 @@
 #include <algine/core/Framebuffer.h>
 #include <algine/core/PtrMaker.h>
 
-using namespace std;
-
 namespace algine {
-void FramebufferBuilder::setOutputLists(const vector<OutputList> &lists) {
+void FramebufferBuilder::setOutputLists(const std::vector<OutputList> &lists) {
     m_outputLists = lists;
 }
 
@@ -13,7 +11,7 @@ void FramebufferBuilder::addOutputList(const OutputList &list) {
     m_outputLists.emplace_back(list);
 }
 
-const vector<OutputList>& FramebufferBuilder::getOutputLists() const {
+const std::vector<OutputList>& FramebufferBuilder::getOutputLists() const {
     return m_outputLists;
 }
 
@@ -29,13 +27,6 @@ FramebufferBuilder::TextureCubeAttachments& FramebufferBuilder::textureCubeAttac
     return m_textureCubeAttachments;
 }
 
-template<typename T>
-struct type_holder {
-    using type = T;
-};
-
-#define type_holder_get(holder) typename decltype(holder)::type
-
 Object* FramebufferBuilder::createImpl() {
     auto framebuffer = new Framebuffer(getActualParent());
     framebuffer->setName(m_name);
@@ -46,28 +37,26 @@ Object* FramebufferBuilder::createImpl() {
     for (const auto & list : m_outputLists)
         framebuffer->addOutputList(list);
 
-    // attach objects; C++20 lambda template
-    auto attachAll = [&](auto &attachments, auto type) {
-        auto attach = [&](auto ptr, Attachment attachment) {
-            using Type = remove_pointer_t<decltype(ptr)>;
+    // attach objects
+    auto attachAll = [&]<typename B>(Attachments<B> &attachments) {
+        using T = B::result_t;
 
-            if constexpr (is_same_v<Type, Renderbuffer>) {
+        auto attach = [&](T *ptr, Attachment attachment) {
+            if constexpr (std::is_same_v<T, Renderbuffer>) {
                 framebuffer->attachRenderbuffer(ptr, attachment);
             }
 
-            if constexpr (is_same_v<Type, Texture2D> || is_same_v<Type, TextureCube>) {
+            if constexpr (std::is_same_v<T, Texture2D> || std::is_same_v<T, TextureCube>) {
                 framebuffer->attachTexture(ptr, attachment);
             }
         };
 
-        auto attachByName = [&](const string &name, Attachment attachment, auto objType) {
-            using Type = type_holder_get(objType);
-
+        auto attachByName = [&](const std::string &name, Attachment attachment) {
             // try to find an object by name
-            auto ptr = getByName<Type*>(name);
+            auto ptr = getByName<T*>(name);
 
             if (ptr == nullptr)
-                throw runtime_error(Object::getTypeName<Type>() + " '" + name + "' does not exist");
+                throw std::runtime_error(Object::getTypeName<T>() + " '" + name + "' does not exist");
 
             // attach object
             attach(ptr, attachment);
@@ -75,14 +64,12 @@ Object* FramebufferBuilder::createImpl() {
 
         // attach using builders, paths and names
 
-        using T = typename std::remove_reference_t<decltype(attachments)>::type;
-
         for (auto &p : attachments.value) {
             auto &v = p.second;
 
             if (auto name = std::get_if<Name>(&v); name) {
-                attachByName(*name, p.first, type);
-            } else if (auto builder = std::get_if<T>(&v); builder) {
+                attachByName(*name, p.first);
+            } else if (auto builder = std::get_if<B>(&v); builder) {
                 builder->setIOSystem(io());
                 attach(builder->get(), p.first);
             }
@@ -91,9 +78,9 @@ Object* FramebufferBuilder::createImpl() {
 
     framebuffer->bind();
 
-    attachAll(m_renderbufferAttachments, type_holder<Renderbuffer>());
-    attachAll(m_texture2DAttachments, type_holder<Texture2D>());
-    attachAll(m_textureCubeAttachments, type_holder<TextureCube>());
+    attachAll(m_renderbufferAttachments);
+    attachAll(m_texture2DAttachments);
+    attachAll(m_textureCubeAttachments);
 
     framebuffer->update();
     framebuffer->unbind();

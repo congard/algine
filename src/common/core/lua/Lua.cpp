@@ -149,11 +149,6 @@ Lua& Lua::getDefault() {
     return def;
 }
 
-template<typename T>
-struct type_holder {
-    using type = T;
-};
-
 void Lua::initEnvironment(sol::global_table &env) {
     auto usertype = env.new_usertype<Lua>(
             "Lua",
@@ -213,17 +208,16 @@ void Lua::initEnvironment(sol::global_table &env) {
         sol::global_table env = *tenv.env;
         sol::table table = env;
 
-        auto typeReg = [&](auto typeHolder) {
-            using T = typename decltype(typeHolder)::type;
+        auto typeReg = [&]<typename T>() {
             return [&]() { algine_lua::registerLuaUsertype<T>(table, this); };
         };
 
         // TODO: move to static initializers
         std::map<std::string_view, std::function<void()>> customReg = {
-            {"algine::PointI", typeReg(type_holder<PointI>())},
-            {"algine::PointF", typeReg(type_holder<PointF>())},
-            {"algine::RectI", typeReg(type_holder<RectI>())},
-            {"algine::RectF", typeReg(type_holder<RectF>())}
+            {"algine::PointI", typeReg.operator()<PointI>()},
+            {"algine::PointF", typeReg.operator()<PointF>()},
+            {"algine::RectI", typeReg.operator()<RectI>()},
+            {"algine::RectF", typeReg.operator()<RectF>()}
         };
 
         if (auto it = customReg.find(type); it != customReg.end()) {
