@@ -2,7 +2,7 @@
 #include <algine/core/lua/GLMLuaTypes.h>
 #include <algine/core/lua/TulzLuaTypes.h>
 #include <algine/core/log/Log.h>
-#include <algine/templates.h>
+#include <algine/platform.h>
 
 #include <algine/core/math/Rect.h>
 #include <algine/core/math/Point.h>

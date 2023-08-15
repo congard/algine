@@ -1,5 +1,5 @@
 #include <algine/core/buffers/Buffer.h>
-#include <algine/templates.h>
+#include <algine/platform.h>
 #include <algine/gl.h>
 
 using namespace algine;

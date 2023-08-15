@@ -1,7 +1,7 @@
 #include <algine/core/Engine.h>
 #include <algine/core/log/Log.h>
 #include <algine/core/Object.h>
-#include <algine/templates.h>
+#include <algine/platform.h>
 #include <algine/gl.h>
 
 #include <tulz/Path.h>
@@ -81,6 +81,9 @@ void linux_detect_dpi() {
 }
 
 void Engine::init(int argc, char *const *argv) {
+    Log::debug(LOG_TAG, "Built with " COMPILER_NAME " " COMPILER_VERSION " (" CPP_VERSION_STR ")");
+    Log::debug(LOG_TAG, "Platform: " PLATFORM_NAME " " PLATFORM_VERSION);
+
     m_argc = argc;
     m_argv = new char*[argc];
 

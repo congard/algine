@@ -254,7 +254,7 @@ set(ALGINE_CORE_SOURCES ${ALGINE_CORE_SOURCES}
 
     src/common/internal/ConfigStrings.h
 
-    include/common/algine/templates.h
+    include/common/algine/platform.h
     include/common/algine/types.h
     include/common/algine/gl.h)
 

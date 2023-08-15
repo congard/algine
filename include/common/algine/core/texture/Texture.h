@@ -7,7 +7,7 @@
 #include <algine/core/DataType.h>
 #include <algine/core/Object.h>
 
-#include <algine/templates.h>
+#include <algine/platform.h>
 #include <algine/types.h>
 #include <algine/gl.h>
 
