@@ -128,13 +128,17 @@ void QtWindow::mouseReleaseEvent(QMouseEvent *event) {
     Qt::MouseButton button = event->button();
 
     if (auto eventHandler = qEventHandler(getEventHandler()); eventHandler) {
+        auto key = getMouseKey(button);
+
+        eventHandler->mouseKeyRelease(key, *this);
+
         auto &info = m_mouseKeys[button];
 
         long releaseTime = Engine::time();
         long deltaTime = releaseTime - info.pressTime;
 
         if (info.maxDeltaSquared <= maxClickDistanceSquared && deltaTime <= maxClickDeltaTime) {
-            eventHandler->mouseClick(getMouseKey(button), *this);
+            eventHandler->mouseClick(key, *this);
         }
     }
 
