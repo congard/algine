@@ -29,6 +29,9 @@ QuadRenderer::QuadRenderer(uint inPosLocation, Object *parent)
     m_inputLayout->unbind();
 }
 
+QuadRenderer::QuadRenderer(Object *parent)
+    : QuadRenderer(0, parent) {}
+
 void QuadRenderer::draw() {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
@@ -43,6 +46,13 @@ ArrayBuffer* QuadRenderer::getArrayBuffer() const {
 
 Shader* QuadRenderer::getVertexShader() {
     constexpr auto name = "Quad.vs";
+
+    // We need this mutex to prevent the simultaneous loading of
+    // vertex shaders, which can lead to a runtime error. If two
+    // objects with the same name are added to the global scene
+    // as children, it can cause issues
+    static std::mutex mutex;
+    std::lock_guard locker(mutex);
 
     if (auto ptr = GlobalScene::getInstance()->findChild<Shader*>(name, Object::FindOption::Direct); ptr) {
         return ptr;

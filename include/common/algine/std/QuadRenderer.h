@@ -8,7 +8,8 @@
 namespace algine {
 class QuadRenderer: public Object {
 public:
-    explicit QuadRenderer(uint inPosLocation = 0, Object *parent = defaultParent());
+    explicit QuadRenderer(uint inPosLocation, Object *parent = defaultParent());
+    explicit QuadRenderer(Object *parent = defaultParent());
 
     void draw();
 
