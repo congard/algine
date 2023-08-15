@@ -50,11 +50,16 @@ endif()
 
 # Qt
 if (ALGINE_QT_PLATFORM)
-    find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
-    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+    find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets OpenGL REQUIRED)
 
     set(CMAKE_AUTOMOC ON)
-    set(ALGINE_QT_LIBS Qt${QT_VERSION_MAJOR}::Widgets)
+
+    set(ALGINE_QT_LIBS
+            Qt${QT_VERSION_MAJOR}::Widgets
+            Qt${QT_VERSION_MAJOR}::OpenGL)
+
+    message(STATUS "Using Qt ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}")
 endif()
 
 include(scripts/deps.cmake)
