@@ -54,9 +54,11 @@ public:
 
     /**
      * @note ownership of the object will not be transferred to the scene
-     * @param framebuffer The renderbuffer to draw UI into
+     * @param framebuffer The framebuffer to draw UI into
      */
     void setFramebuffer(Framebuffer *framebuffer);
+
+    Framebuffer* getFramebuffer() const;
 
     void setSize(int width, int height);
     void setSize(const SizeI &size);

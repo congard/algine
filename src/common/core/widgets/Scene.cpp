@@ -183,6 +183,10 @@ void Scene::setFramebuffer(Framebuffer *framebuffer) {
     m_options.framebuffer = framebuffer;
 }
 
+Framebuffer* Scene::getFramebuffer() const {
+    return m_options.framebuffer;
+}
+
 void Scene::setSize(int width, int height) {
     m_painter->setViewport(width, height);
     m_options.width = width;
