@@ -8,6 +8,7 @@
 #include <QOpenGLContext>
 
 namespace algine {
+#define LOG_TAG "Context"
 #define qContext static_cast<QOpenGLContext*>(m_context)
 #define qSurface static_cast<QOffscreenSurface*>(m_surface)
 
@@ -59,15 +60,29 @@ bool Context::makeCurrent() const {
         printContextNotInitializedError();
         return false;
     } else {
+        Log::debug(LOG_TAG) << "Making context " << this << " current" << Log::endl;
+
         bool result = qContext->makeCurrent(qSurface);
+
+        Log::debug(LOG_TAG) << "Context " << this << " (native=" << getNative() << ") has been made current" << Log::endl;
+
         if (result)
             enableDebugOutputIfPossible();
+
+        Log::debug(LOG_TAG) << "Context " << this << " is ready" << Log::endl;
+
         return result;
     }
 }
 
 bool Context::detach() const {
-    return qContext->makeCurrent(nullptr);
+    Log::debug(LOG_TAG) << "Detaching context " << this << Log::endl;
+
+    auto res = qContext->makeCurrent(nullptr);
+
+    Log::debug(LOG_TAG) << "Context " << this << " has been successfully detached" << Log::endl;
+
+    return res;
 }
 
 bool Context::isCurrent() const {

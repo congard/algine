@@ -21,7 +21,11 @@ inline void enableDebugOutputIfPossible() {
         Log::debug("Context") << "Context " << Context::getCurrentNative() << " now is current for thread "
             << std::hash<std::thread::id>{}(std::this_thread::get_id());
 
+#ifndef ALGINE_QT_PLATFORM
         enableDebugOutput();
+#else
+        Log::warn("Context", "Debug output is temporary disabled for Qt platform");
+#endif
     }
 }
 }
