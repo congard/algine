@@ -5,6 +5,15 @@
 #include <sstream>
 
 namespace algine {
+/**
+ * Used to print logs of different types.
+ * GLM logging support can be enabled by including
+ * `algine/core/log/logger/glm.h`.
+ * @note Logs will be printed when the instance of
+ * Logger is being destroyed. However, you can do
+ * it immediately by using `Log::endl`
+ * @see `Log`, `Logger& Logger::operator\<\<(endl_t)`
+ */
 class Logger {
 public:
     class InputEndListener {
@@ -19,6 +28,8 @@ public:
         Warn,
         Error
     };
+
+    struct endl_t {};
 
 public:
     Logger() = default;
@@ -37,9 +48,20 @@ public:
     Logger& operator<<(float val);
     Logger& operator<<(double val);
     Logger& operator<<(long double val);
-    Logger& operator<<(const char *val);
-    Logger& operator<<(void *val);
     Logger& operator<<(const std::string &val);
+
+    /**
+     * Prints immediately.
+     * @return Reference to the current logger.
+     */
+    Logger& operator<<(endl_t);
+
+    template<typename T>
+    std::enable_if_t<std::is_pointer_v<T>, Logger&>
+    operator<<(T ptr) {
+        m_stream << ptr;
+        return *this;
+    }
 
     void setTag(const std::string &tag);
     void setType(Type type);
@@ -49,6 +71,9 @@ public:
     Type getType() const;
 
     std::string str() const;
+
+private:
+    void flush();
 
 private:
     Type m_type {};

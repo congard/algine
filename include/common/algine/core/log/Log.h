@@ -32,6 +32,9 @@ public:
     /// #solgen #ignore
     static const std::unique_ptr<LogWriter>& getWriter();
 
+public:
+    constexpr static Logger::endl_t endl;
+
 private:
     Log() = default;
 

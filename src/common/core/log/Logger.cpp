@@ -25,9 +25,7 @@ Logger& Logger::operator=(Logger &&other) noexcept {
 }
 
 Logger::~Logger() {
-    if (m_endListener) {
-        m_endListener->onInputEnd(*this);
-    }
+    flush();
 }
 
 #define writeLog(value) m_stream << (value); return *this
@@ -72,16 +70,13 @@ Logger& Logger::operator<<(long double val) {
     writeLog(val);
 }
 
-Logger& Logger::operator<<(const char *val) {
-    writeLog(val);
-}
-
-Logger& Logger::operator<<(void *val) {
-    writeLog(val);
-}
-
 Logger& Logger::operator<<(const std::string &val) {
     writeLog(val);
+}
+
+Logger& Logger::operator<<(algine::Logger::endl_t) {
+    flush();
+    return *this;
 }
 
 void Logger::setTag(const std::string &tag) {
@@ -106,5 +101,13 @@ Logger::Type Logger::getType() const {
 
 std::string Logger::str() const {
     return m_stream.str();
+}
+
+void Logger::flush() {
+    if (m_endListener && !str().empty()) {
+        m_endListener->onInputEnd(*this);
+    }
+
+    m_stream.str({});
 }
 }
