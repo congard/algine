@@ -8,7 +8,6 @@
 #include <algine/core/Renderbuffer.h>
 #include <algine/core/OutputList.h>
 
-#include <algine/templates.h>
 #include <algine/types.h>
 
 #include <vector>

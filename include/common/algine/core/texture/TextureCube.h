@@ -3,7 +3,6 @@
 
 #include <algine/core/texture/Texture.h>
 #include <algine/core/DataType.h>
-#include <algine/templates.h>
 #include <algine/types.h>
 
 #include <vector>

@@ -2,7 +2,6 @@
 #define ALGINE_SHADER_H
 
 #include <algine/core/Object.h>
-#include <algine/templates.h>
 #include <algine/types.h>
 
 #include <string>
