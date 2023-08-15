@@ -164,14 +164,14 @@ function(solgen output)
             append_clang_flags(-U _WIN32 -U _WIN64 -U WIN32 -U WIN64 ${SOLGEN_ANDROID_DEFS})
         endif()
     elseif (ALGINE_QT_PLATFORM)
-        append_clang_flags(-DALGINE_QT_PLATFORM)
+        append_clang_flags(-DALGINE_QT_PLATFORM -fPIC)
     endif()
 
     if (ALGINE_SECURE_OPERATIONS)
         append_clang_flags(-DALGINE_SECURE_OPERATIONS -DALGINE_SOP_LEVEL=${ALGINE_SOP_LEVEL})
     endif()
 
-    message(DEBUG "solgen clang args: ${ALGINE_SOLGEN_CLANG_ARGS}")
+    message(VERBOSE "Solgen clang args: ${ALGINE_SOLGEN_CLANG_ARGS}")
 
     set(SOLGEN_COMMAND ${ALGINE_SOLGEN_PATH}
         ${ALGINE_SOLGEN_ARGS}

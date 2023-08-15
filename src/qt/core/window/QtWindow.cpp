@@ -206,7 +206,7 @@ void QtWindow::moveEvent(QMoveEvent *ev) {
 }
 
 void QtWindow::setCursorPos(QMouseEvent *event) {
-    auto &localPos = event->localPos();
+    auto localPos = event->localPos();
     m_cursorPos = glm::vec2(localPos.x(), localPos.y()) * static_cast<float>(devicePixelRatio());
 }
 
