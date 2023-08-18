@@ -12,29 +12,29 @@
 namespace algine {
 namespace detail {
 template<typename T>
-Logger& log_glm(Logger &logger, const T &val) {
+Logger&& log_glm(Logger &logger, const T &val) {
     logger << glm::to_string(val);
-    return logger;
+    return std::move(logger);
 }
 }
 
-template<glm::length_t L, typename T, glm::qualifier Q>
-Logger& operator<<(Logger &logger, const glm::vec<L, T, Q> &val) {
+template<glm::length_t D, typename T, glm::qualifier Q, typename L>
+Logger&& operator<<(L &&logger, const glm::vec<D, T, Q> &val) {
     return detail::log_glm(logger, val);
 }
 
-template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
-Logger& operator<<(Logger &logger, const glm::mat<C, R, T, Q> &val) {
+template<glm::length_t C, glm::length_t R, typename T, glm::qualifier Q, typename L>
+Logger&& operator<<(L &&logger, const glm::mat<C, R, T, Q> &val) {
     return detail::log_glm(logger, val);
 }
 
-template<typename T, glm::qualifier Q>
-Logger& operator<<(Logger &logger, const glm::qua<T, Q> &val) {
+template<typename T, glm::qualifier Q, typename L>
+Logger&& operator<<(L &&logger, const glm::qua<T, Q> &val) {
     return detail::log_glm(logger, val);
 }
 
-template<typename T, glm::qualifier Q>
-Logger& operator<<(Logger &logger, const glm::tdualquat<T, Q> &val) {
+template<typename T, glm::qualifier Q, typename L>
+Logger&& operator<<(L &&logger, const glm::tdualquat<T, Q> &val) {
     return detail::log_glm(logger, val);
 }
 }
