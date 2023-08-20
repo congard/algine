@@ -127,7 +127,9 @@ function(solgen output)
         return()
     endif()
 
-    gen_type_list(AlgineBindings "${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineBindings.h"
+    set(solgenBindingsListFile "${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineBindings.h")
+
+    gen_type_list(AlgineBindings "${solgenBindingsListFile}"
         "${enabledClassPaths}"
         "${enabledClasses}")
 
@@ -193,7 +195,10 @@ function(solgen output)
         OUTPUT_VARIABLE ${output})
 
     string(REPLACE "\n" ";" ${output} ${${output}})
-    set(${output} ${${output}} PARENT_SCOPE)
+    set(${output}
+            ${${output}}
+            "${solgenBindingsListFile}"
+            PARENT_SCOPE)
 
     if (solgen_ret AND NOT solgen_ret EQUAL 0)
         message(FATAL_ERROR "solgen fatal error: ${${output}}")

@@ -254,8 +254,6 @@ set(ALGINE_CORE_SOURCES ${ALGINE_CORE_SOURCES}
     src/common/core/glsl-shaders/GLSLShaders.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders/GLSLShaders.h
     src/common/core/painter/PainterShaders.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter/PainterShaders.h
     src/common/core/lua/CoreLua.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/CoreLua.h
-    ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineCore.h
-    ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/AlgineStd.h
 
     src/common/internal/ConfigStrings.h
 
