@@ -60,7 +60,7 @@ public:
 
     Framebuffer* getFramebuffer() const;
 
-    void setSize(int width, int height);
+    virtual void setSize(int width, int height);
     void setSize(const SizeI &size);
 
     int getWidth() const;
