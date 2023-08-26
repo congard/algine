@@ -105,7 +105,7 @@ protected:
 private:
     std::forward_list<Task> m_taskQueue;
     std::forward_list<Task>::iterator m_taskQueueTail;
-    std::mutex m_taskQueueMutex;
+    std::recursive_mutex m_taskQueueMutex;
 };
 }
 
