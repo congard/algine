@@ -62,19 +62,11 @@ Object* Object::getParent() const {
 }
 
 Scene* Object::getParentScene() const {
-    if (auto scene = m_parent->as<Scene*>(); scene != nullptr)
-        return scene;
-    else if (m_parent != nullptr)
-        return m_parent->getParentScene();
-    return nullptr;
+    return findParent<Scene*>();
 }
 
 Window* Object::getParentWindow() const {
-    if (auto window = m_parent->as<Window*>(); window != nullptr)
-        return window;
-    else if (m_parent != nullptr)
-        return m_parent->getParentWindow();
-    return nullptr;
+    return findParent<Window*>();
 }
 
 bool Object::isScene() const {

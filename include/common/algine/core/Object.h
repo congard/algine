@@ -101,6 +101,23 @@ public:
         return dynamic_cast<T>(this);
     }
 
+    /**
+     * Returns the parent of type `T`.
+     * @note This function may be expensive, since it will iterate
+     * over parents until the parent of type `T` is found (or nullptr
+     * is reached).
+     * @tparam T The type of the parent.
+     * @return A pointer to the parent object of type `T`.
+     */
+    template<typename T>
+    T findParent() const {
+        if (auto parent = m_parent->as<T>(); parent != nullptr)
+            return parent;
+        else if (m_parent != nullptr)
+            return m_parent->findParent<T>();
+        return nullptr;
+    }
+
     bool hasChild(Object *obj, FindOption option = FindOption::FindRecursively);
 
     /**
