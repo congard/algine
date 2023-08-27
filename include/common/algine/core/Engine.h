@@ -6,6 +6,7 @@
 #include <algine/types.h>
 
 #include <tulz/observer/Subject.h>
+#include <glm/vec2.hpp>
 
 #include <string>
 #include <memory>
@@ -121,6 +122,7 @@ public:
     static void setFaceCullingMode(FaceCulling mode);
     static void setViewport(int x, int y, int width, int height);
     static void setViewport(int width, int height);
+    static void setViewport(glm::ivec2 viewport);
 
     static void waitForExecution();
     static void flushCommandBuffer();

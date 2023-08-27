@@ -320,6 +320,10 @@ void Engine::setViewport(int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+void Engine::setViewport(glm::ivec2 viewport) {
+    setViewport(viewport.x, viewport.y);
+}
+
 void Engine::waitForExecution() {
     glFinish();
 }
