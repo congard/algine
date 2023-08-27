@@ -98,6 +98,11 @@ Texture2D* Blur::get() const {
     return m_pingpongTex[!m_horizontal];
 }
 
+glm::ivec2 Blur::getViewport() const {
+    auto result = get();
+    return {result->getWidth(), result->getHeight()};
+}
+
 void Blur::createShaders(const Params &params) {
     auto vertex = QuadRenderer::getVertexShader();
 

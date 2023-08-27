@@ -53,6 +53,13 @@ public:
     QuadRenderer* getQuadRenderer() const;
     Texture2D* get() const;
 
+    /**
+     * Returns the viewport, i.e. width and height
+     * of the resulting texture.
+     * @return The viewport as a `glm::ivec2`.
+     */
+    glm::ivec2 getViewport() const;
+
 private:
     void createShaders(const Params &params);
     void configureShaders(const Params &params);
