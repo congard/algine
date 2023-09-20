@@ -7,8 +7,9 @@
 #include <algine/core/math/Rect.h>
 #include <algine/core/math/Point.h>
 
+#include <tulz/demangler.h>
+
 #include <utility>
-#include <cxxabi.h>
 
 #include <sol/variadic_args.hpp>
 
@@ -117,16 +118,9 @@ void Lua::loadModule(const Module::Args &args, sol::environment &env) {
     }
 }
 
-std::string nameof(const char* tn) {
-    const auto dmg = abi::__cxa_demangle(tn, nullptr, nullptr, nullptr);
-    std::string name = dmg;
-    std::free(dmg);
-    return name;
-}
-
 template<typename T, typename... Args>
 bool registerType(std::string_view type, sol::table &table, Lua *lua) {
-    if (nameof(typeid(T).name()) == type) {
+    if (tulz::demangler::demangle(typeid(T).name()) == type) {
         algine_lua::registerLuaUsertype<T>(table, lua);
         return true;
     }

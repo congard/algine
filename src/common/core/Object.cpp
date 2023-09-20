@@ -3,7 +3,7 @@
 #include <algine/core/widgets/Widget.h>
 #include <algine/core/Window.h>
 
-#include <cxxabi.h>
+#include <tulz/demangler.h>
 
 namespace algine {
 Object::Object(Object *parent) {
@@ -180,10 +180,7 @@ Object* Object::defaultParent() {
 }
 
 std::string Object::getTypeName(std::string_view mangledName) {
-    const auto dmg = abi::__cxa_demangle(mangledName.data(), nullptr, nullptr, nullptr);
-    std::string name = dmg;
-    std::free(dmg);
-    return name;
+    return tulz::demangler::demangle(mangledName);
 }
 
 Object::Locker::Locker(std::unique_ptr<std::mutex> &mutex)
