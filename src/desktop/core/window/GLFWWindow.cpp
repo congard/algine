@@ -24,16 +24,18 @@ constexpr static auto maxClickDistance = 16.0;
 constexpr static int64_t maxClickDeltaTime = 250; // in ms
 
 GLFWWindow::GLFWWindow(Context context)
-    : initList,
-      m_title("Algine Window"),
-      m_dimensions(512),
-      m_parentContext(context)
-{
-    create();
-}
+    : GLFWWindow("Algine", 512, 512, context) {}
 
-GLFWWindow::GLFWWindow(string title, uint width, uint height, Context context)
-    : initList,
+GLFWWindow::GLFWWindow(std::string title, uint width, uint height, Context context)
+    : m_window(nullptr),
+      m_pos(0),
+      m_fullscreenDimensions(-1),
+      m_cursorMode(CursorMode::Normal),
+      m_mouseTracking(false),
+      m_keyboardTracking(false),
+      m_windowStateTracking(false),
+      m_renderLoopRunning(false),
+      m_viewport(),
       m_title(std::move(title)),
       m_dimensions(width, height),
       m_parentContext(context)
@@ -45,15 +47,15 @@ void GLFWWindow::create() {
     // additional calls to an already initialized library will return GLFW_TRUE immediately
     // https://www.glfw.org/docs/3.3/intro_guide.html#intro_init_init
     if (!glfwInit())
-        throw runtime_error("GLFW init failed");
+        throw std::runtime_error("GLFW init failed");
 
     if (Engine::getGraphicsAPI() != Engine::GraphicsAPI::Core)
-        throw runtime_error("Invalid graphics API: only Core accepted");
+        throw std::runtime_error("Invalid graphics API: only Core accepted");
 
     const auto apiVersion = Engine::getAPIVersion();
 
     if (apiVersion < 100 || apiVersion > 460)
-        throw runtime_error("Invalid API version. Min is 100, max is 460. Your value: " + to_string(apiVersion));
+        throw std::runtime_error("Invalid API version. Min is 100, max is 460. Your value: " + std::to_string(apiVersion));
 
     int majorVersion = apiVersion / 100;
     int minorVersion = (apiVersion - majorVersion * 100) / 10;
@@ -157,7 +159,7 @@ bool GLFWWindow::isMouseKeyPressed(MouseKey key) const {
     return glfwGetMouseButton(m_window, getGLFWMouseKeyValue(key)) == GLFW_PRESS;
 }
 
-void GLFWWindow::setTitle(const string &title) {
+void GLFWWindow::setTitle(const std::string &title) {
     m_title = title;
 
     glfwSetWindowTitle(m_window, title.c_str());
@@ -169,7 +171,7 @@ void GLFWWindow::setIcon(const Icon &icon) {
     glfwSetWindowIcon(m_window, 1, &image);
 }
 
-void GLFWWindow::setIcon(const vector<Icon> &icons) {
+void GLFWWindow::setIcon(const std::vector<Icon> &icons) {
     auto images = new GLFWimage[icons.size()];
 
     for (int i = 0; i < icons.size(); i++)
@@ -240,7 +242,7 @@ void GLFWWindow::setEventHandler(WindowEventHandler *eventHandler) {
     m_eventHandler = eventHandler;
 }
 
-inline auto WEH(EventHandler *eventHandler) {
+inline static auto WEH(EventHandler *eventHandler) {
     return static_cast<WindowEventHandler*>(eventHandler);
 }
 
@@ -282,7 +284,7 @@ void GLFWWindow::setMouseTracking(bool tracking) {
                     mouseKeysInfo.erase(button);
                 }
             } else {
-                throw runtime_error("Mouse tracking - unknown action code: " + to_string(action));
+                throw std::runtime_error("Mouse tracking - unknown action code: " + std::to_string(action));
             }
         });
 
@@ -468,7 +470,7 @@ void GLFWWindow::setFocusOnShow(bool focusOnShow) {
     glfwSetWindowAttrib(m_window, GLFW_FOCUS_ON_SHOW, focusOnShow);
 }
 
-const string& GLFWWindow::getTitle() const {
+const std::string& GLFWWindow::getTitle() const {
     return m_title;
 }
 
