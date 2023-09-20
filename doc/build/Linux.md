@@ -1,5 +1,19 @@
 # Linux Build Instructions
 
+The following tools will be needed:
+
+1. C/C++ compiler
+2. Git
+3. CMake
+
+> [!NOTE]
+> The recommended C/C++ compiler is Clang. But the project also should
+> compile with GCC.
+
+> [!NOTE]
+> The recommended linker is [mold](https://github.com/rui314/mold).
+> Mold is a Modern Linker which supports multithreading. It is incredibly fast.
+
 ## Fedora
 
 ```bash

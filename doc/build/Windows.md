@@ -1,36 +1,101 @@
 # Windows Build Instructions
 
-## GLEW: make OpenGL extensions
+The following tools will be needed:
 
-In order to [make GLEW](https://github.com/nigels-com/glew#code-generation) OpenGL extensions you need
-to [install MSYS2](https://www.msys2.org) even if you are using Visual Studio (MSVC).
+1. [MSVC](https://visualstudio.microsoft.com/downloads/)
+2. [LLVM](https://releases.llvm.org/download.html)
+3. [MSYS2](https://www.msys2.org/)
+4. [Git](https://git-scm.com/downloads)
+5. [CMake](https://cmake.org/download/)
 
-After successful installation open msys2 console and execute:
+> [!NOTE]
+> It is highly recommended to install LLVM and MSYS2 to its default
+> install paths. It will simplify building since you don't need to provide
+> additional options.
+
+> [!NOTE]
+> MSYS2 is optional, but recommended. If you have MSYS2 installed, Algine
+> will be able to perform dependency (GLEW) configuration step automatically.
+> However, any other Unix environment can be used (e.g. WSL).
+> Read more: https://github.com/nigels-com/glew#code-generation
+
+> [!NOTE]
+> In some IDEs (e.g. CLion, Visual Studio with installed CMake Tools)
+> CMake is bundled by default.
+
+## LLVM
+
+In order to compile the project, you must use Clang compiler:
+
+| Tool         | Binary      |
+|--------------|-------------|
+| C compiler   | clang.exe   |
+| C++ compiler | clang++.exe |
+
+By default, the aforementioned binaries are located in `$Env:ProgramW6432/LLVM`.
+
+Tested on Windows 11, clang version 16.0.0, target: x86_64-pc-windows-msvc.
+
+## MSYS2 packages
+
+The following packages must be installed in order to use MSYS2 to complete
+GLEW configuration:
+
+1. `make`
+2. `git`
+3. `python` (python 3)
+
+They can be installed in the following way:
 
 ```bash
 pacman -S make git python
-cd algine_root_folder/deps/glew-src
+```
+
+## GLEW: make OpenGL extensions
+
+> [!NOTE]
+> If you have MSYS2 installed in `$Env:SystemDrive/msys64` with all needed packages,
+> you can skip this step. GLEW will be configured automatically. Note, that the
+> process can take some time.
+
+> [!NOTE]
+> In order to [make GLEW](https://github.com/nigels-com/glew#code-generation)
+> OpenGL extensions, you need to have a Unix or Mac environment. For example,
+> it can be MSYS2, WSL, Linux distro etc.
+
+```bash
+cd $algine_root_folder/deps-win/glew-src
 make extensions
 ```
 
 ## Symbolic links
 
-After building will be executed command `mklink`, which must be executed via administrator.
+Symlinks support is required in order to use Algine. Luckily, it can be enabled
+by enabling Developer mode in the settings.
 
-> Creation of symbolic links requires the `SeCreateSymbolicLinkPrivilege` (“Create symbolic links”),
-> which is granted only to administrators by default (but you can change that using security policy).
+For Windows 11: Settings -> Privacy & security -> For developers -> Developer Mode (on).
 
-This command is necessary so as not to increase the size of output directories and not to make unnecessary copying of libraries.
+## Options
 
-### Steps to change the policies
+| Option        | Description   | Required | Default                   |
+|---------------|---------------|----------|---------------------------|
+| `MSYS64_PATH` | path to MSYS2 | No       | `$Env:SystemDrive/msys64` |
 
-1. Right click on `Start` → `Run` and launch `secpol.msc`.
-2. Open `Security Settings → Local Policies → User Rights Assignment`
-   and select `Create symbolic links` (that represents `SeCreateSymbolicLinkPrivilege`).
-   <br>
-   ![Create symbolic links](https://i.stack.imgur.com/o8J8x.png)
-3. Double-click on the item and add yourself (or the whole `Users` group) to the list.
+## Notes
 
-The changes will apply when you log out and log in again.
+> [!NOTE]
+> If you are a CLion user, it is recommended to enable terminal emulation in the output 
+> console to correctly display colors. 
+> See https://www.jetbrains.com/help/clion/terminal-in-the-output-console.html#enable
 
-[<small>Source</small>](https://superuser.com/questions/124679/how-do-i-create-a-link-in-windows-7-home-premium-as-a-regular-user)
+> [!NOTE]
+> Warnings like
+> ```
+> lld-link: warning: undefined symbol: void __cdecl algine_lua::registerLuaUsertype<class algine::ShapeBuilder>(class sol::basic_table_core<0, class sol::basic_reference<0>> &, void *)
+> >> referenced by D:\Development\Projects\cpp\algine\include\common\algine\core\lua\Lua.h:112
+> ```
+> mean that the specified classes are not listed in your `SolgenLists.lua`.
+> Bindings for the classes mentioned in the warnings are not the minimum required.
+> However, if you explicitly or implicitly try to use them from the Lua code,
+> the engine will crash. This means that these warnings can be safely ignored until
+> you use the bindings of the aforementioned classes.
