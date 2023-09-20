@@ -1,6 +1,18 @@
 # Do not include this file to your CMakeLists
 # include PostBuildWindows.cmake instead
 
+if (NOT DEFINED CURRENT_BINARY_DIR)
+    message(FATAL_ERROR "CURRENT_BINARY_DIR is not defined")
+endif()
+
+if (NOT DEFINED ALGINE_BINARY_DIR)
+    message(FATAL_ERROR "ALGINE_BINARY_DIR is not defined")
+endif()
+
+if (NOT DEFINED ALGINE_DEPS_BUILD_DIR_NAME)
+    message(FATAL_ERROR "ALGINE_DEPS_BUILD_DIR_NAME is not defined")
+endif()
+
 function(dll_symlink dll_path)
     file(GLOB DLL_LIB_PATH ${dll_path})
 
@@ -22,14 +34,14 @@ function(dll_symlink dll_path)
     string(REPLACE "/" "\\" DLL_LIB_REAL_PATH "${DLL_LIB_REAL_PATH}")
     string(REPLACE "/" "\\" DLL_LIB_REAL_PATH_LINK "${DLL_LIB_REAL_PATH_LINK}")
 
-    execute_process(COMMAND cmd /C "mklink ${DLL_LIB_REAL_PATH_LINK} ${DLL_LIB_REAL_PATH} > NUL")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+        "${DLL_LIB_REAL_PATH}"
+        "${DLL_LIB_REAL_PATH_LINK}")
 endfunction()
 
-set(ALGINE_BIN_PATH "${CURRENT_BINARY_DIR}/${PATH_TO_ALGINE}")
-
-dll_symlink("${ALGINE_BIN_PATH}/*algine*.dll")
-dll_symlink("${ALGINE_BIN_PATH}/libs/assimp/code/*assimp*.dll")
-dll_symlink("${ALGINE_BIN_PATH}/libs/tulz/*tulz*.dll")
-dll_symlink("${ALGINE_BIN_PATH}/libs/glfw/src/*glfw3*.dll")
-dll_symlink("${ALGINE_BIN_PATH}/libs/freetype/*freetype*.dll")
+dll_symlink("${ALGINE_BINARY_DIR}/*algine*.dll")
+dll_symlink("${ALGINE_BINARY_DIR}/${ALGINE_DEPS_BUILD_DIR_NAME}/assimp/bin/*assimp*.dll")
+dll_symlink("${ALGINE_BINARY_DIR}/${ALGINE_DEPS_BUILD_DIR_NAME}/tulz/*tulz*.dll")
+dll_symlink("${ALGINE_BINARY_DIR}/${ALGINE_DEPS_BUILD_DIR_NAME}/glfw/src/*glfw3*.dll")
+dll_symlink("${ALGINE_BINARY_DIR}/${ALGINE_DEPS_BUILD_DIR_NAME}/freetype/*freetype*.dll")
 dll_symlink("${CURRENT_BINARY_DIR}/bin/*glew32*.dll")
