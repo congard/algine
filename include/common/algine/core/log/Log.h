@@ -9,7 +9,7 @@
 #include <memory>
 
 namespace algine {
-class Log {
+class AL_EXPORT Log {
 public:
     static Logger verbose(const std::string &tag = "Algine");
     static Logger debug(const std::string &tag = "Algine");

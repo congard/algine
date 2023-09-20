@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace algine {
-class BonesStorage {
+class AL_EXPORT BonesStorage {
 public:
     constexpr static Index BoneNotFound = -1;
 

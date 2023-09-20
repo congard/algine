@@ -1,6 +1,7 @@
 #ifndef ALGINE_COLOR_H
 #define ALGINE_COLOR_H
 
+#include <algine/platform.h>
 #include <algine/types.h>
 
 #include <glm/vec3.hpp>
@@ -9,7 +10,7 @@
 #include <string>
 
 namespace algine {
-class Color {
+class AL_EXPORT Color {
 public:
     enum class Space {
         Invalid, Rgb, Hsv, Luv, Lch, Hsluv
@@ -276,14 +277,14 @@ public:
 
 private:
     union sp {
-        inline explicit sp(ushort p1, ushort p2, ushort p3, ushort p4)
+        inline explicit sp(uint16 p1, uint16 p2, uint16 p3, uint16 p4)
             : rgb({p1, p2, p3, p4}) {}
 
-        struct { ushort r, g, b, a; } rgb;
-        struct { ushort h, s, v, a; } hsv;
-        struct { ushort l, u, v, a; } luv;
-        struct { ushort l, c, h, a; } lch;
-        struct { ushort h, s, l, a; } hsluv;
+        struct { uint16 r, g, b, a; } rgb;
+        struct { uint16 h, s, v, a; } hsv;
+        struct { uint16 l, u, v, a; } luv;
+        struct { uint16 l, c, h, a; } lch;
+        struct { uint16 h, s, l, a; } hsluv;
     } m_sp;
 
     Space m_space {Space::Invalid};

@@ -5,7 +5,7 @@
 #include <mutex>
 
 namespace algine {
-class DefaultLogWriter: public LogWriter {
+class AL_EXPORT DefaultLogWriter: public LogWriter {
 public:
     void verbose(const std::string &tag, std::string_view str) override;
     void debug(const std::string &tag, std::string_view str) override;

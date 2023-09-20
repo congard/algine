@@ -5,7 +5,7 @@
 #include <algine/core/Renderbuffer.h>
 
 namespace algine {
-class RenderbufferBuilder: public ImageBuilder {
+class AL_EXPORT RenderbufferBuilder: public ImageBuilder {
     AL_BUILDER(Renderbuffer)
 
 protected:

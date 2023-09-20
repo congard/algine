@@ -6,7 +6,7 @@
 #include <tulz/Array.h>
 
 namespace algine {
-class BufferReader {
+class AL_EXPORT BufferReader {
 public:
     BufferReader();
     explicit BufferReader(Buffer *buffer);

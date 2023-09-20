@@ -12,7 +12,7 @@ namespace algine::Widgets {
  * Superclass for all widget animations
  * @note onAnimate must be implemented in every derived class
  */
-class Animation {
+class AL_EXPORT Animation {
 public:
     Animation();
     virtual ~Animation() = default;

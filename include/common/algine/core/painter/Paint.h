@@ -3,13 +3,14 @@
 
 #include <algine/core/Color.h>
 #include <algine/core/MutableValue.h>
+#include <algine/platform.h>
 
 #include <glm/mat4x4.hpp>
 
 namespace algine {
 class Texture2D;
 
-class Paint {
+class AL_EXPORT Paint {
     friend class Painter;
 
 public:

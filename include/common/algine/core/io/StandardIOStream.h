@@ -6,7 +6,7 @@
 #include <tulz/File.h>
 
 namespace algine {
-class StandardIOStream: public IOStream {
+class AL_EXPORT StandardIOStream: public IOStream {
 public:
     void open(const std::string &path, IOStream::Mode mode) override;
     void close() override;

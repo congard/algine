@@ -15,7 +15,7 @@
 namespace algine {
 class Shape;
 
-class Model: public Object, public Rotatable, public Translatable, public Scalable {
+class AL_EXPORT Model: public Object, public Rotatable, public Translatable, public Scalable {
     friend class Animator;
     friend class AnimationBlender;
 

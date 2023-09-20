@@ -24,7 +24,7 @@ class Content;
 /**
  * Window implementation that uses GLFW as the backend.
  */
-class GLFWWindow: public Window {
+class AL_EXPORT GLFWWindow: public Window {
 public:
     enum class CursorMode {
         Disabled,

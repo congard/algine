@@ -2,6 +2,7 @@
 #define ALGINE_POINTERINFO_H
 
 #include <algine/core/input/MouseKey.h>
+#include <algine/platform.h>
 
 #include <glm/vec2.hpp>
 #include <variant>
@@ -13,7 +14,7 @@ class QtWindow;
 class GLFWWindow;
 #endif
 
-class PointerInfo {
+class AL_EXPORT PointerInfo {
 public:
     using Finger = int;
     using Pointer = std::variant<MouseKey, Finger>;

@@ -3,6 +3,7 @@
 
 #include <algine/core/Object.h>
 #include <algine/core/Engine.h>
+#include <algine/platform.h>
 #include <tulz/static_initializer.h>
 
 #ifdef ALGINE_SECURE_OPERATIONS
@@ -30,7 +31,7 @@ namespace algine {
  * @example some context objects: Framebuffer, Renderbuffer, TextureCube,
  * Texture2D, ShaderProgram etc.
  */
-class ContextObject: public Object {
+class AL_EXPORT ContextObject: public Object {
 public:
     uint getId() const {
         return m_id;
@@ -149,7 +150,7 @@ private:
  * Every base context object must be defined using this macro
  */
 #define AL_CONTEXT_OBJECT(__name) \
-class __name: public algine::ContextObject
+class AL_EXPORT __name: public algine::ContextObject
 
 #ifdef ALGINE_SECURE_OPERATIONS
 #define _AL_CONTEXT_OBJECT_SOP(__name) \

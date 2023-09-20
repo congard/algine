@@ -10,7 +10,7 @@
 #include <tulz/Array.h>
 
 namespace algine {
-class Blur: public Object {
+class AL_EXPORT Blur: public Object {
 public:
     struct Params {
         /**

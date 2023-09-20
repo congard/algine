@@ -12,7 +12,7 @@
 #include <map>
 
 namespace algine {
-class FramebufferBuilder: public Builder {
+class AL_EXPORT FramebufferBuilder: public Builder {
     AL_BUILDER(Framebuffer)
 
 public:

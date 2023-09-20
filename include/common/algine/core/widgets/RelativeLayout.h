@@ -7,7 +7,7 @@
 #include <list>
 
 namespace algine {
-class RelativeLayout: public Layout {
+class AL_EXPORT RelativeLayout: public Layout {
     STATIC_INITIALIZER_DECL
 
 public:

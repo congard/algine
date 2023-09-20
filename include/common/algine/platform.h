@@ -26,6 +26,16 @@
     #endif
 #endif
 
+#if is_windows()
+    #ifdef ALGINE_BUILD_LIB
+        #define AL_EXPORT __declspec(dllexport)
+    #else
+        #define AL_EXPORT __declspec(dllimport)
+    #endif
+#else
+    #define AL_EXPORT
+#endif
+
 #define _AL_PLATFORM_STRINGIFY(x) #x
 #define _AL_PLATFORM_STR(x) _AL_PLATFORM_STRINGIFY(x)
 

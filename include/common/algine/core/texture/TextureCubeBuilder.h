@@ -5,7 +5,7 @@
 #include <algine/core/texture/TextureCube.h>
 
 namespace algine {
-class TextureCubeBuilder: public TextureBuilder {
+class AL_EXPORT TextureCubeBuilder: public TextureBuilder {
     AL_BUILDER(TextureCube)
 
 public:

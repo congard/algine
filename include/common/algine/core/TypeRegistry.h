@@ -2,13 +2,15 @@
 #define ALGINE_TYPEREGISTRY_H
 
 #include <algine/core/RawPtr.h>
+#include <algine/platform.h>
+
 #include <tulz/static_initializer.h>
 
 #include <string>
 #include <map>
 
 namespace algine {
-class TypeRegistry {
+class AL_EXPORT TypeRegistry {
     STATIC_INITIALIZER_DECL
 
 public:

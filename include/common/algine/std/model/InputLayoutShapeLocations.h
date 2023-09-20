@@ -9,7 +9,7 @@
 namespace algine {
 class ShaderProgram;
 
-class InputLayoutShapeLocations: public Scriptable {
+class AL_EXPORT InputLayoutShapeLocations: public Scriptable {
 public:
     constexpr static int None = -1;
     constexpr static auto Position = "position";

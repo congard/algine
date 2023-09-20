@@ -17,7 +17,7 @@ class Window;
 
 class PlatformFriend;
 
-class Content: public Object {
+class AL_EXPORT Content: public Object {
     friend class Window;
     friend class PlatformFriend;
 

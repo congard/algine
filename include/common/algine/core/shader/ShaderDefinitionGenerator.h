@@ -9,7 +9,7 @@
 #include <vector>
 
 namespace algine {
-class ShaderDefinitionGenerator: public virtual Scriptable {
+class AL_EXPORT ShaderDefinitionGenerator: public virtual Scriptable {
 public:
     using Definition = Pair<std::string, std::string>;
 

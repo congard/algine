@@ -6,7 +6,7 @@
 class GLFWcursor;
 
 namespace algine {
-class Cursor {
+class AL_EXPORT Cursor {
     friend class GLFWWindow;
 
 public:

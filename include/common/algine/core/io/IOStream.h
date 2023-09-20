@@ -1,10 +1,11 @@
 #ifndef ALGINE_IOSTREAM_H
 #define ALGINE_IOSTREAM_H
 
+#include <algine/platform.h>
 #include <string>
 
 namespace algine {
-class IOStream {
+class AL_EXPORT IOStream {
 public:
     enum class Mode {
         None,

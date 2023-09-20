@@ -1,13 +1,14 @@
 #ifndef ALGINE_BONEINFO_H
 #define ALGINE_BONEINFO_H
 
+#include <algine/platform.h>
 #include <algine/types.h>
 
 #include <tulz/Array.h>
 #include <utility>
 
 namespace algine {
-class BoneInfo {
+class AL_EXPORT BoneInfo {
 public:
     explicit BoneInfo(uint size);
 

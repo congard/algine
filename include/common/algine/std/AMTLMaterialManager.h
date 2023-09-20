@@ -8,7 +8,7 @@
 #include <set>
 
 namespace algine {
-class AMTLMaterialManager: public Scriptable {
+class AL_EXPORT AMTLMaterialManager: public Scriptable {
     friend class AMTLManager;
 
 public:

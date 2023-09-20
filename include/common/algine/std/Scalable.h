@@ -7,7 +7,7 @@
 #include <glm/mat4x4.hpp>
 
 namespace algine {
-class Scalable {
+class AL_EXPORT Scalable {
 public:
     Scalable();
 

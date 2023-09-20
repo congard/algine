@@ -2,12 +2,13 @@
 #define ALGINE_FONTLIBRARY_H
 
 #include <algine/core/font/Font.h>
+#include <algine/platform.h>
 #include <algine/types.h>
 
 #include <map>
 
 namespace algine {
-class FontLibrary {
+class AL_EXPORT FontLibrary {
 public:
     static void add(const Font &font);
     static Font get(std::string_view name, Font::Style style);

@@ -6,7 +6,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 namespace algine {
-class FreeRotator: public Rotator {
+class AL_EXPORT FreeRotator: public Rotator {
 public:
     FreeRotator();
 

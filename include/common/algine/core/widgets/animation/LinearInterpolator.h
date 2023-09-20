@@ -4,7 +4,7 @@
 #include <algine/core/widgets/animation/Interpolator.h>
 
 namespace algine::Widgets {
-class LinearInterpolator: public Interpolator {
+class AL_EXPORT LinearInterpolator: public Interpolator {
 public:
     float interpolate(float x) override;
 };

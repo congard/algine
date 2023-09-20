@@ -5,7 +5,7 @@
 #include <algine/core/Engine.h>
 
 namespace algine {
-class Units {
+class AL_EXPORT Units {
 public:
     template<typename T>
     static inline T dp(T value) {

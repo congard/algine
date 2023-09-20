@@ -3,7 +3,7 @@
 
 #include <algine/std/animation/VecAnimKey.h>
 #include <algine/std/animation/QuatAnimKey.h>
-
+#include <algine/platform.h>
 #include <algine/types.h>
 
 #include <string>
@@ -12,7 +12,7 @@
 class aiNodeAnim;
 
 namespace algine {
-class AnimNode {
+class AL_EXPORT AnimNode {
 public:
     explicit AnimNode(const aiNodeAnim *nodeAnim);
 

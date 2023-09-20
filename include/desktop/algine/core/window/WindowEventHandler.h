@@ -9,7 +9,7 @@
 namespace algine {
 class GLFWWindow;
 
-class WindowEventHandler: public EventHandler {
+class AL_EXPORT WindowEventHandler: public EventHandler {
 public:
     virtual void mouseMove(double x, double y, GLFWWindow &window);
     virtual void mouseClick(MouseKey key, GLFWWindow &window);

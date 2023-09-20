@@ -5,7 +5,7 @@
 #include <algine/core/buffers/UniformBuffer.h>
 
 namespace algine {
-class BaseUniformBlock {
+class AL_EXPORT BaseUniformBlock {
 public:
     static constexpr uint VariableNotFound = -1;
 

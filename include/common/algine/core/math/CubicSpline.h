@@ -1,11 +1,12 @@
 #ifndef ALGINE_CUBICSPLINE_H
 #define ALGINE_CUBICSPLINE_H
 
+#include <algine/platform.h>
 #include <vector>
 #include <glm/vec2.hpp>
 
 namespace algine {
-class CubicSpline {
+class AL_EXPORT CubicSpline {
 public:
     CubicSpline();
     explicit CubicSpline(const std::vector<glm::vec2> &points);

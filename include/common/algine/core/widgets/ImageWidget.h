@@ -5,7 +5,7 @@
 #include <tulz/static_initializer.h>
 
 namespace algine {
-class ImageWidget: public Widget {
+class AL_EXPORT ImageWidget: public Widget {
     STATIC_INITIALIZER_DECL
 
 public:

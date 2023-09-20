@@ -12,7 +12,7 @@ namespace algine {
 class Scene;
 class Window;
 
-class Object {
+class AL_EXPORT Object {
     using ObjectList = std::forward_list<Object*>;
 
 public:
@@ -341,7 +341,7 @@ private:
     std::unique_ptr<std::mutex> m_mutex {nullptr};
 
 private:
-    class Locker {
+    class AL_EXPORT Locker {
     public:
         explicit Locker(std::unique_ptr<std::mutex> &mutex);
         ~Locker();

@@ -6,7 +6,7 @@
 #include <algine/core/Builder.h>
 
 namespace algine {
-class ShaderProgramBuilder: public ShaderDefinitionGenerator, public Builder {
+class AL_EXPORT ShaderProgramBuilder: public ShaderDefinitionGenerator, public Builder {
     AL_BUILDER(ShaderProgram)
 
 public:

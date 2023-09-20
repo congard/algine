@@ -8,7 +8,7 @@
 #include <mutex>
 
 namespace algine {
-class ContextPool {
+class AL_EXPORT ContextPool {
 public:
     constexpr static Index InvalidIndex = -1;
 

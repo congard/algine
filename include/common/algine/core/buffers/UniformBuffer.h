@@ -4,7 +4,7 @@
 #include <algine/core/buffers/Buffer.h>
 
 namespace algine {
-class UniformBuffer: public Buffer {
+class AL_EXPORT UniformBuffer: public Buffer {
     AL_CONTEXT_OBJECT_IMPL(UniformBuffer)
 
 public:

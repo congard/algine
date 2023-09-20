@@ -6,7 +6,7 @@
 #include <algine/types.h>
 
 namespace algine {
-class ImageBuilder: public Builder {
+class AL_EXPORT ImageBuilder: public Builder {
 public:
     ImageBuilder();
 

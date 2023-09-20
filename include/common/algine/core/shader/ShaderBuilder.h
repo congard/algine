@@ -14,7 +14,7 @@ class Path;
 }
 
 namespace algine {
-class ShaderBuilder: public ShaderDefinitionGenerator, public Builder {
+class AL_EXPORT ShaderBuilder: public ShaderDefinitionGenerator, public Builder {
     AL_BUILDER(Shader)
 
 public:

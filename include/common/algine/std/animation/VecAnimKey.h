@@ -1,12 +1,13 @@
 #ifndef ALGINE_VECANIMKEY_H
 #define ALGINE_VECANIMKEY_H
 
+#include <algine/platform.h>
 #include <glm/vec3.hpp>
 
 class aiVectorKey;
 
 namespace algine {
-class VecAnimKey {
+class AL_EXPORT VecAnimKey {
 public:
     explicit VecAnimKey(const aiVectorKey *key);
 

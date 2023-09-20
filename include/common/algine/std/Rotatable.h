@@ -5,7 +5,7 @@
 #include <algine/core/lua/Scriptable.h>
 
 namespace algine {
-class Rotatable {
+class AL_EXPORT Rotatable {
 protected:
     void swap(Rotatable &other);
 

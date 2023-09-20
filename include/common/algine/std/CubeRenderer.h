@@ -7,7 +7,7 @@
 #include <memory>
 
 namespace algine {
-class CubeRenderer {
+class AL_EXPORT CubeRenderer {
 public:
     explicit CubeRenderer(uint inPosLocation = 0);
 

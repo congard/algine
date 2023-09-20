@@ -1,10 +1,11 @@
 #ifndef ALGINE_ALIGNMENT_H
 #define ALGINE_ALIGNMENT_H
 
+#include <algine/platform.h>
 #include <algine/types.h>
 
 namespace algine {
-class Alignment {
+class AL_EXPORT Alignment {
 public:
     enum {
         Center  = 0b0000,

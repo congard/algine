@@ -5,7 +5,7 @@
 #include <algine/core/texture/Texture2D.h>
 
 namespace algine {
-class Texture2DBuilder: public TextureBuilder {
+class AL_EXPORT Texture2DBuilder: public TextureBuilder {
     AL_BUILDER(Texture2D)
 
 public:

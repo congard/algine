@@ -8,7 +8,7 @@
 #include <tulz/Array.h>
 
 namespace algine {
-class BlockBufferStorage {
+class AL_EXPORT BlockBufferStorage {
 public:
     constexpr static uint StorageFull = -1;
 

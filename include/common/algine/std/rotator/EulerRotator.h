@@ -4,7 +4,7 @@
 #include <algine/std/rotator/Rotator.h>
 
 namespace algine {
-class EulerRotator: public Rotator {
+class AL_EXPORT EulerRotator: public Rotator {
 public:
     EulerRotator();
 

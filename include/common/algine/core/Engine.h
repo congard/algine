@@ -16,7 +16,7 @@
 #endif
 
 namespace algine {
-class Engine {
+class AL_EXPORT Engine {
     friend class GLFWWindow;
     friend class QtWindow;
 

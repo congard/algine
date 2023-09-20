@@ -1,10 +1,11 @@
 #ifndef ALGINE_JSONHELPER_H
 #define ALGINE_JSONHELPER_H
 
+#include <algine/platform.h>
 #include <json.hpp>
 
 namespace algine {
-class JsonHelper {
+class AL_EXPORT JsonHelper {
 public:
     static constexpr int DoNotFormat = -1;
 

@@ -2,13 +2,14 @@
 #define ALGINE_FONT_H
 
 #include <algine/core/io/IOSystem.h>
+#include <algine/platform.h>
 #include <tulz/static_initializer.h>
 
 #include <string>
 #include <memory>
 
 namespace algine {
-class Font {
+class AL_EXPORT Font {
     STATIC_INITIALIZER_DECL
 
 public:

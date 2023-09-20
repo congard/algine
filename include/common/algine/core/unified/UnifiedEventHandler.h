@@ -28,7 +28,7 @@ class Event;
 /**
  * Platform independent EventHandler
  */
-class UnifiedEventHandler: public PlatformEventHandler {
+class AL_EXPORT UnifiedEventHandler: public PlatformEventHandler {
 public:
     using EventListener = std::function<void(const Event&)>;
 

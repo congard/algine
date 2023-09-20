@@ -16,7 +16,7 @@ class xml_document;
 }
 
 namespace algine {
-class Resources {
+class AL_EXPORT Resources {
 public:
     using Resource = Variant<std::string, int, float, Dimen, Color>;
 

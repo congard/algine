@@ -1,11 +1,13 @@
 #ifndef ALGINE_LOGWRITER_H
 #define ALGINE_LOGWRITER_H
 
+#include <algine/platform.h>
+
 #include <string>
 #include <string_view>
 
 namespace algine {
-class LogWriter {
+class AL_EXPORT LogWriter {
 public:
     virtual ~LogWriter() = default;
 

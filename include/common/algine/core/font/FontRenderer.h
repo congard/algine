@@ -7,7 +7,7 @@
 #include <tulz/Array.h>
 
 namespace algine {
-class FontRenderer {
+class AL_EXPORT FontRenderer {
 public:
     struct Character {
         tulz::Array<ubyte> data;

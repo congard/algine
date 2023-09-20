@@ -29,7 +29,7 @@ namespace algine {
 class IOSystem;
 class Widget;
 
-class Widget: public Object {
+class AL_EXPORT Widget: public Object {
 public:
     enum class Filtering {
         Nearest = 0x2600,

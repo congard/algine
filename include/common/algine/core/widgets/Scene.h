@@ -26,7 +26,7 @@ class Layer;
  *   <li>In the render loop draw UI: <code>scene.draw()</code></li>
  * </ol>
  */
-class Scene: public Object {
+class AL_EXPORT Scene: public Object {
 public:
     explicit Scene(Object *parent = defaultParent());
     Scene(int width, int height, Object *parent = defaultParent());

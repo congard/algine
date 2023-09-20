@@ -3,10 +3,6 @@ project(algine)
 
 set(CMAKE_CXX_STANDARD 20)
 
-if (MSVC)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS true)
-endif()
-
 if (UNIX)
     add_compile_options(-fPIC)
 endif()
@@ -291,6 +287,11 @@ target_include_directories(algine PUBLIC ${PUBLIC_INCLUDES})
 # Qt definitions
 if (ALGINE_QT_PLATFORM)
     target_compile_definitions(algine PUBLIC ALGINE_QT_PLATFORM)
+endif()
+
+# export symbols
+if (WIN32)
+    target_compile_definitions(algine PRIVATE ALGINE_BUILD_LIB)
 endif()
 
 # linking

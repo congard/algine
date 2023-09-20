@@ -7,7 +7,7 @@ namespace algine::Widgets {
 /**
  * Animates the opacity of the widget
  */
-class OpacityAnimation: public Animation {
+class AL_EXPORT OpacityAnimation: public Animation {
 public:
     OpacityAnimation();
     OpacityAnimation(float from, float to, const InterpolatorPtr &interpolator);

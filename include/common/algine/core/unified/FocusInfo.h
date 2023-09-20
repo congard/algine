@@ -1,6 +1,8 @@
 #ifndef ALGINE_FOCUSINFO_H
 #define ALGINE_FOCUSINFO_H
 
+#include <algine/platform.h>
+
 namespace algine {
 #ifdef ALGINE_QT_PLATFORM
 class QtWindow;
@@ -8,7 +10,7 @@ class QtWindow;
 class GLFWWindow;
 #endif
 
-class FocusInfo {
+class AL_EXPORT FocusInfo {
 public:
     enum Reason {
         Unknown,

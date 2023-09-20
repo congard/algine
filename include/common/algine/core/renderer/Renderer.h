@@ -8,7 +8,7 @@
 namespace algine {
 class RenderPass;
 
-class Renderer: public Object {
+class AL_EXPORT Renderer: public Object {
 public:
     explicit Renderer(Scene *parent = GlobalScene::getInstance());
 

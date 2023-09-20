@@ -1,6 +1,8 @@
 #ifndef ALGINE_MODULELOADER_H
 #define ALGINE_MODULELOADER_H
 
+#include <algine/platform.h>
+
 #include <functional>
 #include <forward_list>
 #include <string>
@@ -8,7 +10,7 @@
 #include <sol/environment.hpp>
 
 namespace algine {
-class Module {
+class AL_EXPORT Module {
 public:
     using Args = std::forward_list<std::string>;
 

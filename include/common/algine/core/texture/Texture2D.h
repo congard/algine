@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace algine {
-class Texture2D: public Texture {
+class AL_EXPORT Texture2D: public Texture {
     AL_CONTEXT_OBJECT_IMPL(Texture2D)
 
 public:

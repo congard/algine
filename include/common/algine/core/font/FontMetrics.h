@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 namespace algine {
-class FontMetrics {
+class AL_EXPORT FontMetrics {
 public:
     FontMetrics();
     FontMetrics(Font font, uint size);

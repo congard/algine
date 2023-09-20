@@ -2,6 +2,7 @@
 #define ALGINE_ANIMATIONBLENDER_H
 
 #include <algine/std/model/ModelPtr.h>
+#include <algine/platform.h>
 #include <algine/types.h>
 
 #include <glm/mat4x4.hpp>
@@ -9,7 +10,7 @@
 #include <vector>
 
 namespace algine {
-class AnimationBlender {
+class AL_EXPORT AnimationBlender {
 public:
     enum class BlendListMode {
         Disable,

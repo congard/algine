@@ -2,12 +2,13 @@
 #define ALGINE_IOPROVIDER_H
 
 #include <algine/core/io/IOSystem.h>
+#include <algine/platform.h>
 
 #include <sol/forward.hpp>
 #include <memory>
 
 namespace algine {
-class IOProvider {
+class AL_EXPORT IOProvider {
 public:
     IOProvider();
     explicit IOProvider(std::shared_ptr<IOSystem> ioSystem);

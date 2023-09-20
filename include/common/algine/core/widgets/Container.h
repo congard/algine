@@ -7,7 +7,7 @@
 #include <list>
 
 namespace algine {
-class Container: public Widget {
+class AL_EXPORT Container: public Widget {
     STATIC_INITIALIZER_DECL
 
 public:

@@ -8,7 +8,7 @@ namespace algine::Widgets {
 /**
  * Animates the background color of the widget
  */
-class ColorAnimation: public Animation {
+class AL_EXPORT ColorAnimation: public Animation {
 public:
     ColorAnimation();
     ColorAnimation(const Color &from, const Color &to, const InterpolatorPtr &interpolator);

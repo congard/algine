@@ -12,7 +12,7 @@ class Container;
 namespace algine::Widgets {
 class Scene;
 
-class Layer: public Object {
+class AL_EXPORT Layer: public Object {
     friend class Scene;
 
 public:

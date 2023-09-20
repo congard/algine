@@ -13,7 +13,7 @@
 #include <algine/core/RawPtr.h>
 
 namespace algine {
-class Shape: public Object {
+class AL_EXPORT Shape: public Object {
     friend class ShapeBuilder;
     friend class Model;
     friend class Animator;

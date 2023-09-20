@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace algine {
-class TextureCube: public Texture {
+class AL_EXPORT TextureCube: public Texture {
     AL_CONTEXT_OBJECT_IMPL(TextureCube)
 
 public:

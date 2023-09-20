@@ -2,11 +2,12 @@
 #define ALGINE_DIMEN_H
 
 #include <algine/core/widgets/Unit.h>
+#include <algine/platform.h>
 
 #include <string>
 
 namespace algine {
-class Dimen {
+class AL_EXPORT Dimen {
 public:
     Dimen() = default;
     Dimen(float value, Unit unit);

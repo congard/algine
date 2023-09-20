@@ -6,7 +6,7 @@
 #include <algine/core/font/FontMetrics.h>
 
 namespace algine {
-class Label: public Widget {
+class AL_EXPORT Label: public Widget {
     STATIC_INITIALIZER_DECL
 
 public:

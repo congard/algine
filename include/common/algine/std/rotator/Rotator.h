@@ -6,7 +6,7 @@
 #include <glm/mat4x4.hpp>
 
 namespace algine {
-class Rotator {
+class AL_EXPORT Rotator {
 public:
     enum class Type {
         Simple,

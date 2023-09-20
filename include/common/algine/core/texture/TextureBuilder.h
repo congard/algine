@@ -7,7 +7,7 @@
 #include <map>
 
 namespace algine {
-class TextureBuilder: public ImageBuilder {
+class AL_EXPORT TextureBuilder: public ImageBuilder {
 public:
     enum class Type {
         Texture2D,

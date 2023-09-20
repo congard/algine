@@ -9,7 +9,7 @@
 namespace algine {
 class Model;
 
-class BoneSystemManager {
+class AL_EXPORT BoneSystemManager {
 public:
     void init(Object *bufferParent);
     void writeBonesForAll();

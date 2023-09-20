@@ -5,7 +5,7 @@
 #include <tulz/static_initializer.h>
 
 namespace algine {
-class LinearLayout: public Layout {
+class AL_EXPORT LinearLayout: public Layout {
     STATIC_INITIALIZER_DECL
 
 public:

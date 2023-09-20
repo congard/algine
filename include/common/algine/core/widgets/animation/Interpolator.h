@@ -1,10 +1,11 @@
 #ifndef ALGINE_INTERPOLATOR_H
 #define ALGINE_INTERPOLATOR_H
 
+#include <algine/platform.h>
 #include <memory>
 
 namespace algine::Widgets {
-class Interpolator {
+class AL_EXPORT Interpolator {
 public:
     virtual float interpolate(float x) = 0;
 

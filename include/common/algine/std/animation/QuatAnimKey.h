@@ -1,12 +1,13 @@
 #ifndef ALGINE_QUATANIMKEY_H
 #define ALGINE_QUATANIMKEY_H
 
+#include <algine/platform.h>
 #include <glm/gtc/quaternion.hpp>
 
 class aiQuatKey;
 
 namespace algine {
-class QuatAnimKey {
+class AL_EXPORT QuatAnimKey {
 public:
     explicit QuatAnimKey(const aiQuatKey *key);
 

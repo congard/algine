@@ -5,7 +5,7 @@
 #include <algine/core/math/CubicSpline.h>
 
 namespace algine::Widgets {
-class CubicSplineInterpolator: public Interpolator {
+class AL_EXPORT CubicSplineInterpolator: public Interpolator {
 public:
     CubicSplineInterpolator();
     explicit CubicSplineInterpolator(CubicSpline spline);

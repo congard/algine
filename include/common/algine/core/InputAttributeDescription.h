@@ -2,10 +2,11 @@
 #define ALGINE_INPUTATTRIBUTEDESCRIPTION_H
 
 #include <algine/core/DataType.h>
+#include <algine/platform.h>
 #include <algine/types.h>
 
 namespace algine {
-class InputAttributeDescription {
+class AL_EXPORT InputAttributeDescription {
 public:
     static constexpr uint LocationAbsent = -1;
 

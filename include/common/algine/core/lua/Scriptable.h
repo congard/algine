@@ -7,7 +7,7 @@
 #include <tulz/Path.h>
 
 namespace algine {
-class Scriptable: public IOProvider {
+class AL_EXPORT Scriptable: public IOProvider {
 public:
     void execute(const std::string &path, Lua *lua = nullptr, sol::global_table *env = nullptr);
     void executeString(const std::string &str, Lua *lua = nullptr, sol::global_table *env = nullptr);

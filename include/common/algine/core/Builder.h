@@ -7,7 +7,7 @@
 #include <string>
 
 namespace algine {
-class Builder: public virtual Scriptable {
+class AL_EXPORT Builder: public virtual Scriptable {
 public:
     enum class Scope {
         // The object will be created in the parent scope. Before

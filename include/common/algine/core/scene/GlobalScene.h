@@ -5,7 +5,7 @@
 #include <tulz/static_initializer.h>
 
 namespace algine {
-class GlobalScene: public Scene {
+class AL_EXPORT GlobalScene: public Scene {
     STATIC_INITIALIZER_DECL
 
 public:

@@ -10,7 +10,7 @@ struct aiMesh;
 struct aiScene;
 
 namespace algine {
-class ShapeBuilder: public Builder {
+class AL_EXPORT ShapeBuilder: public Builder {
     AL_BUILDER(Shape)
 
 public:

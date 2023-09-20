@@ -15,7 +15,7 @@ template<typename T> void registerLuaUsertype(sol::table &table, void *userdata)
 }
 
 namespace algine {
-class Lua: public IOProvider {
+class AL_EXPORT Lua: public IOProvider {
 public:
     template<typename... Types>
     struct TypeList {};

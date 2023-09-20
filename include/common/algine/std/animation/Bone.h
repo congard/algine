@@ -2,11 +2,12 @@
 #define ALGINE_BONE_H
 
 #include <algine/std/animation/BoneMatrix.h>
+#include <algine/platform.h>
 
 #include <string>
 
 namespace algine {
-class Bone {
+class AL_EXPORT Bone {
 public:
     Bone(std::string name, const BoneMatrix &matrix);
 

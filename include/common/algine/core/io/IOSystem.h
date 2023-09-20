@@ -7,7 +7,7 @@
 #include <string>
 
 namespace algine {
-class IOSystem {
+class AL_EXPORT IOSystem {
 public:
     virtual ~IOSystem();
 

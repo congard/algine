@@ -4,7 +4,7 @@
 #include <algine/core/log/LogWriter.h>
 
 namespace algine {
-class QtLogWriter: public LogWriter {
+class AL_EXPORT QtLogWriter: public LogWriter {
 public:
     void verbose(const std::string &tag, std::string_view str) override;
     void debug(const std::string &tag, std::string_view str) override;

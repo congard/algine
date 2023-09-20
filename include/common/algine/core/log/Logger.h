@@ -1,6 +1,8 @@
 #ifndef ALGINE_LOGGER_H
 #define ALGINE_LOGGER_H
 
+#include <algine/platform.h>
+
 #include <string>
 #include <sstream>
 
@@ -14,7 +16,7 @@ namespace algine {
  * it immediately by using `Log::endl`
  * @see `Log`, `Logger& Logger::operator\<\<(endl_t)`
  */
-class Logger {
+class AL_EXPORT Logger {
 public:
     class InputEndListener {
     public:

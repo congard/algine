@@ -13,7 +13,7 @@
 #include <algine/types.h>
 
 namespace algine {
-class Painter: public Object {
+class AL_EXPORT Painter: public Object {
 public:
     enum class RenderHint {
         Antialiasing,

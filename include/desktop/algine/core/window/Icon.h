@@ -1,13 +1,14 @@
 #ifndef ALGINE_ICON_H
 #define ALGINE_ICON_H
 
-#include <algine/core/Engine.h>
+#include <algine/core/io/IOSystem.h>
 #include <algine/core/Ptr.h>
+#include <algine/platform.h>
 
 #include <string>
 
 namespace algine {
-class Icon {
+class AL_EXPORT Icon {
 public:
     using PixelData = Ptr<unsigned char[]>;
 

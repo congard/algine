@@ -2,12 +2,13 @@
 #define ALGINE_ANIMATOR_H
 
 #include <algine/std/Node.h>
+#include <algine/platform.h>
 #include <algine/types.h>
 
 namespace algine {
 class Model;
 
-class Animator {
+class AL_EXPORT Animator {
 public:
     Animator();
     Animator(Model *model, const std::string &animationName);

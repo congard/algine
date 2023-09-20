@@ -11,7 +11,7 @@ namespace algine {
  * Describes events
  * @see XEventHandler, Scene, Widget
  */
-class Event {
+class AL_EXPORT Event {
 public:
     enum Id {
         None,

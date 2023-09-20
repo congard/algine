@@ -7,7 +7,7 @@
 #include <glm/mat4x4.hpp>
 
 namespace algine {
-class Translatable {
+class AL_EXPORT Translatable {
 public:
     Translatable();
 

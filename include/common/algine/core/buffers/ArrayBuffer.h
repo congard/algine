@@ -4,7 +4,7 @@
 #include <algine/core/buffers/Buffer.h>
 
 namespace algine {
-class ArrayBuffer: public Buffer {
+class AL_EXPORT ArrayBuffer: public Buffer {
     AL_CONTEXT_OBJECT_IMPL(ArrayBuffer)
 
 public:

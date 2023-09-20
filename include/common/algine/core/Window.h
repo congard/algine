@@ -12,7 +12,7 @@
 namespace algine {
 class Content;
 
-class Window: public Object {
+class AL_EXPORT Window: public Object {
 public:
     using Task = std::function<void()>;
 

@@ -6,7 +6,7 @@
 #include <tulz/Array.h>
 
 namespace algine {
-class UniformBlock: public BaseUniformBlock {
+class AL_EXPORT UniformBlock: public BaseUniformBlock {
 public:
     static constexpr uint PositionNotFound = -1;
 

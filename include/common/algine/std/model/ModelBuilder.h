@@ -9,7 +9,7 @@
 #include <set>
 
 namespace algine {
-class ModelBuilder: public Builder {
+class AL_EXPORT ModelBuilder: public Builder {
     AL_BUILDER(Model)
 
 public:

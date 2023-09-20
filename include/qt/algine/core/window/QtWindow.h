@@ -19,7 +19,7 @@ namespace algine {
  * @note to use this class Qt must be installed (Qt5+) and
  * the Qt backend should be selected.
  */
-class QtWindow: public Window, public QOpenGLWindow {
+class AL_EXPORT QtWindow: public Window, public QOpenGLWindow {
 public:
     explicit QtWindow(Context shareContext = {}, QWindow *parent = nullptr);
     ~QtWindow() override;

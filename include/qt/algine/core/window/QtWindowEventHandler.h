@@ -8,7 +8,7 @@
 namespace algine {
 class QtWindow;
 
-class QtWindowEventHandler: public EventHandler {
+class AL_EXPORT QtWindowEventHandler: public EventHandler {
 public:
     virtual void mouseMove(float x, float y, QtWindow &window);
     virtual void mouseClick(MouseKey key, QtWindow &window);

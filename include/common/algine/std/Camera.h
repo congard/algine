@@ -8,7 +8,7 @@
 #include <glm/mat4x4.hpp>
 
 namespace algine {
-class Camera: public Rotatable, public Translatable, public Scalable {
+class AL_EXPORT Camera: public Rotatable, public Translatable, public Scalable {
 public:
     enum class Type {
         FPS,

@@ -7,7 +7,7 @@
 #include <vector>
 
 namespace algine {
-class BufferWriter {
+class AL_EXPORT BufferWriter {
 public:
     BufferWriter();
     explicit BufferWriter(Buffer *buffer);

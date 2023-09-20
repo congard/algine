@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace algine {
-class AMTLManager: public Scriptable {
+class AL_EXPORT AMTLManager: public Scriptable {
 public:
     AMTLManager();
 

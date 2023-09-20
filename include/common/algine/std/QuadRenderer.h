@@ -6,7 +6,7 @@
 #include <algine/core/shader/Shader.h>
 
 namespace algine {
-class QuadRenderer: public Object {
+class AL_EXPORT QuadRenderer: public Object {
 public:
     explicit QuadRenderer(uint inPosLocation, Object *parent = defaultParent());
     explicit QuadRenderer(Object *parent = defaultParent());

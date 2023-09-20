@@ -4,7 +4,7 @@
 #include <algine/core/buffers/Buffer.h>
 
 namespace algine {
-class IndexBuffer: public Buffer {
+class AL_EXPORT IndexBuffer: public Buffer {
     AL_CONTEXT_OBJECT_IMPL(IndexBuffer)
 
 public:

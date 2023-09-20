@@ -9,7 +9,7 @@
 #include <memory>
 
 namespace algine {
-class Shader: public Object {
+class AL_EXPORT Shader: public Object {
 public:
     enum class Type {
         Vertex,

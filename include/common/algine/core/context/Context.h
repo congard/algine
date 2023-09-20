@@ -1,6 +1,7 @@
 #ifndef ALGINE_CONTEXT_H
 #define ALGINE_CONTEXT_H
 
+#include <algine/platform.h>
 #include <tulz/observer/Subject.h>
 
 namespace algine {
@@ -25,7 +26,7 @@ class ContextConfig;
  * </ol>
  * </ul>
  */
-class Context {
+class AL_EXPORT Context {
 public:
     /**
      * Creates offscreen context

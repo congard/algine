@@ -4,7 +4,7 @@
 #include <algine/core/widgets/Container.h>
 
 namespace algine {
-class Layout: public Container {
+class AL_EXPORT Layout: public Container {
 public:
     static void setMargin(Widget *widget, int left, int top, int right, int bottom);
     static void setMarginLeft(Widget *widget, int margin);

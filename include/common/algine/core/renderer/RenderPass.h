@@ -6,7 +6,7 @@
 namespace algine {
 class Renderer;
 
-class RenderPass: public Object {
+class AL_EXPORT RenderPass: public Object {
 public:
     explicit RenderPass(Renderer *parent);
 

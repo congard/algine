@@ -4,7 +4,7 @@
 #include <algine/core/Object.h>
 
 namespace algine {
-class Scene: public Object {
+class AL_EXPORT Scene: public Object {
 public:
     explicit Scene(Object *parent = nullptr);
 

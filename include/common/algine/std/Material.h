@@ -1,13 +1,15 @@
 #ifndef ALGINE_MATERIAL_H
 #define ALGINE_MATERIAL_H
 
+#include <algine/platform.h>
+
 #include <unordered_map>
 #include <string>
 
 namespace algine {
 class Texture2D;
 
-class Material {
+class AL_EXPORT Material {
 public:
     constexpr static auto AmbientTexture = "ambient";
     constexpr static auto DiffuseTexture = "diffuse";

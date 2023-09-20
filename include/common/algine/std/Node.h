@@ -1,6 +1,8 @@
 #ifndef ALGINE_NODE_H
 #define ALGINE_NODE_H
 
+#include <algine/platform.h>
+
 #include <string>
 #include <vector>
 
@@ -9,7 +11,7 @@
 class aiNode;
 
 namespace algine {
-class Node {
+class AL_EXPORT Node {
 public:
     Node();
     explicit Node(const aiNode *node);

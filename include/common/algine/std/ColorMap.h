@@ -10,7 +10,7 @@
 #include <map>
 
 namespace algine {
-class ColorMap: public Object {
+class AL_EXPORT ColorMap: public Object {
 private:
     struct ColorComparator {
         bool operator()(glm::ivec2 lhs, glm::ivec2 rhs) const;

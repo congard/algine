@@ -9,7 +9,7 @@
 #include <cstddef>
 
 namespace algine {
-class OutputList: public Scriptable {
+class AL_EXPORT OutputList: public Scriptable {
 public:
     // do not mark explicit because we really need implicit conversion
     // just ignore Clang-Tidy warning

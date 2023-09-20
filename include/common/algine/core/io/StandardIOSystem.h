@@ -4,7 +4,7 @@
 #include <algine/core/io/IOSystem.h>
 
 namespace algine {
-class StandardIOSystem: public IOSystem {
+class AL_EXPORT StandardIOSystem: public IOSystem {
 public:
     std::unique_ptr<IOStream> open(const std::string &path, IOStream::Mode mode) override;
     void close(const std::unique_ptr<IOStream> &stream) override;
