@@ -3,6 +3,11 @@ project(algine)
 
 set(CMAKE_CXX_STANDARD 20)
 
+message(VERBOSE "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
+message(VERBOSE "CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
+
+set(ALGINE_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL ALGINE_SOURCE_DIR)
+
 if (UNIX)
     add_compile_options(-fPIC)
 endif()
@@ -155,7 +160,12 @@ function(build_lua_interp out_binary)
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E make_directory ${output_dir})
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -B ${output_dir} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        COMMAND ${CMAKE_COMMAND}
+            -B ${output_dir}
+            -G Ninja
+            -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+            -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+            -D DEPS_DIR=${ALGINE_DEPS_DIR}
         WORKING_DIRECTORY ${lua_interp_dir})
     execute_process(
         COMMAND ${CMAKE_COMMAND} --build ${output_dir} --target lua_interp -- -j 4
@@ -299,6 +309,7 @@ if (ANDROID)
     target_link_libraries(algine assimp android log GLESv3 EGL tulz freetype lua_static)
 elseif (WIN32)
     target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw opengl32 tulz freetype lua_static ${ALGINE_QT_LIBS})
+    target_link_options(algine PRIVATE -Wl,-FORCE)
 elseif (UNIX)
     target_link_libraries(algine assimp ${GLEW_LIBRARY} glfw GL tulz freetype lua_static ${ALGINE_QT_LIBS})
 endif()

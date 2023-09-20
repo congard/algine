@@ -1,11 +1,15 @@
 function(build_solgen out_binary)
     set(output_dir "${CMAKE_CURRENT_BINARY_DIR}/tools/solgen")
-    set(solgen_dir "${CMAKE_CURRENT_LIST_DIR}/deps/solgen-src")
+    set(solgen_dir "${ALGINE_DEPS_DIR}/solgen-src")
 
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E make_directory ${output_dir})
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -B ${output_dir} -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER} -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        COMMAND ${CMAKE_COMMAND}
+            -B ${output_dir}
+            -G Ninja
+            -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+            -D CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
         WORKING_DIRECTORY ${solgen_dir})
     execute_process(
         COMMAND ${CMAKE_COMMAND} --build ${output_dir} --target solgen -- -j 4
@@ -92,7 +96,7 @@ function(solgen output)
             WORKING_DIRECTORY ${PARSED_ARGS_WORKING_DIR})
 
         if (run_lua_exit_code AND NOT run_lua_exit_code EQUAL 0)
-            message(FATAL_ERROR "FindCompilerInclude.lua fatal error: ${${output_var}}")
+            message(FATAL_ERROR "${PARSED_ARGS_SCRIPT_FILE} fatal error: exit code: ${run_lua_exit_code}, ${${output_var}}")
         endif()
 
         set(${PARSED_ARGS_OUTPUT_VAR} ${${PARSED_ARGS_OUTPUT_VAR}} PARENT_SCOPE)
@@ -139,9 +143,11 @@ function(solgen output)
     run_lua(SCRIPT_FILE
         "${CMAKE_CURRENT_LIST_DIR}/scripts/FindCompilerInclude.lua"
         OUTPUT_VAR compilerIncludes
-        ARGS ${CMAKE_CXX_COMPILER} ${platform_str})
+        ARGS "${CMAKE_CXX_COMPILER}" "${platform_str}")
 
     string(REPLACE "\n" ";" compilerIncludes ${compilerIncludes})
+
+    message(STATUS "Solgen: compiler include paths: ${compilerIncludes}")
 
     macro(append_clang_flags)
         list(APPEND ALGINE_SOLGEN_CLANG_ARGS ${ARGV})
