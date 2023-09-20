@@ -18,6 +18,11 @@
     #include "../../src/android/core/Bridge.h"
 #endif
 
+#ifdef _WIN32
+    #define popen _popen
+    #define pclose _pclose
+#endif
+
 #define LOG_TAG "Engine"
 
 using namespace std;
