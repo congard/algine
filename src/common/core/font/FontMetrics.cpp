@@ -93,7 +93,7 @@ int FontMetrics::topVerticalBearing(char16_t c) {
 
 RectI FontMetrics::boundingRect(std::string_view str) {
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utfConv;
-    return boundingRect(utfConv.from_bytes(str.begin(), str.end()));
+    return boundingRect(utfConv.from_bytes(str.data()));
 }
 
 RectI FontMetrics::boundingRect(std::u16string_view str) {

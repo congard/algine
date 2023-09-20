@@ -70,7 +70,7 @@ inline FontSearchInfo findFont(const std::string &name, Font::Style style) {
 #elif defined(_WIN32)
     TCHAR winDir[MAX_PATH];
     GetWindowsDirectory(winDir, MAX_PATH);
-    return findFont({Path(Path::join(string(winDir), "Fonts"))}, name, style);
+    return findFont({Path(Path::join(std::string(winDir), "Fonts"))}, name, style);
 #endif
 }
 

@@ -530,7 +530,7 @@ void Painter::drawText(std::u16string_view text, const PointF &p) {
 
 void Painter::drawText(std::string_view text, const PointF &p) {
     std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utfConv;
-    auto utf16 = utfConv.from_bytes(text.begin(), text.end());
+    auto utf16 = utfConv.from_bytes(text.data());
     drawText(utf16, p);
 }
 
