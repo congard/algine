@@ -16,7 +16,10 @@
 #include "core/debug/Debug.h"
 #include "Icon2GLFWimage.h"
 
-using namespace std;
+#ifdef _WIN32
+    #include "win32/WindowTheme.h"
+#endif
+
 using namespace glm;
 
 namespace algine {
@@ -98,6 +101,10 @@ void GLFWWindow::create() {
     if (!Engine::m_appContext.m_context) {
         Engine::m_appContext.m_context = m_window;
     }
+
+#ifdef _WIN32
+    internal::win32::WindowTheme::applyTheme(m_window);
+#endif
 }
 
 void GLFWWindow::close() {
