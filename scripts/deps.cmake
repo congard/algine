@@ -7,7 +7,25 @@
 
 include(FetchContent)
 
-get_filename_component(FETCHCONTENT_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps" REALPATH)
+macro(__set_global name value)
+    set(${name} ${value} CACHE INTERNAL ${name})
+endmacro()
+
+if (WIN32 AND NOT DEFINED ALGINE_DEPS_DIR_POSTFIX)
+    set(ALGINE_DEPS_DIR_POSTFIX "win")
+endif()
+
+if (NOT DEFINED ALGINE_DEPS_DIR_POSTFIX)
+    __set_global(ALGINE_DEPS_DIR_NAME "deps")
+else()
+    __set_global(ALGINE_DEPS_DIR_NAME "deps-${ALGINE_DEPS_DIR_POSTFIX}")
+endif()
+
+__set_global(ALGINE_DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${ALGINE_DEPS_DIR_NAME}")
+
+message(VERBOSE "Algine: dependencies: ${ALGINE_DEPS_DIR}")
+
+get_filename_component(FETCHCONTENT_BASE_DIR "${ALGINE_DEPS_DIR}" REALPATH)
 
 function(add_dep target)
     # skip if dependency is disabled (for example glew on Android)
@@ -36,7 +54,7 @@ function(add_dep target)
         set(_full_source_dir "${${target}_SOURCE_DIR}/${source_dir_${target}}")
 
         if (EXISTS "${_full_source_dir}/CMakeLists.txt")
-            add_subdirectory("${_full_source_dir}" "deps-build/${target}")
+            add_subdirectory("${_full_source_dir}" "${ALGINE_DEPS_DIR_NAME}-build/${target}")
         endif()
     endif()
 endfunction()
@@ -46,6 +64,27 @@ function(post_populate_glew)
         execute_process(
             COMMAND bash -c "make extensions"
             WORKING_DIRECTORY "${glew_SOURCE_DIR}"
+        )
+    elseif (WIN32)
+        if (NOT DEFINED MSYS64_PATH)
+            message(VERBOSE "MSYS64_PATH is not defined, falling back to default")
+            set(MSYS64_PATH "$ENV{SystemDrive}/msys64")
+        endif()
+
+        message(VERBOSE "MSYS64_PATH: ${MSYS64_PATH}")
+
+        if (NOT EXISTS "${MSYS64_PATH}")
+            message(WARNING "${MSYS64_PATH} does not exist, see: https://github.com/nigels-com/glew#code-generation")
+            return()
+        endif()
+
+        # read more about used options by typing
+        # msys2_shell.cmd --help
+        execute_process(
+            COMMAND "${MSYS64_PATH}/msys2_shell.cmd"
+                -defterm -no-start -clang64
+                -where "${glew_SOURCE_DIR}"
+                -c "make extensions"
         )
     endif()
 endfunction()
@@ -74,16 +113,16 @@ if (NOT ANDROID)
         ${deps_enabled} glew glfw)
 endif()
 
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-set(ASSIMP_BUILD_TESTS OFF)
-set(ASSIMP_INSTALL OFF)
-set(ASSIMP_BUILD_ASSIMP_VIEW OFF)
-set(ASSIMP_NO_EXPORT ON)
+__set_global(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+__set_global(ASSIMP_BUILD_TESTS OFF)
+__set_global(ASSIMP_INSTALL OFF)
+__set_global(ASSIMP_BUILD_ASSIMP_VIEW OFF)
+__set_global(ASSIMP_NO_EXPORT ON)
 
 add_dep(
     tulz
     GIT_REPOSITORY  https://github.com/congard/tulz.git
-    GIT_TAG         c2946d19d82487d17d06d52176d81ce09a0f571b
+    GIT_TAG         e79878fd40339b66b9d66b46a4ba67cb6c2a9298
 )
 
 add_dep(
@@ -125,7 +164,7 @@ add_dep(
 add_dep(
     solgen
     GIT_REPOSITORY  https://github.com/congard/solgen.git
-    GIT_TAG         f55d2411b147a38027384d7113d7b55933893a1c
+    GIT_TAG         4addb9c6188af2b16a96b96ebeafd8fcf54751d2
 )
 
 add_dep(
