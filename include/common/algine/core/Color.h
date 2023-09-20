@@ -277,14 +277,14 @@ public:
 
 private:
     union sp {
-        inline explicit sp(uint16 p1, uint16 p2, uint16 p3, uint16 p4)
+        inline explicit sp(uint16_t p1, uint16_t p2, uint16_t p3, uint16_t p4)
             : rgb({p1, p2, p3, p4}) {}
 
-        struct { uint16 r, g, b, a; } rgb;
-        struct { uint16 h, s, v, a; } hsv;
-        struct { uint16 l, u, v, a; } luv;
-        struct { uint16 l, c, h, a; } lch;
-        struct { uint16 h, s, l, a; } hsluv;
+        struct { uint16_t r, g, b, a; } rgb;
+        struct { uint16_t h, s, v, a; } hsv;
+        struct { uint16_t l, u, v, a; } luv;
+        struct { uint16_t l, c, h, a; } lch;
+        struct { uint16_t h, s, l, a; } hsluv;
     } m_sp;
 
     Space m_space {Space::Invalid};

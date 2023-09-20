@@ -8,49 +8,47 @@
 #include "hsluv/hsluv.h"
 
 namespace algine {
-constexpr ushort USHORT_MAX = -1;
-
 /**
  * ubyte range => ushort range
  */
 template<typename T>
-inline ushort m257(T p) {
+inline static uint16_t m257(T p) {
     return p * 257;
 }
 
 /**
  * ushort range => ubyte range
  */
-inline ubyte d257(ushort p) {
+inline static ubyte d257(uint16_t p) {
     return static_cast<ubyte>(round(p / 257.0));
 }
 
 /**
  * ushort range => float [0, 1] range
  */
-inline float frange(ushort p) {
-    return static_cast<float>(p) / static_cast<float>(USHORT_MAX);
+inline static float frange(uint16_t p) {
+    return static_cast<float>(p) / static_cast<float>(UINT16_MAX);
 }
 
 /**
  * float [0, 1] range => ushort range
  */
-inline ushort usrange(float p) {
-    return static_cast<ushort>(p * USHORT_MAX);
+inline static uint16_t usrange(float p) {
+    return static_cast<uint16_t>(p * UINT16_MAX);
 }
 
 /**
  * degrees [0, 360] => ushort [0, 65535]
  */
-inline ushort deg2us(float deg) {
-    return static_cast<ushort>((float) USHORT_MAX / 360.0f * deg);
+inline static uint16_t deg2us(float deg) {
+    return static_cast<uint16>((float) UINT16_MAX / 360.0f * deg);
 }
 
 /**
  * ushort [0, 65535] => degrees [0, 360]
  */
-inline float us2deg(ushort us) {
-    return (float) us / (float) USHORT_MAX * 360.0f;
+inline static float us2deg(uint16_t us) {
+    return (float) us / (float) UINT16_MAX * 360.0f;
 }
 
 /**
@@ -61,12 +59,12 @@ inline float us2deg(ushort us) {
  * @return position (i.e. value in range [0, 1]) for parameter `a`
  */
 template<typename T>
-inline T posBetween(T a, T lower, T upper) {
+inline static T posBetween(T a, T lower, T upper) {
     return (a - lower) / (upper - lower);
 }
 
 template<typename T>
-inline float posBetweenF(T a, T lower, T upper) {
+inline static float posBetweenF(T a, T lower, T upper) {
     return posBetween(a, lower, upper);
 }
 
@@ -89,7 +87,7 @@ using Triplet = std::tuple<double, double, double>;
 /**
  * @return LUV in the original range
  */
-Triplet luvRangeToInternal(ushort l, ushort u, ushort v) {
+static Triplet luvRangeToInternal(uint16_t l, uint16_t u, uint16_t v) {
     return {
         glm::mix(luvInfo.l_min, luvInfo.l_max, frange(l)),
         glm::mix(luvInfo.u_min, luvInfo.u_max, frange(u)),
@@ -100,7 +98,7 @@ Triplet luvRangeToInternal(ushort l, ushort u, ushort v) {
 /**
  * @return LCH in the original range
  */
-Triplet lchRangeToInternal(ushort l, ushort c, ushort h) {
+static Triplet lchRangeToInternal(uint16_t l, uint16_t c, uint16_t h) {
     return {
         glm::mix(lchInfo.l_min, lchInfo.l_max, frange(l)),
         glm::mix(lchInfo.c_min, lchInfo.c_max, frange(c)),
@@ -111,12 +109,12 @@ Triplet lchRangeToInternal(ushort l, ushort c, ushort h) {
 // details end
 
 template<typename T>
-inline bool isInRangeIncl(T a, T lower, T upper) {
+inline static bool isInRangeIncl(T a, T lower, T upper) {
     return lower <= a && a <= upper;
 }
 
 template<typename T, typename ...Args>
-void assert_values(T from, T to, T val, Args... values) {
+static void assert_values(T from, T to, T val, Args... values) {
     if (!isInRangeIncl(val, from, to)) {
         throw std::invalid_argument(
             "Color value out of range:\n"
@@ -131,17 +129,17 @@ void assert_values(T from, T to, T val, Args... values) {
 }
 
 template<typename ...Args>
-void assert_0_255(int val, Args... values) {
+static void assert_0_255(int val, Args... values) {
     assert_values(0, 255, val, values...);
 }
 
 template<typename ...Args>
-void assert_0_1(float val, Args... values) {
+static void assert_0_1(float val, Args... values) {
     assert_values(0.0f, 1.0f, val, values...);
 }
 
 template<typename ...Args>
-void assert_deg(int val, Args... values) {
+static void assert_deg(int val, Args... values) {
     assert_values(0, 360, val, values...);
 }
 
@@ -599,7 +597,7 @@ Color::Space Color::getSpace() const {
   \param v Hue component, used as output, range: [0, 1]
 
 */
-void rgb2hsv(float r, float g, float b, float &h, float &s, float &v) {
+static void rgb2hsv(float r, float g, float b, float &h, float &s, float &v) {
     float cMax = std::max(std::max(r, g), b);
     float cMin = std::min(std::min(r, g), b);
     float delta = cMax - cMin;
@@ -646,7 +644,7 @@ void rgb2hsv(float r, float g, float b, float &h, float &s, float &v) {
   \param v Hue component, used as input, range: [0, 1]
 
 */
-void hsv2rgb(float &r, float &g, float &b, float h, float s, float v) {
+static void hsv2rgb(float &r, float &g, float &b, float h, float s, float v) {
     float c = v * s; // Chroma
     float hPrime = fmodf(h / 60.0f, 6);
     float x = c * (1 - fabsf(fmodf(hPrime, 2) - 1));
@@ -886,7 +884,7 @@ using FromFunc = Color (*)(const glm::vec4&);
 /**
  * Mixes colors using linear interpolation
  */
-inline Color xMix(const Color &x, const Color &y, float a, GetFunc get, FromFunc from) {
+inline static Color xMix(const Color &x, const Color &y, float a, GetFunc get, FromFunc from) {
     // v means value
     glm::vec4 xv((x.*get)(), x.alphaF());
     glm::vec4 yv((y.*get)(), y.alphaF());
@@ -898,7 +896,7 @@ inline Color xMix(const Color &x, const Color &y, float a, GetFunc get, FromFunc
  * Mixes colors using linear interpolation
  * Hue will be mixed with the shortest distance
  */
-inline Color hueMix(const Color &x, const Color &y, float a, int hueIndex, GetFunc get, FromFunc from) {
+static Color hueMix(const Color &x, const Color &y, float a, int hueIndex, GetFunc get, FromFunc from) {
     glm::vec4 xv((x.*get)(), x.alphaF());
     glm::vec4 yv((y.*get)(), y.alphaF());
 
