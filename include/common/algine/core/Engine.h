@@ -128,8 +128,8 @@ public:
     static void flushCommandBuffer();
 
 public:
-    static long time();
-    static long timeFromStart();
+    static int64_t time();
+    static int64_t timeFromStart();
 
 #ifdef __ANDROID__
 public:
@@ -163,7 +163,7 @@ private:
 #endif
 
 private:
-    static long m_startTime;
+    static int64_t m_startTime;
 };
 }
 

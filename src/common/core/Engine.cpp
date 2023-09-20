@@ -42,7 +42,7 @@ char **Engine::m_argv;
 QApplication *Engine::m_qApp;
 #endif
 
-long Engine::m_startTime;
+int64_t Engine::m_startTime;
 
 string exec(const char *cmd) {
     string result;
@@ -332,12 +332,12 @@ void Engine::flushCommandBuffer() {
     glFlush();
 }
 
-long Engine::time() {
+int64_t Engine::time() {
     using namespace chrono;
     return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
-long Engine::timeFromStart() {
+int64_t Engine::timeFromStart() {
     return Engine::time() - m_startTime;
 }
 

@@ -21,17 +21,7 @@ using namespace glm;
 
 namespace algine {
 constexpr static auto maxClickDistance = 16.0;
-constexpr static auto maxClickDeltaTime = 250L; // in ms
-
-#define initList \
-    m_window(nullptr), \
-    m_pos(0), \
-    m_fullscreenDimensions(-1), \
-    m_cursorMode(CursorMode::Normal), \
-    m_mouseTracking(false), \
-    m_keyboardTracking(false), \
-    m_windowStateTracking(false), \
-    m_renderLoopRunning(false)
+constexpr static int64_t maxClickDeltaTime = 250; // in ms
 
 GLFWWindow::GLFWWindow(Context context)
     : initList,
@@ -282,8 +272,8 @@ void GLFWWindow::setMouseTracking(bool tracking) {
                     eventHandler->mouseKeyRelease(mouseKey, *window);
 
                     // check click event conditions
-                    long releaseTime = Engine::time();
-                    long deltaTime = releaseTime - mouseKeysInfo[button].pressTime;
+                    auto releaseTime = Engine::time();
+                    auto deltaTime = releaseTime - mouseKeysInfo[button].pressTime;
 
                     if (mouseKeysInfo[button].maxDelta <= maxClickDistance && deltaTime <= maxClickDeltaTime) {
                         eventHandler->mouseClick(mouseKey, *window);

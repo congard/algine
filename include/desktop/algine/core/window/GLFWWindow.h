@@ -129,7 +129,7 @@ private:
 
 private:
     struct MouseKeyInfo {
-        long pressTime;
+        int64_t pressTime;
         double maxDelta;
         glm::dvec2 pressCoords;
     };
