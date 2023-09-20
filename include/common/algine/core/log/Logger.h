@@ -41,15 +41,6 @@ public:
     ~Logger();
 
     Logger& operator<<(bool val);
-    Logger& operator<<(short val);
-    Logger& operator<<(unsigned short val);
-    Logger& operator<<(int val);
-    Logger& operator<<(unsigned int val);
-    Logger& operator<<(long val);
-    Logger& operator<<(unsigned long val);
-    Logger& operator<<(float val);
-    Logger& operator<<(double val);
-    Logger& operator<<(long double val);
     Logger& operator<<(const std::string &val);
 
     /**
@@ -62,6 +53,20 @@ public:
     std::enable_if_t<std::is_pointer_v<T>, Logger&>
     operator<<(T ptr) {
         m_stream << ptr;
+        return *this;
+    }
+
+    template<typename T>
+    std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, Logger&>
+    operator<<(T num) {
+        m_stream << num;
+        return *this;
+    }
+
+    template<typename T>
+    std::enable_if_t<std::is_integral_v<T>, Logger&>
+    operator<<(const std::atomic<T> &val) {
+        *this << val.load();
         return *this;
     }
 

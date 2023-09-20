@@ -34,42 +34,6 @@ Logger& Logger::operator<<(bool val) {
     writeLog(val ? "true" : "false");
 }
 
-Logger& Logger::operator<<(short val) {
-    writeLog(val);
-}
-
-Logger& Logger::operator<<(unsigned short val) {
-    writeLog(val);
-}
-
-Logger& Logger::operator<<(int val) {
-    writeLog(val);
-}
-
-Logger& Logger::operator<<(unsigned int val) {
-    writeLog(val);
-}
-
-Logger& Logger::operator<<(long val) {
-    writeLog(val);
-}
-
-Logger& Logger::operator<<(unsigned long val) {
-    writeLog(val);
-}
-
-Logger& Logger::operator<<(float val) {
-    writeLog(val);
-}
-
-Logger& Logger::operator<<(double val) {
-    writeLog(val);
-}
-
-Logger& Logger::operator<<(long double val) {
-    writeLog(val);
-}
-
 Logger& Logger::operator<<(const std::string &val) {
     writeLog(val);
 }
