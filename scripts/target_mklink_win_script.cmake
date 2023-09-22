@@ -1,12 +1,19 @@
 # Do not include this file to your CMakeLists
 # include PostBuildWindows.cmake instead
 
+# Current binary directory of the current target
 if (NOT DEFINED CURRENT_BINARY_DIR)
     message(FATAL_ERROR "CURRENT_BINARY_DIR is not defined")
 endif()
 
+# Directory where the algine binaries are located
 if (NOT DEFINED ALGINE_BINARY_DIR)
     message(FATAL_ERROR "ALGINE_BINARY_DIR is not defined")
+endif()
+
+# Directory where all other binaries are located
+if (NOT DEFINED BINARY_DIR)
+    message(FATAL_ERROR "BINARY_DIR is not defined")
 endif()
 
 if (NOT DEFINED ALGINE_DEPS_BUILD_DIR_NAME)
@@ -44,4 +51,4 @@ dll_symlink("${ALGINE_BINARY_DIR}/${ALGINE_DEPS_BUILD_DIR_NAME}/assimp/bin/*assi
 dll_symlink("${ALGINE_BINARY_DIR}/${ALGINE_DEPS_BUILD_DIR_NAME}/tulz/*tulz*.dll")
 dll_symlink("${ALGINE_BINARY_DIR}/${ALGINE_DEPS_BUILD_DIR_NAME}/glfw/src/*glfw3*.dll")
 dll_symlink("${ALGINE_BINARY_DIR}/${ALGINE_DEPS_BUILD_DIR_NAME}/freetype/*freetype*.dll")
-dll_symlink("${CURRENT_BINARY_DIR}/bin/*glew32*.dll")
+dll_symlink("${BINARY_DIR}/*glew32*.dll")
