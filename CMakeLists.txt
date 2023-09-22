@@ -63,7 +63,7 @@ if (ALGINE_QT_PLATFORM)
     message(STATUS "Using Qt ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}")
 endif()
 
-include(scripts/deps.cmake)
+include(cmake/deps.cmake)
 
 # built-in glsl modules
 # TODO: move to another file
@@ -236,7 +236,7 @@ if (MSVC OR ANDROID)
 endif()
 
 # solgen
-include(scripts/solgen.cmake)
+include(cmake/solgen.cmake)
 solgen(ALGINE_SOLGEN_SOURCES)
 
 # collect project sources
@@ -316,5 +316,5 @@ endif()
 
 # include some helpful scripts for Windows
 if (WIN32)
-    include(scripts/PostBuildWindows.cmake)
+    include(cmake/win32/PostBuild.cmake)
 endif()

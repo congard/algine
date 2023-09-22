@@ -141,7 +141,7 @@ function(solgen output)
 
     # get compiler's include paths
     run_lua(SCRIPT_FILE
-        "${CMAKE_CURRENT_LIST_DIR}/scripts/FindCompilerInclude.lua"
+        "${CMAKE_CURRENT_LIST_DIR}/tools/solgen/FindCompilerInclude.lua"
         OUTPUT_VAR compilerIncludes
         ARGS "${CMAKE_CXX_COMPILER}" "${platform_str}")
 
@@ -190,7 +190,7 @@ function(solgen output)
         --includes ${PRIVATE_INCLUDES} ${PUBLIC_INCLUDES} ${compilerIncludes} ${Qt${QT_VERSION_MAJOR}Widgets_INCLUDE_DIRS}
         --namespace-filter algine
         --type-filter "algine::(?:${SOLGEN_CLASSES_REGEX})(?:::[_a-zA-Z0-9]+)?$"
-        --conf scripts/solgen.conf
+        --conf "tools/solgen/solgen.conf"
         --clang-args -std=c++17 ${ALGINE_SOLGEN_CLANG_ARGS})
 
     message(DEBUG "Executing: ${SOLGEN_COMMAND}")

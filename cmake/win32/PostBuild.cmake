@@ -51,7 +51,7 @@ function(algine_target_mklink)
                 -D ALGINE_BINARY_DIR="${ALGINE_BINARY_DIR}"
                 -D BINARY_DIR="${BINARY_DIR}"
                 -D ALGINE_DEPS_BUILD_DIR_NAME="${ALGINE_DEPS_DIR_NAME}-build"
-                -P "${ALGINE_SOURCE_DIR}/scripts/target_mklink_win_script.cmake"
+                -P "${ALGINE_SOURCE_DIR}/cmake/win32/target_mklink.cmake"
             COMMENT "Creating symlinks..."
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endfunction()

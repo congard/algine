@@ -1,5 +1,5 @@
 # Do not include this file to your CMakeLists
-# include PostBuildWindows.cmake instead
+# include PostBuild.cmake instead
 
 # Current binary directory of the current target
 if (NOT DEFINED CURRENT_BINARY_DIR)
