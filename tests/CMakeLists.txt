@@ -20,6 +20,8 @@ set_global(ASSIMP_BUILD_ZLIB OFF)
 set_global(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
 set_global(ASSIMP_BUILD_TESTS OFF)
 
+set(BUILD_SHARED_LIBS ON)
+
 add_subdirectory(../ algine)
 
 include(FetchContent)
