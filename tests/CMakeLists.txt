@@ -1,38 +1,68 @@
 cmake_minimum_required(VERSION 3.10)
 project(algine_tests)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # silence warnings from sol2
 add_compile_options(-Wno-unknown-warning-option)
 
-if (UNIX AND NOT ANDROID)
-    execute_process(COMMAND bash -c "which mold > /dev/null" RESULT_VARIABLE moldRes)
+include(../cmake/mold.cmake)
+try_use_mold()
 
-    if (${moldRes} EQUAL 0)
-        message(STATUS "mold was found and will be used for linking")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
-        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=mold")
-        set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=mold")
-    endif()
+macro(set_global name value)
+    set(${name} ${value} CACHE INTERNAL ${name})
+endmacro()
+
+set_global(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
+set_global(ASSIMP_BUILD_OBJ_IMPORTER ON)
+set_global(ASSIMP_BUILD_ZLIB OFF)
+set_global(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+set_global(ASSIMP_BUILD_TESTS OFF)
+
+add_subdirectory(../ algine)
+
+include(FetchContent)
+
+if (UNIX)
+    set(DEPS_DIR "deps")
+elseif (WIN32)
+    set(DEPS_DIR "deps-win")
+else()
+    message(FATAL_ERROR "Unsupported OS")
 endif()
 
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
-set(ASSIMP_BUILD_OBJ_IMPORTER ON)
-set(ASSIMP_BUILD_ZLIB OFF)
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-set(ASSIMP_BUILD_TESTS OFF)
+get_filename_component(FETCHCONTENT_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${DEPS_DIR}" REALPATH)
 
-add_subdirectory(../ cmake-build-debug)
+FetchContent_Declare(googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG v1.14.0)
 
-if (ALGINE_DEBUG_ENABLE_SANDBOX)
-    include(src/sandbox/targets.cmake)
-endif()
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-function(add_test name src)
-    add_executable(${name} ${src})
-    target_include_directories(${name} PRIVATE src)
-    target_link_libraries(${name} PRIVATE algine)
+# build gtest as static library
+set(BUILD_SHARED_LIBS_OLD ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS OFF)
+
+FetchContent_MakeAvailable(googletest)
+
+# restore old value
+set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_OLD})
+
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+
+function(add_gtest name src)
+    add_executable(${name} "${src}")
+
+    target_link_libraries(${name} gtest gtest_main algine)
+    target_include_directories(${name} PUBLIC ../include)
+
+    add_test(NAME ${name} COMMAND ${name})
+
+    algine_target_mklink(
+            TARGET ${name}
+            ALGINE_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/algine")
 endfunction()
 
-add_test(ColorTest src/algine/common/core/ColorTest.cpp)
+add_gtest(ColorTest src/algine/common/core/ColorTest.cpp)
