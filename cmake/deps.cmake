@@ -122,7 +122,7 @@ __set_global(ASSIMP_NO_EXPORT ON)
 add_dep(
     tulz
     GIT_REPOSITORY  https://github.com/congard/tulz.git
-    GIT_TAG         e79878fd40339b66b9d66b46a4ba67cb6c2a9298
+    GIT_TAG         90144b140abc87a88ecdc79863599623bb23fe4c
 )
 
 add_dep(
