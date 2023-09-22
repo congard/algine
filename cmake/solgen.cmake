@@ -191,7 +191,7 @@ function(solgen output)
         --namespace-filter algine
         --type-filter "algine::(?:${SOLGEN_CLASSES_REGEX})(?:::[_a-zA-Z0-9]+)?$"
         --conf "tools/solgen/solgen.conf"
-        --clang-args -std=c++17 ${ALGINE_SOLGEN_CLANG_ARGS})
+        --clang-args -std=c++20 ${ALGINE_SOLGEN_CLANG_ARGS})
 
     message(DEBUG "Executing: ${SOLGEN_COMMAND}")
 
