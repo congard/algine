@@ -1,6 +1,8 @@
 #ifndef ALGINE_QTWINDOW_H
 #define ALGINE_QTWINDOW_H
 
+#include <algine/gl.h>
+
 #include <algine/core/Window.h>
 #include <algine/core/context/Context.h>
 #include <algine/core/window/QtWindowEventHandler.h>

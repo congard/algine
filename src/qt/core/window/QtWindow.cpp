@@ -1,5 +1,3 @@
-#include <algine/gl.h>
-
 #include <algine/core/window/QtWindow.h>
 #include <algine/core/Content.h>
 #include <algine/core/Engine.h>
