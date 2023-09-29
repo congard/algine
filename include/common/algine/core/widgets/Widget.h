@@ -27,7 +27,6 @@ class xml_node;
 
 namespace algine {
 class IOSystem;
-class Widget;
 
 class AL_EXPORT Widget: public Object {
 public:
