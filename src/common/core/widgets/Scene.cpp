@@ -8,7 +8,7 @@ using namespace tulz;
 
 namespace algine::Widgets {
 Scene::Scene(Object *parent)
-    : Object(parent),
+    : algine::Scene(parent),
       m_painter(new Painter(this))
 {
     m_options.painter = m_painter;
@@ -28,9 +28,9 @@ Scene::Scene(int width, int height, Object *parent)
  * @param insert must be set to false for non-opaque layers
  * @complexity <code>O(NlogN)</code>
  * @return <code>true</code> if <code>rect</code> is visible
- * and was added to the heap, otherwise <code>false</code>
+ * (and was added to the heap, if specified), otherwise <code>false</code>
  */
-bool placeRect(std::vector<RectI> &heap, const RectI &rect, bool insert) {
+static bool placeRect(std::vector<RectI> &heap, const RectI &rect, bool insert) {
     if (heap.empty()) {
         heap.emplace_back(rect);
         return true;
@@ -131,7 +131,7 @@ void Scene::showLayer(Layer *layer, int level) {
     layer->onShow();
 }
 
-void Scene::showLayerInsteadOf(Layer *replacement, Layer *src) {
+void Scene::replaceLayer(Layer *src, Layer *replacement) {
     assert(src->getParent() == this);
     assert(replacement->getParent() == this);
 
@@ -154,10 +154,10 @@ void Scene::hideLayer(Layer *layer) {
     if (level == -1)
         throw std::runtime_error("Layer was not found at this Scene");
 
-    hideLevel(level);
+    hideLevelAt(level);
 }
 
-void Scene::hideLevel(int level) {
+void Scene::hideLevelAt(int level) {
     m_layers[level]->onHide();
     m_layers.erase(m_layers.begin() + level);
 }
@@ -175,7 +175,7 @@ int Scene::getLevel(const Layer *layer) const {
     return it == m_layers.end() ? -1 : static_cast<int>(std::distance(m_layers.begin(), it));
 }
 
-int Scene::getLayersCount() const {
+int Scene::getLayerCount() const {
     return static_cast<int>(m_layers.size());
 }
 
@@ -254,13 +254,17 @@ Painter* Scene::getPainter() const {
     return m_painter;
 }
 
+void Scene::onRender() {
+    draw();
+}
+
 bool Scene::handlePointerEvent(const Event &event) {
     auto &info = event.getPointerInfo();
     PointI globalPoint {(int) info.getX(), (int) info.getY()};
 
     // returns a widget on the scene at globalPoint
     auto findWidget = [this, &globalPoint]() -> Widget* {
-        for (int i = getLayersCount() - 1; i >= 0; --i) {
+        for (int i = getLayerCount() - 1; i >= 0; --i) {
             auto container = layerAt(i)->getContainer();
             PointI container_lp = container->mapFromGlobal(globalPoint);
 

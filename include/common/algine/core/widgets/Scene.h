@@ -5,6 +5,7 @@
 #include <algine/core/painter/Painter.h>
 #include <algine/core/math/Size.h>
 #include <algine/core/unified/UnifiedEventHandler.h>
+#include <algine/core/scene/Scene.h>
 
 namespace algine {
 class Widget;
@@ -20,37 +21,28 @@ class Layer;
  * <ol>
  *   <li>Inherit your custom scene from <code>algine::Widgets::Scene</code></li>
  *   <li>Load layers (make them as children of the scene)</li>
- *   <li>Add listeners to <code>XEventHandler</code>: call <code>listen(handler)</code>
+ *   <li>Add listeners to <code>UnifiedEventHandler</code>: call <code>listen(handler)</code>
  *   <li>Call <code>setSize(width, height)</code></li>
  *   <li>Show your start layer: <code>scene->showLayer(scene->myStartLayer)</code></li>
- *   <li>In the render loop draw UI: <code>scene.draw()</code></li>
+ *   <li>In the render loop draw UI: <code>scene.render()</code></li>
  * </ol>
  */
-class AL_EXPORT Scene: public Object {
+class AL_EXPORT Scene: public algine::Scene {
 public:
     explicit Scene(Object *parent = defaultParent());
     Scene(int width, int height, Object *parent = defaultParent());
     ~Scene() override = default;
 
-    /**
-     * Draws layers from level <code>begin</code> to <code>end</code>
-     * <br>If <code>end</code> is less than zero, it will be set to
-     * layers count
-     * @param begin
-     * @param end
-     */
-    void draw(int begin = 0, int end = -1);
-
     void showLayer(Layer *layer, int level = -1);
-    void showLayerInsteadOf(Layer *replacement, Layer *src);
+    void replaceLayer(Layer *src, Layer *replacement);
     void hideLayer(Layer *layer);
-    void hideLevel(int level);
+    void hideLevelAt(int level);
 
     Layer* layerAt(int level) const;
     Layer* getTopLayer() const;
 
     int getLevel(const Layer *layer) const;
-    int getLayersCount() const;
+    int getLayerCount() const;
 
     /**
      * @note ownership of the object will not be transferred to the scene
@@ -82,7 +74,19 @@ public:
 
     Painter* getPainter() const;
 
+protected:
+    void onRender() override;
+
 private:
+    /**
+     * Draws layers from level <code>begin</code> to <code>end</code>
+     * <br>If <code>end</code> is less than zero, it will be set to
+     * layers count
+     * @param begin
+     * @param end
+     */
+    void draw(int begin = 0, int end = -1);
+
     bool handlePointerEvent(const Event &event);
     bool handleKeyboardEvent(const Event &event);
 
