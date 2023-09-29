@@ -62,9 +62,11 @@ function(add_gtest name src)
 
     add_test(NAME ${name} COMMAND ${name})
 
-    algine_target_mklink(
-            TARGET ${name}
-            ALGINE_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/algine")
+    if (WIN32)
+        algine_target_mklink(
+                TARGET ${name}
+                ALGINE_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/algine")
+    endif()
 endfunction()
 
 add_gtest(ColorTest src/algine/common/core/ColorTest.cpp)
