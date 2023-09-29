@@ -67,10 +67,10 @@ bool Event::isKeyboard() const {
     }
 }
 
-bool Event::isSurface() const {
+bool Event::isWindow() const {
     switch (getId()) {
-        case SurfaceSizeChange:
-        case SurfaceFocusChange:
+        case WindowSizeChange:
+        case WindowFocusChange:
             return true;
         default:
             return false;

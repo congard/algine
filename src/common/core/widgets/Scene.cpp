@@ -226,7 +226,7 @@ bool Scene::event(const Event &event) {
 void Scene::listen(UnifiedEventHandler *eventHandler) {
     eventHandler->addPointerEventListener(getPointerEventListener());
     eventHandler->addKeyboardEventListener(getKeyboardEventListener());
-    eventHandler->addSurfaceEventListener(getSurfaceEventListener());
+    eventHandler->addWindowEventListener(getSurfaceEventListener());
 }
 
 UnifiedEventHandler::EventListener Scene::getPointerEventListener() {
@@ -242,7 +242,7 @@ UnifiedEventHandler::EventListener Scene::getKeyboardEventListener() {
 UnifiedEventHandler::EventListener Scene::getSurfaceEventListener() {
     return [this](const Event &event) {
         switch (event.getId()) {
-            case Event::SurfaceSizeChange:
+            case Event::WindowSizeChange:
                 setSize(event.getSize());
                 break;
             default: break;

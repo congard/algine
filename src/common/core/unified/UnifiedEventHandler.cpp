@@ -43,11 +43,11 @@ void UnifiedEventHandler::onKeyboardKeyRepeat(KeyboardKey key) {
 }
 
 void UnifiedEventHandler::onSizeChanged(int width, int height) {
-    pushEvent(Event::SurfaceSizeChange, SizeI(width, height), m_surfaceListeners);
+    pushEvent(Event::WindowSizeChange, SizeI(width, height), m_windowListeners);
 }
 
 void UnifiedEventHandler::onFocusChanged(FocusInfo info) {
-    pushEvent(Event::SurfaceFocusChange, info, m_surfaceListeners);
+    pushEvent(Event::WindowFocusChange, info, m_windowListeners);
 }
 
 void UnifiedEventHandler::addPointerEventListener(const EventListener &listener) {
@@ -58,8 +58,8 @@ void UnifiedEventHandler::addKeyboardEventListener(const EventListener &listener
     m_keyboardListeners.emplace_front(listener);
 }
 
-void UnifiedEventHandler::addSurfaceEventListener(const EventListener &listener) {
-    m_surfaceListeners.emplace_front(listener);
+void UnifiedEventHandler::addWindowEventListener(const EventListener &listener) {
+    m_windowListeners.emplace_front(listener);
 }
 
 void UnifiedEventHandler::clearPointerEventListeners() {
@@ -70,7 +70,7 @@ void UnifiedEventHandler::clearKeyboardEventListeners() {
     m_keyboardListeners.clear();
 }
 
-void UnifiedEventHandler::clearSurfaceEventListeners() {
-    m_surfaceListeners.clear();
+void UnifiedEventHandler::clearWindowEventListeners() {
+    m_windowListeners.clear();
 }
 }

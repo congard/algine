@@ -22,8 +22,8 @@ public:
         KeyPress,
         KeyRelease,
         KeyRepeat,
-        SurfaceSizeChange,
-        SurfaceFocusChange
+        WindowSizeChange,
+        WindowFocusChange
     };
 
     using Data = std::any;
@@ -56,7 +56,7 @@ public:
 
     bool isPointer() const;
     bool isKeyboard() const;
-    bool isSurface() const;
+    bool isWindow() const;
 
 private:
     Id m_id;

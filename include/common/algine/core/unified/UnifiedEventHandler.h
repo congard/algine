@@ -75,17 +75,17 @@ public:
     /**
      * Handles such events as
      * <ul>
-     *   <li><code>Event::SurfaceSizeChange</code></li>
-     *   <li><code>Event::SurfaceFocusChange</code></li>
+     *   <li><code>Event::WindowSizeChange</code></li>
+     *   <li><code>Event::WindowFocusChange</code></li>
      * </ul>
      * @param listener
      * @see onSizeChanged, onFocusChanged
      */
-    void addSurfaceEventListener(const EventListener &listener);
+    void addWindowEventListener(const EventListener &listener);
 
     void clearPointerEventListeners();
     void clearKeyboardEventListeners();
-    void clearSurfaceEventListeners();
+    void clearWindowEventListeners();
 
 protected:
 #ifdef __ANDROID__
@@ -133,7 +133,7 @@ protected:
 private:
     std::forward_list<EventListener> m_pointerListeners;
     std::forward_list<EventListener> m_keyboardListeners;
-    std::forward_list<EventListener> m_surfaceListeners;
+    std::forward_list<EventListener> m_windowListeners;
 };
 }
 
