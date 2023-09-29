@@ -2,7 +2,7 @@
 #include <algine/core/window/GLFWWindow.h>
 
 namespace algine {
-inline glm::vec2 toVec2(const glm::dvec2 &v) {
+inline static glm::vec2 toVec2(const glm::dvec2 &v) {
     return {
         static_cast<float>(v.x),
         static_cast<float>(v.y)
@@ -28,19 +28,19 @@ void UnifiedEventHandler::mouseKeyRelease(MouseKey key, GLFWWindow &window) {
     onPointerRelease({toVec2(window.getCursorPos()), key, window});
 }
 
-void UnifiedEventHandler::keyboardKeyPress(KeyboardKey key, GLFWWindow &window) {
+void UnifiedEventHandler::keyboardKeyPress(KeyboardKey key, GLFWWindow&) {
     onKeyboardKeyPress(key);
 }
 
-void UnifiedEventHandler::keyboardKeyRelease(KeyboardKey key, GLFWWindow &window) {
+void UnifiedEventHandler::keyboardKeyRelease(KeyboardKey key, GLFWWindow&) {
     onKeyboardKeyRelease(key);
 }
 
-void UnifiedEventHandler::keyboardKeyRepeat(KeyboardKey key, GLFWWindow &window) {
+void UnifiedEventHandler::keyboardKeyRepeat(KeyboardKey key, GLFWWindow&) {
     onKeyboardKeyRepeat(key);
 }
 
-void UnifiedEventHandler::windowSizeChange(int width, int height, GLFWWindow &window) {
+void UnifiedEventHandler::windowSizeChange(int width, int height, GLFWWindow&) {
     onSizeChanged(width, height);
 }
 
