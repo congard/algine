@@ -49,7 +49,7 @@ Object* Texture2DBuilder::createImpl() {
     return texture;
 }
 
-void Texture2DBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void Texture2DBuilder::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<Texture2DBuilder>(s, path, lua, tenv);
 }
 }

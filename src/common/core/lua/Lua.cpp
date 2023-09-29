@@ -17,8 +17,8 @@
 #include "CoreLua.h"
 
 namespace algine {
-Lua::Locker::Locker(const std::unique_ptr<std::recursive_mutex> &mutex)
-    : m_mutex(mutex.get())
+Lua::Locker::Locker(std::recursive_mutex *mutex)
+    : m_mutex(mutex)
 {
     if (m_mutex) {
         m_mutex->lock();
@@ -40,10 +40,11 @@ void Lua::init() {
     m_lua->open_libraries();
 
     // TODO: move to static initializer lists
-    addModule("glm", Module([this](auto &, sol::global_table env) { GLMLuaTypes::registerLuaUsertype(this, &env); }));
-    addModule("tulz", Module([this](auto &, sol::global_table env) { TulzLuaTypes::registerLuaUsertype(this, &env); }));
+    addModule("glm", Module([this](auto &, sol::environment &env) { GLMLuaTypes::registerLuaUsertype(this, &env); }));
+    addModule("tulz", Module([this](auto &, sol::environment &env) { TulzLuaTypes::registerLuaUsertype(this, &env); }));
 
-    initEnvironment(getGlobalEnvironment());
+    sol::environment env = getGlobalEnvironment();
+    initEnvironment(env);
 }
 
 bool Lua::isInitialized() const {
@@ -63,29 +64,26 @@ bool Lua::isThreadSafety() const {
     return m_mutex.get();
 }
 
-const std::unique_ptr<std::recursive_mutex>& Lua::getMutex() const {
-    return m_mutex;
+std::recursive_mutex* Lua::getMutex() const {
+    return m_mutex.get();
 }
 
-const std::unique_ptr<sol::state>& Lua::state() const {
-    return m_lua;
-}
-
-sol::global_table Lua::createEnvironment() {
+sol::state& Lua::state() {
     Locker locker(this);
-    sol::environment env(*m_lua, sol::create);
-    sol::global_table tenv = env;
-    initEnvironment(tenv);
-    return tenv;
+    if (m_lua == nullptr)
+        init();
+    return *m_lua;
 }
 
-sol::global_table Lua::createEnvironment(const sol::global_table &parent) {
+sol::environment Lua::createEnvironment() {
     Locker locker(this);
-    return sol::environment(*m_lua, sol::create, sol::environment(parent));
+    sol::environment env(state(), sol::create);
+    initEnvironment(env);
+    return env;
 }
 
-sol::global_table& Lua::getGlobalEnvironment() const {
-    return m_lua->globals();
+sol::global_table& Lua::getGlobalEnvironment() {
+    return state().globals();
 }
 
 void Lua::addModule(std::string_view name, const Module &module) {
@@ -119,7 +117,7 @@ void Lua::loadModule(const Module::Args &args, sol::environment &env) {
 }
 
 template<typename T, typename... Args>
-bool registerType(std::string_view type, sol::table &table, Lua *lua) {
+bool static registerType(std::string_view type, sol::environment &table, Lua *lua) {
     if (tulz::demangler::demangle(typeid(T).name()) == type) {
         algine_lua::registerLuaUsertype<T>(table, lua);
         return true;
@@ -132,27 +130,25 @@ bool registerType(std::string_view type, sol::table &table, Lua *lua) {
 }
 
 template<typename... Args>
-bool registerType(std::string_view type, sol::table &table, Lua *lua, Lua::TypeList<Args...>) {
+bool static registerType(std::string_view type, sol::environment &table, Lua *lua, Lua::TypeList<Args...>) {
     return registerType<Args...>(type, table, lua);
 }
 
 Lua& Lua::getDefault() {
     auto &def = get_default();
-    if (!def.isInitialized())
-        def.init();
     return def;
 }
 
-void Lua::initEnvironment(sol::global_table &env) {
-    auto usertype = env.new_usertype<Lua>(
+void Lua::initEnvironment(sol::environment &env) {
+    auto luaUsertype = env.new_usertype<Lua>(
             "Lua",
             sol::meta_function::construct, sol::no_constructor,
             sol::call_constructor, sol::no_constructor,
             sol::base_classes, sol::bases<IOProvider>());
-    usertype["memoryUsed"] = [this]() { return m_lua->memory_used(); };
+    luaUsertype["memoryUsed"] = [this]() { return m_lua->memory_used(); };
 
     auto print = [](bool err, const sol::variadic_args &va, sol::this_environment tenv) {
-        sol::function toString = sol::environment(*tenv.env)["tostring"];
+        sol::function toString = (*tenv.env)["tostring"];
         std::string message;
 
         for (auto it = va.begin() + 1; it < va.end(); ++it) {
@@ -171,8 +167,8 @@ void Lua::initEnvironment(sol::global_table &env) {
         }
     };
 
-    usertype["print"] = [print](const sol::variadic_args &va, sol::this_environment tenv) { print(false, va, std::move(tenv)); };
-    usertype["printErr"] = [print](const sol::variadic_args &va, sol::this_environment tenv) { print(true, va, std::move(tenv)); };
+    luaUsertype["print"] = [print](const sol::variadic_args &va, sol::this_environment tenv) { print(false, va, std::move(tenv)); };
+    luaUsertype["printErr"] = [print](const sol::variadic_args &va, sol::this_environment tenv) { print(true, va, std::move(tenv)); };
 
     env["state"] = this;
 
@@ -199,11 +195,10 @@ void Lua::initEnvironment(sol::global_table &env) {
     };
 
     env["algine_require_type"] = [this](std::string_view type, sol::this_environment tenv) {
-        sol::global_table env = *tenv.env;
-        sol::table table = env;
+        sol::environment &env = tenv;
 
         auto typeReg = [&]<typename T>() {
-            return [&]() { algine_lua::registerLuaUsertype<T>(table, this); };
+            return [&]() { algine_lua::registerLuaUsertype<T>(env, this); };
         };
 
         // TODO: move to static initializers
@@ -216,30 +211,30 @@ void Lua::initEnvironment(sol::global_table &env) {
 
         if (auto it = customReg.find(type); it != customReg.end()) {
             it->second();
-        } else if (!registerType(type, table, this, AlgineBindings())) {
+        } else if (!registerType(type, env, this, AlgineBindings())) {
             get_typeLoaders()[type.data()](*tenv.env);
         }
     };
 
     registerUsertype<IOProvider>(this, &env);
 
-    m_lua->script(core_lua, sol::environment(env));
+    m_lua->script(core_lua, env);
 }
 
-sol::global_table& Lua::getEnv(Lua *lua, sol::global_table *env) {
+sol::environment Lua::getEnv(Lua *lua, sol::environment *env) {
     if (env)
         return *env;
 
     if (!lua)
-        return getDefault().state()->globals();
+        return getDefault().state().globals();
 
     if (!lua->isInitialized())
         lua->init();
 
-    return lua->state()->globals();
+    return lua->state().globals();
 }
 
-bool Lua::isRegistered(sol::global_table &env, std::string_view type) {
+bool Lua::isRegistered(sol::environment &env, std::string_view type) {
     return env[type].valid();
 }
 

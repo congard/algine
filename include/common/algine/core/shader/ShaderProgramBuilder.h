@@ -20,7 +20,7 @@ public:
 
 protected:
     Object* createImpl() override;
-    void exec(const std::string &s, bool path, Lua *lua, sol::global_table *env) override;
+    void exec(const std::string &s, bool path, Lua *lua, sol::environment *env) override;
 
 private:
     std::vector<ShaderBuilder> m_shaders;

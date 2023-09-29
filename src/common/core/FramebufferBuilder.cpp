@@ -88,7 +88,7 @@ Object* FramebufferBuilder::createImpl() {
     return framebuffer;
 }
 
-void FramebufferBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void FramebufferBuilder::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<FramebufferBuilder>(s, path, lua, tenv);
 }
 }

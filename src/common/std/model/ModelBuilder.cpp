@@ -185,7 +185,7 @@ Object* ModelBuilder::createImpl() {
     return model;
 }
 
-void ModelBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void ModelBuilder::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<ModelBuilder>(s, path, lua, tenv);
 }
 }

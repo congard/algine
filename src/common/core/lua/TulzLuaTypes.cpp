@@ -8,7 +8,7 @@ using namespace tulz;
 
 namespace algine {
 template<typename T>
-void registerArray(std::string_view name, sol::global_table &env) {
+void registerArray(std::string_view name, sol::environment &env) {
     if (Lua::isRegistered(env, name))
         return;
 
@@ -56,7 +56,7 @@ void registerArray(std::string_view name, sol::global_table &env) {
     );
 }
 
-void registerPath(sol::global_table &env) {
+void registerPath(sol::environment &env) {
     if (Lua::isRegistered(env, "Path"))
         return;
 
@@ -89,8 +89,8 @@ void registerPath(sol::global_table &env) {
         static_cast<std::string (*)(const std::string&, const std::string&)>(&Path::join));
 }
 
-void TulzLuaTypes::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Lua::getEnv(lua, tenv);
+void TulzLuaTypes::registerLuaUsertype(Lua *lua, sol::environment *tenv) {
+    auto env = Lua::getEnv(lua, tenv);
 
     registerArray<sol::object>("Array", env);
     registerArray<ubyte>("UnsignedByteArray", env);

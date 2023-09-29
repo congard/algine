@@ -56,7 +56,7 @@ const vector<ShaderDefinitionGenerator::Definition>& ShaderDefinitionGenerator::
     return m_definitions;
 }
 
-void ShaderDefinitionGenerator::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void ShaderDefinitionGenerator::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<ShaderDefinitionGenerator>(s, path, lua, tenv);
 }
 }

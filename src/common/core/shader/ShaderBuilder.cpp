@@ -203,7 +203,7 @@ Object* ShaderBuilder::createImpl() {
     return shader;
 }
 
-void ShaderBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void ShaderBuilder::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<ShaderBuilder>(s, path, lua, tenv);
 }
 

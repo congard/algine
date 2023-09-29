@@ -654,7 +654,7 @@ void ShapeBuilder::genBuffers() {
     m_shape->m_indices = createBuffer<IndexBuffer>(m_shape, m_indices);
 }
 
-void ShapeBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void ShapeBuilder::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<ShapeBuilder>(s, path, lua, tenv);
 }
 }

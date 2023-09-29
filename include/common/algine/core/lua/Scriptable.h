@@ -9,8 +9,8 @@
 namespace algine {
 class AL_EXPORT Scriptable: public IOProvider {
 public:
-    void execute(const std::string &path, Lua *lua = nullptr, sol::global_table *env = nullptr);
-    void executeString(const std::string &str, Lua *lua = nullptr, sol::global_table *env = nullptr);
+    void execute(const std::string &path, Lua *lua = nullptr, sol::environment *env = nullptr);
+    void executeString(const std::string &str, Lua *lua = nullptr, sol::environment *env = nullptr);
 
     void setRootDir(std::string_view rootDir);
     const std::string& getRootDir() const;
@@ -19,19 +19,19 @@ protected:
     Scriptable() = default;
 
 protected:
-    static inline auto& getEnv(Lua *lua, sol::global_table *tenv) { return Lua::getEnv(lua, tenv); }
-    static inline bool isRegistered(sol::global_table &env, std::string_view type) { return Lua::isRegistered(env, type); }
+    static inline auto getEnv(Lua *lua, sol::environment *tenv) { return Lua::getEnv(lua, tenv); }
+    static inline bool isRegistered(sol::environment &env, std::string_view type) { return Lua::isRegistered(env, type); }
 
-    virtual void exec(const std::string &s, bool path, Lua *lua, sol::global_table *env) = 0;
+    virtual void exec(const std::string &s, bool path, Lua *lua, sol::environment *env) = 0;
 
     template<typename T>
-    void exec_t(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+    void exec_t(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
         lua = lua ? lua : &Lua::getDefault();
         Lua::Locker locker(lua);
-        auto &env = getEnv(lua, tenv);
+        auto env = getEnv(lua, tenv);
         Lua::registerUsertype<T>(lua, tenv);
 
-        auto &state = *lua->state();
+        auto &state = lua->state();
 
         auto printErr = [&](sol::error &error) {
             printExecErr(error, s, path);

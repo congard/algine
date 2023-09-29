@@ -57,7 +57,7 @@ Object* TextureCubeBuilder::createImpl() {
     return texture;
 }
 
-void TextureCubeBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void TextureCubeBuilder::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<TextureCubeBuilder>(s, path, lua, tenv);
 }
 }

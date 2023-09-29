@@ -25,7 +25,7 @@ public:
     const std::vector<Definition>& getDefinitions() const;
 
 protected:
-    void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
+    void exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) override;
 
 protected:
     std::vector<Definition> m_definitions;

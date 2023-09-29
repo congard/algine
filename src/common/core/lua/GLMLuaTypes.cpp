@@ -74,7 +74,7 @@ constexpr bool is_glm_mat() {
 }
 
 template<typename T, typename C>
-void registerGlmType(std::string_view name, sol::global_table &env, C constructors) {
+void registerGlmType(std::string_view name, sol::environment &env, C constructors) {
     if (Lua::isRegistered(env, name))
         return;
 
@@ -143,8 +143,8 @@ void registerGlmType(std::string_view name, sol::global_table &env, C constructo
     }
 }
 
-void GLMLuaTypes::registerLuaUsertype(Lua *lua, sol::global_table *tenv) {
-    auto &env = Lua::getEnv(lua, tenv);
+void GLMLuaTypes::registerLuaUsertype(Lua *lua, sol::environment *tenv) {
+    auto env = Lua::getEnv(lua, tenv);
 
     using namespace glm;
 

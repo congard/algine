@@ -25,7 +25,7 @@ public:
     void loadScript(std::string_view script, Lua *lua = nullptr);
 
 protected:
-    void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
+    void exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) override;
 
 private:
     void load(std::string_view s, bool builder, Lua *lua = nullptr);

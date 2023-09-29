@@ -72,7 +72,7 @@ Object* ShaderProgramBuilder::createImpl() {
     return program;
 }
 
-void ShaderProgramBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *env) {
+void ShaderProgramBuilder::exec(const std::string &s, bool path, Lua *lua, sol::environment *env) {
     exec_t<ShaderProgramBuilder>(s, path, lua, env);
 }
 }

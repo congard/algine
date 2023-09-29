@@ -735,7 +735,7 @@ sol::environment Widget::env(Lua *lua) {
 
     Lua::Locker locker(lua);
 
-    if (m_luaEnv.lua_state() != lua->state()->lua_state()) {
+    if (m_luaEnv.lua_state() != lua->state().lua_state()) {
         m_luaEnv.abandon();
         m_luaEnv = lua->createEnvironment(lua->getGlobalEnvironment());
     }
@@ -754,7 +754,7 @@ void Widget::addLuaScript(const std::string &s, bool path, Lua *lua) {
 
     Lua::Locker locker(lua);
 
-    auto &state = *lua->state();
+    auto &state = lua->state();
 
     auto printErr = [&](sol::error &error) {
         if (!path) {

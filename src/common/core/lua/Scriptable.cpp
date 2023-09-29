@@ -6,7 +6,7 @@
 using namespace tulz;
 
 namespace algine {
-void Scriptable::execute(const std::string &in_path, Lua *lua, sol::global_table *env) {
+void Scriptable::execute(const std::string &in_path, Lua *lua, sol::environment *env) {
     std::string path = in_path;
 
     if (m_rootDir.empty()) {
@@ -18,7 +18,7 @@ void Scriptable::execute(const std::string &in_path, Lua *lua, sol::global_table
     exec(path, true, lua, env);
 }
 
-void Scriptable::executeString(const std::string &str, Lua *lua, sol::global_table *env) {
+void Scriptable::executeString(const std::string &str, Lua *lua, sol::environment *env) {
     exec(str, false, lua, env);
 }
 

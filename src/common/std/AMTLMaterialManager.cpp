@@ -89,7 +89,7 @@ Texture2D* AMTLMaterialManager::loadTexture(const string &texName, Object *paren
     return nullptr;
 }
 
-void AMTLMaterialManager::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void AMTLMaterialManager::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<AMTLMaterialManager>(s, path, lua, tenv);
 }
 }

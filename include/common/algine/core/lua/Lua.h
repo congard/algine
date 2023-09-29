@@ -30,13 +30,19 @@ public:
 
     void setThreadSafety(bool enabled);
     bool isThreadSafety() const;
-    const std::unique_ptr<std::recursive_mutex>& getMutex() const;
+    std::recursive_mutex* getMutex() const;
 
-    const std::unique_ptr<sol::state>& state() const;
+    sol::state& state();
 
-    sol::global_table createEnvironment();
-    sol::global_table createEnvironment(const sol::global_table &parent);
-    sol::global_table& getGlobalEnvironment() const;
+    sol::environment createEnvironment();
+
+    template<bool b>
+    sol::environment createEnvironment(const sol::basic_reference<b> &parent) {
+        Locker locker(this);
+        return {state(), sol::create, parent};
+    }
+
+    sol::global_table& getGlobalEnvironment();
 
     /**
      * Adds module
@@ -88,8 +94,8 @@ public:
      */
     static bool hasTypeLoader(std::string_view name);
 
-    static sol::global_table& getEnv(Lua *lua, sol::global_table *env = nullptr);
-    static bool isRegistered(sol::global_table &env, std::string_view type);
+    static sol::environment getEnv(Lua *lua, sol::environment *env = nullptr);
+    static bool isRegistered(sol::environment &env, std::string_view type);
 
     template<typename T, typename G, typename S>
     static void new_property(sol::usertype<T> &usertype,
@@ -100,14 +106,14 @@ public:
     static void new_property(sol::usertype<T> &usertype, std::string_view propName, G &&getter, S &&setter);
 
     template<typename T, typename... Args>
-    void registerUsertype(sol::global_table *env = nullptr);
+    void registerUsertype(sol::environment *env = nullptr);
 
     template<typename... Args>
-    void registerUsertype(sol::global_table *env, TypeList<Args...>) { registerUsertype<Args...>(env); }
+    void registerUsertype(sol::environment *env, TypeList<Args...>) { registerUsertype<Args...>(env); }
 
     template<typename T>
-    static void registerUsertype(Lua *lua = nullptr, sol::global_table *tenv = nullptr) {
-        auto &env = Lua::getEnv(lua, tenv);
+    static void registerUsertype(Lua *lua = nullptr, sol::environment *tenv = nullptr) {
+        auto env = Lua::getEnv(lua, tenv);
         sol::table table = env;
         algine_lua::registerLuaUsertype<T>(table, lua);
     }
@@ -120,7 +126,7 @@ public:
     static Lua& getDefault();
 
 private:
-    void initEnvironment(sol::global_table &env);
+    void initEnvironment(sol::environment &env);
     void loadModule(const Module::Args &args, sol::environment &env);
 
 private:
@@ -151,7 +157,7 @@ void Lua::new_property(sol::usertype<T> &usertype, std::string_view propName, G 
 }
 
 template<typename T, typename... Args>
-void Lua::registerUsertype(sol::global_table *env) {
+void Lua::registerUsertype(sol::environment *env) {
     registerUsertype<T>(this, env);
 
     if constexpr(sizeof...(Args) != 0) {
@@ -161,7 +167,7 @@ void Lua::registerUsertype(sol::global_table *env) {
 
 class Lua::Locker {
 public:
-    explicit Locker(const std::unique_ptr<std::recursive_mutex> &mutex);
+    explicit Locker(std::recursive_mutex *mutex);
     explicit Locker(const Lua *lua);
     ~Locker();
 

@@ -15,7 +15,7 @@ Object* RenderbufferBuilder::createImpl() {
     return renderbuffer;
 }
 
-void RenderbufferBuilder::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void RenderbufferBuilder::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<RenderbufferBuilder>(s, path, lua, tenv);
 }
 }

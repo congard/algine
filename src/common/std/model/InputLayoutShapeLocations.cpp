@@ -46,7 +46,7 @@ InputLayoutShapeLocations InputLayoutShapeLocations::fromScript(const std::strin
     return locations;
 }
 
-void InputLayoutShapeLocations::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void InputLayoutShapeLocations::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<InputLayoutShapeLocations>(s, path, lua, tenv);
 }
 }

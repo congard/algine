@@ -16,7 +16,7 @@ public:
 
 protected:
     Object* createImpl() override;
-    void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
+    void exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) override;
 
 private:
     std::string m_path;

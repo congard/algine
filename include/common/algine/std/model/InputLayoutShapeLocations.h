@@ -36,7 +36,7 @@ public:
     static InputLayoutShapeLocations fromScript(const std::string &script);
 
 protected:
-    void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
+    void exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) override;
 
 public:
     std::map<std::string, int> data;

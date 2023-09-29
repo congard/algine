@@ -92,11 +92,10 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
 
     Lua::Locker locker(lua);
 
-    auto &state = *lua->state();
-    auto tenv = lua->createEnvironment(lua->getGlobalEnvironment());
-    sol::environment env(tenv);
+    auto &state = lua->state();
+    auto env = lua->createEnvironment(lua->getGlobalEnvironment());
 
-    lua->registerUsertype<Texture, Texture2DBuilder>(&tenv);
+    lua->registerUsertype<Texture, Texture2DBuilder>(&env);
 
     class Name {
     public:
@@ -133,7 +132,7 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
                 builder.setName(name.value());
 
             if (path.size() >= 4 && string_view(path.c_str() + path.size() - 4) == ".lua") {
-                builder.execute(path, lua, &tenv);
+                builder.execute(path, lua, &env);
             } else {
                 builder.setPath(path);
             }
@@ -172,7 +171,7 @@ void AMTLManager::load(std::string_view s, bool path, Lua *lua) {
     env.abandon();
 }
 
-void AMTLManager::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void AMTLManager::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<AMTLManager>(s, path, lua, tenv);
 }
 }

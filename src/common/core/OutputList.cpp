@@ -85,7 +85,7 @@ const Attachment* OutputList::data() const {
     return m_list.data();
 }
 
-void OutputList::exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) {
+void OutputList::exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) {
     exec_t<OutputList>(s, path, lua, tenv);
 }
 }

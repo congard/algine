@@ -41,7 +41,7 @@ public:
     Texture2D* loadTexture(const std::string &texName, Object *parent = GlobalScene::getInstance());
 
 protected:
-    void exec(const std::string &s, bool path, Lua *lua, sol::global_table *tenv) override;
+    void exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) override;
 
 private:
     std::string m_workingDirectory;
