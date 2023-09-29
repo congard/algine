@@ -123,6 +123,12 @@ local types = {
     ["PointF"] = {
         file = "include/common/algine/core/math/Point.h"
     },
+    ["Scene"] = {
+        file = "include/common/algine/core/scene/Scene.h"
+    },
+    ["GlobalScene"] = {
+        file = "include/common/algine/core/scene/GlobalScene.h"
+    },
 
     -- std
     ["ShapeBuilder"] = {
