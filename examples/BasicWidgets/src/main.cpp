@@ -11,14 +11,12 @@
 using namespace algine;
 
 static void exec() {
-    Engine::setDPI(130);
-
 #ifdef ALGINE_QT_PLATFORM
     auto window = new QtWindow();
     window->setDimensions(512, 512);
 
     window->addOnInitializedListener([window]() {
-        window->setContent(new MainContent());
+        window->setContent(new MainContent(window));
         window->renderLoop(1000);
     });
 
@@ -30,7 +28,7 @@ static void exec() {
     window.setKeyboardTracking(true);
     window.setWindowStateTracking(true);
     //window.setCursorMode(Window::CursorMode::Disabled);
-    window.setContentLater<MainContent>();
+    window.setContentLater<MainContent>(&window);
     window.renderLoop();
 #endif
 }

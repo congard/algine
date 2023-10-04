@@ -4,8 +4,9 @@
 #include <algine/core/Framebuffer.h>
 #include <algine/core/Window.h>
 
-MainContent::MainContent()
-    : m_scene(new UI::MainScene(this))
+MainContent::MainContent(Object *parent)
+    : Content(parent),
+      m_scene(new UI::MainScene(this))
 {
     m_scene->listen(this);
 }

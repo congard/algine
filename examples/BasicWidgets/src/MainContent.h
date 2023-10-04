@@ -12,7 +12,7 @@ class MainScene;
 
 class MainContent: public Content, public UnifiedEventHandler {
 public:
-    MainContent();
+    MainContent(Object *parent);
 
     void onShow() override;
     void render() override;
