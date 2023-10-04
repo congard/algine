@@ -70,3 +70,4 @@ function(add_gtest name src)
 endfunction()
 
 add_gtest(ColorTest src/algine/common/core/ColorTest.cpp)
+add_gtest(DimenTest src/algine/common/core/widgets/DimenTest.cpp)
