@@ -6,6 +6,9 @@
 #include "LayoutProperties.h"
 
 namespace algine {
+Layout::Layout(Object *parent)
+    : Container(parent) {}
+
 inline static void requestParentUpdate(Widget *widget) {
     if (auto parent = widget->getParentWidget(); parent != nullptr) {
         parent->requestLayout();

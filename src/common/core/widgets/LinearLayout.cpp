@@ -8,8 +8,11 @@
 
 namespace algine {
 STATIC_INITIALIZER_IMPL(LinearLayout) {
-    alRegisterType(LinearLayout);
+    alRegisterType(LinearLayout, Object*);
 }
+
+LinearLayout::LinearLayout(Object *parent)
+    : Layout(parent) {}
 
 void LinearLayout::setOrientation(Orientation orientation) {
     if (orientation != m_orientation) {

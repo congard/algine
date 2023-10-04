@@ -18,8 +18,11 @@
 
 namespace algine {
 STATIC_INITIALIZER_IMPL(RelativeLayout) {
-    alRegisterType(RelativeLayout);
+    alRegisterType(RelativeLayout, Object*);
 }
+
+RelativeLayout::RelativeLayout(Object *parent)
+    : Layout(parent) {}
 
 inline static void requestParentUpdate(Widget *widget) {
     if (auto parent = widget->getParentWidget(); parent != nullptr) {

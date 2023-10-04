@@ -6,6 +6,8 @@
 namespace algine {
 class AL_EXPORT Layout: public Container {
 public:
+    explicit Layout(Object *parent = GlobalScene::getInstance());
+
     static void setMargin(Widget *widget, int left, int top, int right, int bottom);
     static void setMarginLeft(Widget *widget, int margin);
     static void setMarginTop(Widget *widget, int margin);

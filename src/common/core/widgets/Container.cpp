@@ -11,11 +11,11 @@
 
 namespace algine {
 STATIC_INITIALIZER_IMPL(Container) {
-    alRegisterType(Container);
+    alRegisterType(Container, Object*);
 }
 
-Container::Container()
-    : Widget() {}
+Container::Container(Object *parent)
+    : Widget(parent) {}
 
 void Container::addWidget(Widget *child) {
     requestLayout();
@@ -163,9 +163,7 @@ void Container::fromXML(const pugi::xml_node &node, const std::shared_ptr<IOSyst
     Widget::fromXML(node, io);
 
     for (auto child : node.children()) {
-        auto childPtr = TypeRegistry::create<Widget>(child.name());
-        childPtr->setParent(this);
-        childPtr->fromXML(child, io);
+        auto childPtr = Widget::constructFromXML(child, io, this);
         addWidget(childPtr);
     }
 }

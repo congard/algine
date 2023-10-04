@@ -12,8 +12,12 @@
 
 namespace algine {
 STATIC_INITIALIZER_IMPL(ImageWidget) {
-    alRegisterType(ImageWidget);
+    alRegisterType(ImageWidget, Object*);
 }
+
+ImageWidget::ImageWidget(Object *parent)
+    : Widget(parent),
+      m_image() {}
 
 void ImageWidget::setImage(Texture2D *image, bool takeOwnership) {
     requestLayout();

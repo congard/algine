@@ -15,6 +15,8 @@ public:
     };
 
 public:
+    explicit LinearLayout(Object *parent = GlobalScene::getInstance());
+
     void setOrientation(Orientation orientation);
     Orientation getOrientation() const;
 

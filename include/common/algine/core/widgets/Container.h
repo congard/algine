@@ -11,7 +11,7 @@ class AL_EXPORT Container: public Widget {
     STATIC_INITIALIZER_DECL
 
 public:
-    Container();
+    explicit Container(Object *parent = GlobalScene::getInstance());
 
     void addWidget(Widget *child);
     bool removeWidget(Widget *child, FindOption option = FindOption::FindRecursively);

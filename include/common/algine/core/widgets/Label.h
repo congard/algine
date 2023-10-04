@@ -10,7 +10,7 @@ class AL_EXPORT Label: public Widget {
     STATIC_INITIALIZER_DECL
 
 public:
-    Label();
+    explicit Label(Object *parent = GlobalScene::getInstance());
     explicit Label(const std::string &text);
 
     void setText(const std::string &text);

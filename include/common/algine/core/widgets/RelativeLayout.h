@@ -11,6 +11,8 @@ class AL_EXPORT RelativeLayout: public Layout {
     STATIC_INITIALIZER_DECL
 
 public:
+    explicit RelativeLayout(Object *parent = GlobalScene::getInstance());
+
     static void setAbove(Widget *widget, std::string_view name);
     static void setBelow(Widget *widget, std::string_view name);
     static void setToRightOf(Widget *widget, std::string_view name);

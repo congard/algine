@@ -1,8 +1,10 @@
 #include <algine/core/widgets/Label.h>
 #include <algine/core/widgets/Alignment.h>
+#include <algine/core/widgets/Dimen.h>
 #include <algine/core/painter/Painter.h>
 #include <algine/core/font/FontLibrary.h>
 #include <algine/core/TypeRegistry.h>
+#include <algine/core/Window.h>
 
 #include <pugixml.hpp>
 
@@ -10,16 +12,22 @@
 
 namespace algine {
 STATIC_INITIALIZER_IMPL(Label) {
-    alRegisterType(Label);
+    alRegisterType(Label, Object*);
 }
 
-Label::Label()
-    : m_textAlignment(Alignment::Center),
+Label::Label(Object *parent)
+    : Widget(parent),
+      m_textAlignment(Alignment::Center),
       m_fontColor(0xff000000),
       m_textX(), m_textY()
 {
     m_fontMetrics.setFont(FontLibrary::getDefault());
-    m_fontMetrics.setFontSize(24); // TODO
+
+    if (auto window = getParentWindow(); window != nullptr) {
+        m_fontMetrics.setFontSize(static_cast<uint>(Dimen(24, Unit::dp).pixels(window)));
+    } else {
+        m_fontMetrics.setFontSize(24);
+    }
 }
 
 Label::Label(const std::string &text): Label() {

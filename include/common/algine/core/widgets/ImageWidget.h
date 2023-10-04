@@ -9,6 +9,8 @@ class AL_EXPORT ImageWidget: public Widget {
     STATIC_INITIALIZER_DECL
 
 public:
+    explicit ImageWidget(Object *parent = GlobalScene::getInstance());
+
     void setImage(Texture2D *image, bool takeOwnership = true);
     Texture2D* getImage() const;
 

@@ -5,6 +5,7 @@
 #include <algine/core/widgets/WidgetDisplayOptions.h>
 #include <algine/core/widgets/Layer.h>
 #include <algine/core/widgets/animation/Animation.h>
+#include <algine/core/scene/GlobalScene.h>
 #include <algine/core/unified/Event.h>
 #include <algine/core/painter/Paint.h>
 #include <algine/core/math/Rect.h>
@@ -43,8 +44,7 @@ public:
     using Animations = std::forward_list<Widgets::AnimationPtr>;
 
 public:
-    // TODO: add Object* as a param (and to all derived classes too)
-    Widget();
+    explicit Widget(Object *parent = GlobalScene::getInstance());
     ~Widget() override = default;
 
     /**

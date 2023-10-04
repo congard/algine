@@ -33,8 +33,9 @@
 #endif
 
 namespace algine {
-Widget::Widget()
-    : m_flags(),
+Widget::Widget(Object *parent)
+    : Object(parent),
+      m_flags(),
       m_geometry(0, 0, 128, 128),
       m_minWidth(),
       m_minHeight(),
@@ -1114,9 +1115,19 @@ bool Widget::fromXMLFile(const std::string &file) {
 }
 
 Widget* Widget::constructFromXML(const pugi::xml_node &node, const IOSystemPtr &io, Object *parent) {
-    auto rootWidget = TypeRegistry::create<Widget>(node.name());
-    rootWidget->setParent(parent);
+    std::string typeName = node.name();
+    Widget *rootWidget = nullptr;
+
+    if (auto signature = alTypeRegistrySignatureTStr(typeName, Object*); TypeRegistry::contains(signature)) {
+        rootWidget = TypeRegistry::create<Widget>(signature, parent);
+    } else {
+        // fallback to default constructor
+        rootWidget = TypeRegistry::create<Widget>(alTypeRegistrySignatureTStr(typeName));
+        rootWidget->setParent(parent);
+    }
+
     rootWidget->fromXML(node, io);
+
     return rootWidget;
 }
 
