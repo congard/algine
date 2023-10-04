@@ -63,12 +63,15 @@ private:
 };
 }
 
-#define alTypeRegistryNameWithArgs(type, ...) #type "(" #__VA_ARGS__ ")"
+#define alTypeRegistrySignature(type, ...) #type "(" #__VA_ARGS__ ")"
 
-#define alRegisterTypeWithArgs(type, ...) algine::TypeRegistry::registerType<type, __VA_ARGS__>(alTypeRegistryNameWithArgs(type, __VA_ARGS__))
-#define alUnregisterTypeWithArgs(type, ...) algine::TypeRegistry::unregister(alTypeRegistryNameWithArgs(type, __VA_ARGS__))
+/**
+ * The same as `alTypeRegistrySignature`,
+ * but `typeStr` must be of type `std::string`
+ */
+#define alTypeRegistrySignatureTStr(typeStr, ...) (typeStr + ("(" #__VA_ARGS__ ")"))
 
-#define alRegisterType(type) algine::TypeRegistry::registerType<type>(#type)
-#define alUnregisterType(type) algine::TypeRegistry::unregister(#type)
+#define alRegisterType(...) algine::TypeRegistry::registerType<__VA_ARGS__>(alTypeRegistrySignature(__VA_ARGS__))
+#define alUnregisterType(...) algine::TypeRegistry::unregister(alTypeRegistrySignature(__VA_ARGS__))
 
 #endif //ALGINE_TYPEREGISTRY_H
