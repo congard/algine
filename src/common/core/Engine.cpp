@@ -25,10 +25,8 @@
 
 #define LOG_TAG "Engine"
 
-using namespace std;
-
 namespace algine {
-shared_ptr<IOSystem> Engine::m_defaultIOSystem;
+std::shared_ptr<IOSystem> Engine::m_defaultIOSystem;
 
 int Engine::m_apiVersion;
 Engine::GraphicsAPI Engine::m_graphicsAPI;
@@ -49,12 +47,12 @@ QApplication *Engine::m_qApp;
 
 int64_t Engine::m_startTime;
 
-string exec(const char *cmd) {
-    string result;
+static std::string exec(const char *cmd) {
+    std::string result;
     FILE* pipe = popen(cmd, "r");
 
     if (!pipe)
-        throw runtime_error("popen() failed!");
+        throw std::runtime_error("popen() failed!");
 
     try {
         char buffer[256];
@@ -75,7 +73,7 @@ string exec(const char *cmd) {
 void linux_detect_dpi() {
     auto dpi_str = exec("xrdb -query | grep 'Xft.dpi' | cut -f 2");
 
-    if (auto pos = dpi_str.find('\n'); pos != string::npos)
+    if (auto pos = dpi_str.find('\n'); pos != std::string::npos)
         dpi_str.erase(pos);
 
     char *end;
@@ -114,7 +112,7 @@ void Engine::init(int argc, char *const *argv) {
     m_startTime = Engine::time();
 
 #ifndef __ANDROID__
-    m_defaultIOSystem = make_shared<StandardIOSystem>();
+    m_defaultIOSystem = std::make_shared<StandardIOSystem>();
 
     tulz::LocaleInfo::Info localeInfo;
 
@@ -123,7 +121,7 @@ void Engine::init(int argc, char *const *argv) {
         localeInfo = tulz::LocaleInfo::get("en_GB.UTF-8");
         Log::warn(LOG_TAG, "LC_ALL is not defined, locale was set to en_GB.UTF-8");
     } else {
-        localeInfo = tulz::LocaleInfo::get(locale("").name().c_str());
+        localeInfo = tulz::LocaleInfo::get(std::locale("").name().c_str());
     }
 
     setLanguage(localeInfo.languageCode);
@@ -202,11 +200,11 @@ void Engine::setDefaultIOSystem(IOSystem *ioSystem) {
     m_defaultIOSystem.reset(ioSystem);
 }
 
-void Engine::setDefaultIOSystem(const shared_ptr<IOSystem> &ioSystem) {
+void Engine::setDefaultIOSystem(const std::shared_ptr<IOSystem> &ioSystem) {
     m_defaultIOSystem = ioSystem;
 }
 
-const shared_ptr<IOSystem>& Engine::getDefaultIOSystem() {
+const std::shared_ptr<IOSystem>& Engine::getDefaultIOSystem() {
     return m_defaultIOSystem;
 }
 
@@ -251,11 +249,11 @@ const Context& Engine::getApplicationContext() {
     return m_appContext;
 }
 
-string Engine::getGPUVendor() {
+std::string Engine::getGPUVendor() {
     return reinterpret_cast<char const*>(glGetString(GL_VENDOR));
 }
 
-string Engine::getGPURenderer() {
+std::string Engine::getGPURenderer() {
     return reinterpret_cast<char const*>(glGetString(GL_RENDERER));
 }
 
@@ -338,7 +336,7 @@ void Engine::flushCommandBuffer() {
 }
 
 int64_t Engine::time() {
-    using namespace chrono;
+    using namespace std::chrono;
     return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
