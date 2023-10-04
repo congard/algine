@@ -19,7 +19,12 @@ STATIC_INITIALIZER_IMPL(ImageWidget) {
 void ImageWidget::setImage(Texture2D *image, bool takeOwnership) {
     requestLayout();
     invalidate();
+
     m_image = image;
+
+    if (takeOwnership) {
+        m_image->setParent(this);
+    }
 }
 
 Texture2D* ImageWidget::getImage() const {
