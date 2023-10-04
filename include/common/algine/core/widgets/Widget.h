@@ -43,6 +43,7 @@ public:
     using Animations = std::forward_list<Widgets::AnimationPtr>;
 
 public:
+    // TODO: add Object* as a param (and to all derived classes too)
     Widget();
     ~Widget() override = default;
 
@@ -293,8 +294,8 @@ protected:
     static Filtering parseFiltering(std::string_view str);
 
     static std::string getString(const char *str);
-    static float getDimenPxF(const char *str);
-    static int getDimenPx(const char *str);
+    float getDimenPxF(const char *str);
+    int getDimenPx(const char *str);
     static Color getColor(const char *str);
 
 protected:

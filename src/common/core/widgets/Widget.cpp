@@ -1,5 +1,4 @@
 #include <algine/core/widgets/Widget.h>
-#include <algine/core/widgets/Units.h>
 #include <algine/core/widgets/Scene.h>
 #include <algine/core/painter/Painter.h>
 #include <algine/core/texture/Texture2D.h>
@@ -910,12 +909,13 @@ std::string Widget::getString(const char *str) {
 float Widget::getDimenPxF(const char *str) {
     bool error;
     auto result = Resources::instance()->parse(str, &error);
+    auto window = getParentWindow();
 
-    if (error) { // try to parse using Units, not Resources
-        return Units::parse(str);
+    if (error) { // try to parse using Dimen, not Resources
+        return Dimen(str).pixels(window);
     }
 
-    return result.as<Dimen>().pixels();
+    return result.as<Dimen>().pixels(window);
 }
 
 int Widget::getDimenPx(const char *str) {
@@ -1005,10 +1005,12 @@ void Widget::fromXML(const pugi::xml_node &node, const IOSystemPtr &io) {
         } else if (isAttr("padding")) {
             auto padding = tulz::StringUtils::split(getString(), " ");
 
-            auto left = Units::parse<int>(padding[0].c_str());
-            auto top = Units::parse<int>(padding[1].c_str());
-            auto right = Units::parse<int>(padding[2].c_str());
-            auto bottom = Units::parse<int>(padding[3].c_str());
+            auto window = getParentWindow();
+
+            auto left = Dimen(padding[0]).pixelsAs<int>(window);
+            auto top = Dimen(padding[1]).pixelsAs<int>(window);
+            auto right = Dimen(padding[2]).pixelsAs<int>(window);
+            auto bottom = Dimen(padding[3]).pixelsAs<int>(window);
 
             setPadding(left, top, right, bottom);
         } else if (isAttr("paddingLeft")) {
@@ -1058,12 +1060,12 @@ void Widget::fromXML(const pugi::xml_node &node, const IOSystemPtr &io) {
                     } else if (res_value.is<float>()) {
                         setProperty(name, res_value.as<float>());
                     } else if (res_value.is<Dimen>()) {
-                        setProperty(name, res_value.as<Dimen>().pixels());
+                        setProperty(name, res_value.as<Dimen>().pixels(getParentWindow()));
                     } else if (res_value.is<Color>()) {
                         setProperty(name, static_cast<int>(res_value.as<Color>().value()));
                     }
-                } else if (auto unit_value = Units::try_parse(value, &error); !error) {
-                    setProperty(name, unit_value);
+                } else if (Dimen dimen; dimen.parse(value)) {
+                    setProperty(name, dimen.pixels(getParentWindow()));
                 } else if (strcmp(value, "true") == 0) {
                     setProperty(name, true);
                 } else if (strcmp(value, "false") == 0) {

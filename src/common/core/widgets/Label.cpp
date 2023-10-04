@@ -1,6 +1,5 @@
 #include <algine/core/widgets/Label.h>
 #include <algine/core/widgets/Alignment.h>
-#include <algine/core/widgets/Units.h>
 #include <algine/core/painter/Painter.h>
 #include <algine/core/font/FontLibrary.h>
 #include <algine/core/TypeRegistry.h>
@@ -20,7 +19,7 @@ Label::Label()
       m_textX(), m_textY()
 {
     m_fontMetrics.setFont(FontLibrary::getDefault());
-    m_fontMetrics.setFontSize(24_dp);
+    m_fontMetrics.setFontSize(24); // TODO
 }
 
 Label::Label(const std::string &text): Label() {

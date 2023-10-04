@@ -31,8 +31,6 @@ std::shared_ptr<IOSystem> Engine::m_defaultIOSystem;
 int Engine::m_apiVersion;
 Engine::GraphicsAPI Engine::m_graphicsAPI;
 
-uint Engine::m_dpi = 96;
-
 std::string Engine::m_languageCode;
 std::string Engine::m_countryCode;
 
@@ -79,7 +77,8 @@ void linux_detect_dpi() {
     char *end;
 
     if (auto dpi = strtol(dpi_str.c_str(), &end, 0); *end == '\0') {
-        Engine::setDPI(dpi);
+        // TODO: move to GLFWWindow
+        // Engine::setDPI(dpi);
     }
 }
 
@@ -219,14 +218,6 @@ int Engine::getAPIVersion() {
 
 Engine::GraphicsAPI Engine::getGraphicsAPI() {
     return m_graphicsAPI;
-}
-
-void Engine::setDPI(uint dpi) {
-    m_dpi = dpi;
-}
-
-uint Engine::getDPI() {
-    return m_dpi;
 }
 
 void Engine::setLanguage(std::string_view isoCode) {

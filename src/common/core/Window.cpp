@@ -6,7 +6,8 @@ namespace algine {
 Window::Window(Object *parent)
     : Object(parent),
       m_taskQueue(),
-      m_taskQueueTail(m_taskQueue.before_begin()) {}
+      m_taskQueueTail(m_taskQueue.before_begin()),
+      m_dpi(96) {}
 
 Window::~Window() = default;
 
@@ -43,7 +44,7 @@ void Window::setContent(Content *content) {
 }
 
 void Window::setContentLater(Content *content, bool deleteOld) {
-    invokeLater([=] {
+    invokeLater([=, this] {
         setContent(content, deleteOld);
     });
 }
@@ -58,6 +59,14 @@ void Window::setEventHandler(EventHandler *eventHandler) {
 
 EventHandler* Window::getEventHandler() const {
     return m_eventHandler;
+}
+
+void Window::setDPI(uint32_t dpi) {
+    m_dpi = dpi;
+}
+
+uint32_t Window::getDPI() const {
+    return m_dpi;
 }
 
 void Window::processTasks() {

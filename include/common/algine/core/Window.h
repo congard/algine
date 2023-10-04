@@ -92,6 +92,20 @@ public:
     void setEventHandler(EventHandler *eventHandler);
     EventHandler* getEventHandler() const;
 
+    /**
+     * Sets the window DPI. This value can be later used by e.g.
+     * widgets in order to convert `dp` to `px`.
+     * @param dpi The DPI value to set.
+     */
+    void setDPI(uint32_t dpi);
+
+    /**
+     * Returns the DPI value for this window.
+     * @note The default value is 96.
+     * @return The DPI value.
+     */
+    uint32_t getDPI() const;
+
 protected:
     /**
      * Must be called from the rendering thread
@@ -106,6 +120,9 @@ private:
     std::forward_list<Task> m_taskQueue;
     std::forward_list<Task>::iterator m_taskQueueTail;
     std::recursive_mutex m_taskQueueMutex;
+
+private:
+    uint32_t m_dpi;
 };
 }
 

@@ -1,6 +1,5 @@
 #include <algine/core/Resources.h>
 #include <algine/core/log/Log.h>
-#include <algine/core/widgets/Units.h>
 
 #include <pugixml.hpp>
 
@@ -77,7 +76,7 @@ void Resources::setColor(std::string_view name, Color value) {
 }
 
 template<typename T>
-inline auto has(const T &m, const std::string &name) {
+inline static auto has(const T &m, const std::string &name) {
     return m.find(name) != m.end();
 }
 
@@ -212,7 +211,7 @@ void Resources::fromXML(const pugi::xml_node &node) {
         } else if (isChild(Key_Float)) {
             setFloat(name, value.as_float());
         } else if (isChild(Key_Dimen)) {
-            setDimen(name, Units::parse_dimen(value.as_string()));
+            setDimen(name, Dimen(value.as_string()));
         } else if (isChild(Key_Color)) {
             setColor(name, Color::parseColor(value.as_string()));
         } else {

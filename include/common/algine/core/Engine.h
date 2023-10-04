@@ -61,9 +61,6 @@ public:
     static int getAPIVersion();
     static GraphicsAPI getGraphicsAPI();
 
-    static void setDPI(uint dpi);
-    static uint getDPI();
-
     static void setLanguage(std::string_view isoCode);
     static void setCountry(std::string_view isoCode);
 
@@ -147,8 +144,6 @@ private:
 
     static int m_apiVersion;
     static GraphicsAPI m_graphicsAPI;
-
-    static uint m_dpi;
 
     static std::string m_languageCode;
     static std::string m_countryCode;
