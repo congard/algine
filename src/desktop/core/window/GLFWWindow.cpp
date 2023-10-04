@@ -18,7 +18,10 @@
 
 #ifdef _WIN32
     #include "win32/WindowTheme.h"
+    #include "win32/WindowDPI.h"
 #endif
+
+#define LOG_TAG "GLFWWindow"
 
 using namespace glm;
 
@@ -90,7 +93,7 @@ void GLFWWindow::create() {
     }
 
     if (Log::isEnabled(Logger::Type::Debug)) {
-        auto logger = Log::debug("GLFWWindow");
+        auto logger = Log::debug(LOG_TAG);
         logger << "Time: " << Engine::time() << "\n";
         logger << "GPU Vendor: " << Engine::getGPUVendor() << "\n";
         logger << "GPU Renderer: " << Engine::getGPURenderer() << "\n";
@@ -104,7 +107,23 @@ void GLFWWindow::create() {
 
 #ifdef _WIN32
     internal::win32::WindowTheme::applyTheme(m_window);
+    setDPI(internal::win32::WindowDPI::getDPI(m_window));
+#elif defined(__linux__)
+    // TODO
 #endif
+
+    {
+        auto label = getTitle();
+
+        if (label.empty()) {
+            label = "<untitled window>";
+        } else {
+            label.insert(0, "'");
+            label.append("'");
+        }
+
+        Log::debug(LOG_TAG) << "Window " << label << " (" << this << ") has been initialized";
+    }
 }
 
 void GLFWWindow::close() {
