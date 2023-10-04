@@ -88,6 +88,7 @@ protected:
     void exec(const std::string &s, bool path, Lua *lua, sol::environment *tenv) override;
 
 private:
+    void createShapeIfNull();
     void loadBones(const aiMesh *aimesh);
     void processNode(const aiNode *node, const aiScene *scene);
     void processMesh(const aiMesh *aimesh, const aiScene *scene);

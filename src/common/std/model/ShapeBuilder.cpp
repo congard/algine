@@ -30,7 +30,7 @@ constexpr uint BonesPerVertex = 4;
 constexpr auto ClassName = "Shape";
 }
 
-constexpr auto TAG = "Algine ShapeBuilder";
+constexpr auto LOG_TAG = "ShapeBuilder";
 
 ShapeBuilder::ShapeBuilder()
     : m_className(Default::ClassName),
@@ -164,8 +164,7 @@ void ShapeBuilder::setIndices(const BufferData<uint> &indices) {
 }
 
 Object* ShapeBuilder::createImpl() {
-    m_shape = TypeRegistry::create<Shape>(m_className);
-    m_shape->setParent(getActualParent());
+    createShapeIfNull();
 
     if (!m_modelPath.empty()) {
         loadFile();
@@ -176,7 +175,7 @@ Object* ShapeBuilder::createImpl() {
     return m_shape;
 }
 
-uint getMaxBonesPerVertex(const aiMesh *mesh) {
+static uint getMaxBonesPerVertex(const aiMesh *mesh) {
     auto bonesPerVertices = (uint*) calloc(mesh->mNumVertices, sizeof(uint));
 
     for (uint i = 0; i < mesh->mNumBones; i++) {
@@ -205,7 +204,7 @@ constexpr int PARAMS_TYPE_ASSIMP = 0;
 constexpr int PARAMS_TYPE_ALGINE = 1;
 
 template<int type>
-inline auto getParams(const vector<ShapeBuilder::Param> &params) {
+inline static auto getParams(const vector<ShapeBuilder::Param> &params) {
     using Param = ShapeBuilder::Param;
 
     map<Param, uint> assimpParams = {
@@ -313,8 +312,7 @@ private:
 };
 
 void ShapeBuilder::loadFile() {
-    if (m_shape == nullptr)
-        m_shape = TypeRegistry::create<Shape>(m_className);
+    createShapeIfNull();
 
     // Create an instance of the Importer class
     Assimp::Importer importer;
@@ -325,7 +323,7 @@ void ShapeBuilder::loadFile() {
 
     // If the import failed, report it
     if (!scene) {
-        Log::error(TAG) << "Assimp error: " << importer.GetErrorString();
+        Log::error(LOG_TAG) << "Assimp error: " << importer.GetErrorString();
         return;
     }
 
@@ -333,7 +331,7 @@ void ShapeBuilder::loadFile() {
 
     m_amtlManager.setParent(m_shape);
 
-    // try to load AMTL from file if current material is empty
+    // try to load AMTL from file if the current material is empty
     if (m_amtlManager.getMaterials().empty()) {
         string amtlPath = m_modelPath.substr(0, m_modelPath.find_last_of('.')) + ".amtl";
 
@@ -363,8 +361,7 @@ void ShapeBuilder::loadShape() {
 }
 
 void ShapeBuilder::applyParams() {
-    if (m_shape == nullptr)
-        m_shape = TypeRegistry::create<Shape>(m_className);
+    createShapeIfNull();
 
     // apply algine params
     for (const auto p : algine::getParams<PARAMS_TYPE_ALGINE>(m_params)) {
@@ -381,7 +378,7 @@ void ShapeBuilder::applyParams() {
                 break;
             }
             default: {
-                Log::error(TAG) << "Unknown algine param " << static_cast<uint>(p);
+                Log::error(LOG_TAG) << "Unknown algine param " << static_cast<uint>(p);
                 break;
             }
         }
@@ -391,8 +388,7 @@ void ShapeBuilder::applyParams() {
 }
 
 void ShapeBuilder::createInputLayouts() {
-    if (m_shape == nullptr)
-        m_shape = TypeRegistry::create<Shape>(m_className);
+    createShapeIfNull();
 
     for (auto &item : m_locations) {
         m_shape->createInputLayout(item);
@@ -401,6 +397,13 @@ void ShapeBuilder::createInputLayouts() {
 
 Shape* ShapeBuilder::getCurrentShape() {
     return m_shape;
+}
+
+void ShapeBuilder::createShapeIfNull() {
+    if (m_shape == nullptr) {
+        m_shape = TypeRegistry::create<Shape>(alTypeRegistrySignatureTStr(m_className));
+        m_shape->setParent(getActualParent());
+    }
 }
 
 void ShapeBuilder::loadBones(const aiMesh *aimesh) {
@@ -641,9 +644,7 @@ inline BufferType* createBuffer(Object *parent, ShapeBuilder::BufferData<DataTyp
 }
 
 void ShapeBuilder::genBuffers() {
-    if (m_shape == nullptr)
-        m_shape = TypeRegistry::create<Shape>(m_className);
-
+    createShapeIfNull();
     m_shape->m_vertices = createBuffer<ArrayBuffer>(m_shape, m_vertices);
     m_shape->m_normals = createBuffer<ArrayBuffer>(m_shape, m_normals);
     m_shape->m_texCoords = createBuffer<ArrayBuffer>(m_shape, m_texCoords);
