@@ -19,6 +19,8 @@
 #ifdef _WIN32
     #include "win32/WindowTheme.h"
     #include "win32/WindowDPI.h"
+#else
+    #include "linux/WindowX11DPI.h"
 #endif
 
 #define LOG_TAG "GLFWWindow"
@@ -109,7 +111,7 @@ void GLFWWindow::create() {
     internal::win32::WindowTheme::applyTheme(m_window);
     setDPI(internal::win32::WindowDPI::getDPI(m_window));
 #elif defined(__linux__)
-    // TODO
+    setDPI(internal::linux_x11::WindowDPI::getDPI());
 #endif
 
     {

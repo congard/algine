@@ -68,20 +68,6 @@ static std::string exec(const char *cmd) {
     return result;
 }
 
-void linux_detect_dpi() {
-    auto dpi_str = exec("xrdb -query | grep 'Xft.dpi' | cut -f 2");
-
-    if (auto pos = dpi_str.find('\n'); pos != std::string::npos)
-        dpi_str.erase(pos);
-
-    char *end;
-
-    if (auto dpi = strtol(dpi_str.c_str(), &end, 0); *end == '\0') {
-        // TODO: move to GLFWWindow
-        // Engine::setDPI(dpi);
-    }
-}
-
 void Engine::init(int argc, char *const *argv) {
     Log::debug(LOG_TAG, "Built with " COMPILER_NAME " " COMPILER_VERSION " (" CPP_VERSION_STR ")");
     Log::debug(LOG_TAG, "Platform: " PLATFORM_NAME " " PLATFORM_VERSION);
@@ -128,10 +114,6 @@ void Engine::init(int argc, char *const *argv) {
 #else
     m_defaultIOSystem = make_shared<AssetsIOSystem>();
     m_appContext = Context::getCurrent();
-#endif
-
-#if defined(__linux__) && !defined(__ANDROID__)
-    linux_detect_dpi();
 #endif
 }
 
