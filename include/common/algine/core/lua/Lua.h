@@ -37,10 +37,7 @@ public:
     sol::environment createEnvironment();
 
     template<bool b>
-    sol::environment createEnvironment(const sol::basic_reference<b> &parent) {
-        Locker locker(this);
-        return {state(), sol::create, parent};
-    }
+    sol::environment createEnvironment(const sol::basic_reference<b> &parent);
 
     sol::global_table& getGlobalEnvironment();
 
@@ -179,6 +176,12 @@ public:
 private:
     std::recursive_mutex *m_mutex;
 };
+
+template<bool b>
+sol::environment Lua::createEnvironment(const sol::basic_reference<b> &parent) {
+    Locker locker(this);
+    return {state(), sol::create, parent};
+}
 } // algine
 
 #endif //ALGINE_LUA_H
