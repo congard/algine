@@ -23,7 +23,8 @@ namespace algine {
  */
 class AL_EXPORT QtWindow: public Window, public QOpenGLWindow {
 public:
-    explicit QtWindow(Context shareContext = {}, QWindow *parent = nullptr);
+    explicit QtWindow(std::string_view title = {}, Context shareContext = {}, QWindow *parent = nullptr);
+    explicit QtWindow(Context shareContext, QWindow *parent = nullptr);
     ~QtWindow() override;
 
     void renderLoop(int delayMs);
