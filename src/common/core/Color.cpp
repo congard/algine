@@ -157,6 +157,9 @@ Color::Color(uint color)
             (color >> 24) & 0xff
       ) {}
 
+Color::Color(std::string color)
+    : Color(Color::parseColor(std::move(color))) {}
+
 Color::Color(int r, int g, int b, int a)
     : m_sp(m257(r), m257(g), m257(b), m257(a)),
       m_space(Space::Rgb)
