@@ -5,7 +5,8 @@
 #include <tuple>
 #include <glm/common.hpp>
 
-#include "hsluv/hsluv.h"
+#include "color/hsluv.h"
+#include "color/hsv.h"
 
 namespace algine {
 /**
@@ -583,111 +584,6 @@ Color::Space Color::getSpace() const {
     return m_space;
 }
 
-// RGB <=> HSV source:
-// https://gist.github.com/fairlight1337/4935ae72bcbcc1ba5c72
-
-/*! \brief Convert RGB to HSV color space
-
-  Converts a given set of RGB values `r', `g', `b' into HSV
-  coordinates. The input RGB values are in the range [0, 1], and the
-  output HSV values are in the ranges h = [0, 360], and s, v = [0, 1], respectively.
-
-  \param r Red component, used as input, range: [0, 1]
-  \param g Green component, used as input, range: [0, 1]
-  \param b Blue component, used as input, range: [0, 1]
-  \param h Hue component, used as output, range: [0, 360]
-  \param s Hue component, used as output, range: [0, 1]
-  \param v Hue component, used as output, range: [0, 1]
-
-*/
-static void rgb2hsv(float r, float g, float b, float &h, float &s, float &v) {
-    float cMax = std::max(std::max(r, g), b);
-    float cMin = std::min(std::min(r, g), b);
-    float delta = cMax - cMin;
-
-    if (delta > 0) {
-        if (cMax == r) {
-            h = 60 * fmodf(((g - b) / delta), 6);
-        } else if (cMax == g) {
-            h = 60 * (((b - r) / delta) + 2);
-        } else if (cMax == b) {
-            h = 60 * (((r - g) / delta) + 4);
-        }
-
-        if (cMax > 0) {
-            s = delta / cMax;
-        } else {
-            s = 0;
-        }
-
-        v = cMax;
-    } else {
-        h = 0;
-        s = 0;
-        v = cMax;
-    }
-
-    if (h < 0) {
-        h = 360 + h;
-    }
-}
-
-/*! \brief Convert HSV to RGB color space
-
-  Converts a given set of HSV values `h', `s', `v' into RGB
-  coordinates. The output RGB values are in the range [0, 1], and
-  the input HSV values are in the ranges h = [0, 360], and s, v =
-  [0, 1], respectively.
-
-  \param r Red component, used as output, range: [0, 1]
-  \param g Green component, used as output, range: [0, 1]
-  \param b Blue component, used as output, range: [0, 1]
-  \param h Hue component, used as input, range: [0, 360]
-  \param s Hue component, used as input, range: [0, 1]
-  \param v Hue component, used as input, range: [0, 1]
-
-*/
-static void hsv2rgb(float &r, float &g, float &b, float h, float s, float v) {
-    float c = v * s; // Chroma
-    float hPrime = fmodf(h / 60.0f, 6);
-    float x = c * (1 - fabsf(fmodf(hPrime, 2) - 1));
-    float m = v - c;
-
-    if (0 <= hPrime && hPrime < 1) {
-        r = c;
-        g = x;
-        b = 0;
-    } else if (1 <= hPrime && hPrime < 2) {
-        r = x;
-        g = c;
-        b = 0;
-    } else if (2 <= hPrime && hPrime < 3) {
-        r = 0;
-        g = c;
-        b = x;
-    } else if (3 <= hPrime && hPrime < 4) {
-        r = 0;
-        g = x;
-        b = c;
-    } else if (4 <= hPrime && hPrime < 5) {
-        r = x;
-        g = 0;
-        b = c;
-    } else if (5 <= hPrime && hPrime < 6) {
-        r = c;
-        g = 0;
-        b = x;
-    } else {
-        r = 0;
-        g = 0;
-        b = 0;
-    }
-
-    r += m;
-    g += m;
-    b += m;
-}
-
 Color Color::toRgb() const {
     auto clampRgb = [](double &r, double &g, double &b) {
         r = glm::clamp(r, 0.0, 1.0);
@@ -700,7 +596,7 @@ Color Color::toRgb() const {
         case Space::Rgb: return *this;
         case Space::Hsv: {
             float r, g, b;
-            hsv2rgb(r, g, b, frange(m_sp.hsv.h) * 360.0f, frange(m_sp.hsv.s), frange(m_sp.hsv.v));
+            internal::hsv2rgb(r, g, b, frange(m_sp.hsv.h) * 360.0f, frange(m_sp.hsv.s), frange(m_sp.hsv.v));
             return Color::fromRgbF(r, g, b, alphaF());
         }
         case Space::Luv: {
@@ -734,7 +630,7 @@ Color Color::toHsv() const {
 
     auto rgb = toRgb();
     float h, s, v;
-    rgb2hsv(rgb.redF(), rgb.greenF(), rgb.blueF(), h, s, v);
+    internal::rgb2hsv(rgb.redF(), rgb.greenF(), rgb.blueF(), h, s, v);
 
     return Color::fromHsvF(h / 360.0f, s, v, alphaF());
 }
