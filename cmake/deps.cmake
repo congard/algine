@@ -170,7 +170,7 @@ add_dep(
 add_dep(
     glew
     GIT_REPOSITORY  https://github.com/nigels-com/glew.git
-    GIT_TAG         9fb23c3e61cbd2d581e33ff7d8579b572b38ee26 # 2.2.0
+    GIT_TAG         e1a80a9f12d7def202d394f46e44cfced1104bfb # note: master, > 2.2.0
 )
 
 add_dep(
