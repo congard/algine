@@ -19,6 +19,7 @@ public:
 public:
     Color();
     explicit Color(uint color);
+    explicit Color(std::string color);
     Color(int r, int g, int b, int a = 255);
 
     bool operator==(const Color &rhs) const;

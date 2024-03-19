@@ -1,6 +1,7 @@
 #include <algine/core/window/QtWindow.h>
 #include <algine/core/Content.h>
 #include <algine/core/Engine.h>
+#include <algine/core/log/Log.h>
 
 #include <QMouseEvent>
 #include <QKeyEvent>
@@ -10,16 +11,40 @@
 #include "core/input/MouseKeyConverter.h"
 #include "core/input/KeyboardKeyConverter.h"
 
+#define LOG_TAG "QtWindow"
+
 namespace algine {
 constexpr static auto maxClickDistanceSquared = 16.0f * 16.0f;
 constexpr static auto maxClickDeltaTime = 250L; // in ms
 
-QtWindow::QtWindow(Context shareContext, QWindow *parent)
+QtWindow::QtWindow(std::string_view title, Context shareContext, QWindow *parent)
     : m_parentContext(shareContext),
       m_cursorPos(-1.0f, -1.0f),
       QOpenGLWindow(
           shareContext.isInitialized() ? static_cast<QOpenGLContext*>(shareContext.m_context) : QOpenGLContext::globalShareContext(),
-          NoPartialUpdate, parent) {}
+          NoPartialUpdate, parent)
+{
+    setTitle(title.data());
+
+    setDPI(static_cast<uint32_t>(devicePixelRatio() * 96));
+    Log::debug(LOG_TAG) << "DPI: " << getDPI();
+
+    {
+        auto label = this->title();
+
+        if (label.isEmpty()) {
+            label = "<untitled window>";
+        } else {
+            label.insert(0, "'");
+            label.append("'");
+        }
+
+        Log::debug(LOG_TAG) << "Window " << qPrintable(label) << " (" << this << ") has been initialized";
+    }
+}
+
+QtWindow::QtWindow(Context shareContext, QWindow *parent)
+    : QtWindow({}, shareContext, parent) {}
 
 QtWindow::~QtWindow() = default;
 
