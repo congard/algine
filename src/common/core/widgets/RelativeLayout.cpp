@@ -340,6 +340,15 @@ void RelativeLayout::onLayout() {
     std::list<WidgetInfo> widgetsInfo;
 
     for (auto child : getWidgets()) {
+        // TODO: hot fix! Verify it!
+        auto policy_v = child->getVerticalSizePolicy();
+        auto policy_h = child->getHorizontalSizePolicy();
+
+        if (child->isVisible() && (policy_v == SizePolicy::MatchParent || policy_h == SizePolicy::MatchParent)) {
+            child->forceLayout();
+        }
+        //
+
         child->measure();
         child->layout();
 
