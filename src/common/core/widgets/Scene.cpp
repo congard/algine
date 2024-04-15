@@ -301,13 +301,14 @@ bool Scene::handlePointerEvent(const Event &event) {
             }
             return false;
         case Event::Click:
-            // click is called after release, so we should handle it separately
+        case Event::Move:
+            // click is called after release, so we should handle it separately;
+            // move can be called even before press
             if (auto widget = findWidget(); widget) {
                 pushEvent(widget);
                 return true;
             }
             return false;
-        case Event::Move:
         case Event::Release:
             if (auto it = m_touchedWidgets.find(info.getPointer()); it != m_touchedWidgets.end()) {
                 pushEvent(it->second);
