@@ -65,92 +65,9 @@ endif()
 
 include(cmake/deps.cmake)
 
-# built-in glsl modules
-# TODO: move to another file
-file(READ src/common/core/glsl-modules/BoneSystem.glsl GLSLModules_BoneSystem)
-file(READ src/common/core/glsl-modules/NormalMapping.vs.glsl GLSLModules_NormalMapping_vs)
-file(READ src/common/core/glsl-modules/NormalMapping.fs.glsl GLSLModules_NormalMapping_fs)
-file(READ src/common/core/glsl-modules/SSR.glsl GLSLModules_SSR)
-
-file(READ src/common/core/glsl-modules/fresnel.glsl GLSLModules_fresnel)
-
-file(READ src/common/core/glsl-modules/ToneMapping/all.glsl GLSLModules_ToneMapping_all)
-file(READ src/common/core/glsl-modules/ToneMapping/aces.glsl GLSLModules_ToneMapping_aces)
-file(READ src/common/core/glsl-modules/ToneMapping/exposure.glsl GLSLModules_ToneMapping_exposure)
-file(READ src/common/core/glsl-modules/ToneMapping/filmic.glsl GLSLModules_ToneMapping_filmic)
-file(READ src/common/core/glsl-modules/ToneMapping/lottes.glsl GLSLModules_ToneMapping_lottes)
-file(READ src/common/core/glsl-modules/ToneMapping/reinhard.glsl GLSLModules_ToneMapping_reinhard)
-file(READ src/common/core/glsl-modules/ToneMapping/reinhard2.glsl GLSLModules_ToneMapping_reinhard2)
-file(READ src/common/core/glsl-modules/ToneMapping/uchimura.glsl GLSLModules_ToneMapping_uchimura)
-file(READ src/common/core/glsl-modules/ToneMapping/uncharted2.glsl GLSLModules_ToneMapping_uncharted2)
-file(READ src/common/core/glsl-modules/ToneMapping/unreal.glsl GLSLModules_ToneMapping_unreal)
-
-file(READ src/common/core/glsl-modules/Blending/all.glsl GLSLModules_Blending_all)
-file(READ src/common/core/glsl-modules/Blending/add.glsl GLSLModules_Blending_add)
-file(READ src/common/core/glsl-modules/Blending/average.glsl GLSLModules_Blending_average)
-file(READ src/common/core/glsl-modules/Blending/color-burn.glsl GLSLModules_Blending_color_burn)
-file(READ src/common/core/glsl-modules/Blending/color-dodge.glsl GLSLModules_Blending_color_dodge)
-file(READ src/common/core/glsl-modules/Blending/darken.glsl GLSLModules_Blending_darken)
-file(READ src/common/core/glsl-modules/Blending/difference.glsl GLSLModules_Blending_difference)
-file(READ src/common/core/glsl-modules/Blending/exclusion.glsl GLSLModules_Blending_exclusion)
-file(READ src/common/core/glsl-modules/Blending/glow.glsl GLSLModules_Blending_glow)
-file(READ src/common/core/glsl-modules/Blending/hard-light.glsl GLSLModules_Blending_hard_light)
-file(READ src/common/core/glsl-modules/Blending/hard-mix.glsl GLSLModules_Blending_hard_mix)
-file(READ src/common/core/glsl-modules/Blending/lighten.glsl GLSLModules_Blending_lighten)
-file(READ src/common/core/glsl-modules/Blending/linear-burn.glsl GLSLModules_Blending_linear_burn)
-file(READ src/common/core/glsl-modules/Blending/linear-dodge.glsl GLSLModules_Blending_linear_dodge)
-file(READ src/common/core/glsl-modules/Blending/linear-light.glsl GLSLModules_Blending_linear_light)
-file(READ src/common/core/glsl-modules/Blending/multiply.glsl GLSLModules_Blending_multiply)
-file(READ src/common/core/glsl-modules/Blending/negation.glsl GLSLModules_Blending_negation)
-file(READ src/common/core/glsl-modules/Blending/normal.glsl GLSLModules_Blending_normal)
-file(READ src/common/core/glsl-modules/Blending/overlay.glsl GLSLModules_Blending_overlay)
-file(READ src/common/core/glsl-modules/Blending/phoenix.glsl GLSLModules_Blending_phoenix)
-file(READ src/common/core/glsl-modules/Blending/pin-light.glsl GLSLModules_Blending_pin_light)
-file(READ src/common/core/glsl-modules/Blending/reflect.glsl GLSLModules_Blending_reflect)
-file(READ src/common/core/glsl-modules/Blending/screen.glsl GLSLModules_Blending_screen)
-file(READ src/common/core/glsl-modules/Blending/soft-light.glsl GLSLModules_Blending_soft_light)
-file(READ src/common/core/glsl-modules/Blending/subtract.glsl GLSLModules_Blending_subtract)
-file(READ src/common/core/glsl-modules/Blending/vivid-light.glsl GLSLModules_Blending_vivid_light)
-
-file(READ src/common/core/glsl-modules/Shading/all.glsl GLSLModules_Shading_all)
-file(READ src/common/core/glsl-modules/Shading/attenuation.glsl GLSLModules_Shading_attenuation)
-file(READ src/common/core/glsl-modules/Shading/diffuseLambert.glsl GLSLModules_Shading_diffuseLambert)
-file(READ src/common/core/glsl-modules/Shading/diffuseOrenNayar.glsl GLSLModules_Shading_diffuseOrenNayar)
-file(READ src/common/core/glsl-modules/Shading/specularAnisotropic.glsl GLSLModules_Shading_specularAnisotropic)
-file(READ src/common/core/glsl-modules/Shading/specularBlinnPhong.glsl GLSLModules_Shading_specularBlinnPhong)
-file(READ src/common/core/glsl-modules/Shading/specularCookTorrance.glsl GLSLModules_Shading_specularCookTorrance)
-file(READ src/common/core/glsl-modules/Shading/specularPhong.glsl GLSLModules_Shading_specularPhong)
-file(READ src/common/core/glsl-modules/Shading/dirLightShadow.glsl GLSLModules_Shading_dirLightShadow)
-file(READ src/common/core/glsl-modules/Shading/pointLightShadow.glsl GLSLModules_Shading_pointLightShadow)
-
-file(READ src/common/core/glsl-modules/DOF/all.glsl GLSLModules_DOF_all)
-file(READ src/common/core/glsl-modules/DOF/cinematicCoC.glsl GLSLModules_DOF_cinematicCoC)
-file(READ src/common/core/glsl-modules/DOF/linearCoC.glsl GLSLModules_DOF_linearCoC)
-
-file(READ src/common/core/glsl-modules/Luminance/all.glsl GLSLModules_Luminance_all)
-file(READ src/common/core/glsl-modules/Luminance/luminance.glsl GLSLModules_Luminance_luminance)
-file(READ src/common/core/glsl-modules/Luminance/luminanceHSP.glsl GLSLModules_Luminance_luminanceHSP)
-file(READ src/common/core/glsl-modules/Luminance/luminanceW3.glsl GLSLModules_Luminance_luminanceW3)
-
-configure_file(src/common/core/glsl-modules/GLSLModules.h.in src/common/core/glsl-modules/GLSLModules.h)
-
-# built-in glsl shaders
-file(READ src/common/core/glsl-shaders/Blur.fs.glsl GLSLShaders_Blur_fs)
-file(READ src/common/core/glsl-shaders/Quad.vs.glsl GLSLShaders_Quad_vs)
-file(READ src/common/core/glsl-shaders/Shadow.fs.glsl GLSLShaders_Shadow_fs)
-file(READ src/common/core/glsl-shaders/Shadow.gs.glsl GLSLShaders_Shadow_gs)
-file(READ src/common/core/glsl-shaders/Shadow.vs.glsl GLSLShaders_Shadow_vs)
-
-configure_file(src/common/core/glsl-shaders/GLSLShaders.h.in src/common/core/glsl-shaders/GLSLShaders.h)
-
-# painter shaders
-file(READ src/common/core/painter/painter.vs.glsl Painter_painter_vs)
-file(READ src/common/core/painter/fill.fs.glsl Painter_fill_fs)
-file(READ src/common/core/painter/circle-fill.fs.glsl Painter_circle_fill_fs)
-file(READ src/common/core/painter/roundRect-fill.fs.glsl Painter_round_rect_fill_fs)
-file(READ src/common/core/painter/text-fill.fs.glsl Painter_text_fill_fs)
-
-configure_file(src/common/core/painter/PainterShaders.h.in src/common/core/painter/PainterShaders.h)
+# pack built-in glsl resources
+include(cmake/GLSLResources.cmake)
+glsl_pack_all()
 
 # lua
 function(build_lua_interp out_binary)
