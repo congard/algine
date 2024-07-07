@@ -2,7 +2,7 @@
 #define ALGINE_IMAGEWIDGET_H
 
 #include <algine/core/widgets/Widget.h>
-#include <tulz/static_initializer.h>
+#include <tulz/util/static_initializer.h>
 
 namespace algine {
 class AL_EXPORT ImageWidget: public Widget {

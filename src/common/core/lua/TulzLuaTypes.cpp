@@ -1,7 +1,7 @@
 #include <algine/core/lua/TulzLuaTypes.h>
 #include <algine/core/Engine.h>
 
-#include <tulz/Array.h>
+#include <tulz/container/Array.h>
 #include <tulz/Path.h>
 
 using namespace tulz;

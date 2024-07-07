@@ -3,8 +3,6 @@
 #include <algine/core/buffers/IndexBuffer.h>
 #include <algine/core/buffers/UniformBuffer.h>
 
-#include <tulz/macros.h>
-
 using namespace std;
 using namespace tulz;
 

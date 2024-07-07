@@ -3,7 +3,7 @@
 
 #include <algine/core/InputLayout.h>
 #include <algine/core/buffers/ArrayBuffer.h>
-#include <tulz/macros.h>
+
 #include <memory>
 
 namespace algine {

@@ -3,7 +3,7 @@
 
 #include <algine/core/io/IOSystem.h>
 #include <algine/platform.h>
-#include <tulz/static_initializer.h>
+#include <tulz/util/static_initializer.h>
 
 #include <string>
 #include <memory>

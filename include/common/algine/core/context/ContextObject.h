@@ -4,7 +4,7 @@
 #include <algine/core/Object.h>
 #include <algine/core/Engine.h>
 #include <algine/platform.h>
-#include <tulz/static_initializer.h>
+#include <tulz/util/static_initializer.h>
 
 #ifdef ALGINE_SECURE_OPERATIONS
     #include <algine/core/context/Context.h>

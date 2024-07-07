@@ -2,7 +2,7 @@
 #define ALGINE_CONTAINER_H
 
 #include <algine/core/widgets/Widget.h>
-#include <tulz/static_initializer.h>
+#include <tulz/util/static_initializer.h>
 
 #include <list>
 

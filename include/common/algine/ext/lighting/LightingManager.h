@@ -10,7 +10,7 @@
 #include <algine/ext/lighting/DirLight.h>
 #include <algine/ext/lighting/PointLight.h>
 
-#include <tulz/Array.h>
+#include <tulz/container/Array.h>
 
 namespace algine {
 class LightingManager: public Object {

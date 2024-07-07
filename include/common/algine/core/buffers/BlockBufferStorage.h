@@ -5,7 +5,7 @@
 #include <algine/types.h>
 
 #include <vector>
-#include <tulz/Array.h>
+#include <tulz/container/Array.h>
 
 namespace algine {
 class AL_EXPORT BlockBufferStorage {

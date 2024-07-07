@@ -3,7 +3,7 @@
 
 #include <algine/core/buffers/Buffer.h>
 
-#include <tulz/Array.h>
+#include <tulz/container/Array.h>
 #include <vector>
 
 namespace algine {

@@ -4,7 +4,7 @@
 #include <algine/core/RawPtr.h>
 #include <algine/platform.h>
 
-#include <tulz/static_initializer.h>
+#include <tulz/util/static_initializer.h>
 
 #include <string>
 #include <map>

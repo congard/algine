@@ -4,8 +4,8 @@
 #include <algine/core/context/ContextObject.h>
 #include <algine/types.h>
 
-#include <tulz/Array.h>
-#include <tulz/macros.h>
+#include <tulz/container/Array.h>
+#include <tulz/util/macros.h>
 
 namespace algine {
 AL_CONTEXT_OBJECT(Buffer) {

@@ -10,7 +10,7 @@
 
 #include <algine/core/Object.h>
 
-#include <tulz/static_initializer.h>
+#include <tulz/util/static_initializer.h>
 
 namespace algine {
 class Shape;

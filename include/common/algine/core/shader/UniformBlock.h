@@ -3,7 +3,7 @@
 
 #include <algine/core/shader/BaseUniformBlock.h>
 
-#include <tulz/Array.h>
+#include <tulz/container/Array.h>
 
 namespace algine {
 class AL_EXPORT UniformBlock: public BaseUniformBlock {

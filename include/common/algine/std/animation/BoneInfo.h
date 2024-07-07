@@ -4,7 +4,7 @@
 #include <algine/platform.h>
 #include <algine/types.h>
 
-#include <tulz/Array.h>
+#include <tulz/container/Array.h>
 #include <utility>
 
 namespace algine {

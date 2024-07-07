@@ -3,7 +3,7 @@
 #include <algine/core/shader/ShaderProgram.h>
 #include <algine/gl.h>
 
-#include <tulz/Array.h>
+#include <tulz/container/Array.h>
 
 using namespace std;
 using namespace tulz;

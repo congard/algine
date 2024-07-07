@@ -2,7 +2,7 @@
 #define ALGINE_RELATIVELAYOUT_H
 
 #include <algine/core/widgets/Layout.h>
-#include <tulz/static_initializer.h>
+#include <tulz/util/static_initializer.h>
 
 #include <list>
 

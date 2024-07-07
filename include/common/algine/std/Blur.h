@@ -7,8 +7,6 @@
 
 #include <algine/std/QuadRenderer.h>
 
-#include <tulz/Array.h>
-
 namespace algine {
 class AL_EXPORT Blur: public Object {
 public:

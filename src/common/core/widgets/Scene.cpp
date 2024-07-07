@@ -2,8 +2,6 @@
 #include <algine/core/widgets/Layer.h>
 #include <algine/core/widgets/Container.h>
 
-#include <tulz/Array.h>
-
 using namespace tulz;
 
 namespace algine::Widgets {

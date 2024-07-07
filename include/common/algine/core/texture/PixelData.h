@@ -1,7 +1,7 @@
 #ifndef ALGINE_PIXELDATA_H
 #define ALGINE_PIXELDATA_H
 
-#include <tulz/Array.h>
+#include <tulz/container/Array.h>
 #include <algine/types.h>
 
 namespace algine {

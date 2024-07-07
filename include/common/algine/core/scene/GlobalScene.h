@@ -2,7 +2,7 @@
 #define ALGINE_GLOBALSCENE_H
 
 #include <algine/core/scene/Scene.h>
-#include <tulz/static_initializer.h>
+#include <tulz/util/static_initializer.h>
 
 namespace algine {
 class AL_EXPORT GlobalScene: public Scene {

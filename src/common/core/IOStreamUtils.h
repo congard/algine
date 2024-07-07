@@ -3,7 +3,7 @@
 
 #include <algine/core/Engine.h>
 
-#include <tulz/Array.h>
+#include <tulz/container/Array.h>
 
 namespace algine::IOStreamUtils {
 template<typename T>

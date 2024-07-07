@@ -4,7 +4,7 @@
 #include <algine/core/texture/Texture2D.h>
 #include <algine/core/font/Font.h>
 
-#include <tulz/Array.h>
+#include <tulz/container/Array.h>
 
 namespace algine {
 class AL_EXPORT FontRenderer {

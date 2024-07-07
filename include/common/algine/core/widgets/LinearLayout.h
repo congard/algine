@@ -2,7 +2,7 @@
 #define ALGINE_LINEARLAYOUT_H
 
 #include <algine/core/widgets/Layout.h>
-#include <tulz/static_initializer.h>
+#include <tulz/util/static_initializer.h>
 
 namespace algine {
 class AL_EXPORT LinearLayout: public Layout {

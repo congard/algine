@@ -1,9 +1,8 @@
 #include <algine/std/ColorMap.h>
-#include <algine/core/PtrMaker.h>
 
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/hash.hpp>
-#include <tulz/Array.h>
+
 #include <stdexcept>
 
 namespace algine {
