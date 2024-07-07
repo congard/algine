@@ -54,7 +54,7 @@ public:
     const BoneMatrix& getBone(Index index) const;
     const BoneMatrices& getBoneTransformations() const;
 
-public:
+protected:
     glm::mat4 m_transform;
 
 protected:
