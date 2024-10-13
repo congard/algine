@@ -157,8 +157,8 @@ add_dep(
 
 add_dep(
     sol2
-    GIT_REPOSITORY  https://github.com/ThePhD/sol2.git
-    GIT_TAG         eba86625b707e3c8c99bbfc4624e51f42dc9e561 # 3.3.0
+    GIT_REPOSITORY  https://github.com/ndoxx/sol2.git
+    GIT_TAG         717738f # 3.3.0 clang 18.1.0 bugfix
 )
 
 add_dep(
