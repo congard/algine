@@ -65,7 +65,7 @@ _AL_PLATFORM_STRINGIFY(major) "." _AL_PLATFORM_STRINGIFY(minor) "." _AL_PLATFORM
 #define COMPILER_VERSION _AL_PLATFORM_VER_STRING(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
 #endif
 
-#if __cplusplus == 202101L
+#if __cplusplus == 202302L
 #define CPP_VERSION_STR "C++23"
 #elif __cplusplus == 202002L
 #define CPP_VERSION_STR "C++20"
