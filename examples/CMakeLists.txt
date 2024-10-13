@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.28)
 project(algine_examples)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 # silence warnings from sol2
 add_compile_options(-Wno-unknown-warning-option)
