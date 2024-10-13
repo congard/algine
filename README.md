@@ -1,8 +1,14 @@
 # Algine
 
-Algine - OpenGL 3.3+ engine written in C++
-
+![stability-wip](https://img.shields.io/badge/Stability-WIP-lightgrey.svg)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/40d3479da92040c79c5570336aff3697)](https://www.codacy.com/manual/congard/algine?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=congard/algine&amp;utm_campaign=Badge_Grade)
+
+> [!WARNING]
+> This project in a WIP state, which means a lot of things will be changed.
+> Use it at your own risk and responsibility.
+> <br>See our [board](https://github.com/users/congard/projects/2/) for more info about planned changes.
+
+Algine - OpenGL 3.3+ engine written in C++
 
 **Supported platforms:** Linux, Android, Windows
 <br>**Target platforms:** Linux (clang), Android
