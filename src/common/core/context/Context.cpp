@@ -26,13 +26,14 @@ bool Context::create() {
     return create(ContextConfig {});
 }
 
-tulz::Subscription<Context*> Context::addOnDestroyListener(const tulz::Observer<Context*> &observer) {
-    return getOnDestroy().subscribe(observer);
+Context::DestroySubject::Subscription_t
+Context::addOnDestroyListener(DestroySubject::ObserverAutoPtr_t observer) {
+    return getOnDestroy().subscribe(std::move(observer));
 }
 
-tulz::Subject<Context*>& Context::getOnDestroy() {
+Context::DestroySubject& Context::getOnDestroy() {
     // https://isocpp.org/wiki/faq/ctors#static-init-order
-    static tulz::Subject<Context*> onDestroy;
+    static DestroySubject onDestroy;
     return onDestroy;
 }
 }

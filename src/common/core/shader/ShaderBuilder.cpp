@@ -2,49 +2,91 @@
 #include <algine/core/Engine.h>
 #include <algine/core/log/Log.h>
 
-#include <tulz/StringUtils.h>
 #include <tulz/File.h>
 
 #include <stdexcept>
+#include <regex>
 
 #include "GLSLModules.h"
 #include "GLSLShaders.h"
 
 using namespace std;
 using namespace tulz;
-using namespace tulz::StringUtils;
+
+// TODO: this class should be refactored and simplified.
+//  It's overcomplicated and contains a lot of magic values.
+
+// TODO: use std::string_view, std::format
+
+// TODO: write tests
 
 // Algine Preprocessor
 namespace ALPKeywords {
 constexpr auto Include = "include";
-constexpr auto Link = "link";
 }
 
 constexpr auto TAG = "Algine ShaderBuilder";
 
 namespace algine {
+namespace {
 template<typename T>
-inline bool isElementExist(const vector<T> &v, const T &e) {
-    return find(v.begin(), v.end(), e) != v.end();
+bool isElementExist(const std::vector<T> &v, const T &e) {
+    return std::find(v.begin(), v.end(), e) != v.end();
 }
 
 template<typename T>
-inline void removeElement(vector<T> &v, const T &e) {
-    auto it = find(v.begin(), v.end(), e);
+void removeElement(std::vector<T> &v, const T &e) {
+    auto it = std::find(v.begin(), v.end(), e);
 
     if (it != v.end()) {
         v.erase(it);
     }
 }
 
-vector<string> ShaderBuilder::m_globalIncludePaths;
+class Matches {
+public:
+    size_t pos;
+    size_t size;
+    std::vector<std::string> matches;
+
+    Matches(size_t pos, size_t size, std::vector<std::string> matches)
+        : pos(pos), size(size), matches(std::move(matches)) {}
+};
+
+std::vector<Matches> findRegex(const std::string &src, const std::string &_regex, bool ignoreEmptyMatches = true) {
+    std::vector<Matches> matches;
+    std::regex regex {_regex};
+
+    for (auto i = std::sregex_iterator {src.begin(), src.end(), regex}; i != std::sregex_iterator(); ++i) {
+        auto &match = *i;
+        std::vector<std::string> strings;
+
+        for (size_t j = 0; j < i->size(); j++) {
+            auto str = match[j].str();
+
+            if (ignoreEmptyMatches && str.empty()) {
+                continue; // ignore empty matches
+            }
+
+            strings.emplace_back(std::move(str));
+        }
+
+        matches.emplace_back(match.position(), match.length(), std::move(strings));
+    }
+
+    return matches;
+}
+}
+
+std::vector<std::string> ShaderBuilder::m_globalIncludePaths;
 
 ShaderBuilder::ShaderBuilder(): m_type() {}
 
+// TODO: static function fromLua
 ShaderBuilder::ShaderBuilder(Shader::Type type, const std::string &path)
     : m_type(type)
 {
-    if (string_view(path.c_str() + path.size() - 3) == "lua") {
+    if (path.ends_with(".lua")) {
         execute(path);
     } else {
         setPath(path);
@@ -107,52 +149,53 @@ void ShaderBuilder::resetGenerated() {
     m_gen = "";
 }
 
-inline void cfgSourceImpl(ShaderBuilder *self) {
-    const string &source = self->getSource();
-    const string &path = self->getPath();
-    const string &rootDir = self->getRootDir();
+namespace {
+// TODO: make it member function
+void cfgSource(ShaderBuilder *self) {
+    const std::string &source {self->getSource()};
+    const std::string &path {self->getPath()};
+    const std::string &rootDir {self->getRootDir()};
 
     if (source.empty()) {
         if (path.empty()) {
             throw runtime_error("Source and path are empty");
         }
 
-        constexpr char algineShaders[] = "@algine/";
+        constexpr std::string_view algineShaders {"@algine/"};
 
         if (path.find(algineShaders) == 0) {
-            string name = path.substr(strlen(algineShaders));
+            auto name = std::string_view {path}.substr(algineShaders.length());
 
-            for (const auto &p : GLSLShaders::shaders) {
+            for (const auto &p : GLSLShaders::shaders) { // TODO: read from smth like ShaderProvider?
                 if (p.first == name) {
                     self->setSource(p.second);
                     return;
                 }
             }
 
-            throw runtime_error("Built-in shader '" + name + "' not found");
+            throw runtime_error("Built-in shader '" + std::string {name} + "' not found");
         } else {
             self->setSource(self->readStr(Path::join(rootDir, path)));
         }
     }
 }
-
-#define cfgSource() cfgSourceImpl(this)
+}
 
 void ShaderBuilder::generate() {
     constexpr char versionRegex[] = R"~([ \t]*#[ \t]*version[ \t]+[0-9]+(?:[ \t]+[a-z]+|[ \t]*)(?:\r\n|\n|$))~";
 
-    cfgSource();
+    cfgSource(this);
 
     m_gen = m_source;
 
     // generate definitions code
     {
-        vector<Matches> version = findRegex(m_gen, versionRegex);
+        std::vector<Matches> version = findRegex(m_gen, versionRegex);
 
         uint versionHeaderOffset;
 
         if (version.empty()) {
-            string versionHeader = "#version " + to_string(Engine::getAPIVersion()) + " ";
+            string versionHeader = "#version " + std::to_string(Engine::getAPIVersion()) + " ";
 
             if (Engine::getGraphicsAPI() == Engine::GraphicsAPI::Core) {
                 versionHeader.append("core");
@@ -169,7 +212,7 @@ void ShaderBuilder::generate() {
             versionHeaderOffset = version[0].pos + version[0].size;
         }
 
-        string definitionsCode = "\n";
+        std::string definitionsCode = "\n";
 
         for (auto &j : m_definitions) {
             definitionsCode += "#define " + j.first + " " + j.second + "\n";
@@ -231,17 +274,18 @@ vector<string>& ShaderBuilder::getGlobalIncludePaths() {
     return m_globalIncludePaths;
 }
 
+namespace {
 // src: where to insert
 // srcPos: position to start erase
 // srcSize: count of symbols to erase
 // data: what to insert, will be inserted in srcPos position
-inline void insert(string &src, uint srcPos, uint srcSize, const string &data) {
+void insert(string &src, uint srcPos, uint srcSize, const string &data) {
     src = src.erase(srcPos, srcSize);
     src.insert(srcPos, data);
 }
 
-inline vector<Matches> findPragmas(const string &src, const string &regex, const vector<pair<uint, uint>> &excludes) {
-    auto matches = StringUtils::findRegex(src,
+std::vector<Matches> findPragmas(const string &src, const string &regex, const vector<pair<uint, uint>> &excludes) {
+    auto matches = findRegex(src,
             R"([ \t]*#[ \t]*pragma[ \t]+algine[ \t]+)" + regex +
             R"(|[ \t]*#[ \t]*alp[ \t]+)" + regex);
 
@@ -262,7 +306,7 @@ inline vector<Matches> findPragmas(const string &src, const string &regex, const
 
 inline vector<pair<uint, uint>> findComments(const string &src) {
     constexpr char regex[] = R"(//.*|/\*(?:.|\n|\r\n)*?\*/)"; // line and block comments
-    auto matches = StringUtils::findRegex(src, regex);
+    auto matches = findRegex(src, regex);
     vector<pair<uint, uint>> result;
     result.reserve(matches.size());
 
@@ -270,6 +314,7 @@ inline vector<pair<uint, uint>> findComments(const string &src) {
         result.emplace_back(match.pos, match.size);
 
     return result;
+}
 }
 
 string ShaderBuilder::processDirectives(const string &src, const Path &baseIncludePath) {
@@ -292,7 +337,7 @@ string ShaderBuilder::processDirectives(const string &src, const Path &baseInclu
 
         if (pragmaIs(Include)) {
             // check for inclusion of built-in files
-            vector<Matches> fileMatches = StringUtils::findRegex(matches.matches[2], R"~(<(.+)>)~"); // <file>;
+            vector<Matches> fileMatches = findRegex(matches.matches[2], R"~(<(.+)>)~"); // <file>;
 
             if (!fileMatches.empty()) {
                 string &path = fileMatches[0].matches[1];
@@ -311,7 +356,7 @@ string ShaderBuilder::processDirectives(const string &src, const Path &baseInclu
             }
 
             // otherwise process as inclusion of user file
-            fileMatches = StringUtils::findRegex(matches.matches[2], R"~("(.+)")~"); // "file"
+            fileMatches = findRegex(matches.matches[2], R"~("(.+)")~"); // "file"
             Path filePath(fileMatches[0].matches[1]);
 
             auto fileNotFoundError = [&]() {
@@ -359,12 +404,6 @@ string ShaderBuilder::processDirectives(const string &src, const Path &baseInclu
 
             insert(result, matches.pos, matches.size,
                    processDirectives(readStr(filePath.toString()), filePath.getParentDirectory()));
-        } else if (pragmaIs(Link)) {
-            auto fileMatches = StringUtils::findRegex(matches.matches[2], R"~((.+)[ \t]+(.+))~");
-
-            // #alp link base link
-            insert(result, matches.pos, matches.size,
-                   "#define " + fileMatches[0].matches[2] + " " + fileMatches[0].matches[1]);
         } else {
             Log::error(TAG) << "Unknown pragma " << pragmaName << "\n" << matches.matches[0];
         }

@@ -27,6 +27,9 @@ public:
     };
 
 public:
+    using DestroySubject = tulz::Subject<>;
+
+public:
     static void init(int argc, char *const *argv);
     static void init();
     static void wait();
@@ -50,7 +53,7 @@ public:
      * @note This function can be safely called during
      * static initialization.
      */
-    static tulz::Subscription<> addOnDestroyListener(const tulz::Observer<> &observer);
+    static DestroySubject::Subscription_t addOnDestroyListener(DestroySubject::ObserverAutoPtr_t observer);
 
     static void setDefaultIOSystem(IOSystem *ioSystem);
     static void setDefaultIOSystem(const std::shared_ptr<IOSystem> &ioSystem);
@@ -137,7 +140,7 @@ public:
 #endif
 
 private:
-    static tulz::Subject<>& get_onDestroy();
+    static DestroySubject& get_onDestroy();
 
 private:
     static std::shared_ptr<IOSystem> m_defaultIOSystem;

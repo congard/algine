@@ -1,14 +1,15 @@
 #include <algine/core/widgets/Alignment.h>
 
-#include <tulz/StringUtils.h>
+#include <ranges>
 
 namespace algine {
 uint Alignment::parse(const char *str) {
-    auto alignmentValues = tulz::StringUtils::split(str, "|");
+    using std::operator""sv;
+
     uint alignment = Alignment::Center;
 
-    for (std::string &value : alignmentValues) {
-        if (value == "center") {
+    for (const auto r : std::views::split(std::string_view {str}, "|"sv)) {
+        if (std::string_view value {r}; value == "center") {
             alignment |= Alignment::Center;
         } else if (value == "left") {
             alignment |= Alignment::Left;

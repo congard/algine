@@ -173,8 +173,9 @@ void Engine::exec(const std::function<void()> &func) {
     exec(argc, argv, func);
 }
 
-tulz::Subscription<> Engine::addOnDestroyListener(const tulz::Observer<> &observer) {
-    return get_onDestroy().subscribe(observer);
+Engine::DestroySubject::Subscription_t
+Engine::addOnDestroyListener(DestroySubject::ObserverAutoPtr_t observer) {
+    return get_onDestroy().subscribe(std::move(observer));
 }
 
 void Engine::setDefaultIOSystem(IOSystem *ioSystem) {
@@ -323,9 +324,9 @@ std::string Engine::Android::getAppDataDirectory() {
 }
 #endif
 
-tulz::Subject<>& Engine::get_onDestroy() {
+Engine::DestroySubject& Engine::get_onDestroy() {
     // https://isocpp.org/wiki/faq/ctors#static-init-order
-    static tulz::Subject<> onDestroy;
+    static DestroySubject onDestroy;
     return onDestroy;
 }
 }

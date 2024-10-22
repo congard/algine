@@ -28,6 +28,9 @@ class ContextConfig;
  */
 class AL_EXPORT Context {
 public:
+    using DestroySubject = tulz::Subject<Context*>;
+
+public:
     /**
      * Creates offscreen context
      * @param config
@@ -50,7 +53,8 @@ public:
     static Context getCurrent();
     static void* getCurrentNative();
 
-    static tulz::Subscription<Context*> addOnDestroyListener(const tulz::Observer<Context*> &observer);
+    static DestroySubject::Subscription_t
+    addOnDestroyListener(DestroySubject::ObserverAutoPtr_t observer);
 
 #ifdef ALGINE_QT_PLATFORM
     void *m_context {nullptr};
@@ -67,7 +71,7 @@ private:
     bool createImpl(int major, int minor, const ContextConfig &config);
 
 private:
-    static tulz::Subject<Context*>& getOnDestroy();
+    static DestroySubject& getOnDestroy();
 };
 }
 

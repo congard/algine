@@ -3,8 +3,6 @@
 #include <algine/core/Framebuffer.h>
 #include <algine/core/TypeRegistry.h>
 
-#include <tulz/StringUtils.h>
-
 #include <pugixml.hpp>
 
 #include <algorithm>

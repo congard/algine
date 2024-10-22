@@ -9,11 +9,12 @@
 #include <algine/core/TypeRegistry.h>
 #include <algine/core/Resources.h>
 
-#include <tulz/StringUtils.h>
+#include <tulz/util/overloaded.h>
 #include <glm/ext/matrix_transform.hpp>
 
 #include <pugixml.hpp>
 
+#include <ranges>
 #include <cstring>
 
 #include "core/djb2.h"
@@ -903,8 +904,9 @@ Widget::Filtering Widget::parseFiltering(std::string_view str) {
     }
 }
 
+// TODO: return std::optional
 std::string Widget::getString(const char *str) {
-    return Resources::instance()->parse(str).as<std::string>();
+    return std::get<std::string>(Resources::instance()->parse(str));
 }
 
 float Widget::getDimenPxF(const char *str) {
@@ -916,7 +918,7 @@ float Widget::getDimenPxF(const char *str) {
         return Dimen(str).pixels(window);
     }
 
-    return result.as<Dimen>().pixels(window);
+    return std::get<Dimen>(result).pixels(window);
 }
 
 int Widget::getDimenPx(const char *str) {
@@ -931,7 +933,7 @@ Color Widget::getColor(const char *str) {
         return Color::parseColor(str);
     }
 
-    return result.as<Color>();
+    return std::get<Color>(result);
 }
 
 // Note: you can use resources (e.g. @string/app_name) for all Widget attributes, except the following:
@@ -974,7 +976,7 @@ void Widget::fromXML(const pugi::xml_node &node, const IOSystemPtr &io) {
                 return attr.as_float();
             }
 
-            return result.as<float>();
+            return std::get<float>(result);
         };
 
         auto getString = [&]() { return Widget::getString(attr.as_string()); };
@@ -1004,7 +1006,13 @@ void Widget::fromXML(const pugi::xml_node &node, const IOSystemPtr &io) {
         } else if (isAttr("backgroundColor")) {
             m_background.setColor(getColor(attr.as_string()));
         } else if (isAttr("padding")) {
-            auto padding = tulz::StringUtils::split(getString(), " ");
+            using std::operator""sv;
+
+            auto paddingStr = getString();
+
+            auto padding = std::views::split(paddingStr, " "sv)
+                | std::views::transform([](const auto &r) { return std::string_view {r}; })
+                | std::ranges::to<std::vector>();
 
             auto window = getParentWindow();
 
@@ -1054,17 +1062,17 @@ void Widget::fromXML(const pugi::xml_node &node, const IOSystemPtr &io) {
                 bool error;
 
                 if (auto res_value = Resources::instance()->parse(value, &error); !error) {
-                    if (res_value.is<std::string>()) {
-                        setProperty(name, res_value.as<std::string>());
-                    } else if (res_value.is<int>()) {
-                        setProperty(name, res_value.as<int>());
-                    } else if (res_value.is<float>()) {
-                        setProperty(name, res_value.as<float>());
-                    } else if (res_value.is<Dimen>()) {
-                        setProperty(name, res_value.as<Dimen>().pixels(getParentWindow()));
-                    } else if (res_value.is<Color>()) {
-                        setProperty(name, static_cast<int>(res_value.as<Color>().value()));
-                    }
+                    std::visit(tulz::overloaded {
+                        [&, this](const Dimen &dimen) {
+                            setProperty(name, dimen.pixels(getParentWindow()));
+                        },
+                        [&, this](const Color &color) {
+                            setProperty(name, static_cast<int>(color.value()));
+                        },
+                        [&, this](const auto &value) {
+                            setProperty(name, value);
+                        }
+                    }, res_value);
                 } else if (Dimen dimen; dimen.parse(value)) {
                     setProperty(name, dimen.pixels(getParentWindow()));
                 } else if (strcmp(value, "true") == 0) {
