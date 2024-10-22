@@ -10,7 +10,6 @@
 #include <algine/core/painter/Paint.h>
 #include <algine/core/math/Rect.h>
 #include <algine/core/PtrView.h>
-#include <algine/core/Variant.h>
 #include <algine/core/lua/Lua.h>
 #include <algine/core/io/IOSystemPtr.h>
 #include <algine/core/Object.h>

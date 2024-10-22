@@ -3,7 +3,6 @@
 
 #include <algine/core/widgets/Dimen.h>
 #include <algine/core/Color.h>
-#include <algine/core/Variant.h>
 #include <algine/core/Engine.h>
 
 #include <variant>
@@ -18,7 +17,7 @@ class xml_document;
 namespace algine {
 class AL_EXPORT Resources {
 public:
-    using Resource = Variant<std::string, int, float, Dimen, Color>;
+    using Resource = std::variant<std::string, int, float, Dimen, Color>;
 
 public:
     void setStrings(const std::map<std::string, std::string> &strings);
@@ -60,6 +59,7 @@ public:
     pugi::xml_document toXML() const;
     std::string toXMLString() const;
 
+    // TODO: should be moved to smth like `InstanceHolder`
     static Resources* instance();
 
 private:
