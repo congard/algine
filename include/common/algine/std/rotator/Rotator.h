@@ -1,7 +1,7 @@
 #ifndef ALGINE_ROTATOR_H
 #define ALGINE_ROTATOR_H
 
-#include <algine/core/lua/Lua.h>
+#include <algine/lua/Lua.h>
 
 #include <glm/mat4x4.hpp>
 

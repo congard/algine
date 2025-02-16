@@ -3,7 +3,7 @@
 
 #include <algine/core/scene/GlobalScene.h>
 #include <algine/core/Object.h>
-#include <algine/types.h>
+#include <algine/core/types.h>
 
 namespace algine {
 class RenderPass;

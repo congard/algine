@@ -3,8 +3,8 @@
 
 #include <algine/std/animation/VecAnimKey.h>
 #include <algine/std/animation/QuatAnimKey.h>
-#include <algine/platform.h>
-#include <algine/types.h>
+#include <algine/core/platform.h>
+#include <algine/core/types.h>
 
 #include <string>
 #include <vector>

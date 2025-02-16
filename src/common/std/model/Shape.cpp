@@ -1,6 +1,6 @@
-#include <algine/std/model/Shape.h>
-#include <algine/core/DataType.h>
 #include <algine/core/TypeRegistry.h>
+#include <algine/gpu/DataType.h>
+#include <algine/std/model/Shape.h>
 
 using namespace std;
 
@@ -142,35 +142,35 @@ InputLayout* Shape::getInputLayout(Index index) {
     return m_inputLayouts[index];
 }
 
-RawPtr<ArrayBuffer> Shape::getVerticesBuffer() const {
+ArrayBuffer* Shape::getVerticesBuffer() const {
     return m_vertices;
 }
 
-RawPtr<ArrayBuffer> Shape::getNormalsBuffer() const {
+ArrayBuffer* Shape::getNormalsBuffer() const {
     return m_normals;
 }
 
-RawPtr<ArrayBuffer> Shape::getTexCoordsBuffer() const {
+ArrayBuffer* Shape::getTexCoordsBuffer() const {
     return m_texCoords;
 }
 
-RawPtr<ArrayBuffer> Shape::getTangentsBuffer() const {
+ArrayBuffer* Shape::getTangentsBuffer() const {
     return m_tangents;
 }
 
-RawPtr<ArrayBuffer> Shape::getBitangentsBuffer() const {
+ArrayBuffer* Shape::getBitangentsBuffer() const {
     return m_bitangents;
 }
 
-RawPtr<ArrayBuffer> Shape::getBoneWeightsBuffer() const {
+ArrayBuffer* Shape::getBoneWeightsBuffer() const {
     return m_boneWeights;
 }
 
-RawPtr<ArrayBuffer> Shape::getBoneIdsBuffer() const {
+ArrayBuffer* Shape::getBoneIdsBuffer() const {
     return m_boneIds;
 }
 
-RawPtr<IndexBuffer> Shape::getIndicesBuffer() const {
+IndexBuffer* Shape::getIndicesBuffer() const {
     return m_indices;
 }
 }

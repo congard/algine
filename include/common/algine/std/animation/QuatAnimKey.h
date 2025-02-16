@@ -1,7 +1,7 @@
 #ifndef ALGINE_QUATANIMKEY_H
 #define ALGINE_QUATANIMKEY_H
 
-#include <algine/platform.h>
+#include <algine/core/platform.h>
 #include <glm/gtc/quaternion.hpp>
 
 class aiQuatKey;

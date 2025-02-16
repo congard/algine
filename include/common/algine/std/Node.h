@@ -1,7 +1,7 @@
 #ifndef ALGINE_NODE_H
 #define ALGINE_NODE_H
 
-#include <algine/platform.h>
+#include <algine/core/platform.h>
 
 #include <string>
 #include <vector>

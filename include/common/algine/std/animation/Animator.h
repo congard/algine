@@ -2,8 +2,8 @@
 #define ALGINE_ANIMATOR_H
 
 #include <algine/std/Node.h>
-#include <algine/platform.h>
-#include <algine/types.h>
+#include <algine/core/platform.h>
+#include <algine/core/types.h>
 
 namespace algine {
 class Model;

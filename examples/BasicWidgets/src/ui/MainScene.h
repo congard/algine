@@ -1,7 +1,7 @@
 #ifndef ALGINE_EXAMPLES_MAINSCENE_H
 #define ALGINE_EXAMPLES_MAINSCENE_H
 
-#include <algine/core/widgets/Scene.h>
+#include <algine/widgets/Scene.h>
 
 using namespace algine;
 

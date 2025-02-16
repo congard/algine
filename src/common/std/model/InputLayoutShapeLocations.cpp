@@ -1,5 +1,5 @@
 #include <algine/std/model/InputLayoutShapeLocations.h>
-#include <algine/core/shader/ShaderProgram.h>
+#include <algine/gpu/shader/ShaderProgram.h>
 
 namespace algine {
 InputLayoutShapeLocations::InputLayoutShapeLocations(ShaderProgram *program,

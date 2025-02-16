@@ -1,8 +1,8 @@
 #ifndef ALGINE_BONEINFO_H
 #define ALGINE_BONEINFO_H
 
-#include <algine/platform.h>
-#include <algine/types.h>
+#include <algine/core/platform.h>
+#include <algine/core/types.h>
 
 #include <tulz/container/Array.h>
 #include <utility>

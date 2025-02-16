@@ -4,10 +4,10 @@
 local types = {
     -- core
     ["Object"] = {
-        file = "include/common/algine/core/Object.h"
+        file = "include/algine/core/Object.h"
     },
     ["Scriptable"] = {
-        file = "include/common/algine/core/lua/Scriptable.h"
+        file = "include/algine/lua/Scriptable.h"
     },
     ["Font"] = {
         file = "include/common/algine/core/font/Font.h"
@@ -22,70 +22,70 @@ local types = {
         file = "include/common/algine/core/font/FontRenderer.h"
     },
     ["IOProvider"] = {
-        file = "include/common/algine/core/io/IOProvider.h"
+        file = "include/algine/io/IOProvider.h"
     },
     ["Log"] = {
-        file = "include/common/algine/core/log/Log.h"
+        file = "include/algine/log/Log.h"
     },
     ["Shader"] = {
-        file = "include/common/algine/core/shader/Shader.h"
+        file = "include/algine/gpu/shader/Shader.h"
     },
     ["ShaderBuilder"] = {
-        file = "include/common/algine/core/shader/ShaderBuilder.h"
+        file = "include/algine/gpu/shader/ShaderBuilder.h"
     },
     ["ShaderDefinitionGenerator"] = {
-        file = "include/common/algine/core/shader/ShaderDefinitionGenerator.h"
+        file = "include/algine/gpu/shader/ShaderDefinitionGenerator.h"
     },
     ["ShaderProgram"] = {
-        file = "include/common/algine/core/shader/ShaderProgram.h"
+        file = "include/algine/gpu/shader/ShaderProgram.h"
     },
     ["ShaderProgramBuilder"] = {
-        file = "include/common/algine/core/shader/ShaderProgramBuilder.h"
+        file = "include/algine/gpu/shader/ShaderProgramBuilder.h"
     },
     ["Color"] = {
         file = "include/common/algine/core/Color.h"
     },
     ["ImageBuilder"] = {
-        file = "include/common/algine/core/ImageBuilder.h"
+        file = "include/algine/gpu/ImageBuilder.h"
     },
     ["Texture"] = {
-        file = "include/common/algine/core/texture/Texture.h"
+        file = "include/algine/gpu/texture/Texture.h"
     },
     ["Texture2D"] = {
-        file = "include/common/algine/core/texture/Texture2D.h"
+        file = "include/algine/gpu/texture/Texture2D.h"
     },
     ["Texture2DBuilder"] = {
-        file = "include/common/algine/core/texture/Texture2DBuilder.h"
+        file = "include/algine/gpu/texture/Texture2DBuilder.h"
     },
     ["TextureCreateInfo"] = {
-        file = "include/common/algine/core/texture/TextureCreateInfo.h"
+        file = "include/algine/gpu/texture/TextureCreateInfo.h"
     },
     ["TextureBuilder"] = {
-        file = "include/common/algine/core/texture/TextureBuilder.h"
+        file = "include/algine/gpu/texture/TextureBuilder.h"
     },
     ["TextureCube"] = {
-        file = "include/common/algine/core/texture/TextureCube.h"
+        file = "include/algine/gpu/texture/TextureCube.h"
     },
     ["TextureCubeBuilder"] = {
-        file = "include/common/algine/core/texture/TextureCubeBuilder.h"
+        file = "include/algine/gpu/texture/TextureCubeBuilder.h"
     },
     ["TextureFileInfo"] = {
-        file = "include/common/algine/core/texture/TextureFileInfo.h"
+        file = "include/algine/gpu/texture/TextureFileInfo.h"
     },
     ["Framebuffer"] = {
-        file = "include/common/algine/core/Framebuffer.h"
+        file = "include/algine/gpu/Framebuffer.h"
     },
     ["FramebufferBuilder"] = {
-        file = "include/common/algine/core/FramebufferBuilder.h"
+        file = "include/algine/gpu/FramebufferBuilder.h"
     },
     ["Renderbuffer"] = {
-        file = "include/common/algine/core/Renderbuffer.h"
+        file = "include/algine/gpu/Renderbuffer.h"
     },
     ["RenderbufferBuilder"] = {
-        file = "include/common/algine/core/RenderbufferBuilder.h"
+        file = "include/algine/gpu/RenderbufferBuilder.h"
     },
     ["Builder"] = {
-        file = "include/common/algine/core/Builder.h"
+        file = "include/algine/core/Builder.h"
     },
     ["DataType"] = {
         file = "include/common/algine/core/DataType.h"
@@ -103,13 +103,13 @@ local types = {
         file = "include/common/algine/core/painter/RoundRect.h"
     },
     ["Widget"] = {
-        file = "include/common/algine/core/widgets/Widget.h"
+        file = "include/algine/widgets/Widget.h"
     },
     ["Dimen"] = {
-        file = "include/common/algine/core/widgets/Dimen.h"
+        file = "include/algine/widgets/Dimen.h"
     },
     ["Unit"] = {
-        file = "include/common/algine/core/widgets/Unit.h"
+        file = "include/algine/widgets/Unit.h"
     },
     ["RectI"] = {
         file = "include/common/algine/core/math/Rect.h"

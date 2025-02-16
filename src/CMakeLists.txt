@@ -1,0 +1,11 @@
+target_include_directories(algine PRIVATE .)
+
+add_subdirectory(core)
+add_subdirectory(math)
+add_subdirectory(io)
+add_subdirectory(log)
+add_subdirectory(gfx)
+add_subdirectory(widgets)
+add_subdirectory(lua)
+add_subdirectory(window)
+add_subdirectory(gpu)

@@ -1,4 +1,4 @@
-#include <algine/core/log/DefaultLogWriter.h>
+#include <algine/log/DefaultLogWriter.h>
 
 #include <android/log.h>
 

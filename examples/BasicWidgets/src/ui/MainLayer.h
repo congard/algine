@@ -1,7 +1,7 @@
 #ifndef ALGINE_EXAMPLES_MAINLAYER_H
 #define ALGINE_EXAMPLES_MAINLAYER_H
 
-#include <algine/core/widgets/Layer.h>
+#include <algine/widgets/Layer.h>
 
 using namespace algine;
 

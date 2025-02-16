@@ -2,7 +2,7 @@
 #define ALGINE_BONESSTORAGE_H
 
 #include <algine/std/animation/Bone.h>
-#include <algine/types.h>
+#include <algine/core/types.h>
 
 #include <glm/mat4x4.hpp>
 

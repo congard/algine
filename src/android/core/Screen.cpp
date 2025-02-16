@@ -1,7 +1,7 @@
 #include <algine/core/Screen.h>
 
-#include <algine/core/Content.h>
 #include <algine/core/ScreenEventHandler.h>
+#include <algine/window/Content.h>
 
 #include <tulz/macros.h>
 

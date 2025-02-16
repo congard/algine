@@ -29,7 +29,7 @@ function(gen_type_list list_name save_to includes classes)
         "#ifndef ALGINE_${list_name}_H\n"
         "#define ALGINE_${list_name}_H\n"
         "\n"
-        "#include <algine/core/lua/Lua.h>\n"
+        "#include <algine/lua/Lua.h>\n"
         "${includes_code}\n"
         "\n"
         "namespace algine {\n"
@@ -191,7 +191,7 @@ function(solgen output)
         --namespace-filter algine
         --type-filter "algine::(?:${SOLGEN_CLASSES_REGEX})(?:::[_a-zA-Z0-9]+)?$"
         --conf "tools/solgen/solgen.conf"
-        --clang-args -std=c++20 ${ALGINE_SOLGEN_CLANG_ARGS})
+        --clang-args -std=c++23 ${ALGINE_SOLGEN_CLANG_ARGS})
 
     message(DEBUG "Executing: ${SOLGEN_COMMAND}")
 

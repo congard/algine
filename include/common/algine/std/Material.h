@@ -1,7 +1,7 @@
 #ifndef ALGINE_MATERIAL_H
 #define ALGINE_MATERIAL_H
 
-#include <algine/platform.h>
+#include <algine/core/platform.h>
 
 #include <unordered_map>
 #include <string>

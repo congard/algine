@@ -1,7 +1,7 @@
 #ifndef ALGINE_INPUTLAYOUTSHAPELOCATIONS_H
 #define ALGINE_INPUTLAYOUTSHAPELOCATIONS_H
 
-#include <algine/core/lua/Scriptable.h>
+#include <algine/lua/Scriptable.h>
 
 #include <string>
 #include <map>

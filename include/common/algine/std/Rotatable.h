@@ -2,7 +2,7 @@
 #define ALGINE_ROTATABLE_H
 
 #include <algine/std/rotator/Rotator.h>
-#include <algine/core/lua/Scriptable.h>
+#include <algine/lua/Scriptable.h>
 
 namespace algine {
 class AL_EXPORT Rotatable {

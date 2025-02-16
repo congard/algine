@@ -1,8 +1,8 @@
 #ifndef ALGINE_EXAMPLES_MAINCONTENT_H
 #define ALGINE_EXAMPLES_MAINCONTENT_H
 
-#include <algine/core/unified/UnifiedEventHandler.h>
-#include <algine/core/Content.h>
+#include <algine/window/unified/UnifiedEventHandler.h>
+#include <algine/window/Content.h>
 
 using namespace algine;
 

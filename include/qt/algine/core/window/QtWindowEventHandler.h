@@ -1,9 +1,9 @@
 #ifndef ALGINE_QTWIDGETEVENTHANDLER_H
 #define ALGINE_QTWIDGETEVENTHANDLER_H
 
-#include <algine/core/EventHandler.h>
-#include <algine/core/input/MouseKey.h>
 #include <algine/core/input/KeyboardKey.h>
+#include <algine/core/input/MouseKey.h>
+#include <algine/window/EventHandler.h>
 
 namespace algine {
 class QtWindow;

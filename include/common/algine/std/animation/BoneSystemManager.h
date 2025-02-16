@@ -1,8 +1,8 @@
 #ifndef ALGINE_BONESYSTEMMANAGER_H
 #define ALGINE_BONESYSTEMMANAGER_H
 
-#include <algine/core/shader/UniformBlock.h>
-#include <algine/core/buffers/BlockBufferStorage.h>
+#include <algine/gpu/shader/UniformBlock.h>
+#include <algine/gpu/buffers/BlockBufferStorage.h>
 
 #include <unordered_map>
 

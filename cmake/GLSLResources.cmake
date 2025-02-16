@@ -32,7 +32,7 @@ endmacro()
 
 # built-in glsl modules
 function(glsl_pack_modules)
-    set(MDIR "src/common/core/glsl-modules")
+    set(MDIR "src/gpu/glsl-modules")
 
     _glsl_read(BASEDIR "${MDIR}" PAIRS
         "BoneSystem.glsl" GLSLModules_BoneSystem
@@ -105,7 +105,7 @@ endfunction()
 
 # built-in glsl shaders
 function(glsl_pack_shaders)
-    set(SDIR "src/common/core/glsl-shaders")
+    set(SDIR "src/gpu/glsl-shaders")
 
     _glsl_read(BASEDIR "${SDIR}" PAIRS
         "Blur.fs.glsl" GLSLShaders_Blur_fs
@@ -119,7 +119,7 @@ endfunction()
 
 # painter-related shaders
 function(glsl_pack_painter_shaders)
-    set(PDIR "src/common/core/painter")
+    set(PDIR "src/gfx/painter")
 
     _glsl_read(BASEDIR "${PDIR}" PAIRS
         "painter.vs.glsl" Painter_painter_vs

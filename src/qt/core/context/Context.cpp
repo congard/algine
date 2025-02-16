@@ -1,5 +1,5 @@
-#include <algine/core/context/Context.h>
-#include <algine/core/context/ContextConfig.h>
+#include <algine/gpu/context/Context.h>
+#include <algine/gpu/context/ContextConfig.h>
 
 #include "core/context/ContextCommon.h"
 

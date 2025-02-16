@@ -1,11 +1,11 @@
 #ifndef ALGINE_QTWINDOW_H
 #define ALGINE_QTWINDOW_H
 
-#include <algine/gl.h>
+#include <algine/gpu/gl.h>
 
-#include <algine/core/Window.h>
-#include <algine/core/context/Context.h>
-#include <algine/core/window/QtWindowEventHandler.h>
+#include <algine/gpu/context/Context.h>
+#include <algine/window/QtWindowEventHandler.h>
+#include <algine/window/Window.h>
 
 #include <tulz/observer/Subject.h>
 
@@ -22,6 +22,9 @@ namespace algine {
  * the Qt backend should be selected.
  */
 class AL_EXPORT QtWindow: public Window, public QOpenGLWindow {
+public:
+    using OnInitializedSubject = tulz::Subject<>;
+
 public:
     explicit QtWindow(std::string_view title = {}, Context shareContext = {}, QWindow *parent = nullptr);
     explicit QtWindow(Context shareContext, QWindow *parent = nullptr);
@@ -49,7 +52,8 @@ public:
      * @note The observer will be called from the rendering thread.
      * @param observer
      */
-    tulz::Subscription<> addOnInitializedListener(const tulz::Observer<> &observer);
+    OnInitializedSubject::Subscription_t
+    addOnInitializedListener(OnInitializedSubject::ObserverAutoPtr_t observer);
 
 protected:
     void initializeGL() override;
@@ -76,7 +80,7 @@ private:
 
 private:
     Context m_parentContext;
-    tulz::Subject<> m_onInitialized;
+    OnInitializedSubject m_onInitialized;
 
     QTimer m_renderLoopTimer;
 

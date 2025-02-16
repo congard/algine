@@ -1,7 +1,7 @@
 #ifndef ALGINE_AMTLMATERIALMANAGER_H
 #define ALGINE_AMTLMATERIALMANAGER_H
 
-#include <algine/core/texture/Texture2DBuilder.h>
+#include <algine/gpu/texture/Texture2DBuilder.h>
 #include <algine/core/scene/GlobalScene.h>
 
 #include <unordered_map>

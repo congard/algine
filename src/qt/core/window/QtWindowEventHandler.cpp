@@ -1,4 +1,4 @@
-#include <algine/core/window/QtWindowEventHandler.h>
+#include <algine/window/QtWindowEventHandler.h>
 
 namespace algine {
 void QtWindowEventHandler::mouseMove(float x, float y, QtWindow &window) {}

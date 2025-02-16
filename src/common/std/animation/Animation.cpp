@@ -1,6 +1,6 @@
 #include <algine/std/animation/Animation.h>
 
-#include <algine/types.h>
+#include <algine/core/types.h>
 
 #include <assimp/anim.h>
 

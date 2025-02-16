@@ -1,5 +1,5 @@
 #include <algine/std/AMTLMaterialManager.h>
-#include <algine/core/texture/Texture2D.h>
+#include <algine/gpu/texture/Texture2D.h>
 
 using namespace std;
 

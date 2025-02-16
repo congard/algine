@@ -1,4 +1,4 @@
-#include <algine/core/Color.h>
+#include <algine/math/Color.h>
 #include <gtest/gtest.h>
 
 using namespace algine;

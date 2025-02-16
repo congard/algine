@@ -1,5 +1,5 @@
 #include <algine/core/unified/PointerInfo.h>
-#include <algine/core/window/QtWindow.h>
+#include <algine/window/QtWindow.h>
 
 namespace algine {
 bool PointerInfo::isPointerActive(Pointer pointer) const {

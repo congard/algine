@@ -1,8 +1,8 @@
 #include <algine/std/QuadRenderer.h>
-#include <algine/core/shader/ShaderBuilder.h>
+#include <algine/gpu/shader/ShaderBuilder.h>
 #include <algine/core/scene/GlobalScene.h>
 
-#include <algine/gl.h>
+#include <algine/gpu/gl.h>
 
 namespace algine {
 QuadRenderer::QuadRenderer(uint inPosLocation, Object *parent)

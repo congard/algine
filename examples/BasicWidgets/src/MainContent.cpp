@@ -1,8 +1,8 @@
 #include "MainContent.h"
 #include "ui/MainScene.h"
 
-#include <algine/core/Framebuffer.h>
-#include <algine/core/Window.h>
+#include <algine/gpu/Framebuffer.h>
+#include <algine/window/Window.h>
 
 MainContent::MainContent(Object *parent)
     : Content(parent),

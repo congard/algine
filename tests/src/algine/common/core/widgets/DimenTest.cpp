@@ -1,4 +1,4 @@
-#include <algine/core/widgets/Dimen.h>
+#include <algine/widgets/Dimen.h>
 #include <gtest/gtest.h>
 
 using namespace algine;

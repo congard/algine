@@ -1,8 +1,8 @@
 #include "MainLayer.h"
 
-#include <algine/core/widgets/Container.h>
-#include <algine/core/log/Log.h>
-#include <algine/core/log/logger/glm.h>
+#include <algine/widgets/Container.h>
+#include <algine/log/Log.h>
+#include <algine/log/logger/glm.h>
 
 #include <tulz/demangler.h>
 

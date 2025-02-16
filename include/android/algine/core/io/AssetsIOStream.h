@@ -1,7 +1,7 @@
 #ifndef ALGINE_ASSETSIOSTREAM_H
 #define ALGINE_ASSETSIOSTREAM_H
 
-#include <algine/core/io/IOStream.h>
+#include <algine/io/IOStream.h>
 
 #include <tulz/assets/Asset.h>
 

@@ -2,7 +2,7 @@
 #define ALGINE_BONE_H
 
 #include <algine/std/animation/BoneMatrix.h>
-#include <algine/platform.h>
+#include <algine/core/platform.h>
 
 #include <string>
 

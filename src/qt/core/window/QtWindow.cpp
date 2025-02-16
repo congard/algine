@@ -1,7 +1,7 @@
-#include <algine/core/window/QtWindow.h>
-#include <algine/core/Content.h>
 #include <algine/core/Engine.h>
-#include <algine/core/log/Log.h>
+#include <algine/window/QtWindow.h>
+#include <algine/log/Log.h>
+#include <algine/window/Content.h>
 
 #include <QMouseEvent>
 #include <QKeyEvent>
@@ -109,13 +109,14 @@ glm::ivec2 QtWindow::getViewport() {
     };
 }
 
-tulz::Subscription<> QtWindow::addOnInitializedListener(const tulz::Observer<> &observer) {
-    return m_onInitialized.subscribe(observer);
+QtWindow::OnInitializedSubject::Subscription_t
+QtWindow::addOnInitializedListener(OnInitializedSubject::ObserverAutoPtr_t observer) {
+    return m_onInitialized.subscribe(std::move(observer));
 }
 
 void QtWindow::initializeGL() {
     if (auto code = glewInit(); code != GLEW_NO_ERROR) {
-        throw std::runtime_error("GLEW init failed, error code " + std::to_string(code));
+        throw std::runtime_error("GLEW init failed, error code " + std::to_string(code) + ", message: " + std::string {reinterpret_cast<const char *>(glewGetErrorString(code))});
     }
 
     Engine::m_appContext = getContext();

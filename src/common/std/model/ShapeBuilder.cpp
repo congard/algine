@@ -1,13 +1,13 @@
 #include <algine/std/model/ShapeBuilder.h>
 #include <algine/std/animation/BoneInfo.h>
 
-#include <algine/core/texture/Texture2D.h>
+#include <algine/gpu/texture/Texture2D.h>
 #include <algine/core/PtrMaker.h>
 #include <algine/core/TypeRegistry.h>
-#include <algine/core/log/Log.h>
+#include <algine/log/Log.h>
 
-#include <algine/core/io/IOSystem.h>
-#include <algine/core/io/IOStream.h>
+#include <algine/io/IOStream.h>
+#include <algine/io/IOSystem.h>
 
 #include <assimp/IOSystem.hpp>
 #include <assimp/IOStream.hpp>

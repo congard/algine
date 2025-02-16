@@ -8,9 +8,8 @@
 #include <algine/std/animation/BonesStorage.h>
 #include <algine/std/Node.h>
 
-#include <algine/core/InputLayout.h>
 #include <algine/core/Object.h>
-#include <algine/core/RawPtr.h>
+#include <algine/gpu/InputLayout.h>
 
 namespace algine {
 class AL_EXPORT Shape: public Object {
@@ -76,9 +75,17 @@ protected:
     uint m_bonesPerVertex;
 
 protected:
-    RawPtr<ArrayBuffer> m_vertices, m_normals, m_texCoords;
-    RawPtr<ArrayBuffer> m_tangents, m_bitangents, m_boneWeights, m_boneIds;
-    RawPtr<IndexBuffer> m_indices;
+    ArrayBuffer* m_vertices;
+    ArrayBuffer* m_normals;
+    ArrayBuffer* m_texCoords;
+
+    ArrayBuffer* m_tangents;
+    ArrayBuffer* m_bitangents;
+
+    ArrayBuffer* m_boneWeights;
+    ArrayBuffer* m_boneIds;
+
+    IndexBuffer* m_indices;
 };
 }
 

@@ -1,7 +1,7 @@
 #ifndef ALGINE_SCREEN_H
 #define ALGINE_SCREEN_H
 
-#include <algine/core/Window.h>
+#include <algine/window/Window.h>
 
 #include <string_view>
 

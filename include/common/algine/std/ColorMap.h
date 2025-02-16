@@ -1,9 +1,9 @@
 #ifndef ALGINE_COLORMAP_H
 #define ALGINE_COLORMAP_H
 
-#include <algine/core/texture/Texture2D.h>
 #include <algine/core/Object.h>
-#include <algine/core/Color.h>
+#include <algine/gpu/texture/Texture2D.h>
+#include <algine/math/Color.h>
 
 #include <glm/vec2.hpp>
 

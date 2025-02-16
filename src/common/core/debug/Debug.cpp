@@ -1,7 +1,7 @@
 #include "Debug.h"
 
-#include <algine/core/log/Log.h>
-#include <algine/gl.h>
+#include <algine/gpu/gl.h>
+#include <algine/log/Log.h>
 
 namespace algine {
 // taken from https://vallentin.dev/2015/02/23/debugging-opengl

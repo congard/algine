@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 message(VERBOSE "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
 message(VERBOSE "CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
 
+set(ALGINE_HEADERS "${CMAKE_CURRENT_LIST_DIR}/include/algine")
 set(ALGINE_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL ALGINE_SOURCE_DIR)
 
 if (UNIX)
@@ -50,8 +51,9 @@ if (ALGINE_SECURE_OPERATIONS)
 endif()
 
 # Qt
+# TODO: move to qt cmake
 if (ALGINE_QT_PLATFORM)
-    find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets OpenGL REQUIRED)
+    find_package(QT NAMES Qt6 COMPONENTS Widgets OpenGL REQUIRED)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets OpenGL REQUIRED)
 
     set(CMAKE_AUTOMOC ON)
@@ -97,19 +99,20 @@ if (NOT ALGINE_LUA_PATH)
     message(STATUS "ALGINE_LUA_PATH=${ALGINE_LUA_PATH}")
 endif()
 
-file(READ src/common/core/lua/core.lua Lua_core_lua)
+file(READ src/lua/core.lua Lua_core_lua)
 
-configure_file(src/common/core/lua/CoreLua.h.in src/common/core/lua/CoreLua.h)
+configure_file(src/lua/CoreLua.h.in src/lua/CoreLua.h)
 
 set(SOLGEN_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/src/solgen)
 
 # include paths
 set(PRIVATE_INCLUDES
     src/common
-    ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules
-    ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders
-    ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter
+    ${CMAKE_CURRENT_BINARY_DIR}/src/gpu/glsl-modules
+    ${CMAKE_CURRENT_BINARY_DIR}/src/gpu/glsl-shaders
+    ${CMAKE_CURRENT_BINARY_DIR}/src/gfx/painter
     ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua
+    ${CMAKE_CURRENT_BINARY_DIR}/src/lua # TODO: do it in the corresponding cmake's if needed
 
     ${assimp_SOURCE_DIR}/include
     ${freetype_SOURCE_DIR}/include
@@ -125,16 +128,19 @@ set(PUBLIC_INCLUDES
     ${glm_SOURCE_DIR}
     ${sol2_SOURCE_DIR}/include
     ${nlohmann_json_SOURCE_DIR}
-    include/common)
+    include/common
+    include)
 
 if (ALGINE_QT_PLATFORM)
     set(PRIVATE_INCLUDES ${PRIVATE_INCLUDES}
         src/qt)
 
+    # TODO: move to qt cmake
     set(PUBLIC_INCLUDES ${PUBLIC_INCLUDES}
         ${glew_SOURCE_DIR}/include # TODO: mark PRIVATE in the future (see Texture.h)
         include/qt)
 elseif (NOT ANDROID)
+    # TODO: move to glfw cmake
     set(PRIVATE_INCLUDES ${PRIVATE_INCLUDES}
         src/desktop
         ${glfw_SOURCE_DIR}/include)
@@ -157,6 +163,7 @@ include(cmake/solgen.cmake)
 solgen(ALGINE_SOLGEN_SOURCES)
 
 # collect project sources
+# TODO: do not use glob!
 function(collectSources output headersPath sourcesPath)
     file(GLOB_RECURSE files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
         "${headersPath}/*.h"
@@ -167,44 +174,27 @@ function(collectSources output headersPath sourcesPath)
 endfunction()
 
 collectSources(ALGINE_CORE_SOURCES "include/common/algine/core" "src/common/core")
-collectSources(ALGINE_STD_SOURCES "include/common/algine/std" "src/common/std")
-collectSources(ALGINE_EXT_SOURCES "include/common/algine/ext" "src/common/ext")
 
 set(ALGINE_CORE_SOURCES ${ALGINE_CORE_SOURCES}
     ${pugixml_SOURCE_DIR}/src/pugixml.cpp
 
-    src/common/core/glsl-modules/GLSLModules.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-modules/GLSLModules.h
-    src/common/core/glsl-shaders/GLSLShaders.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/glsl-shaders/GLSLShaders.h
-    src/common/core/painter/PainterShaders.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/painter/PainterShaders.h
-    src/common/core/lua/CoreLua.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/common/core/lua/CoreLua.h
+    ${CMAKE_CURRENT_BINARY_DIR}/src/gfx/painter/PainterShaders.h
+        src/lua/CoreLua.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/lua/CoreLua.h) # TODO: remove solgen
 
-    src/common/internal/ConfigStrings.h
+add_library(algine)
 
-    include/common/algine/platform.h
-    include/common/algine/types.h
-    include/common/algine/gl.h)
+target_sources(algine PRIVATE
+        ${ALGINE_CORE_SOURCES}
+        ${ALGINE_SOLGEN_SOURCES}
+)
 
-set(ALGINE_STD_SOURCES ${ALGINE_STD_SOURCES}
-    include/common/algine/constants/ShadowShader.h
-    include/common/algine/constants/QuadShader.h
-    include/common/algine/constants/CubemapShader.h)
+add_subdirectory(src)
 
 if (ALGINE_QT_PLATFORM)
-    collectSources(ALGINE_QT_SOURCES "include/qt/algine" "src/qt")
-elseif (NOT ANDROID)
-    collectSources(ALGINE_DESKTOP_SOURCES "include/desktop/algine" "src/desktop")
-else()
-    collectSources(ALGINE_ANDROID_SOURCES "include/android/algine" "src/android")
+    add_subdirectory(qt)
+else() # TODO: add options ALGINE_USE_QT and ALGINE_USE_GLFW
+    add_subdirectory(glfw)
 endif()
-
-add_library(algine
-    ${ALGINE_CORE_SOURCES}
-    ${ALGINE_STD_SOURCES}
-    ${ALGINE_EXT_SOURCES}
-    ${ALGINE_QT_SOURCES}
-    ${ALGINE_DESKTOP_SOURCES}
-    ${ALGINE_ANDROID_SOURCES}
-    ${ALGINE_SOLGEN_SOURCES})
 
 set_target_properties(algine PROPERTIES LINKER_LANGUAGE CXX)
 

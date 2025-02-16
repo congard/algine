@@ -1,7 +1,7 @@
 #ifndef ALGINE_SCALABLE_H
 #define ALGINE_SCALABLE_H
 
-#include <algine/core/lua/Scriptable.h>
+#include <algine/lua/Scriptable.h>
 
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>

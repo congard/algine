@@ -1,9 +1,9 @@
 #include <algine/core/Engine.h>
 
 #ifdef ALGINE_QT_PLATFORM
-    #include <algine/core/window/QtWindow.h>
+    #include <algine/window/QtWindow.h>
 #else
-    #include <algine/core/window/GLFWWindow.h>
+    #include <algine/window/GLFWWindow.h>
 #endif
 
 #include "MainContent.h"

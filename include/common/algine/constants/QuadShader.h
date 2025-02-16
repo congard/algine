@@ -1,6 +1,9 @@
 #ifndef ALGINE_QUADSHADER_H
 #define ALGINE_QUADSHADER_H
 
+// TODO: move to the corresponding locations or drop
+// TODO: QuadShaderBuilder
+
 // only vertex shader variables
 
 #define constant(name, val) constexpr char name[] = val;

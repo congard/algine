@@ -1,7 +1,7 @@
 #ifndef ALGINE_MESH_H
 #define ALGINE_MESH_H
 
-#include <algine/types.h>
+#include <algine/core/types.h>
 #include <algine/std/Material.h>
 
 namespace algine {

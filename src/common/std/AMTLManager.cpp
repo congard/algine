@@ -1,5 +1,5 @@
 #include <algine/std/AMTLManager.h>
-#include <algine/core/texture/Texture2D.h>
+#include <algine/gpu/texture/Texture2D.h>
 #include <algine/core/scene/GlobalScene.h>
 
 #include <tulz/Path.h>

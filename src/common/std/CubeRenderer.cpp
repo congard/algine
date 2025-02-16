@@ -1,6 +1,6 @@
 #include <algine/std/CubeRenderer.h>
 
-#include <algine/gl.h>
+#include <algine/gpu/gl.h>
 
 namespace algine {
 CubeRenderer::CubeRenderer(uint inPosLocation)

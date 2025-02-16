@@ -2,8 +2,8 @@
 #define ALGINE_ANIMATIONBLENDER_H
 
 #include <algine/std/model/ModelPtr.h>
-#include <algine/platform.h>
-#include <algine/types.h>
+#include <algine/core/platform.h>
+#include <algine/core/types.h>
 
 #include <glm/mat4x4.hpp>
 

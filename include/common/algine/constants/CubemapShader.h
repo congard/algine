@@ -1,6 +1,9 @@
 #ifndef ALGINE_CUBEMAPSHADER_H
 #define ALGINE_CUBEMAPSHADER_H
 
+// TODO: move to the corresponding locations or drop
+// TODO: CubemapShaderBuilder
+
 #define constant(name, val) constexpr char name[] = val;
 
 namespace algine {

@@ -1,9 +1,9 @@
 #ifndef ALGINE_BLUR_H
 #define ALGINE_BLUR_H
 
-#include <algine/core/texture/Texture2D.h>
-#include <algine/core/Framebuffer.h>
-#include <algine/core/shader/ShaderProgram.h>
+#include <algine/gpu/shader/ShaderProgram.h>
+#include <algine/gpu/texture/Texture2D.h>
+#include <algine/gpu/Framebuffer.h>
 
 #include <algine/std/QuadRenderer.h>
 

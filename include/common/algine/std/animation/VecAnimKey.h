@@ -1,7 +1,7 @@
 #ifndef ALGINE_VECANIMKEY_H
 #define ALGINE_VECANIMKEY_H
 
-#include <algine/platform.h>
+#include <algine/core/platform.h>
 #include <glm/vec3.hpp>
 
 class aiVectorKey;

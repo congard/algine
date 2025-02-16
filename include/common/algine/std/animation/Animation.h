@@ -2,7 +2,7 @@
 #define ALGINE_ANIMATION_H
 
 #include <algine/std/animation/AnimNode.h>
-#include <algine/platform.h>
+#include <algine/core/platform.h>
 
 #include <string>
 #include <vector>

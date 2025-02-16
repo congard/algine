@@ -1,9 +1,9 @@
 #ifndef ALGINE_QUADRENDERER_H
 #define ALGINE_QUADRENDERER_H
 
-#include <algine/core/InputLayout.h>
-#include <algine/core/buffers/ArrayBuffer.h>
-#include <algine/core/shader/Shader.h>
+#include <algine/gpu/buffers/ArrayBuffer.h>
+#include <algine/gpu/shader/Shader.h>
+#include <algine/gpu/InputLayout.h>
 
 namespace algine {
 class AL_EXPORT QuadRenderer: public Object {

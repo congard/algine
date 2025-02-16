@@ -1,7 +1,7 @@
 #ifndef ALGINE_ASSETSIOSYSTEM_H
 #define ALGINE_ASSETSIOSYSTEM_H
 
-#include <algine/core/io/IOSystem.h>
+#include <algine/io/IOSystem.h>
 
 namespace algine {
 class AssetsIOSystem: public IOSystem {

@@ -1,5 +1,5 @@
 #include <algine/core/unified/UnifiedEventHandler.h>
-#include <algine/core/window/QtWindow.h>
+#include <algine/window/QtWindow.h>
 
 namespace algine {
 void UnifiedEventHandler::mouseMove(float x, float y, QtWindow &window) {

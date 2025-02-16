@@ -1,6 +1,6 @@
 #include <algine/std/Blur.h>
 
-#include <algine/core/shader/ShaderBuilder.h>
+#include <algine/gpu/shader/ShaderBuilder.h>
 #include <algine/core/PtrMaker.h>
 #include <algine/core/Engine.h>
 

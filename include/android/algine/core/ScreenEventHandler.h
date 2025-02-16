@@ -1,7 +1,7 @@
 #ifndef ALGINE_SCREENEVENTHANDLER_H
 #define ALGINE_SCREENEVENTHANDLER_H
 
-#include <algine/core/EventHandler.h>
+#include <algine/window/EventHandler.h>
 
 namespace algine {
 class ScreenEventHandler: public EventHandler {
