@@ -1,0 +1,11 @@
+# Include all Algine module CMake files.
+include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/core.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/std.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/widgets.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/ext.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/desktop.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/qt.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/android.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/glm.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/tulz.cmake)
